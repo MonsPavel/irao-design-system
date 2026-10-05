@@ -38,12 +38,21 @@
  * Пресет stylelint-config-recommended сознательно не подключён: задача T1.2 —
  * архитектурные гейты, а не общая гигиена; добавим отдельным решением, если
  * понадобится (без шума в PR компонентов).
+ *
+ * 6. `irao/no-primitive-token-references` — гейт «компонент читает только
+ *    слой 2» (ADR-0009, задача T2.2): ссылки на примитивы слоя 1
+ *    (`var(--ui-blue-800)`…) разрешены только внутри tokens/. Локальный
+ *    плагин — см. tools/stylelint/no-primitive-token-references.mjs
+ *    (почему не declaration-property-value-disallowed-list — в шапке плагина).
  */
+import { FAMILIES as PRIMITIVE_FAMILIES } from './tools/stylelint/no-primitive-token-references.mjs';
+
 export default {
   plugins: [
     'stylelint-selector-bem-pattern',
     'stylelint-declaration-strict-value',
     'stylelint-order',
+    './tools/stylelint/no-primitive-token-references.mjs',
   ],
   rules: {
     // 1. БЭМ ui-{block}__{elem}--{mod}: имя компонента — без префикса `ui-`
@@ -125,6 +134,11 @@ export default {
       { '/^outline$/': ['none', '0'] },
       { severity: 'warning' },
     ],
+
+    // 6. Компоненты читают только слой 2 (ADR-0009, T2.2): примитивы слоя 1 —
+    //    только внутри tokens/. Список семейств синхронизирован с
+    //    primitives.css юнит-тестом tests/unit/tokens-semantic.test.js.
+    'irao/no-primitive-token-references': [PRIMITIVE_FAMILIES],
 
     // 5. Порядок свойств: токены → box-sizing (ADR-0002) → компоновка →
     //    коробка → рамки → фон → типографика → визуал → анимация → взаимодействие.
@@ -307,6 +321,15 @@ export default {
       files: ['**/a11y/vi.css'],
       rules: {
         'declaration-no-important': null,
+      },
+    },
+    {
+      // Слой 2 «семантика» существует РАДИ ссылок на примитивы (ADR-0009,
+      // T2.2): гейт «компонент читает только слой 2» действует вне tokens/.
+      // Позитивный контроль — tests/lint-cases/css/tokens/semantic.css.
+      files: ['**/tokens/**'],
+      rules: {
+        'irao/no-primitive-token-references': null,
       },
     },
   ],

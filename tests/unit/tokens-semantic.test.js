@@ -25,11 +25,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import stylelintConfig from '../../stylelint.config.mjs';
+import { FAMILIES as PRIMITIVE_FAMILIES } from '../../tools/stylelint/no-primitive-token-references.mjs';
 
 const root = join(import.meta.dirname, '../..');
 const semanticSource = readFileSync(join(root, 'tokens/semantic.css'), 'utf8');
 const primitivesSource = readFileSync(join(root, 'tokens/primitives.css'), 'utf8');
-const stylelintConfigSource = readFileSync(join(root, 'stylelint.config.mjs'), 'utf8');
 
 /** Строка без блочных комментариев — для структурных проверок. */
 const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -290,37 +291,22 @@ describe('tokens/semantic.css — focus-тройка (ADR-0001)', () => {
 describe('гейт «компонент читает только слой 2» (AC T2.2)', () => {
   const RULE_ID = 'irao/no-primitive-token-references';
 
-  it('правило активно в stylelint.config.mjs', () => {
-    expect(stylelintConfigSource).toContain(RULE_ID);
-    expect(stylelintConfigSource).toMatch(
-      new RegExp(`'${RULE_ID.replace('/', '\\/')}'\\s*:\\s*\\[`),
-    );
+  it('правило активно в stylelint.config.mjs и получает список семейств плагина', () => {
+    const options = stylelintConfig.rules[RULE_ID];
+    expect(options, 'правило не подключено в rules конфига').toBeDefined();
+    expect(options[0]).toEqual(PRIMITIVE_FAMILIES);
   });
 
-  it('список семейств правила покрывает ВСЕ семейства primitives.css', () => {
-    const optionsBlock = stylelintConfigSource.match(
-      new RegExp(`'${RULE_ID.replace('/', '\\/')}':\\s*\\[([\\s\\S]*?)\\],`),
-    );
-    expect(optionsBlock, 'нет опций правила в конфиге').not.toBeNull();
-    const configured = new Set(
-      [...optionsBlock[1].matchAll(/'([a-z]+)'/g)].map((m) => m[1]),
-    );
-    const primitiveFamilies = new Set(
-      [...primitiveNames.map((name) => familyOf(name))],
-    );
-    for (const family of primitiveFamilies) {
-      expect(configured.has(family), `семейство ${family} вне запрета`).toBe(true);
-    }
-    // И в правиле нет лишних семейств (иначе семантика с таким именем запрещена бы была).
-    for (const family of configured) {
-      expect(primitiveFamilies.has(family), `лишнее семейство ${family}`).toBe(true);
-    }
+  it('список семейств покрывает ВСЕ семейства primitives.css (без лишних)', () => {
+    const primitiveFamilies = new Set(primitiveNames.map((name) => familyOf(name)));
+    expect(new Set(PRIMITIVE_FAMILIES)).toEqual(primitiveFamilies);
   });
 
   it('действие правила исключено для tokens/ (override в конфиге)', () => {
-    const overrideBlock = stylelintConfigSource.match(
-      /\*\*\/tokens\/\*\*[\s\S]*?'irao\/no-primitive-token-references': null/,
+    const override = stylelintConfig.overrides.find((entry) =>
+      entry.files.includes('**/tokens/**'),
     );
-    expect(overrideBlock, 'нет override для tokens/ с отключённым правилом').not.toBeNull();
+    expect(override, 'нет override для tokens/').toBeDefined();
+    expect(override.rules[RULE_ID]).toBeNull();
   });
 });
