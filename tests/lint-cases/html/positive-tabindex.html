@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>Фикстура: положительный tabindex</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- НАРУШЕНИЕ: tabindex > 0 ломает естественный порядок фокуса
+         (WCAG 2.4.3; docs/02-architecture.md §5).
+         Ожидаемый красный: irao/no-positive-tabindex. -->
+    <a href="#main" tabindex="3">К основному содержимому</a>
+  </body>
+</html>

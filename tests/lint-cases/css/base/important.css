@@ -1,0 +1,7 @@
+/* НАРУШЕНИЕ (AC T1.2): `!important` вне a11y/vi.css — запрещён.
+   Специфичность одного класса — основа сосуществования с legacy-CSS
+   (docs/02-architecture.md §1, принцип 4).
+   Ожидаемый красный: declaration-no-important. */
+.ui-skip-link:focus {
+  color: var(--ui-color-text) !important;
+}

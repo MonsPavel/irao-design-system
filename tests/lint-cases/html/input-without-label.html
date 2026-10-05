@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>Фикстура: input без label</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- НАРУШЕНИЕ: у input нет связанного label (label обязателен,
+         docs/02-architecture.md §5, «Формы и валидация»).
+         Ожидаемый красный: input-missing-label. -->
+    <form action="/" method="post">
+      <input type="email" id="email" name="email" autocomplete="email" />
+      <button type="submit">Отправить</button>
+    </form>
+  </body>
+</html>

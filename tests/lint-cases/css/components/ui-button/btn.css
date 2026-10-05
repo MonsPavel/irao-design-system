@@ -1,0 +1,10 @@
+/** @define button */
+
+/* НАРУШЕНИЕ (AC T1.2): нейтральное имя класса `btn` — запрещено.
+   Префикс `ui-` изолирует систему от legacy-CSS сайтов Битрикс;
+   `btn`/`container`/`wrapper` на старых сайтах уже заняты
+   (docs/02-architecture.md §2, «Namespace»).
+   Ожидаемый красный: plugin/selector-bem-pattern. */
+.btn {
+  color: var(--ui-color-text);
+}
