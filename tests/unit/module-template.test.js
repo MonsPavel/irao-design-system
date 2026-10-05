@@ -106,7 +106,7 @@ describe('module-template — readyState-guard (оба режима, init ров
   });
 
   it("readyState 'complete': init синхронный — инстансы готовы сразу, подписки нет", () => {
-    const { window, document, domContentLoadedSubscriptions } = makeSandbox({
+    const { document, domContentLoadedSubscriptions } = makeSandbox({
       readyState: 'complete',
       bodyHtml: twoInstancesHtml,
     });
@@ -116,7 +116,7 @@ describe('module-template — readyState-guard (оба режима, init ров
   });
 
   it("readyState 'interactive': init синхронный — как 'complete'", () => {
-    const { window, document, domContentLoadedSubscriptions } = makeSandbox({
+    const { document, domContentLoadedSubscriptions } = makeSandbox({
       readyState: 'interactive',
       bodyHtml: twoInstancesHtml,
     });
