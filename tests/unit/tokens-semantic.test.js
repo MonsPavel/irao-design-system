@@ -147,9 +147,7 @@ describe('tokens/semantic.css — структура слоя 2 (ADR-0009)', () 
   it('цветовые семантические токены — ровно один var() (AC «только примитивы/семантика»)', () => {
     for (const [name, value] of declarations) {
       if (!/color/.test(name)) continue;
-      expect(value, `${name}: ${value} — не одиночный var()`).toMatch(
-        /^var\(--ui-[a-z0-9-]+\)$/,
-      );
+      expect(value, `${name}: ${value} — не одиночный var()`).toMatch(/^var\(--ui-[a-z0-9-]+\)$/);
     }
   });
 });
@@ -187,14 +185,8 @@ describe('tokens/semantic.css — типографика (rem, лестница 
   it('для каждой роли §3.2 есть тройка --ui-fs-*/--ui-lh-*/--ui-fw-*', () => {
     for (const [role, triple] of Object.entries(ROLES)) {
       expect(declarations.get(`--ui-fs-${role}`), `--ui-fs-${role} отсутствует`).toBeDefined();
-      expect(
-        declarations.get(`--ui-lh-${role}`),
-        `--ui-lh-${role} отсутствует`,
-      ).toBe(triple.lh);
-      expect(
-        declarations.get(`--ui-fw-${role}`),
-        `--ui-fw-${role} отсутствует`,
-      ).toBe(triple.fw);
+      expect(declarations.get(`--ui-lh-${role}`), `--ui-lh-${role} отсутствует`).toBe(triple.lh);
+      expect(declarations.get(`--ui-fw-${role}`), `--ui-fw-${role} отсутствует`).toBe(triple.fw);
     }
   });
 
@@ -219,9 +211,7 @@ describe('tokens/semantic.css — типографика (rem, лестница 
       // Монотонность: база ≤ 768 ≤ 1024.
       const numeric = [
         ...(steps.base !== undefined ? [steps.base] : []),
-        ...mediaOverrides
-          .filter((o) => o.name === `--ui-fs-${role}`)
-          .map((o) => remToPx(o.value)),
+        ...mediaOverrides.filter((o) => o.name === `--ui-fs-${role}`).map((o) => remToPx(o.value)),
       ];
       expect(numeric).toEqual([...numeric].sort((a, b) => a - b));
     }
