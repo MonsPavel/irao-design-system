@@ -62,7 +62,7 @@ test.describe('ui-button', () => {
     await primary.click();
     await expect(primary).toBeFocused();
 
-    await page.keyboard.tab(); // фокус переходит по DOM — без мыши
+    await page.keyboard.press('Tab'); // фокус переходит по DOM — без мыши
   });
 
   test('axe чист на всех состояниях', async ({ stand }) => {
