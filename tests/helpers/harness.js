@@ -107,7 +107,10 @@ const SHOT_FREEZE_CSS = `
  *
  * Имя эталона — `<name>--<viewport>.png` (name из аргументов, иначе — slug
  * заголовка теста); файл кладётся в tests/visual/__screenshots__/<spec>/
- * (snapshotPathTemplate в playwright.config.mjs).
+ * (snapshotPathTemplate в playwright.config.mjs). Явное имя суффиксов
+ * браузера не получает, поэтому эталоны пишет **только chromium-проект** —
+ * единое окружение эталонов (ADR-0004): firefox/webkit из матрицы идут
+ * мимо скриншотов (поведение проверяют, визуал — chromium).
  *
  * Вне окружения создания эталонов (SNAPSHOTS_ENABLED) — no-op с аннотацией.
  */
@@ -119,11 +122,11 @@ export async function shot(page, { name, viewport = 'desktop' } = {}) {
     );
   }
   const info = base.info();
-  if (!SNAPSHOTS_ENABLED) {
+  if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
     info.annotations.push({
       type: 'shot-skipped',
       description:
-        `${viewport}: эталоны создаются только из контейнера/CI ` +
+        `${viewport}: эталоны создаются только из контейнера/CI в chromium-проекте ` +
         '(ADR-0004) — запустите npm run test:docker',
     });
     return;

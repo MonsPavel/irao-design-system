@@ -98,7 +98,15 @@ const args = [
   'node',
   'node_modules/playwright/cli.js',
   'test',
-  ...testArgs,
+  // PR-проект chromium — дефолт (ADR-0004: PR-матрица — chromium; эталоны
+  // пишет только он). Аргументы насквозь, chromium добавляется, если проект
+  // не указан явно:
+  //   npm run test:docker                                → chromium
+  //   npm run test:docker -- --update-snapshots          → chromium + перегенерация
+  //   npm run test:docker -- --project=firefox           → матрица без chromium
+  ...(testArgs.some((arg) => arg === '--project' || arg.startsWith('--project=') || arg === '-p')
+    ? testArgs
+    : [...testArgs, '--project=chromium']),
 ];
 
 console.log(`test:docker: ${tool} run … ${image}`);
