@@ -10,8 +10,8 @@ test('индекс showcase открывается, axe чист, эталон �
   await openIndex(page);
   await expect(page).toHaveTitle(/irao-ui showcase/);
 
-  const violations = await a11y(page).analyze();
-  expect(violations).toEqual([]);
+  const results = await a11y(page).analyze();
+  expect(results.violations).toEqual([]);
 
   for (const viewport of Object.keys(VIEWPORTS)) {
     await shot(page, { name: 'showcase-index', viewport });

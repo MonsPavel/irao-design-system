@@ -8,6 +8,11 @@
 node_modules/
 dist/
 
+# Playwright (T1.4): артефакты прогонов и отчёты. Скриншот-эталоны
+# tests/visual/__screenshots__/ — НЕ артефакт, они коммитятся (ADR-0004).
+test-results/
+playwright-report/
+
 # Сгенерированный showcase (showcase/build.mjs) — артефакт, не исходники
 showcase/dist/
 
