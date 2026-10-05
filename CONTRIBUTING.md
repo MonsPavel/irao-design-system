@@ -42,7 +42,8 @@ design-decision владельца дизайна).
 | Гейт | Правило | Что запрещает |
 |---|---|---|
 | `stylelint.config.mjs` | `plugin/selector-bem-pattern` | классы вне БЭМ `ui-{block}__{elem}--{mod}`; `is-*`/`has-*` — только в цепочке с блоком (§2 «Namespace») |
-| | `scale-unlimited/declaration-strict-value` | сырые цвета (hex/rgb/hsl) вне `var()`/`inherit`/`currentColor`/`transparent`/`color-mix()`; hex разрешён только в `tokens/primitives.css` (§3.1) |
+| | `scale-unlimited/declaration-strict-value` | сырые цвета (hex/rgb/hsl) вне `var()`/`inherit`/`currentColor`/`transparent`/`color-mix()` — включая цветоносные шорткаты `background`/`border`/`outline` (expandShorthand) и `box-shadow`/`text-shadow` (значение — целостный `var()`-токен); hex разрешён только в `tokens/primitives.css` (§3.1) |
+| | `declaration-property-value-allowed-list` | цветной кастом-проп (`--ui-color-*`) — ровно один токен: `var()`/`color-mix()`/`inherit`/`currentColor`/`transparent` (declaration-strict-value кастом-свойства не видит) |
 | | `declaration-no-important` | `!important` вне `a11y/vi.css` (§1, принцип 4) |
 | | `declaration-property-value-disallowed-list` | `outline: none`/`0` без замены — warning до EPIC-4, затем error (ADR-0001) |
 | | `order/properties-order` | произвольный порядок свойств; `box-sizing` — сразу после токенов (ADR-0002) |
@@ -55,8 +56,17 @@ design-decision владельца дизайна).
 - **`/** @define <block> */` в начале CSS компонента** — без него файл
   выпадает из БЭМ-проверки сознательно (tokens/base/a11y/themes — не
   компоненты); забыли `@define` в компоненте — БЭМ-гейт молчит.
-- `color-mix()` гейтится только снаружи: аргументы внутри вызова должны быть
-  из `var(--ui-*)` (производные состояния, §3.2).
+- Остаточные ограничения hex-гейта (исполняет ревью):
+  - `color-mix()` и значения с `var()` внутри гейтятся «снаружи»: сырой цвет
+    внутри `linear-gradient(var(--x), #fff)` или `color-mix(in srgb, var(--p), #fff)`
+    regex не увидит — внутри функций цвета только из `var(--ui-*)`;
+  - `box-shadow`/`text-shadow` проверяются по частям значения: тень — только
+    целостный `var()`-токен (`box-shadow: var(--ui-shadow-md)`), составные
+    тени из сырых длин не проходят гейт сознательно — тени токенизированы
+    (§3.2);
+  - цветной кастом-проп — ровно один токен (значение сопоставляется целиком):
+    составное значение оформляйте нецветным именем (`--ui-ring`, не
+    `--ui-color-ring`) или переносите в слой токенов.
 - HTML-паттерны — в стиле HTML5: void-элементы без слэша (`<meta>`, не
   `<meta />`) — `void-style` из recommended это и ловит.
 

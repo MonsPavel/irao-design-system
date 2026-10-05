@@ -66,14 +66,45 @@ export default {
     },
 
     // 2. Цвета — только токены; исключение по пути — см. overrides.
+    //    Ревью T1.2 (high): гейт обязан исполнять инвариант «hex вне
+    //    tokens/primitives.css» и для цветоносных ШОРТКАТОВ (background,
+    //    border, outline — главный класс ошибок career-portal #D6D6D6),
+    //    поэтому expandShorthand разворачивает их в цветовые longhand'ы;
+    //    box-shadow/text-shadow не разворачиваются — в списке напрямую;
+    //     значение проверяется по частям, поэтому тень допустима только
+    //     целостным var()-токеном (`box-shadow: var(--ui-shadow-md)`) —
+    //     сознательно строже: тени токенизированы (§3.2).
     'scale-unlimited/declaration-strict-value': [
-      ['/color$/', 'fill', 'stroke'],
+      ['/color$/', '/^--[-a-z0-9]*color/', 'fill', 'stroke', 'box-shadow', 'text-shadow'],
       {
         // var(--ui-*) — основной способ; оставить включённым.
         ignoreVariables: true,
         // Жёстко: rgb()/hsl()/lab() с сырыми аргументами — нарушение.
         ignoreFunctions: false,
-        ignoreValues: ['inherit', 'currentColor', 'transparent', '/^color-mix\\(/'],
+        // Разворачивать шорткаты и проверять цветовые longhand'ы.
+        expandShorthand: true,
+        ignoreValues: ['inherit', 'currentColor', 'transparent', '/^color-mix\\(/', '/var\\(/'],
+      },
+    ],
+
+    // 2а. Ревью T1.2 (high): declaration-strict-value кастом-свойства не
+    //     проверяет вовсе (проверено прогоном: не ловит даже точное имя),
+    //     а «отложенный» цвет компонента (`--ui-color-card-border: #d6d6d6`)
+    //     — тот же инвариант «hex вне tokens/primitives.css». Цветоносный
+    //     кастом-проп обязан быть РОВНО одним токеном: var(...), color-mix(...)
+    //     поверх var() (§3.2) либо ключевое слово. allowed-list (а не
+    //     disallowed-list): id «declaration-property-value-disallowed-list»
+    //     уже занят outline-гейтом с warning-severity (см. 4). Паттерны —
+    //     полнозначные: allowed-list сопоставляет значение целиком.
+    'declaration-property-value-allowed-list': [
+      {
+        '/^--[a-z0-9-]*color/': [
+          '/^var\\([\\s\\S]+\\)$/',
+          '/^color-mix\\([\\s\\S]+\\)$/',
+          'inherit',
+          'currentColor',
+          'transparent',
+        ],
       },
     ],
 
@@ -251,10 +282,13 @@ export default {
   overrides: [
     {
       // Слой 1 «примитивы» — единственное место с hex (02-architecture §3.1,
-      // CONTRIBUTING «Куда положить файл X»). AC T1.2: hex здесь разрешён.
+      // CONTRIBUTING «Куда положить файл X»): снимается hex-гейт longhand'ов
+      // и требование токенности цветных кастом-свойств. AC T1.2: hex здесь
+      // разрешён.
       files: ['**/tokens/primitives.css'],
       rules: {
         'scale-unlimited/declaration-strict-value': null,
+        'declaration-property-value-allowed-list': null,
       },
     },
     {

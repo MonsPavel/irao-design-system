@@ -40,6 +40,28 @@ const EXPECTATIONS = [
     rules: ['scale-unlimited/declaration-strict-value'],
   },
   {
+    // Ревью T1.2 (high): сырой hex в цветоносном шорткате background.
+    file: 'css/components/ui-card/hex-in-background.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['scale-unlimited/declaration-strict-value'],
+  },
+  {
+    // Ревью T1.2 (high): сырой hex в кастом-свойстве с «color» в имени.
+    // declaration-strict-value кастом-свойства не проверяет вовсе —
+    // ловит гейт declaration-property-value-allowed-list.
+    file: 'css/components/ui-card/hex-in-custom-prop.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['declaration-property-value-allowed-list'],
+  },
+  {
+    // Ревью T1.2 (high): шорткаты из токенов — ложных срабатываний нет.
+    file: 'css/components/ui-badge/valid-shorthands.css',
+    tool: 'stylelint',
+    expect: 'pass',
+  },
+  {
     file: 'css/components/ui-modal/outline-none.css',
     tool: 'stylelint',
     expect: 'fail',

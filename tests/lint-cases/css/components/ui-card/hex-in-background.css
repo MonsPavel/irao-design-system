@@ -1,0 +1,9 @@
+/** @define card */
+
+/* НАРУШЕНИЕ (ревью T1.2, high): сырой hex в цветоносном ШОРТКАТЕ —
+   background. Гейт обязан ловить его через цветовой longhand
+   background-color (expandShorthand), а не только /color$/-свойства.
+   Ожидаемый красный: scale-unlimited/declaration-strict-value. */
+.ui-card {
+  background: #d6d6d6;
+}

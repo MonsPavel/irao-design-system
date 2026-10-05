@@ -1,0 +1,11 @@
+/** @define card */
+
+/* НАРУШЕНИЕ (ревью T1.2, high): сырой hex в кастом-свойстве — «отложенный»
+   цвет компонента мимо токенов. declaration-strict-value кастом-свойства не
+   видит вовсе, поэтому для них действует отдельный гейт
+   declaration-property-value-disallowed-list (см. stylelint.config.mjs).
+   Ожидаемый красный: declaration-property-value-disallowed-list. */
+.ui-card {
+  --ui-color-card-border: #d6d6d6;
+  color: var(--ui-color-text);
+}
