@@ -7,8 +7,8 @@
  *  2. КАЖДЫЙ цвет career-portal (css/variables.css + захардкоженные hex/rgba
  *     в components.css/pages.css) отражён в конкретный примитив — исполняемая
  *     форма таблицы соответствия «career-portal значение → примитив»
- *     (AC T2.1, дублирует humans-таблицу docs/ui-system/epics/
- *     EPIC-02-design-tokens/T2.1-mapping.md);
+ *     (AC T2.1, дублирует humans-таблицу docs/ui-system/architecture/
+ *     tokens-career-portal-mapping.md);
  *  3. нейтральная шкала серых 100–900 и статусные шкалы red/green/orange
  *     с производными bg полны (Scope T2.1);
  *  4. у каждого примитива — комментарий происхождения непосредственно над

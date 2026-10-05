@@ -10,7 +10,7 @@
  * css/variables.css + захардкоженные hex/rgba компонентов): переносятся как
  * есть; отклонения от них — design-decision владельца дизайна. Таблица
  * соответствия «career-portal значение → примитив»:
- * docs/ui-system/epics/EPIC-02-design-tokens/T2.1-mapping.md
+ * docs/ui-system/architecture/tokens-career-portal-mapping.md
  * (исполняемая форма — tests/unit/tokens-primitives.test.js).
  *
  * У каждого примитива — комментарий происхождения: career-portal (с именем
