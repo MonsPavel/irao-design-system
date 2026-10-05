@@ -1,0 +1,140 @@
+/*!
+ * irao-ui — слой 1: токены-примитивы, палитра (ADR-0009, задача T2.1).
+ *
+ * «Сырые» имена ЗНАЧЕНИЙ, не смысла (`--ui-blue-800`, а не `--ui-color-primary`):
+ * компоненты и темы этот файл не читают — только слой 2 tokens/semantic.css
+ * (T2.2). Единственное место системы, где допустимы hex/rgba (гейт stylelint,
+ * T1.2). Темы примитивы не переопределяют (ADR-0009).
+ *
+ * Источник значений — одобренный дизайн career-portal (макет CP_Ревью,
+ * css/variables.css + захардкоженные hex/rgba компонентов): переносятся как
+ * есть; отклонения от них — design-decision владельца дизайна. Таблица
+ * соответствия «career-portal значение → примитив»:
+ * docs/ui-system/epics/EPIC-02-design-tokens/T2.1-mapping.md
+ * (исполняемая форма — tests/unit/tokens-primitives.test.js).
+ *
+ * У каждого примитива — комментарий происхождения: career-portal (с именем
+ * переменной-источника или местом захардкоживания) / новый (достройка шкалы
+ * по Scope T2.1) / исправлен (таких пока нет — значения не менялись).
+ * Семейства упорядочены от светлых к тёмным (меньше число — светлее).
+ * Альфа-токены: суффикс — процент непрозрачности (--ui-white-80 = 0.8).
+ */
+:root {
+  /* ── Базовые ── */
+
+  /* career-portal: --color-surface, --color-text-on-dark, #FFFFFF кнопок */
+  --ui-white: #ffffff;
+  /* career-portal: --color-text */
+  --ui-black: #1f1f1f;
+
+  /* ── Синие (brand) ── */
+
+  /* career-portal: --color-surface-blue-50 (светло-голубой фон карточек) */
+  --ui-blue-50: #f1f5fe;
+  /* career-portal: --color-surface-blue-100 (фон карточки при наведении) */
+  --ui-blue-100: #e8eefe;
+  /* career-portal: --color-blue-700 и --color-blue-800 (одно значение; разведение смыслов — слой 2) */
+  --ui-blue-700: #164b89;
+  /* career-portal: --color-primary-deep (тёмно-синий фоновых панелей); промежуточный шаг 700–800 */
+  --ui-blue-750: #152a4f;
+  /* career-portal: --color-primary (основной тёмно-синий; стеклянные поверхности и оверлеи — см. альфу) */
+  --ui-blue-800: #002856;
+
+  /* ── Серо-синие (холодные нейтрали рамок/разделителей/поверхностей) ── */
+
+  /* career-portal: --color-page-head-bg (фон внутренних страниц) */
+  --ui-slate-50: #f5f8fc;
+  /* career-portal: --color-page-head-border (рамка шапки внутренних страниц) */
+  --ui-slate-100: #e8eef6;
+  /* career-portal: #C4CDDC — разделители крошек (components.css:22), фон прогресса (pages.css:526) */
+  --ui-slate-200: #c4cddc;
+  /* career-portal: #B9C6DE — hover-рамка карточки (components.css:123) */
+  --ui-slate-300: #b9c6de;
+  /* career-portal: --color-text-on-dark-muted (вторичный текст на тёмном) */
+  --ui-slate-400: #8f9cbf;
+
+  /* ── Нейтральные серые 100–900 (рамки/разделители/поверхности) ── */
+
+  /* career-portal: --tag-gray-bg */
+  --ui-gray-100: #f0f1f3;
+  /* новый: достройка шкалы 100–900 (Scope T2.1) — поверхности между gray-100 и gray-300 */
+  --ui-gray-200: #e0e0e0;
+  /* career-portal: #D6D6D6 — рамка карточки (components.css:117, pages.css:182) */
+  --ui-gray-300: #d6d6d6;
+  /* новый: достройка шкалы 100–900 (Scope T2.1) — приглушённые рамки */
+  --ui-gray-400: #bdbdbd;
+  /* новый: достройка шкалы 100–900 (Scope T2.1) — иконки/вторичные рамки */
+  --ui-gray-500: #9e9e9e;
+  /* career-portal: --color-text-muted (вторичный текст) */
+  --ui-gray-600: #808080;
+  /* новый: достройка шкалы 100–900 (Scope T2.1) — сильный вторичный текст (сырьё для AA-гейта T2.3) */
+  --ui-gray-700: #616161;
+  /* новый: достройка шкалы 100–900 (Scope T2.1) — тёмные поверхности/текст на светлых полях */
+  --ui-gray-800: #424242;
+  /* career-portal: --color-text (основной текст; дубль значения с --ui-black — якорь шкалы) */
+  --ui-gray-900: #1f1f1f;
+
+  /* ── Оранжевые (акцент + статус warning + теги) ── */
+
+  /* career-portal: --tag-orange-bg (фон тегов; производная bg оранжевой шкалы) */
+  --ui-orange-50: #ffe3d3;
+  /* career-portal: --color-accent-bright */
+  --ui-orange-300: #f28b00;
+  /* career-portal: --color-accent-light */
+  --ui-orange-400: #f37131;
+  /* career-portal: --color-accent (оранжевый кнопок, акцентов) */
+  --ui-orange-500: #f26722;
+  /* career-portal: --tag-orange-text (текст тегов на orange-50; сырьё для контраст-гейта T2.3) */
+  --ui-orange-700: #b34a10;
+
+  /* ── Красные (статус error) ── */
+
+  /* career-portal: --color-error-bg (фон ошибок; производная bg) */
+  --ui-red-50: #fff6f4;
+  /* career-portal: --color-error */
+  --ui-red-600: #d8402c;
+
+  /* ── Зелёные (статус success) ── */
+
+  /* career-portal: --color-success-bg / --tag-green-bg (одно значение; производная bg) */
+  --ui-green-50: #ddf3e1;
+  /* career-portal: --color-success / --tag-green-text (одно значение) */
+  --ui-green-700: #1e7a34;
+
+  /* ── Персиковые (декоративная серия) ── */
+
+  /* career-portal: --color-peach-100 */
+  --ui-peach-100: #ffd3b7;
+  /* career-portal: --color-peach-200 */
+  --ui-peach-200: #ffceac;
+  /* career-portal: --color-peach-300 */
+  --ui-peach-300: #ffab72;
+
+  /* ── Пурпурные (декоративная серия) ── */
+
+  /* career-portal: --color-plum */
+  --ui-purple-900: #511d59;
+
+  /* ── Альфа-значения: стекло, оверлеи, сырьё теней ── */
+  /* Цветовая составляющая будущих семантических shadow-токенов (T2.2) —
+     геометрия (смещения/размытие) уедет в слой 2; здесь только цвет с альфой. */
+
+  /* career-portal: --glass-dark (стекло на тёмном) */
+  --ui-white-10: rgba(255, 255, 255, 0.1);
+  /* career-portal: pages.css:620 — подпись на тёмном (company-stats__label) */
+  --ui-white-75: rgba(255, 255, 255, 0.75);
+  /* career-portal: --glass-light (стекло на светлом) */
+  --ui-white-80: rgba(255, 255, 255, 0.8);
+  /* career-portal: pages.css:164 — фон sticky-шапки */
+  --ui-white-90: rgba(255, 255, 255, 0.9);
+  /* career-portal: components.css:124 — цвет тени карточки (сырьё shadow-токена T2.2) */
+  --ui-blue-800-10: rgba(0, 40, 86, 0.1);
+  /* career-portal: components.css:375 — цвет тени dropdown (сырьё shadow-токена T2.2) */
+  --ui-blue-800-16: rgba(0, 40, 86, 0.16);
+  /* career-portal: --glass-blue (стекло поверх фото на тёмно-синем) */
+  --ui-blue-800-50: rgba(0, 40, 86, 0.5);
+  /* career-portal: pages.css:478 — оверлей баннера поверх фото */
+  --ui-blue-800-55: rgba(0, 40, 86, 0.55);
+  /* career-portal: components.css:359 — hover dd__trigger (blue-50 с альфой) */
+  --ui-blue-50-55: rgba(241, 245, 254, 0.55);
+}

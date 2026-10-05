@@ -72,15 +72,51 @@ const CAREER_PORTAL_COLORS = [
   { value: '#F5F8FC', source: '--color-page-head-bg', token: '--ui-slate-50' },
   { value: '#E8EEF6', source: '--color-page-head-border', token: '--ui-slate-100' },
   // css/components.css + css/pages.css — захардкоженные вне токенов
-  { value: '#D6D6D6', source: 'components.css:117, pages.css:182 — рамка карточки', token: '--ui-gray-300' },
-  { value: '#B9C6DE', source: 'components.css:123 — hover-рамка карточки', token: '--ui-slate-300' },
-  { value: '#C4CDDC', source: 'components.css:22, pages.css:526 — разделители', token: '--ui-slate-200' },
-  { value: 'rgba(255, 255, 255, 0.9)', source: 'pages.css:164 — фон sticky-шапки', token: '--ui-white-90' },
-  { value: 'rgba(255, 255, 255, 0.75)', source: 'pages.css:620 — подпись на тёмном', token: '--ui-white-75' },
-  { value: 'rgba(241, 245, 254, 0.55)', source: 'components.css:359 — hover dd__trigger', token: '--ui-blue-50-55' },
-  { value: 'rgba(0, 40, 86, 0.55)', source: 'pages.css:478 — оверлей баннера', token: '--ui-blue-800-55' },
-  { value: 'rgba(0, 40, 86, 0.16)', source: 'components.css:375 — цвет тени dropdown', token: '--ui-blue-800-16' },
-  { value: 'rgba(0, 40, 86, 0.10)', source: 'components.css:124 — цвет тени карточки', token: '--ui-blue-800-10' },
+  {
+    value: '#D6D6D6',
+    source: 'components.css:117, pages.css:182 — рамка карточки',
+    token: '--ui-gray-300',
+  },
+  {
+    value: '#B9C6DE',
+    source: 'components.css:123 — hover-рамка карточки',
+    token: '--ui-slate-300',
+  },
+  {
+    value: '#C4CDDC',
+    source: 'components.css:22, pages.css:526 — разделители',
+    token: '--ui-slate-200',
+  },
+  {
+    value: 'rgba(255, 255, 255, 0.9)',
+    source: 'pages.css:164 — фон sticky-шапки',
+    token: '--ui-white-90',
+  },
+  {
+    value: 'rgba(255, 255, 255, 0.75)',
+    source: 'pages.css:620 — подпись на тёмном',
+    token: '--ui-white-75',
+  },
+  {
+    value: 'rgba(241, 245, 254, 0.55)',
+    source: 'components.css:359 — hover dd__trigger',
+    token: '--ui-blue-50-55',
+  },
+  {
+    value: 'rgba(0, 40, 86, 0.55)',
+    source: 'pages.css:478 — оверлей баннера',
+    token: '--ui-blue-800-55',
+  },
+  {
+    value: 'rgba(0, 40, 86, 0.16)',
+    source: 'components.css:375 — цвет тени dropdown',
+    token: '--ui-blue-800-16',
+  },
+  {
+    value: 'rgba(0, 40, 86, 0.10)',
+    source: 'components.css:124 — цвет тени карточки',
+    token: '--ui-blue-800-10',
+  },
 ];
 
 /** Строка без комментариев — для структурных проверок. */
@@ -173,9 +209,14 @@ describe('tokens/primitives.css — полнота отражения career-por
   });
 
   it('дубликат career-portal --color-blue-700/--color-blue-800 (#164B89) отражён одним примитивом', () => {
-    // В career-portal две переменные с одним значением; в слое 1 значение —
-    // одна сущность шкалы. Семантический слой разведёт смыслы в T2.2.
-    expect(declarations.get('--ui-blue-700')).toBe(declarations.get('--ui-blue-800'));
+    // В career-portal две переменные с одним значением #164B89; в слое 1
+    // значение — одна сущность шкалы (--ui-blue-700). Семантический слой
+    // разведёт смыслы в T2.2. Проверяем, что значение в палитре ровно одно.
+    const target = parseColor('#164B89');
+    const carriers = [...declarations.values()].filter((value) =>
+      sameColor(parseColor(value), target),
+    );
+    expect(carriers).toHaveLength(1);
   });
 });
 
