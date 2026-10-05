@@ -44,6 +44,12 @@ function parseDeclarations(css) {
   return declarations;
 }
 
+/** База :root без media-блоков (иначе последнее переопределение побеждает). */
+function parseBaseDeclarations(css) {
+  const withoutMedia = css.replace(/@media\s*\(min-width:\s*\d+px\)\s*\{[\s\S]*?\n\}/g, '');
+  return parseDeclarations(withoutMedia);
+}
+
 /** Media-переопределения: [{ min, name, value }] из блоков @media (min-width: Npx). */
 function parseMediaDeclarations(css) {
   const overrides = [];
@@ -65,9 +71,9 @@ const remToPx = (value) => {
 };
 
 const stripped = stripComments(semanticSource);
-const declarations = parseDeclarations(stripped);
+const declarations = parseBaseDeclarations(stripped);
 const mediaOverrides = parseMediaDeclarations(stripped);
-const primitiveNames = [...parseDeclarations(stripComments(primitivesSource)).keys()];
+const primitiveNames = [...parseBaseDeclarations(stripComments(primitivesSource)).keys()];
 
 /** Семейство примитива по имени: --ui-blue-800-10 → blue, --ui-white → white. */
 function familyOf(name) {
@@ -77,24 +83,34 @@ function familyOf(name) {
 }
 
 describe('tokens/semantic.css — структура слоя 2 (ADR-0009)', () => {
-  it('файл состоит только из :root-блоков и @media-обёрток (без селекторов компонентов)', () => {
-    const withoutRoots = stripped
-      .replace(/:root\s*\{[\s\S]*?\}/g, '')
-      .replace(/@media\s*\(min-width:\s*\d+px\)\s*\{/g, '')
-      .trim();
-    expect(withoutRoots).toBe('');
+  it('файл состоит только из :root-блоков, @media-обёрток и объявлений (без селекторов компонентов)', () => {
+    const lines = stripped
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+    expect(lines.length).toBeGreaterThan(0);
+    for (const line of lines) {
+      const allowed =
+        /^:root\s*\{$/.test(line) ||
+        /^@media\s*\(min-width:\s*\d+px\)\s*\{$/.test(line) ||
+        line === '}' ||
+        /^--[a-z0-9-]+\s*:\s*[^;]+;$/.test(line);
+      expect(allowed, `чужая для слоя 2 строка: ${line}`).toBe(true);
+    }
   });
 
-  it('все объявления — кастом-свойства с неймспейсом --ui-, имена уникальны', () => {
+  it('все объявления — кастом-свойства --ui-; имена базы уникальны; media-override без базы невозможен', () => {
     expect(declarations.size).toBeGreaterThan(0);
-    for (const name of declarations.keys()) {
+    const baseNames = [...declarations.keys()];
+    for (const name of baseNames) {
       expect(name).toMatch(/^--ui-[a-z0-9-]+$/);
     }
-    const baseAndMedia = [
-      ...declarations.keys(),
-      ...mediaOverrides.map((o) => o.name),
-    ];
-    expect(new Set(baseAndMedia).size).toBe(baseAndMedia.length);
+    // Media-переопределения ПОВТОРЯЮТ имена базы сознательно (mobile-first) —
+    // уникальны только базовые имена; каждый override обязан иметь базу.
+    expect(new Set(baseNames).size).toBe(baseNames.length);
+    for (const override of mediaOverrides) {
+      expect(declarations.has(override.name), `override без базы: ${override.name}`).toBe(true);
+    }
   });
 
   it('media-переопределения — только min-width из шкалы 768/1024 (mobile-first, T2.5)', () => {

@@ -1,0 +1,324 @@
+/*!
+ * irao-ui — слой 2: семантические токены (ADR-0009, задача T2.2).
+ *
+ * Полный смысловой API значений для всех компонентов (02-architecture §3.2):
+ * цвета-смыслы, focus-тройка (ADR-0001), типографика fs/lh/fw в rem,
+ * spacing 1–8, радиусы, рамки, тени, z-лестница, переходы, контейнеры.
+ * Единственный слой, который переопределяют темы (ADR-0009): новый токен —
+ * minor с дефолтом в :root, переименование/удаление — major.
+ *
+ * Правила слоя:
+ *  — значения — ТОЛЬКО ссылки на примитивы (tokens/primitives.css) или на
+ *    другие семантические токены; hex здесь невозможен (stylelint: гейты
+ *    T1.2 + irao/no-primitive-token-references снимает запрет ссылок на
+ *    примитивы только для каталога tokens);
+ *  — компоненты читают только этот слой (гейт «компонент не знает
+ *    примитивов» — stylelint-плагин tools/stylelint/, T2.2);
+ *  — типографика в rem, база 16px на html (устанавливается base/reset, T3.1):
+ *    rem-типографика — основа требования «не ломается при увеличении шрифта»
+ *    (T3.6); line-height — безразмерные множители;
+ *  — mobile-first: базовые значения fs — мобильные (career-portal base.css
+ *    @media (max-width: 767px)), рост к lg переопределением в min-width media
+ *    (768/1024 — шкала брейкпоинтов §3.2, константы; линтер шкалы — T2.5).
+ *
+ * Источник значений — одобренный дизайн career-portal (макет CP_Ревью,
+ * css/variables.css + media-правила base.css + захардкоженные значения),
+ * перенос «как есть» с пересчётом px → rem (÷16). У каждого токена —
+ * комментарий происхождения (career-portal / новый / 02-architecture) —
+ * исполняемый контроль: tests/unit/tokens-semantic.test.js. Таблица диффов
+ * против career-portal: docs/ui-system/architecture/tokens-career-portal-mapping.md.
+ */
+:root {
+  /* ── Цвета-смыслы: бренд и текст ── */
+
+  /* career-portal: --color-primary (основной тёмно-синий) */
+  --ui-color-primary: var(--ui-blue-800);
+  /* career-portal: --color-primary-deep (тёмные фоновые панели) */
+  --ui-color-primary-deep: var(--ui-blue-750);
+  /* career-portal: --color-accent (оранжевый кнопок/акцентов; hover-производные — T2.6) */
+  --ui-color-accent: var(--ui-orange-500);
+  /* career-portal: --color-text */
+  --ui-color-text: var(--ui-black);
+  /* career-portal: --color-text-muted (#808080; AA-замена значения — T2.3, примитив остаётся эталоном) */
+  --ui-color-text-muted: var(--ui-gray-600);
+  /* career-portal: --color-text-on-dark */
+  --ui-color-text-on-dark: var(--ui-white);
+  /* career-portal: --color-text-on-dark-muted */
+  --ui-color-text-on-dark-muted: var(--ui-slate-400);
+
+  /* ── Цвета-смыслы: поверхности ── */
+
+  /* career-portal: --color-surface */
+  --ui-color-surface: var(--ui-white);
+  /* career-portal: --color-surface-blue-50 — приглушённый фон карточек и «серых» секций (section--gray) */
+  --ui-color-surface-muted: var(--ui-blue-50);
+  /* career-portal: --color-blue-700 — синие карточки «почему мы»; разведение дубля #164B89 — таблица T2.1 */
+  --ui-color-surface-blue-deep: var(--ui-blue-700);
+  /* career-portal: тёмные секции (bg = --color-primary, 8 использований в components/pages) — пара к text-on-dark */
+  --ui-color-surface-dark: var(--ui-color-primary);
+  /* career-portal: pages.css:164 — полупрозрачный фон sticky-шапки */
+  --ui-color-surface-translucent: var(--ui-white-90);
+
+  /* ── Цвета-смыслы: стекло и оверлеи ── */
+
+  /* career-portal: --glass-light */
+  --ui-color-glass-light: var(--ui-white-80);
+  /* career-portal: --glass-dark */
+  --ui-color-glass-dark: var(--ui-white-10);
+  /* career-portal: --glass-blue */
+  --ui-color-glass-blue: var(--ui-blue-800-50);
+  /* career-portal: pages.css:478 — оверлей поверх фото (будущие модалки) */
+  --ui-color-overlay: var(--ui-blue-800-55);
+
+  /* ── Цвета-смыслы: рамки и разделители ── */
+
+  /* career-portal: components.css:22, pages.css:526 — разделители крошек/прогресса */
+  --ui-color-divider: var(--ui-slate-200);
+  /* career-portal: --color-page-head-border (мягкая рамка шапки внутренних страниц) */
+  --ui-color-border-muted: var(--ui-slate-100);
+
+  /* ── Цвета-смыслы: статусы ── */
+
+  /* career-portal: --color-error */
+  --ui-color-error: var(--ui-red-600);
+  /* career-portal: --color-error-bg */
+  --ui-color-error-bg: var(--ui-red-50);
+  /* career-portal: --color-success, --tag-green-text (одно значение) */
+  --ui-color-success: var(--ui-green-700);
+  /* career-portal: --color-success-bg, --tag-green-bg (одно значение) */
+  --ui-color-success-bg: var(--ui-green-50);
+  /* 02-architecture §3.2 требует info-пару: значение — ступень одобренной синей шкалы (новый) */
+  --ui-color-info: var(--ui-blue-700);
+  /* новый: производная bg одобренной шкалы — пара к error-bg/success-bg */
+  --ui-color-info-bg: var(--ui-blue-50);
+
+  /* ── Цвета-смыслы: теги (пары bg/text для Badge, T4.2) ── */
+
+  /* career-portal: --tag-orange-bg */
+  --ui-color-tag-orange-bg: var(--ui-orange-50);
+  /* career-portal: --tag-orange-text */
+  --ui-color-tag-orange-text: var(--ui-orange-700);
+  /* career-portal: --tag-green-bg */
+  --ui-color-tag-green-bg: var(--ui-green-50);
+  /* career-portal: --tag-green-text */
+  --ui-color-tag-green-text: var(--ui-green-700);
+  /* career-portal: --tag-gray-bg (текст тега — --ui-color-text) */
+  --ui-color-tag-gray-bg: var(--ui-gray-100);
+
+  /* ── Focus (единая политика :focus-visible, ADR-0001) ── */
+
+  /* career-portal: pages.css:52 — цвет фокуса = --color-primary */
+  --ui-focus-color: var(--ui-color-primary);
+  /* career-portal: pages.css:52 — outline: 3px solid (волосяная геометрия, не масштабируется — см. доку токенов) */
+  --ui-focus-width: 3px;
+  /* career-portal: pages.css:52 — outline-offset: 2px */
+  --ui-focus-offset: 2px;
+
+  /* ── Типографика (rem; тройки fs/lh/fw на роль — §3.2) ── */
+
+  /* career-portal: --font-family; фолбэк-стек расширен по 02-architecture §3.2 (шрифты подключит T3.1) */
+  --ui-font-family: 'Golos Text', Arial, 'Helvetica Neue', sans-serif;
+  /* новый: 02-architecture §3.2 (--ui-font-family-mono); в career-portal моноширинного нет */
+  --ui-font-family-mono: ui-monospace, Consolas, 'Courier New', monospace;
+
+  /* career-portal: base.css @media (max-width: 767px) — 34px; mobile-first база, рост к lg ниже */
+  --ui-fs-h1: 2.125rem;
+  /* career-portal: --lh-h1 */
+  --ui-lh-h1: 1.1;
+  /* career-portal: --fw-h1 */
+  --ui-fw-h1: 400;
+
+  /* career-portal: base.css @media (max-width: 767px) — 28px */
+  --ui-fs-h2: 1.75rem;
+  /* career-portal: --lh-h2 */
+  --ui-lh-h2: 1.1;
+  /* career-portal: --fw-h2 */
+  --ui-fw-h2: 400;
+
+  /* career-portal: base.css @media (max-width: 767px) — 24px */
+  --ui-fs-h3: 1.5rem;
+  /* career-portal: --lh-h3 */
+  --ui-lh-h3: 1.3;
+  /* career-portal: --fw-h3 */
+  --ui-fw-h3: 500;
+
+  /* career-portal: base.css @media (max-width: 767px) — 20px */
+  --ui-fs-h4: 1.25rem;
+  /* career-portal: --lh-h4 */
+  --ui-lh-h4: 1.25;
+  /* career-portal: --fw-h4 */
+  --ui-fw-h4: 500;
+
+  /* новый: роль §3.2, в career-portal её нет; размер = ступень lead одобренной шкалы, без media-лестницы */
+  --ui-fs-h5: 1.5rem;
+  /* новый: роль §3.2 (см. --ui-fs-h5) */
+  --ui-lh-h5: 1.25;
+  /* новый: роль §3.2 (см. --ui-fs-h5) */
+  --ui-fw-h5: 500;
+
+  /* новый: роль §3.2, в career-portal её нет; размер = ступень body одобренной шкалы, без media-лестницы */
+  --ui-fs-h6: 1.25rem;
+  /* новый: роль §3.2 (см. --ui-fs-h6) */
+  --ui-lh-h6: 1.25;
+  /* новый: роль §3.2 (см. --ui-fs-h6) */
+  --ui-fw-h6: 500;
+
+  /* career-portal: base.css @media (max-width: 767px) — 18px */
+  --ui-fs-lead: 1.125rem;
+  /* career-portal: --lh-lead */
+  --ui-lh-lead: 1.35;
+  /* career-portal: --fw-lead */
+  --ui-fw-lead: 400;
+
+  /* career-portal: base.css @media (max-width: 767px) — 16px; career-portal --fs-body-bold выразим парой body × fw 500 */
+  --ui-fs-body: 1rem;
+  /* career-portal: --lh-body */
+  --ui-lh-body: 1.35;
+  /* career-portal: --fw-body */
+  --ui-fw-body: 400;
+
+  /* career-portal: --fs-small (14px, media-переопределений нет); --fs-small-regular выразим парой small × fw 400 */
+  --ui-fs-small: 0.875rem;
+  /* career-portal: --lh-small */
+  --ui-lh-small: 1.35;
+  /* career-portal: --fw-small */
+  --ui-fw-small: 500;
+
+  /* career-portal: --fs-caption (13px) */
+  --ui-fs-caption: 0.8125rem;
+  /* career-portal: --lh-caption */
+  --ui-lh-caption: 1.1;
+  /* career-portal: --fw-caption */
+  --ui-fw-caption: 500;
+
+  /* career-portal: --fs-micro (12px) */
+  --ui-fs-micro: 0.75rem;
+  /* career-portal: --lh-micro */
+  --ui-lh-micro: 1.35;
+  /* career-portal: --fw-micro */
+  --ui-fw-micro: 400;
+
+  /* ── Отступы (02-architecture §3.2: фиксированная шкала 4/8/12/16/24/32/48/64,
+        в career-portal отступы произвольные — новый шаг шкалы) ── */
+
+  /* новый: 02-architecture §3.2 — шкала 1–8 (4px → 0.25rem) */
+  --ui-space-1: 0.25rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (8px → 0.5rem) */
+  --ui-space-2: 0.5rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (12px → 0.75rem) */
+  --ui-space-3: 0.75rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (16px → 1rem) */
+  --ui-space-4: 1rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (24px → 1.5rem) */
+  --ui-space-5: 1.5rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (32px → 2rem) */
+  --ui-space-6: 2rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (48px → 3rem) */
+  --ui-space-7: 3rem;
+  /* новый: 02-architecture §3.2 — шкала 1–8 (64px → 4rem) */
+  --ui-space-8: 4rem;
+
+  /* ── Радиусы ── */
+
+  /* новый: 02-architecture §3.2 — сброс радиуса (в career-portal нет) */
+  --ui-radius-none: 0;
+  /* career-portal: --radius-small (8px → 0.5rem) */
+  --ui-radius-sm: 0.5rem;
+  /* career-portal: --radius-card (16px → 1rem) */
+  --ui-radius-md: 1rem;
+  /* career-portal: --radius-big (24px → 1.5rem) */
+  --ui-radius-lg: 1.5rem;
+  /* career-portal: --radius-pill (100px → 6.25rem) */
+  --ui-radius-pill: 6.25rem;
+
+  /* ── Рамки (геометрия; цвета рамок — в «Цветах-смыслах») ── */
+
+  /* новый: 02-architecture §3.2 — константа толщины рамок одобренного дизайна (карточки/поля, 1px) */
+  --ui-border-width: 1px;
+  /* career-portal: components.css:117, pages.css:182 — цвет рамки карточки #D6D6D6 */
+  --ui-border-color: var(--ui-gray-300);
+
+  /* ── Тени (геометрия + цвет из примитивов-альф; в career-portal rgba захардкожена) ── */
+
+  /* новый: нижняя ступень лестницы §3.2; цвет — сырьё тени карточки career-portal */
+  --ui-shadow-sm: 0 0.125rem 0.5rem var(--ui-blue-800-10);
+  /* career-portal: components.css:124 — тень карточки 0 12px 32px rgba(0, 40, 86, 0.10) → rem */
+  --ui-shadow-md: 0 0.75rem 2rem var(--ui-blue-800-10);
+  /* career-portal: components.css:375 — тень dropdown 0 16px 40px rgba(0, 40, 86, 0.16) → rem */
+  --ui-shadow-lg: 0 1rem 2.5rem var(--ui-blue-800-16);
+  /* career-portal: семантическое имя тени карточки (= одобренное значение через лестницу) */
+  --ui-shadow-card: var(--ui-shadow-md);
+
+  /* ── Z-index (лестница §3.2; сегодня в career-portal плавающие 70/200) ── */
+
+  /* career-portal: components.css:376 — dropdown z-index: 70 */
+  --ui-z-dropdown: 70;
+  /* 02-architecture §3.2: новый (липкие подзаголовки между dropdown и header) */
+  --ui-z-sticky: 100;
+  /* 02-architecture §3.2: новый (шапка сайта) */
+  --ui-z-header: 150;
+  /* 02-architecture §3.2: новый (подложки оверлеев; 200 в career-portal занят vi-панелью — vi.css:11) */
+  --ui-z-overlay: 200;
+  /* 02-architecture §3.2: новый (модальные окна) */
+  --ui-z-modal: 300;
+  /* 02-architecture §3.2: новый (VI-режим поверх всего, ГОСТ Р 52872) */
+  --ui-z-vi: 400;
+
+  /* ── Переходы (02-architecture §3.2: 0.15/0.25/0.4 ease) ── */
+
+  /* 02-architecture §3.2: новый (быстрые микровзаимодействия) */
+  --ui-transition-fast: 0.15s ease;
+  /* career-portal: --transition (0.25s ease) */
+  --ui-transition: 0.25s ease;
+  /* 02-architecture §3.2: новый (медленные крупные движения) */
+  --ui-transition-slow: 0.4s ease;
+
+  /* ── Контейнеры (1360px контента внутри 1440px — career-portal) ── */
+
+  /* career-portal: --container-max (1440px → 90rem; Technical considerations T2.2) */
+  --ui-container-max: 90rem;
+  /* career-portal: base.css @media (max-width: 767px) — 16px; mobile-first база */
+  --ui-container-pad: 1rem;
+  /* career-portal: base.css @media (max-width: 1023px) — 24px; читает контейнер в @media (min-width: 768px) */
+  --ui-container-pad-md: 1.5rem;
+  /* career-portal: base.css 1024–1439 — 32px; читает контейнер в @media (min-width: 1024px) */
+  --ui-container-pad-lg: 2rem;
+}
+
+/* Mobile-first: базовые --ui-fs-* — мобильные (career-portal @media (max-width: 767px)),
+   рост к lg. Значения career-portal base.css @media (max-width: 1023px):
+   h1 48 / h2 40 / h3 30 / body 18. */
+@media (min-width: 768px) {
+  :root {
+    /* career-portal: base.css @media (max-width: 1023px) — 48px */
+    --ui-fs-h1: 3rem;
+    /* career-portal: base.css @media (max-width: 1023px) — 40px */
+    --ui-fs-h2: 2.5rem;
+    /* career-portal: base.css @media (max-width: 1023px) — 30px */
+    --ui-fs-h3: 1.875rem;
+    /* career-portal: base.css @media (max-width: 1023px) — 18px */
+    --ui-fs-body: 1.125rem;
+  }
+}
+
+/* career-portal: база variables.css (десктоп) — h1 80 / h2 60 / h3 42 / h4 28 /
+   lead 24 / body 20. Промежуточный шаг career-portal @media (max-width: 1439px)
+   (h1 64 / h2 48 / h3 36) и паддинг 40px ≥1440 в слой 2 не перенесены —
+   спека T2.2: лестница «рост к lg», паддинги 16/24/32; запись в таблице
+   диффов: docs/ui-system/architecture/tokens-career-portal-mapping.md. */
+@media (min-width: 1024px) {
+  :root {
+    /* career-portal: --fs-h1 — 80px */
+    --ui-fs-h1: 5rem;
+    /* career-portal: --fs-h2 — 60px */
+    --ui-fs-h2: 3.75rem;
+    /* career-portal: --fs-h3 — 42px */
+    --ui-fs-h3: 2.625rem;
+    /* career-portal: --fs-h4 — 28px (в base @media 767 уже 20px) */
+    --ui-fs-h4: 1.75rem;
+    /* career-portal: --fs-lead — 24px */
+    --ui-fs-lead: 1.5rem;
+    /* career-portal: --fs-body — 20px */
+    --ui-fs-body: 1.25rem;
+  }
+}
