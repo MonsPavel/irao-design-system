@@ -1,0 +1,10 @@
+/* T2.2 (негативная фикстура): компонент читает примитив напрямую —
+   var(--ui-blue-800) вместо слоя 2. Гейт «компонент читает только слой 2»
+   (ADR-0009, AC T2.2) обязан поймать это правилом
+   irao/no-primitive-token-references. */
+/** @define button */
+.ui-button {
+  box-sizing: border-box;
+  background: var(--ui-blue-800);
+  color: var(--ui-color-text);
+}

@@ -1,0 +1,17 @@
+/* T2.2 (позитивный контроль исключения): semantic.css ОБЯЗАН ссылаться на
+   примитивы — запрет irao/no-primitive-token-references снят для tokens/
+   через overrides (как hex-гейт для primitives.css). Путь css/tokens/
+   повторяет структуру репозитория — path-based исключение проверяется на
+   тех же путях, что и в реальном репозитории. */
+:root {
+  /* career-portal: --color-primary */
+  --ui-color-primary: var(--ui-blue-800);
+  /* career-portal: --color-text */
+  --ui-color-text: var(--ui-black);
+  /* career-portal: --color-surface */
+  --ui-color-surface: var(--ui-white);
+  /* 02-architecture §3.2: база 16 на html, rem-типографика */
+  --ui-fs-body: 1.25rem;
+  /* 02-architecture §3.2: шкала отступов 4–64 */
+  --ui-space-2: 0.5rem;
+}
