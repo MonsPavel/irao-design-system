@@ -48,7 +48,9 @@ if (htmlFiles.length === 0) {
   process.exit(0);
 }
 
-const bin = join(root, 'node_modules', 'html-validate', 'bin', 'html-validate.js');
+// html-validate 11: bin — html-validate.mjs (путь не выполнялся до T1.3:
+// HTML-файлов в исходниках не было, обёртка выходила ранним «пропуском»)
+const bin = join(root, 'node_modules', 'html-validate', 'bin', 'html-validate.mjs');
 const result = spawnSync(process.execPath, [bin, ...htmlFiles.map((f) => relative(root, f))], {
   cwd: root,
   stdio: 'inherit',
