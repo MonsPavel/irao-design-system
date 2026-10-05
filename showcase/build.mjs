@@ -43,6 +43,7 @@ import {
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transform } from 'esbuild';
+import { parseTokensFile, renderTokensStand, TOKENS_SOURCES } from './tokens-stand.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -293,8 +294,31 @@ const THEME_SCRIPT = `  <script>
 function generateShowcase({ themes }) {
   mkdirSync(join(SHOWCASE_DIST, 'stands'), { recursive: true });
 
-  const discovered = discoverComponents();
   const stands = [];
+
+  // Стенд «Токены» (T2.2) — генерируется из файлов токенов, не вручную
+  // (Implementation requirements T2.2 п.2); полнота — tokens-stand.test.js.
+  if (TOKENS_SOURCES.every(({ file }) => existsSync(join(ROOT, file)))) {
+    const parsedTokens = TOKENS_SOURCES.map(({ file, layer }) =>
+      parseTokensFile(readFileSync(join(ROOT, file), 'utf8'), layer),
+    );
+    const tokensPage = frame({
+      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
+      title: 'tokens — irao-ui showcase',
+      main: renderTokensStand(parsedTokens),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'tokens.html'), tokensPage);
+    stands.push({
+      name: 'tokens',
+      source: 'tokens/primitives.css + tokens/semantic.css (генерация из файлов)',
+    });
+  } else {
+    warn('tokens/*.css ещё не все на месте — стенд tokens не сгенерирован');
+  }
+
+  const discovered = discoverComponents();
   for (const name of discovered) {
     if (!COMPONENTS.includes(name)) {
       warn(

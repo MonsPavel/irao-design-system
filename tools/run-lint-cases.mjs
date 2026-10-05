@@ -74,6 +74,14 @@ const EXPECTATIONS = [
     rules: [['declaration-property-value-disallowed-list', 'warning']],
   },
   {
+    // T2.2: компонент читает примитив напрямую — гейт «компонент читает
+    // только слой 2» (ADR-0009, AC T2.2).
+    file: 'css/components/ui-button/primitive-ref.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['irao/no-primitive-token-references'],
+  },
+  {
     file: 'css/components/ui-link/order.css',
     tool: 'stylelint',
     expect: 'fail',
@@ -86,6 +94,13 @@ const EXPECTATIONS = [
     rules: ['declaration-no-important'],
   },
   { file: 'css/tokens/primitives.css', tool: 'stylelint', expect: 'pass' },
+  {
+    // T2.2: позитивный контроль — semantic.css ссылается на примитивы
+    // легитимно (запрет снят только для tokens/).
+    file: 'css/tokens/semantic.css',
+    tool: 'stylelint',
+    expect: 'pass',
+  },
   { file: 'css/a11y/vi.css', tool: 'stylelint', expect: 'pass' },
   // eslint: eqeqeq; шаблон модуля — чист; запрет глобалов
   { file: 'js/eqeq.js', tool: 'eslint', expect: 'fail', rules: ['eqeqeq'] },

@@ -1,4 +1,4 @@
-# Таблица соответствия «career-portal значение → примитив» (T2.1)
+# Таблица соответствия «career-portal значение → токен» (T2.1 примитивы, T2.2 семантика)
 
 > Документ-деливерабл задачи T2.1, не файл задачи бэклога: живёт в
 > architecture/, а не в epics/ — валидатор бэклога считает любой `T*.md`
@@ -99,3 +99,75 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 - Значения, заведомо не проходящие AA (например, `--ui-gray-600` #808080 как
   muted-текст), переносятся как есть: правка значений произойдёт в T2.3
   семантически, примитивы остаются эталоном утверждённого дизайна.
+
+## Слой 2 — семантика (T2.2)
+
+Исполняемая форма — tests/unit/tokens-semantic.test.js; стенд —
+`/showcase/dist/stands/tokens.html` (генерация из файлов). Нейминг —
+02-architecture §3.1/§3.2 (`--ui-color-*`, `--ui-fs/lh/fw-*`, `--ui-space-*`…).
+
+### Перенос (значение как есть, px → rem ÷16)
+
+| career-portal | Токен слоя 2 | Примечание |
+| --- | --- | --- |
+| `--color-primary` | `--ui-color-primary` → `--ui-blue-800` | |
+| `--color-primary-deep` | `--ui-color-primary-deep` → `--ui-blue-750` | |
+| `--color-accent` | `--ui-color-accent` → `--ui-orange-500` | |
+| `--color-text` | `--ui-color-text` → `--ui-black` | |
+| `--color-text-muted` | `--ui-color-text-muted` → `--ui-gray-600` | AA-замена значения — T2.3 |
+| `--color-text-on-dark` / `…-muted` | `--ui-color-text-on-dark[-muted]` → `--ui-white` / `--ui-slate-400` | |
+| `--color-surface` | `--ui-color-surface` → `--ui-white` | |
+| `--color-surface-blue-50` | `--ui-color-surface-muted` → `--ui-blue-50` | см. решение №2 ниже |
+| `--color-blue-700` (карточки «почему мы») | `--ui-color-surface-blue-deep` → `--ui-blue-700` | разведение дубля #164B89 |
+| `--color-page-head-bg` | (поверхность внутренних страниц — EPIC-4 паттерны) → `--ui-slate-50` | смысловая пара к border-muted |
+| `--color-page-head-border` | `--ui-color-border-muted` → `--ui-slate-100` | |
+| `--glass-light/dark/blue` | `--ui-color-glass-light/dark/blue` → `--ui-white-80` / `--ui-white-10` / `--ui-blue-800-50` | |
+| `--color-error[-bg]` | `--ui-color-error[-bg]` → `--ui-red-600` / `--ui-red-50` | |
+| `--color-success[-bg]` | `--ui-color-success[-bg]` → `--ui-green-700` / `--ui-green-50` | |
+| `--tag-orange-bg/text`, `--tag-green-bg/text`, `--tag-gray-bg` | `--ui-color-tag-*` | пары bg/text для Badge (T4.2) |
+| `--fs/lh/fw-{h1..h4,lead,body,small,caption,micro}` | `--ui-fs/lh/fw-*` тройками | px → rem; лестница из media-правил base.css |
+| `--font-family` | `--ui-font-family` | стек расширен по §3.2 — решение №6 |
+| `--radius-small/card/big/pill` (8/16/24/100) | `--ui-radius-{sm,md,lg,pill}` | |
+| тень карточки `0 12px 32px rgba(0,40,86,.10)` (components.css:124) | `--ui-shadow-md`, `--ui-shadow-card` | геометрия px → rem, цвет — примитив-альфа |
+| тень dropdown `0 16px 40px rgba(0,40,86,.16)` (components.css:375) | `--ui-shadow-lg` | |
+| `--transition` 0.25s ease | `--ui-transition` | fast/slow 0.15/0.4 — §3.2 (новые) |
+| `--container-max` 1440px | `--ui-container-max: 90rem` | |
+| фокус pages.css:52 (outline 3px primary, offset 2px) | `--ui-focus-color/width/offset` | ADR-0001 |
+| z-index: 70 dropdown (components.css:376) | `--ui-z-dropdown: 70` | |
+
+### Новые (в career-portal нет источника)
+
+| Токен | Значение | Обоснование |
+| --- | --- | --- |
+| `--ui-space-1..8` | 4–64 (rem) | шкала §3.2 |
+| `--ui-radius-none`, `--ui-border-width` | 0, 1px | §3.2 |
+| `--ui-shadow-sm` | 0 2px 8px blue-800-10 | нижняя ступень лестницы теней |
+| `--ui-z-{sticky,header,overlay,modal,vi}` | 100/150/200/300/400 | лестница §3.2, фиксирует «плавающие» z |
+| `--ui-color-info[-bg]` | blue-700 / blue-50 | §3.2 требует info; ступени одобренной шкалы |
+| `--ui-font-family-mono` | ui-monospace, Consolas, 'Courier New', monospace | §3.2 |
+| `--ui-fs/lh/fw-h5/h6` | ступени lead/body одобренной шкалы | роли §3.2, в career-portal их нет |
+
+### Решения-отклонения (design-decision, согласование владельца дизайна)
+
+1. **Hover-значения не вошли в слой 2 (Out of scope T2.2 → T2.6):**
+   `--color-accent-light` (btn--accent:hover), `--ui-blue-100`
+   (фон карточки при наведении), `--ui-slate-300` (hover-рамка),
+   `--ui-blue-50-55` (hover dd__trigger). Остались примитивами; производные
+   состояний появятся в T2.6 (color-mix, §3.2).
+2. **`--ui-color-surface-muted` = blue-50, а не gray-100:** пример §3.1
+   (`gray-100`) заменён значением одобренного дизайна — в career-portal
+   приглушённый фон карточек и «серых» секций — `--color-surface-blue-50`
+   (`.section--gray`). Gray-100 занят смыслом «фон тега» (`--ui-color-tag-gray-bg`).
+3. **`--ui-color-surface-dark` = `var(--ui-color-primary)`:** тёмные секции
+   career-portal красятся `--color-primary` (8 использований); семантическое
+   имя даёт теме одну точку переопределения пары «тёмная секция ↔ текст на тёмном».
+4. **Промежуточный шаг 1439 не перенесён:** career-portal @media (max-width:
+   1439px) даёт h1 64/h2 48/h3 36 и паддинг 40px на ≥1440; спека T2.2 —
+   «рост к lg» и паддинги 16/24/32 (`--ui-container-pad{,-md,-lg}` = 16/24/32).
+   На 1024–1439 h1 80 вместо 64, на ≥1440 паддинг 32 вместо 40.
+5. **z-лестница разводит «плавающие» 200:** vi-панель (vi.css:11) и оверлей
+   баннера жили на одном 200; по §3.2 vi = 400 (поверх всего, ГОСТ), оверлей = 200.
+6. **Фолбэк-стек шрифта расширен** (`Arial, 'Helvetica Neue', sans-serif`)
+   по §3.2 против career-portal `Arial, sans-serif` — до подключения шрифтов (T3.1).
+7. **`--ui-focus-width/offset` — в px (3/2), не rem:** волосяная геометрия
+   фолбэка; значения career-portal pages.css:52 перенесены как есть.
