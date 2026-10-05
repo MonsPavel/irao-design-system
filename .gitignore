@@ -1,0 +1,13 @@
+# ZCode: машинные артефакты воркфлоу не коммитим (конвенция health-log),
+# но определения воркфлоу (.zcode/workflows/*.dwf.ts) — коммитим:
+# на них ссылается docs/process/nightly-review-protocol.md
+.zcode/workflow-runs/
+.zcode/workflow-drafts/
+
+# Node (появятся в Iteration 0); dist собирает CI, релизы — артефакты GitHub Releases
+node_modules/
+dist/
+
+# OS
+Thumbs.db
+.DS_Store

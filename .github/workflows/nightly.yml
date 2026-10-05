@@ -1,0 +1,75 @@
+# Ночной контур irao-ui — детерминированная часть nightly-цикла.
+# Паттерн: health-log/.github/workflows/eval-nightly.yml (TASK-092):
+#   ОТДЕЛЬНЫЙ контур — триггеров pull_request/push нет, красная ночь НЕ блокирует
+#   PR-пайплайн (сегрегация осознанная); красный прогон = investigate.
+#   Протокол всего ночного цикла (включая AI-ревью агентом code-reviewer и
+#   обязательные правки CRITICAL/HIGH): docs/process/nightly-review-protocol.md.
+#
+# Сегодня (docs-only репозиторий): validate-backlog (битые ссылки/orphan-задачи/
+# пропущенные секции task-файлов). Без Node — только bash/find/grep.
+# Эволюция (по плану docs/ui-system/):
+#   T1.2/T1.6 — добавить шаги lint (stylelint/eslint/prettier/html-validate) и unit (vitest);
+#   T1.4/T1.5 — добавить e2e+axe и матрицу chromium/firefox/webkit (в контейнере
+#               Playwright-образа, ADR-0004), zoom/32px + VI-smoke (T3.6/T9.1);
+#   визуальная regression — advisory-эталоны из CI (ADR-0004).
+name: Nightly cycle
+
+on:
+  # Ночь 03:00 UTC-независимо от локальной машины — дешёвый детектор деградации.
+  schedule:
+    - cron: '0 3 * * *'
+  # Ручной прогон — приёмка контура и после изменений проверок.
+  workflow_dispatch:
+
+# Минимальные права (паттерн health-log): проверка только читает репозиторий.
+permissions:
+  contents: read
+
+# Новый ночной прогон отменяет устаревший.
+concurrency:
+  group: nightly
+  cancel-in-progress: true
+
+jobs:
+  nightly:
+    name: Nightly validate
+    runs-on: ubuntu-latest
+    # Бюджет прогона небольшой; 15 мин — аварийный предел.
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Красный exit-код фиксируется (continue-on-error), чтобы отчёт и артефакт
+      # грузились всегда — как «Eval report» в health-log (if: always()).
+      - name: Validate backlog (links / orphans / sections)
+        id: validate
+        continue-on-error: true
+        run: |
+          bash tools/validate-backlog.sh | tee nightly-report.txt
+
+      # Отчёт — в Job Summary (паттерн health-log §18).
+      - name: Report to job summary
+        if: always()
+        run: |
+          {
+            echo "# Nightly cycle report"
+            echo
+            if [ -f nightly-report.txt ]; then cat nightly-report.txt; else echo "validate: отчёт не создан (прогон упал до отчёта)"; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Артефакт — грузится и при красном прогоне.
+      - name: Upload nightly report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-report
+          path: nightly-report.txt
+          if-no-files-found: warn
+
+      # Явный статус job'а: красный validate = красная ночь (investigate, PR не блокирует).
+      - name: Fail on validation problems
+        if: steps.validate.outcome == 'failure'
+        run: |
+          echo "nightly: обнаружены проблемы (см. Job Summary и артефакт) — investigate по протоколу docs/process/nightly-review-protocol.md"
+          exit 1
