@@ -47,6 +47,7 @@ design-decision владельца дизайна).
 | | `declaration-property-value-allowed-list` | цветной кастом-проп (`--ui-color-*`) — ровно один токен: `var()`/`color-mix()`/`inherit`/`currentColor`/`transparent` (declaration-strict-value кастом-свойства не видит) |
 | | `declaration-no-important` | `!important` вне `a11y/vi.css` (§1, принцип 4) |
 | | `declaration-property-value-disallowed-list` | `outline: none`/`0` без замены — warning до EPIC-4, затем error (ADR-0001) |
+| | `irao/no-primitive-token-references` (локальный плагин `tools/stylelint/no-primitive-token-references.mjs`) | ссылки на примитивы слоя 1 (`var(--ui-blue-800)`…) вне `tokens/` — компоненты читают только слой 2 (ADR-0009, T2.2); список семейств синхронизирован с primitives.css юнит-тестом |
 | | `order/properties-order` | произвольный порядок свойств; `box-sizing` — сразу после токенов (ADR-0002) |
 | `eslint.config.mjs` | `eqeqeq`, `no-implicit-globals`, recommended | `==`, глобальный scope (только `window.IraoUI.*`), ошибки; код компонентов — классический скрипт, tools — Node ESM, tests — jsdom |
 | `prettier.config.mjs` + `.editorconfig` | — | разнобой стиля кода (проза `*.md` не форматируется) |
