@@ -19,6 +19,7 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { execPath } from 'node:process';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { TOKENS_SOURCES, collectTokens, parseTokensFile } from '../../showcase/tokens-stand.mjs';
 
@@ -30,9 +31,9 @@ let primitiveTokens;
 
 beforeAll(async () => {
   // Реальная сборка: dist + showcase (страница стенда генерируется из файлов токенов).
-  execFileSync(process.execPath, ['showcase/build.mjs'], { cwd: root, stdio: 'pipe' });
-  const parsed = TOKENS_SOURCES.map(({ file }) =>
-    parseTokensFile(readFileSync(join(root, file), 'utf8')),
+  execFileSync(execPath, ['showcase/build.mjs'], { cwd: root, stdio: 'pipe' });
+  const parsed = TOKENS_SOURCES.map(({ file, layer }) =>
+    parseTokensFile(readFileSync(join(root, file), 'utf8'), layer),
   );
   tokens = collectTokens(parsed);
   primitiveTokens = collectTokens([parsed[0]]);
@@ -62,7 +63,7 @@ describe('полнота стенда токенов (AC T2.2)', () => {
 
   it('ui-core.min.css: баннер → primitives → semantic (AC T2.2)', () => {
     const css = readFileSync(join(root, 'dist/ui-core.min.css'), 'utf8');
-    const body = css.replace(/^\/\*![\s\S]*?\*\//, '');
+    const body = css.replace(/^\/\*![\s\S]*?\*\//, '').trim();
     expect(body.startsWith(':root{'), 'ui-core.min.css начинается не с токенов').toBe(true);
     const lastPrimitive = body.indexOf('--ui-blue-50-55:');
     const firstSemantic = body.indexOf('--ui-color-primary:');
