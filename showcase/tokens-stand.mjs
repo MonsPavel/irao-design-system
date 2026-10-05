@@ -269,22 +269,26 @@ function renderBoxDemo(token) {
 function renderTable(section) {
   const rows = section.tokens.map((token) =>
     [
-      `          <tr data-token="${token.name}">`,
-      `            <th scope="row"><code class="ts-name">${token.name}</code></th>`,
-      `            <td class="ts-value">${escapeHtml(ladderText(token))}</td>`,
-      `            <td class="ts-value">${escapeHtml(token.description)}</td>`,
-      `          </tr>`,
+      `            <tr data-token="${token.name}">`,
+      `              <th scope="row"><code class="ts-name">${token.name}</code></th>`,
+      `              <td class="ts-value">${escapeHtml(ladderText(token))}</td>`,
+      `              <td class="ts-value">${escapeHtml(token.description)}</td>`,
+      `            </tr>`,
     ].join('\n'),
   );
+  // Обёртка с горизонтальным скроллом: min-content таблицы при 32px базе
+  // больше узкого вьюпорта — страница не должна разваливаться (AC T2.2).
   return [
-    `      <table class="ts-table">`,
-    `        <thead>`,
-    `          <tr><th scope="col">Токен</th><th scope="col">Значение</th><th scope="col">Происхождение / смысл</th></tr>`,
-    `        </thead>`,
-    `        <tbody>`,
+    `      <div class="ts-table-wrap">`,
+    `        <table class="ts-table">`,
+    `          <thead>`,
+    `            <tr><th scope="col">Токен</th><th scope="col">Значение</th><th scope="col">Происхождение / смысл</th></tr>`,
+    `          </thead>`,
+    `          <tbody>`,
     ...rows,
-    `        </tbody>`,
-    `      </table>`,
+    `          </tbody>`,
+    `        </table>`,
+    `      </div>`,
   ].join('\n');
 }
 
@@ -304,6 +308,7 @@ const STAND_CSS = `
   .ts-demo { display: block; height: 4rem; background: var(--ui-color-surface); border: var(--ui-border-width) solid var(--ui-border-color); }
   .ts-name { font-family: var(--ui-font-family-mono); font-size: var(--ui-fs-micro); overflow-wrap: anywhere; }
   .ts-value { font-size: var(--ui-fs-micro); color: var(--ui-color-text-muted); overflow-wrap: anywhere; }
+  .ts-table-wrap { overflow-x: auto; max-width: 100%; }
   .ts-table { width: 100%; border-collapse: collapse; }
   .ts-table th, .ts-table td { text-align: left; vertical-align: top; padding: var(--ui-space-2) var(--ui-space-3) var(--ui-space-2) 0; border-bottom: var(--ui-border-width) solid var(--ui-border-color); }
   .ts-sp-h1 { font-family: var(--ui-font-family); font-size: var(--ui-fs-h1); line-height: var(--ui-lh-h1); font-weight: var(--ui-fw-h1); }
