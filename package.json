@@ -1,0 +1,17 @@
+{
+  "name": "irao-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "irao-ui — UI-система для сайтов группы на Bitrix: нативный CSS/JS, БЭМ ui-, токены --ui-* (docs/02-architecture.md).",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "lint": "echo \"[заглушка] lint появится в T1.2: stylelint + eslint + prettier + html-validate\"",
+    "test": "echo \"[заглушка] test появится в T1.4/T1.6: Playwright e2e + axe, Vitest unit\"",
+    "test:unit": "echo \"[заглушка] test:unit появится в T1.6: Vitest + jsdom, эталонный тест docs/templates/module-template.js\"",
+    "build": "echo \"[заглушка] build появится в T1.3: esbuild, dist + showcase\"",
+    "serve": "echo \"[заглушка] serve появится в T1.3/T1.4: статический сервер для showcase и Playwright\""
+  },
+  "devDependencies": {}
+}
