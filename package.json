@@ -14,7 +14,7 @@
     "lint:html": "node tools/lint-html.mjs",
     "test": "echo \"[заглушка] test появится в T1.4/T1.6: Playwright e2e + axe, Vitest unit\"",
     "test:lint": "node tools/run-lint-cases.mjs",
-    "test:unit": "echo \"[заглушка] test:unit появится в T1.6: Vitest + jsdom, эталонный тест docs/templates/module-template.js\"",
+    "test:unit": "vitest run",
     "build": "node showcase/build.mjs",
     "serve": "node showcase/serve.mjs"
   },
@@ -24,10 +24,12 @@
     "eslint": "^10.12.0",
     "globals": "^17.13.0",
     "html-validate": "^11.16.2",
+    "jsdom": "^29.1.1",
     "prettier": "^3.9.9",
     "stylelint": "^17.16.0",
     "stylelint-declaration-strict-value": "^1.12.1",
     "stylelint-order": "^8.1.1",
-    "stylelint-selector-bem-pattern": "^5.0.0"
+    "stylelint-selector-bem-pattern": "^5.0.0",
+    "vitest": "^5.0.3"
   }
 }
