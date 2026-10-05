@@ -83,7 +83,16 @@ export default {
         ignoreFunctions: false,
         // Разворачивать шорткаты и проверять цветовые longhand'ы.
         expandShorthand: true,
-        ignoreValues: ['inherit', 'currentColor', 'transparent', '/^color-mix\\(/', '/var\\(/'],
+        // `none` — легитимный сброс (тень при active/hover, рамка, фон);
+        // цветом не является (ревью T1.2, регрессия d8c71fa).
+        ignoreValues: [
+          'inherit',
+          'currentColor',
+          'transparent',
+          'none',
+          '/^color-mix\\(/',
+          '/var\\(/',
+        ],
       },
     ],
 

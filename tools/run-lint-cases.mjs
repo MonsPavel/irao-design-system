@@ -62,6 +62,12 @@ const EXPECTATIONS = [
     expect: 'pass',
   },
   {
+    // Ревью T1.2 (high, регрессия d8c71fa): сброс тени `none` — не цвет.
+    file: 'css/components/ui-badge/shadow-reset.css',
+    tool: 'stylelint',
+    expect: 'pass',
+  },
+  {
     file: 'css/components/ui-modal/outline-none.css',
     tool: 'stylelint',
     expect: 'fail',
