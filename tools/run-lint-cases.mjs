@@ -87,8 +87,14 @@ const EXPECTATIONS = [
   },
   { file: 'css/tokens/primitives.css', tool: 'stylelint', expect: 'pass' },
   { file: 'css/a11y/vi.css', tool: 'stylelint', expect: 'pass' },
-  // eslint: eqeqeq; шаблон модуля — чист
+  // eslint: eqeqeq; шаблон модуля — чист; запрет глобалов
   { file: 'js/eqeq.js', tool: 'eslint', expect: 'fail', rules: ['eqeqeq'] },
+  {
+    file: 'js/implicit-global.js',
+    tool: 'eslint',
+    expect: 'fail',
+    rules: ['no-implicit-globals'],
+  },
   { file: 'js/valid-module.js', tool: 'eslint', expect: 'pass' },
   // html-validate: alt, один h1, label, tabindex; эталонная страница — чиста
   { file: 'html/img-without-alt.html', tool: 'html', expect: 'fail', rules: ['wcag/h37'] },
@@ -246,6 +252,58 @@ for (const [tool, expectations] of Object.entries(groups)) {
       );
       digest.forEach(report);
     }
+  }
+}
+
+// == Разделение сред eslint (DoD T1.2: «env browser + jsdom (тесты)», запрет
+// глобалов) ==
+// Проверяется ГЛАВНЫЙ конфиг (default export eslint.config.mjs), а не
+// configForLintCases: гейт no-implicit-globals работает только в
+// sourceType 'script', поэтому регрессия «блок testScripts перебивает среду
+// всем файлам» ловится здесь, на resolve-поведении основного конфига.
+// История: negated-паттерн в `files` (['tests/**/*.js', '!tests/lint-cases/**'])
+// в ESLint 10 не исключает файлы — блок матчит всё, и стоя последним,
+// sourceType 'module' побеждал для всех .js; исключение внутри блока —
+// через блок-level `ignores` (документированный механизм).
+{
+  const { ESLint } = await import('eslint');
+  const mainEslint = new ESLint({ cwd: root });
+
+  const sourceTypeChecks = [
+    {
+      name: 'компонентный скрипт — классический (script)',
+      file: 'components/example/example.js',
+      expected: 'script',
+    },
+    {
+      name: 'unit-тест под jsdom — модуль',
+      file: 'tests/unit/example.test.js',
+      expected: 'module',
+    },
+    { name: 'инструмент репозитория — модуль', file: 'tools/example.mjs', expected: 'module' },
+  ];
+  for (const check of sourceTypeChecks) {
+    const config = await mainEslint.calculateConfigForFile(check.file);
+    const actual = config?.languageOptions?.sourceType;
+    if (actual === check.expected) {
+      report(`OK   (config) eslint ${check.name}`);
+    } else {
+      report(
+        `FAIL (config) eslint ${check.name}: ожидали sourceType '${check.expected}', получили '${actual}'`,
+      );
+    }
+  }
+
+  const leakResult = await mainEslint.lintText('var globalLeak = 2;\n', {
+    filePath: 'components/example/example.js',
+  });
+  const leakRules = leakResult[0].messages.map((m) => m.ruleId);
+  if (leakRules.includes('no-implicit-globals')) {
+    report('OK   (config) eslint no-implicit-globals ловит глобальную var в компонентном скрипте');
+  } else {
+    report(
+      `FAIL (config) eslint no-implicit-globals не сработал на глобальной var в компонентном скрипте (получили: ${leakRules.join(', ') || 'ничего'})`,
+    );
   }
 }
 

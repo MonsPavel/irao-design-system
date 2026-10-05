@@ -57,9 +57,18 @@ const rootConfigs = {
   rules: sharedRules,
 };
 
-/** Код компонентов: классический браузерный скрипт (IIFE, window.IraoUI). */
+/**
+ * Код компонентов: классический браузерный скрипт (IIFE, window.IraoUI).
+ *
+ * Ревью T1.2 (high): tests/** исключён блок-level `ignores`, а НЕ negated-
+ * паттерном в `files` — в ESLint 10 negation в `files` не исключает файлы,
+ * блок матчил всё, и стоя последним задавал sourceType 'module' всем .js,
+ * делая no-implicit-globals инертным. `ignores` рядом с `files` —
+ * документированный способ исключить пути из конкретного блока.
+ */
 const componentScripts = {
   files: ['**/*.js'],
+  ignores: ['tests/**'],
   languageOptions: {
     ecmaVersion: 'latest',
     sourceType: 'script',
@@ -79,9 +88,10 @@ const toolingScripts = {
   rules: sharedRules,
 };
 
-/** Тесты (харнесс подключает T1.4/T1.6): модули, среда jsdom. */
+/** Тесты (харнесс подключает T1.4/T1.6): модули, среда jsdom. lint-cases
+ * исключены globalIgnores (см. выше), поэтому negation здесь не нужен. */
 const testScripts = {
-  files: ['tests/**/*.js', '!tests/lint-cases/**'],
+  files: ['tests/**/*.js'],
   languageOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
