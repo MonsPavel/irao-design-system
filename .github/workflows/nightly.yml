@@ -5,10 +5,10 @@
 #   Протокол всего ночного цикла (включая AI-ревью агентом code-reviewer и
 #   обязательные правки CRITICAL/HIGH): docs/process/nightly-review-protocol.md.
 #
-# Сегодня (docs-only репозиторий): validate-backlog (битые ссылки/orphan-задачи/
-# пропущенные секции task-файлов). Без Node — только bash/find/grep.
+# Сегодня: validate-backlog (битые ссылки/orphan-задачи/пропущенные секции
+# task-файлов; без внешних пакетов) + unit (vitest, T1.6 — с npm ci).
 # Эволюция (по плану docs/ui-system/):
-#   T1.2/T1.6 — добавить шаги lint (stylelint/eslint/prettier/html-validate) и unit (vitest);
+#   T1.2 — добавить шаги lint (stylelint/eslint/prettier/html-validate);
 #   T1.4/T1.5 — добавить e2e+axe и матрицу chromium/firefox/webkit (в контейнере
 #               Playwright-образа, ADR-0004), zoom/32px + VI-smoke (T3.6/T9.1);
 #   визуальная regression — advisory-эталоны из CI (ADR-0004).
@@ -55,6 +55,17 @@ jobs:
         run: |
           node tools/validate-backlog.mjs | tee nightly-report.txt
 
+      # T1.6: юнит-слой — Vitest + jsdom (DOM-независимая логика модулей и
+      # guard'ы; эталонный тест docs/templates/module-template.js).
+      # Зависимости нужны только этому шагу: validate — node-скрипт без пакетов.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests (vitest)
+        id: unit
+        continue-on-error: true
+        run: npm run test:unit
+
       # Отчёт — в Job Summary (паттерн health-log §18).
       - name: Report to job summary
         if: always()
@@ -63,6 +74,8 @@ jobs:
             echo "# Nightly cycle report"
             echo
             if [ -f nightly-report.txt ]; then cat nightly-report.txt; else echo "validate: отчёт не создан (прогон упал до отчёта)"; fi
+            echo
+            echo "unit (vitest): ${{ steps.unit.outcome }}"
           } >> "$GITHUB_STEP_SUMMARY"
 
       # Артефакт — грузится и при красном прогоне.
@@ -74,9 +87,10 @@ jobs:
           path: nightly-report.txt
           if-no-files-found: warn
 
-      # Явный статус job'а: красный validate = красная ночь (investigate, PR не блокирует).
+      # Явный статус job'а: красный validate или unit = красная ночь (investigate,
+      # PR не блокирует).
       - name: Fail on validation problems
-        if: steps.validate.outcome == 'failure'
+        if: steps.validate.outcome == 'failure' || steps.unit.outcome == 'failure'
         run: |
           echo "nightly: обнаружены проблемы (см. Job Summary и артефакт) — investigate по протоколу docs/process/nightly-review-protocol.md"
           exit 1
