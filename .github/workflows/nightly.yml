@@ -40,13 +40,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Валидатор — node-скрипт (без зависимостей); bash-версия удалена 05.10:
+      # на Windows-машине владельца спавн bash уходил в WSL-релей.
+      - name: Setup Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       # Красный exit-код фиксируется (continue-on-error), чтобы отчёт и артефакт
       # грузились всегда — как «Eval report» в health-log (if: always()).
       - name: Validate backlog (links / orphans / sections)
         id: validate
         continue-on-error: true
         run: |
-          bash tools/validate-backlog.sh | tee nightly-report.txt
+          node tools/validate-backlog.mjs | tee nightly-report.txt
 
       # Отчёт — в Job Summary (паттерн health-log §18).
       - name: Report to job summary

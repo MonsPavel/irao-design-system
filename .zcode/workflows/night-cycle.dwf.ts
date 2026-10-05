@@ -125,8 +125,8 @@ const IMPL_SYSTEM = [
   "Спецификация задачи самодостаточна: ## Scope / ## Out of scope — объём, ## Implementation requirements — требования, ## Technical considerations — ограничения, ## Testing requirements — тесты, ## Acceptance Criteria и ## Definition of Done — приёмка. Архитектура — docs/02-architecture.md, решения — docs/adr/.",
   "Правила: держись ## Scope и не трогай чужие задачи; не изменяй docs/ui-system/STATUS.md и файлы задач; не мерджи, не пуши, не переключайся на main; минимальные неизбежные сопутствующие правки описывай в summary.",
   "Инварианты (их нарушение — HIGH на ревью): hex только в tokens/primitives.css; !important только в a11y/vi.css; box-sizing на корне каждого компонента (ADR-0002); глобальная политика фокуса ADR-0001; mobile-first min-width только из шкалы брейкпоинтов; значения одобренного дизайна career-portal не менять (отклонение — design-decision владельца дизайна); D:/repositories/career-portal — read-only референс.",
-  "Если npm-инструменты ещё не настроены — работай в рамках существующей инфраструктуры (docs/статика), проверки — tools/validate-backlog.sh и сценарии задачи; не создавай новую инфраструктуру вне ## Scope.",
-  "Перед завершением прогони доступные проверки (bash tools/validate-backlog.sh; npm run lint и npm run test:unit, если скрипты есть) и запиши итог в tests.",
+  "Если npm-инструменты ещё не настроены — работай в рамках существующей инфраструктуры (docs/статика), проверки — node tools/validate-backlog.mjs и сценарии задачи; не создавай новую инфраструктуру вне ## Scope.",
+  "Перед завершением прогони доступные проверки (node tools/validate-backlog.mjs; npm run lint и npm run test:unit, если скрипты есть) и запиши итог в tests.",
   "Если продолжать честно невозможно (сеть, окружение, противоречие в спеке) — закоммить сделанное на ветке и верни status=blocked с конкретной причиной; не выдумывай проходное решение и не имитируй успех.",
   "Сомневаешься в трактовке спеки — прими разумное толкование в её духе и опиши его в summary.",
 ].join(" ");
@@ -223,7 +223,8 @@ async function localHour(): Promise<number | null> {
 
 async function runGate(): Promise<{ ok: boolean; details: string }> {
   const parts: string[] = [];
-  const v = await world.run("bash", ["tools/validate-backlog.sh"], { timeoutMs: 120000 });
+  // Валидатор — node-скрипт: спавн bash на Windows вне Git Bash уходил в WSL-релей и падал.
+  const v = await world.run("node", ["tools/validate-backlog.mjs"], { timeoutMs: 120000 });
   if (v.exitCode !== 0) return { ok: false, details: "validate-backlog упал:\n" + (v.stdout + v.stderr).slice(0, 2000) };
   parts.push("validate-backlog зелёный");
   // npm-шаги — только когда инфраструктура задачи T1.2/T1.6 уже создана.
@@ -505,7 +506,7 @@ lines.push("### Последние коммиты main", "", "```", recent.stdou
 lines.push("### Как проверялось", "",
   "- Каждая задача: усиленное независимое ревью (severity-модель ecc code-reviewer) — critical/high блокируют мердж и правятся всегда (до " + maxReviewRounds + " раундов).",
   "- Каждая задача: независимая приёмка по ## Acceptance Criteria / ## Definition of Done с доказательствами.",
-  "- Gate перед мерджем: bash tools/validate-backlog.sh + npm run lint/test:unit (когда настроены).",
+  "- Gate перед мерджем: node tools/validate-backlog.mjs + npm run lint/test:unit (когда настроены).",
   "- Мердж --no-ff в main, push после каждой задачи (мог не пройти — помечено в примечаниях).", "");
 await artifact.markdown("night-report", lines.join("\n"), {
   title: "Итоги ночного цикла",
@@ -552,7 +553,7 @@ const result: WorkflowReport = {
   verified: [
     "каждую ветку ревьюил независимый ревьюер с severity-моделью ecc (critical/high блокируют и правятся всегда, до " + maxReviewRounds + " раундов)",
     "каждую задачу принимал независимый приёмщик по Acceptance Criteria/Definition of Done",
-    "gate validate-backlog (+ npm lint/test:unit, когда настроены) выполнялся конвейером перед каждым мерджем",
+    "gate validate-backlog (node; + npm lint/test:unit, когда настроены) выполнялся конвейером перед каждым мерджем",
     "после каждого мерджа — push origin main (при сбоях сети помечено в примечаниях)",
   ],
   notCovered: [

@@ -6,7 +6,7 @@
 
 - **Воркфлоу:** [.zcode/workflows/night-cycle.dwf.ts](../../.zcode/workflows/night-cycle.dwf.ts) — запуск вечером: «Запусти workflow night-cycle до 04:00»; днём — только с `force=true`.
 - **Леджер статусов:** [docs/ui-system/STATUS.md](../ui-system/STATUS.md) (`todo / in-progress / done / blocked`) — ведёт конвейер.
-- **CI-контур (детерминированная часть, независимо):** [.github/workflows/nightly.yml](../../.github/workflows/nightly.yml) + [tools/validate-backlog.sh](../../tools/validate-backlog.sh).
+- **CI-контур (детерминированная часть, независимо):** [.github/workflows/nightly.yml](../../.github/workflows/nightly.yml) + [tools/validate-backlog.mjs](../../tools/validate-backlog.mjs).
 
 ## Цикл на каждую задачу
 
@@ -18,7 +18,7 @@
        critical/high → блокируют мердж; правки ВСЕГДА; до 3 раундов
        medium/low    → не блокируют; собираются в бэклог ночи
   → независимая приёмка (агент-приёмщик: Acceptance Criteria / DoD с доказательствами)
-  → gate: bash tools/validate-backlog.sh + npm run lint / test:unit (когда настроены)
+  → gate: node tools/validate-backlog.mjs + npm run lint / test:unit (когда настроены)
   → мердж --no-ff в main + push + строка в STATUS.md (агент-интегратор)
 ```
 
