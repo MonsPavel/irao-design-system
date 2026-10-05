@@ -27,11 +27,36 @@ const casesDir = path.join(root, 'tests', 'lint-cases');
  */
 const EXPECTATIONS = [
   // stylelint: БЭМ, hex-гейт, !important, outline, порядок свойств
-  { file: 'css/components/ui-button/btn.css', tool: 'stylelint', expect: 'fail', rules: ['plugin/selector-bem-pattern'] },
-  { file: 'css/components/ui-card/hex.css', tool: 'stylelint', expect: 'fail', rules: ['scale-unlimited/declaration-strict-value'] },
-  { file: 'css/components/ui-modal/outline-none.css', tool: 'stylelint', expect: 'fail', rules: [['declaration-property-value-disallowed-list', 'warning']] },
-  { file: 'css/components/ui-link/order.css', tool: 'stylelint', expect: 'fail', rules: ['order/properties-order'] },
-  { file: 'css/base/important.css', tool: 'stylelint', expect: 'fail', rules: ['declaration-no-important'] },
+  {
+    file: 'css/components/ui-button/btn.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['plugin/selector-bem-pattern'],
+  },
+  {
+    file: 'css/components/ui-card/hex.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['scale-unlimited/declaration-strict-value'],
+  },
+  {
+    file: 'css/components/ui-modal/outline-none.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: [['declaration-property-value-disallowed-list', 'warning']],
+  },
+  {
+    file: 'css/components/ui-link/order.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['order/properties-order'],
+  },
+  {
+    file: 'css/base/important.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['declaration-no-important'],
+  },
   { file: 'css/tokens/primitives.css', tool: 'stylelint', expect: 'pass' },
   { file: 'css/a11y/vi.css', tool: 'stylelint', expect: 'pass' },
   // eslint: eqeqeq; шаблон модуля — чист
@@ -40,17 +65,28 @@ const EXPECTATIONS = [
   // html-validate: alt, один h1, label, tabindex; эталонная страница — чиста
   { file: 'html/img-without-alt.html', tool: 'html', expect: 'fail', rules: ['wcag/h37'] },
   { file: 'html/two-h1.html', tool: 'html', expect: 'fail', rules: ['irao/one-h1'] },
-  { file: 'html/positive-tabindex.html', tool: 'html', expect: 'fail', rules: ['irao/no-positive-tabindex'] },
-  { file: 'html/input-without-label.html', tool: 'html', expect: 'fail', rules: ['input-missing-label'] },
+  {
+    file: 'html/positive-tabindex.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/no-positive-tabindex'],
+  },
+  {
+    file: 'html/input-without-label.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['input-missing-label'],
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 
 /** @returns {Map<string, Array<{ruleId: string, severity: string|number, message: string}>>} */
 async function lintWithStylelint(files) {
-  const { lint } = await import('stylelint');
+  // stylelint 17: ESM-экспорт — API в default (named export `lint` отсутствует).
+  const stylelint = (await import('stylelint')).default;
   const configModule = await import(pathToFileURL(path.join(root, 'stylelint.config.mjs')).href);
 
-  const result = await lint({ files, config: configModule.default, configBasedir: root });
+  const result = await stylelint.lint({ files, config: configModule.default, configBasedir: root });
 
   const messagesByFile = new Map();
   for (const fileResult of result.results) {
@@ -65,16 +101,26 @@ async function lintWithStylelint(files) {
 /** @returns {Map<string, Array<{ruleId: string, severity: number, message: string}>>} */
 async function lintWithEslint(files) {
   const { ESLint } = await import('eslint');
-  const { configForLintCases } = await import(pathToFileURL(path.join(root, 'eslint.config.mjs')).href);
+  const { configForLintCases } = await import(
+    pathToFileURL(path.join(root, 'eslint.config.mjs')).href
+  );
 
-  const eslint = new ESLint({ cwd: root, overrideConfigFile: true, overrideConfig: [configForLintCases] });
+  const eslint = new ESLint({
+    cwd: root,
+    overrideConfigFile: true,
+    overrideConfig: [configForLintCases],
+  });
   const results = await eslint.lintFiles(files.map((f) => path.relative(root, f)));
 
   const messagesByFile = new Map();
   for (const fileResult of results) {
     messagesByFile.set(
       path.resolve(fileResult.filePath),
-      fileResult.messages.map((m) => ({ ruleId: m.ruleId, severity: m.severity, message: m.message })),
+      fileResult.messages.map((m) => ({
+        ruleId: m.ruleId,
+        severity: m.severity,
+        message: m.message,
+      })),
     );
   }
   return messagesByFile;
@@ -134,13 +180,17 @@ for (const [tool, expectations] of Object.entries(groups)) {
   for (const expectation of expectations) {
     const absFile = path.join(casesDir, expectation.file);
     const messages = messagesByFile.get(absFile) ?? [];
-    const digest = messages.map((m) => `    ${m.ruleId} [${severityName(m.severity)}] ${m.message.split('\n')[0]}`);
+    const digest = messages.map(
+      (m) => `    ${m.ruleId} [${severityName(m.severity)}] ${m.message.split('\n')[0]}`,
+    );
 
     if (expectation.expect === 'pass') {
       if (messages.length === 0) {
         report(`OK   (pass) ${tool} ${expectation.file}`);
       } else {
-        report(`FAIL (pass) ${tool} ${expectation.file}: ожидали чистый прогон, получили замечания:`);
+        report(
+          `FAIL (pass) ${tool} ${expectation.file}: ожидали чистый прогон, получили замечания:`,
+        );
         digest.forEach(report);
       }
       continue;
@@ -156,15 +206,23 @@ for (const [tool, expectations] of Object.entries(groups)) {
       const unexpected = messages.filter((m) => !expectation.rules.flat().includes(m.ruleId));
       if (unexpected.length) {
         console.log(`     … попутные замечания (не влияют на вердикт):`);
-        unexpected.forEach((m) => console.log(`       ${m.ruleId} [${severityName(m.severity)}] ${m.message.split('\n')[0]}`));
+        unexpected.forEach((m) =>
+          console.log(
+            `       ${m.ruleId} [${severityName(m.severity)}] ${m.message.split('\n')[0]}`,
+          ),
+        );
       }
     } else {
-      report(`FAIL (fail) ${tool} ${expectation.file}: не пойманы: ${missing.map((m) => (Array.isArray(m) ? m.join('@') : m)).join(', ')}`);
+      report(
+        `FAIL (fail) ${tool} ${expectation.file}: не пойманы: ${missing.map((m) => (Array.isArray(m) ? m.join('@') : m)).join(', ')}`,
+      );
       digest.forEach(report);
     }
   }
 }
 
 console.log('== SUMMARY ==');
-console.log(failures === 0 ? 'RESULT: все ожидания lint-cases совпали' : `RESULT: расхождений: ${failures}`);
+console.log(
+  failures === 0 ? 'RESULT: все ожидания lint-cases совпали' : `RESULT: расхождений: ${failures}`,
+);
 process.exit(failures === 0 ? 0 : 1);

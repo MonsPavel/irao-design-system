@@ -67,7 +67,7 @@
       destroy: function () {
         root.removeEventListener('click', onRootClick);
         root.removeAttribute(INIT_ATTR);
-      }
+      },
     };
   }
 
@@ -89,7 +89,11 @@
       } catch (err) {
         // один сломанный инстанс не должен ронять страницу и соседние инстансы
         if (window.console && window.console.warn) {
-          window.console.warn('[IraoUI:' + MODULE_NAME + '] ошибка инициализации инстанса:', roots[i], err);
+          window.console.warn(
+            '[IraoUI:' + MODULE_NAME + '] ошибка инициализации инстанса:',
+            roots[i],
+            err,
+          );
         }
       }
     }
@@ -100,7 +104,7 @@
   window.IraoUI = window.IraoUI || {};
   window.IraoUI[MODULE_NAME] = {
     init: init,
-    selector: SELECTOR
+    selector: SELECTOR,
   };
 
   // readyState-guard: если документ ещё грузится — ждём DOMContentLoaded,
