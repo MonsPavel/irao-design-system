@@ -1,0 +1,9 @@
+/** @define card */
+
+/* НАРУШЕНИЕ (AC T1.2): hex в компоненте — запрещён; цвета только через
+   токены --ui-* (docs/02-architecture.md §3; дискриминация ручной дисциплины
+   career-portal — риск №5 из 05-mvp-risks).
+   Ожидаемый красный: scale-unlimited/declaration-strict-value. */
+.ui-card {
+  border-color: #d6d6d6;
+}

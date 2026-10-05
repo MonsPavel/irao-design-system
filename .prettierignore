@@ -1,0 +1,14 @@
+# Проза (доки, задачи, README компонентов) — не код: prettier её не форматирует.
+**/*.md
+
+# Машинные артефакты и vendor
+package-lock.json
+node_modules/
+dist/
+.zcode/
+.playwright-mcp/
+.github/
+
+# Негативные фикстуры линтеров: намеренно «кривые», гоняет
+# tools/run-lint-cases.mjs, а не prettier (tests/lint-cases/README.md)
+tests/lint-cases/

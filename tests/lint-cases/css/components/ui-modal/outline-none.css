@@ -1,0 +1,8 @@
+/** @define modal */
+
+/* НАРУШЕНИЕ: `outline: none` без замены убивает видимый фокус.
+   Политика фокуса — ADR-0001; до EPIC-4 правило warning, после — error.
+   Ожидаемый красный (warning): declaration-property-value-disallowed-list. */
+.ui-modal:focus {
+  outline: none;
+}

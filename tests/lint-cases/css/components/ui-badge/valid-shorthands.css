@@ -1,0 +1,18 @@
+/** @define badge */
+
+/* ПОЗИТИВНЫЙ КОНТРОЛЬ (ревью T1.2): цветоносные шорткаты из токенов
+   разрешены — border/background/outline ловятся только по цветовому
+   longhand'у (expandShorthand), box-shadow — целостный var()-токен
+   (значение проверяется по частям: сырые длины в тени запрещены —
+   тени токенизированы, 02-architecture §3.2).
+   Ожидаемый зелёный: ни одного замечания. */
+.ui-badge {
+  border: var(--ui-border-width) solid var(--ui-border-color);
+  background: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  box-shadow: var(--ui-shadow-md);
+}
+
+.ui-badge:focus-visible {
+  outline: var(--ui-focus-width) solid var(--ui-focus-color);
+}

@@ -1,0 +1,9 @@
+/** @define link */
+
+/* НАРУШЕНИЕ: `display` объявлен после `color` — нарушает обязательный порядок
+   свойств (stylelint-order; box-sizing — первым, ADR-0002).
+   Ожидаемый красный: order/properties-order. */
+.ui-link {
+  color: var(--ui-color-text);
+  display: inline-block;
+}
