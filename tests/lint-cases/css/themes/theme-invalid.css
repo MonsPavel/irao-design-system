@@ -1,0 +1,14 @@
+/* Негативная фикстура T2.4: нарушения гейта irao/theme-semantic-overrides —
+   тема переопределяет примитив слоя 1, несуществующий (опечатка) токен,
+   обычное свойство и селектор компонента. Всё это запрещено в themes/
+   (ADR-0009: тема — один блок [data-ui-theme="…"], только семантический слой).
+   Намеренно «кривой» файл: не источник правды (tests/lint-cases/README.md). */
+[data-ui-theme="bad"] {
+  --ui-blue-800: #002856;
+  --ui-color-primaryy: var(--ui-purple-900);
+  color: var(--ui-color-text);
+}
+
+.ui-button {
+  --ui-radius-md: 0;
+}

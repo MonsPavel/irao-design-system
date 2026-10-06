@@ -102,6 +102,23 @@ const EXPECTATIONS = [
     expect: 'pass',
   },
   { file: 'css/a11y/vi.css', tool: 'stylelint', expect: 'pass' },
+  {
+    // T2.4: тема переопределяет примитив (слой 1), несуществующий токен,
+    // обычное свойство, селектор компонента — гейт «тема переопределяет
+    // только семантический слой» (Implementation requirements T2.4 п.1).
+    file: 'css/themes/theme-invalid.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['irao/theme-semantic-overrides'],
+  },
+  {
+    // T2.4: позитивный контроль — валидная «старая» тема (подмножество
+    // семантических токенов, значения — ссылки на примитивы). Двойная роль:
+    // фикстура совместимости «старая тема + новый токен» (tests/unit/themes.test.js).
+    file: 'css/themes/theme-old-compat.css',
+    tool: 'stylelint',
+    expect: 'pass',
+  },
   // eslint: eqeqeq; шаблон модуля — чист; запрет глобалов
   { file: 'js/eqeq.js', tool: 'eslint', expect: 'fail', rules: ['eqeqeq'] },
   {

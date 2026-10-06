@@ -1,0 +1,13 @@
+/* Фикстура совместимости T2.4: «старая» версия тестовой темы — знает только
+   три токена; core с тех пор добавил новые (--ui-color-info и др.) с дефолтом
+   в :root. Две роли (см. шапку tools/run-lint-cases.mjs и tests/unit/themes.test.js):
+   1) позитивный контроль гейта irao/theme-semantic-overrides — валидная тема
+      проходит (npm run test:lint, expect: pass);
+   2) вход юнит-теста «старая тема + новый токен»: каскад core + эта тема
+      вычислим для каждого семантического токена — не переопределённые работают
+      дефолтом :root (правило обратной совместимости ADR-0007/0009). */
+[data-ui-theme="old-compat"] {
+  --ui-color-primary: var(--ui-purple-900);
+  --ui-color-accent: var(--ui-peach-300);
+  --ui-color-surface-muted: var(--ui-peach-100);
+}
