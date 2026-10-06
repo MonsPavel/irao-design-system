@@ -28,6 +28,7 @@ showcase/dist/             # сгенерированный полигон (giti
 ├── stands/base.html       # стенд base (T3.2) — из showcase/pages/base/index.html
 ├── stands/typography.html # стенд типографики (T3.3) — из showcase/pages/typography/index.html
 ├── stands/layout.html     # стенд layout-примитивов (T3.4) — из showcase/pages/layout/index.html
+├── stands/ui-skip-link.html # стенд ui-skip-link (T3.5) — из канонического паттерна components/ui-skip-link/
 └── stands/<name>.html     # стенд компонента из components/<name>/<name>.html
 ```
 
@@ -72,8 +73,10 @@ showcase/dist/             # сгенерированный полигон (giti
   по вьюпортам и эталонов на 4 вьюпортах (`tests/e2e/layout.spec.js`).
 - Базовый стенд генерируется автоматически для каждой папки
   `components/ui-<name>/` с каноническим `ui-<name>.html`: тело паттерна
-  оборачивается в каркас (skip-link, header-заглушка, `<main id="main">`,
-  подключение dist, переключатель темы `?theme=`).
+  оборачивается в каркас (skip-link, header-заглушка,
+  `<main id="main" tabindex="-1">` — цель skip-link фокусируема, T3.5,
+  подключение dist, переключатель темы `?theme=`). Сборка валидирует пару
+  «skip-link + цель» на каждой странице (selfChecks).
 - Расширенный стенд (все варианты × состояния, 375/768/1440) —
   `showcase/pages/<name>/index.html` (фрагмент тела, как канонический
   паттерн): при наличии он заменяет базовый. Контент стендов конкретных

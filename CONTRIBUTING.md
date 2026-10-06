@@ -17,7 +17,7 @@
 | Канонический HTML компонента | `components/ui-<name>/ui-<name>.html` | источник доки и тестов |
 | JS компонента | `components/ui-<name>/ui-<name>.js` | копия `docs/templates/module-template.js` |
 | Дока компонента (API, состояния, a11y) | `components/ui-<name>/README.md` | |
-| A11y-модуль (ГОСТ vi, skip-link) | `a11y/` | `!important` допустим **только** в `a11y/vi.css` |
+| A11y-модуль (ГОСТ vi) | `a11y/` | `!important` допустим **только** в `a11y/vi.css`; skip-link — не здесь, а компонент `components/ui-skip-link/` (T3.5) |
 | Паттерн страницы (header, list-page…) | `patterns/<name>/` | HTML из готовых компонентов, без кода в dist |
 | Тема бренда | `themes/theme-<company>.css` | только переопределение токенов `--ui-*` |
 | Стенд компонента | `showcase/pages/<name>/` | расширенный стенд; базовый генерируется автоматически из паттерна (showcase/README.md) |

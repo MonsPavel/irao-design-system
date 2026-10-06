@@ -1,0 +1,64 @@
+/** @define skip-link */
+
+/*!
+ * irao-ui — ui-skip-link: клавиатурный переход к основному контенту
+ * (задача T3.5; WCAG 2.4.1 «Bypass Blocks»; 02-architecture §5).
+ *
+ * Классика visually-hidden-until-focus (Implementation requirements п.1):
+ *  - вне фокуса — 1px-клип: якорь остаётся в дереве доступности (первый
+ *    в порядке DOM, первый Tab страницы), но не виден и не влияет на layout
+ *    (margin: -1px компенсирует бокс 1×1);
+ *  - при фокусе — фиксированная плашка top-left: position: fixed снимает
+ *    элемент из потока, клип снят, z-index — уровень --ui-z-overlay
+ *    лестницы T2.2 (Technical considerations);
+ *  - никакой анимации появления (мгновенно — меньше движения, надёжнее
+ *    при prefers-reduced-motion).
+ *
+ * Пара цветов — токены слоя 2: --ui-color-primary (фон) + --ui-color-text-
+ * on-dark (текст) — контрастная пара одобренного дизайна (карьерные тёмные
+ * секции); outline клавиатурного фокуса рисует глобальная политика
+ * base/focus.css (ADR-0001), здесь он не запрещается и не заменяется.
+ *
+ * Цель — href="#main": каркас showcase гарантирует <main id="main"
+ * tabindex="-1"> (фокус переносится реально: без tabindex браузеры меняют
+ * хэш, но activeElement уходит на body — Safari-кейс, зонд 2026-10-06,
+ * e2e tests/e2e/skip-link.spec.js). Правило для сайтов и разметка для
+ * header.php — README.md компонента и bitrix/snippets/.
+ *
+ * VI-режим (EPIC-9): перекраска vi.css накрывает плашку как обычный
+ * элемент — компонент не содержит цветов вне токенов (инвариант §5).
+ */
+
+.ui-skip-link {
+  box-sizing: border-box;
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+  /* clip — легаси-дублёр clip-path (до clip-path только им и прятали);
+     свойство не зарегистрировано в order-списке — в конце правила. */
+  clip: rect(0, 0, 0, 0);
+}
+
+.ui-skip-link:focus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--ui-z-overlay);
+  overflow: visible;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: var(--ui-space-2) var(--ui-space-4);
+  border-radius: 0 0 var(--ui-radius-sm) 0;
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+  white-space: nowrap;
+  clip-path: none;
+  clip: auto;
+}

@@ -370,8 +370,7 @@ irao-design-system/
 │       ├── <name>.js           # опционально
 │       └── README.md           # API, состояния, a11y, do/don't, миграции
 ├── a11y/
-│   ├── vi.css / vi.js / vi-panel.html    # ГОСТ-модуль (портирован)
-│   └── skip-link/…
+│   └── vi.css / vi.js / vi-panel.html    # ГОСТ-модуль (портирован); skip-link — компонент components/ui-skip-link/ (T3.5)
 ├── patterns/                   # доки-паттерны без кода в dist (header, list-page, form-page)
 ├── themes/                     # theme-irao.css, theme-<company>.css (только токены!)
 ├── showcase/                   # статический styleguide: страницы-стенды компонентов

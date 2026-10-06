@@ -26,9 +26,12 @@ import { expect } from '@playwright/test';
 
 import { a11y, shot, test as standTest } from '../helpers/harness.js';
 
-/** Всё, что получает фокус с клавиатуры на стенде (цели политики + каркас). */
+/** Всё, что получает фокус с клавиатуры на стенде (цели политики + каркас).
+ * [tabindex="-1"] исключён (сопутствующее T3.5): цель skip-link
+ * `<main id="main" tabindex="-1">` фокусируема программно, но не участвует
+ * в последовательной навигации — в Tab-обходе её нет. */
 const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]';
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
 
 /** Состояние фокуса: цель, :focus-visible и computed outline активного элемента. */
 const focusState = (page) =>
