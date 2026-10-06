@@ -78,8 +78,8 @@ beforeAll(async () => {
 describe('themes/theme-test.css — форма темы (AC T2.4, ADR-0009)', () => {
   const theme = parseTheme(readFileSync(THEME_SOURCE, 'utf8'));
 
-  it('один блок [data-ui-theme="test"] (атрибут механизма — фиксация T2.4)', () => {
-    expect(theme.selector).toBe('[data-ui-theme="test"]');
+  it('один блок data-ui-theme="test" (атрибут механизма — фиксация T2.4; кавычки — стиль prettier)', () => {
+    expect(theme.selector).toMatch(/^\[data-ui-theme=(?:"|')test(?:"|')\]$/);
   });
 
   it('переопределяет 5–7 семантических токенов (Scope T2.4)', () => {
