@@ -12,3 +12,7 @@ dist/
 # Негативные фикстуры линтеров: намеренно «кривые», гоняет
 # tools/run-lint-cases.mjs, а не prettier (tests/lint-cases/README.md)
 tests/lint-cases/
+
+# PHP-сниппеты для интеграторов Bitrix: prettier без PHP-парсера, формат —
+# зона копирующего интегратора (T3.1, полная версия сниппетов — T11.1)
+bitrix/snippets/*.snippet.php

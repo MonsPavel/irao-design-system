@@ -72,12 +72,17 @@ standTest.describe('шрифты Golos и reset (T3.1)', () => {
           document.fonts.load('600 16px "Golos Text"', sample),
         ]);
         await document.fonts.ready;
-        const check = (weight, text = '') => document.fonts.check(`${weight} 16px "Golos Text"`, text);
+        const check = (weight, text = '') =>
+          document.fonts.check(`${weight} 16px "Golos Text"`, text);
         return {
           // AC: document.fonts.check('16px "Golos Text"') — сэмпл по умолчанию (latin)
           defaultLatin: document.fonts.check('16px "Golos Text"'),
           cyr: { w400: check('400', 'АБВ'), w500: check('500', 'АБВ'), w600: check('600', 'АБВ') },
-          lat: { w400: check('400', 'Golos'), w500: check('500', 'Golos'), w600: check('600', 'Golos') },
+          lat: {
+            w400: check('400', 'Golos'),
+            w500: check('500', 'Golos'),
+            w600: check('600', 'Golos'),
+          },
         };
       });
 
@@ -102,74 +107,72 @@ standTest.describe('шрифты Golos и reset (T3.1)', () => {
     },
   );
 
-  standTest('каркас showcase: preload golos-400-cyr и golos-500-cyr — до CSS-каскада', async ({
-    stand,
-  }) => {
-    const page = await stand('tokens');
+  standTest(
+    'каркас showcase: preload golos-400-cyr и golos-500-cyr — до CSS-каскада',
+    async ({ stand }) => {
+      const page = await stand('tokens');
 
-    const headLinks = await page.evaluate(() =>
-      [...document.head.children].map((el) => ({
-        rel: el.getAttribute('rel'),
-        href: el.getAttribute('href'),
-        as: el.getAttribute('as'),
-        type: el.getAttribute('type'),
-        crossorigin: el.hasAttribute('crossorigin'),
-      })),
-    );
+      const headLinks = await page.evaluate(() =>
+        [...document.head.children].map((el) => ({
+          rel: el.getAttribute('rel'),
+          href: el.getAttribute('href'),
+          as: el.getAttribute('as'),
+          type: el.getAttribute('type'),
+          crossorigin: el.hasAttribute('crossorigin'),
+        })),
+      );
 
-    const fontPreloads = headLinks.filter((l) => l.rel === 'preload' && l.as === 'font');
-    expect(fontPreloads.map((l) => l.href.split('/').pop()).sort()).toEqual([
-      'golos-400-cyr.woff2',
-      'golos-500-cyr.woff2',
-    ]);
-    for (const preload of fontPreloads) {
-      expect(preload.type).toBe('font/woff2');
+      const fontPreloads = headLinks.filter((l) => l.rel === 'preload' && l.as === 'font');
+      expect(fontPreloads.map((l) => l.href.split('/').pop()).sort()).toEqual([
+        'golos-400-cyr.woff2',
+        'golos-500-cyr.woff2',
+      ]);
+      for (const preload of fontPreloads) {
+        expect(preload.type).toBe('font/woff2');
+        expect(
+          preload.crossorigin,
+          'шрифты грузятся в CORS-режиме — без crossorigin preload не матчится с загрузкой',
+        ).toBe(true);
+      }
+
+      const firstStylesheet = headLinks.findIndex((l) => l.rel === 'stylesheet');
+      const lastFontPreload = headLinks.findIndex((l) => l.rel === 'preload' && l.as === 'font');
       expect(
-        preload.crossorigin,
-        'шрифты грузятся в CORS-режиме — без crossorigin preload не матчится с загрузкой',
-      ).toBe(true);
-    }
+        lastFontPreload,
+        'preload стоит раньше подключения CSS (до каскада, паттерн career-portal)',
+      ).toBeLessThan(firstStylesheet);
+    },
+  );
 
-    const firstStylesheet = headLinks.findIndex((l) => l.rel === 'stylesheet');
-    const lastFontPreload = headLinks.findIndex((l) => l.rel === 'preload' && l.as === 'font');
-    expect(
-      lastFontPreload,
-      'preload стоит раньше подключения CSS (до каскада, паттерн career-portal)',
-    ).toBeLessThan(firstStylesheet);
-  });
+  standTest(
+    'фолбэк: woff2 заблокированы — текст рендерится Arial, страница читаема',
+    async ({ page }) => {
+      let fontRequestsFailed = 0;
+      page.on('requestfailed', (request) => {
+        if (FONT_URL.test(new URL(request.url()).pathname)) fontRequestsFailed += 1;
+      });
+      await page.route(FONT_URL, (route) => route.abort());
 
-  standTest('фолбэк: woff2 заблокированы — текст рендерится Arial, страница читаема', async ({
-    page,
-  }) => {
-    let fontRequestsFailed = 0;
-    page.on('requestfailed', (request) => {
-      if (FONT_URL.test(new URL(request.url()).pathname)) fontRequestsFailed += 1;
-    });
-    await page.route(FONT_URL, (route) => route.abort());
+      await openStand(page, 'tokens');
 
-    await openStand(page, 'tokens');
+      const state = await page.evaluate(async () => {
+        await document.fonts.ready;
+        return {
+          golosLoaded: document.fonts.check('16px "Golos Text"'),
+          hScroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      });
+      const metrics = await measureFallback(page);
 
-    const state = await page.evaluate(async () => {
-      await document.fonts.ready;
-      return {
-        golosLoaded: document.fonts.check('16px "Golos Text"'),
-        hScroll:
-          document.documentElement.scrollWidth > document.documentElement.clientWidth,
-      };
-    });
-    const metrics = await measureFallback(page);
-
-    expect(
-      fontRequestsFailed,
-      'блокировка активна: запросы woff2 были и все провалились',
-    ).toBeGreaterThanOrEqual(2);
-    expect(state.golosLoaded, 'Golos не загрузился').toBe(false);
-    expect(metrics.stack, 'текст измерим — не «невидимый»').toBeGreaterThan(0);
-    expect(
-      metrics.differs,
-      'метрики стека = метрикам Arial — рендер идёт фолбэком',
-    ).toBe(false);
-    expect(state.hScroll, 'макет не сломан: нет горизонтального скролла').toBe(false);
-    await expect(page.locator('main h1').first()).toBeVisible();
-  });
+      expect(
+        fontRequestsFailed,
+        'блокировка активна: запросы woff2 были и все провалились',
+      ).toBeGreaterThanOrEqual(2);
+      expect(state.golosLoaded, 'Golos не загрузился').toBe(false);
+      expect(metrics.stack, 'текст измерим — не «невидимый»').toBeGreaterThan(0);
+      expect(metrics.differs, 'метрики стека = метрикам Arial — рендер идёт фолбэком').toBe(false);
+      expect(state.hScroll, 'макет не сломан: нет горизонтального скролла').toBe(false);
+      await expect(page.locator('main h1').first()).toBeVisible();
+    },
+  );
 });

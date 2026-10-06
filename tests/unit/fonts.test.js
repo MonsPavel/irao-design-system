@@ -78,17 +78,22 @@ describe('base/fonts.css — 6 @font-face Golos Text (порт career-portal)', 
     ['500', 'lat'],
     ['600', 'cyr'],
     ['600', 'lat'],
-  ])('%s %s — url() под dist-структуру и unicode-range байт-в-байт из career-portal', (weight, subset) => {
-    const block = blocks.find(
-      (b) =>
-        b.includes(`font-weight: ${weight};`) && b.includes(`golos-${weight}-${subset}.woff2`),
-    );
-    expect(block, `блок ${weight}/${subset} существует`).toBeTruthy();
-    expect(block).toContain(`src: url('fonts/golos-${weight}-${subset}.woff2') format('woff2')`);
-    expect(block).toContain(
-      `unicode-range: ${subset === 'cyr' ? UNICODE_RANGE_CYR : UNICODE_RANGE_LAT}`,
-    );
-  });
+  ])(
+    '%s %s — url() под dist-структуру и unicode-range байт-в-байт из career-portal',
+    (weight, subset) => {
+      const block = blocks.find(
+        (b) =>
+          b.includes(`font-weight: ${weight};`) && b.includes(`golos-${weight}-${subset}.woff2`),
+      );
+      expect(block, `блок ${weight}/${subset} существует`).toBeTruthy();
+      expect(block).toContain(`src: url('fonts/golos-${weight}-${subset}.woff2') format('woff2')`);
+      // prettier переносит длинное lat-значение — сравниваем значение с
+      // нормализованными пробелами: список range-значений байт-в-байт.
+      expect(block.replace(/\s+/g, ' ')).toContain(
+        `unicode-range: ${subset === 'cyr' ? UNICODE_RANGE_CYR : UNICODE_RANGE_LAT}`,
+      );
+    },
+  );
 });
 
 describe('base/reset.css — безопасный глобальный reset (порт career-portal)', () => {
@@ -157,7 +162,7 @@ describe('CONTRIBUTING — правило ADR-0002 (AC T3.1)', () => {
 
   it('компонент объявляет свой box-sizing и не полагается на глобальный сброс base/reset.css', () => {
     expect(contributing).toContain('ADR-0002');
-    expect(contributing).toMatch(/объявляет\s+свой\s+box-sizing/);
+    expect(contributing).toMatch(/объявляет\s+свой\s+`?box-sizing/);
     expect(contributing).toContain('base/reset.css');
   });
 });
