@@ -31,9 +31,11 @@
  *
  * Подключение: правила нет в основном `rules` (themes-специфичен), включается
  * override'ом для каталога themes/ в stylelint.config.mjs — там же снят
- * `irao/no-primitive-token-references`: значения темы — ссылки на примитивы,
- * как в самом слое 2 (позитивный контроль — tests/lint-cases/css/themes/
- * theme-old-compat.css, негативный — theme-invalid.css, `npm run test:lint`).
+ * `irao/no-primitive-token-references`: цветовые/теневые значения темы —
+ * ссылки на примитивы через var(), неколоровые — сырые длины (radius и т.п.)
+ * без цветов (позитивный контроль — tests/lint-cases/css/themes/
+ * theme-old-compat.css, негативные — theme-invalid.css и theme-shadow-raw.css,
+ * `npm run test:lint`).
  */
 import stylelint from 'stylelint';
 
