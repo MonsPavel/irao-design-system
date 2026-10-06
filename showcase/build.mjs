@@ -77,7 +77,9 @@ const CSS_CORE_ORDER = [
  *   JS  components/<имя>/<имя>.js  — подключается автоматически, если есть.
  * Папка components/<имя>/ без строки здесь — предупреждение сборки.
  */
-const COMPONENTS = [];
+const COMPONENTS = [
+  'ui-skip-link', // T3.5 — клавиатурный переход к #main (WCAG 2.4.1)
+];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
 const CSS_VI = ['a11y/vi.css'];
@@ -238,7 +240,12 @@ function frame({
   const body = [
     '  <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>',
     ...header,
-    '  <main id="main">',
+    // tabindex="-1" на цели skip-link: Enter переносит фокус РЕАЛЬНО в main
+    // (без него браузеры меняют только хэш, activeElement уходит на body —
+    // Safari-кейс, T3.5 п.2; проверено зондом chromium 2026-10-06 и e2e
+    // tests/e2e/skip-link.spec.js). В Tab-порядок main не попадает:
+    // отрицательный tabindex исключает последовательную навигацию.
+    '  <main id="main" tabindex="-1">',
     main,
     '  </main>',
   ];
@@ -491,6 +498,20 @@ function selfChecks({ banner, stands }) {
     const match = html.match(sourceRef);
     assert(!match, `${rel} ссылается на исходники, а не на dist: ${match ? match[1] : ''}`);
     assert(html.includes('dist/ui-core.min.css'), `${rel} не подключает собранный ui-core.min.css`);
+    // Skip-link и его цель в каркасе каждой страницы (T3.5: правило для
+    // сайтов «цель существует» исполняет сборка; WCAG 2.4.1).
+    assert(
+      html.includes('<a class="ui-skip-link" href="#main">'),
+      `${rel}: skip-link отсутствует в каркасе (T3.5)`,
+    );
+    assert(
+      html.indexOf('<a class="ui-skip-link"') < html.indexOf('<header'),
+      `${rel}: skip-link — не первый интерактивный элемент каркаса`,
+    );
+    assert(
+      html.includes('<main id="main" tabindex="-1">'),
+      `${rel}: цель #main (main id="main" tabindex="-1") отсутствует — skip-link ведёт в никуда`,
+    );
   }
   // Идемпотентность баннера: ни дат, ни меток времени.
   assert(

@@ -42,9 +42,9 @@ describe('components/ui-skip-link/ui-skip-link.css — скрыт до фоку�
   const path = join(root, 'components', 'ui-skip-link', 'ui-skip-link.css');
   const css = stripCssComments(readFileSync(path, 'utf8'));
 
-  it('файл существует и проходит БЭМ-гейт (@define ui-skip-link)', () => {
+  it('файл существует и проходит БЭМ-гейт (@define skip-link — без префикса ui-)', () => {
     expect(existsSync(path), 'папка компонента на месте').toBe(true);
-    expect(readFileSync(path, 'utf8').startsWith('/** @define ui-skip-link */')).toBe(true);
+    expect(readFileSync(path, 'utf8').startsWith('/** @define skip-link */')).toBe(true);
   });
 
   it('.ui-skip-link: box-sizing на корне (ADR-0002) и 1px-клип вне фокуса', () => {
@@ -112,16 +112,17 @@ describe('каркас showcase (Scope: включён по умолчанию; 
   const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
 
   it("COMPONENTS содержит 'ui-skip-link' — CSS в dist/ui-core.min.css", () => {
-    expect(build).toMatch(/const COMPONENTS = \[\s*'ui-skip-link',?\s*\]/);
+    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-skip-link'[^\]]*\]/);
   });
 
   it('frame(): skip-link — первый элемент body, до header и до main', () => {
-    const skip = build.indexOf('<a class="ui-skip-link" href="#main">');
-    const header = build.indexOf('  <header class="ui-showcase-header">');
-    const main = build.indexOf('  <main id="main"');
-    expect(skip).toBeGreaterThan(-1);
-    expect(header).toBeGreaterThan(skip);
-    expect(main).toBeGreaterThan(header);
+    const bodyBlock = build.match(/const body = \[[\s\S]*?\];/)[0];
+    const skip = bodyBlock.indexOf('<a class="ui-skip-link" href="#main">');
+    const header = bodyBlock.indexOf('...header');
+    const main = bodyBlock.indexOf('<main id="main" tabindex="-1">');
+    expect(skip, 'skip-link в теле каркаса').toBeGreaterThan(-1);
+    expect(header, 'header после skip-link').toBeGreaterThan(skip);
+    expect(main, 'цель #main после header').toBeGreaterThan(header);
   });
 
   it('frame(): цель #main несёт tabindex="-1" — фокус переносится реально (Safari-кейс)', () => {
@@ -137,13 +138,13 @@ describe('каркас showcase (Scope: включён по умолчанию; 
 });
 
 describe('bitrix-сниппет header.php (Scope: включён по умолчанию)', () => {
-  const snippet = readFileSync(
-    join(root, 'bitrix', 'snippets', 'header-php.snippet.php'),
-    'utf8',
-  );
+  const snippet = readFileSync(join(root, 'bitrix', 'snippets', 'header-php.snippet.php'), 'utf8');
 
   it('skip-link — первый элемент body сниппета, href="#main"', () => {
-    expect(snippet).toMatch(/<body[^>]*>\s*<a class="ui-skip-link" href="#main">/);
+    // Между <body> и якорем допустим только HTML-комментарий (не элемент).
+    expect(snippet).toMatch(
+      /<body[^>]*>\s*(?:<!--[\s\S]*?-->\s*)?<a class="ui-skip-link" href="#main">/,
+    );
   });
 });
 

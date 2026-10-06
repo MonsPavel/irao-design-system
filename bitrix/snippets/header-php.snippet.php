@@ -11,7 +11,13 @@
  *   2. подключает CSS системы в порядке каскада: ui-core → (тема) →
  *      template_styles.css сайта (последним — точка расширения);
  *   3. подключает ui.min.js в конец (defer-семантика Bitrix) и ui-vi.min.css
- *      (кнопка входа в версию для слабовидящих — на любой странице).
+ *      (кнопка входа в версию для слабовидящих — на любой странице);
+ *   4. ставит ui-skip-link первым элементом <body> (T3.5, WCAG 2.4.1):
+ *      первый Tab страницы — «Перейти к основному содержимому». Цель —
+ *      <main id="main" tabindex="-1"> в шаблоне страницы/footer.php:
+ *      tabindex="-1" делает цель фокусируемой, иначе Enter меняет только
+ *      хэш, а фокус остаётся на ссылке (Safari-кейс). Правило для сайтов —
+ *      components/ui-skip-link/README.md; полные сниппеты — T11.1.
  *
  * Шрифты и лицензия лежат рядом с css в той же папке версии
  * (/local/ui/{version}/fonts/) — относительные url() @font-face работают
@@ -42,3 +48,7 @@ $asset->addJs('/local/ui/' . UI_VERSION . '/ui.min.js', true); // true => в к�
   <?php $APPLICATION->ShowHead(); ?>
 </head>
 <body data-ui-theme="irao">
+  <!-- Skip-link (T3.5, WCAG 2.4.1): первый элемент body — первый Tab страницы
+       попадает в него. Цель <main id="main" tabindex="-1"> обязательна
+       (см. components/ui-skip-link/README.md). -->
+  <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>
