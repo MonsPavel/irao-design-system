@@ -35,13 +35,16 @@ function channelsOf(computed) {
   const rgb = computed.match(/^rgba?\(([^)]+)\)$/);
   if (rgb) return rgb[1].split(',').map(Number);
   const srgb = computed.match(/^color\(\s*srgb\s+([^)]+)\)$/);
-  if (srgb) return srgb[1].trim().split(/\s+/).map((c) => Number(c) * 255);
+  if (srgb)
+    return srgb[1]
+      .trim()
+      .split(/\s+/)
+      .map((c) => Number(c) * 255);
   throw new Error(`неожиданная сериализация вычисленного цвета: ${computed}`);
 }
 
 /** Демо-чип: цветной span внутри карточки (data-ui-demo — на li-карточке). */
-const demo = (page, name) =>
-  page.locator(`[data-ui-demo="${name}"] .ts-state-demo`);
+const demo = (page, name) => page.locator(`[data-ui-demo="${name}"] .ts-state-demo`);
 
 standTest.describe('производные состояния (T2.6, ADR-0010)', () => {
   standTest(
