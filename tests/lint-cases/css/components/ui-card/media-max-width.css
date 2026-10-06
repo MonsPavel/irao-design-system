@@ -1,0 +1,12 @@
+/** @define card */
+
+/* НАРУШЕНИЕ (T2.5): desktop-first max-width — подход career-portal сознательно
+   не переносится (класс C аудита): база = мобильная, рост к xl/2xl в min-width.
+   Шкала — константа BREAKPOINTS в stylelint.config.mjs, дока —
+   docs/ui-system/architecture/responsive-approach.md.
+   Ожидаемый красный: media-feature-name-disallowed-list. */
+@media (max-width: 767px) {
+  .ui-card {
+    padding: 1rem;
+  }
+}

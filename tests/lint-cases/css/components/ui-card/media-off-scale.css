@@ -1,0 +1,11 @@
+/** @define card */
+
+/* НАРУШЕНИЕ (T2.5): min-width вне шкалы — класс «плавающих» брейкпоинтов
+   career-portal (999/1279/359…), с которым заканчивает задача T2.5.
+   Значения min-width — только из шкалы (BREAKPOINTS в stylelint.config.mjs).
+   Ожидаемый красный: media-feature-name-value-allowed-list. */
+@media (min-width: 999px) {
+  .ui-card {
+    padding: 1.5rem;
+  }
+}
