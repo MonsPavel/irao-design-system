@@ -1,0 +1,231 @@
+/** @define button */
+
+/*!
+ * irao-ui — ui-button: кнопка-действие (задача T4.2 — эталонный компонент).
+ *
+ * Источник — .btn career-portal (components.css:65–93): варианты
+ * primary/accent/outline/light, высота 52px, радиус pill, переход 0.25s.
+ * Расширения системы: размер sm, disabled, loading; hover/active — по T2.6/
+ * ADR-0010. Кнопка — только для ДЕЙСТВИЙ: переход по адресу (страница,
+ * якорь, файл, внешний сайт) — ui-link, «переход-выглядит-как-действие» —
+ * ui-link--button (do/don't — README.md компонента).
+ *
+ * Все значения — токены слоя 2 (Implementation requirements п.1): высоты
+ * --ui-button-height(-sm), рамка --ui-button-border-width, радиус/паддинги/
+ * шрифтовая тройка small — одобренный .btn. Высота — min-height, не height
+ * (Technical considerations T4.2): 32px-база T3.6 растит кнопку вместе с
+ * текстом, контент центрируется flex'ом.
+ *
+ * База без модификатора — «тихая» кнопка каркаса career-portal (button-reset
+ * base.css:77: background none, цвет текста): прозрачный фон, цвет текста,
+ * рамка прозрачная (толщина зарезервирована — все варианты в одной коробке).
+ *
+ * Производные состояния (T2.6, ADR-0010): hover пар одобренного дизайна —
+ * явные токены (--ui-color-primary-hover = blue-700 components.css:80,
+ * --ui-color-accent-hover = accent-light components.css:83; outline
+ * components.css:90 — заливка primary + белая подпись; light components.css:93
+ * — blue-100 как --ui-color-surface-hover); active одобренным дизайном не
+ * задан — color-mix(in srgb, var(--ui-…) 88%, black). Подписи переобъявлены
+ * в каждом hover/active-правиле варианта: без них просачивается цвет generic-
+ * правила .ui-button:hover/:active при равной специфичности (урок ui-link —
+ * тёмный текст на blue-700 = 1.78:1). Все :hover — ТОЛЬКО под
+ * @media (hover: hover) (EPIC-4: sticky-hover не «залипает» на таче).
+ *
+ * disabled (Implementation requirements п.2): только атрибут disabled —
+ * нативно не фокусируется и не кликается; визуал — затемнение из токена
+ * --ui-opacity-disabled (career-portal components.css:269, единственный
+ * disabled-паттерн одобренного дизайна). Контраст подписи disabled не
+ * гейтится: WCAG 1.4.3 исключает неактивные компоненты (AC: «контраст
+ * disabled — декоративный, исключение зафиксировано» — README.md,
+ * KNOWN_AXE_EXCEPTIONS e2e). Правило ПОСЛЕ hover/active — порядок каскада.
+ *
+ * loading (Implementation requirements п.3, Scope): JS-независимый класс
+ * is-loading + aria-busy="true" в разметке (управление состоянием — за
+ * формой/приложением, кнопка в форме управляется T5.5). pointer-events:none
+ * выключает мышиные клики; клавиатурные/программные активации CSS не отменяет
+ * — их перехватывает управляющий модуль по aria-busy. Лейбл визуально скрыт
+ * clip-path'ом (display:none убрал бы accessible name — имя кнопки неизменно,
+ * e2e пинит); спиннер — декоративный (aria-hidden), кольцо на currentColor:
+ * красится токенами подписи варианта и перекраской VI (инвариант §5).
+ *
+ * Фокус — глобальная гарантия base/focus.css (ADR-0001): button:focus-visible
+ * в списке политики; здесь outline не запрещается и не заменяется.
+ */
+
+.ui-button {
+  box-sizing: border-box;
+  display: inline-flex;
+  position: relative;
+  gap: var(--ui-space-2);
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ui-button-height);
+  padding: var(--ui-space-3) var(--ui-space-5);
+  border: var(--ui-button-border-width) solid transparent;
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  transition:
+    background-color var(--ui-transition),
+    color var(--ui-transition),
+    border-color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* ── Варианты (career-portal .btn--*, цвета — строго токены слоя 2) ── */
+
+.ui-button--primary {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-button--accent {
+  background-color: var(--ui-color-accent);
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-button--outline {
+  border-color: var(--ui-color-primary);
+  background-color: transparent;
+  color: var(--ui-color-primary);
+}
+
+.ui-button--light {
+  background-color: var(--ui-color-surface-muted);
+  color: var(--ui-color-primary);
+}
+
+/* ── Размеры: md — база (--ui-button-height), sm (Scope) ── */
+
+.ui-button--sm {
+  min-height: var(--ui-button-height-sm);
+}
+
+/* ── Слоты ── */
+
+/* Иконка — геометрия от шрифта (1em), как в ui-link__icon. Цвет —
+   currentColor из разметки (fill/stroke-атрибуты svg), CSS-цвет сознательно
+   не задаётся: варианты, hover и VI-перекраска работают сами. */
+.ui-button__icon {
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+}
+
+.ui-button__label {
+  box-sizing: border-box;
+}
+
+/* Спиннер: скрыт по умолчанию, показывается в is-loading. Кольцо на
+   currentColor (см. шапку). Радиус pill в маленьком боксе даёт круг. */
+.ui-button__spinner {
+  box-sizing: border-box;
+  display: none;
+  width: 1em;
+  height: 1em;
+  border: var(--ui-border-width) solid currentColor;
+  border-radius: var(--ui-radius-pill);
+  border-top-color: transparent;
+}
+
+/* ── loading: базовый класс без JS (состояние в разметке: is-loading +
+      aria-busy="true"); анимацию гасит глобальный kill-switch
+      prefers-reduced-motion (base/reset.css, T3.1) ── */
+
+.ui-button.is-loading {
+  pointer-events: none;
+}
+
+.ui-button.is-loading .ui-button__spinner {
+  display: block;
+  animation: ui-button-spin var(--ui-transition-slow) linear infinite;
+}
+
+/* Лейбл визуально скрыт, но остаётся в accessibility tree (именование);
+   display:none запрещён — см. шапку. */
+.ui-button.is-loading .ui-button__label {
+  position: absolute;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@keyframes ui-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ── :hover — только под (hover: hover); пары/значения одобренного дизайна,
+      generic ghost — одобренная hover-поверхность blue-100 ── */
+
+@media (hover: hover) {
+  .ui-button:hover {
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-text);
+  }
+
+  .ui-button--primary:hover {
+    background-color: var(--ui-color-primary-hover);
+    /* Подпись переобъявлена: без неё просачивался цвет generic-.ui-button:hover
+       (тёмный текст на blue-700 = 1.78:1 — поймано контрастом e2e). */
+    color: var(--ui-color-text-on-dark);
+  }
+
+  .ui-button--accent:hover {
+    background-color: var(--ui-color-accent-hover);
+    color: var(--ui-color-text-on-dark);
+  }
+
+  /* career-portal components.css:90: заливка primary, подпись белая. */
+  .ui-button--outline:hover {
+    border-color: var(--ui-color-primary);
+    background-color: var(--ui-color-primary);
+    color: var(--ui-color-text-on-dark);
+  }
+
+  /* career-portal components.css:93: фон blue-100 (--ui-color-surface-hover). */
+  .ui-button--light:hover {
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-primary);
+  }
+}
+
+/* ── :active — color-mix 88% + black (одобренным дизайном active не задан) ── */
+
+.ui-button:active {
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
+  color: var(--ui-color-text);
+}
+
+.ui-button--primary:active {
+  background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-button--accent:active {
+  background-color: color-mix(in srgb, var(--ui-color-accent) 88%, black);
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-button--outline:active {
+  border-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
+  background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-button--light:active {
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
+  color: var(--ui-color-primary);
+}
+
+/* ── disabled: атрибут disabled (не фокусируется, не кликается нативно);
+      визуал — токен. Правило после hover/active: порядок каскада, а не
+      специфичность (Implementation requirements п.2, AC). ── */
+
+.ui-button:disabled {
+  opacity: var(--ui-opacity-disabled);
+}

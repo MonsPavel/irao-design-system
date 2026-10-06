@@ -108,7 +108,9 @@ describe('components/ui-button/ui-button.css — база (Implementation requir
 
   it('переход — токен --ui-transition (career-portal .btn: background/color/border-color)', () => {
     const block = blockOf(css, '.ui-button');
-    expect(block).toContain(
+    // Нормализация пробелов: prettier (printWidth 100) переносит длинный список.
+    const oneLine = block.replace(/\s+/g, ' ');
+    expect(oneLine).toContain(
       'transition: background-color var(--ui-transition), color var(--ui-transition), border-color var(--ui-transition);',
     );
   });
@@ -335,9 +337,9 @@ describe('канонический паттерн (components/ui-button/ui-butto
   it('состояния disabled и loading в паттерне: disabled-атрибут; is-loading + aria-busy + спиннер aria-hidden', () => {
     expect(html).toMatch(/<button[^>]*disabled[^>]*>/);
     expect(html).toMatch(/is-loading[^>]*aria-busy="true"|aria-busy="true"[^>]*is-loading/);
-    const spinnerTags = [...html.matchAll(/<span[^>]*class="[^"]*ui-button__spinner[^"]*"[^>]*>/g)].map(
-      ([tag]) => tag,
-    );
+    const spinnerTags = [
+      ...html.matchAll(/<span[^>]*class="[^"]*ui-button__spinner[^"]*"[^>]*>/g),
+    ].map(([tag]) => tag);
     expect(spinnerTags.length, 'спиннер в паттерне есть').toBeGreaterThan(0);
     for (const tag of spinnerTags) {
       expect(tag, 'спиннер декоративный').toContain('aria-hidden="true"');

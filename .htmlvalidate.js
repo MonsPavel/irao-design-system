@@ -28,6 +28,11 @@
  *    aria-hidden). Аварийный визуально-скрытый текст проходит гейт (текст
  *    в DOM без aria-hidden), aria-label — тоже.
  *
+ * С T4.2: `no-implicit-button-type` (recommended) понижен до `warning` —
+ * severity спеки T4.2 (Scope: «тип обязательный (html-validate warning)»).
+ * <button> без type по умолчанию submit — в чужой форме клик отправит её;
+ * негативная фикстура — tests/lint-cases/html/button-without-type.html.
+ *
  * Кастомные правила регистрируются инлайн-плагином (html-validate 11: ключ в
  * plugin.rules — уже полный id правила). Формат файла — CJS: загрузчик конфига
  * html-validate исполняет его в CJS-контексте.
@@ -179,5 +184,7 @@ module.exports = {
     'irao/link-external-noopener': 'error',
     'irao/link-accessible-name': 'warn',
     'input-missing-label': 'error',
+    // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
+    'no-implicit-button-type': 'warn',
   },
 };

@@ -30,6 +30,12 @@
  *     (?theme=test) перекрашивает primary и color-mix-active автоматически,
  *     пара одобренного дизайна НЕ пересчитывается из primary;
  * 10. эталоны 375/768/1280/1440 — только из контейнера/CI (ADR-0004).
+ *
+ * Работа с transition: у кнопки --ui-transition (0.25s) из одобренного .btn —
+ * computed-цвет, прочитанный сразу после hover/active, является
+ * интерполированным кадром перехода (броузер сериализует его в т.ч. как
+ * oklab): каждое состояние-утверждение ждёт устоявшееся значение
+ * (expect.poll до целевого), пины сравнивают конечное состояние.
  */
 import { expect } from '@playwright/test';
 
@@ -104,13 +110,17 @@ const stateOf = (page, id) =>
     };
   });
 
-/** Вычисленный фон (для expect.poll при смене темы). */
+/** Вычисленный фон (для expect.poll при переходах/смене темы). */
 const bgOf = (page, id) =>
   page.locator(`#${id}`).evaluate((el) => getComputedStyle(el).backgroundColor);
 
 /**
  * Каналы вычисленного цвета в 0–255 (обе сериализации chromium: rgb() после
  * var() и color(srgb …) после color-mix — паттерн derived-states.spec.js).
+ * Устоявшийся color-mix сериализуется color(srgb …); КАДРЫ transition —
+ * oklab(...): интерполяция перехода идёт в oklab (probe: active @100ms —
+ * oklab, @1600ms — color(srgb)) — такие значения предикатами poll'а
+ * пропускается через safeChannels (throw внутри expect.poll роняет опрос).
  */
 function colorOf(computed) {
   const rgb = computed.match(/^rgba?\(([^)]+)\)$/);
@@ -126,28 +136,71 @@ function colorOf(computed) {
   throw new Error(`неожиданная сериализация вычисленного цвета: ${computed}`);
 }
 
+/** colorOf без throw: промежуточные кадры transition (oklab) → null. */
+const safeChannels = (computed) => {
+  try {
+    return colorOf(computed);
+  } catch {
+    return null;
+  }
+};
+
 /** Допуск округления 8-битного результата color-mix браузером (ADR-0010). */
 const MIX_TOLERANCE = 1.25;
 
 /** Ближайшие каналы color-mix(in srgb, var(--token) 88%, black) по базовому. */
 const mix88 = ([r, g, b]) => [r * 0.88, g * 0.88, b * 0.88];
 
-async function expectBackgroundChannels(state, [r, g, b], label) {
-  const channels = colorOf(state.backgroundColor);
-  for (const [index, expected] of [r, g, b].entries()) {
-    const actual = [channels.r, channels.g, channels.b][index];
-    expect(
-      Math.abs(actual - expected),
-      `${label}: канал ${'rgb'[index]} = ${actual}, ожидалось ${expected} (±${MIX_TOLERANCE})`,
-    ).toBeLessThanOrEqual(MIX_TOLERANCE);
-  }
+/** Каналы цвета совпадают с ожидаемыми в пределах допуска mix. */
+const channelsNear = (channels, [r, g, b]) =>
+  [channels.r, channels.g, channels.b].every(
+    (actual, index) => Math.abs(actual - [r, g, b][index]) <= MIX_TOLERANCE,
+  );
+
+/**
+ * Дождаться конца CSS-transition (--ui-transition 0.25s) по предикату
+ * состояния и вернуть устоявшееся состояние: computed-цвет промежуточных
+ * кадров — интерполяция браузера (в т.ч. oklab), для пинов не годится.
+ */
+async function settledState(page, id, isSettled, label) {
+  await expect
+    .poll(
+      async () => {
+        const state = await stateOf(page, id);
+        let settled = false;
+        try {
+          settled = isSettled(state);
+        } catch {
+          settled = false; // кадр transition (oklab) — ждать устоявшегося
+        }
+        return settled;
+      },
+      { timeout: 5000 },
+    )
+    .toBe(true);
+  const state = await stateOf(page, id);
+  expect(isSettled(state), `${label}: состояние устоялось и совпало`).toBe(true);
+  return state;
+}
+
+/** Хвост микровзаимодействия (--ui-transition 0.25s + запас) — для прогонов
+ *  по нескольким кнопкам (контраст), где poll до конкретного цвета избыточен. */
+const settleTransitions = (page) => page.waitForTimeout(350);
+
+/** Эффективный фон: собственный непрозрачный, иначе подложка (страница). */
+function backdropOf(state) {
+  const self = colorOf(state.backgroundColor);
+  if (self.a === 1) return self;
+  return colorOf(state.backdrop);
 }
 
 /** Доступное имя кнопки (aria-label или текст; скрытый лейбл остаётся в DOM). */
 const nameOf = (page, id) =>
   page
     .locator(`#${id}`)
-    .evaluate((el) => (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim());
+    .evaluate((el) =>
+      (el.getAttribute('aria-label') || el.textContent || '').replace(/\s+/g, ' ').trim(),
+    );
 
 /** Счётчики click на всех кнопках стенда (окно ожидает e2e-проверок). */
 async function armClickCounters(page) {
@@ -162,8 +215,7 @@ async function armClickCounters(page) {
   });
 }
 
-const clicksOf = (page, id) =>
-  page.evaluate((btnId) => window.__buttonClicks[btnId] ?? -1, id);
+const clicksOf = (page, id) => page.evaluate((btnId) => window.__buttonClicks[btnId] ?? -1, id);
 
 /** Клавиатурный обход до кнопки (фокус с клавиатуры — :focus-visible, ADR-0001). */
 async function tabTo(page, locator) {
@@ -174,15 +226,15 @@ async function tabTo(page, locator) {
   throw new Error('фокус не дошёл до кнопки за 30 Tab');
 }
 
-/** Физический клик мышью по центру кнопки (без actionability-проверок Playwright:
- *  для disabled/loading важен именно нативный исход, а не ожидание харнесса). */
+/** Физический клик мышью по центру кнопки (без actionability-проверок
+ *  Playwright: для disabled/loading важен именно нативный исход). */
 async function rawClick(page, id) {
   const box = await page.locator(`#${id}`).boundingBox();
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
 }
 
 /** DOM-страховка гейта html-validate (no-implicit-button-type): у каждой
- *  кнопки стенда явный type; иконки декоративные. */
+ *  кнопки стенда явный type; иконки и спиннеры декоративные. */
 const standGuards = (page) =>
   page.evaluate(() => {
     const problems = [];
@@ -227,9 +279,7 @@ standTest.describe('ui-button (T4.2)', () => {
         expect(state.borderRadius, `${id}: радиус pill`).toBe('100px');
         expect(state.fontSize, `${id}: fs-small`).toBe('14px');
         expect(state.fontWeight, `${id}: fw-small`).toBe('500');
-        expect(state.fontFamily, `${id}: кнопка не остаётся на UA-шрифте`).toContain(
-          'Golos Text',
-        );
+        expect(state.fontFamily, `${id}: кнопка не остаётся на UA-шрифте`).toContain('Golos Text');
       }
 
       const sm = await stateOf(page, BTN.primarySm);
@@ -246,38 +296,56 @@ standTest.describe('ui-button (T4.2)', () => {
       const page = await stand('ui-button');
 
       await page.locator(`#${BTN.primary}`).hover();
-      expect(
-        (await stateOf(page, BTN.primary)).backgroundColor,
+      const primary = await settledState(
+        page,
+        BTN.primary,
+        (s) => s.backgroundColor === 'rgb(22, 75, 137)' && s.color === 'rgb(255, 255, 255)',
         'hover primary — пара --ui-color-primary-hover (blue-700), не color-mix',
-      ).toBe('rgb(22, 75, 137)');
+      );
+      expect(primary.backgroundColor, 'hover primary — значение пары одобренного дизайна').toBe(
+        'rgb(22, 75, 137)',
+      );
 
       await page.locator(`#${BTN.accent}`).hover();
-      expect(
-        (await stateOf(page, BTN.accent)).backgroundColor,
+      const accent = await settledState(
+        page,
+        BTN.accent,
+        (s) => s.backgroundColor === 'rgb(243, 113, 49)',
         'hover accent — пара --ui-color-accent-hover (accent-light)',
-      ).toBe('rgb(243, 113, 49)');
+      );
+      expect(accent.backgroundColor, 'hover accent — значение пары одобренного дизайна').toBe(
+        'rgb(243, 113, 49)',
+      );
 
       await page.locator(`#${BTN.outline}`).hover();
-      const outline = await stateOf(page, BTN.outline);
-      expect(outline.backgroundColor, 'hover outline — заливка primary (components.css:90)').toBe(
-        'rgb(0, 40, 86)',
+      const outline = await settledState(
+        page,
+        BTN.outline,
+        (s) =>
+          s.backgroundColor === 'rgb(0, 40, 86)' &&
+          s.color === 'rgb(255, 255, 255)' &&
+          s.borderColor === 'rgb(0, 40, 86)',
+        'hover outline — заливка primary и белая подпись (components.css:90)',
       );
-      expect(outline.color, 'hover outline — подпись белая').toBe('rgb(255, 255, 255)');
-      expect(outline.borderColor, 'рамка остаётся primary').toBe('rgb(0, 40, 86)');
+      expect(outline.borderColor, 'рамка outline остаётся primary').toBe('rgb(0, 40, 86)');
 
       await page.locator(`#${BTN.light}`).hover();
-      const light = await stateOf(page, BTN.light);
-      expect(
-        light.backgroundColor,
+      const light = await settledState(
+        page,
+        BTN.light,
+        (s) => s.backgroundColor === 'rgb(232, 238, 254)' && s.color === 'rgb(0, 40, 86)',
         'hover light — --ui-color-surface-hover (blue-100, components.css:93)',
-      ).toBe('rgb(232, 238, 254)');
+      );
       expect(light.color, 'подпись light — primary').toBe('rgb(0, 40, 86)');
 
       await page.locator(`#${BTN.ghost}`).hover();
-      const ghost = await stateOf(page, BTN.ghost);
-      expect(ghost.backgroundColor, 'hover ghost — одобренная hover-поверхность').toBe(
-        'rgb(232, 238, 254)',
+      const ghost = await settledState(
+        page,
+        BTN.ghost,
+        (s) => s.backgroundColor === 'rgb(232, 238, 254)',
+        'hover ghost — одобренная hover-поверхность blue-100',
       );
+      expect(ghost.color, 'подпись ghost — цвет текста').toBe('rgb(31, 31, 31)');
     },
   );
 
@@ -286,52 +354,74 @@ standTest.describe('ui-button (T4.2)', () => {
 
     await page.locator(`#${BTN.primary}`).hover();
     await page.mouse.down();
-    await expectBackgroundChannels(
-      await stateOf(page, BTN.primary),
-      mix88([0, 40, 86]),
-      'active primary',
+    const primary = await settledState(
+      page,
+      BTN.primary,
+      (s) =>
+        channelsNear(colorOf(s.backgroundColor), mix88([0, 40, 86])) &&
+        s.color === 'rgb(255, 255, 255)',
+      'active primary — color-mix 88% + black',
     );
+    expect(
+      channelsNear(colorOf(primary.backgroundColor), mix88([0, 40, 86])),
+      'active primary: каналы фона = 88% от primary',
+    ).toBe(true);
     await page.mouse.up();
 
     await page.locator(`#${BTN.accent}`).hover();
     await page.mouse.down();
-    await expectBackgroundChannels(
-      await stateOf(page, BTN.accent),
-      mix88([242, 103, 34]),
-      'active accent',
+    const accent = await settledState(
+      page,
+      BTN.accent,
+      (s) => channelsNear(colorOf(s.backgroundColor), mix88([242, 103, 34])),
+      'active accent — color-mix 88% + black',
     );
+    expect(
+      channelsNear(colorOf(accent.backgroundColor), mix88([242, 103, 34])),
+      'active accent: каналы фона = 88% от accent',
+    ).toBe(true);
     await page.mouse.up();
 
     await page.locator(`#${BTN.outline}`).hover();
     await page.mouse.down();
-    await expectBackgroundChannels(
-      await stateOf(page, BTN.outline),
-      mix88([0, 40, 86]),
-      'active outline',
+    const outline = await settledState(
+      page,
+      BTN.outline,
+      (s) =>
+        channelsNear(colorOf(s.backgroundColor), mix88([0, 40, 86])) &&
+        s.color === 'rgb(255, 255, 255)',
+      'active outline — color-mix 88% + black, подпись белая',
     );
+    expect(
+      channelsNear(colorOf(outline.backgroundColor), mix88([0, 40, 86])),
+      'active outline: каналы фона = 88% от primary',
+    ).toBe(true);
     await page.mouse.up();
   });
 
   standTest.describe('клавиатурный прогон (AC: Tab/Enter/Space; фокус — ADR-0001)', () => {
-    standTest('Tab: focus-visible рисует политика base/focus.css; Enter и Space активируют', async ({
-      stand,
-    }) => {
-      const page = await stand('ui-button');
-      await armClickCounters(page);
+    standTest(
+      'Tab: focus-visible рисует политика base/focus.css; Enter и Space активируют',
+      async ({ stand }) => {
+        const page = await stand('ui-button');
+        await armClickCounters(page);
 
-      const primary = page.locator(`#${BTN.primary}`);
-      await tabTo(page, primary);
-      const state = await stateOf(page, BTN.primary);
-      expect(state.focusVisible, 'фокус пришёл с клавиатуры').toBe(true);
-      expect(state.outlineStyle, 'outline рисует глобальная политика ADR-0001').toBe('solid');
-      expect(state.outlineWidth, 'ширина — --ui-focus-width (3px)').toBe('3px');
-      expect(state.outlineColor, 'цвет — --ui-focus-color (primary)').toBe('rgb(0, 40, 86)');
+        const primary = page.locator(`#${BTN.primary}`);
+        await tabTo(page, primary);
+        const state = await stateOf(page, BTN.primary);
+        expect(state.focusVisible, 'фокус пришёл с клавиатуры').toBe(true);
+        expect(state.outlineStyle, 'outline рисует глобальная политика ADR-0001').toBe('solid');
+        expect(state.outlineWidth, 'ширина — --ui-focus-width (3px)').toBe('3px');
+        expect(state.outlineColor, 'цвет — --ui-focus-color (primary)').toBe('rgb(0, 40, 86)');
 
-      await page.keyboard.press('Enter');
-      expect(await clicksOf(page, BTN.primary), 'Enter даёт click').toBe(1);
-      await page.keyboard.press('Space');
-      expect(await clicksOf(page, BTN.primary), 'Space даёт click').toBe(1);
-    });
+        await page.keyboard.press('Enter');
+        expect(await clicksOf(page, BTN.primary), 'Enter даёт click').toBe(1);
+        await page.keyboard.press('Space');
+        expect(await clicksOf(page, BTN.primary), 'Space даёт click (счётчик накопительный)').toBe(
+          2,
+        );
+      },
+    );
 
     standTest('disabled: не фокусируется и не кликается нативно (AC)', async ({ stand }) => {
       const page = await stand('ui-button');
@@ -350,9 +440,10 @@ standTest.describe('ui-button (T4.2)', () => {
 
       // Мышь: физический клик по центру — событие click не возникает.
       await rawClick(page, BTN.primaryDisabled);
-      expect(await clicksOf(page, BTN.primaryDisabled), 'клик по disabled игнорируется нативно').toBe(
-        0,
-      );
+      expect(
+        await clicksOf(page, BTN.primaryDisabled),
+        'клик по disabled игнорируется нативно',
+      ).toBe(0);
     });
   });
 
@@ -404,9 +495,10 @@ standTest.describe('ui-button (T4.2)', () => {
     async ({ stand }) => {
       const page = await stand('ui-button');
 
+      /** Контраст computed-пары «подпись/эффективный фон» (свой bg или подложка). */
+      const ratioOf = (state) => contrastRatio(colorOf(state.color), backdropOf(state));
       const assertAA = async (id, label) => {
-        const state = await stateOf(page, id);
-        const ratio = contrastRatio(colorOf(state.color), colorOf(state.backgroundColor));
+        const ratio = ratioOf(await stateOf(page, id));
         expect(ratio, `${label}: ${ratio.toFixed(2)}:1 ≥ 4.5`).toBeGreaterThanOrEqual(4.5);
       };
       for (const id of [BTN.ghost, BTN.primary, BTN.outline, BTN.light]) {
@@ -415,36 +507,38 @@ standTest.describe('ui-button (T4.2)', () => {
 
       // hover: пары/значения одобренного дизайна — все ≥ 4.5 (blue-700 8.74:1).
       await page.locator(`#${BTN.primary}`).hover();
+      await settleTransitions(page);
       await assertAA(BTN.primary, 'hover primary');
       await page.locator(`#${BTN.outline}`).hover();
+      await settleTransitions(page);
       await assertAA(BTN.outline, 'hover outline');
       await page.locator(`#${BTN.light}`).hover();
+      await settleTransitions(page);
       await assertAA(BTN.light, 'hover light');
       await page.locator(`#${BTN.ghost}`).hover();
+      await settleTransitions(page);
       await assertAA(BTN.ghost, 'hover ghost');
 
       // accent — известный разрыв одобренного дизайна (пары кнопок не гейтятся
       // в tests/contrast/pairs.config.mjs с T2.6; значение не меняется без
       // design-decision владельца). Пин факта + некстовый пол ≥ 3 (T9.2).
       const accentState = await stateOf(page, BTN.accent);
-      const accentRatio = contrastRatio(
-        colorOf(accentState.color),
-        colorOf(accentState.backgroundColor),
-      );
-      expect(accentRatio, 'пин одобренного значения 3.12:1 (белая подпись на orange-500)').toBeCloseTo(
-        3.12,
-        1,
-      );
+      const accentRatio = ratioOf(accentState);
+      expect(
+        accentRatio,
+        'пин одобренного значения 3.12:1 (белая подпись на orange-500)',
+      ).toBeCloseTo(3.12, 1);
       expect(accentRatio, 'пол некстового уровня (чек-лист T9.2)').toBeGreaterThanOrEqual(3);
     },
   );
 
-  standTest('DOM-страховка гейтов: у всех кнопок type, иконки и спиннеры aria-hidden', async ({
-    stand,
-  }) => {
-    const page = await stand('ui-button');
-    expect(await standGuards(page), 'страховка html-validate-гейта типа').toEqual([]);
-  });
+  standTest(
+    'DOM-страховка гейтов: у всех кнопок type, иконки и спиннеры aria-hidden',
+    async ({ stand }) => {
+      const page = await stand('ui-button');
+      expect(await standGuards(page), 'страховка html-validate-гейта типа').toEqual([]);
+    },
+  );
 
   standTest('axe: нарушения вне известных исключений отсутствуют (AC)', async ({ stand }) => {
     const page = await stand('ui-button');
@@ -469,7 +563,7 @@ standTest.describe('ui-button (T4.2)', () => {
       async ({ stand }) => {
         const page = await stand('ui-button');
 
-        // Дефолтная тема: актив — 88% от blue-800 (проверено выше; здесь база).
+        // Дефолтная тема: primary — blue-800 (пары/миксы — см. тесты выше).
         expect(await bgOf(page, BTN.primary)).toBe('rgb(0, 40, 86)');
 
         // Механизм T2.4: select каркаса ставит data-ui-theme и подключает тему.
@@ -483,25 +577,27 @@ standTest.describe('ui-button (T4.2)', () => {
         // 88% × rgb(81, 29, 89) ≈ rgb(71.28, 25.52, 78.32).
         await page.locator(`#${BTN.primary}`).hover();
         await page.mouse.down();
-        await expectBackgroundChannels(
-          await stateOf(page, BTN.primary),
-          mix88([81, 29, 89]),
-          'themed active primary',
+        await settledState(
+          page,
+          BTN.primary,
+          (s) => channelsNear(colorOf(s.backgroundColor), mix88([81, 29, 89])),
+          'themed active primary — color-mix от themed primary',
         );
         await page.mouse.up();
 
         // Пара одобренного дизайна за primary НЕ следует (граница ADR-0010):
         // hover остаётся blue-700 #164b89.
-        await expect.poll(() => bgOf(page, BTN.primary), { timeout: 5000 }).toBe('rgb(81, 29, 89)');
         await page.locator(`#${BTN.primary}`).hover();
-        expect(
-          await bgOf(page, BTN.primary),
-          'пара hover не пересчитывается из themed primary',
-        ).toBe('rgb(22, 75, 137)');
+        await expect
+          .poll(() => bgOf(page, BTN.primary), { timeout: 5000 })
+          .toBe('rgb(22, 75, 137)');
 
         // light-hover: bg — пара (тема не переопределяла — blue-100), подпись —
         // primary (едет за темой).
         await page.locator(`#${BTN.light}`).hover();
+        await expect
+          .poll(async () => (await stateOf(page, BTN.light)).backgroundColor, { timeout: 5000 })
+          .toBe('rgb(232, 238, 254)');
         const light = await stateOf(page, BTN.light);
         expect(light.backgroundColor, 'пара light-hover — blue-100 без пересчёта').toBe(
           'rgb(232, 238, 254)',

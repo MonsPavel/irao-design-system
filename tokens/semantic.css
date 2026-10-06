@@ -56,6 +56,8 @@
   --ui-color-surface: var(--ui-white);
   /* career-portal: --color-surface-blue-50 — приглушённый фон карточек и «серых» секций (section--gray) */
   --ui-color-surface-muted: var(--ui-blue-50);
+  /* career-portal: --color-surface-blue-100 — фон при наведении (.btn--light:hover components.css:93, hover карточек) — пара одобренного дизайна (ADR-0010 п.4: color-mix значение макета не воспроизводит); семантическое имя заведено T4.2 (запись в таблице диффов) */
+  --ui-color-surface-hover: var(--ui-blue-100);
   /* career-portal: --color-blue-700 — синие карточки «почему мы»; разведение дубля #164B89 — таблица T2.1 */
   --ui-color-surface-blue-deep: var(--ui-blue-700);
   /* career-portal: тёмные секции (bg = --color-primary, 8 использований в components/pages) — пара к text-on-dark */
@@ -124,6 +126,17 @@
   --ui-link-underline-thickness: 0.0625em;
   /* новый: Technical considerations T4.1 — отступ подчёркивания от базовой линии */
   --ui-link-underline-offset: 0.1875em;
+
+  /* ── Кнопки (ui-button, T4.2): геометрия и состояния ── */
+
+  /* career-portal: components.css:70 — height .btn 52px → rem; используется как min-height (Technical considerations T4.2: совместимость с 32px-базой T3.6) */
+  --ui-button-height: 3.25rem;
+  /* новый: малый размер sm (в career-portal .btn один — 52px); ступень 8px-шкалы §3.2, пересмотр — design-decision владельца */
+  --ui-button-height-sm: 2rem;
+  /* новый: Technical considerations T4.2 «все значения из токенов» — толщина рамки outline-варианта, career-portal components.css:87 (2px) */
+  --ui-button-border-width: 0.125rem;
+  /* career-portal: components.css:269 — .pagination__arrow[disabled] opacity 0.3, единственный disabled-паттерн одобренного дизайна; контраст неактивных контролов WCAG 1.4.3 не требует (исключение зафиксировано в README ui-button) */
+  --ui-opacity-disabled: 0.3;
 
   /* ── Типографика (rem; тройки fs/lh/fw на роль — §3.2) ── */
 
