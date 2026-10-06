@@ -60,6 +60,31 @@
 - глобальный `prefers-reduced-motion` kill-switch — все анимации/переходы
   отключаются настройкой ОС.
 
+**`base/typography.css` — типографика страницы (T3.3):**
+
+- `body`-дефолты страницы: шрифт/размер/веса/цвет/фон — из токенов слоя 2
+  (`--ui-font-family`, тройка body, `--ui-color-text`, `--ui-color-surface`;
+  порт career-portal `css/base.css:60`) + `overflow-wrap: break-word` —
+  длинные RU-слова не создают горизонтальный скролл (32px-сценарий, №19 ТЗ);
+- классы ролей `ui-h1…ui-h6`, `ui-lead`, `ui-body`, `ui-small`, `ui-caption`,
+  `ui-micro` — типографическая шкала как API: каждый класс задаёт
+  fs/lh/fw/letter-spacing целиком из тройки токенов T2.2; mobile-first
+  лестница размеров живёт в токенах (media в файле нет);
+- «классы, а не теги»: теги h1–h6/p файлом не стилизуются — в шаблонах Bitrix
+  заголовки выводятся классами (специфичность класса против legacy
+  `h1 { … }`); семантику даёт реальный тег, иерархия h1→h2→h3 без пропусков
+  исполняется гейтами `irao/one-h1` + `irao/heading-order` и e2e на всех
+  страницах showcase; «роль и когда какую» —
+  [дока «Роли типографики»](../docs/ui-system/architecture/typography-roles.md);
+- `ui-text--muted` — вторичный текст (AA-пара T2.3);
+- `ui-list` — маркеры/отступы содержательных списков (reset T3.1 выключает
+  маркеры глобально; `ul` — disc, `ol` — decimal, отступы из шкалы spacing);
+- `ui-address`-минимум — без браузерного курсива;
+- компоненты НЕ зависят от этих element-дефолтов (ADR-0002): base задаёт
+  только разумный дефолт страницы; e2e-поверхность — стенд
+  `stands/typography.html` (computed-размеры 375/768/1440, иерархия, 32px —
+  `tests/e2e/typography.spec.js`).
+
 Единственные `!important` вне `a11y/vi.css` — `[hidden]` и kill-switch в
 `base/reset.css`: байты career-portal (без `!important` правила теряют смысл),
 каждое помечено inline-disable с обоснованием; других нет — пин в
@@ -72,4 +97,4 @@
 | `reset.css` | T3.1 | глобальный reset (выше) |
 | `fonts.css` | T3.1 | @font-face Golos Text 400/500/600 × cyr/lat |
 | `focus.css` | T3.2 | глобальная политика `:focus-visible` (ADR-0001) |
-| `typography.css` | T3.3 | body-типографика, rem-шкала |
+| `typography.css` | T3.3 | классы ролей ui-h1…ui-micro, body-дефолты, ui-list/ui-address |

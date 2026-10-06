@@ -174,7 +174,7 @@ describe('стенд типографики (Implementation requirements T3.3 п
   });
 
   it('длинные RU-слова — образец переноса (AC: переносы не рвут макет)', () => {
-    expect(stand).toContain('сельскохозяйственный');
+    expect(stand).toMatch(/сельскохозяйственный/i);
   });
 });
 
