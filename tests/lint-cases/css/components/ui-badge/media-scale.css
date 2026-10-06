@@ -1,0 +1,37 @@
+/** @define badge */
+
+/* ПОЗИТИВНЫЙ КОНТРОЛЬ (T2.5): все пять значений шкалы min-width
+   (sm 480 / md 768 / lg 1024 / xl 1280 / 2xl 1440 — 02-architecture §3.2)
+   разрешены гейтом; источник значений — константа BREAKPOINTS в
+   stylelint.config.mjs. Пять «позитивных значений шкалы» из Testing
+   requirements T2.5 — по одному запросу на значение.
+   Ожидаемый зелёный: ни одного замечания. */
+@media (min-width: 480px) {
+  .ui-badge--sm-up {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .ui-badge--md-up {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ui-badge--lg-up {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1280px) {
+  .ui-badge--xl-up {
+    display: inline-flex;
+  }
+}
+
+@media (min-width: 1440px) {
+  .ui-badge--2xl-up {
+    display: inline-flex;
+  }
+}

@@ -1,0 +1,21 @@
+/** @define card */
+
+/* НАРУШЕНИЕ (ревью T2.5, high): negation-формы desktop-first — семантика
+   «width < Npx», ровно тот max-width-паттерн career-portal, который задача
+   запрещает; механическая «инверсия той же сетки» из доки записывается
+   именно так. Имя фичи — min-width (media-feature-name-disallowed-list
+   молчит), значение — из шкалы (media-feature-name-value-allowed-list
+   молчит): дыру закрывает локальный плагин irao/no-negated-min-width
+   (tools/stylelint/no-negated-min-width.mjs).
+   Ожидаемый красный: irao/no-negated-min-width (на каждый запрос). */
+@media not (min-width: 768px) {
+  .ui-card {
+    padding: 1.5rem;
+  }
+}
+
+@media not all and (min-width: 768px) {
+  .ui-card {
+    padding: 1.5rem;
+  }
+}

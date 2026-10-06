@@ -27,3 +27,4 @@
 Документы-результаты задач (не файлы задач бэклога — потому не в epics/):
 
 - [Таблица соответствия «career-portal значение → примитив»](tokens-career-portal-mapping.md) — T2.1, инструмент контроля отклонений от одобренного дизайна; исполняемая форма — `tests/unit/tokens-primitives.test.js`.
+- [«Адаптивный подход» (mobile-first)](responsive-approach.md) — T2.5, шкала брейкпоинтов и правила медиазапросов; единственный источник значений — константа `BREAKPOINTS` в `stylelint.config.mjs`, исполняемая форма — stylelint-гейт + `tests/unit/breakpoints.test.js`.

@@ -128,6 +128,40 @@ const EXPECTATIONS = [
     expect: 'fail',
     rules: ['irao/theme-semantic-overrides'],
   },
+  // T2.5: mobile-first-гейт медиазапросов. Шкала — константа BREAKPOINTS
+  // в stylelint.config.mjs (один источник, дока ссылается:
+  // docs/ui-system/architecture/responsive-approach.md); Testing requirements
+  // T2.5 — 2 негативных + 5 позитивных значений шкалы.
+  {
+    // Файл с @media (max-width: 767px) — desktop-first, красный.
+    file: 'css/components/ui-card/media-max-width.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['media-feature-name-disallowed-list'],
+  },
+  {
+    // Файл с @media (min-width: 999px) — вне шкалы, красный.
+    file: 'css/components/ui-card/media-off-scale.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['media-feature-name-value-allowed-list'],
+  },
+  {
+    // Ревью T2.5 (high): negation-формы desktop-first — семантика
+    // «width < Npx». Имя фичи min-width и значение из шкалы, поэтому
+    // пара встроенных гейтов молчит; ловит локальный плагин.
+    file: 'css/components/ui-card/media-not-min-width.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['irao/no-negated-min-width'],
+  },
+  {
+    // Позитивный контроль: все 5 значений шкалы (480/768/1024/1280/1440)
+    // в одном файле — гейт молчит.
+    file: 'css/components/ui-badge/media-scale.css',
+    tool: 'stylelint',
+    expect: 'pass',
+  },
   // eslint: eqeqeq; шаблон модуля — чист; запрет глобалов
   { file: 'js/eqeq.js', tool: 'eslint', expect: 'fail', rules: ['eqeqeq'] },
   {
