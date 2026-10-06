@@ -31,10 +31,16 @@ const blockOf = (css, selector) => {
   return match ? match[1] : null;
 };
 
-/** Тела всех правил внутри @media (min-width: Npx) одним куском. */
-const mediaBlock = (css, px) => {
-  const match = css.match(new RegExp(`@media \\(min-width: ${px}px\\) \\{([\\s\\S]*?)\\n\\}`));
-  return match ? match[1] : null;
+/** Тела ВСЕХ правил внутри @media (min-width: Npx) одним куском (блоков
+ * одной ширины в файле несколько — контейнер и сетка объявлены раздельно). */
+const mediaBlocks = (css, px) => {
+  let joined = '';
+  for (const [, body] of css.matchAll(
+    new RegExp(`@media \\(min-width: ${px}px\\) \\{([\\s\\S]*?)\\n\\}`, 'g'),
+  )) {
+    joined += `\n${body}`;
+  }
+  return joined;
 };
 
 describe('base/layout.css — контейнер (Scope T3.4)', () => {
@@ -54,8 +60,8 @@ describe('base/layout.css — контейнер (Scope T3.4)', () => {
   });
 
   it('рост паддинга по шкале: 24 в md (768), 32 в lg (1024) — mobile-first', () => {
-    const md = mediaBlock(css, 768);
-    const lg = mediaBlock(css, 1024);
+    const md = mediaBlocks(css, 768);
+    const lg = mediaBlocks(css, 1024);
     expect(md, '@media (min-width: 768px) найден').toBeTruthy();
     expect(md).toContain('padding: 0 var(--ui-container-pad-md);');
     expect(lg, '@media (min-width: 1024px) найден').toBeTruthy();
@@ -71,7 +77,7 @@ describe('base/layout.css — секция (Scope T3.4)', () => {
     expect(block, 'правило .ui-section найдено').toBeTruthy();
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('padding: var(--ui-space-6) 0;');
-    const lg = mediaBlock(css, 1024);
+    const lg = mediaBlocks(css, 1024);
     expect(lg).toContain('.ui-section');
     expect(lg).toContain('padding: var(--ui-space-7) 0;');
   });
@@ -105,13 +111,13 @@ describe('base/layout.css — сетка (Scope T3.4)', () => {
   });
 
   it('md (768): все сетки — 2 колонки; lg (1024): --2 — 2, --3 — 3', () => {
-    const md = mediaBlock(css, 768);
+    const md = mediaBlocks(css, 768);
     expect(md).toContain('.ui-grid--2');
     expect(md).toContain('.ui-grid--3');
     expect(md).toContain('.ui-grid--4');
     expect(md).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
 
-    const lg = mediaBlock(css, 1024);
+    const lg = mediaBlocks(css, 1024);
     expect(lg).toContain('.ui-grid--2');
     expect(lg).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
     expect(lg).toContain('.ui-grid--3');
@@ -119,19 +125,19 @@ describe('base/layout.css — сетка (Scope T3.4)', () => {
   });
 
   it('--4: 3 колонки на xl (1280), 4 на 2xl (1440) — лестница Implementation requirements п.2', () => {
-    const xl = mediaBlock(css, 1280);
+    const xl = mediaBlocks(css, 1280);
     expect(xl, '@media (min-width: 1280px) найден').toBeTruthy();
     expect(xl).toContain('.ui-grid--4');
     expect(xl).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
 
-    const xxl = mediaBlock(css, 1440);
+    const xxl = mediaBlocks(css, 1440);
     expect(xxl, '@media (min-width: 1440px) найден').toBeTruthy();
     expect(xxl).toContain('.ui-grid--4');
     expect(xxl).toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
   });
 
   it('gap: рост до --ui-space-6 на lg; --4 плотнее (--ui-space-5) — правило ПОСЛЕ media (порядок источника)', () => {
-    const lg = mediaBlock(css, 1024);
+    const lg = mediaBlocks(css, 1024);
     expect(lg).toContain('gap: var(--ui-space-6);');
 
     const gap4 = css.indexOf('.ui-grid--4');

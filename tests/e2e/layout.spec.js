@@ -67,7 +67,9 @@ const gridGaps = (page, selector) =>
     return { row: parseFloat(s.rowGap), column: parseFloat(s.columnGap) };
   }, selector);
 
-/** Состояние первого контейнера на стенде. */
+/** Состояние первого контейнера на стенде. База ширины — body.clientWidth:
+ * вертикальный скроллбар (15px в chromium) входит в clientWidth html
+ * (scrollbar-gutter: stable, T3.1), а контейнер растягивается по body. */
 const containerState = (page) =>
   page.evaluate(() => {
     const el = document.querySelector('.ui-container');
@@ -80,7 +82,7 @@ const containerState = (page) =>
       paddingBottom: parseFloat(s.paddingBottom),
       offsetWidth: el.offsetWidth,
       offsetLeft: el.offsetLeft,
-      clientWidth: document.documentElement.clientWidth,
+      bodyClientWidth: document.body.clientWidth,
     };
   });
 
@@ -155,10 +157,10 @@ test.describe('layout-примитивы (T3.4)', () => {
       expect(state.paddingBottom, `${width}: вертикальный паддинг контейнера нулевой`).toBe(0);
       expect(
         state.offsetWidth,
-        `${width}: ширина контейнера = min(max-width, вьюпорт)`,
-      ).toBeCloseTo(Math.min(max, state.clientWidth), 6);
+        `${width}: ширина контейнера = min(max-width, ширина body)`,
+      ).toBeCloseTo(Math.min(max, state.bodyClientWidth), 6);
       expect(state.offsetLeft, `${width}: контейнер центрирован (margin: 0 auto)`).toBeCloseTo(
-        (state.clientWidth - state.offsetWidth) / 2,
+        (state.bodyClientWidth - state.offsetWidth) / 2,
         0,
       );
     }

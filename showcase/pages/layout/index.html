@@ -1,0 +1,70 @@
+<p class="ui-showcase-stand__note">
+  Стенд layout-примитивов (T3.4): <code>ui-container</code>, <code>ui-section</code>,
+  <code>ui-grid</code> — mobile-first пересборка <code>.container</code>/<code>.section</code>/
+  <code>.cards-grid</code> career-portal. Колонки сеток: 1 (mobile) → 2 (md) → N (lg); сетка
+  <code>--4</code> — 3 (xl) → 4 (2xl). Сценарии — <code>tests/e2e/layout.spec.js</code>.
+</p>
+
+<section class="ui-section" aria-labelledby="layout-container-heading">
+  <h2 id="layout-container-heading">ui-container</h2>
+  <p class="ui-body">
+    Центрируемый контейнер: <code>max-width: var(--ui-container-max)</code>, горизонтальные паддинги
+    <code>--ui-container-pad{,-md,-lg}</code> растут по шкале — 16 → 24 (md) → 32 (lg). Секция
+    вокруг — <code>ui-section</code>: вертикальный ритм 32 (mobile) → 48 (lg) из spacing-шкалы.
+  </p>
+  <div class="ui-container">
+    <div class="ui-section ui-section--muted">
+      <p class="ui-body">
+        Блок внутри контейнера на фоне <code>surface-muted</code>: видно горизонтальные паддинги
+        контейнера на текущем вьюпорте (16/24/32) и центрирование на широких экранах.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="ui-section" aria-labelledby="layout-section-heading">
+  <h2 id="layout-section-heading">ui-section--muted</h2>
+  <p class="ui-body">
+    Приглушённая секция (порт <code>.section--gray</code>): фон
+    <code>--ui-color-surface-muted</code>, радиус <code>--ui-radius-lg</code> (24). Ячейки сеток
+    ниже — те же приглушённые секции: композиция примитивов вместо отдельного «демо-стиля».
+  </p>
+  <div class="ui-section ui-section--muted">
+    <p class="ui-body">ui-section--muted — фон и крупный радиус, вертикальный ритм секции.</p>
+  </div>
+</section>
+
+<section class="ui-section" aria-labelledby="layout-grid-heading">
+  <h2 id="layout-grid-heading">ui-grid — сетки --2/--3/--4</h2>
+  <p class="ui-body">
+    Колонки — <code>minmax(0, 1fr)</code>: длинное слово переносится и не распирает колонку (вместе
+    с <code>overflow-wrap</code> на body, T3.3). Gap — из spacing-шкалы: 24, рост 32 (lg); сетка
+    <code>--4</code> плотнее — 24 на всех ширинах. Порядок ячеек = порядок DOM (свойство
+    <code>order</code> не используется).
+  </p>
+
+  <h3>ui-grid--2</h3>
+  <div class="ui-grid ui-grid--2">
+    <div class="ui-section ui-section--muted"><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted"><p class="ui-body">02</p></div>
+  </div>
+
+  <h3>ui-grid--3</h3>
+  <div class="ui-grid ui-grid--3">
+    <div class="ui-section ui-section--muted"><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted">
+      <p class="ui-body">
+        02 — Сельскохозяйственный: длинное RU-слово переносится, колонку не распирает.
+      </p>
+    </div>
+    <div class="ui-section ui-section--muted"><p class="ui-body">03</p></div>
+  </div>
+
+  <h3>ui-grid--4</h3>
+  <div class="ui-grid ui-grid--4">
+    <div class="ui-section ui-section--muted"><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted"><p class="ui-body">02</p></div>
+    <div class="ui-section ui-section--muted"><p class="ui-body">03</p></div>
+    <div class="ui-section ui-section--muted"><p class="ui-body">04</p></div>
+  </div>
+</section>

@@ -1,0 +1,143 @@
+/*!
+ * irao-ui — base/layout.css: layout-примитивы страницы (задача T3.4;
+ * mobile-first пересборка .container/.section/.cards-grid career-portal).
+ *
+ * Что делает глобально (дока слоя: base/README.md):
+ *  - ui-container — центрируемый max-width из --ui-container-max, горизонтальные
+ *    паддинги по токенам --ui-container-pad{,-md,-lg}: 16 → 24 (md) → 32 (lg);
+ *  - ui-section — вертикальный ритм секций из spacing-шкалы §3.2;
+ *    ui-section--muted — приглушённая секция (порт .section--gray:
+ *    фон --ui-color-surface-muted + радиус --ui-radius-lg);
+ *  - ui-grid (+ --2/--3/--4) — адаптивная сетка карточек: 1 колонка на
+ *    mobile → 2 на md → N на lg; --4 — 3 на xl → 4 на 2xl.
+ *
+ * Правила файла:
+ *  - все размеры — только токены (Implementation requirements T3.4 п.1):
+ *    геометрия из spacing/контейнерных токенов слоя 2, media — только
+ *    min-width из шкалы брейкпоинтов T2.5 (гейт stylelint, константа
+ *    BREAKPOINTS); вертикальный паддинг контейнера и горизонтальный секции —
+ *    нули career-portal (.container: padding 0 X, .section: padding 40px 0);
+ *  - мобильная база = вид без media (одноколоночный мобильный = порядок DOM —
+ *    Accessibility requirements T3.4); рост к lg/xl/2xl — переопределением
+ *    в min-width;
+ *  - grid-template-columns — только minmax(0, 1fr) (Technical considerations
+ *    T3.4: длинное слово не распирает колонку — вместе с overflow-wrap на
+ *    body, T3.3);
+ *  - box-sizing: border-box на корне каждого блока (ADR-0002: не полагаемся
+ *    на глобальный сброс base/reset.css — legacy-сброс сайта подключён позже);
+ *  - запрета фиксированных высот придерживаемся отсутствием height/min-height
+ *    вовсе (Scope T3.4) — высота ячеек от контента;
+ *  - никаких !important (инвариант системы) и никакого hex — только токены.
+ *
+ * Перенос значений career-portal (desktop-first → mobile-first, инверсия той
+ * же сетки: 767 → 768−1, 1023 → 1024−1, 1279 → 1280):
+ *  - паддинги контейнера 16/24/32 — точно (base.css: base 16, ≤1023 — 24,
+ *    ≤1439 — 32; ступень 40 ≥1440 в слой 2 не перенесена — T2.2);
+ *  - сетки: career-portal ≤767 — 1 колонка, ≤1023 — 2, base --2/--3 — 2/3,
+ *    --4: ≤1279 — 3, ≥1280 — 4. Лестница спеки (Implementation requirements
+ *    п.2) выравнивает финальный шаг --4 на шкалу: 3 колонки на xl (1280),
+ *    4 на 2xl (1440) — на макетном вьюпорте 1440 поведение совпадает
+ *    (4 колонки); «4→3 на xl» из Scope T3.4;
+ *  - gap 36/24 (pages.css: .cards-grid 36, .cards-grid--4 24, ≤1023 — 24):
+ *    36 не на шкале §3.2 — ближайшая ступень 32 (--ui-space-6) с роста lg;
+ *    24 — на шкале (--ui-space-5): мобильная база и плотная сетка --4
+ *    (24 на всех ширинах, как в career-portal);
+ *  - вертикальный ритм .section 40px: не на шкале §3.2 — маппинг 32
+ *    (--ui-space-6) на mobile → 48 (--ui-space-7) с lg, мобильный вид чуть
+ *    плотнее десктопного (mobile-first рост). Отклонения от байтов макета —
+ *    в рамках требования «размеры только из шкалы» (Implementation
+ *    requirements T3.4 п.1); таблица диффов — base/README.md.
+ *
+ * Пины формы решения — tests/unit/layout.test.js; поверхность браузера
+ * (overflow 320/375/768/1024/1440, computed-колонки по вьюпортам, токены,
+ * axe, эталоны на 4 вьюпортах) — tests/e2e/layout.spec.js, стенд layout.
+ */
+
+/* ── Контейнер: career-portal base.css .container ── */
+
+.ui-container {
+  box-sizing: border-box;
+  max-width: var(--ui-container-max);
+  margin: 0 auto;
+  padding: 0 var(--ui-container-pad);
+}
+
+@media (min-width: 768px) {
+  .ui-container {
+    padding: 0 var(--ui-container-pad-md);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ui-container {
+    padding: 0 var(--ui-container-pad-lg);
+  }
+}
+
+/* ── Секция: career-portal components.css .section / .section--gray ── */
+
+.ui-section {
+  box-sizing: border-box;
+  padding: var(--ui-space-6) 0;
+}
+
+@media (min-width: 1024px) {
+  .ui-section {
+    padding: var(--ui-space-7) 0;
+  }
+}
+
+.ui-section--muted {
+  border-radius: var(--ui-radius-lg);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* ── Сетка карточек: career-portal pages.css .cards-grid--2/3/4 ── */
+
+.ui-grid {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  .ui-grid--2,
+  .ui-grid--3,
+  .ui-grid--4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .ui-grid {
+    gap: var(--ui-space-6);
+  }
+
+  .ui-grid--2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ui-grid--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .ui-grid--4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .ui-grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Плотная сетка --4: gap 24 на всех ширинах (career-portal .cards-grid--4).
+   После lg-media: равная специфичность с .ui-grid — побеждает порядок
+   источника. */
+.ui-grid--4 {
+  gap: var(--ui-space-5);
+}
