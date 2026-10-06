@@ -16,3 +16,5 @@ UI-система для сайтов Группы «Интер РАО» на 1�
 | [process/nightly-review-protocol.md](process/nightly-review-protocol.md) | Ночной цикл (night-cycle): автономный конвейер задач из STATUS.md — TDD → усиленное ревью (severity-модель ecc; critical/high правятся всегда) → приёмка → gate → merge; детерминированная CI-часть — `.github/workflows/nightly.yml` |
 
 Референс: `D:/repositories/career-portal` (статическая вёрстка карьерного портала, источник решений класса A).
+
+PR-конвейер: обязательные гейты CI — см. .github/workflows/ci.yml (T1.5).
