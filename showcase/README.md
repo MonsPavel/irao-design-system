@@ -27,6 +27,7 @@ showcase/dist/             # сгенерированный полигон (giti
 ├── stands/tokens.html     # стенд токенов (T2.2) — генерация из tokens/*.css
 ├── stands/base.html       # стенд base (T3.2) — из showcase/pages/base/index.html
 ├── stands/typography.html # стенд типографики (T3.3) — из showcase/pages/typography/index.html
+├── stands/layout.html     # стенд layout-примитивов (T3.4) — из showcase/pages/layout/index.html
 └── stands/<name>.html     # стенд компонента из components/<name>/<name>.html
 ```
 
@@ -64,6 +65,11 @@ showcase/dist/             # сгенерированный полигон (giti
   `ui-h1…ui-micro` + `ui-text--muted`, списки `ui-list`, `ui-address` и
   длинные RU-слова (переносы) — поверхность computed-размеров, иерархии
   заголовков и 32px-сценария (`tests/e2e/typography.spec.js`).
+- Стенд «layout» (`stands/layout.html`, T3.4) генерируется из фрагмента
+  `showcase/pages/layout/index.html`: контейнер, секции (в т.ч.
+  `ui-section--muted`) и сетки `ui-grid--2/3/4` с длинным RU-словом в ячейке
+  — поверхность overflow-проверок (320/375/768/1024/1440), computed-колонок
+  по вьюпортам и эталонов на 4 вьюпортах (`tests/e2e/layout.spec.js`).
 - Базовый стенд генерируется автоматически для каждой папки
   `components/ui-<name>/` с каноническим `ui-<name>.html`: тело паттерна
   оборачивается в каркас (skip-link, header-заглушка, `<main id="main">`,

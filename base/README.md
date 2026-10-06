@@ -85,6 +85,31 @@
   `stands/typography.html` (computed-размеры 375/768/1440, иерархия, 32px —
   `tests/e2e/typography.spec.js`).
 
+**`base/layout.css` — layout-примитивы (T3.4):**
+
+- `ui-container` — центрируемый контейнер: `max-width: var(--ui-container-max)`,
+  горизонтальные паддинги из токенов `--ui-container-pad{,-md,-lg}` — 16 → 24
+  (md) → 32 (lg), mobile-first (порт `.container` career-portal, инверсия той
+  же сетки: 767 → 768−1, 1023 → 1024−1). Паддинг ≥ 16 на любой ширине —
+  focus-обводка (outline-offset 2) не обрезается краем экрана;
+- `ui-section` — вертикальный ритм секций из spacing-шкалы §3.2: 32
+  (`--ui-space-6`) → 48 (`--ui-space-7`) с lg. Вертикальный ритм career-portal
+  (`.section`: 40px) не на шкале — маппинг 32/48 (мобильный вид плотнее
+  десктопного, рост по шкале); `ui-section--muted` — порт `.section--gray`:
+  фон `--ui-color-surface-muted` + радиус `--ui-radius-lg` (big, 24px);
+- `ui-grid` (+ `--2/--3/--4`) — адаптивная сетка карточек: 1 колонка на
+  mobile → 2 на md → N на lg; `--4` — 3 на xl → 4 на 2xl (лестница спеки
+  T3.4 п.2, «4→3 на xl»; на макетном вьюпорте 1440 поведение career-portal —
+  4 колонки — сохранено). Колонки только `minmax(0, 1fr)`: длинное слово не
+  распирает колонку (вместе с `overflow-wrap` на body, T3.3); gap из шкалы:
+  24 → 32 (lg), `--4` плотнее — 24 на всех ширинах (перенос
+  `.cards-grid--4`); свойство `order` не используется — порядок чтения сетки
+  = порядок DOM (одноколоночный мобильный = DOM-порядок);
+- box-sizing: border-box на корне каждого блока (ADR-0002); фиксированных
+  высот нет — высота ячеек от контента; e2e-поверхность — стенд
+  `stands/layout.html` (overflow на 320/375/768/1024/1440, computed-колонки,
+  токены, эталоны на 4 вьюпортах — `tests/e2e/layout.spec.js`).
+
 Единственные `!important` вне `a11y/vi.css` — `[hidden]` и kill-switch в
 `base/reset.css`: байты career-portal (без `!important` правила теряют смысл),
 каждое помечено inline-disable с обоснованием; других нет — пин в
@@ -98,3 +123,4 @@
 | `fonts.css` | T3.1 | @font-face Golos Text 400/500/600 × cyr/lat |
 | `focus.css` | T3.2 | глобальная политика `:focus-visible` (ADR-0001) |
 | `typography.css` | T3.3 | классы ролей ui-h1…ui-micro, body-дефолты, ui-list/ui-address |
+| `layout.css` | T3.4 | ui-container / ui-section (+ --muted) / ui-grid --2/--3/--4 |
