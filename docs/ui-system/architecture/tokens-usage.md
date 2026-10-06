@@ -86,5 +86,10 @@ outline без замены (stylelint, warning до EPIC-4). Ширина/см�
   вычислимость var-цепочек: `--ui-color-primary` → rgb(0, 40, 86),
   `--ui-fs-h1` = 160px при 32px базе. В T1.4 сценарий переезжает в
   `tests/e2e/` как постоянный гейт.
-- Контраст пар «смысл → фон» — отдельный гейт T2.3 (стенд — первое место
-  его применения).
+- Контраст пар «смысл → фон» — обязательный CI-гейт AA (T2.3):
+  `npm run test:contrast` (`tests/contrast/check.mjs` + конфиг пар
+  `tests/contrast/pairs.config.mjs`); нарушенный порог или цветовой токен
+  слоя 2 без пары/исключения делают прогон красным. Как работает и как
+  добавлять пары/исключения — [tests/contrast/README.md](../../../tests/contrast/README.md);
+  правки значений против career-portal (muted, tag-orange, error) — таблица
+  «AA-замены» в [tokens-career-portal-mapping.md](tokens-career-portal-mapping.md).
