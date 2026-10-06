@@ -12,7 +12,8 @@
  * Среды (flat config: languageOptions.globals вместо env):
  *  - код компонентов — классические браузерные скрипты: система поставляется
  *    без транспиляции и без ES-модулей на сайтах (§1 принцип 2, §6.4 п.3);
- *  - tools/**, showcase/** — Node + ESM (скрипты репозитория, dev-only);
+ *  - tools/**, showcase/**, tests/contrast/** — Node + ESM (скрипты
+ *    репозитория, dev-only);
  *  - tests/** — тестовый код под jsdom: пакет `globals` с v17 отдельного
  *    окружения jsdom не имеет; window/document входят в `globals.browser`,
  *    которого jsdom-харнесс достаточно. Витест-глобалы (describe/it/expect)
@@ -79,7 +80,7 @@ const componentScripts = {
 
 /** Инструменты репозитория: Node + ESM. */
 const toolingScripts = {
-  files: ['tools/**/*.mjs', 'showcase/**/*.mjs'],
+  files: ['tools/**/*.mjs', 'showcase/**/*.mjs', 'tests/contrast/**/*.mjs'],
   languageOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',

@@ -39,8 +39,8 @@
   --ui-color-accent: var(--ui-orange-500);
   /* career-portal: --color-text */
   --ui-color-text: var(--ui-black);
-  /* career-portal: --color-text-muted (#808080; AA-замена значения — T2.3, примитив остаётся эталоном) */
-  --ui-color-text-muted: var(--ui-gray-600);
+  /* career-portal: --color-text-muted (#808080 → gray-700 — AA-замена T2.3, design-decision: 6.19:1 на белом; примитив gray-600 остаётся эталоном) */
+  --ui-color-text-muted: var(--ui-gray-700);
   /* career-portal: --color-text-on-dark */
   --ui-color-text-on-dark: var(--ui-white);
   /* career-portal: --color-text-on-dark-muted */
@@ -79,8 +79,8 @@
 
   /* ── Цвета-смыслы: статусы ── */
 
-  /* career-portal: --color-error */
-  --ui-color-error: var(--ui-red-600);
+  /* career-portal: --color-error (#D8402C → red-700 — AA-замена T2.3, design-decision: 5.10:1 на белом, 4.80:1 на error-bg; примитив остаётся эталоном) */
+  --ui-color-error: var(--ui-red-700);
   /* career-portal: --color-error-bg */
   --ui-color-error-bg: var(--ui-red-50);
   /* career-portal: --color-success, --tag-green-text (одно значение) */
@@ -96,8 +96,8 @@
 
   /* career-portal: --tag-orange-bg */
   --ui-color-tag-orange-bg: var(--ui-orange-50);
-  /* career-portal: --tag-orange-text */
-  --ui-color-tag-orange-text: var(--ui-orange-700);
+  /* career-portal: --tag-orange-text (#B34A10 → orange-800 — AA-замена T2.3, design-decision: 4.78:1 на orange-50; примитив остаётся эталоном) */
+  --ui-color-tag-orange-text: var(--ui-orange-800);
   /* career-portal: --tag-green-bg */
   --ui-color-tag-green-bg: var(--ui-green-50);
   /* career-portal: --tag-green-text */
