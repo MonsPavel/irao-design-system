@@ -1,10 +1,12 @@
 # CI-конвейер irao-ui (задача T1.5; docs/02-architecture.md §10, 06 §7, ADR-0004).
 #
 # Обязательные гейты PR (06 §7): lint, html-validate, unit, build, e2e+axe.
-# Visual regression — ADVISORY до v1.0 (ADR-0004): отдельная джоба-чек с
-# continue-on-error, диф-артефакты прикладываются; расхождение красит ЧЕК
-# visual, но не роняет прогон и не блокирует merge — обязательные гейты
-# остаются зелёными независимо от visual.
+# Visual regression — ADVISORY до v1.0 (ADR-0004): отдельная джоба-чек,
+# диф-артефакты прикладываются; при расхождении чек visual и прогон красные,
+# merge НЕ блокируется — чек не включён в required checks до v1.0 (включение
+# mandatory — Iteration 10). Job-level continue-on-error сознательно НЕ
+# используется: GitHub даёт упавшей джобе conclusion=success — чек выглядел
+# бы зелёным («игнорировать красное» не приучаем).
 #
 # Браузерные джобы — в пиннутом Playwright-образе, том же, что локальный
 # `npm run test:docker` (ADR-0004; пин — package.json iraoUi.playwrightImage,
@@ -184,9 +186,10 @@ jobs:
     name: Visual regression (advisory, ADR-0004)
     needs:
       - build
-    # Advisory: расхождение эталонов красит ЭТОТ чек, но не роняет прогон
-    # и не блокирует merge (до v1.0; mandatory — Iteration 10, ADR-0004).
-    continue-on-error: true
+    # Advisory: расхождение эталонов красит ЭТОТ чек и прогон; merge не
+    # блокируется — чек не в required checks до v1.0 (mandatory — Iteration 10,
+    # ADR-0004). Job-level continue-on-error запрещён: упавшей джобе GitHub
+    # ставит conclusion=success, чек маскировался бы зелёным (ревью T1.5 high).
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
     timeout-minutes: 15
@@ -228,10 +231,11 @@ jobs:
             playwright-report/
           if-no-files-found: ignore
 
-      # Чек visual обязан отражать расхождение: красим джобу по outcome
-      # step'а (job-уровневый continue-on-error держит прогон зелёным).
+      # Чек visual обязан отражать расхождение: красим джобу (и прогон) по
+      # outcome step'а — step-level continue-on-error выше гарантирует, что
+      # диф-артефакты уже собраны.
       - name: Fail check on visual diff
         if: always() && steps.visual.outcome == 'failure'
         run: |
-          echo "visual: расхождение эталонов — advisory-чек красный, дифы в артефакте visual-diffs; merge не блокируется (ADR-0004). Обновление: npm run test:docker -- --update-snapshots"
+          echo "visual: расхождение эталонов — чек и прогон красные, дифы в артефакте visual-diffs; merge не блокируется — visual не в required checks до v1.0 (ADR-0004). Обновление: npm run test:docker -- --update-snapshots"
           exit 1

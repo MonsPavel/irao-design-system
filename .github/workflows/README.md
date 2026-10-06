@@ -39,12 +39,20 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
 
 Чек `Visual regression (advisory, ADR-0004)` в `ci.yml`:
 
-- джоба с `continue-on-error: true` — прогон остаётся зелёным независимо от visual;
+- `continue-on-error: true` стоит ТОЛЬКО на шаге прогона (`id: visual`) — дифы
+  собираются следующими шагами; на джобе флага НЕТ: GitHub даёт упавшей джобе
+  check-run `conclusion=success`, и именованный чек выглядел бы зелёным при
+  любом расхождении (ревью T1.5 high, community #77915/#15452, SO 62045967);
 - шаг прогона с `IRAO_SNAPSHOTS=1` сравнивает эталоны (chromium, порог нулевой);
 - дифы (`*-diff.png/*-actual.png/*-expected.png`) + HTML-отчёт — артефакт `visual-diffs`,
   прикладываются всегда (`if: always()`);
-- при расхождении чек красный (финальный шаг красит по `steps.visual.outcome`) —
-  merge не блокирует, но «игнорировать красное» не приучаем: обязательные гейты зелёные отдельно.
+- при расхождении финальный шаг красит джобу по `steps.visual.outcome`: чек И
+  прогон красные; merge не блокируется — чек не включён в required checks до
+  v1.0 («игнорировать красное» не приучаем);
+- следствие на main: расхождение эталонов = красный CI = Pages не задеплоится,
+  пока эталоны не обновлены (`test:docker -- --update-snapshots` или
+  `update-snapshots.yml`) — осознанное поведение, расхождение обязано быть
+  разобрано.
 
 Обновление эталонов: локально `npm run test:docker -- --update-snapshots` (обычный коммит)
 или fallback — `update-snapshots.yml` (ручной запуск, бот-ветка `bot/update-snapshots-<run>`
@@ -73,7 +81,9 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
 3. Обязательные (минимум по спеке T1.5): `Lint (stylelint / eslint / prettier)`,
    `Build (dist + showcase)`, `Unit (vitest)`, `E2E + axe (chromium, контейнер)`;
    рекомендуется добавить и `HTML-validate (паттерны и стенды)` (06 §7 считает его mandatory).
-4. НЕ включать `Visual regression (advisory, ADR-0004)` до v1.0 — он advisory по ADR-0004.
+4. НЕ включать `Visual regression (advisory, ADR-0004)` до v1.0 — он advisory по
+   ADR-0004: до Iteration 10 эталоны обновляются массово, и required-чек при
+   каждом осознанном изменении блокировал бы merge до обновления эталонов.
 5. Альтернатива через API: `gh api repos/MonsPavel/irao-design-system/branches/main/protection -X PUT ...`
    с `required_status_checks.contexts` из п. 3.
 
