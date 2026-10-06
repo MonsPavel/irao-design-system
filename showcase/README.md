@@ -25,6 +25,7 @@ showcase/dist/             # сгенерированный полигон (giti
 ├── index.html             # индекс-каталог стендов
 ├── standalone.html        # страница только с ui-core.min.css — проверка url()
 ├── stands/tokens.html     # стенд токенов (T2.2) — генерация из tokens/*.css
+├── stands/base.html       # стенд base (T3.2) — из showcase/pages/base/index.html
 └── stands/<name>.html     # стенд компонента из components/<name>/<name>.html
 ```
 
@@ -53,6 +54,10 @@ showcase/dist/             # сгенерированный полигон (giti
   `showcase/tokens-stand.mjs` — вручную не редактируется: новый токен
   появляется после `npm run build`. Полнота «узлов стенда = токенов файлов» —
   tests/unit/tokens-stand.test.js (`npm run test:unit`).
+- Стенд «base» (`stands/base.html`, T3.2) генерируется из фрагмента
+  `showcase/pages/base/index.html`: все 7 целей политики фокуса
+  (`base/focus.css`, ADR-0001) на одной странице — поверхность
+  Tab-обхода и legacy-атаки (`tests/e2e/focus.spec.js`).
 - Базовый стенд генерируется автоматически для каждой папки
   `components/ui-<name>/` с каноническим `ui-<name>.html`: тело паттерна
   оборачивается в каркас (skip-link, header-заглушка, `<main id="main">`,

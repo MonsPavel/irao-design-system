@@ -28,3 +28,4 @@
 
 - [Таблица соответствия «career-portal значение → примитив»](tokens-career-portal-mapping.md) — T2.1, инструмент контроля отклонений от одобренного дизайна; исполняемая форма — `tests/unit/tokens-primitives.test.js`.
 - [«Адаптивный подход» (mobile-first)](responsive-approach.md) — T2.5, шкала брейкпоинтов и правила медиазапросов; единственный источник значений — константа `BREAKPOINTS` в `stylelint.config.mjs`, исполняемая форма — stylelint-гейт + `tests/unit/breakpoints.test.js`.
+- [«Focus visible: почему так»](focus-policy.md) — T3.2, политика фокуса по ADR-0001; исполняемая форма — `base/focus.css` + пин списка `tests/unit/focus.test.js` + e2e `tests/e2e/focus.spec.js` (Tab-обход, legacy-атака, смена темы).
