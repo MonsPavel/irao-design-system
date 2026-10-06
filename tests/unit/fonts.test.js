@@ -32,6 +32,12 @@ const FONTS = [
   'golos-600-lat.woff2',
 ];
 
+/**
+ * CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки
+ * (шапка упоминает @font-face и !important — и это не объявления).
+ */
+const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+
 /** career-portal css/base.css:8 — кириллица. */
 const UNICODE_RANGE_CYR = 'U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116';
 /** career-portal css/base.css:16 — латиница и пунктуация. */
@@ -53,7 +59,7 @@ describe('assets/fonts — источник поставки шрифтов (T3.
 });
 
 describe('base/fonts.css — 6 @font-face Golos Text (порт career-portal)', () => {
-  const css = readFileSync(join(root, 'base', 'fonts.css'), 'utf8');
+  const css = stripCssComments(readFileSync(join(root, 'base', 'fonts.css'), 'utf8'));
   const blocks = css.split('@font-face').slice(1);
 
   it('ровно 6 @font-face; в каждом — family «Golos Text», normal, font-display: swap', () => {
@@ -86,7 +92,7 @@ describe('base/fonts.css — 6 @font-face Golos Text (порт career-portal)', 
 });
 
 describe('base/reset.css — безопасный глобальный reset (порт career-portal)', () => {
-  const css = readFileSync(join(root, 'base', 'reset.css'), 'utf8');
+  const css = stripCssComments(readFileSync(join(root, 'base', 'reset.css'), 'utf8'));
 
   it('универсальный box-sizing: border-box (глобально)', () => {
     expect(css).toMatch(/\*,\s*\*::before,\s*\*::after\s*\{\s*box-sizing:\s*border-box;\s*\}/);
