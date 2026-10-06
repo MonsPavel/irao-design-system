@@ -1,0 +1,99 @@
+# Релизный конвейер irao-ui — КАРКАС (задача T1.5; боевой режим — T12.1).
+#
+# На тег v*: полный матричный прогон chromium/firefox/webkit в пиннутом
+# Playwright-образе (ADR-0004; chromium сравнивает эталоны — релизная точка
+# обязана быть визуально чистой) + dist-zip артефакт (02-architecture §10).
+#
+# Боевой режим добавит в T12.1: GitHub Release, CHANGELOG-check, шрифто-зом
+# и VI-smoke (масштабирование/зум — релизный гейт T3.6/T9.1), публикация
+# пакета (ADR-0006).
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-dist:
+    name: Dist artifact (zip)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dist + showcase
+        run: npm run build
+
+      - name: Zip dist
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: zip -r "irao-ui-dist-${GITHUB_REF_NAME}.zip" dist
+
+      - name: Upload dist-zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: irao-ui-dist-*.zip
+          if-no-files-found: error
+
+  matrix:
+    name: Matrix (${{ matrix.browser }}, контейнер)
+    needs:
+      - build-dist
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser:
+          - chromium
+          - firefox
+          - webkit
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build showcase
+        run: npm run build
+
+      # IRAO_SNAPSHOTS=1: chromium сверяет эталоны (порог нулевой — ADR-0004);
+      # firefox/webkit проверяют поведение, скриншоты у них no-op (харнесс).
+      - name: Playwright (${{ matrix.browser }})
+        env:
+          IRAO_SNAPSHOTS: '1'
+        run: npx playwright test --project=${{ matrix.browser }}
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.browser }}-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore

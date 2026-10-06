@@ -16,6 +16,7 @@
     "test:matrix": "npm run build && playwright test",
     "test:docker": "node tools/test-docker.mjs",
     "test:lint": "node tools/run-lint-cases.mjs",
+    "test:workflows": "node tools/validate-workflows.mjs",
     "test:contrast": "node tests/contrast/check.mjs",
     "test:unit": "vitest run",
     "build": "node showcase/build.mjs",

@@ -1,0 +1,241 @@
+# CI-конвейер irao-ui (задача T1.5; docs/02-architecture.md §10, 06 §7, ADR-0004).
+#
+# Обязательные гейты PR (06 §7): lint, html-validate, unit, build, e2e+axe.
+# Visual regression — ADVISORY до v1.0 (ADR-0004): отдельная джоба-чек,
+# диф-артефакты прикладываются; при расхождении чек visual и прогон красные,
+# merge НЕ блокируется — чек не включён в required checks до v1.0 (включение
+# mandatory — Iteration 10). Job-level continue-on-error сознательно НЕ
+# используется: GitHub даёт упавшей джобе conclusion=success — чек выглядел
+# бы зелёным («игнорировать красное» не приучаем).
+#
+# Браузерные джобы — в пиннутом Playwright-образе, том же, что локальный
+# `npm run test:docker` (ADR-0004; пин — package.json iraoUi.playwrightImage,
+# совпадение проверяет tools/validate-workflows.mjs). Браузеры уже в образе,
+# поэтому кэш Playwright-браузеров не нужен: runner-уровневых браузерных
+# шагов в конвейере нет (если появятся — actions/cache ~/.cache/ms-playwright
+# + npx playwright install, см. .github/workflows/README.md).
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  # Прогон на main — прямая проверка ветки и сигнал зелёного CI для pages.yml
+  # (деплой showcase только после зелёного CI, технические требования T1.5).
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Ни одна джоба CI не пишет в репозиторий (эталоны обновляет отдельный
+# workflow update-snapshots.yml со своими правами).
+permissions:
+  contents: read
+
+# Новый пуш в PR отменяет устаревший прогон.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (stylelint / eslint / prettier)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Конвейер проверяет собственную конфигурацию на каждый PR: структура
+      # воркфлоу — контракт T1.5 (см. шапку tools/validate-workflows.mjs).
+      - name: Validate workflows
+        run: node tools/validate-workflows.mjs
+
+      - name: Lint CSS
+        run: npm run lint:css
+
+      - name: Lint JS
+        run: npm run lint:js
+
+      - name: Check formatting
+        run: npm run lint:format
+
+  html-validate:
+    name: HTML-validate (паттерны и стенды)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate HTML
+        run: npm run lint:html
+
+  unit:
+    name: Unit (vitest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Unit tests
+        run: npm run test:unit
+
+  build:
+    name: Build (dist + showcase)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Сборка детерминирована (баннер версия+sha без меток времени),
+      # идемпотентна — артефакт PR воспроизводим.
+      - name: Build dist + showcase
+        run: npm run build
+
+      - name: Zip dist
+        run: zip -r irao-ui-dist.zip dist
+
+      - name: Upload dist-zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-zip
+          path: irao-ui-dist.zip
+          if-no-files-found: error
+
+  e2e:
+    name: E2E + axe (chromium, контейнер)
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Полигон showcase/dist собирается в контейнере (esbuild — платформенный
+      # бинарник, ставится npm ci на linux).
+      - name: Build showcase
+        run: npm run build
+
+      # Обязательный a11y-гейт: e2e + axe на каждый PR с первого дня (T1.5).
+      # IRAO_SNAPSHOTS сознательно НЕ задан: скриншот-хелпер — no-op,
+      # mandatory-гейт не сравнивает и не пишет эталоны (ADR-0004).
+      - name: E2E + axe (chromium)
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-e2e
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+  visual:
+    name: Visual regression (advisory, ADR-0004)
+    needs:
+      - build
+    # Advisory: расхождение эталонов красит ЭТОТ чек и прогон; merge не
+    # блокируется — чек не в required checks до v1.0 (mandatory — Iteration 10,
+    # ADR-0004). Job-level continue-on-error запрещён: упавшей джобе GitHub
+    # ставит conclusion=success, чек маскировался бы зелёным (ревью T1.5 high).
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build showcase
+        run: npm run build
+
+      # IRAO_SNAPSHOTS=1 — окружение сравнения эталонов (гейт харнесса);
+      # chromium — единственный проект, пишущий/сравнивающий эталоны (ADR-0004).
+      - name: Visual regression (chromium)
+        id: visual
+        continue-on-error: true # диф-артефакты собираются следующими шагами
+        env:
+          IRAO_SNAPSHOTS: '1'
+        run: npx playwright test --project=chromium
+
+      # Диф-артефакты прикладываются даже при advisory (требование T1.5).
+      - name: Upload visual diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-diffs
+          path: |
+            test-results/**/*-diff.png
+            test-results/**/*-actual.png
+            test-results/**/*-expected.png
+            playwright-report/
+          if-no-files-found: ignore
+
+      # Чек visual обязан отражать расхождение: красим джобу (и прогон) по
+      # outcome step'а — step-level continue-on-error выше гарантирует, что
+      # диф-артефакты уже собраны.
+      - name: Fail check on visual diff
+        if: always() && steps.visual.outcome == 'failure'
+        run: |
+          echo "visual: расхождение эталонов — чек и прогон красные, дифы в артефакте visual-diffs; merge не блокируется — visual не в required checks до v1.0 (ADR-0004). Обновление: npm run test:docker -- --update-snapshots"
+          exit 1
