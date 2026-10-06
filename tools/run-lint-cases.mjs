@@ -194,6 +194,28 @@ const EXPECTATIONS = [
     expect: 'fail',
     rules: ['input-missing-label'],
   },
+  {
+    // T4.1 (AC): внешняя ссылка target="_blank" без rel="noopener" — ошибка.
+    file: 'html/link-external-noopener.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/link-external-noopener'],
+  },
+  {
+    // T4.1 (Implementation requirements п.3): ссылка без доступного имени
+    // (icon-only без aria-label) — предупреждение (severity warning).
+    file: 'html/link-icon-only-without-name.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: [['irao/link-accessible-name', 'warning']],
+  },
+  {
+    // T4.1: позитивный контроль гейта доступного имени — текст ссылки,
+    // aria-label и img с alt дают имя, гейт молчит.
+    file: 'html/link-named.html',
+    tool: 'html',
+    expect: 'pass',
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: у ссылок есть доступное имя (позитивный контроль)</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- ПОЗИТИВНЫЙ контроль irao/link-accessible-name (T4.1): текст, aria-label,
+         img с alt и svg с aria-label дают ссылке имя — гейт молчит. -->
+    <a href="https://example.com">Текстовая ссылка</a>
+    <a href="https://example.com/report.pdf" aria-label="Скачать отчёт (PDF, 2 МБ)">
+      <svg aria-hidden="true" focusable="false" width="16" height="16"><path d="M0 0h16v16H0z"></path></svg>
+    </a>
+    <a href="https://example.com/logo">
+      <img src="logo.svg" alt="Логотип партнёра" width="32" height="32">
+    </a>
+    <a href="#top"><span aria-hidden="true">→</span> Наверх</a>
+  </body>
+</html>

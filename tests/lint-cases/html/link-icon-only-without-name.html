@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: ссылка без доступного имени</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- НАРУШЕНИЕ (Implementation requirements T4.1 п.3): ссылка без текста
+         (icon-only) и без aria-label/визуально-скрытого текста — для
+         скринридера имя пустое. Ожидаемый красный (warning):
+         irao/link-accessible-name. -->
+    <a href="https://example.com/report.pdf">
+      <svg aria-hidden="true" focusable="false" width="16" height="16"><path d="M0 0h16v16H0z"></path></svg>
+    </a>
+  </body>
+</html>
