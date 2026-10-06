@@ -1,0 +1,9 @@
+/* Негативная фикстура ревью T2.4: сырой цвет в НЕ-цветовом токене темы.
+   Гейт irao/theme-semantic-overrides обязан требовать для теневых токенов
+   целый var()-токен или none: сырой rgba/hex в --ui-shadow-* утекает в
+   рендер (цвет тени) и нарушает инвариант «hex вне tokens/primitives.css».
+   Намеренно «кривой» файл: не источник правды (tests/lint-cases/README.md). */
+[data-ui-theme="bad-shadow"] {
+  --ui-shadow-card: 0 0 1rem rgba(0, 0, 0, 0.4);
+  --ui-shadow-md: 0 0.25rem 0.5rem #002856;
+}
