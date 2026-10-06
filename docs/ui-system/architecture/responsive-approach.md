@@ -28,8 +28,11 @@ requirements T2.5 п.1: «один источник: константы в ко�
 tests/unit/breakpoints.test.js.
 
 Гейт (stylelint): viewport-фичи семейства ширины/высоты запрещены, кроме
-`min-width`; значения `min-width` — только из шкалы (px). Негативные
-фикстуры: tests/lint-cases/css/components/ui-card/media-*.css (2 красных),
+`min-width`; значения `min-width` — только из шкалы (px); «not» перед
+`min-width` запрещён (локальный плагин `irao/no-negated-min-width`: у
+`not (min-width: 768px)` имя фичи разрешённое и значение шкальное — встроенная
+пара name/value-гейтов молчит, дыру закрыло ревью T2.5). Негативные
+фикстуры: tests/lint-cases/css/components/ui-card/media-*.css (3 красных),
 позитив — ui-badge/media-scale.css (5 значений шкалы), прогон `npm run test:lint`.
 
 ## Mobile-first: база — мобильная
@@ -42,8 +45,10 @@ tests/unit/breakpoints.test.js.
   desktop-first career-portal осознанно не переносится (класс C аудита).
   Перенос существующих значений — инверсия той же сетки: 767 → 768−1,
   1023 → 1024−1, 1439 → 1440−1 (брейкпоинт = «включительно от», а не «до»).
-- Range-синтаксис (`width >= 768px`, `400px <= width`) гейт отклоняет по имени
-  фичи — каноническая форма записи одна: `(min-width: Npx)`.
+- Range-синтаксис (`width >= 768px`, `400px <= width`) и negation-формы
+  (`not (min-width: 768px)`, `not all and (min-width: 768px)` — семантика
+  «width < Npx», тот же desktop-first-паттерн) гейт отклоняет — каноническая
+  форма записи одна: положительный `(min-width: Npx)`.
 - px, не em/rem: фиксируем px сознательно (Technical considerations T2.5 —
   команда мала, дизайн-макеты в px; пересчёт zoom'ом браузера не требуется).
 
