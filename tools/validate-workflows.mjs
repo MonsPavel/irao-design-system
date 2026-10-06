@@ -7,8 +7,10 @@
  * до реального прогона GitHub Actions. Скрипт — исполняемая спецификация
  * контрактов T1.5 (TDD-тест конвейера):
  *   - обязательные PR-гейты: lint, html-validate, unit, build, e2e+axe;
- *   - visual regression — advisory: отдельный чек с continue-on-error,
- *     диф-артефакты, обязательные гейты зелёные независимо от него (ADR-0004);
+ *   - visual regression — advisory: отдельный чек, красный при расхождении
+ *     (continue-on-error только на step'е, job-level запрещён — иначе чек
+ *     всегда зелёный), диф-артефакты; merge не блокируется — чек не в
+ *     required checks до v1.0 (ADR-0004);
  *   - update-snapshots — fallback-обновление эталонов ботом (ADR-0004);
  *   - pages — деплой showcase из main только после зелёного CI;
  *   - release — каркас матрицы + dist-артефакт (боевой режим — T12.1);
@@ -522,12 +524,18 @@ function checkCi(name, doc) {
     }
   }
 
-  // visual — advisory: continue-on-error на джобе и step'е, диф-артефакты, красный чек при расхождении
+  // visual — advisory: Job-level continue-on-error ЗАПРЕЩЁН (GitHub ставит
+  // упавшей джобе check-run conclusion=success — именованный чек всегда
+  // зелёный и «Visual-падение отражается отдельным check-результатом» не
+  // выполняется). Механика: continue-on-error ТОЛЬКО на step'е (дифы
+  // собираются), финальный шаг красит джобу по steps.visual.outcome; чек и
+  // прогон красные, merge не блокируется — visual не в required checks до
+  // v1.0 (ADR-0004, ревью T1.5 high).
   if (jobs.visual) {
-    if (jobs.visual['continue-on-error'] !== true) {
+    if (jobs.visual['continue-on-error'] === true) {
       problem(
         name,
-        'visual: нет continue-on-error: true на джобе (run обязан оставаться зелёным, ADR-0004)',
+        'visual: continue-on-error: true на джобе запрещён — GitHub даёт упавшей джобе conclusion=success, именованный чек всегда зелёный (AC «отражается отдельным check-результатом» нарушен); флаг оставлен только на step id: visual',
       );
     }
     const needs = jobs.visual.needs ?? [];
