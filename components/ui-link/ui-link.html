@@ -1,0 +1,71 @@
+<!-- ui-link (T4.1): канонический паттерн. Полный стенд состояний —
+     showcase/pages/ui-link/index.html; API, do/don't «ссылка vs кнопка»
+     и правила особых случаев — README.md.
+     Default — подчёркнутая всегда (различимость без цвета, WCAG 1.4.1).
+     Внешние ссылки: target="_blank" ОБЯЗАТЕЛЬНО с rel="noopener"
+     (html-validate-гейт irao/link-external-noopener). Файловые: иконка +
+     тип в доступном имени. Иконки: svg currentColor, aria-hidden,
+     focusable="false"; icon-only ссылка — aria-label.
+     Вариант ui-link--on-dark применяется внутри тёмных секций сайта
+     (фон секции — контекст страницы, не компонента): см. стенд. -->
+<p>
+  Вакансии компании: <a class="ui-link" href="/vacancies/">смотреть вакансии</a>
+  <a class="ui-link ui-link--button" href="/vacancies/">Посмотреть вакансии</a>
+</p>
+
+<p>
+  Внешние материалы —
+  <a class="ui-link" href="https://example.com" target="_blank" rel="noopener">
+    справочник соискателя
+    <svg
+      class="ui-link__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M4.5 11.5 11.5 4.5M5.5 4.5h6v6"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg> </a
+  >.
+</p>
+
+<p>
+  Прайс-лист —
+  <a class="ui-link" href="/upload/prays-list.pdf" aria-label="Скачать прайс-лист (PDF, 2 МБ)"
+    >прайс-лист</a
+  >
+  (файловая: тип и размер — в доступном имени). Icon-only:
+  <a
+    class="ui-link"
+    href="https://example.com"
+    target="_blank"
+    rel="noopener"
+    aria-label="Инструкция для соискателя (откроется в новой вкладке)"
+  >
+    <svg
+      class="ui-link__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M4.5 11.5 11.5 4.5M5.5 4.5h6v6"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </a>
+</p>

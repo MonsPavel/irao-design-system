@@ -1,0 +1,130 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-link (T4.1): варианты × состояния — default, hover, focus-visible, visited, active.
+  Сценарии — <code>tests/e2e/ui-link.spec.js</code> (computed color/underline по варианту, контраст
+  ≥ 4.5:1 сквозной с T2.3, axe); do/don't «Ссылка vs кнопка» и правила особых случаев — README.md
+  компонента. <code>:visited</code> на стенде не форсируется — браузеры скрывают историю посещений
+  (правило «только цвет» пинится юнит-тестом); правила ссылок — классы ролей типографики
+  (<code>ui-body</code>, <code>ui-small</code>) не навязываются: компонент красит только ссылку.
+</p>
+
+<style>
+  .uls-dark {
+    margin: 0 0 var(--ui-space-6);
+    padding: var(--ui-space-5);
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-color-surface-dark);
+    color: var(--ui-color-text-on-dark);
+  }
+  .uls-dark > p {
+    margin: 0 0 var(--ui-space-3);
+  }
+  .uls-dark > p:last-child {
+    margin: 0;
+  }
+  .uls-example {
+    margin: 0 0 var(--ui-space-5);
+  }
+</style>
+
+<section aria-labelledby="ui-link-text-heading">
+  <h2 id="ui-link-text-heading">Ссылка в тексте (default)</h2>
+  <p class="uls-example">
+    Подходящих вакансий — 12: открыть
+    <a class="ui-link" id="ui-link-default" href="#ui-link-button-heading">список вакансий</a>
+    или заглянуть в
+    <a
+      class="ui-link"
+      id="ui-link-external"
+      href="https://example.com"
+      target="_blank"
+      rel="noopener"
+      >справочник соискателя
+      <svg
+        class="ui-link__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M4.5 11.5 11.5 4.5M5.5 4.5h6v6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path></svg></a
+    >. Прайс-лист компании —
+    <a
+      class="ui-link"
+      id="ui-link-file"
+      href="https://example.com/prays-list.pdf"
+      aria-label="Скачать прайс-лист (PDF, 2 МБ)"
+      >прайс-лист</a
+    >.
+  </p>
+  <p class="uls-example ui-small ui-text--muted">
+    Ссылка на малой роли остаётся различимой: подчёркивание масштабируется вместе с текстом (токены
+    <code>--ui-link-underline-*</code> в em).
+  </p>
+  <p class="uls-example ui-small">
+    Малая роль со ссылкой на
+    <a class="ui-link" href="#ui-link-button-heading">условия программы</a>.
+  </p>
+</section>
+
+<section aria-labelledby="ui-link-on-dark-heading">
+  <h2 id="ui-link-on-dark-heading">На тёмной секции (ui-link--on-dark)</h2>
+  <div class="uls-dark" data-ui-link-bg="on-dark">
+    <p>
+      Для соискателей —
+      <a class="ui-link ui-link--on-dark" id="ui-link-on-dark" href="#ui-link-button-heading"
+        >все программы обучения</a
+      >.
+    </p>
+    <p>
+      Icon-only — с доступным именем:
+      <a
+        class="ui-link ui-link--on-dark"
+        id="ui-link-on-dark-icon"
+        href="https://example.com"
+        target="_blank"
+        rel="noopener"
+        aria-label="Инструкция для соискателя (откроется в новой вкладке)"
+      >
+        <svg
+          class="ui-link__icon"
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M4.5 11.5 11.5 4.5M5.5 4.5h6v6"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      </a>
+    </p>
+  </div>
+</section>
+
+<section aria-labelledby="ui-link-button-heading">
+  <h2 id="ui-link-button-heading">Вид кнопки, семантика ссылки (ui-link--button)</h2>
+  <p class="uls-example">
+    <a class="ui-link ui-link--button" id="ui-link-button" href="#ui-link-text-heading"
+      >Посмотреть вакансии</a
+    >
+  </p>
+  <p class="uls-example ui-small ui-text--muted">
+    Только для «переход-выглядит-как-действие»: навигация на другой адрес. Действие на странице
+    (отправка, раскрытие) — <code>ui-button</code> (T4.2). Подробнее — do/don't в README.md
+    компонента.
+  </p>
+</section>

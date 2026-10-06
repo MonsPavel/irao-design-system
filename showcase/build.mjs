@@ -79,6 +79,7 @@ const CSS_CORE_ORDER = [
  */
 const COMPONENTS = [
   'ui-skip-link', // T3.5 — клавиатурный переход к #main (WCAG 2.4.1)
+  'ui-link', // T4.1 — ссылки: варианты default/--on-dark/--button, правила особых случаев
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */

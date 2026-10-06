@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: внешняя ссылка без rel="noopener"</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- НАРУШЕНИЕ (AC T4.1): внешняя ссылка target="_blank" без rel="noopener" —
+         обратная ссылка (opener) отдаёт контекст браузера целевой странице.
+         Ожидаемый красный: irao/link-external-noopener. -->
+    <a href="https://example.com" target="_blank">Внешний сайт</a>
+  </body>
+</html>

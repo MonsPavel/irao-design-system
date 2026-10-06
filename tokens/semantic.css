@@ -118,6 +118,13 @@
   /* career-portal: pages.css:52 — outline-offset: 2px */
   --ui-focus-offset: 2px;
 
+  /* ── Ссылки (ui-link, T4.1): геометрия подчёркивания ── */
+
+  /* новый: Technical considerations T4.1 — толщина подчёркивания «из токенов, без магии» (WCAG 1.4.1); em — от размера роли: 1px на 16px, 2px на 32px-базе T3.6 */
+  --ui-link-underline-thickness: 0.0625em;
+  /* новый: Technical considerations T4.1 — отступ подчёркивания от базовой линии */
+  --ui-link-underline-offset: 0.1875em;
+
   /* ── Типографика (rem; тройки fs/lh/fw на роль — §3.2) ── */
 
   /* career-portal: --font-family; фолбэк-стек расширен по 02-architecture §3.2 (шрифты подключит T3.1) */
