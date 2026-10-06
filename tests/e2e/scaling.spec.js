@@ -35,12 +35,7 @@ import { test } from '../helpers/harness.js';
  * добавится сюда с появлением формы — EPIC-5). Расширять синхронно с
  * разметкой узлов — пин синхронизации: tests/unit/scaling.test.js.
  */
-const CHECK_STANDS = Object.freeze([
-  'base',
-  'typography',
-  'layout',
-  'font-scaling-broken', // ВРЕМЕННЫЙ сломанный стенд TDD-шага (красный прогон) — удаляется зелёным коммитом
-]);
+const CHECK_STANDS = Object.freeze(['base', 'typography', 'layout']);
 
 /** Базы зум-сценария A (CSS-вьюпорт = база/2: 640 и 384 — обе ≥ 320 T3.4). */
 const ZOOM_BASE_WIDTHS = Object.freeze([1280, 768]);
@@ -195,11 +190,11 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
         await page.setViewportSize({ width: base, height: 900 });
         const session = await applyZoom(page, { width: base, height: 900, factor: 2 });
 
-        const cssWidth = await page.evaluate(() => window.innerWidth);
-        expect(
-          cssWidth,
-          `зум применён: CSS-вьюпорт ${base}/2 = ${Math.round(base / 2)}`,
-        ).toBe(Math.round(base / 2));
+        // Ожидание применения эмуляции (а не одиночное чтение): при высокой
+        // параллельной нагрузке CDP-override доезжает не мгновенно, и ранний
+        // замер поймал бы гонку, а не раскладку.
+        const cssWidth = Math.round(base / 2);
+        await page.waitForFunction((expected) => window.innerWidth === expected, cssWidth);
         await nextFrame(page);
 
         expectNoViolations(await collectViolations(page), `zoom 200% (база ${base}) на «${name}»`);

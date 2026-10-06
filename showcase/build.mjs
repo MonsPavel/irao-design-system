@@ -401,25 +401,6 @@ function generateShowcase({ themes }) {
     warn('showcase/pages/layout/index.html ещё нет — стенд layout не сгенерирован');
   }
 
-  // ВРЕМЕННО (T3.6, красный TDD-шаг): сломанный стенд для проверки
-  // чувствительности гейта масштабирования (tests/e2e/scaling.spec.js).
-  // Удаляется зелёным коммитом вместе с источником.
-  const brokenStandSource = join(ROOT, 'showcase', 'pages', 'font-scaling-broken', 'index.html');
-  if (existsSync(brokenStandSource)) {
-    const page = frame({
-      rel: '../../..', // showcase/dist/stands/ → корень репозитория
-      home: '../index.html',
-      title: 'font-scaling-broken — irao-ui showcase',
-      main: `    <h1>font-scaling-broken</h1>\n${readFileSync(brokenStandSource, 'utf8').trim()}`,
-      themes,
-    });
-    writeFileSync(join(SHOWCASE_DIST, 'stands', 'font-scaling-broken.html'), page);
-    stands.push({
-      name: 'font-scaling-broken',
-      source: 'showcase/pages/font-scaling-broken/index.html (временно, T3.6)',
-    });
-  }
-
   const discovered = discoverComponents();
   for (const name of discovered) {
     if (!COMPONENTS.includes(name)) {
