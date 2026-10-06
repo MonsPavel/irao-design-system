@@ -44,8 +44,33 @@
  *    (`var(--ui-blue-800)`…) разрешены только внутри tokens/. Локальный
  *    плагин — см. tools/stylelint/no-primitive-token-references.mjs
  *    (почему не declaration-property-value-disallowed-list — в шапке плагина).
+ *
+ * 7. `irao/theme-semantic-overrides` — гейт «тема переопределяет только
+ *    семантический слой» (ADR-0009, задача T2.4): файл themes/ — один блок
+ *    [data-ui-theme="…"] из кастом-свойств, имена — из tokens/semantic.css.
+ *    Специфичен для themes/, в основном `rules` выключен, включается
+ *    override'ом (см. ниже); список имён считается из tokens/semantic.css,
+ *    сверяется с ним тестом tests/unit/themes.test.js.
  */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { FAMILIES as PRIMITIVE_FAMILIES } from './tools/stylelint/no-primitive-token-references.mjs';
+
+/**
+ * Имена семантических токенов (слой 2) — опция гейта тем (T2.4). Читается
+ * из исходника tokens/semantic.css: новый токен слоя 2 автоматически
+ * разрешён темам без правки конфига. Путь — от каталога конфига
+ * (import.meta.dirname): и в реальном stylelint (Node ≥ 20.11), и под vitest.
+ */
+const SEMANTIC_TOKENS = [
+  ...new Set(
+    [
+      ...readFileSync(join(import.meta.dirname, 'tokens/semantic.css'), 'utf8').matchAll(
+        /^\s*(--ui-[a-z0-9-]+)\s*:/gm,
+      ),
+    ].map((match) => match[1]),
+  ),
+];
 
 export default {
   plugins: [
@@ -53,6 +78,7 @@ export default {
     'stylelint-declaration-strict-value',
     'stylelint-order',
     './tools/stylelint/no-primitive-token-references.mjs',
+    './tools/stylelint/theme-semantic-overrides.mjs',
   ],
   rules: {
     // 1. БЭМ ui-{block}__{elem}--{mod}: имя компонента — без префикса `ui-`
@@ -139,6 +165,10 @@ export default {
     //    только внутри tokens/. Список семейств синхронизирован с
     //    primitives.css юнит-тестом tests/unit/tokens-semantic.test.js.
     'irao/no-primitive-token-references': [PRIMITIVE_FAMILIES],
+
+    // 7. Гейт тем (T2.4) — themes-специфичен, глобально выключен; включается
+    //    override'ом ниже (для остальных файлов themes-правила не существуют).
+    'irao/theme-semantic-overrides': null,
 
     // 5. Порядок свойств: токены → box-sizing (ADR-0002) → компоновка →
     //    коробка → рамки → фон → типографика → визуал → анимация → взаимодействие.
@@ -329,6 +359,24 @@ export default {
       // Позитивный контроль — tests/lint-cases/css/tokens/semantic.css.
       files: ['**/tokens/**'],
       rules: {
+        'irao/no-primitive-token-references': null,
+      },
+    },
+    {
+      // Темы (ADR-0009, T2.4): единственный слой переопределения — семантика.
+      //  - irao/theme-semantic-overrides: один блок [data-ui-theme="…"],
+      //    только кастом-свойства, имена — из SEMANTIC_TOKENS;
+      //  - запрет ссылок на примитивы снят: значения темы — ссылки на
+      //    примитивы, как в самом слое 2 (в противном случае теме нечем
+      //    выразить «другой бренд»).
+      // Позитивный контроль — tests/lint-cases/css/themes/theme-old-compat.css
+      // (он же фикстура совместимости), негативный — theme-invalid.css.
+      files: ['**/themes/**'],
+      rules: {
+        // Список — обёрнут во внешний массив: stylelint читает значение правила
+        // как [primary, secondary], иначе primary станет первая СТРОКА списка
+        // (та же схема, что у irao/no-primitive-token-references выше).
+        'irao/theme-semantic-overrides': [SEMANTIC_TOKENS],
         'irao/no-primitive-token-references': null,
       },
     },

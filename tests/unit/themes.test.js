@@ -60,7 +60,7 @@ function parseDeclarations(css) {
 /** Единственный блок селектор → Map объявлений (для файлов тем, без media). */
 function parseTheme(css) {
   const stripped = stripComments(css);
-  const match = stripped.match(/^([^{}]+)\{([\s\S]*)\}$/);
+  const match = stripped.match(/^([^{}]+)\{([\s\S]*)\}\s*$/);
   expect(match, 'файл темы — один блок «селектор { объявления }»').not.toBeNull();
   return { selector: match[1].trim(), declarations: parseDeclarations(match[2]) };
 }
@@ -127,7 +127,9 @@ describe('тема в сборке и на стендах (AC T2.4)', () => {
     expect(stand, 'data-ui-theme выставляется на documentElement').toContain(
       "document.documentElement.setAttribute('data-ui-theme'",
     );
-    expect(stand, 'тема запрашивается из query ?theme=').toContain("searchParams.get('theme')");
+    expect(stand, 'тема запрашивается из query ?theme=').toContain(
+      "new URLSearchParams(window.location.search).get('theme')",
+    );
   });
 });
 
@@ -151,27 +153,51 @@ describe('фикстура совместимости: старая тема + �
 
   it('каскад с фикстурой вычислим для каждого семантического токена (визуал валиден)', () => {
     const themed = new Map([...core, ...fixture.declarations]);
-    for (const [name, value] of semantic) {
+    for (const name of semantic.keys()) {
       if (!name.includes('color')) continue;
-      const expected = fixture.declarations.get(name) ?? value;
-      expect(resolveTokenColor(name, themed), `${name} не вычислим со старой темой`).toBe(
-        resolveTokenColor(name, new Map([...core, [name, expected]])),
-      );
+      // Валидность: ни одна var()-ссылка не повисает — переопределённые токены
+      // дают значения фикстуры, остальные и производные (chain через primary
+      // и т.п.) — значения core с учётом переопределений, как в браузере.
+      // Альфа-токены (surface-translucent, стекло) lib контраста до непрозрачного
+      // цвета не доводит сознательно (исключения pairs.config.mjs) — для
+      // валидности темы достаточно, что ссылка определена.
+      let resolved;
+      try {
+        resolved = resolveTokenColor(name, themed);
+      } catch (error) {
+        expect(
+          error.message.startsWith('альфа-цвет'),
+          `${name} не вычислим со старой темой: ${error.message}`,
+        ).toBe(true);
+        continue;
+      }
+      if (fixture.declarations.has(name)) {
+        const reference = fixture.declarations.get(name).match(/^var\((--[a-z0-9-]+)\)$/)[1];
+        expect(resolved, `${name} не взял значение фикстуры`).toBe(
+          resolveTokenColor(reference, themed),
+        );
+      }
     }
+    // Механизм: производный слой 2 следует за переопределением (фикстура
+    // красит primary → surface-dark, читающий primary, едет следом).
+    expect(resolveTokenColor('--ui-color-surface-dark', themed)).toBe(
+      resolveTokenColor('--ui-color-primary', themed),
+    );
   });
 });
 
 describe('stylelint-гейт themes/ (Implementation requirements T2.4 п.1)', () => {
   const RULE = 'irao/theme-semantic-overrides';
 
-  it('override **/themes/**: гейт включён, запрет примитивов снят (значения тем — слой 1)', () => {
+  it('override каталога themes/: гейт включён, запрет примитивов снят (значения тем — слой 1)', () => {
     const override = stylelintConfig.overrides.find((entry) =>
       entry.files.includes('**/themes/**'),
     );
     expect(override, 'нет override для themes/ в stylelint.config.mjs').toBeDefined();
-    const options = override.rules[RULE];
-    expect(options, `${RULE} не включён для themes/`).toBeDefined();
-    expect(new Set(options)).toEqual(semantic);
+    // Опция правила — [список]: stylelint читает значение как [primary, secondary].
+    const [options] = override.rules[RULE];
+    expect(Array.isArray(options), `${RULE} получил список имён`).toBe(true);
+    expect(new Set(options)).toEqual(new Set(semantic.keys()));
     expect(override.rules['irao/no-primitive-token-references']).toBeNull();
   });
 });
