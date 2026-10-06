@@ -60,10 +60,20 @@
  *    responsive-approach.md, синхронность проверяет tests/unit/breakpoints.test.js.
  *    Механика: max-width (desktop-first career-portal, класс C аудита)
  *    и range-синтаксис ловятся disallowed-list по имени фичи, значения
- *    min-width — value-allowed-list из BREAKPOINTS. Неширинные media-фичи
+ *    min-width — value-allowed-list из BREAKPOINTS. Пара слепа к
+ *    negation-формам (`not (min-width: …)` — имя фичи разрешённое, значение
+ *    шкальное, оба гейта молчат): их закрывает правило 9. Неширинные media-фичи
  *    (prefers-reduced-motion, forced-colors…) — не предмет шкалы, этим
  *    гейтом не регулируются. Исключение из гейта — только через ADR
  *    (запись с обоснованием) + override по путям в этом конфиге.
+ *
+ * 9. `irao/no-negated-min-width` — локальный плагин (ревью T2.5, high;
+ *    tools/stylelint/no-negated-min-width.mjs): «not» перед min-width
+ *    (`not (min-width: 768px)`, `not all and (min-width: 768px)`) запрещён —
+ *    семантика «width < Npx» повторяет desktop-first max-width-паттерн,
+ *    который T2.5 запрещает, а name/value-гейты (правило 8) её не видят.
+ *    Каноническая форма записи медиазапроса — только положительный
+ *    `(min-width: Npx)`.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -129,6 +139,7 @@ export default {
     'stylelint-order',
     './tools/stylelint/no-primitive-token-references.mjs',
     './tools/stylelint/theme-semantic-overrides.mjs',
+    './tools/stylelint/no-negated-min-width.mjs',
   ],
   rules: {
     // 1. БЭМ ui-{block}__{elem}--{mod}: имя компонента — без префикса `ui-`
@@ -222,11 +233,11 @@ export default {
 
     // 8. Mobile-first-гейт медиазапросов (T2.5, 02-architecture §3.2):
     //    база — мобильная, рост только в min-width из шкалы BREAKPOINTS.
-    //    Два правила вместо одного локального плагина: пара встроенных гейтов
-    //    закрывает все кейсы (проверено прогоном, T2.5) — max-width и
-    //    range-синтаксис ловит disallowed-list по имени фичи, значения
-    //    min-width — value-allowed-list; плагин дал бы только русский текст
-    //    сообщения. px, не em — сознательно (Technical considerations T2.5:
+    //    Два встроенных гейта: max-width и range-синтаксис ловит
+    //    disallowed-list по имени фичи, значения min-width —
+    //    value-allowed-list (первая реализация «два правила вместо плагина»
+    //    была неполной — ревью T2.5 нашло negation-дыру, закрытую правилом 9).
+    //    px, не em — сознательно (Technical considerations T2.5:
     //    команда мала, дизайн-макеты в px). Значение вне шкалы
     //    (`min-width: 999px` — класс «плавающих» брейкпоинтов career-portal)
     //    и `(min-width: 768.0px)` (неканоническая запись) отклоняются:
@@ -234,6 +245,18 @@ export default {
     //    через ADR (запись с обоснованием) + override по путям в этом конфиге.
     'media-feature-name-disallowed-list': [WIDTH_MEDIA_DISALLOWED],
     'media-feature-name-value-allowed-list': [{ 'min-width': MIN_WIDTH_SCALE }],
+
+    // 9. Negation-дыра пары выше (ревью T2.5, high): `not (min-width: 768px)`
+    //    и `not all and (min-width: 768px)` несут разрешённое имя фичи и
+    //    шкальное значение — оба гейта молчат (проверено: npx stylelint на
+    //    фикстуре → exit 0), а семантика «width < Npx» повторяет
+    //    desktop-first max-width. «not» перед min-width запрещён — локальный
+    //    плагин, каноническая форма записи только положительная
+    //    `(min-width: Npx)`. Формы, где «not» отрицает НЕ min-width
+    //    (`not screen and (min-width: …)`,
+    //    `(min-width: 768px) and not (prefers-reduced-motion: reduce)`),
+    //    легальны и проходят (границы регэкспа — в шапке плагина).
+    'irao/no-negated-min-width': true,
 
     // 5. Порядок свойств: токены → box-sizing (ADR-0002) → компоновка →
     //    коробка → рамки → фон → типографика → визуал → анимация → взаимодействие.
