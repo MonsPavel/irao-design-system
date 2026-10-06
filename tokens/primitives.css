@@ -86,6 +86,8 @@
   --ui-orange-500: #f26722;
   /* career-portal: --tag-orange-text (текст тегов на orange-50; сырьё для контраст-гейта T2.3) */
   --ui-orange-700: #b34a10;
+  /* новый: AA-замена --tag-orange-text (T2.3, design-decision): 4.78:1 на orange-50; --ui-orange-700 — эталон career-portal */
+  --ui-orange-800: #a94710;
 
   /* ── Красные (статус error) ── */
 
@@ -93,6 +95,8 @@
   --ui-red-50: #fff6f4;
   /* career-portal: --color-error */
   --ui-red-600: #d8402c;
+  /* новый: AA-замена --color-error (T2.3, design-decision): 5.10:1 на белом, 4.80:1 на red-50; --ui-red-600 — эталон career-portal */
+  --ui-red-700: #c93a26;
 
   /* ── Зелёные (статус success) ── */
 

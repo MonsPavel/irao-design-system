@@ -24,7 +24,12 @@ import { join } from 'node:path';
 import { execPath } from 'node:process';
 import { describe, expect, it } from 'vitest';
 import { EXCEPTIONS, PAIRS } from '../../tests/contrast/pairs.config.mjs';
-import { THRESHOLDS, contrastRatio, evaluateContrast, resolveTokenColor } from '../../tests/contrast/lib.mjs';
+import {
+  THRESHOLDS,
+  contrastRatio,
+  evaluateContrast,
+  resolveTokenColor,
+} from '../../tests/contrast/lib.mjs';
 
 const root = join(import.meta.dirname, '../..');
 
@@ -67,7 +72,8 @@ describe('контраст-гейт: математика WCAG 2.1 (1.4.3)', () 
   });
 
   it('полупрозрачный цвет без подложки не вычислим — resolve обязан падать', () => {
-    expect(() => resolveTokenColor('--ui-color-glass-light', primitives)).toThrow(/альф/i);
+    const bothLayers = new Map([...primitives, ...semantic]);
+    expect(() => resolveTokenColor('--ui-color-glass-light', bothLayers)).toThrow(/альф/i);
   });
 });
 
@@ -107,7 +113,13 @@ describe('контраст-гейт: негативный кейс — тонк�
   it('пара с неизвестным токеном — ошибка конфига, а не тихий пропуск', () => {
     const broken = [
       ...PAIRS,
-      { id: 'broken', fg: '--ui-color-nope', bg: '--ui-color-surface', level: 'text', usage: 'тест' },
+      {
+        id: 'broken',
+        fg: '--ui-color-nope',
+        bg: '--ui-color-surface',
+        level: 'text',
+        usage: 'тест',
+      },
     ];
     const result = evaluateContrast({
       primitives,
@@ -166,10 +178,14 @@ describe('контраст-гейт: дефолтная палитра зелё�
 describe('контраст-гейт: CLI (exit-код = CI-шаг, AC 1/2)', () => {
   it('дефолтная палитра: exit 0, markdown-отчёт записан', () => {
     const reportPath = join(mkdtempSync(join(tmpdir(), 'irao-contrast-')), 'report.md');
-    const run = spawnSync(execPath, [join(root, 'tests/contrast/check.mjs'), '--report', reportPath], {
-      cwd: root,
-      encoding: 'utf8',
-    });
+    const run = spawnSync(
+      execPath,
+      [join(root, 'tests/contrast/check.mjs'), '--report', reportPath],
+      {
+        cwd: root,
+        encoding: 'utf8',
+      },
+    );
     expect(run.stdout, run.stderr).toMatch(/RESULT: OK/);
     expect(run.status).toBe(0);
     const report = readFileSync(reportPath, 'utf8');
@@ -187,13 +203,7 @@ describe('контраст-гейт: CLI (exit-код = CI-шаг, AC 1/2)', () 
     const reportPath = join(mkdtempSync(join(tmpdir(), 'irao-contrast-')), 'report.md');
     const run = spawnSync(
       execPath,
-      [
-        join(root, 'tests/contrast/check.mjs'),
-        '--tokens',
-        tokensDir,
-        '--report',
-        reportPath,
-      ],
+      [join(root, 'tests/contrast/check.mjs'), '--tokens', tokensDir, '--report', reportPath],
       { cwd: root, encoding: 'utf8' },
     );
     expect(run.status).toBe(1);
