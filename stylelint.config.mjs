@@ -48,9 +48,22 @@
  * 7. `irao/theme-semantic-overrides` — гейт «тема переопределяет только
  *    семантический слой» (ADR-0009, задача T2.4): файл themes/ — один блок
  *    [data-ui-theme="…"] из кастом-свойств, имена — из tokens/semantic.css.
- *    Специфичен для themes/, в основном `rules` выключен, включается
+ *    Специфен для themes/, в основном `rules` выключен, включается
  *    override'ом (см. ниже); список имён считается из tokens/semantic.css,
  *    сверяется с ним тестом tests/unit/themes.test.js.
+ *
+ * 8. `media-feature-name-disallowed-list` + `media-feature-name-value-allowed-list`
+ *    — mobile-first-гейт медиазапросов (задача T2.5, 02-architecture §3.2).
+ *    Шкала — константа BREAKPOINTS ниже (media query нельзя выразить
+ *    CSS-переменной, поэтому шкала — не токены, а конвенция, исполняемая
+ *    здесь); дока ссылается на неё — docs/ui-system/architecture/
+ *    responsive-approach.md, синхронность проверяет tests/unit/breakpoints.test.js.
+ *    Механика: max-width (desktop-first career-portal, класс C аудита)
+ *    и range-синтаксис ловятся disallowed-list по имени фичи, значения
+ *    min-width — value-allowed-list из BREAKPOINTS. Неширинные media-фичи
+ *    (prefers-reduced-motion, forced-colors…) — не предмет шкалы, этим
+ *    гейтом не регулируются. Исключение из гейта — только через ADR
+ *    (запись с обоснованием) + override по путям в этом конфиге.
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -70,6 +83,43 @@ const SEMANTIC_TOKENS = [
       ),
     ].map((match) => match[1]),
   ),
+];
+
+/**
+ * Утверждённая шкала брейкпоинтов (02-architecture §3.2, задача T2.5) —
+ * ЕДИНСТВЕННЫЙ источник (Implementation requirements T2.5 п.1): media query
+ * нельзя выразить CSS-переменной, поэтому шкала живёт константой в конфиге
+ * линтера, дока ссылается на неё (docs/ui-system/architecture/
+ * responsive-approach.md), синхронность доки и конфига проверяет юнит-тест
+ * tests/unit/breakpoints.test.js — новый брейкпоинт вводится правкой этой
+ * константы + правкой доки одним PR. `2xl 1440` — для широких декоративных
+ * секций (наследие макета career-portal 1440).
+ */
+export const BREAKPOINTS = Object.freeze({ sm: 480, md: 768, lg: 1024, xl: 1280, '2xl': 1440 });
+
+/** Значения шкалы в px — опция гейта значений min-width (правило 8 ниже). */
+const MIN_WIDTH_SCALE = Object.entries(BREAKPOINTS).map(([, px]) => `${px}px`);
+
+/**
+ * Viewport-фичи семейства ширины/высоты (правило 8): все запрещены, кроме
+ * `min-width` — mobile-first, требование ТЗ №1. `max-width` — подход
+ * career-portal, осознанно не переносимый (класс C аудита); range-синтаксис
+ * (`width >= 768px`, `400px <= width <= 1279px`) ловится тем же списком по
+ * имени фичи (`width`) — каноническая форма записи одна: `(min-width: Npx)`.
+ * Высота (min/max-height) вне гейта шкалы: шкалы высот нет. Неширинные фичи
+ * (prefers-reduced-motion, prefers-contrast, forced-colors, hover, print…)
+ * — не предмет шкалы брейкпоинтов и этим списком не запрещаются.
+ */
+const WIDTH_MEDIA_DISALLOWED = [
+  'width',
+  'max-width',
+  'device-width',
+  'min-device-width',
+  'max-device-width',
+  'height',
+  'min-height',
+  'max-height',
+  'device-height',
 ];
 
 export default {
@@ -169,6 +219,21 @@ export default {
     // 7. Гейт тем (T2.4) — themes-специфичен, глобально выключен; включается
     //    override'ом ниже (для остальных файлов themes-правила не существуют).
     'irao/theme-semantic-overrides': null,
+
+    // 8. Mobile-first-гейт медиазапросов (T2.5, 02-architecture §3.2):
+    //    база — мобильная, рост только в min-width из шкалы BREAKPOINTS.
+    //    Два правила вместо одного локального плагина: пара встроенных гейтов
+    //    закрывает все кейсы (проверено прогоном, T2.5) — max-width и
+    //    range-синтаксис ловит disallowed-list по имени фичи, значения
+    //    min-width — value-allowed-list; плагин дал бы только русский текст
+    //    сообщения. px, не em — сознательно (Technical considerations T2.5:
+    //    команда мала, дизайн-макеты в px). Значение вне шкалы
+    //    (`min-width: 999px` — класс «плавающих» брейкпоинтов career-portal)
+    //    и `(min-width: 768.0px)` (неканоническая запись) отклоняются:
+    //    allowed-list сопоставляет значение целиком. Исключение — только
+    //    через ADR (запись с обоснованием) + override по путям в этом конфиге.
+    'media-feature-name-disallowed-list': [WIDTH_MEDIA_DISALLOWED],
+    'media-feature-name-value-allowed-list': [{ 'min-width': MIN_WIDTH_SCALE }],
 
     // 5. Порядок свойств: токены → box-sizing (ADR-0002) → компоновка →
     //    коробка → рамки → фон → типографика → визуал → анимация → взаимодействие.
