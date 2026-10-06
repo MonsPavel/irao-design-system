@@ -97,6 +97,18 @@ describe('сценарии и пороги в спеке (Implementation require
     }
   });
 
+  it('clip — только режущие значения hidden/clip; скроллируемый контент не флагается', () => {
+    const text = spec();
+    // Ревью T3.6 (high): предикат «overflow !== visible» флагал overflow
+    // auto/scroll с достижимым прокруткой контентом — против собственного
+    // контракта (README «что считать поломкой», шапка спеки).
+    expect(text).toContain("['hidden', 'clip'].includes(cs.overflowY)");
+    expect(text).toContain("['hidden', 'clip'].includes(cs.overflowX)");
+    expect(text, 'предикат «любой не-visible» в чекере не остаётся').not.toContain(
+      "!== 'visible'",
+    );
+  });
+
   it('зум-сценарий помечен chromium-only (CDP), 32px — все браузеры матрицы', () => {
     const text = spec();
     expect(text).toMatch(/project\.name !== 'chromium'/);
@@ -150,5 +162,27 @@ describe('подключение к nightly + release (AC 2; Scope T3.6)', () =>
   it('валидатор воркфлоу закрепляет: матрица release обязана гонять playwright', () => {
     const validator = readFileSync(join(root, 'tools', 'validate-workflows.mjs'), 'utf8');
     expect(validator).toContain('матрица release: нет прогона npx playwright test');
+  });
+
+  it('решение спеки «не в PR»: PR-джобы ci.yml e2e и visual исключают гейт', () => {
+    // Ревью T3.6 (high): PR-джобы ci.yml (e2e, visual) гоняют полный suite —
+    // без явного исключения scaling.spec.js исполнялся бы на каждый PR,
+    // вопреки решению спеки (Context: «в nightly и релизе, не в PR»).
+    const ci = readFileSync(join(root, '.github', 'workflows', 'ci.yml'), 'utf8');
+    const count = ci.split("IRAO_SCALING: 'off'").length - 1;
+    expect(count, 'обе PR-джобы с playwright (e2e и visual) помечены IRAO_SCALING: off').toBe(2);
+  });
+
+  it('nightly и release гейт НЕ исключают: IRAO_SCALING в этих воркфлоу нет', () => {
+    for (const file of ['nightly.yml', 'release.yml']) {
+      const text = readFileSync(join(root, '.github', 'workflows', file), 'utf8');
+      expect(text, `${file}: гейт едет в матрице безусловно`).not.toContain('IRAO_SCALING');
+    }
+  });
+
+  it('playwright.config: спек гейта выключается только явным IRAO_SCALING=off', () => {
+    const config = readFileSync(join(root, 'playwright.config.mjs'), 'utf8');
+    expect(config, 'условие на env-флаг').toMatch(/IRAO_SCALING\s*===\s*'off'/);
+    expect(config, 'testIgnore целясь в scaling.spec.js').toContain("'**/scaling.spec.js'");
   });
 });

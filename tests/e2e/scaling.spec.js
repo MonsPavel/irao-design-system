@@ -260,4 +260,29 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
       `наложение соседей ловится как перекрытие (поймано: ${[...kinds].join(', ')})`,
     ).toBe(true);
   });
+
+  test('чувствительность гейта: скроллируемый контент (overflow: auto) — не поломка', async ({
+    stand,
+  }) => {
+    // Контент в overflow: auto достижим прокруткой — поломкой не считается
+    // (tests/e2e/README.md, «что считать поломкой»; шапка спеки). Режущие
+    // hidden/clip — поломка (соседний тест). Ревью T3.6 (high): прогон с
+    // предикатом «overflow !== visible» здесь красный — он флагает
+    // достижимый контент как обрезку.
+    const page = await stand('layout');
+    await page.addStyleTag({
+      content: `
+        [data-ui-check-layout] {
+          height: 40px !important;
+          overflow: auto !important;
+        }
+      `,
+    });
+    await nextFrame(page);
+
+    expectNoViolations(
+      await collectViolations(page),
+      'overflow: auto с прокручиваемым (достижимым) контентом',
+    );
+  });
 });
