@@ -19,12 +19,15 @@ import { expect, test as base } from '@playwright/test';
 export const FIXED_TIME = new Date('2026-01-01T12:00:00Z');
 
 /**
- * Шкала вьюпортов скриншотов (T1.4: 375/768/1440). Высоты условные:
- * скриншоты снимаются fullPage, важна ширина медиа-вычислений.
+ * Шкала вьюпортов скриншотов (T1.4: 375/768/1440; T3.4 добавил xl 1280 —
+ * брейкпоинт шкалы T2.5, различающий ступени 3/4 колонок сетки --4).
+ * Высоты условные: скриншоты снимаются fullPage, важна ширина
+ * медиа-вычислений.
  */
 export const VIEWPORTS = Object.freeze({
   mobile: Object.freeze({ width: 375, height: 667 }),
   tablet: Object.freeze({ width: 768, height: 1024 }),
+  xl: Object.freeze({ width: 1280, height: 800 }),
   desktop: Object.freeze({ width: 1440, height: 900 }),
 });
 
