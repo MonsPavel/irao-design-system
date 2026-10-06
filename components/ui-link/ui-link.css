@@ -1,0 +1,133 @@
+/** @define link */
+
+/*!
+ * irao-ui — ui-link: ссылки с вариантами и правилами особых случаев
+ * (задача T4.1; ссылка — семантический дефолт для навигации, кнопка —
+ * только для действий: do/don't в README.md).
+ *
+ * Default — подчёркнутая ВСЕГДА (WCAG 1.4.1 «Use of Color»: ссылка обязана
+ * различаться без цвета; спека T4.1: «подчёркнутая при hover/всегда —
+ * фиксируется по бренду», бренд зафиксирован). В career-portal ссылки
+ * стилизованы глобально (a { color: inherit; text-decoration: none } +
+ * локальные цветные hover: .vac-card__company:hover, .breadcrumbs a:hover) —
+ * компонент переносит идею цветного hover на явный класс и токены.
+ *
+ * Цвета/подчёркивание — только токены слоя 2 (Implementation requirements
+ * п.1): --ui-color-primary/text-muted/text-on-dark(-muted); link-токены цвета
+ * не заводились (правило «слой 3 — только если двум сайтам нужно различие»).
+ * Геометрия подчёркивания — токены --ui-link-underline-thickness/offset в em
+ * (Technical considerations: различимость без магии; линия толщеется вместе
+ * с ролью текста — 32px-база T3.6).
+ *
+ * Производные состояния (T2.6, ADR-0010): одобренным дизайном hover/active
+ * ССЫЛКИ не заданы — color-mix(in srgb, var(--ui-…) 88%, black); hover для
+ * кнопочного варианта — исключение ADR-0010: пара одобренного дизайна
+ * var(--ui-color-primary-hover) (career-portal .btn--primary:hover).
+ * Все :hover — ТОЛЬКО под @media (hover: hover) (EPIC-4: sticky-hover
+ * не «залипает» на таче). Порядок правил LVHA (:visited → :hover → :active):
+ * при равной специфичности (0,2,0) каскад решает порядок — иначе hover
+ * не виден на посещённых ссылках.
+ *
+ * :visited — минимально, только color (приватность истории браузера
+ * ограничивает допустимые свойства; Technical considerations).
+ *
+ * Фокус — глобальная гарантия base/focus.css (ADR-0001): селектор
+ * a:focus-visible в списке политики; здесь outline не запрещается и не
+ * заменяется. Известный разрыв: focus-цвет primary на тёмных секциях не
+ * читается — замена производных на тёмном зафиксирована за T9.2
+ * (tests/contrast/pairs.config.mjs).
+ *
+ * VI-режим (EPIC-9): перекраска vi.css накрывает ссылки как обычные
+ * элементы — цветов вне токенов в файле нет (инвариант §5).
+ */
+
+.ui-link {
+  box-sizing: border-box;
+  color: var(--ui-color-primary);
+  text-decoration: underline;
+  /* Незарегистрированные в order-списке свойства text-decoration-thickness/
+     text-underline-offset — в конце правила (stylelint-order). */
+  text-decoration-thickness: var(--ui-link-underline-thickness);
+  text-underline-offset: var(--ui-link-underline-offset);
+}
+
+/* Иконка — геометрия от шрифта (1em): растёт вместе с текстом роли.
+   Цвет — currentColor из разметки (fill/stroke-атрибуты svg), CSS-цвет
+   сознательно не задаётся: наследование и VI-перекраска работают сами. */
+.ui-link__icon {
+  box-sizing: border-box;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+}
+
+/* ── :visited — только цвет (приватность истории) ── */
+
+.ui-link:visited {
+  color: var(--ui-color-text-muted);
+}
+
+.ui-link--on-dark {
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-link--on-dark:visited {
+  color: var(--ui-color-text-on-dark-muted);
+}
+
+/* ── ui-link--button: визуально кнопка, семантика ссылки
+      («переход-выглядит-как-действие»; полная кнопка — T4.2). Геометрия —
+      padдинги одобренного .btn career-portal (12/28) без фиксированной
+      высоты: 32px-база не разваливает подпись. ── */
+
+.ui-link--button {
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  padding: var(--ui-space-3) var(--ui-space-5);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  text-decoration: none;
+}
+
+.ui-link--button:visited {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* ── :hover — только под (hover: hover); :active — color-mix ── */
+
+@media (hover: hover) {
+  .ui-link:hover {
+    color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
+  }
+
+  .ui-link--on-dark:hover {
+    color: color-mix(in srgb, var(--ui-color-text-on-dark) 88%, black);
+  }
+
+  .ui-link--button:hover {
+    background-color: var(--ui-color-primary-hover);
+    /* Подпись переобъявлена: без неё на кнопку при hover просачивался цвет
+       .ui-link:hover (color-mix primary) — тёмный текст на blue-700 = 1.78:1
+       (поймано e2e-контрастом). */
+    color: var(--ui-color-text-on-dark);
+  }
+}
+
+.ui-link:active {
+  color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
+}
+
+.ui-link--on-dark:active {
+  color: color-mix(in srgb, var(--ui-color-text-on-dark) 88%, black);
+}
+
+.ui-link--button:active {
+  background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
+  /* Подпись — белая (та же причина, что в :hover: против просачивания
+     color-mix из .ui-link:active). */
+  color: var(--ui-color-text-on-dark);
+}

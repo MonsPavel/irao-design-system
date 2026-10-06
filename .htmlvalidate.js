@@ -36,17 +36,19 @@
 
 const { definePlugin, Rule } = require('html-validate');
 
-/** Ссылка имеет доступное имя: aria-label/aria-labelledby либо контент. */
-function hasAccessibleName(link) {
+/** Ссылка имеет доступное имя: aria-label/aria-labelledby либо контент.
+ *  const-стрелки, не function declarations: файл CJS-script, eslint
+ *  no-implicit-globals ловит глобальные function-декларации. */
+const hasAccessibleName = (link) => {
   for (const attr of ['aria-label', 'aria-labelledby']) {
     const value = link.getAttribute(attr);
     if (value && value.value.trim() !== '') return true;
   }
   return hasAccessibleContent(link);
-}
+};
 
 /** Контент, из которого скринридер возьмёт имя (прозрачная рекурсия). */
-function hasAccessibleContent(node) {
+const hasAccessibleContent = (node) => {
   for (const child of node.childNodes) {
     // nodeType 3 — TextNode (html-validate: textContent, без .is()).
     if (child.nodeType === 3) {
@@ -69,7 +71,7 @@ function hasAccessibleContent(node) {
     if (hasAccessibleContent(child)) return true;
   }
   return false;
-}
+};
 
 /** На странице должен быть ровно один h1. */
 class OneH1 extends Rule {

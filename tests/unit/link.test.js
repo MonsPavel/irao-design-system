@@ -37,10 +37,11 @@ const root = join(import.meta.dirname, '..', '..');
 /** CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки. */
 const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
 
-/** Тело правила по селектору (начало строки — селектор, до закрывающей скобки). */
+/** Тело правила по селектору (начало строки — селектор, до закрывающей скобки).
+ *  \s* перед селектором — правила внутри @media идут с отступом. */
 const blockOf = (css, selector) => {
   const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = css.match(new RegExp(`(?:^|\\n)${escaped}\\s*\\{([^}]*)\\}`));
+  const match = css.match(new RegExp(`(?:^|\\n)\\s*${escaped}\\s*\\{([^}]*)\\}`));
   return match ? match[1] : null;
 };
 
@@ -91,13 +92,15 @@ describe('components/ui-link/ui-link.css — база (Implementation requiremen
     expect(css).not.toMatch(/#[0-9a-f]{3,8}\b/i);
   });
 
-  it('фиксированных высот нет (32px-база T3.6 не разваливает кнопочный вариант)', () => {
-    expect(css).not.toMatch(/(?:^|\n)\s*(?:min-)?height:\s/);
+  it('фиксированных (px/rem) высот нет (32px-база T3.6); em-геометрия иконки легальна', () => {
+    expect(css).not.toMatch(/(?:^|\n)\s*(?:min-)?height:\s*[\d.]+(?:px|rem|pt)/);
   });
 });
 
 describe('components/ui-link/ui-link.css — производные состояния (T2.6, ADR-0010)', () => {
-  const css = stripCssComments(readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'));
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'),
+  );
 
   it('все :hover-правила — ТОЛЬКО внутри @media (hover: hover) (EPIC-4: sticky-hover на таче)', () => {
     const mediaIndex = css.indexOf('@media (hover: hover)');
@@ -122,29 +125,41 @@ describe('components/ui-link/ui-link.css — производные состоя
 
   it('hover кнопочного варианта — пара одобренного дизайна var(--ui-color-primary-hover), не color-mix', () => {
     const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
-    expect(mediaBlock).toContain(
-      '.ui-link--button:hover {\n    background-color: var(--ui-color-primary-hover);',
-    );
+    const block = blockOf(mediaBlock, '.ui-link--button:hover');
+    expect(block).toContain('background-color: var(--ui-color-primary-hover);');
+    // Подпись переобъявлена: иначе просачивается color-mix из .ui-link:hover —
+    // тёмный текст на blue-700 = 1.78:1 (поймано e2e-контрастом T4.1).
+    expect(block).toContain('color: var(--ui-color-text-on-dark);');
   });
 
-  it('active — color-mix 88% + black (одобренным дизайном active не задан)', () => {
+  it('active — color-mix 88% + black (одобренным дизайном active не задан); подпись кнопки остаётся белой', () => {
     expect(css).toContain(
       '.ui-link:active {\n  color: color-mix(in srgb, var(--ui-color-primary) 88%, black);',
     );
     expect(css).toContain(
       '.ui-link--on-dark:active {\n  color: color-mix(in srgb, var(--ui-color-text-on-dark) 88%, black);',
     );
-    expect(css).toContain(
-      '.ui-link--button:active {\n  background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);',
+    const buttonActive = blockOf(css, '.ui-link--button:active');
+    expect(buttonActive).toContain(
+      'background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);',
+    );
+    expect(buttonActive, 'подпись против просачивания .ui-link:active').toContain(
+      'color: var(--ui-color-text-on-dark);',
     );
   });
 });
 
 describe('components/ui-link/ui-link.css — :visited и порядок LVHA (Technical considerations T4.1)', () => {
-  const css = stripCssComments(readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'));
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'),
+  );
 
   it(':visited стилизован минимально — ровно одно объявление color (приватность истории)', () => {
-    for (const selector of ['.ui-link:visited', '.ui-link--on-dark:visited', '.ui-link--button:visited']) {
+    for (const selector of [
+      '.ui-link:visited',
+      '.ui-link--on-dark:visited',
+      '.ui-link--button:visited',
+    ]) {
       const block = blockOf(css, selector);
       expect(block, `правило ${selector} найдено`).toBeTruthy();
       const declarations = declarationsOf(block);
@@ -173,7 +188,9 @@ describe('components/ui-link/ui-link.css — :visited и порядок LVHA (Te
 });
 
 describe('components/ui-link/ui-link.css — варианты (Scope T4.1)', () => {
-  const css = stripCssComments(readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'));
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'),
+  );
 
   it('ui-link--on-dark: пара text-on-dark; visited — text-on-dark-muted', () => {
     const block = blockOf(css, '.ui-link--on-dark');
@@ -208,10 +225,13 @@ describe('components/ui-link/ui-link.css — варианты (Scope T4.1)', () 
 describe('канонический паттерн (components/ui-link/ui-link.html)', () => {
   const html = readFileSync(join(root, 'components', 'ui-link', 'ui-link.html'), 'utf8');
 
-  it('все три варианта в паттерне: default, --on-dark, --button', () => {
+  it('варианты в паттерне: default и --button; --on-dark — на стенде (тёмный фон — контекст секции сайта, не компонента)', () => {
     expect(html).toContain('class="ui-link"');
-    expect(html).toContain('class="ui-link ui-link--on-dark"');
     expect(html).toContain('class="ui-link ui-link--button"');
+    // Паттерн без inline-стилей (VI-инвариант §5), тёмной секции в системе
+    // ещё нет (layout — T3.4, только --muted): on-dark демонстрирует стенд
+    // своей каркасной обвязкой.
+    expect(html, 'inline-стили в паттерне запрещены').not.toMatch(/<a[^>]*style=/);
   });
 
   it('внешняя ссылка: target="_blank" только вместе с rel="noopener" (AC T4.1)', () => {
@@ -225,9 +245,15 @@ describe('канонический паттерн (components/ui-link/ui-link.ht
     expect(html).toMatch(/<a[^>]*aria-label="[^"]+"/);
   });
 
-  it('ui-link__icon — svg с aria-hidden и currentColor', () => {
-    expect(html).toMatch(/<svg class="ui-link__icon"[^>]*aria-hidden="true"/);
-    expect(html).toMatch(/currentColor/);
+  it('ui-link__icon — svg с aria-hidden и currentColor (порядок атрибутов не пинится)', () => {
+    // prettier разбивает теги на строки — матчим по одному тегу <svg …>.
+    const svgTags = [...html.matchAll(/<svg[\s\S]*?>/g)].map(([tag]) => tag);
+    const iconTags = svgTags.filter((tag) => tag.includes('class="ui-link__icon"'));
+    expect(iconTags.length, 'иконки в паттерне есть').toBeGreaterThan(0);
+    for (const tag of iconTags) {
+      expect(tag, 'иконка скрыта от скринридера').toContain('aria-hidden="true"');
+    }
+    expect(html, 'currentColor в атрибутах иконки').toContain('currentColor');
   });
 });
 
@@ -267,7 +293,7 @@ describe('подключение и гейты (DoD)', () => {
     expect(runner).toContain("file: 'html/link-named.html'");
   });
 
-  it('README компонента: do/don\'t «ссылка vs кнопка», правила внешних и icon-only ссылок (AC)', () => {
+  it("README компонента: do/don't «ссылка vs кнопка», правила внешних и icon-only ссылок (AC)", () => {
     const readme = readFileSync(join(root, 'components', 'ui-link', 'README.md'), 'utf8');
     expect(readme).toMatch(/Ссылка vs кнопка/i);
     expect(readme).toContain('noopener');
