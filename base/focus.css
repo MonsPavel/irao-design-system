@@ -1,0 +1,34 @@
+/*!
+ * irao-ui — base/focus.css: глобальная политика фокуса (задача T3.2,
+ * реализация ADR-0001; WCAG 2.4.7 «Focus Visible»).
+ *
+ * Почему селекторный список «элемент + :focus-visible», а не :where(...) —
+ * ADR-0001: ui-core подключается в каскаде первым, и на legacy-сайтах после
+ * него встречаются tag-правила вида `a { outline: none }` (специфичность
+ * 0-0-1). Специфичность каждой декларации здесь 0-1-1 — видимый фокус
+ * побеждает независимо от порядка подключения. Это сознательное исключение
+ * из правила «специфичность одного класса»: правило задаёт гарантированный
+ * глобальный минимум, компоненты по-прежнему стилизуют фокус своими классами.
+ *
+ * `:focus-visible` подсвечивает только клавиатурный фокус — мышиный
+ * сознательно не подсвечивается. `outline-offset` гарантирует видимость
+ * на заполненных фонах.
+ *
+ * Значения — focus-тройка токенов слоя 2 (T2.2, career-portal pages.css:52):
+ * смена темы переопределяет --ui-focus-* и меняет фокус без правки этого
+ * файла (e2e — tests/e2e/focus.spec.js). Расширение списка новым
+ * интерактивным тегом — ответственность владельца этой задачи: процедура —
+ * docs/ui-system/architecture/focus-policy.md, пин списка —
+ * tests/unit/focus.test.js, поверхность Tab-обхода — стенд base.
+ */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: var(--ui-focus-width) solid var(--ui-focus-color);
+  outline-offset: var(--ui-focus-offset);
+}
