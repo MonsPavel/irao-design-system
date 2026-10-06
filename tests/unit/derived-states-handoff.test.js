@@ -30,9 +30,7 @@ beforeAll(() => {
 
 describe('T2.6, кнопочная часть AC2 — запись в tests/e2e/README.md до T4.2', () => {
   it('секция сценария T2.6 присутствует со статусом «ожидает поверхности» (ui-button — T4.2)', () => {
-    expect(section, 'секции «Сценарий T2.6» нет в tests/e2e/README.md').toContain(
-      'Сценарий T2.6',
-    );
+    expect(section, 'секции «Сценарий T2.6» нет в tests/e2e/README.md').toContain('Сценарий T2.6');
     expect(section).toContain('Статус: **ожидает поверхности**');
     expect(section).toContain('T4.2');
   });
@@ -50,9 +48,9 @@ describe('T2.6, кнопочная часть AC2 — запись в tests/e2e/
     expect(section).toContain('88%');
   });
 
-  it('visual-эталоны привязаны к окружению создания по ADR-0004 (test:docker/CI), не хост', () => {
+  it('visual-эталоны привязаны к окружению создания по ADR-0003/0004 (test:docker/CI), не хост', () => {
     expect(section).toContain('test:docker');
-    expect(section).toContain('ADR-0004');
+    expect(section).toContain('ADR-0003/0004');
   });
 
   it('общая часть сценария уже в коде — derived-states.spec.js упомянут', () => {
