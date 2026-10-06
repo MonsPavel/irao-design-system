@@ -294,6 +294,29 @@ describe('tokens/semantic.css — focus-тройка (ADR-0001)', () => {
   });
 });
 
+describe('tokens/semantic.css — hover-пары одобренного дизайна (T2.6, ADR-0010)', () => {
+  /** Примитивы отдельно: пара обязана указывать на значение макета, не пересчитывать его. */
+  const primitiveDeclarations = parseBaseDeclarations(stripComments(primitivesSource));
+
+  it('primary-hover = var(--ui-blue-700) — пара одобренного дизайна, не color-mix', () => {
+    // career-portal: .btn--primary:hover { background: var(--color-blue-700) }
+    // (components.css:80); значение макета не пересчитывается (Scope T2.6:
+    // «одобренный визуал не пересчитывается», ADR-0010).
+    expect(declarations.get('--ui-color-primary-hover')).toBe('var(--ui-blue-700)');
+  });
+
+  it('accent-hover = var(--ui-orange-400) — пара одобренного дизайна, не color-mix', () => {
+    // career-portal: .btn--accent:hover { background: var(--color-accent-light) }
+    // (components.css:83); #F37131 = примитив --ui-orange-400.
+    expect(declarations.get('--ui-color-accent-hover')).toBe('var(--ui-orange-400)');
+  });
+
+  it('значения пар — примитивы одобренного дизайна без пересчёта (#164b89 / #f37131)', () => {
+    expect(primitiveDeclarations.get('--ui-blue-700')).toBe('#164b89');
+    expect(primitiveDeclarations.get('--ui-orange-400')).toBe('#f37131');
+  });
+});
+
 describe('гейт «компонент читает только слой 2» (AC T2.2)', () => {
   const RULE_ID = 'irao/no-primitive-token-references';
 

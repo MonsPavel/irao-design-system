@@ -52,3 +52,39 @@ Playwright-сценарии поведения компонентов по ст�
 `tests/contrast/pairs.config.mjs`); сценарий проверяет механизм, а не
 утверждённый визуал (тот — дефолтная тема career-portal).
 
+## Сценарий T2.6, кнопочная часть (AC2 «Кнопка (совместно с T4.2)»): hover из токенов-пар, active — color-mix на кнопке
+
+Статус: **ожидает поверхности** — `ui-button` появится в T4.2 (эталонный
+потребитель T2.6; Notes спеки T2.6: «должна закрыться до/вместе с T4.2»),
+закрытие критерия — при приёмке T4.2. Токен-сторона реализована и подтверждена
+T2.6: `--ui-color-primary-hover` = blue-700 `#164b89`,
+`--ui-color-accent-hover` = accent-light `#f37131` (tokens/semantic.css,
+ADR-0010, color-mix значения пар не заменяют). Общая часть сценария (механика
+пар и color-mix, смена темы) уже исполняется в коде —
+`tests/e2e/derived-states.spec.js` на демо-секции стенда «Токены»
+(пин записи — `tests/unit/derived-states-handoff.test.js`).
+
+Шаги (после появления стенда `ui-button`):
+
+1. Открыть `/showcase/dist/stands/ui-button.html` без темы.
+2. Assert computed hover (правила под `@media (hover: hover)`):
+   `ui-button--primary` — background = значение пары `var(--ui-color-primary-hover)`
+   = `rgb(22, 75, 137)` — одобренный дизайн, не color-mix; `ui-button--accent` —
+   `rgb(243, 113, 49)`.
+3. Assert computed active: background =
+   `color-mix(in srgb, var(--ui-color-primary) 88%, black)` ≈ `rgb(0, 35, 76)`
+   (конвенция ADR-0010; проверка — с допуском на округление браузером 8-битного
+   результата mix; сериализация color(srgb/rgb — как в derived-states.spec.js).
+4. Открыть тот же стенд с `?theme=test` (механизм T2.4): hover кнопок
+   определяется токеном-парой и не пересчитывается из primary — при themed
+   primary пара, которую тема не переопределила, остаётся одобренным значением;
+   color-mix-производные кнопки следуют за темой автоматически.
+5. Visual-эталоны состояний кнопки (default/hover/active/disabled/loading ×
+   варианты × 375/768/1440) — только из контейнера/CI: `npm run test:docker`
+   или CI-джоба `update-snapshots` (ADR-0003/0004: хост-прогоны эталоны не
+   пишут и не сравнивают). Пункт исполняется в чек-листе T4.2.
+
+Границы: сценарий закрывает только T2.6-сторону AC2 — источники hover/active
+цветов кнопки; полный компонентный чек-лист T4.2 (e2e disabled/loading, axe,
+клавиатура, CONTRIBUTING) — задача T4.2.
+
