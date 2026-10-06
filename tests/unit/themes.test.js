@@ -216,3 +216,43 @@ describe('stylelint-гейт themes/ (Implementation requirements T2.4 п.1)', (
     expect(override.rules['irao/no-primitive-token-references']).toBeNull();
   });
 });
+
+describe('сценарий AC1 «вид кнопок/карточек/полей» — фиксация до харнесса (приёмка T2.4)', () => {
+  // Суб-часть AC1 «меняется вид настоящих ui-компонентов» физически не
+  // проверяема, пока компонентов нет (EPIC-4/5), а харнесс e2e — T1.4.
+  // Конвенция tests/README.md: до T1.4 e2e-сценарии фиксируются текстом в
+  // tests/e2e/. Тест не даёт фиксации потерять конкретику: без неё приёмка
+  // T1.4/EPIC-4 не соберёт сценарий, и суб-часть AC1 останется навсегда
+  // «неподтверждённой» молча.
+  const E2E_README = readFileSync(join(root, 'tests', 'e2e', 'README.md'), 'utf8');
+
+  it('сценарий T2.4 записан в tests/e2e/README.md: тема, стенды компонентов, computed-ожидания', () => {
+    expect(E2E_README, 'нет секции сценария T2.4').toContain('T2.4');
+    expect(E2E_README, 'сценарий не называет атрибут механизма').toContain('data-ui-theme="test"');
+    for (const stand of ['ui-button', 'ui-card', 'ui-field']) {
+      expect(E2E_README, `сценарий не покрывает стенд ${stand}`).toContain(stand);
+    }
+    expect(E2E_README, 'нет computed-ожидания по primary').toContain('--ui-color-primary');
+    expect(E2E_README, 'нет ожидания themed-значения primary (#511d59)').toContain('#511d59');
+    expect(E2E_README, 'не указано, чем исполняется (харнесс T1.4)').toContain('T1.4');
+  });
+
+  it('промежуточная поверхность доказательства реальна: демо стенда «Токены» читает слой 2 через var()', () => {
+    // «Вид меняется» на стенде — не декорация: стилевые правила демо-классов
+    // сгенерированы как background/border-radius/box-shadow: var(--токен),
+    // поэтому перекраска под [data-ui-theme] — тот же каскад, что у будущих
+    // ui-компонентов (ADR-0009: компоненты читают только слой 2).
+    const stand = readFileSync(STAND_SOURCE, 'utf8');
+    for (const token of [
+      '--ui-color-primary',
+      '--ui-color-accent',
+      '--ui-color-surface-muted',
+      '--ui-radius-md',
+      '--ui-shadow-card',
+    ]) {
+      expect(stand, `демо ${token} на стенде не читает токен через var()`).toContain(
+        `var(${token})`,
+      );
+    }
+  });
+});
