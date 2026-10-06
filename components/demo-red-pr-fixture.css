@@ -1,0 +1,9 @@
+/* Контрольная фикстура красного демо-PR (Testing requirements T1.5:
+ * «демо-PR с нарушением блокируется»). Нарушение — инвариант
+ * «hex только в tokens/primitives.css»: stylelint обязан упасть,
+ * mandatory-гейт lint в ci.yml становится красным, PR не проходит приёмку.
+ * Файл живёт ТОЛЬКО на ветке task/T1.5-demo-red и не предназначен для merge.
+ */
+.ui-demo-red-pr-fixture {
+  color: #ff0000;
+}
