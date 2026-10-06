@@ -353,6 +353,26 @@ function generateShowcase({ themes }) {
     warn('showcase/pages/base/index.html ещё нет — стенд base не сгенерирован');
   }
 
+  // Стенд «typography» (T3.3) — поверхность e2e типографики: все классы ролей
+  // ui-h1…ui-micro + ui-text--muted, списки ui-list, ui-address и длинные
+  // RU-слова (переносы) на одной странице. Сценарии — computed-размеры на
+  // 375/768/1440, иерархия заголовков всех страниц полигона, 32px-сценарий
+  // (tests/e2e/typography.spec.js). Источник — фрагмент тела, как у base.
+  const typographyStandSource = join(ROOT, 'showcase', 'pages', 'typography', 'index.html');
+  if (existsSync(typographyStandSource)) {
+    const page = frame({
+      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
+      title: 'typography — irao-ui showcase',
+      main: `    <h1>typography</h1>\n${readFileSync(typographyStandSource, 'utf8').trim()}`,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'typography.html'), page);
+    stands.push({ name: 'typography', source: 'showcase/pages/typography/index.html' });
+  } else {
+    warn('showcase/pages/typography/index.html ещё нет — стенд typography не сгенерирован');
+  }
+
   const discovered = discoverComponents();
   for (const name of discovered) {
     if (!COMPONENTS.includes(name)) {

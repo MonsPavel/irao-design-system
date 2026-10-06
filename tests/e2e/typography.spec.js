@@ -209,12 +209,14 @@ test.describe('типографика (T3.3)', () => {
     await openIndex(page);
 
     const links = await page.evaluate(() =>
-      [...new Set(Array.from(document.querySelectorAll('a[href]'), (a) => a.href))].filter(
-        // Только реальные страницы полигона (stands/, standalone); ссылка-«домой»
-        // каркаса на самом индексе резолвится в /index.html вне полигона (404) —
-        // не страница системы, иерархию на ней не проверяем.
-        (href) => href.startsWith(`${window.location.origin}/showcase/dist/`),
-      ),
+      [...new Set(Array.from(document.querySelectorAll('a[href]'), (a) => a.getAttribute('href')))]
+        // href-атрибуты индекса относительные («stands/x.html»), а сервер
+        // отдаёт индекс на «/» rewrite'ом — резолвим против канонического
+        // адреса документа полигона; /showcase/dist/ — и есть полигон
+        // (ссылка-«домой» каркаса на индексе уходит выше корня и отфильтрована).
+        .filter((href) => href && !href.startsWith('#'))
+        .map((href) => new URL(href, `${window.location.origin}/showcase/dist/index.html`).href)
+        .filter((href) => href.startsWith(`${window.location.origin}/showcase/dist/`)),
     );
     expect(
       links.length,

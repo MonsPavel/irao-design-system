@@ -1,0 +1,120 @@
+<p class="ui-showcase-stand__note">
+  Стенд типографики (T3.3): классы ролей — типографическая шкала как API. Каждая роль задаёт
+  fs/lh/fw/letter-spacing целиком из тройки токенов T2.2; заголовки выводятся классами, а не тегами
+  — защита от legacy <code>h1 { … }</code> (семантику даёт реальный тег, класс — вид). Роли и «когда
+  какую» — <code>docs/ui-system/architecture/typography-roles.md</code>; сценарии —
+  <code>tests/e2e/typography.spec.js</code>.
+</p>
+
+<section aria-labelledby="typography-heading-roles">
+  <h2 id="typography-heading-roles">Заголовочные роли</h2>
+  <p>
+    letter-spacing −0.02em — перенос макета career-portal (<code>page-title</code>,
+    <code>section__title</code>).
+  </p>
+
+  <p class="ui-h1">ui-h1 — заголовок страницы</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-h1 · --ui-lh-h1 · --ui-fw-h1 · ls −0.02em</code>
+  </p>
+
+  <p class="ui-h2">ui-h2 — заголовок раздела</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-h2 · --ui-lh-h2 · --ui-fw-h2 · ls −0.02em</code>
+  </p>
+
+  <p class="ui-h3">ui-h3 — подзаголовок раздела</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-h3 · --ui-lh-h3 · --ui-fw-h3 · ls −0.02em</code>
+  </p>
+
+  <p class="ui-h4">ui-h4 — заголовок карточки</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-h4 · --ui-lh-h4 · --ui-fw-h4 · ls −0.02em</code>
+  </p>
+
+  <p class="ui-h5">ui-h5 — заголовок блока</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-h5 · --ui-lh-h5 · --ui-fw-h5 · ls −0.02em</code>
+  </p>
+
+  <p class="ui-h6">ui-h6 — заголовок группы</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-h6 · --ui-lh-h6 · --ui-fw-h6 · ls −0.02em</code>
+  </p>
+</section>
+
+<section aria-labelledby="typography-text-roles">
+  <h2 id="typography-text-roles">Текстовые роли</h2>
+
+  <p class="ui-lead">
+    ui-lead — лид-абзац вводной секции: крупнее body, держит внимание на первом экране.
+  </p>
+  <p class="ui-small ui-text--muted"><code>--ui-fs-lead · --ui-lh-lead · --ui-fw-lead</code></p>
+
+  <p class="ui-body">
+    ui-body — основной текст страницы: размер по умолчанию <code>body</code>, читается на всех
+    носителях и масштабируется с базой пользователя (rem, требование №19 ТЗ).
+  </p>
+  <p class="ui-small ui-text--muted"><code>--ui-fs-body · --ui-lh-body · --ui-fw-body</code></p>
+
+  <p class="ui-small">
+    ui-small — вторичный текст: подписи полей, сноски, вспомогательные строки списков.
+  </p>
+  <p class="ui-small ui-text--muted"><code>--ui-fs-small · --ui-lh-small · --ui-fw-small</code></p>
+
+  <p class="ui-caption">ui-caption — подписи к иллюстрациям и датам.</p>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-fs-caption · --ui-lh-caption · --ui-fw-caption</code>
+  </p>
+
+  <p class="ui-micro">ui-micro — служебные подписи и юридические строки.</p>
+  <p class="ui-small ui-text--muted"><code>--ui-fs-micro · --ui-lh-micro · --ui-fw-micro</code></p>
+
+  <p class="ui-body ui-text--muted">
+    ui-text--muted — модификатор вторичного текста: <code>--ui-color-text-muted</code> (AA-пара
+    T2.3). Можно сочетать с любой текстовой ролью.
+  </p>
+</section>
+
+<section aria-labelledby="typography-lists-address">
+  <h2 id="typography-lists-address">Списки и адрес</h2>
+  <p>
+    Глобальный reset (T3.1) выключает маркеры у всех <code>ul</code>/<code>ol</code> —
+    содержательный список возвращается классом <code>ui-list</code> (отступ и ритм пунктов — из
+    шкалы spacing).
+  </p>
+
+  <ul class="ui-list">
+    <li>Маркированный список: маркетинговые перечни и преимущества.</li>
+    <li>Маркер — <code>disc</code>, отступ — <code>--ui-space-5</code>.</li>
+    <li>Между пунктами — <code>--ui-space-2</code>.</li>
+  </ul>
+
+  <ol class="ui-list">
+    <li>Нумерованный список: шаги и инструкции.</li>
+    <li>Маркер — <code>decimal</code>.</li>
+    <li>Отступы и ритм — те же, что у маркированного.</li>
+  </ol>
+
+  <address class="ui-address">
+    ui-address: 125252, г. Москва, ул. Примерная, д. 1, стр. 2 — без браузерного курсива.
+  </address>
+</section>
+
+<section aria-labelledby="typography-long-words">
+  <h2 id="typography-long-words">Длинные слова (перенос, RU)</h2>
+  <p>
+    <code>overflow-wrap: break-word</code> на <code>body</code>: длинные русские слова переносятся,
+    а не создают горизонтальный скролл — в том числе при 32px-базе (сценарий T3.6/T3.3).
+  </p>
+
+  <p class="ui-h1">Сельскохозяйственный электроэнергетический</p>
+  <p class="ui-lead">
+    Человеконенавистничество, сверхвысокочастотный, машиностроительный, предпринимательство.
+  </p>
+  <p class="ui-body">
+    Двадцатисимвольные производные слова русскоязычных текстов — профессиональная терминология,
+    электроэнергетика, интернационализация — переносятся на узких вьюпортах без разрушения сетки.
+  </p>
+</section>
