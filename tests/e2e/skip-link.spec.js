@@ -135,29 +135,32 @@ standTest.describe('ui-skip-link (T3.5, WCAG 2.4.1)', () => {
         expect(state.color, 'текст — --ui-color-text-on-dark (#fff)').toBe('rgb(255, 255, 255)');
       },
     );
+
+    // Tab→Enter — продолжение сценария первого Tab (начинается с Tab на
+    // skip-link): наследует webkit-skip describe'а (Safari/WebKit по
+    // умолчанию не даёт Tab на ссылки — Option+Tab, поведение браузера).
+    standTest(
+      'Tab→Enter: фокус реально внутри #main, плашка скрылась (AC 1; Testing requirements)',
+      async ({ stand }) => {
+        const page = await stand('base');
+        await page.keyboard.press('Tab');
+        await page.keyboard.press('Enter');
+
+        const focus = await focusState(page);
+        expect(focus.hash, 'переход по якорю совершен').toBe('#main');
+        expect(
+          focus.isMainTarget || focus.insideMain,
+          'AC/Testing requirements: activeElement внутри main',
+        ).toBe(true);
+
+        const state = await skipState(page);
+        expect(
+          state.rectWidth,
+          'фокус покинул ссылку — плашка скрылась в 1px-клип',
+        ).toBeLessThanOrEqual(1);
+      },
+    );
   });
-
-  standTest(
-    'Tab→Enter: фокус реально внутри #main, плашка скрылась (AC 1; Testing requirements)',
-    async ({ stand }) => {
-      const page = await stand('base');
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Enter');
-
-      const focus = await focusState(page);
-      expect(focus.hash, 'переход по якорю совершен').toBe('#main');
-      expect(
-        focus.isMainTarget || focus.insideMain,
-        'AC/Testing requirements: activeElement внутри main',
-      ).toBe(true);
-
-      const state = await skipState(page);
-      expect(
-        state.rectWidth,
-        'фокус покинул ссылку — плашка скрылась в 1px-клип',
-      ).toBeLessThanOrEqual(1);
-    },
-  );
 
   standTest('axe чист на стенде ui-skip-link', async ({ stand }) => {
     const page = await stand('ui-skip-link');
