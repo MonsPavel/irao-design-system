@@ -35,8 +35,12 @@
   --ui-color-primary: var(--ui-blue-800);
   /* career-portal: --color-primary-deep (тёмные фоновые панели) */
   --ui-color-primary-deep: var(--ui-blue-750);
-  /* career-portal: --color-accent (оранжевый кнопок/акцентов; hover-производные — T2.6) */
+  /* career-portal: --color-accent (оранжевый кнопок/акцентов) */
   --ui-color-accent: var(--ui-orange-500);
+  /* career-portal: --color-blue-700 как hover primary (.btn--primary:hover, components.css:80) — пара одобренного дизайна (T2.6, ADR-0010): color-mix значение макета не заменяет, тема переопределяет пару явно вместе с primary */
+  --ui-color-primary-hover: var(--ui-blue-700);
+  /* career-portal: --color-accent-light как hover accent (.btn--accent:hover, components.css:83) — пара одобренного дизайна (T2.6, ADR-0010): color-mix значение макета не заменяет */
+  --ui-color-accent-hover: var(--ui-orange-400);
   /* career-portal: --color-text */
   --ui-color-text: var(--ui-black);
   /* career-portal: --color-text-muted (#808080 → gray-700 — AA-замена T2.3, design-decision: 6.19:1 на белом; примитив gray-600 остаётся эталоном) */
