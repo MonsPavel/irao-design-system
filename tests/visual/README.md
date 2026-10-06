@@ -1,7 +1,7 @@
 # tests/visual/
 
 Скриншот-эталоны: `__screenshots__/<spec>/<name>--<viewport>.png`
-(375/768/1440 — шкала `VIEWPORTS` харнесса). Коммитятся.
+(375/768/1280/1440 — шкала `VIEWPORTS` харнесса, T3.4 добавил xl). Коммитятся.
 
 Создаются **только** в окружении создания (ADR-0004): `npm run test:docker`
 (официальный образ `mcr.microsoft.com/playwright:vX-jammy`, пин — рядом с

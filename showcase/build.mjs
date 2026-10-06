@@ -357,7 +357,7 @@ function generateShowcase({ themes }) {
   // Стенд «typography» (T3.3) — поверхность e2e типографики: все классы ролей
   // ui-h1…ui-micro + ui-text--muted, списки ui-list, ui-address и длинные
   // RU-слова (переносы) на одной странице. Сценарии — computed-размеры на
-  // 375/768/1440, иерархия заголовков всех страниц полигона, 32px-сценарий
+  // 375/768/1280/1440, иерархия заголовков всех страниц полигона, 32px-сценарий
   // (tests/e2e/typography.spec.js). Источник — фрагмент тела, как у base.
   const typographyStandSource = join(ROOT, 'showcase', 'pages', 'typography', 'index.html');
   if (existsSync(typographyStandSource)) {

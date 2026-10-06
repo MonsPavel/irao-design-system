@@ -214,3 +214,39 @@ describe('e2e-сценарии записаны (Testing requirements T3.4)', ()
     expect(spec).toContain('gridTemplateColumns');
   });
 });
+
+describe('шкала вьюпортов скриншотов — дока ↔ код (ревью T3.4: рассинхрон)', () => {
+  // T3.4 добавил xl 1280 в VIEWPORTS — живые упоминания шкалы скриншотов
+  // обязаны показывать четырёхвьюпортную шкалу. Пинется текст влитую:
+  // «375/768/1280/1440» и отсутствие оборота «три/трёх вьюпорта(х)».
+  // Исторические справки (harness.js: «T1.4: 375/768/1440; T3.4 добавил…»)
+  // и упоминания ручной приёмки стендов (CONTRIBUTING, showcase/README,
+  // 02-architecture:412, responsive-approach:74 — критические вьюпорты
+  // ручной проверки) и замороженные файлы задач пином не накрываются.
+  const LIVE_SCALE_FILES = [
+    'tests/README.md', // шаблон компонентных тестов + пример названия теста
+    'tests/visual/README.md', // шапка каталога эталонов
+    'tests/e2e/README.md', // чек-лист T2.6: visual-эталоны
+    'tests/e2e/typography.spec.js', // шапка + названия тестов
+    'tests/e2e/showcase-index.spec.js', // шапка
+    'tests/helpers/harness.js', // докстринг shot()
+    'docs/02-architecture.md', // §9: строка visual regression
+    'base/README.md', // поверхность e2e typography
+    'base/typography.css', // шапка: поверхность браузера
+    'showcase/build.mjs', // комментарий стенда typography
+  ];
+
+  it.each(LIVE_SCALE_FILES)('%s: шкала скриншотов названа как 375/768/1280/1440', (rel) => {
+    const text = readFileSync(join(root, ...rel.split('/')), 'utf8');
+    expect(text, `${rel}: четырёхвьюпортная шкала не названа`).toContain('375/768/1280/1440');
+    expect(text, `${rel}: оборот «три/трёх вьюпорта(х)» не вычищен`).not.toMatch(
+      /три вьюпорта|трёх вьюпорт/,
+    );
+  });
+
+  it('источник истины VIEWPORTS — ровно 375/768/1280/1440', () => {
+    const harness = readFileSync(join(root, 'tests', 'helpers', 'harness.js'), 'utf8');
+    const widths = [...harness.matchAll(/width:\s*(\d+)/g)].map((m) => Number(m[1]));
+    expect(widths, 'шкала VIEWPORTS в harness.js').toEqual([375, 768, 1280, 1440]);
+  });
+});

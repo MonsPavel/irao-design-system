@@ -82,7 +82,7 @@
 - `ui-address`-минимум — без браузерного курсива;
 - компоненты НЕ зависят от этих element-дефолтов (ADR-0002): base задаёт
   только разумный дефолт страницы; e2e-поверхность — стенд
-  `stands/typography.html` (computed-размеры 375/768/1440, иерархия, 32px —
+  `stands/typography.html` (computed-размеры 375/768/1280/1440, иерархия, 32px —
   `tests/e2e/typography.spec.js`).
 
 **`base/layout.css` — layout-примитивы (T3.4):**
