@@ -33,8 +33,11 @@
 `!important` только в `a11y/vi.css`; `box-sizing: border-box` на корне каждого
 компонента (ADR-0002); mobile-first, `min-width` только из шкалы брейкпоинтов
 (шкала и исключения — дока [«Адаптивный подход»](docs/ui-system/architecture/responsive-approach.md));
-значения утверждённого дизайна career-portal не меняются (отклонение —
-design-decision владельца дизайна).
+производные состояния без одобренного дизайна — `color-mix` над токеном слоя 2
+(88% базовый + black, под `@media (hover: hover)`), hover-пары одобренного
+дизайна — явные токены `--ui-color-primary-hover` / `--ui-color-accent-hover`
+(ADR-0010); значения утверждённого дизайна career-portal не меняются
+(отклонение — design-decision владельца дизайна).
 
 ## Гейты линтеров (с T1.2)
 

@@ -115,6 +115,8 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--color-primary` | `--ui-color-primary` → `--ui-blue-800` | |
 | `--color-primary-deep` | `--ui-color-primary-deep` → `--ui-blue-750` | |
 | `--color-accent` | `--ui-color-accent` → `--ui-orange-500` | |
+| `--color-blue-700` (hover btn--primary, components.css:80) | `--ui-color-primary-hover` → `--ui-blue-700` | hover-пара одобренного дизайна (T2.6, ADR-0010); color-mix значение не заменяет |
+| `--color-accent-light` (hover btn--accent, components.css:83) | `--ui-color-accent-hover` → `--ui-orange-400` | hover-пара одобренного дизайна (T2.6, ADR-0010) |
 | `--color-text` | `--ui-color-text` → `--ui-black` | |
 | `--color-text-muted` | `--ui-color-text-muted` → `--ui-gray-700` | AA-замена значения — T2.3, см. «AA-замены» |
 | `--color-text-on-dark` / `…-muted` | `--ui-color-text-on-dark[-muted]` → `--ui-white` / `--ui-slate-400` | |
@@ -165,11 +167,14 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 
 ### Решения-отклонения (design-decision, согласование владельца дизайна)
 
-1. **Hover-значения не вошли в слой 2 (Out of scope T2.2 → T2.6):**
-   `--color-accent-light` (btn--accent:hover), `--ui-blue-100`
-   (фон карточки при наведении), `--ui-slate-300` (hover-рамка),
-   `--ui-blue-50-55` (hover dd__trigger). Остались примитивами; производные
-   состояний появятся в T2.6 (color-mix, §3.2).
+1. **Hover-значения в слой 2 не вошли при T2.2 (Out of scope T2.2 → T2.6);**
+   кнопочные hover-пары перенесены T2.6 (`--color-accent-light` →
+   `--ui-color-accent-hover`, `--color-blue-700` как hover primary →
+   `--ui-color-primary-hover`; см. «Перенос» выше и ADR-0010). Остальные
+   hover-значения остались примитивами: `--ui-blue-100` (фон карточки при
+   наведении), `--ui-slate-300` (hover-рамка), `--ui-blue-50-55` (hover
+   dd__trigger) — семантические имена заведут задачи компонентов (T4.3+) либо
+   состояния выразятся color-mix по конвенции 88% + black (ADR-0010).
 2. **`--ui-color-surface-muted` = blue-50, а не gray-100:** пример §3.1
    (`gray-100`) заменён значением одобренного дизайна — в career-portal
    приглушённый фон карточек и «серых» секций — `--color-surface-blue-50`
