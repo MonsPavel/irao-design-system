@@ -66,7 +66,7 @@ e2e-сценарии → axe → скриншоты**.
 2. Сценарии поведения — по состояниям стенда: клик, клавиатура (фокус,
    Escape/стрелки по APG), деградация без JS.
 3. axe — обязательно, на весь стенд; падение axe валит тест.
-4. Скриншоты — все три вьюпорта шкалы `shot()` (375/768/1440).
+4. Скриншоты — все вьюпорты шкалы `shot()` (375/768/1280/1440).
 
 ```js
 // tests/e2e/ui-button.spec.js
@@ -91,7 +91,7 @@ test.describe('ui-button', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('эталоны 375/768/1440', async ({ stand }) => {
+  test('эталоны 375/768/1280/1440', async ({ stand }) => {
     const page = await stand('ui-button');
     for (const viewport of Object.keys(VIEWPORTS)) {
       await shot(page, { name: 'ui-button', viewport });

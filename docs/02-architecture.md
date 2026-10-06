@@ -432,7 +432,7 @@ irao-design-system/
 | Unit JS | Vitest (+jsdom) — только для модулей с логикой (vi, валидация, focus-utils) | чистые функции: парсинг localStorage, расчёт валидности | mandatory PR |
 | Integration/E2E | Playwright по showcase | поведение компонентов: dropdown Escape/стрелки, modal trap, tabs, форма | mandatory PR |
 | Accessibility | axe-core (в Playwright, `@axe-core/playwright`) по всем стендам | автоматизируемая часть WCAG на каждом состоянии | mandatory PR |
-| Visual regression | Playwright screenshots (built-in toHaveScreenshot) по стендам 375/768/1440; единое контейнерное окружение — официальный Playwright-образ и локально (`test:docker`), и в CI: эталоны, созданные в контейнере, совпадают с CI; CI-джоба `update-snapshots` — fallback для машин без контейнера (ADR-0004, заменил ADR-0003) | непреднамеренные визуальные сдвиги | advisory в PR → mandatory с v1.0 |
+| Visual regression | Playwright screenshots (built-in toHaveScreenshot) по стендам 375/768/1280/1440; единое контейнерное окружение — официальный Playwright-образ и локально (`test:docker`), и в CI: эталоны, созданные в контейнере, совпадают с CI; CI-джоба `update-snapshots` — fallback для машин без контейнера (ADR-0004, заменил ADR-0003) | непреднамеренные визуальные сдвиги | advisory в PR → mandatory с v1.0 |
 | Кросс-браузерность | Playwright: chromium, firefox, webkit | матрица evergreen; отдельный smoke на мобильном Safari-профиле | nightly + release |
 | Шрифто-зум тест | Playwright scenario | страница жива при 200% zoom / 32px базы | release |
 | VI-режим | Playwright scenario | включение тем/размеров не ломает стенды, панель работает | release |

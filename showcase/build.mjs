@@ -68,6 +68,7 @@ const CSS_CORE_ORDER = [
   'base/fonts.css', // T3.1 — @font-face, url() относительно dist/fonts/
   'base/focus.css', // T3.2 — глобальная политика фокуса (ADR-0001)
   'base/typography.css', // T3.3 — типографика
+  'base/layout.css', // T3.4 — layout-примитивы (контейнер/секция/сетка)
 ];
 
 /**
@@ -356,7 +357,7 @@ function generateShowcase({ themes }) {
   // Стенд «typography» (T3.3) — поверхность e2e типографики: все классы ролей
   // ui-h1…ui-micro + ui-text--muted, списки ui-list, ui-address и длинные
   // RU-слова (переносы) на одной странице. Сценарии — computed-размеры на
-  // 375/768/1440, иерархия заголовков всех страниц полигона, 32px-сценарий
+  // 375/768/1280/1440, иерархия заголовков всех страниц полигона, 32px-сценарий
   // (tests/e2e/typography.spec.js). Источник — фрагмент тела, как у base.
   const typographyStandSource = join(ROOT, 'showcase', 'pages', 'typography', 'index.html');
   if (existsSync(typographyStandSource)) {
@@ -371,6 +372,26 @@ function generateShowcase({ themes }) {
     stands.push({ name: 'typography', source: 'showcase/pages/typography/index.html' });
   } else {
     warn('showcase/pages/typography/index.html ещё нет — стенд typography не сгенерирован');
+  }
+
+  // Стенд «layout» (T3.4) — поверхность e2e layout-примитивов: контейнер,
+  // секции (в т.ч. --muted) и сетки --2/--3/--4 с длинным RU-словом в ячейке
+  // (защита minmax(0, 1fr)). Сценарии — overflow на 320/375/768/1024/1440,
+  // computed-колонки по вьюпортам, токены, эталоны на 4 вьюпортах
+  // (tests/e2e/layout.spec.js). Источник — фрагмент тела, как у base.
+  const layoutStandSource = join(ROOT, 'showcase', 'pages', 'layout', 'index.html');
+  if (existsSync(layoutStandSource)) {
+    const page = frame({
+      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
+      title: 'layout — irao-ui showcase',
+      main: `    <h1>layout</h1>\n${readFileSync(layoutStandSource, 'utf8').trim()}`,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'layout.html'), page);
+    stands.push({ name: 'layout', source: 'showcase/pages/layout/index.html' });
+  } else {
+    warn('showcase/pages/layout/index.html ещё нет — стенд layout не сгенерирован');
   }
 
   const discovered = discoverComponents();

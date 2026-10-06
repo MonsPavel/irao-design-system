@@ -6,7 +6,7 @@
  *
  * Проверяется:
  *  1. AC: каждый класс роли имеет computed font-size из соответствующего
- *     токена — на всех трёх вьюпортах шкалы (375/768/1440), то есть через
+ *     токена — на всех вьюпортах шкалы (375/768/1280/1440; xl — T3.4), то есть через
  *     всю mobile-first media-лестницу слоя 2 (T2.2);
  *  2. класс роли задаёт fs/lh/fw/letter-spacing целиком (Implementation
  *     requirements T3.3 п.1): computed тройки равны токенам, letter-spacing
@@ -21,7 +21,7 @@
  *  6. 32px-сценарий (совместно с T3.6): типографика масштабируется
  *     пропорционально rem-токенам, длинные RU-слова не рвут макет —
  *     горизонтального скролла нет;
- *  7. axe чист на стенде; эталоны 375/768/1440 — только из контейнера
+ *  7. axe чист на стенде; эталоны 375/768/1280/1440 — только из контейнера
  *     (ADR-0004).
  */
 import { expect } from '@playwright/test';
@@ -75,7 +75,7 @@ const rootFontSize = (page) =>
   page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).fontSize));
 
 test.describe('типографика (T3.3)', () => {
-  test('AC: каждый класс роли — computed font-size из токена на 375/768/1440', async ({
+  test('AC: каждый класс роли — computed font-size из токена на 375/768/1280/1440', async ({
     stand,
   }) => {
     const page = await stand('typography');
@@ -282,7 +282,7 @@ test.describe('типографика (T3.3)', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('эталоны стенда 375/768/1440 (только из контейнера, ADR-0004)', async ({ stand }) => {
+  test('эталоны стенда 375/768/1280/1440 (только из контейнера, ADR-0004)', async ({ stand }) => {
     const page = await stand('typography');
     for (const viewport of Object.keys(VIEWPORTS)) {
       await shot(page, { name: 'typography', viewport });

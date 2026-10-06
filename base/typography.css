@@ -33,7 +33,7 @@
  *  - никаких !important (инвариант системы) и никакого hex — только токены.
  *
  * Пины формы решения — tests/unit/typography.test.js; поверхность браузера
- * (computed-размеры на 375/768/1440, иерархия, 32px, эталоны) —
+ * (computed-размеры на 375/768/1280/1440, иерархия, 32px, эталоны) —
  * tests/e2e/typography.spec.js, стенд typography. «Роль и когда какую» —
  * docs/ui-system/architecture/typography-roles.md.
  */
