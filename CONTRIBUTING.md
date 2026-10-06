@@ -31,7 +31,8 @@
 
 Правила каскада, действующие везде: hex только в `tokens/primitives.css`;
 `!important` только в `a11y/vi.css`; `box-sizing: border-box` на корне каждого
-компонента (ADR-0002); mobile-first, `min-width` только из шкалы брейкпоинтов;
+компонента (ADR-0002); mobile-first, `min-width` только из шкалы брейкпоинтов
+(шкала и исключения — дока [«Адаптивный подход»](docs/ui-system/architecture/responsive-approach.md));
 значения утверждённого дизайна career-portal не меняются (отклонение —
 design-decision владельца дизайна).
 
@@ -48,6 +49,7 @@ design-decision владельца дизайна).
 | | `declaration-property-value-allowed-list` | цветной кастом-проп (`--ui-color-*`) — ровно один токен: `var()`/`color-mix()`/`inherit`/`currentColor`/`transparent` (declaration-strict-value кастом-свойства не видит) |
 | | `declaration-no-important` | `!important` вне `a11y/vi.css` (§1, принцип 4) |
 | | `declaration-property-value-disallowed-list` | `outline: none`/`0` без замены — warning до EPIC-4, затем error (ADR-0001) |
+| | `media-feature-name-disallowed-list` + `media-feature-name-value-allowed-list` | media-запросы вне mobile-first шкалы (T2.5): viewport-фичи ширины/высоты запрещены, кроме `min-width` (в т.ч. `max-width` и range-синтаксис `width >= …`); значения `min-width` — только шкала `BREAKPOINTS` из конфига (§3.2); неширинные фичи (`prefers-reduced-motion`…) не регулируются; исключение — только через ADR + override (дока «Адаптивный подход») |
 | | `irao/no-primitive-token-references` (локальный плагин `tools/stylelint/no-primitive-token-references.mjs`) | ссылки на примитивы слоя 1 (`var(--ui-blue-800)`…) вне `tokens/` — компоненты читают только слой 2 (ADR-0009, T2.2); список семейств синхронизирован с primitives.css юнит-тестом |
 | | `order/properties-order` | произвольный порядок свойств; `box-sizing` — сразу после токенов (ADR-0002) |
 | `eslint.config.mjs` | `eqeqeq`, `no-implicit-globals`, recommended | `==`, глобальный scope (только `window.IraoUI.*`), ошибки; код компонентов — классический скрипт, tools — Node ESM, tests — jsdom |
