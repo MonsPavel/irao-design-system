@@ -3,7 +3,9 @@
   fs/lh/fw/letter-spacing целиком из тройки токенов T2.2; заголовки выводятся классами, а не тегами
   — защита от legacy <code>h1 { … }</code> (семантику даёт реальный тег, класс — вид). Роли и «когда
   какую» — <code>docs/ui-system/architecture/typography-roles.md</code>; сценарии —
-  <code>tests/e2e/typography.spec.js</code>.
+  <code>tests/e2e/typography.spec.js</code>. Ключевые узлы размечены
+  <code>data-ui-check-layout</code> — контракт гейта масштабирования T3.6
+  (<code>tests/e2e/scaling.spec.js</code>, пороги — tests/e2e/README.md).
 </p>
 
 <section aria-labelledby="typography-heading-roles">
@@ -13,32 +15,32 @@
     <code>section__title</code>).
   </p>
 
-  <p class="ui-h1">ui-h1 — заголовок страницы</p>
+  <p class="ui-h1" data-ui-check-layout>ui-h1 — заголовок страницы</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-h1 · --ui-lh-h1 · --ui-fw-h1 · ls −0.02em</code>
   </p>
 
-  <p class="ui-h2">ui-h2 — заголовок раздела</p>
+  <p class="ui-h2" data-ui-check-layout>ui-h2 — заголовок раздела</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-h2 · --ui-lh-h2 · --ui-fw-h2 · ls −0.02em</code>
   </p>
 
-  <p class="ui-h3">ui-h3 — подзаголовок раздела</p>
+  <p class="ui-h3" data-ui-check-layout>ui-h3 — подзаголовок раздела</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-h3 · --ui-lh-h3 · --ui-fw-h3 · ls −0.02em</code>
   </p>
 
-  <p class="ui-h4">ui-h4 — заголовок карточки</p>
+  <p class="ui-h4" data-ui-check-layout>ui-h4 — заголовок карточки</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-h4 · --ui-lh-h4 · --ui-fw-h4 · ls −0.02em</code>
   </p>
 
-  <p class="ui-h5">ui-h5 — заголовок блока</p>
+  <p class="ui-h5" data-ui-check-layout>ui-h5 — заголовок блока</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-h5 · --ui-lh-h5 · --ui-fw-h5 · ls −0.02em</code>
   </p>
 
-  <p class="ui-h6">ui-h6 — заголовок группы</p>
+  <p class="ui-h6" data-ui-check-layout>ui-h6 — заголовок группы</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-h6 · --ui-lh-h6 · --ui-fw-h6 · ls −0.02em</code>
   </p>
@@ -47,28 +49,28 @@
 <section aria-labelledby="typography-text-roles">
   <h2 id="typography-text-roles">Текстовые роли</h2>
 
-  <p class="ui-lead">
+  <p class="ui-lead" data-ui-check-layout>
     ui-lead — лид-абзац вводной секции: крупнее body, держит внимание на первом экране.
   </p>
   <p class="ui-small ui-text--muted"><code>--ui-fs-lead · --ui-lh-lead · --ui-fw-lead</code></p>
 
-  <p class="ui-body">
+  <p class="ui-body" data-ui-check-layout>
     ui-body — основной текст страницы: размер по умолчанию <code>body</code>, читается на всех
     носителях и масштабируется с базой пользователя (rem, требование №19 ТЗ).
   </p>
   <p class="ui-small ui-text--muted"><code>--ui-fs-body · --ui-lh-body · --ui-fw-body</code></p>
 
-  <p class="ui-small">
+  <p class="ui-small" data-ui-check-layout>
     ui-small — вторичный текст: подписи полей, сноски, вспомогательные строки списков.
   </p>
   <p class="ui-small ui-text--muted"><code>--ui-fs-small · --ui-lh-small · --ui-fw-small</code></p>
 
-  <p class="ui-caption">ui-caption — подписи к иллюстрациям и датам.</p>
+  <p class="ui-caption" data-ui-check-layout>ui-caption — подписи к иллюстрациям и датам.</p>
   <p class="ui-small ui-text--muted">
     <code>--ui-fs-caption · --ui-lh-caption · --ui-fw-caption</code>
   </p>
 
-  <p class="ui-micro">ui-micro — служебные подписи и юридические строки.</p>
+  <p class="ui-micro" data-ui-check-layout>ui-micro — служебные подписи и юридические строки.</p>
   <p class="ui-small ui-text--muted"><code>--ui-fs-micro · --ui-lh-micro · --ui-fw-micro</code></p>
 
   <p class="ui-body ui-text--muted">
@@ -85,19 +87,19 @@
     шкалы spacing).
   </p>
 
-  <ul class="ui-list">
+  <ul class="ui-list" data-ui-check-layout>
     <li>Маркированный список: маркетинговые перечни и преимущества.</li>
     <li>Маркер — <code>disc</code>, отступ — <code>--ui-space-5</code>.</li>
     <li>Между пунктами — <code>--ui-space-2</code>.</li>
   </ul>
 
-  <ol class="ui-list">
+  <ol class="ui-list" data-ui-check-layout>
     <li>Нумерованный список: шаги и инструкции.</li>
     <li>Маркер — <code>decimal</code>.</li>
     <li>Отступы и ритм — те же, что у маркированного.</li>
   </ol>
 
-  <address class="ui-address">
+  <address class="ui-address" data-ui-check-layout>
     ui-address: 125252, г. Москва, ул. Примерная, д. 1, стр. 2 — без браузерного курсива.
   </address>
 </section>
@@ -109,11 +111,11 @@
     а не создают горизонтальный скролл — в том числе при 32px-базе (сценарий T3.6/T3.3).
   </p>
 
-  <p class="ui-h1">Сельскохозяйственный электроэнергетический</p>
-  <p class="ui-lead">
+  <p class="ui-h1" data-ui-check-layout>Сельскохозяйственный электроэнергетический</p>
+  <p class="ui-lead" data-ui-check-layout>
     Человеконенавистничество, сверхвысокочастотный, машиностроительный, предпринимательство.
   </p>
-  <p class="ui-body">
+  <p class="ui-body" data-ui-check-layout>
     Двадцатисимвольные производные слова русскоязычных текстов — профессиональная терминология,
     электроэнергетика, интернационализация — переносятся на узких вьюпортах без разрушения сетки.
   </p>

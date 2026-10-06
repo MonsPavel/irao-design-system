@@ -26,6 +26,12 @@ export default defineConfig({
   testDir: './tests',
   // Только spec-файлы харнесса: lint-cases — не тесты, unit появится в T1.6.
   testMatch: '**/*.spec.js',
+  // Гейт масштабирования T3.6 (tests/e2e/scaling.spec.js) — ночной/релизный,
+  // не PR (решение спеки T3.6: «в nightly и релизе, не в PR (скорость)»):
+  // PR-джобы ci.yml e2e/visual стартуют с IRAO_SCALING=off и спек исключается;
+  // ночные/релизные матрицы и локальные прогоны (npm test, test:matrix) гоняют
+  // его всегда. Пины — tests/unit/scaling.test.js.
+  testIgnore: process.env.IRAO_SCALING === 'off' ? '**/scaling.spec.js' : undefined,
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

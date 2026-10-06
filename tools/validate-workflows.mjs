@@ -707,6 +707,12 @@ function checkRelease(name, doc) {
       );
     if (!matrixJob.container) problem(name, 'матрица release: нет container (ADR-0004)');
     if (!matrixJob.needs) problem(name, 'матрица release: нет needs (порядок build → матрица)');
+    if (!runSteps(matrixJob).some((r) => r.includes('npx playwright test'))) {
+      problem(
+        name,
+        'матрица release: нет прогона npx playwright test (e2e и гейт масштабирования T3.6 обязаны блокировать релиз)',
+      );
+    }
   }
 }
 

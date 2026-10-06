@@ -169,7 +169,12 @@ jobs:
       # Обязательный a11y-гейт: e2e + axe на каждый PR с первого дня (T1.5).
       # IRAO_SNAPSHOTS сознательно НЕ задан: скриншот-хелпер — no-op,
       # mandatory-гейт не сравнивает и не пишет эталоны (ADR-0004).
+      # IRAO_SCALING=off: гейт масштабирования T3.6 (scaling.spec.js) —
+      # ночной/релизный, не PR (решение спеки T3.6, скорость PR);
+      # playwright.config.mjs исключает спек по этому флагу.
       - name: E2E + axe (chromium)
+        env:
+          IRAO_SCALING: 'off'
         run: npx playwright test --project=chromium
 
       - name: Upload Playwright report
@@ -211,11 +216,13 @@ jobs:
 
       # IRAO_SNAPSHOTS=1 — окружение сравнения эталонов (гейт харнесса);
       # chromium — единственный проект, пишущий/сравнивающий эталоны (ADR-0004).
+      # IRAO_SCALING=off — гейт масштабирования T3.6 не в PR (см. джобу e2e).
       - name: Visual regression (chromium)
         id: visual
         continue-on-error: true # диф-артефакты собираются следующими шагами
         env:
           IRAO_SNAPSHOTS: '1'
+          IRAO_SCALING: 'off'
         run: npx playwright test --project=chromium
 
       # Диф-артефакты прикладываются даже при advisory (требование T1.5).

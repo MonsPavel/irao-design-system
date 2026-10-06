@@ -14,7 +14,9 @@
 #               контейнер Playwright-образа, ADR-0004); PR-гейты — ci.yml;
 #   T2.3 — contrast-гейт переезжает в ci.yml как mandatory PR-гейт (06 §7,
 #               спека T2.3: «шаг в ci.yml»; на момент T2.3 ci.yml ещё нет);
-#   T3.6/T9.1 — zoom/32px + VI-smoke в ночную/release матрицу.
+#   T3.6 (готово) — шрифто-зум-гейт масштабирования (tests/e2e/scaling.spec.js:
+#               zoom 200% — chromium, 32px-база — все браузеры) исполняется
+#               полным прогоном e2e-matrix ниже; VI-smoke (T9.1) — следующим.
 name: Nightly cycle
 
 on:
@@ -162,6 +164,10 @@ jobs:
       - name: Build showcase
         run: npm run build
 
+      # Полный прогон несёт и релизный гейт масштабирования T3.6
+      # (tests/e2e/scaling.spec.js: zoom 200% — chromium-проект, 32px-база —
+      # все браузеры матрицы; пороги и контракт data-ui-check-layout —
+      # tests/e2e/README.md). Красный шаг = красная ночь (investigate).
       - name: Playwright (${{ matrix.browser }})
         run: npx playwright test --project=${{ matrix.browser }}
 

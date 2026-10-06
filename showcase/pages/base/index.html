@@ -2,10 +2,12 @@
   Поверхность e2e политики фокуса (T3.2, ADR-0001): все 7 целей селекторного списка
   <code>base/focus.css</code> на одной странице. Сценарии — <code>tests/e2e/focus.spec.js</code>;
   правила и «почему так» — дока «Focus visible: почему так»
-  (docs/ui-system/architecture/focus-policy.md).
+  (docs/ui-system/architecture/focus-policy.md). Ключевые узлы размечены
+  <code>data-ui-check-layout</code> — контракт гейта масштабирования T3.6
+  (<code>tests/e2e/scaling.spec.js</code>, пороги — tests/e2e/README.md).
 </p>
 
-<section aria-labelledby="base-focus-heading">
+<section data-ui-check-layout aria-labelledby="base-focus-heading">
   <h2 id="base-focus-heading">Интерактивные элементы политики</h2>
   <p>
     При фокусе с клавиатуры (<code>:focus-visible</code>) каждый элемент ниже получает
@@ -36,9 +38,9 @@
   </details>
 </section>
 
-<section aria-labelledby="base-focus-tabindex-heading">
+<section data-ui-check-layout aria-labelledby="base-focus-tabindex-heading">
   <h2 id="base-focus-tabindex-heading">Программно фокусируемый блок</h2>
-  <div tabindex="0">
+  <div tabindex="0" data-ui-check-layout>
     Блок с <code>tabindex="0"</code> — цель селектора
     <code>[tabindex]:focus-visible</code> (положительный tabindex запрещён — WCAG 2.4.3).
   </div>

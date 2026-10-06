@@ -4,9 +4,12 @@
 # Playwright-образе (ADR-0004; chromium сравнивает эталоны — релизная точка
 # обязана быть визуально чистой) + dist-zip артефакт (02-architecture §10).
 #
-# Боевой режим добавит в T12.1: GitHub Release, CHANGELOG-check, шрифто-зом
-# и VI-smoke (масштабирование/зум — релизный гейт T3.6/T9.1), публикация
-# пакета (ADR-0006).
+# Гейт масштабирования T3.6 (tests/e2e/scaling.spec.js: zoom 200% — chromium,
+# 32px-база — все браузеры) входит в полный прогон матрицы: красная матрица
+# БЛОКИРУЕТ релиз (шаги без continue-on-error).
+#
+# Боевой режим добавит в T12.1: GitHub Release, CHANGELOG-check и VI-smoke
+# (T9.1), публикация пакета (ADR-0006).
 name: Release
 
 on:
@@ -83,6 +86,8 @@ jobs:
 
       # IRAO_SNAPSHOTS=1: chromium сверяет эталоны (порог нулевой — ADR-0004);
       # firefox/webkit проверяют поведение, скриншоты у них no-op (харнесс).
+      # В полный прогон входит релизный гейт масштабирования T3.6
+      # (tests/e2e/scaling.spec.js): падение валит матрицу — релиз блокирован.
       - name: Playwright (${{ matrix.browser }})
         env:
           IRAO_SNAPSHOTS: '1'
