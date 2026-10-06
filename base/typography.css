@@ -1,0 +1,165 @@
+/*!
+ * irao-ui — base/typography.css: типографика страницы (задача T3.3;
+ * шкала — тройки fs/lh/fw слоя 2 из T2.2, порт career-portal).
+ *
+ * Что делает глобально (дока слоя: base/README.md):
+ *  - body-дефолты страницы: шрифт/размер/веса/цвет/фон — из токенов слоя 2
+ *    (байты career-portal css/base.css:60, переведённые на --ui-*);
+ *    overflow-wrap: break-word — длинные RU-слова (и 32px-база требования
+ *    №19 ТЗ) не создают горизонтального скролла; -webkit-font-smoothing —
+ *    рендер одобренного макета;
+ *  - классы ролей ui-h1…ui-h6, ui-lead, ui-body, ui-small, ui-caption,
+ *    ui-micro — типографическая шкала как API для контентных областей:
+ *    в шаблонах Bitrix заголовки выводятся КЛАССАМИ, т.к. теги стилизуются
+ *    legacy («классы, а не теги» — специфичность класса против legacy
+ *    `h1 { … }`, Technical considerations T3.3). Семантику страницы по-прежнему
+ *    даёт реальный тег (h1→h2→h3 без пропусков — гейты irao/one-h1,
+ *    irao/heading-order и e2e на всех страницах showcase), класс — вид.
+ *  - ui-text--muted — вторичный текст (AA-пара T2.3);
+ *  - ui-list — маркеры/отступы списков контентных областей (глобальный reset
+ *    T3.1 сознательно выключает маркеры: список возвращается явным классом);
+ *  - ui-address-минимум — без браузерного курсива.
+ *
+ * Правила файла:
+ *  - класс роли задаёт fs/lh/fw/letter-spacing ЦЕЛИКОМ (Implementation
+ *    requirements T3.3 п.1) — роль не собирается по частям; размеры — только
+ *    rem-токены: mobile-first лестница живёт в tokens/semantic.css (media
+ *    здесь нет — рост к lg переопределяет токены, классы неизменны);
+ *  - letter-spacing: заголовочные роли −0.02em (перенос макета career-portal:
+ *    page-title, section__title), текстовые — normal; значения в em — от
+ *    размера самой роли, масштабируются вместе с ней;
+ *  - text-wrap: pretty/balance не используется (нет в матрице браузеров —
+ *    Technical considerations T3.3; кандидат на minor-улучшение позже);
+ *  - никаких !important (инвариант системы) и никакого hex — только токены.
+ *
+ * Пины формы решения — tests/unit/typography.test.js; поверхность браузера
+ * (computed-размеры на 375/768/1440, иерархия, 32px, эталоны) —
+ * tests/e2e/typography.spec.js, стенд typography. «Роль и когда какую» —
+ * docs/ui-system/architecture/typography-roles.md.
+ */
+
+body {
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-body);
+  line-height: var(--ui-lh-body);
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Заголовочные роли: career-portal page-title/section__title (−0.02em) ── */
+
+.ui-h1 {
+  font-size: var(--ui-fs-h1);
+  font-weight: var(--ui-fw-h1);
+  line-height: var(--ui-lh-h1);
+  letter-spacing: -0.02em;
+}
+
+.ui-h2 {
+  font-size: var(--ui-fs-h2);
+  font-weight: var(--ui-fw-h2);
+  line-height: var(--ui-lh-h2);
+  letter-spacing: -0.02em;
+}
+
+.ui-h3 {
+  font-size: var(--ui-fs-h3);
+  font-weight: var(--ui-fw-h3);
+  line-height: var(--ui-lh-h3);
+  letter-spacing: -0.02em;
+}
+
+.ui-h4 {
+  font-size: var(--ui-fs-h4);
+  font-weight: var(--ui-fw-h4);
+  line-height: var(--ui-lh-h4);
+  letter-spacing: -0.02em;
+}
+
+/* Роли h5/h6 §3.2: в career-portal их нет (см. --ui-fs-h5/h6); трекинг —
+   как у остальных заголовочных ролей. */
+.ui-h5 {
+  font-size: var(--ui-fs-h5);
+  font-weight: var(--ui-fw-h5);
+  line-height: var(--ui-lh-h5);
+  letter-spacing: -0.02em;
+}
+
+.ui-h6 {
+  font-size: var(--ui-fs-h6);
+  font-weight: var(--ui-fw-h6);
+  line-height: var(--ui-lh-h6);
+  letter-spacing: -0.02em;
+}
+
+/* ── Текстовые роли ── */
+
+.ui-lead {
+  font-size: var(--ui-fs-lead);
+  font-weight: var(--ui-fw-lead);
+  line-height: var(--ui-lh-lead);
+  letter-spacing: normal;
+}
+
+.ui-body {
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-body);
+  line-height: var(--ui-lh-body);
+  letter-spacing: normal;
+}
+
+.ui-small {
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  letter-spacing: normal;
+}
+
+.ui-caption {
+  font-size: var(--ui-fs-caption);
+  font-weight: var(--ui-fw-caption);
+  line-height: var(--ui-lh-caption);
+  letter-spacing: normal;
+}
+
+.ui-micro {
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-micro);
+  line-height: var(--ui-lh-micro);
+  letter-spacing: normal;
+}
+
+/* Вторичный текст: AA-пара T2.3 (--ui-color-text-muted, 6.19:1 на белом). */
+.ui-text--muted {
+  color: var(--ui-color-text-muted);
+}
+
+/* ── Списки контентных областей ── */
+/* Глобальный reset (T3.1) выключает маркеры у всех ul/ol — содержательный
+   список возвращается классом. ui-list работает и на ul (disc), и на ol
+   (decimal); отступ и ритм пунктов — из шкалы spacing §3.2. */
+
+.ui-list {
+  padding-left: var(--ui-space-5);
+}
+
+.ui-list li + li {
+  margin-top: var(--ui-space-2);
+}
+
+ul.ui-list {
+  list-style: disc;
+}
+
+ol.ui-list {
+  list-style: decimal;
+}
+
+/* ── Адрес (минимум) ── */
+
+.ui-address {
+  font-style: normal;
+}

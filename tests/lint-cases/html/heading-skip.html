@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: пропуск уровня заголовков</title>
+  </head>
+  <body>
+    <!-- НАРУШЕНИЕ (AC T3.3): h1 → h3 — пропуск уровня иерархии (SEO h1→h2→h3
+         без пропусков, docs/02-architecture.md §0; перенос идеи
+         test_internship_headings.py career-portal). Ожидаемый красный:
+         irao/heading-order. -->
+    <h1>Заголовок страницы</h1>
+    <h3>Скачок на два уровня без h2</h3>
+  </body>
+</html>

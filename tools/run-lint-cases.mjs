@@ -175,6 +175,14 @@ const EXPECTATIONS = [
   { file: 'html/img-without-alt.html', tool: 'html', expect: 'fail', rules: ['wcag/h37'] },
   { file: 'html/two-h1.html', tool: 'html', expect: 'fail', rules: ['irao/one-h1'] },
   {
+    // T3.3: пропуск уровня иерархии h1→h3 (SEO h1→h2→h3 без пропусков;
+    // перенос идеи test_internship_headings.py career-portal).
+    file: 'html/heading-skip.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/heading-order'],
+  },
+  {
     file: 'html/positive-tabindex.html',
     tool: 'html',
     expect: 'fail',
