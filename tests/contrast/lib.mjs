@@ -211,6 +211,9 @@ export function evaluateContrast({
       configErrors.push(`исключение ${exception.token} — не цветовой токен слоя 2`);
       continue;
     }
+    if (paired.has(exception.token)) {
+      configErrors.push(`исключение ${exception.token} также используется в паре`);
+    }
     exceptionTokens.add(exception.token);
     exceptionRows.push(exception);
   }
