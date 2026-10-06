@@ -44,9 +44,7 @@ describe('BREAKPOINTS — единственный источник шкалы (
 
 describe('гейты медиазапросов собраны из BREAKPOINTS (правило 8 конфига, T2.5)', () => {
   it('значения min-width — ровно шкала в px, не дубликат руками (значит, и не em)', () => {
-    expect(VALUE_RULE['min-width']).toEqual(
-      Object.values(BREAKPOINTS).map((px) => `${px}px`),
-    );
+    expect(VALUE_RULE['min-width']).toEqual(Object.values(BREAKPOINTS).map((px) => `${px}px`));
     for (const value of VALUE_RULE['min-width']) {
       expect(value, `значение ${value} — не канонические px`).toMatch(/^\d+px$/);
     }
