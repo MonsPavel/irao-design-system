@@ -130,6 +130,21 @@ describe('контраст-гейт: негативный кейс — тонк�
     expect(result.configErrors.join(' ')).toMatch(/--ui-color-nope/);
   });
 
+  it('токен-исключение, найденный в паре, — ошибка конфига (обещание pairs.config.mjs)', () => {
+    // Ревью T2.3 (high): --ui-color-text — fg пары text-on-surface; исключение
+    // для токена из пары — рассинхрон конфига, обязан быть ошибкой, а не
+    // молчаливым зелёным.
+    const result = evaluateContrast({
+      primitives,
+      semantic,
+      pairs: PAIRS,
+      exceptions: [...EXCEPTIONS, { token: '--ui-color-text', reason: 'тест конфликта' }],
+    });
+    expect(result.configErrors).toHaveLength(1);
+    expect(result.configErrors[0]).toMatch(/--ui-color-text/);
+    expect(result.configErrors[0]).toMatch(/также используется в паре/);
+  });
+
   it('цикл в var()-цепочке обнаружен', () => {
     const cyclic = new Map([
       ['--ui-a', 'var(--ui-b)'],
