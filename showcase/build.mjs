@@ -48,8 +48,15 @@ import { parseTokensFile, renderTokensStand, TOKENS_SOURCES } from './tokens-sta
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
 const SHOWCASE_DIST = join(ROOT, 'showcase', 'dist');
-const FONTS_SRC = join(ROOT, 'assets', 'fonts'); // появится в T3.1
+const FONTS_SRC = join(ROOT, 'assets', 'fonts'); // шрифты Golos + OFL-лицензия (T3.1) → копия в dist/fonts/
 const THEMES_SRC = join(ROOT, 'themes');
+
+/**
+ * Приоритетные грани preload (T3.1): 400/500 cyr — 90% русской страницы
+ * (паттерн career-portal). Препружаргружаются в каркасе каждой showcase-
+ * страницы ДО CSS-каскада и документируются в bitrix-сниппете подключения.
+ */
+const PRELOAD_FONTS = ['golos-400-cyr.woff2', 'golos-500-cyr.woff2'];
 
 /* ── Явный порядок каскада (02-architecture §3.3: tokens → base → компоненты) ── */
 
@@ -122,7 +129,7 @@ function copyFonts() {
   const target = join(DIST, 'fonts');
   mkdirSync(target, { recursive: true });
   if (!existsSync(FONTS_SRC)) {
-    warn('assets/fonts/ пока нет (шрифты появятся в T3.1) — dist/fonts/ создан пустым');
+    warn('assets/fonts/ отсутствует — dist/fonts/ создан пустым');
     return;
   }
   cpSync(FONTS_SRC, target, { recursive: true });
@@ -199,7 +206,16 @@ function frame({
   withJs = true,
 }) {
   const d = `${rel}/dist`;
-  const head = [`  <link rel="stylesheet" href="${d}/ui-core.min.css">`];
+  // Preload шрифтов ДО CSS-каскада (T3.1, паттерн career-portal). Шрифты
+  // грузятся в CORS-режиме даже с того же origin — без crossorigin preload
+  // не матчится с загрузкой и шрифт запросится дважды.
+  const head = [
+    ...PRELOAD_FONTS.map(
+      (font) =>
+        `  <link rel="preload" href="${d}/fonts/${font}" as="font" type="font/woff2" crossorigin>`,
+    ),
+    `  <link rel="stylesheet" href="${d}/ui-core.min.css">`,
+  ];
   if (withVi) head.push(`  <link rel="stylesheet" href="${d}/ui-vi.min.css">`);
 
   const header = [

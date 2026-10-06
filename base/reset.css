@@ -1,0 +1,84 @@
+/*!
+ * irao-ui — base/reset.css: безопасный глобальный reset (задача T3.1,
+ * порт career-portal css/base.css — класс A аудита).
+ *
+ * Что делает глобально (дока слоя: base/README.md):
+ *  - box-sizing: border-box на всё — база для зон без legacy-конфликтов;
+ *    ПОЛИТИКА СИСТЕМЫ (ADR-0002): компонент объявляет свой box-sizing и не
+ *    полагается на этот сброс — legacy-сброс сайта подключён позже и
+ *    побеждает равные универсальные селекторы;
+ *  - [hidden] сильнее любых display-правил — доступность скрытия без JS;
+ *  - scrollbar-gutter: stable — сетка не сдвигается при появлении скролла
+ *    (урок career-portal);
+ *  - img block/max-width, ресет отступов body/h1–h4/p/ul/ol;
+ *  - глобальный prefers-reduced-motion kill-switch (a11y: уважение к
+ *    настройке «уменьшить движение»).
+ *
+ * !important: инвариант системы — «только в a11y/vi.css». Два осознанных
+ * исключения ниже ([hidden] и kill-switch) — байты career-portal: без
+ * !important правила теряют смысл ([hidden] обязан бить классы legacy,
+ * kill-switch — переходы компонентов). Каждое помечено inline-disable
+ * с обоснованием; других !important в base нет (пин: tests/unit/fonts.test.js).
+ *
+ * Body-типографика (font-family/fs/color) — не здесь: base/typography.css
+ * (T3.3); стек фолбэка — --ui-font-family (T2.2), подключение шрифтов —
+ * base/fonts.css (T3.1).
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Атрибут hidden всегда сильнее любых display-правил */
+[hidden] {
+  /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): [hidden] обязан бить любые display-правила legacy */
+  display: none !important;
+}
+
+/* Резервируем место под полосу прокрутки ещё до появления длинного контента.
+   Иначе при загрузке/смене страницы вся сетка сдвигается на её ширину. */
+html {
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+p {
+  margin: 0;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Уважение к настройке «уменьшить движение» (глобальный kill-switch) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): kill-switch обязан бить transition компонентов */
+    transition-duration: 0.01ms !important;
+    /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): kill-switch обязан бить animation компонентов */
+    animation-duration: 0.01ms !important;
+    /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): kill-switch обязан бить анимации компонентов */
+    animation-iteration-count: 1 !important;
+    /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): kill-switch обязан бить smooth-scroll страницы */
+    scroll-behavior: auto !important;
+  }
+}

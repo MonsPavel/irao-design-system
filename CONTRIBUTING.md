@@ -30,8 +30,13 @@
 | Негативная lint-фикстура | `tests/lint-cases/` | намеренно «кривой» файл; строка-ожидание в `tools/run-lint-cases.mjs`; из `npm run lint` исключён |
 
 Правила каскада, действующие везде: hex только в `tokens/primitives.css`;
-`!important` только в `a11y/vi.css`; `box-sizing: border-box` на корне каждого
-компонента (ADR-0002); mobile-first, `min-width` только из шкалы брейкпоинтов
+`!important` только в `a11y/vi.css` (единственные осознанные исключения —
+`[hidden]` и reduced-motion kill-switch в `base/reset.css`: байты
+career-portal, перенос T3.1, каждое помечено inline-disable с обоснованием);
+правило ADR-0002: компонент объявляет свой `box-sizing: border-box` на корне
+и не полагается на глобальный сброс `base/reset.css` — legacy-сброс сайта
+подключён позже и побеждает равные универсальные селекторы; mobile-first,
+`min-width` только из шкалы брейкпоинтов
 (шкала и исключения — дока [«Адаптивный подход»](docs/ui-system/architecture/responsive-approach.md));
 производные состояния без одобренного дизайна — `color-mix` над токеном слоя 2
 (88% базовый + black, под `@media (hover: hover)`), hover-пары одобренного
