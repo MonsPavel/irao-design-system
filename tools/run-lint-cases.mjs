@@ -147,6 +147,15 @@ const EXPECTATIONS = [
     rules: ['media-feature-name-value-allowed-list'],
   },
   {
+    // Ревью T2.5 (high): negation-формы desktop-first — семантика
+    // «width < Npx». Имя фичи min-width и значение из шкалы, поэтому
+    // пара встроенных гейтов молчит; ловит локальный плагин.
+    file: 'css/components/ui-card/media-not-min-width.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['irao/no-negated-min-width'],
+  },
+  {
     // Позитивный контроль: все 5 значений шкалы (480/768/1024/1280/1440)
     // в одном файле — гейт молчит.
     file: 'css/components/ui-badge/media-scale.css',
