@@ -21,7 +21,7 @@
  * контраст-гейт AA (T2.3) на неё не действует — исключение зафиксировано
  * в шапке tests/contrast/pairs.config.mjs.
  */
-[data-ui-theme="test"] {
+[data-ui-theme='test'] {
   /* «Бренд» тестовой темы; производные слоя 2 (--ui-color-surface-dark,
      --ui-shadow-* через --ui-blue-800-*) следуют за primary сами, где читают его */
   --ui-color-primary: var(--ui-purple-900);

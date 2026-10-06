@@ -50,10 +50,7 @@ const stripComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
 function parseDeclarations(css) {
   const withoutMedia = css.replace(/@media\s*\([^)]*\)\s*\{[\s\S]*?\n\}/g, '');
   return new Map(
-    [...withoutMedia.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)].map((m) => [
-      m[1],
-      m[2].trim(),
-    ]),
+    [...withoutMedia.matchAll(/(--[a-z0-9-]+)\s*:\s*([^;]+);/g)].map((m) => [m[1], m[2].trim()]),
   );
 }
 
@@ -65,8 +62,12 @@ function parseTheme(css) {
   return { selector: match[1].trim(), declarations: parseDeclarations(match[2]) };
 }
 
-const primitives = parseDeclarations(stripComments(readFileSync(join(root, 'tokens/primitives.css'), 'utf8')));
-const semantic = parseDeclarations(stripComments(readFileSync(join(root, 'tokens/semantic.css'), 'utf8')));
+const primitives = parseDeclarations(
+  stripComments(readFileSync(join(root, 'tokens/primitives.css'), 'utf8')),
+);
+const semantic = parseDeclarations(
+  stripComments(readFileSync(join(root, 'tokens/semantic.css'), 'utf8')),
+);
 const core = new Map([...primitives, ...semantic]);
 
 beforeAll(async () => {
@@ -122,7 +123,9 @@ describe('тема в сборке и на стендах (AC T2.4)', () => {
 
   it('переключатель ?theme= на стенде: опция test + data-ui-theme на <html>', () => {
     const stand = readFileSync(STAND_SOURCE, 'utf8');
-    expect(stand, 'опция темы test в переключателе').toContain('<option value="test">test</option>');
+    expect(stand, 'опция темы test в переключателе').toContain(
+      '<option value="test">test</option>',
+    );
     expect(stand, 'data-theme-base у переключателя').toContain('data-theme-base=');
     expect(stand, 'data-ui-theme выставляется на documentElement').toContain(
       "document.documentElement.setAttribute('data-ui-theme'",
@@ -139,7 +142,9 @@ describe('фикстура совместимости: старая тема + �
   it('старая тема знает только подмножество семантических токенов (меньше тестовой темы)', () => {
     expect(fixture.selector).toBe('[data-ui-theme="old-compat"]');
     expect(fixture.declarations.size).toBeGreaterThan(0);
-    expect(fixture.declarations.size).toBeLessThan(parseTheme(readFileSync(THEME_SOURCE, 'utf8')).declarations.size);
+    expect(fixture.declarations.size).toBeLessThan(
+      parseTheme(readFileSync(THEME_SOURCE, 'utf8')).declarations.size,
+    );
     for (const name of fixture.declarations.keys()) {
       expect(semantic.has(name), `${name} — не семантический токен`).toBe(true);
     }
