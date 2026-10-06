@@ -14,10 +14,9 @@
  *    без транспиляции и без ES-модулей на сайтах (§1 принцип 2, §6.4 п.3);
  *  - tools/**, showcase/**, tests/contrast/** — Node + ESM (скрипты
  *    репозитория, dev-only);
- *  - tests/** — тестовый код под jsdom: пакет `globals` с v17 отдельного
- *    окружения jsdom не имеет; window/document входят в `globals.browser`,
- *    которого jsdom-харнесс достаточно. Витест-глобалы (describe/it/expect)
- *    добавит T1.6 вместе с харнессом.
+ *  - tests/** — тестовый код: e2e Playwright-харнесс (браузерные глобалы,
+ *    хелперам нужны и Node-глобалы process.env) и unit Vitest+jsdom
+ *    (window/document из globals.browser; describe/it/expect — vitest).
  *
  * Нативный JS без TS — сознательное решение (docs/06-implementation-plan.md §7).
  *
@@ -89,14 +88,17 @@ const toolingScripts = {
   rules: sharedRules,
 };
 
-/** Тесты (харнесс подключает T1.4/T1.6): модули, среда jsdom. lint-cases
- * исключены globalIgnores (см. выше), поэтому negation здесь не нужен. */
+/** Тесты (с T1.4 — Playwright-харнесс; T1.6 добавит Vitest): модули, среда
+ * браузер + Node. Node-глобалы нужны харнесс-хелперам (process.env
+ * IRAO_SNAPSHOTS — гейт создания эталонов ADR-0004) и будущим unit-тестам
+ * (jsdom-окружение Витеста живёт под Node). lint-cases исключены
+ * globalIgnores (см. выше), поэтому negation здесь не нужен. */
 const testScripts = {
   files: ['tests/**/*.js'],
   languageOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    globals: { ...globals.browser },
+    globals: { ...globals.browser, ...globals.node },
   },
   rules: sharedRules,
 };
