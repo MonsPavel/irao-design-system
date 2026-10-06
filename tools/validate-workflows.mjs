@@ -64,7 +64,8 @@ function stripComment(line) {
 function parseScalar(raw) {
   const s = raw.trim();
   if (s === '') return null;
-  if (s.length >= 2 && s.startsWith("'") && s.endsWith("'")) return s.slice(1, -1).replaceAll("''", "'");
+  if (s.length >= 2 && s.startsWith("'") && s.endsWith("'"))
+    return s.slice(1, -1).replaceAll("''", "'");
   if (s.length >= 2 && s.startsWith('"') && s.endsWith('"')) {
     try {
       return JSON.parse(s);
@@ -139,7 +140,12 @@ function splitFlowKey(item) {
     const ch = item[i];
     if (ch === "'" && !inDouble) inSingle = !inSingle;
     else if (ch === '"' && !inSingle) inDouble = !inDouble;
-    else if (ch === ':' && !inSingle && !inDouble && (item[i + 1] === ' ' || i === item.length - 1)) {
+    else if (
+      ch === ':' &&
+      !inSingle &&
+      !inDouble &&
+      (item[i + 1] === ' ' || i === item.length - 1)
+    ) {
       return [item.slice(0, i).trim(), item.slice(i + 1).trim()];
     }
   }
@@ -208,7 +214,8 @@ class Parser {
   /** Узел блока с отступом indent: отображение, последовательность или скаляр. */
   parseNode(indent) {
     const v = this.peek();
-    if (!v || v.indent < indent) this.fail(v ? v.n : this.lines.length, `пустой блок (отступ ${indent})`);
+    if (!v || v.indent < indent)
+      this.fail(v ? v.n : this.lines.length, `пустой блок (отступ ${indent})`);
     if (v.text.startsWith('- ') || v.text === '-') return this.parseSequence(v.indent);
     if (parseKeyLine(v.text)) return this.parseMapping(v.indent);
     return parseFlow(v.text);
@@ -220,12 +227,18 @@ class Parser {
     for (;;) {
       const v = this.peek();
       if (!v || v.indent < indent) return map;
-      if (v.indent > indent) this.fail(v.n, `отступ ${v.indent} не соответствует уровню отображения ${indent}`);
-      if (v.text.startsWith('- ')) this.fail(v.n, 'элемент последовательности внутри отображения на том же отступе не поддержан');
+      if (v.indent > indent)
+        this.fail(v.n, `отступ ${v.indent} не соответствует уровню отображения ${indent}`);
+      if (v.text.startsWith('- '))
+        this.fail(
+          v.n,
+          'элемент последовательности внутри отображения на том же отступе не поддержан',
+        );
       const kv = parseKeyLine(v.text);
       if (!kv) this.fail(v.n, `строка не является «ключ: значение»: «${v.text}»`);
       const [keyRaw, rest] = kv;
-      if (keyRaw.includes('&') || keyRaw.startsWith('!!')) this.fail(v.n, 'якоря/теги YAML не поддержаны');
+      if (keyRaw.includes('&') || keyRaw.startsWith('!!'))
+        this.fail(v.n, 'якоря/теги YAML не поддержаны');
       const key = parseScalar(keyRaw);
       if (typeof key !== 'string') this.fail(v.n, `ключ не строка: «${keyRaw}»`);
       if (key in map) this.fail(v.n, `дублирующийся ключ «${key}»`);
@@ -271,7 +284,8 @@ class Parser {
       const indent = raw.length - raw.trimStart().length;
       if (indent <= header.raw.length - header.raw.trimStart().length) break;
       if (bodyIndent === -1) bodyIndent = indent;
-      if (indent < bodyIndent) this.fail(this.lines[this.pos].n, 'отступ тела блочного скаляра меньше первого');
+      if (indent < bodyIndent)
+        this.fail(this.lines[this.pos].n, 'отступ тела блочного скаляра меньше первого');
       parts.push(raw.slice(bodyIndent));
       this.pos += 1;
     }
@@ -286,7 +300,8 @@ class Parser {
     for (;;) {
       const v = this.peek();
       if (!v || v.indent < indent) return items;
-      if (v.indent > indent) this.fail(v.n, `отступ ${v.indent} не соответствует уровню последовательности ${indent}`);
+      if (v.indent > indent)
+        this.fail(v.n, `отступ ${v.indent} не соответствует уровню последовательности ${indent}`);
       if (!(v.text.startsWith('- ') || v.text === '-')) {
         this.fail(v.n, `ожидался элемент последовательности «- …», получено: «${v.text}»`);
       }
@@ -324,7 +339,13 @@ function parseYaml(text, file) {
 
 const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
 const PINNED_IMAGE = pkg.iraoUi?.playwrightImage;
-const REQUIRED_WORKFLOWS = ['ci.yml', 'pages.yml', 'release.yml', 'update-snapshots.yml', 'nightly.yml'];
+const REQUIRED_WORKFLOWS = [
+  'ci.yml',
+  'pages.yml',
+  'release.yml',
+  'update-snapshots.yml',
+  'nightly.yml',
+];
 
 /** Allowlist first-party actions (supply-chain; сторонние — через решение владельца). */
 const ACTION_ALLOWLIST = new Set([
@@ -379,12 +400,17 @@ function checkCommon(name, doc) {
       continue;
     }
     if (!job['runs-on']) problem(name, `джоба ${jobName}: нет runs-on`);
-    if (typeof job['timeout-minutes'] !== 'number') problem(name, `джоба ${jobName}: нет timeout-minutes (бюджет прогона)`);
-    if (typeof job.steps !== 'object' || !Array.isArray(job.steps)) problem(name, `джоба ${jobName}: нет steps`);
+    if (typeof job['timeout-minutes'] !== 'number')
+      problem(name, `джоба ${jobName}: нет timeout-minutes (бюджет прогона)`);
+    if (typeof job.steps !== 'object' || !Array.isArray(job.steps))
+      problem(name, `джоба ${jobName}: нет steps`);
     if (job.container) {
       const image = typeof job.container === 'string' ? job.container : job.container.image;
       if (image !== PINNED_IMAGE) {
-        problem(name, `джоба ${jobName}: контейнер «${image}» !== пин package.json iraoUi.playwrightImage «${PINNED_IMAGE}» (ADR-0004)`);
+        problem(
+          name,
+          `джоба ${jobName}: контейнер «${image}» !== пин package.json iraoUi.playwrightImage «${PINNED_IMAGE}» (ADR-0004)`,
+        );
       }
     }
     for (const step of job.steps ?? []) {
@@ -392,14 +418,18 @@ function checkCommon(name, doc) {
         problem(name, `джоба ${jobName}: action «${step.uses}» вне allowlist first-party`);
       }
       for (const m of String(step?.run ?? '').matchAll(/npm run ([a-z0-9:.-]+)/g)) {
-        if (typeof pkg.scripts?.[m[1]] !== 'string') problem(name, `джоба ${jobName}: шаг вызывает несуществующий скрипт npm run ${m[1]}`);
+        if (typeof pkg.scripts?.[m[1]] !== 'string')
+          problem(name, `джоба ${jobName}: шаг вызывает несуществующий скрипт npm run ${m[1]}`);
       }
     }
     for (const step of job.steps ?? []) {
       if (step?.uses === 'actions/setup-node@v4') {
         const with_ = step.with ?? {};
         if (with_['node-version'] !== 24 && with_['node-version'] !== '24') {
-          problem(name, `джоба ${jobName}: setup-node node-version «${with_['node-version']}» !== 24 (engines package.json)`);
+          problem(
+            name,
+            `джоба ${jobName}: setup-node node-version «${with_['node-version']}» !== 24 (engines package.json)`,
+          );
         }
         if (with_.cache !== 'npm') problem(name, `джоба ${jobName}: setup-node без cache: npm`);
       }
@@ -411,22 +441,29 @@ function checkCommon(name, doc) {
 }
 
 function checkCi(name, doc) {
-  if (doc.name !== 'CI') problem(name, `name «${doc.name}» !== «CI» (на него ссылается pages.yml workflow_run)`);
+  if (doc.name !== 'CI')
+    problem(name, `name «${doc.name}» !== «CI» (на него ссылается pages.yml workflow_run)`);
   const on = doc.on ?? {};
   const prBranches = get(on, 'pull_request.branches', name, 'on.pull_request.branches') ?? [];
   if (!prBranches.includes('main')) problem(name, 'on.pull_request.branches не содержит main');
   const pushBranches = get(on, 'push.branches', name, 'on.push.branches') ?? [];
-  if (!pushBranches.includes('main')) problem(name, 'on.push.branches не содержит main (сигнал зелёного CI для pages.yml)');
+  if (!pushBranches.includes('main'))
+    problem(name, 'on.push.branches не содержит main (сигнал зелёного CI для pages.yml)');
   if (!('workflow_dispatch' in on)) problem(name, 'нет on.workflow_dispatch');
   if (get(doc, 'permissions.contents', name, 'permissions.contents') !== 'read') {
-    problem(name, 'permissions.contents обязан быть read (запись репозитория — только update-snapshots.yml)');
+    problem(
+      name,
+      'permissions.contents обязан быть read (запись репозитория — только update-snapshots.yml)',
+    );
   }
-  if (!get(doc, 'concurrency.group', name, 'concurrency.group')) problem(name, 'нет concurrency.group (отмена устаревших прогонов PR)');
+  if (!get(doc, 'concurrency.group', name, 'concurrency.group'))
+    problem(name, 'нет concurrency.group (отмена устаревших прогонов PR)');
 
   const jobs = get(doc, 'jobs', name, 'jobs') ?? {};
   const expected = ['lint', 'html-validate', 'unit', 'build', 'e2e', 'visual'];
   for (const j of expected) if (!(j in jobs)) problem(name, `нет обязательной джобы ${j}`);
-  for (const j of Object.keys(jobs)) if (!expected.includes(j)) problem(name, `неожиданная джоба ${j} (контракт гейтов — 06 §7)`);
+  for (const j of Object.keys(jobs))
+    if (!expected.includes(j)) problem(name, `неожиданная джоба ${j} (контракт гейтов — 06 §7)`);
 
   // lint: stylelint + eslint + prettier (+ self-проверка воркфлоу)
   if (jobs.lint) {
@@ -434,7 +471,10 @@ function checkCi(name, doc) {
       if (!anyRunContains(jobs.lint, script)) problem(name, `lint: нет шага ${script}`);
     }
     if (!anyRunContains(jobs.lint, 'tools/validate-workflows.mjs')) {
-      problem(name, 'lint: нет self-шага node tools/validate-workflows.mjs (конвейер проверяет свою конфигурацию на каждый PR)');
+      problem(
+        name,
+        'lint: нет self-шага node tools/validate-workflows.mjs (конвейер проверяет свою конфигурацию на каждый PR)',
+      );
     }
   }
 
@@ -450,86 +490,129 @@ function checkCi(name, doc) {
 
   // build — отдельный обязательный гейт + dist-zip артефакт PR
   if (jobs.build) {
-    if (!anyRunContains(jobs.build, 'npm run build')) problem(name, 'build: нет шага npm run build');
-    if (!anyRunContains(jobs.build, 'zip ')) problem(name, 'build: нет zip dist-артефакта (артефакт PR — требование T1.5)');
+    if (!anyRunContains(jobs.build, 'npm run build'))
+      problem(name, 'build: нет шага npm run build');
+    if (!anyRunContains(jobs.build, 'zip '))
+      problem(name, 'build: нет zip dist-артефакта (артефакт PR — требование T1.5)');
     const upload = (jobs.build.steps ?? []).find((s) => s?.uses === 'actions/upload-artifact@v4');
     if (!upload) problem(name, 'build: нет upload-artifact dist-zip');
     else if (upload.with?.['if-no-files-found'] !== 'error') {
-      problem(name, 'build: upload-artifact без if-no-files-found: error (артефакт обязан существовать)');
+      problem(
+        name,
+        'build: upload-artifact без if-no-files-found: error (артефакт обязан существовать)',
+      );
     }
   }
 
   // e2e + axe — mandatory, контейнер, БЕЗ IRAO_SNAPSHOTS (эталоны не сравниваются)
   if (jobs.e2e) {
     const needs = jobs.e2e.needs ?? [];
-    if (!needs.includes('build')) problem(name, 'e2e: needs не содержит build (порядок build → e2e)');
-    if (!jobs.e2e.container) problem(name, 'e2e: нет container (ADR-0004 — браузерные джобы в пиннутом образе)');
+    if (!needs.includes('build'))
+      problem(name, 'e2e: needs не содержит build (порядок build → e2e)');
+    if (!jobs.e2e.container)
+      problem(name, 'e2e: нет container (ADR-0004 — браузерные джобы в пиннутом образе)');
     if (!anyRunContains(jobs.e2e, 'npx playwright test --project=chromium')) {
       problem(name, 'e2e: нет шага npx playwright test --project=chromium');
     }
     if (jobEnvVars(jobs.e2e).has('IRAO_SNAPSHOTS')) {
-      problem(name, 'e2e: IRAO_SNAPSHOTS задан — mandatory-гейт не должен трогать эталоны (сравнение — только advisory visual)');
+      problem(
+        name,
+        'e2e: IRAO_SNAPSHOTS задан — mandatory-гейт не должен трогать эталоны (сравнение — только advisory visual)',
+      );
     }
   }
 
   // visual — advisory: continue-on-error на джобе и step'е, диф-артефакты, красный чек при расхождении
   if (jobs.visual) {
     if (jobs.visual['continue-on-error'] !== true) {
-      problem(name, 'visual: нет continue-on-error: true на джобе (run обязан оставаться зелёным, ADR-0004)');
+      problem(
+        name,
+        'visual: нет continue-on-error: true на джобе (run обязан оставаться зелёным, ADR-0004)',
+      );
     }
     const needs = jobs.visual.needs ?? [];
     if (!needs.includes('build')) problem(name, 'visual: needs не содержит build');
-    if (!jobs.visual.container) problem(name, 'visual: нет container (паритет эталонов с test:docker, ADR-0004)');
+    if (!jobs.visual.container)
+      problem(name, 'visual: нет container (паритет эталонов с test:docker, ADR-0004)');
     const visualStep = (jobs.visual.steps ?? []).find((s) => s?.id === 'visual');
     if (!visualStep) problem(name, 'visual: нет step id: visual');
     else {
       if (visualStep['continue-on-error'] !== true) {
-        problem(name, 'visual: step visual без continue-on-error: true (последующие шаги собирают дифы)');
+        problem(
+          name,
+          'visual: step visual без continue-on-error: true (последующие шаги собирают дифы)',
+        );
       }
       if (visualStep.env?.IRAO_SNAPSHOTS !== '1') {
-        problem(name, "visual: env IRAO_SNAPSHOTS !== '1' (сравнение/запись эталонов — гейт харнесса)");
+        problem(
+          name,
+          "visual: env IRAO_SNAPSHOTS !== '1' (сравнение/запись эталонов — гейт харнесса)",
+        );
       }
       if (!String(visualStep.run ?? '').includes('--project=chromium')) {
         problem(name, 'visual: прогон не ограничен chromium (эталоны пишет только он, ADR-0004)');
       }
     }
     const diffUpload = (jobs.visual.steps ?? []).find(
-      (s) => s?.uses === 'actions/upload-artifact@v4' && String(s.with?.path ?? '').includes('-diff.png'),
+      (s) =>
+        s?.uses === 'actions/upload-artifact@v4' &&
+        String(s.with?.path ?? '').includes('-diff.png'),
     );
-    if (!diffUpload) problem(name, 'visual: нет артефакта визуальных дифов (test-results *-diff.png)');
+    if (!diffUpload)
+      problem(name, 'visual: нет артефакта визуальных дифов (test-results *-diff.png)');
     else if (diffUpload.if !== 'always()') {
       problem(name, 'visual: артефакт дифов без if: always() (дифы нужны и при красном step)');
     }
     const reFail = (jobs.visual.steps ?? []).some(
-      (s) => String(s?.if ?? '').includes('steps.visual.outcome') && anyRunContains({ steps: [s] }, 'exit 1'),
+      (s) =>
+        String(s?.if ?? '').includes('steps.visual.outcome') &&
+        anyRunContains({ steps: [s] }, 'exit 1'),
     );
     if (!reFail) {
-      problem(name, 'visual: нет финального шага, красящего джобу по steps.visual.outcome (именованный чек должен отражать расхождение)');
+      problem(
+        name,
+        'visual: нет финального шага, красящего джобу по steps.visual.outcome (именованный чек должен отражать расхождение)',
+      );
     }
   }
 }
 
 function checkUpdateSnapshots(name, doc) {
   const on = doc.on ?? {};
-  if (!('workflow_dispatch' in on)) problem(name, 'нет on.workflow_dispatch (ручной fallback, ADR-0004)');
+  if (!('workflow_dispatch' in on))
+    problem(name, 'нет on.workflow_dispatch (ручной fallback, ADR-0004)');
   const triggerKeys = Object.keys(on);
-  if (triggerKeys.length !== 1) problem(name, `ожидается единственный триггер workflow_dispatch, найдено: ${triggerKeys.join(', ')}`);
+  if (triggerKeys.length !== 1)
+    problem(
+      name,
+      `ожидается единственный триггер workflow_dispatch, найдено: ${triggerKeys.join(', ')}`,
+    );
   if (get(doc, 'permissions.contents', name, 'permissions.contents') !== 'read') {
-    problem(name, 'permissions.contents на уровне workflow обязан быть read (write — только у джобы коммита)');
+    problem(
+      name,
+      'permissions.contents на уровне workflow обязан быть read (write — только у джобы коммита)',
+    );
   }
   const jobs = get(doc, 'jobs', name, 'jobs') ?? {};
   const snapshots = jobs.snapshots;
   if (!snapshots) {
     problem(name, 'нет джобы snapshots');
   } else {
-    if (!snapshots.container) problem(name, 'snapshots: нет container (паритет эталонов, ADR-0004)');
-    if (!anyRunContains(snapshots, '--update-snapshots')) problem(name, 'snapshots: нет --update-snapshots');
-    if (!anyRunContains(snapshots, '--project=chromium')) problem(name, 'snapshots: эталоны пишет только chromium-проект (ADR-0004)');
+    if (!snapshots.container)
+      problem(name, 'snapshots: нет container (паритет эталонов, ADR-0004)');
+    if (!anyRunContains(snapshots, '--update-snapshots'))
+      problem(name, 'snapshots: нет --update-snapshots');
+    if (!anyRunContains(snapshots, '--project=chromium'))
+      problem(name, 'snapshots: эталоны пишет только chromium-проект (ADR-0004)');
     if (!runSteps(snapshots).some((r) => r.includes('sha256sum'))) {
-      problem(name, 'snapshots: нет sha256sum в summary (контроль бинарного паритета с npm run test:docker — AC T1.5)');
+      problem(
+        name,
+        'snapshots: нет sha256sum в summary (контроль бинарного паритета с npm run test:docker — AC T1.5)',
+      );
     }
     const upload = (snapshots.steps ?? []).find((s) => s?.uses === 'actions/upload-artifact@v4');
-    if (!upload) problem(name, 'snapshots: нет артефакта эталонов (протокол сверки tests/visual/README.md)');
+    if (!upload)
+      problem(name, 'snapshots: нет артефакта эталонов (протокол сверки tests/visual/README.md)');
     else if (upload.with?.['if-no-files-found'] !== 'error') {
       problem(name, 'snapshots: артефакт эталонов без if-no-files-found: error');
     }
@@ -540,9 +623,12 @@ function checkUpdateSnapshots(name, doc) {
   } else {
     const perms = commit.permissions ?? {};
     if (perms.contents !== 'write') problem(name, 'commit: permissions.contents !== write');
-    if (!runSteps(commit).some((r) => r.includes('irao-ui-bot'))) problem(name, 'commit: коммит не от бота irao-ui-bot');
-    if (!runSteps(commit).some((r) => r.includes('git push'))) problem(name, 'commit: нет git push');
-    if (!runSteps(commit).some((r) => r.includes('gh pr create'))) problem(name, 'commit: нет gh pr create (fallback для машин без контейнера)');
+    if (!runSteps(commit).some((r) => r.includes('irao-ui-bot')))
+      problem(name, 'commit: коммит не от бота irao-ui-bot');
+    if (!runSteps(commit).some((r) => r.includes('git push')))
+      problem(name, 'commit: нет git push');
+    if (!runSteps(commit).some((r) => r.includes('gh pr create')))
+      problem(name, 'commit: нет gh pr create (fallback для машин без контейнера)');
   }
 }
 
@@ -550,15 +636,22 @@ function checkPages(name, doc) {
   const on = doc.on ?? {};
   const wr = on.workflow_run;
   if (!wr || typeof wr !== 'object') {
-    problem(name, 'нет on.workflow_run (деплой только после зелёного CI — технические требования T1.5)');
+    problem(
+      name,
+      'нет on.workflow_run (деплой только после зелёного CI — технические требования T1.5)',
+    );
   } else {
-    if (!(wr.workflows ?? []).includes('CI')) problem(name, 'workflow_run.workflows не содержит CI');
-    if (!(wr.types ?? []).includes('completed')) problem(name, 'workflow_run.types не содержит completed');
-    if (!(wr.branches ?? []).includes('main')) problem(name, 'workflow_run.branches не содержит main');
+    if (!(wr.workflows ?? []).includes('CI'))
+      problem(name, 'workflow_run.workflows не содержит CI');
+    if (!(wr.types ?? []).includes('completed'))
+      problem(name, 'workflow_run.types не содержит completed');
+    if (!(wr.branches ?? []).includes('main'))
+      problem(name, 'workflow_run.branches не содержит main');
   }
   if (!('workflow_dispatch' in on)) problem(name, 'нет on.workflow_dispatch');
   const perms = doc.permissions ?? {};
-  if (perms.pages !== 'write' || perms['id-token'] !== 'write') problem(name, 'permissions pages: write / id-token: write обязательны для deploy-pages');
+  if (perms.pages !== 'write' || perms['id-token'] !== 'write')
+    problem(name, 'permissions pages: write / id-token: write обязательны для deploy-pages');
   const jobs = get(doc, 'jobs', name, 'jobs') ?? {};
   const deploy = Object.values(jobs)[0];
   if (!deploy) {
@@ -571,12 +664,15 @@ function checkPages(name, doc) {
     if (get(deploy, 'environment.name', name, 'environment.name') !== 'github-pages') {
       problem(name, 'environment.name !== github-pages');
     }
-    if (!hasStepUsing(deploy, 'actions/upload-pages-artifact@v3')) problem(name, 'нет upload-pages-artifact');
+    if (!hasStepUsing(deploy, 'actions/upload-pages-artifact@v3'))
+      problem(name, 'нет upload-pages-artifact');
     if (!hasStepUsing(deploy, 'actions/deploy-pages@v4')) problem(name, 'нет deploy-pages');
     const upload = (deploy.steps ?? []).find((s) => s?.uses === 'actions/upload-pages-artifact@v3');
-    if (upload && upload.with?.path !== 'showcase/dist') problem(name, 'upload-pages-artifact path !== showcase/dist');
+    if (upload && upload.with?.path !== 'showcase/dist')
+      problem(name, 'upload-pages-artifact path !== showcase/dist');
     if (!anyRunContains(deploy, 'npm run build')) problem(name, 'деплой: нет сборки npm run build');
-    if (!anyRunContains(deploy, '.nojekyll')) problem(name, 'деплой: нет .nojekyll (GitHub Pages без Jekyll-обработки)');
+    if (!anyRunContains(deploy, '.nojekyll'))
+      problem(name, 'деплой: нет .nojekyll (GitHub Pages без Jekyll-обработки)');
   }
 }
 
@@ -586,7 +682,9 @@ function checkRelease(name, doc) {
   if (!tags.includes('v*')) problem(name, "on.push.tags не содержит 'v*'");
   if (!('workflow_dispatch' in on)) problem(name, 'нет on.workflow_dispatch');
   const jobs = get(doc, 'jobs', name, 'jobs') ?? {};
-  const buildDist = Object.keys(jobs).find((j) => jobs[j]?.steps?.some((s) => String(s?.run ?? '').includes('zip ')));
+  const buildDist = Object.keys(jobs).find((j) =>
+    jobs[j]?.steps?.some((s) => String(s?.run ?? '').includes('zip ')),
+  );
   if (!buildDist) problem(name, 'нет джобы сборки dist-zip артефакта');
   const matrixJob = Object.values(jobs).find((j) => j?.strategy?.matrix);
   if (!matrixJob) {
@@ -594,7 +692,11 @@ function checkRelease(name, doc) {
   } else {
     const browsers = matrixJob.strategy.matrix.browser ?? [];
     for (const b of BROWSERS) if (!browsers.includes(b)) problem(name, `матрица release без ${b}`);
-    if (matrixJob.strategy['fail-fast'] !== false) problem(name, 'матрица release: fail-fast обязан быть false (один браузер не роняет остальные)');
+    if (matrixJob.strategy['fail-fast'] !== false)
+      problem(
+        name,
+        'матрица release: fail-fast обязан быть false (один браузер не роняет остальные)',
+      );
     if (!matrixJob.container) problem(name, 'матрица release: нет container (ADR-0004)');
     if (!matrixJob.needs) problem(name, 'матрица release: нет needs (порядок build → матрица)');
   }
@@ -611,13 +713,17 @@ function checkNightly(name, doc) {
   } else {
     const browsers = matrixJob.strategy.matrix.browser ?? [];
     for (const b of BROWSERS) if (!browsers.includes(b)) problem(name, `матрица nightly без ${b}`);
-    if (matrixJob.strategy['fail-fast'] !== false) problem(name, 'матрица nightly: fail-fast обязан быть false');
+    if (matrixJob.strategy['fail-fast'] !== false)
+      problem(name, 'матрица nightly: fail-fast обязан быть false');
     if (!matrixJob.container) problem(name, 'матрица nightly: нет container (ADR-0004)');
     if (!runSteps(matrixJob).some((r) => r.includes('npx playwright test'))) {
       problem(name, 'матрица nightly: нет прогона npx playwright test');
     }
     if (jobEnvVars(matrixJob).has('IRAO_SNAPSHOTS')) {
-      problem(name, 'матрица nightly: IRAO_SNAPSHOTS задан — ночь эталоны не пишет и не сравнивает');
+      problem(
+        name,
+        'матрица nightly: IRAO_SNAPSHOTS задан — ночь эталоны не пишет и не сравнивает',
+      );
     }
   }
 }
@@ -627,7 +733,9 @@ function checkNightly(name, doc) {
 // ---------------------------------------------------------------------------
 
 if (!PINNED_IMAGE || !/:v\d+\.\d+\.\d+-jammy$/.test(PINNED_IMAGE)) {
-  console.error(`validate-workflows: в package.json нет корректного пина iraoUi.playwrightImage (${PINNED_IMAGE})`);
+  console.error(
+    `validate-workflows: в package.json нет корректного пина iraoUi.playwrightImage (${PINNED_IMAGE})`,
+  );
   process.exit(1);
 }
 
@@ -660,10 +768,12 @@ for (const f of files) {
 if (docs.has('ci.yml')) checkCommon('ci.yml', docs.get('ci.yml'));
 if (docs.has('pages.yml')) checkCommon('pages.yml', docs.get('pages.yml'));
 if (docs.has('release.yml')) checkCommon('release.yml', docs.get('release.yml'));
-if (docs.has('update-snapshots.yml')) checkCommon('update-snapshots.yml', docs.get('update-snapshots.yml'));
+if (docs.has('update-snapshots.yml'))
+  checkCommon('update-snapshots.yml', docs.get('update-snapshots.yml'));
 if (docs.has('nightly.yml')) checkCommon('nightly.yml', docs.get('nightly.yml'));
 if (docs.has('ci.yml')) checkCi('ci.yml', docs.get('ci.yml'));
-if (docs.has('update-snapshots.yml')) checkUpdateSnapshots('update-snapshots.yml', docs.get('update-snapshots.yml'));
+if (docs.has('update-snapshots.yml'))
+  checkUpdateSnapshots('update-snapshots.yml', docs.get('update-snapshots.yml'));
 if (docs.has('pages.yml')) checkPages('pages.yml', docs.get('pages.yml'));
 if (docs.has('release.yml')) checkRelease('release.yml', docs.get('release.yml'));
 if (docs.has('nightly.yml')) checkNightly('nightly.yml', docs.get('nightly.yml'));
