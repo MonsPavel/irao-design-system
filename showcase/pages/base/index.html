@@ -1,0 +1,45 @@
+<p class="ui-showcase-stand__note">
+  Поверхность e2e политики фокуса (T3.2, ADR-0001): все 7 целей селекторного списка
+  <code>base/focus.css</code> на одной странице. Сценарии — <code>tests/e2e/focus.spec.js</code>;
+  правила и «почему так» — дока «Focus visible: почему так»
+  (docs/ui-system/architecture/focus-policy.md).
+</p>
+
+<section aria-labelledby="base-focus-heading">
+  <h2 id="base-focus-heading">Интерактивные элементы политики</h2>
+  <p>
+    При фокусе с клавиатуры (<code>:focus-visible</code>) каждый элемент ниже получает
+    <code>outline</code> из focus-тройки токенов:
+    <code>var(--ui-focus-width) solid var(--ui-focus-color)</code> со сдвигом
+    <code>var(--ui-focus-offset)</code>.
+  </p>
+  <p><a href="#base-focus-heading">Ссылка (a)</a></p>
+  <p><button type="button">Кнопка (button)</button></p>
+  <p>
+    <label for="base-focus-input">Поле ввода (input)</label>
+    <input id="base-focus-input" name="base-focus-input" type="text">
+  </p>
+  <p>
+    <label for="base-focus-select">Список (select)</label>
+    <select id="base-focus-select" name="base-focus-select">
+      <option value="one">Один</option>
+      <option value="two">Два</option>
+    </select>
+  </p>
+  <p>
+    <label for="base-focus-textarea">Многострочное поле (textarea)</label>
+    <textarea id="base-focus-textarea" name="base-focus-textarea" rows="3"></textarea>
+  </p>
+  <details>
+    <summary>Раскрывающийся блок (summary)</summary>
+    <p>Содержимое <code>details</code>: фокус получает <code>summary</code>, не содержимое.</p>
+  </details>
+</section>
+
+<section aria-labelledby="base-focus-tabindex-heading">
+  <h2 id="base-focus-tabindex-heading">Программно фокусируемый блок</h2>
+  <div tabindex="0">
+    Блок с <code>tabindex="0"</code> — цель селектора
+    <code>[tabindex]:focus-visible</code> (положительный tabindex запрещён — WCAG 2.4.3).
+  </div>
+</section>

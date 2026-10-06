@@ -334,6 +334,25 @@ function generateShowcase({ themes }) {
     warn('tokens/*.css ещё не все на месте — стенд tokens не сгенерирован');
   }
 
+  // Стенд «base» (T3.2) — поверхность e2e политики фокуса (ADR-0001): все 7
+  // целей селекторного списка base/focus.css на одной странице, чтобы
+  // Tab-обход (tests/e2e/focus.spec.js) проходил по каждой. Источник —
+  // фрагмент тела, как у компонентов (showcase/pages/base/index.html).
+  const baseStandSource = join(ROOT, 'showcase', 'pages', 'base', 'index.html');
+  if (existsSync(baseStandSource)) {
+    const page = frame({
+      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
+      title: 'base — irao-ui showcase',
+      main: `    <h1>base</h1>\n${readFileSync(baseStandSource, 'utf8').trim()}`,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'base.html'), page);
+    stands.push({ name: 'base', source: 'showcase/pages/base/index.html' });
+  } else {
+    warn('showcase/pages/base/index.html ещё нет — стенд base не сгенерирован');
+  }
+
   const discovered = discoverComponents();
   for (const name of discovered) {
     if (!COMPONENTS.includes(name)) {

@@ -27,6 +27,24 @@
 - приоритетные грани (400/500 cyr — 90% русской страницы) препружаргружаются
   каркасом showcase и документированы в `bitrix/snippets/header-php.snippet.php`.
 
+**`base/focus.css` — глобальная политика фокуса (T3.2, ADR-0001):**
+
+- список селекторов «элемент + `:focus-visible`» — `a`, `button`, `input`,
+  `select`, `textarea`, `summary`, `[tabindex]` — со специфичностью 0-1-1:
+  видимый фокус побеждает legacy tag-правила вида `a { outline: none }`
+  независимо от порядка подключения (ui-core грузится первым). «Почему так» —
+  дока [«Focus visible: почему так»](../docs/ui-system/architecture/focus-policy.md);
+- значения — focus-тройка токенов слоя 2 (`--ui-focus-color/width/offset`,
+  T2.2): смена темы меняет фокус без правки `base/`;
+- `:focus-visible` — только клавиатурный фокус, мышиный сознательно не
+  подсвечивается; `outline-offset` — видимость на заполненных фонах;
+- компоненты стилизуют фокус своими классами поверх этого минимума;
+  `outline: none`/`0` без замены запрещён stylelint-гейтом (warning до конца
+  EPIC-4, затем error);
+- расширение списка новым интерактивным тегом — ответственность T3.2
+  (процедура — в доке выше); e2e-поверхность — стенд `stands/base.html`
+  (Tab-обход, legacy-атака, смена темы — `tests/e2e/focus.spec.js`).
+
 **`base/reset.css` — безопасный reset (T3.1, порт career-portal):**
 
 - `*, *::before, *::after { box-sizing: border-box }` — база для зон без
