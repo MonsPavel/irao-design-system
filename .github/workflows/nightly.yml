@@ -10,11 +10,11 @@
 # unit (vitest, T1.6 — с npm ci).
 # Эволюция (по плану docs/ui-system/):
 #   T1.2 — добавить шаги lint (stylelint/eslint/prettier/html-validate);
-#   T1.4/T1.5 — добавить e2e+axe и матрицу chromium/firefox/webkit (в контейнере
-#               Playwright-образа, ADR-0004), zoom/32px + VI-smoke (T3.6/T9.1);
-#   T1.5 — contrast-гейт переезжает в ci.yml как mandatory PR-гейт (06 §7,
+#   T1.5 (готово) — матрица chromium/firefox/webkit добавлена (e2e-matrix,
+#               контейнер Playwright-образа, ADR-0004); PR-гейты — ci.yml;
+#   T2.3 — contrast-гейт переезжает в ci.yml как mandatory PR-гейт (06 §7,
 #               спека T2.3: «шаг в ci.yml»; на момент T2.3 ci.yml ещё нет);
-#   визуальная regression — advisory-эталоны из CI (ADR-0004).
+#   T3.6/T9.1 — zoom/32px + VI-smoke в ночную/release матрицу.
 name: Nightly cycle
 
 on:
@@ -45,10 +45,11 @@ jobs:
 
       # Валидатор — node-скрипт (без зависимостей); bash-версия удалена 05.10:
       # на Windows-машине владельца спавн bash уходил в WSL-релей.
-      - name: Setup Node 22
+      - name: Setup Node 24
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: 24
+          cache: npm
 
       # Красный exit-код фиксируется (continue-on-error), чтобы отчёт и артефакт
       # грузились всегда — как «Eval report» в health-log (if: always()).
@@ -57,6 +58,13 @@ jobs:
         continue-on-error: true
         run: |
           node tools/validate-backlog.mjs | tee nightly-report.txt
+
+      # T1.5: структурная валидация воркфлоу (контракты CI-конвейера).
+      - name: Validate workflows
+        id: workflows
+        continue-on-error: true
+        run: |
+          node tools/validate-workflows.mjs | tee workflows-report.txt
 
       # T2.3: контраст-гейт AA — node-скрипт без зависимостей (до npm ci):
       # пары «использование → фон» из tokens/*, пороги WCAG AA, markdown-отчёт
@@ -88,6 +96,10 @@ jobs:
             echo
             if [ -f nightly-report.txt ]; then cat nightly-report.txt; else echo "validate: отчёт не создан (прогон упал до отчёта)"; fi
             echo
+            echo "workflows (структура CI-конвейера): ${{ steps.workflows.outcome }}"
+            echo
+            if [ -f workflows-report.txt ]; then cat workflows-report.txt; else echo "workflows: отчёт не создан (прогон упал до отчёта)"; fi
+            echo
             echo "contrast (AA): ${{ steps.contrast.outcome }}"
             echo
             if [ -f contrast-report.md ]; then cat contrast-report.md; else echo "contrast: отчёт не создан (прогон упал до отчёта)"; fi
@@ -103,13 +115,62 @@ jobs:
           name: nightly-report
           path: |
             nightly-report.txt
+            workflows-report.txt
             contrast-report.md
           if-no-files-found: warn
 
-      # Явный статус job'а: красный validate, contrast или unit = красная ночь
-      # (investigate, PR не блокирует).
+      # Явный статус job'а: красный validate, workflows, contrast или unit =
+      # красная ночь (investigate, PR не блокирует).
       - name: Fail on validation problems
-        if: steps.validate.outcome == 'failure' || steps.contrast.outcome == 'failure' || steps.unit.outcome == 'failure'
+        if: steps.validate.outcome == 'failure' || steps.workflows.outcome == 'failure' || steps.contrast.outcome == 'failure' || steps.unit.outcome == 'failure'
         run: |
           echo "nightly: обнаружены проблемы (см. Job Summary и артефакт) — investigate по протоколу docs/process/nightly-review-protocol.md"
           exit 1
+
+  # Матрица браузеров (T1.5; 02-architecture §10): полный прогон e2e+axe на
+  # chromium/firefox/webkit в пиннутом Playwright-образе (ADR-0004; пин —
+  # package.json iraoUi.playwrightImage, контроль — tools/validate-workflows.mjs).
+  # Ночь — не гейт PR (сегрегация осознанная, см. шапку): красная нога =
+  # красная ночь = investigate. Эталоны не пишутся и не сравниваются
+  # (IRAO_SNAPSHOTS не задан, харнесс): поведение проверяют, визуал —
+  # chromium в ci.yml (advisory) и update-snapshots.yml.
+  e2e-matrix:
+    name: Matrix ${{ matrix.browser }} (nightly)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser:
+          - chromium
+          - firefox
+          - webkit
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build showcase
+        run: npm run build
+
+      - name: Playwright (${{ matrix.browser }})
+        run: npx playwright test --project=${{ matrix.browser }}
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-${{ matrix.browser }}-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
