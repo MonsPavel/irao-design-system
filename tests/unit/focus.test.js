@@ -40,9 +40,7 @@ describe('base/focus.css — глобальная политика :focus-visibl
   });
 
   it('значения — focus-тройка токенов слоя 2 (T2.2), outline-offset на месте', () => {
-    expect(css).toMatch(
-      /outline:\s*var\(--ui-focus-width\)\s+solid\s+var\(--ui-focus-color\);/,
-    );
+    expect(css).toMatch(/outline:\s*var\(--ui-focus-width\)\s+solid\s+var\(--ui-focus-color\);/);
     expect(css).toMatch(/outline-offset:\s*var\(--ui-focus-offset\);/);
   });
 

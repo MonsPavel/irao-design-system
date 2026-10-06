@@ -1,15 +1,15 @@
 <p class="ui-showcase-stand__note">
-  Поверхность e2e политики фокуса (T3.2, ADR-0001): все 7 целей селекторного
-  списка <code>base/focus.css</code> на одной странице. Сценарии —
-  <code>tests/e2e/focus.spec.js</code>; правила и «почему так» — дока
-  «Focus visible: почему так» (docs/ui-system/architecture/focus-policy.md).
+  Поверхность e2e политики фокуса (T3.2, ADR-0001): все 7 целей селекторного списка
+  <code>base/focus.css</code> на одной странице. Сценарии — <code>tests/e2e/focus.spec.js</code>;
+  правила и «почему так» — дока «Focus visible: почему так»
+  (docs/ui-system/architecture/focus-policy.md).
 </p>
 
 <section aria-labelledby="base-focus-heading">
   <h2 id="base-focus-heading">Интерактивные элементы политики</h2>
   <p>
-    При фокусе с клавиатуры (<code>:focus-visible</code>) каждый элемент ниже
-    получает <code>outline</code> из focus-тройки токенов:
+    При фокусе с клавиатуры (<code>:focus-visible</code>) каждый элемент ниже получает
+    <code>outline</code> из focus-тройки токенов:
     <code>var(--ui-focus-width) solid var(--ui-focus-color)</code> со сдвигом
     <code>var(--ui-focus-offset)</code>.
   </p>
@@ -40,7 +40,6 @@
   <h2 id="base-focus-tabindex-heading">Программно фокусируемый блок</h2>
   <div tabindex="0">
     Блок с <code>tabindex="0"</code> — цель селектора
-    <code>[tabindex]:focus-visible</code> (положительный tabindex запрещён —
-    WCAG 2.4.3).
+    <code>[tabindex]:focus-visible</code> (положительный tabindex запрещён — WCAG 2.4.3).
   </div>
 </section>

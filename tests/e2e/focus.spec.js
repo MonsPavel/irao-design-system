@@ -145,35 +145,36 @@ standTest.describe('политика фокуса (T3.2, ADR-0001)', () => {
     },
   );
 
-  standTest('смена темы (?theme=test) меняет цвет фокуса — сквозной сценарий с T2.4', async ({
-    stand,
-  }) => {
-    const page = await stand('base');
-    await page.keyboard.press('Tab'); // фокус на ссылке
+  standTest(
+    'смена темы (?theme=test) меняет цвет фокуса — сквозной сценарий с T2.4',
+    async ({ stand }) => {
+      const page = await stand('base');
+      await page.keyboard.press('Tab'); // фокус на ссылке
 
-    const before = await focusState(page);
-    expect(before.tag).toBe('a');
-    expect(before.outlineColor, 'дефолт: --ui-focus-color = primary #002856').toBe(
-      'rgb(0, 40, 86)',
-    );
+      const before = await focusState(page);
+      expect(before.tag).toBe('a');
+      expect(before.outlineColor, 'дефолт: --ui-focus-color = primary #002856').toBe(
+        'rgb(0, 40, 86)',
+      );
 
-    // Механизм T2.4 (как в derived-states.spec.js): select каркаса ставит
-    // data-ui-theme="test" на <html> и подключает dist/themes/theme-test.css
-    // без перезагрузки страницы.
-    await page.selectOption('#ui-showcase-theme', 'test');
-    await expect(page.locator('html')).toHaveAttribute('data-ui-theme', 'test');
+      // Механизм T2.4 (как в derived-states.spec.js): select каркаса ставит
+      // data-ui-theme="test" на <html> и подключает dist/themes/theme-test.css
+      // без перезагрузки страницы.
+      await page.selectOption('#ui-showcase-theme', 'test');
+      await expect(page.locator('html')).toHaveAttribute('data-ui-theme', 'test');
 
-    // Тема переопределила --ui-focus-color (--ui-orange-400 #f37131):
-    // браузер пересчитывает computed outline сам, base/focus.css не меняется.
-    await expect
-      .poll(() => focusState(page), { timeout: 5000 })
-      .toMatchObject({ tag: 'a', outlineColor: 'rgb(243, 113, 49)' });
-    const themed = await focusState(page);
-    expect(
-      parseFloat(themed.outlineWidth),
-      'геометрия фокуса при смене темы не теряется',
-    ).toBeGreaterThanOrEqual(2);
-  });
+      // Тема переопределила --ui-focus-color (--ui-orange-400 #f37131):
+      // браузер пересчитывает computed outline сам, base/focus.css не меняется.
+      await expect
+        .poll(() => focusState(page), { timeout: 5000 })
+        .toMatchObject({ tag: 'a', outlineColor: 'rgb(243, 113, 49)' });
+      const themed = await focusState(page);
+      expect(
+        parseFloat(themed.outlineWidth),
+        'геометрия фокуса при смене темы не теряется',
+      ).toBeGreaterThanOrEqual(2);
+    },
+  );
 
   standTest('axe чист на стенде base', async ({ stand }) => {
     const page = await stand('base');
@@ -181,11 +182,12 @@ standTest.describe('политика фокуса (T3.2, ADR-0001)', () => {
     expect(results.violations).toEqual([]);
   });
 
-  standTest('скриншот focus-состояния — эталон только из контейнера (ADR-0004)', async ({
-    stand,
-  }) => {
-    const page = await stand('base');
-    await page.keyboard.press('Tab'); // :focus-visible на первом интерактивном
-    await shot(page, { name: 'focus-visible', viewport: 'desktop' });
-  });
+  standTest(
+    'скриншот focus-состояния — эталон только из контейнера (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('base');
+      await page.keyboard.press('Tab'); // :focus-visible на первом интерактивном
+      await shot(page, { name: 'focus-visible', viewport: 'desktop' });
+    },
+  );
 });

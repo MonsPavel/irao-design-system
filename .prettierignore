@@ -16,3 +16,9 @@ tests/lint-cases/
 # PHP-сниппеты для интеграторов Bitrix: prettier без PHP-парсера, формат —
 # зона копирующего интегратора (T3.1, полная версия сниппетов — T11.1)
 bitrix/snippets/*.snippet.php
+
+# Стенды-фрагменты showcase/pages: prettier печатает void-элементы только
+# самозакрытыми (<input />), а конвенция репозитория (CONTRIBUTING, гейт
+# void-style html-validate) — HTML5 без слэша. Авторитетный гейт разметки
+# таких файлов — lint:html (T3.2; будущее расширение — решение владельца).
+showcase/pages/base/index.html
