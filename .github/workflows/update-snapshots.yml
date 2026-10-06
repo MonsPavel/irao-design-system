@@ -1,0 +1,114 @@
+# Fallback-обновление скриншот-эталонов из CI (задача T1.5, ADR-0004).
+#
+# Для машин без контейнера: ручной запуск (Actions → Update snapshots →
+# Run workflow, ветка main). Эталоны создаются в ТОМ ЖЕ пиннутом образе,
+# что и локальный `npm run test:docker` (пин — package.json
+# iraoUi.playwrightImage; контроль совпадения — tools/validate-workflows.mjs),
+# поэтому бинарно совпадают с локальным контейнерным прогоном (AC T1.5,
+# решение 06.10). Протокол сверки: tests/visual/README.md (sha256 артефакта
+# === sha256 локального прогона; sha256 ещё и в Job Summary).
+#
+# Коммит делает БОТ в отдельную ветку + PR: merge — за разработчиком
+# (диф эталонов — осознанное изменение визуала, вопрос расхождения —
+# дизайнеру, tests/README.md «Нельзя»).
+name: Update snapshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  snapshots:
+    name: Update snapshots (chromium, контейнер)
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build showcase
+        run: npm run build
+
+      # IRAO_SNAPSHOTS=1 + --update-snapshots — окружение ПЕРЕГЕНЕРАЦИИ
+      # эталонов (гейт харнесса); chromium — единственный проект эталонов.
+      - name: Regenerate baselines
+        env:
+          IRAO_SNAPSHOTS: '1'
+        run: npx playwright test --project=chromium --update-snapshots
+
+      # Контроль паритета (AC T1.5): sha256 эталонов из CI сравнивается с
+      # sha256 локального `npm run test:docker -- --update-snapshots`.
+      - name: Print sha256 to summary
+        run: |
+          echo '## sha256 эталонов (CI)' >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          find tests/visual/__screenshots__ -name '*.png' -type f | sort | xargs sha256sum >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload baselines artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: snapshots
+          path: tests/visual/__screenshots__
+          if-no-files-found: error
+
+  commit:
+    name: Bot commit + PR
+    needs:
+      - snapshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download baselines artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: snapshots
+          path: tests/visual/__screenshots__
+
+      - name: Commit and push bot branch
+        id: push
+        env:
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          git config user.name "irao-ui-bot"
+          git config user.email "irao-ui-bot@users.noreply.github.com"
+          git checkout -B "bot/update-snapshots-${GITHUB_RUN_ID}"
+          git add tests/visual/__screenshots__
+          if git diff --cached --quiet; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "эталоны без изменений — PR не нужен"
+          else
+            git commit -m "chore(visual): обновление эталонов из CI (update-snapshots ${GITHUB_RUN_ID})"
+            git push origin "bot/update-snapshots-${GITHUB_RUN_ID}"
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open PR
+        if: steps.push.outputs.changes == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          gh pr create \
+            --base main \
+            --head "bot/update-snapshots-${GITHUB_RUN_ID}" \
+            --title "chore(visual): обновление эталонов из CI (update-snapshots ${GITHUB_RUN_ID})" \
+            --body "Fallback-джоба update-snapshots (ADR-0004), прогон ${GITHUB_RUN_ID}. Эталоны созданы в пиннутом Playwright-образе — бинарно совпадают с npm run test:docker (sha256 — в Job Summary прогона). Диф эталонов ревьюим как осознанное визуальное изменение."
