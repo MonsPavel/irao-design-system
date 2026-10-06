@@ -119,6 +119,15 @@ const EXPECTATIONS = [
     tool: 'stylelint',
     expect: 'pass',
   },
+  {
+    // Ревью T2.4 (high): сырой rgba/hex в НЕ-цветовом токене темы (тень).
+    // Гейт обязан требовать для --ui-shadow-* целый var()-токен или none —
+    // иначе сырой цвет утекает в рендер мимо инварианта «hex вне primitives».
+    file: 'css/themes/theme-shadow-raw.css',
+    tool: 'stylelint',
+    expect: 'fail',
+    rules: ['irao/theme-semantic-overrides'],
+  },
   // eslint: eqeqeq; шаблон модуля — чист; запрет глобалов
   { file: 'js/eqeq.js', tool: 'eslint', expect: 'fail', rules: ['eqeqeq'] },
   {

@@ -108,6 +108,16 @@ describe('themes/theme-test.css — форма темы (AC T2.4, ADR-0009)', ()
     }
   });
 
+  it('теневые значения — целый var()-токен или none (сырой цвет в --ui-shadow-* запрещён, ревью T2.4)', () => {
+    for (const [name, value] of theme.declarations) {
+      if (!/shadow/i.test(name)) continue;
+      expect(
+        value,
+        `${name}: ${value} — не целый var()-токен/none (сырой цвет в тени утекает в рендер)`,
+      ).toMatch(/^(?:var\(--ui-[a-z0-9-]+\)|none)$/);
+    }
+  });
+
   it('каждое значение ≠ дефолту :root (иначе тема не доказывает механизм)', () => {
     for (const [name, value] of theme.declarations) {
       expect(value, `${name} повторяет дефолт :root`).not.toBe(semantic.get(name));
