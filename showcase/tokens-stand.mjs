@@ -322,7 +322,69 @@ const STAND_CSS = `
   .ts-sp-small { font-family: var(--ui-font-family); font-size: var(--ui-fs-small); line-height: var(--ui-lh-small); font-weight: var(--ui-fw-small); }
   .ts-sp-caption { font-family: var(--ui-font-family); font-size: var(--ui-fs-caption); line-height: var(--ui-lh-caption); font-weight: var(--ui-fw-caption); }
   .ts-sp-micro { font-family: var(--ui-font-family); font-size: var(--ui-fs-micro); line-height: var(--ui-lh-micro); font-weight: var(--ui-fw-micro); }
+  /* Производные состояния (T2.6, ADR-0010): hover-пары одобренного дизайна —
+     токены слоя 2; active и hover-производные light-вариантов — color-mix
+     (88% базовый + black). Transition на чипах нет сознательно: computed-style
+     e2e (tests/e2e/derived-states.spec.js) читает :hover без ожиданий. */
+  .ts-state-demo { display: block; height: 3.5rem; border-radius: var(--ui-radius-sm); border: var(--ui-border-width) solid var(--ui-border-color); }
+  .ts-state-demo--pair-primary { background: var(--ui-color-primary); }
+  .ts-state-demo--pair-primary:hover { background: var(--ui-color-primary-hover); }
+  .ts-state-demo--pair-accent { background: var(--ui-color-accent); }
+  .ts-state-demo--pair-accent:hover { background: var(--ui-color-accent-hover); }
+  .ts-state-demo--derived-light { background: var(--ui-color-surface-muted); }
+  .ts-state-demo--derived-light:hover { background: color-mix(in srgb, var(--ui-color-surface-muted) 88%, black); }
+  .ts-state-demo--derived-active { background: var(--ui-color-primary); }
+  .ts-state-demo--derived-active:active { background: color-mix(in srgb, var(--ui-color-primary) 88%, black); }
 `;
+
+/**
+ * Секция «Производные состояния» (T2.6, ADR-0010) — живые чипы hover/active:
+ * стандарт color-mix и пары одобренного дизайна на слое 2. Узлам демо НЕ
+ * ставить data-token: счётчик полноты стенда (tests/unit/tokens-stand.test.js)
+ * считает токены файлов, демо-чип токеном не является.
+ */
+function renderDerivedStatesSection() {
+  const card = (demoName, modifier, title, note) =>
+    [
+      `        <li class="ts-card" data-ui-demo="${demoName}">`,
+      `          <span class="ts-state-demo ${modifier}" aria-hidden="true"></span>`,
+      `          <code class="ts-name">${title}</code>`,
+      `          <span class="ts-value">${escapeHtml(note)}</span>`,
+      `        </li>`,
+    ].join('\n');
+  return [
+    `    <section class="ts-section" aria-labelledby="ts-derived">`,
+    `      <h2 id="ts-derived">Производные состояния (T2.6)</h2>`,
+    `      <p class="ts-lead">Hover-пары одобренного дизайна — явные семантические токены (--ui-color-primary-hover, --ui-color-accent-hover): color-mix их значение не заменяет (ADR-0010). Состояния, которых дизайн не задавал (active, hover-производные light-вариантов), — color-mix над токеном слоя 2: color-mix(in srgb, var(--ui-…) 88%, black). Смена темы (?theme=test) пересчитывает color-mix-производные автоматически, пары тема переопределяет явно. e2e — tests/e2e/derived-states.spec.js; эталонный потребитель — ui-button (T4.2).</p>`,
+    `      <ul class="ts-grid">`,
+    card(
+      'hover-pair-primary',
+      'ts-state-demo--pair-primary',
+      'hover: var(--ui-color-primary-hover)',
+      'пара одобренного дизайна: primary → blue-700 #164b89 (career-portal components.css:80)',
+    ),
+    card(
+      'hover-pair-accent',
+      'ts-state-demo--pair-accent',
+      'hover: var(--ui-color-accent-hover)',
+      'пара одобренного дизайна: accent → accent-light #f37131 (career-portal components.css:83)',
+    ),
+    card(
+      'hover-derived-light',
+      'ts-state-demo--derived-light',
+      'hover: color-mix(88%, black)',
+      'hover-производная light-варианта (дизайн не задавал): surface-muted, за темой следует автоматически',
+    ),
+    card(
+      'active-derived-primary',
+      'ts-state-demo--derived-active',
+      'active: color-mix(88%, black)',
+      'производная active от primary — конвенция ADR-0010 (88% базовый + black), применит T4.2',
+    ),
+    `      </ul>`,
+    `    </section>`,
+  ].join('\n');
+}
 
 /**
  * Главная страница стенда (содержимое <main> каркаса showcase).
@@ -414,5 +476,6 @@ export function renderTokensStand(parsedFiles) {
     `    <h1>Токены</h1>`,
     `    <p class="ts-lead">Сгенерировано showcase/tokens-stand.mjs из tokens/primitives.css + tokens/semantic.css — не редактировать вручную: новый токен появляется здесь после <code>npm run build</code>. Компоненты читают только слой 2 (ADR-0009); порядок каскада dist: primitives → semantic (AC T2.2).</p>`,
     ...sectionsHtml,
+    renderDerivedStatesSection(),
   ].join('\n');
 }

@@ -23,10 +23,25 @@ import { expect } from '@playwright/test';
 
 import { test as standTest } from '../helpers/harness.js';
 
-/** Вычисленный фон элемента (цвет Hover-состояния читается на живом :hover). */
+/** Вычисленный фон элемента (цвет hover-состояния читается на живом :hover). */
 const bg = (locator) => locator.evaluate((el) => getComputedStyle(el).backgroundColor);
 
-const demo = (page, name) => page.locator(`[data-ui-demo="${name}"]`);
+/**
+ * Каналы вычисленного цвета в 0–255. Браузер сериализует результат color-mix
+ * по-разному (chromium: color(srgb 0 0.138 0.297) с плавающими 0–1; rgb() —
+ * после обычных var()) — приводим обе формы к числам.
+ */
+function channelsOf(computed) {
+  const rgb = computed.match(/^rgba?\(([^)]+)\)$/);
+  if (rgb) return rgb[1].split(',').map(Number);
+  const srgb = computed.match(/^color\(\s*srgb\s+([^)]+)\)$/);
+  if (srgb) return srgb[1].trim().split(/\s+/).map((c) => Number(c) * 255);
+  throw new Error(`неожиданная сериализация вычисленного цвета: ${computed}`);
+}
+
+/** Демо-чип: цветной span внутри карточки (data-ui-demo — на li-карточке). */
+const demo = (page, name) =>
+  page.locator(`[data-ui-demo="${name}"] .ts-state-demo`);
 
 standTest.describe('производные состояния (T2.6, ADR-0010)', () => {
   standTest(
@@ -53,16 +68,21 @@ standTest.describe('производные состояния (T2.6, ADR-0010)',
       expect(await bg(pairAccent)).toBe('rgb(242, 103, 34)');
 
       // active: color-mix(in srgb, var(--ui-color-primary) 88%, black) —
-      // конвенция ADR-0010: 0.88 × rgb(0, 40, 86) ≈ rgb(0, 35, 76).
-      // Допуск ±1 — округление 8-битного результата color-mix браузером.
+      // конвенция ADR-0010: 0.88 × rgb(0, 40, 86) ≈ rgb(0, 35.2, 75.7).
+      // Допуск ±1.25 — округление 8-битного результата color-mix браузером.
       await activeDerived.hover();
       await page.mouse.down();
-      const activeBg = await bg(activeDerived);
+      const activeChannels = channelsOf(await bg(activeDerived));
       await page.mouse.up();
-      const [r, g, b] = activeBg.match(/\d+/g).map(Number);
-      expect(r, 'r: у primary он нулевой, mix с black его не меняет').toBe(0);
-      expect(Math.abs(g - 35.2), `g: 88% от 40 (факт ${g})`).toBeLessThanOrEqual(1);
-      expect(Math.abs(b - 75.68), `b: 88% от 86 (факт ${b})`).toBeLessThanOrEqual(1);
+      expect(activeChannels[0], 'r: у primary нулевой, mix с black его не меняет').toBe(0);
+      expect(
+        Math.abs(activeChannels[1] - 35.2),
+        `g: 88% от 40 (факт ${activeChannels[1]})`,
+      ).toBeLessThanOrEqual(1.25);
+      expect(
+        Math.abs(activeChannels[2] - 75.68),
+        `b: 88% от 86 (факт ${activeChannels[2]})`,
+      ).toBeLessThanOrEqual(1.25);
     },
   );
 
