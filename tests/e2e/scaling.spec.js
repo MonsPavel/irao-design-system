@@ -49,10 +49,11 @@ const OVERLAP_THRESHOLD_PX = 2;
 /**
  * Сборка нарушений раскладки (исполняется в браузере; замыканий снаружи —
  * только сериализуемый код). Возвращает список { kind, node, detail }.
+ * Порог перекрытия — единственный источник OVERLAP_THRESHOLD_PX спеки.
  */
 const collectViolations = (page) =>
-  page.evaluate(() => {
-    const THRESHOLD = 2; // px — синхронно с OVERLAP_THRESHOLD_PX спеки
+  page.evaluate((threshold) => {
+    const THRESHOLD = threshold; // px — порог перекрытия из OVERLAP_THRESHOLD_PX
     const violations = [];
 
     const label = (el) => {
@@ -101,10 +102,14 @@ const collectViolations = (page) =>
       const cs = getComputedStyle(nodes[i]);
       const axis = [];
       if (cs.overflowY !== 'visible' && nodes[i].scrollHeight > nodes[i].clientHeight) {
-        axis.push(`по Y: scrollHeight ${nodes[i].scrollHeight} > clientHeight ${nodes[i].clientHeight}`);
+        axis.push(
+          `по Y: scrollHeight ${nodes[i].scrollHeight} > clientHeight ${nodes[i].clientHeight}`,
+        );
       }
       if (cs.overflowX !== 'visible' && nodes[i].scrollWidth > nodes[i].clientWidth) {
-        axis.push(`по X: scrollWidth ${nodes[i].scrollWidth} > clientWidth ${nodes[i].clientWidth}`);
+        axis.push(
+          `по X: scrollWidth ${nodes[i].scrollWidth} > clientWidth ${nodes[i].clientWidth}`,
+        );
       }
       if (axis.length > 0) {
         violations.push({
@@ -139,7 +144,7 @@ const collectViolations = (page) =>
       }
     }
     return violations;
-  });
+  }, OVERLAP_THRESHOLD_PX);
 
 /** Читаемый ассерт «нарушений нет»: список проваливается с расшифровкой. */
 const expectNoViolations = (violations, context) => {
@@ -212,8 +217,8 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
 
       for (const width of BASE32_WIDTHS) {
         await page.setViewportSize({ width, height: 900 });
-        const root = await page.evaluate(
-          () => parseFloat(getComputedStyle(document.documentElement).fontSize),
+        const root = await page.evaluate(() =>
+          parseFloat(getComputedStyle(document.documentElement).fontSize),
         );
         expect(root, `32px-база применена (${width})`).toBe(32);
         await nextFrame(page);
