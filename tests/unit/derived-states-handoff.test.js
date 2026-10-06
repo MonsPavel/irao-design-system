@@ -1,17 +1,15 @@
 /**
- * Пин переноса кнопочной части AC2 T2.6 (ревью приёмки T2.6).
+ * Пин переноса кнопочной части AC2 T2.6 (ревью приёмки T2.6; обновлён T4.2).
  *
  * Критерий «Кнопка (совместно с T4.2): hover — из токенов-пар, active —
- * color-mix на кнопке; visual-эталоны состояний сняты» физически не исполним,
- * пока нет ui-button (T4.2 не реализована: components/ — только README.md), а
- * visual-эталоны пишутся только в контейнере/CI (ADR-0004). По конвенции
- * tests/README.md («сценарии, чья поверхность ещё не появилась, фиксируются
- * в tests/e2e/README.md текстом; при появлении инфраструктуры переезжают
- * в код без изменения сути») сценарий записан в tests/e2e/README.md —
- * секция «Сценарий T2.6, кнопочная часть». Прецедент пина — T2.4 в
- * tests/unit/themes.test.js: тест не даёт записи потерять конкретику,
- * иначе суб-часть AC2 останется «неподтверждённой» молча навсегда.
- * Закрытие критерия — при приёмке T4.2.
+ * color-mix на кнопке; visual-эталоны состояний сняты» до T4.2 был записан
+ * текстом в tests/e2e/README.md (конвенция tests/README.md: сценарии, чья
+ * поверхность ещё не появилась, фиксируются в README и переезжают в код
+ * без изменения сути). С реализацией ui-button (T4.2) сценарий исполняется
+ * кодом — tests/e2e/ui-button.spec.js (hover-пары, color-mix-active, смена
+ * темы); эта секция README остаётся записью сценария с конкретными
+ * computed-значениями. Пин не даёт записи потерять конкретику и статус
+ * «исполняется» (иначе суб-часть AC2 «потерялась бы» молча).
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -28,10 +26,11 @@ beforeAll(() => {
   section = readme.slice(start, next === -1 ? undefined : next);
 });
 
-describe('T2.6, кнопочная часть AC2 — запись в tests/e2e/README.md до T4.2', () => {
-  it('секция сценария T2.6 присутствует со статусом «ожидает поверхности» (ui-button — T4.2)', () => {
+describe('T2.6, кнопочная часть AC2 — сценарий исполняется кодом с T4.2', () => {
+  it('секция сценария T2.6 присутствует со статусом «исполняется» и ссылкой на e2e ui-button', () => {
     expect(section, 'секции «Сценарий T2.6» нет в tests/e2e/README.md').toContain('Сценарий T2.6');
-    expect(section).toContain('Статус: **ожидает поверхности**');
+    expect(section).toContain('Статус: **исполняется**');
+    expect(section).toContain('ui-button.spec.js');
     expect(section).toContain('T4.2');
   });
 
@@ -44,7 +43,8 @@ describe('T2.6, кнопочная часть AC2 — запись в tests/e2e/
   });
 
   it('active записан по конвенции ADR-0010: color-mix 88% базовый + black', () => {
-    expect(section).toContain('color-mix(in srgb, var(--ui-color-primary) 88%, black)');
+    expect(section).toContain('color-mix(in srgb, var(--ui-color-primary)');
+    expect(section).toContain('88%, black)');
     expect(section).toContain('88%');
   });
 
@@ -53,7 +53,7 @@ describe('T2.6, кнопочная часть AC2 — запись в tests/e2e/
     expect(section).toContain('ADR-0003/0004');
   });
 
-  it('общая часть сценария уже в коде — derived-states.spec.js упомянут', () => {
+  it('общая часть сценария — derived-states.spec.js упомянут', () => {
     expect(section).toContain('derived-states.spec.js');
   });
 });

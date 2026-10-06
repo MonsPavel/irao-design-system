@@ -119,8 +119,8 @@ const bgOf = (page, id) =>
  * var() и color(srgb …) после color-mix — паттерн derived-states.spec.js).
  * Устоявшийся color-mix сериализуется color(srgb …); КАДРЫ transition —
  * oklab(...): интерполяция перехода идёт в oklab (probe: active @100ms —
- * oklab, @1600ms — color(srgb)) — такие значения предикатами poll'а
- * пропускается через safeChannels (throw внутри expect.poll роняет опрос).
+ * oklab, @1600ms — color(srgb)). Throw внутри предиката expect.poll роняет
+ * опрос досрочно — settledState оборачивает предикат в try/catch.
  */
 function colorOf(computed) {
   const rgb = computed.match(/^rgba?\(([^)]+)\)$/);
@@ -135,15 +135,6 @@ function colorOf(computed) {
   }
   throw new Error(`неожиданная сериализация вычисленного цвета: ${computed}`);
 }
-
-/** colorOf без throw: промежуточные кадры transition (oklab) → null. */
-const safeChannels = (computed) => {
-  try {
-    return colorOf(computed);
-  } catch {
-    return null;
-  }
-};
 
 /** Допуск округления 8-битного результата color-mix браузером (ADR-0010). */
 const MIX_TOLERANCE = 1.25;
@@ -167,13 +158,11 @@ async function settledState(page, id, isSettled, label) {
     .poll(
       async () => {
         const state = await stateOf(page, id);
-        let settled = false;
         try {
-          settled = isSettled(state);
+          return isSettled(state);
         } catch {
-          settled = false; // кадр transition (oklab) — ждать устоявшегося
+          return false; // кадр transition (oklab) — ждать устоявшегося
         }
-        return settled;
       },
       { timeout: 5000 },
     )

@@ -38,8 +38,7 @@ const root = join(import.meta.dirname, '..', '..');
  *  Рабочая копия Windows (core.autocrlf) отдаёт CRLF, а пины многострочных
  *  toContain сравнивают с \n: нормализуем концы строк (CI/контейнер — LF).
  *  Сопутствующая правка T4.2: на CRLF-хосте весь suite был красным. */
-const stripCssComments = (css) =>
-  css.replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '');
+const stripCssComments = (css) => css.replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '');
 
 /** Тело правила по селектору (начало строки — селектор, до закрывающей скобки).
  *  \s* перед селектором — правила внутри @media идут с отступом. */
