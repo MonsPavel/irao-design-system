@@ -500,7 +500,10 @@ function checkCi(name, doc) {
     else if (diffUpload.if !== 'always()') {
       problem(name, 'visual: артефакт дифов без if: always() (дифы нужны и при красном step)');
     }
-    if (!runSteps(jobs.visual).some((r) => r.includes('steps.visual.outcome'))) {
+    const reFail = (jobs.visual.steps ?? []).some(
+      (s) => String(s?.if ?? '').includes('steps.visual.outcome') && anyRunContains({ steps: [s] }, 'exit 1'),
+    );
+    if (!reFail) {
       problem(name, 'visual: нет финального шага, красящего джобу по steps.visual.outcome (именованный чек должен отражать расхождение)');
     }
   }
