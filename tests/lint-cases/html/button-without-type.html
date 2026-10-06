@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: button без явного type</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- НАРУШЕНИЕ (Scope T4.2): <button> без явного type — по умолчанию
+         это submit: в форме вне <form> клик может отправить чужую форму,
+         а скринридер объявляет «кнопку отправки». Ожидаемый красный
+         (warning, severity спеки T4.2): no-implicit-button-type. -->
+    <button class="ui-button">Отправить</button>
+  </body>
+</html>

@@ -216,6 +216,14 @@ const EXPECTATIONS = [
     tool: 'html',
     expect: 'pass',
   },
+  {
+    // T4.2 (Scope): <button> без явного type (умолчание submit) —
+    // предупреждение; встроенное no-implicit-button-type, severity спеки T4.2.
+    file: 'html/button-without-type.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: [['no-implicit-button-type', 'warning']],
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 
