@@ -104,9 +104,10 @@ describe('сценарии и пороги в спеке (Implementation require
     // контракта (README «что считать поломкой», шапка спеки).
     expect(text).toContain("['hidden', 'clip'].includes(cs.overflowY)");
     expect(text).toContain("['hidden', 'clip'].includes(cs.overflowX)");
-    expect(text, 'предикат «любой не-visible» в чекере не остаётся').not.toContain(
-      "!== 'visible'",
-    );
+    expect(text, 'предикат «любой не-visible» в чекере не остаётся').not.toContain("!== 'visible'");
+    // Overlap меряет ВИДИМЫЕ ректы: скролл-контент под скролл/clip-предком
+    // не «наезжает» на внешние узлы (visualBox).
+    expect(text).toContain('const visualBox =');
   });
 
   it('зум-сценарий помечен chromium-only (CDP), 32px — все браузеры матрицы', () => {

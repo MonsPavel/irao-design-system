@@ -20,11 +20,14 @@
  *    недостижим; auto/scroll — достижимость прокруткой, не поломка);
  *  - стенд без единого маркера data-ui-check-layout — нарушение контракта.
  *
- * Запуск: nightly + release матрица (падение блокирует релиз), не в PR —
- * подключение к контурам зафиксировано в tests/e2e/README.md и шапках
- * .github/workflows/{nightly,release}.yml. Зум-сценарий A — только chromium
- * (CDP); 32px-сценарий B — все браузеры матрицы. Пины контракта —
- * tests/unit/scaling.test.js.
+ * Запуск: nightly + release матрицы полным прогоном (падение блокирует
+ * релиз). Решение спеки T3.6 «не в PR (скорость)» исполняется env-флагом:
+ * PR-джобы ci.yml (e2e, visual) стартуют с IRAO_SCALING=off, и
+ * playwright.config.mjs исключает спек testIgnore-ом; ночные/релизные
+ * матрицы и локальные npm test / test:matrix гоняют его всегда. Подключение
+ * зафиксировано в tests/e2e/README.md, шапках .github/workflows/*.yml и
+ * пинах tests/unit/scaling.test.js. Зум-сценарий A — только chromium
+ * (CDP); 32px-сценарий B — все браузеры матрицы.
  */
 import { expect } from '@playwright/test';
 
@@ -95,18 +98,50 @@ const collectViolations = (page) =>
     // Нулевой бокс = display:none/не отрисован — в проверках не участвует.
     const visible = boxes.map((box) => box.width > 0 && box.height > 0);
 
-    // 3. Обрезка контента: узел РЕЖЕТ содержимое (overflow hidden/clip —
-    //    контент недостижим; auto/scroll — достижимость прокруткой).
+    // Видимый рект узла: обрезан clip-предками (computed overflow ≠ visible).
+    // Скролл-контент скролл-контейнера рисуется ОБРЕЗАННЫМ и не «наезжает»
+    // на внешние узлы — иначе любой легитимный скролл с размеченными детьми
+    // давал бы ложный overlap (ревью T3.6, класс дефекта «скролл ≠ поломка»).
+    const visualBox = (el, box) => {
+      let rect = { ...box };
+      for (let p = el.parentElement; p !== null; p = p.parentElement) {
+        const pcs = getComputedStyle(p);
+        if (pcs.overflowX === 'visible' && pcs.overflowY === 'visible') continue;
+        const pr = p.getBoundingClientRect();
+        const left = Math.max(rect.x, pr.x);
+        const top = Math.max(rect.y, pr.y);
+        const right = Math.min(rect.x + rect.width, pr.x + pr.width);
+        const bottom = Math.min(rect.y + rect.height, pr.y + pr.height);
+        rect = {
+          x: left,
+          y: top,
+          width: Math.max(0, right - left),
+          height: Math.max(0, bottom - top),
+        };
+      }
+      return rect;
+    };
+
+    // 3. Обрезка контента: узел РЕЖЕТ содержимое — только режущие значения
+    //    hidden/clip делают контент недостижимым; auto/scroll — достижимость
+    //    прокруткой, поломкой не считается (README «что считать поломкой»;
+    //    ревью T3.6 high: предикат «!== visible» флагал скроллируемое).
     for (let i = 0; i < nodes.length; i += 1) {
       if (!visible[i]) continue;
       const cs = getComputedStyle(nodes[i]);
       const axis = [];
-      if (cs.overflowY !== 'visible' && nodes[i].scrollHeight > nodes[i].clientHeight) {
+      if (
+        ['hidden', 'clip'].includes(cs.overflowY) &&
+        nodes[i].scrollHeight > nodes[i].clientHeight
+      ) {
         axis.push(
           `по Y: scrollHeight ${nodes[i].scrollHeight} > clientHeight ${nodes[i].clientHeight}`,
         );
       }
-      if (cs.overflowX !== 'visible' && nodes[i].scrollWidth > nodes[i].clientWidth) {
+      if (
+        ['hidden', 'clip'].includes(cs.overflowX) &&
+        nodes[i].scrollWidth > nodes[i].clientWidth
+      ) {
         axis.push(
           `по X: scrollWidth ${nodes[i].scrollWidth} > clientWidth ${nodes[i].clientWidth}`,
         );
@@ -120,20 +155,19 @@ const collectViolations = (page) =>
       }
     }
 
-    // 4. Перекрытие ключевых узлов: пересечение боксов пары «не предок и не
-    //    потомок» глубже THRESHOLD по обеим осям (2px гасят субпиксель).
+    // 4. Перекрытие ключевых узлов: пересечение ВИДИМЫХ ректов (обрезанных
+    //    по clip-предкам, см. visualBox) пары «не предок и не потомок»
+    //    глубже THRESHOLD по обеим осям (2px гасят субпиксель).
     for (let i = 0; i < nodes.length; i += 1) {
       for (let j = i + 1; j < nodes.length; j += 1) {
         if (!visible[i] || !visible[j]) continue;
         const a = nodes[i];
         const b = nodes[j];
         if (a.contains(b) || b.contains(a)) continue; // вложенность — не перекрытие
-        const overlapX =
-          Math.min(boxes[i].x + boxes[i].width, boxes[j].x + boxes[j].width) -
-          Math.max(boxes[i].x, boxes[j].x);
-        const overlapY =
-          Math.min(boxes[i].y + boxes[i].height, boxes[j].y + boxes[j].height) -
-          Math.max(boxes[i].y, boxes[j].y);
+        const va = visualBox(a, boxes[i]);
+        const vb = visualBox(b, boxes[j]);
+        const overlapX = Math.min(va.x + va.width, vb.x + vb.width) - Math.max(va.x, vb.x);
+        const overlapY = Math.min(va.y + va.height, vb.y + vb.height) - Math.max(va.y, vb.y);
         if (overlapX > THRESHOLD && overlapY > THRESHOLD) {
           violations.push({
             kind: 'overlap',
@@ -268,7 +302,11 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
     // (tests/e2e/README.md, «что считать поломкой»; шапка спеки). Режущие
     // hidden/clip — поломка (соседний тест). Ревью T3.6 (high): прогон с
     // предикатом «overflow !== visible» здесь красный — он флагает
-    // достижимый контент как обрезку.
+    // достижимый контент как обрезку (1 failed, 107 clip-нарушений вида
+    // «overflow auto/auto … scrollHeight 260 > clientHeight 96»).
+    // Инжект ШИРОКИЙ (все маркерные узлы height 40 + overflow: auto): попутно
+    // проверяет overlap-устойчивость — ректы скролл-контента обрезаются по
+    // clip-предкам (visualBox) и не «наезжают» на внешние узлы.
     const page = await stand('layout');
     await page.addStyleTag({
       content: `
