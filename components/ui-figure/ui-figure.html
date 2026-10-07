@@ -1,0 +1,15 @@
+<!-- ui-figure (T4.6): канонический паттерн. figure/figcaption — нативная
+     семантика: подпись структурно принадлежит изображению (Accessibility
+     requirements T4.6). Внутри — ui-image со всеми атрибутами паттерна;
+     alt обязателен и осмысленный: подпись не заменяет alt — у декоративного
+     изображения (alt="") подписывать нечего. Типографика подписи — роли base
+     (ui-small/ui-text--muted); правила — README.md. Img — в одну строку:
+     prettier печатает void-элементы самозакрытыми (/>), а гейт void-style
+     требует HTML5 без слэша — prettier-ignore сохраняет img без слэша. -->
+<figure class="ui-figure">
+  <!-- prettier-ignore -->
+  <img class="ui-image" src="/upload/reports/internship-2025.svg" alt="Динамика заявок на стажировку за 2025 год" width="640" height="360" loading="lazy">
+  <figcaption class="ui-figure__caption ui-small ui-text--muted">
+    Рис. 1. Число заявок по месяцам: пики — март и сентябрь.
+  </figcaption>
+</figure>

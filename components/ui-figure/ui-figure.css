@@ -1,0 +1,37 @@
+/** @define figure */
+
+/*!
+ * irao-ui — ui-figure: фигура с подписью (задача T4.6).
+ *
+ * Семантика — нативные <figure>/<figcaption>: подпись структурно принадлежит
+ * содержимому фигуры (скринридер объявляет figcaption вместе с figure), а не
+ * «текст рядом с картинкой». В career-portal подписи изображений собирались
+ * контентной вёрсткой без figure-семантики (article-page__gallery,
+ * pages.css:455); компонент фиксирует паттерн (Accessibility requirements:
+ * подпись связана семантически).
+ *
+ * База: box-sizing на корне (ADR-0002). margin: 0 — сброс UA-дефолта figure
+ * (1em 40px): глобальный сброс base/reset.css (h1–h4/p/ul/ol) figure не
+ * трогает, legacy-сброс сайта тоже не обязан — поэтому сброс объявляет сам
+ * компонент; композиция — через слоты/сетку сайта, не UA-отступами.
+ *
+ * Подпись __caption: шаг от изображения --ui-space-2; типографика — роли
+ * base в разметке (ui-small/ui-text--muted — паттерн ui-card/ui-alert:
+ * компонент шрифты не переобъявляет). Стилей изображения внутри фигуры нет:
+ * живёт <img class="ui-image"> со всеми атрибутами паттерна (alt,
+ * width/height, loading, aria-describedby — README ui-image). Правило
+ * смысловой пары: подпись не заменяет alt — подписывать декоративное
+ * изображение (alt="") нечего (do/don't — README.md).
+ *
+ * Компонент статичен: JS-модуля нет.
+ */
+
+.ui-figure {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.ui-figure__caption {
+  box-sizing: border-box;
+  margin-top: var(--ui-space-2);
+}

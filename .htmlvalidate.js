@@ -33,6 +33,15 @@
  * <button> без type по умолчанию submit — в чужой форме клик отправит её;
  * негативная фикстура — tests/lint-cases/html/button-without-type.html.
  *
+ * С T4.6: `irao/img-dimensions` — img без зафиксированного места — ошибка:
+ * обязательны атрибуты width/height ИЛИ модификатор `ui-image--ratio-*`
+ * (место резервирует aspect-ratio из CSS; спека T4.6: «width/height или
+ * aspect-ratio обязательны»). Без зафиксированного места загрузка картинки
+ * сдвигает контент (CLS, ТЗ №20); alt закрывает recommended-правило
+ * `wcag/h37` (T1.2). Негативная фикстура —
+ * tests/lint-cases/html/img-without-dimensions.html, позитивная —
+ * img-dimensions-valid.html.
+ *
  * Кастомные правила регистрируются инлайн-плагином (html-validate 11: ключ в
  * plugin.rules — уже полный id правила). Формат файла — CJS: загрузчик конфига
  * html-validate исполняет его в CJS-контексте.
@@ -163,6 +172,27 @@ class LinkAccessibleName extends Rule {
   }
 }
 
+/** Img без зафиксированного места — CLS при загрузке (T4.6, AC). */
+class ImgDimensions extends Rule {
+  setup() {
+    this.on('element:ready', (event) => {
+      if (!event.target.is('img')) return;
+      const width = event.target.getAttribute('width');
+      const height = event.target.getAttribute('height');
+      if (width && height && width.value.trim() !== '' && height.value.trim() !== '') return;
+      // Второй легитимный путь (спека T4.6: «width/height или aspect-ratio»):
+      // место резервирует CSS-класс ui-image--ratio-* (aspect-ratio из шкалы).
+      const cls = event.target.getAttribute('class');
+      const classValue = cls ? cls.value : '';
+      if (/(?:^|\s)ui-image--ratio-[-a-z0-9]+(?:\s|$)/.test(classValue)) return;
+      this.report(
+        event.target,
+        'У <img> нет зафиксированного места: обязательны атрибуты width/height ИЛИ класс ui-image--ratio-* (место резервирует aspect-ratio) — иначе загрузка картинки сдвигает контент (CLS, T4.6).',
+      );
+    });
+  }
+}
+
 module.exports = {
   extends: ['html-validate:recommended'],
   plugins: [
@@ -174,6 +204,7 @@ module.exports = {
         'irao/no-positive-tabindex': NoPositiveTabindex,
         'irao/link-external-noopener': LinkExternalNoopener,
         'irao/link-accessible-name': LinkAccessibleName,
+        'irao/img-dimensions': ImgDimensions,
       },
     }),
   ],
@@ -183,6 +214,7 @@ module.exports = {
     'irao/no-positive-tabindex': 'error',
     'irao/link-external-noopener': 'error',
     'irao/link-accessible-name': 'warn',
+    'irao/img-dimensions': 'error',
     'input-missing-label': 'error',
     // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
     'no-implicit-button-type': 'warn',

@@ -1,0 +1,19 @@
+<!-- ui-image (T4.6): канонический паттерн. Три вида изображений и правила
+     alt/размеров/lazy — README.md (чек-лист подготовки изображений); гейт
+     разметки — html-validate irao/img-dimensions (место фиксируют width/height
+     ИЛИ класс ui-image--ratio-*). Атрибуты width/height обязательны всегда:
+     CLS-страховка до загрузки CSS и intrinsic-пропорция; loading="lazy" —
+     для изображений вне первого экрана. Img — в одну строку: prettier
+     печатает void-элементы самозакрытыми (/>), а гейт void-style требует
+     HTML5 без слэша — prettier-ignore сохраняет img без слэша.
+     Информативный пример: -->
+<!-- prettier-ignore -->
+<img class="ui-image" src="/upload/news/ceremony.jpg" alt="Церемония награждения победителей программы стажировок" width="640" height="360" loading="lazy">
+
+<!-- Media-паттерн (карточка/обложка, слот ui-card__media): место из шкалы
+     (--ratio-*) + кадрирование (--cover/--contain) + атрибуты файла. Пропорция
+     файла (4:3) может отличаться от бокса (16:9) — object-fit: cover кадрирует,
+     место в потоке фиксирует aspect-ratio. Retina: добавьте srcset 1x/2x
+     (README.md, пример для Bitrix). -->
+<!-- prettier-ignore -->
+<img class="ui-image ui-image--cover ui-image--ratio-16-9" src="/upload/vacancy/cover.jpg" alt="Команда разработки за совместной работой над проектом" width="640" height="480" loading="lazy">

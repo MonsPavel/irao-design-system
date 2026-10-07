@@ -1,0 +1,150 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-image (T4.6): паттерн изображений — три вида alt-семантики (декоративное
+  <code>alt=""</code>, информативное — осмысленный alt, complex — длинное описание через
+  <code>aria-describedby</code>), модификаторы <code>--cover/--contain</code> (object-fit) и
+  <code>--ratio-*</code> (aspect-ratio из шкалы <code>--ui-ratio-*</code> слоя 2 — место под
+  картинку фиксируется без знания размеров файла), fallback сломанного src. Атрибуты
+  <code>width/height</code> обязательны у каждой картинки (гейт
+  <code>html-validate irao/img-dimensions</code>); изображения ниже первого экрана —
+  <code>loading="lazy"</code>. Сценарии — <code>tests/e2e/ui-image.spec.js</code> (CLS = 0 при
+  lazy-загрузке, broken-src не рушит сетку — boundingBox, axe, эталоны 375/768/1280/1440); чек-лист
+  подготовки изображений (retina, Bitrix, форматы) — README.md компонента.
+</p>
+
+<style>
+  .uim-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+  }
+
+  .uim-grid-gap {
+    margin-top: var(--ui-space-4);
+  }
+
+  .uim-note {
+    margin: var(--ui-space-4) 0 0;
+  }
+</style>
+
+<section aria-labelledby="ui-image-kinds">
+  <h2 id="ui-image-kinds">Три вида изображений (WCAG 1.1.1)</h2>
+  <div class="uim-stack">
+    <h3>Декоративное — alt=""</h3>
+    <!-- prettier-ignore -->
+    <img class="ui-image" id="ui-image-decorative" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27480%27%20height%3D%27300%27%3E%3Crect%20width%3D%27480%27%20height%3D%27300%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27390%27%20cy%3D%2760%27%20r%3D%27120%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%2760%27%20cy%3D%27260%27%20r%3D%2780%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E" alt="" width="480" height="300">
+    <p class="ui-small ui-text--muted">
+      Оформление рядом с текстом: скринридер пропускает (пустой alt), место в потоке зафиксировано
+      атрибутами.
+    </p>
+
+    <h3>Информативное — осмысленный alt</h3>
+    <!-- prettier-ignore -->
+    <img class="ui-image" id="ui-image-informative" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27360%27%3E%3Crect%20width%3D%27640%27%20height%3D%27360%27%20fill%3D%27%23F0F1F3%27%2F%3E%3Crect%20x%3D%2740%27%20y%3D%2756%27%20width%3D%27280%27%20height%3D%27248%27%20rx%3D%2716%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27352%27%20y%3D%27104%27%20width%3D%27248%27%20height%3D%27152%27%20rx%3D%2716%27%20fill%3D%27%23F26722%27%2F%3E%3Ccircle%20cx%3D%27180%27%20cy%3D%27140%27%20r%3D%2744%27%20fill%3D%27%23F1F5FE%27%2F%3E%3C%2Fsvg%3E" alt="Абстрактная иллюстрация: синие и оранжевые блоки на светлом фоне" width="640" height="360">
+    <p class="ui-small ui-text--muted">
+      Alt описывает содержание (не имя файла и не «картинка») — он же текст fallback при сломанном
+      src.
+    </p>
+
+    <h3>Complex — длинное описание через aria-describedby</h3>
+    <!-- prettier-ignore -->
+    <img class="ui-image" id="ui-image-complex" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27360%27%3E%3Crect%20width%3D%27640%27%20height%3D%27360%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Crect%20x%3D%2772%27%20y%3D%27216%27%20width%3D%2752%27%20height%3D%27104%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27156%27%20y%3D%27168%27%20width%3D%2752%27%20height%3D%27152%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27240%27%20y%3D%27120%27%20width%3D%2752%27%20height%3D%27200%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27324%27%20y%3D%27184%27%20width%3D%2752%27%20height%3D%27136%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27408%27%20y%3D%2772%27%20width%3D%2752%27%20height%3D%27248%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%27492%27%20y%3D%27136%27%20width%3D%2752%27%20height%3D%27184%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Столбчатая диаграмма: заявки на стажировку по месяцам 2025 года" width="640" height="360" aria-describedby="ui-image-complex-desc">
+    <p class="ui-body" id="ui-image-complex-desc">
+      Число заявок росло с января по май: пик пришёлся на май (230 заявок) после запуска кампании в
+      соцсетях. Летом интерес снизился до 140 заявок в месяц, к осени восстановился до 180. Вывод:
+      аудитория откликается на кампании весной и в начале учебного года — следующие запуски
+      планируются на март и сентябрь.
+    </p>
+  </div>
+  <p class="uim-note ui-small ui-text--muted">
+    Alt краткий, описание — полное: короткая версия в <code>alt</code>, детали — в связанном
+    элементе (<code>aria-describedby</code>); скринридер объявляет их вместе. Кейс для Bitrix
+    (генерация описания из инфоблока) — README.md компонента.
+  </p>
+</section>
+
+<section aria-labelledby="ui-image-modifiers">
+  <h2 id="ui-image-modifiers">
+    Модификаторы: фиксация места (--ratio-*) и кадрирование (--cover/--contain)
+  </h2>
+  <div class="ui-grid ui-grid--3 uim-grid-gap">
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-1-1" id="ui-image-ratio-1-1" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27480%27%20height%3D%27480%27%3E%3Crect%20width%3D%27480%27%20height%3D%27480%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Ccircle%20cx%3D%27240%27%20cy%3D%27240%27%20r%3D%27140%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Заглушка 1:1: синий круг на голубом фоне" width="480" height="480" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        --ratio-1-1: пропорция файла совпадает с боксом — без кадрирования.
+      </figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-3-2" id="ui-image-ratio-3-2" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27600%27%20height%3D%27400%27%3E%3Crect%20width%3D%27600%27%20height%3D%27400%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27200%27%20r%3D%27120%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="Заглушка 3:2: оранжевый круг на голубом фоне" width="600" height="400" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        --ratio-3-2: классика фото; место = ширина колонки × 2/3.
+      </figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-4-3" id="ui-image-ratio-4-3" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27480%27%3E%3Crect%20width%3D%27640%27%20height%3D%27480%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Crect%20x%3D%27160%27%20y%3D%27120%27%20width%3D%27320%27%20height%3D%27240%27%20rx%3D%2724%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Заглушка 4:3: синий скруглённый прямоугольник" width="640" height="480" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        --ratio-4-3: место зафиксировано aspect-ratio, высота не магическим числом.
+      </figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--cover ui-image--ratio-16-9" id="ui-image-cover" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27480%27%3E%3Crect%20width%3D%27640%27%20height%3D%27480%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27200%27%20width%3D%27240%27%20height%3D%27480%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="Кадрирование cover: файл 4:3 обрезан по центру до бокса 16:9" width="640" height="480" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        --cover + --ratio-16-9: файл 4:3 заполняет бокс 16:9, излишек обрезан (без искажения).
+      </figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--contain ui-image--ratio-16-9" id="ui-image-contain" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27480%27%20height%3D%27480%27%3E%3Crect%20width%3D%27480%27%20height%3D%27480%27%20fill%3D%27%23F26722%27%2F%3E%3Ccircle%20cx%3D%27240%27%20cy%3D%27240%27%20r%3D%27110%27%20fill%3D%27%23F1F5FE%27%2F%3E%3C%2Fsvg%3E" alt="Кадрирование contain: квадрат целиком вписан в бокс 16:9 с полями" width="480" height="480" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        --contain + --ratio-16-9: файл вписан целиком — поля по бокам, место в потоке неизменно.
+      </figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-16-9" id="ui-image-ratio-16-9" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27360%27%3E%3Crect%20width%3D%27640%27%20height%3D%27360%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Crect%20x%3D%2780%27%20y%3D%2760%27%20width%3D%27480%27%20height%3D%27240%27%20rx%3D%2724%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Заглушка 16:9: синий скруглённый прямоугольник" width="640" height="360" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        --ratio-16-9 без object-fit: обложки и видео; файл той же пропорции.
+      </figcaption>
+    </figure>
+  </div>
+  <p class="uim-note ui-small ui-text--muted">
+    Модификаторы ортогональны: <code>--ratio-*</code> фиксирует место (width: 100% + aspect-ratio из
+    шкалы <code>--ui-ratio-*</code>), <code>--cover/--contain</code> — object-fit поверх бокса.
+    Атрибуты <code>width/height</code> обязательны и здесь: CLS-страховка до загрузки CSS и
+    intrinsic-пропорция.
+  </p>
+</section>
+
+<section aria-labelledby="ui-image-fallback">
+  <h2 id="ui-image-fallback">Fallback: сломанный src не рушит сетку (ТЗ №20)</h2>
+  <div class="ui-grid ui-grid--3 uim-grid-gap">
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-16-9" id="ui-image-fallback-a" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27360%27%3E%3Crect%20width%3D%27640%27%20height%3D%27360%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27540%27%20cy%3D%2780%27%20r%3D%2790%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E" alt="Живое изображение: синий фон с тёмным кругом" width="640" height="360" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">Живое изображение.</figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-16-9" id="ui-image-broken" src="../images/no-such-image-404.svg" alt="Статистика обращений в поддержку: рост обращений в августе" width="640" height="360" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        Сломанный src: вместо картинки — alt-текст, бокс сохранён.
+      </figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <!-- prettier-ignore -->
+      <img class="ui-image ui-image--ratio-16-9" id="ui-image-fallback-c" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27640%27%20height%3D%27360%27%3E%3Crect%20width%3D%27640%27%20height%3D%27360%27%20fill%3D%27%23F26722%27%2F%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%27280%27%20r%3D%2780%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E" alt="Живое изображение: оранжевый фон с тёмным кругом" width="640" height="360" loading="lazy">
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">Живое изображение.</figcaption>
+    </figure>
+  </div>
+  <p class="uim-note ui-small ui-text--muted">
+    Средняя картинка указывает на несуществующий файл: бокс зарезервирован (<code
+      >--ratio-16-9</code
+    >
+    + атрибуты), сетка не схлопывается, соседи не смещаются; рендерится alt-текст — потому он обязан
+    быть полезным. Сценарий — boundingBox-проверка в <code>tests/e2e/ui-image.spec.js</code>.
+  </p>
+</section>
