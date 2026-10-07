@@ -99,6 +99,10 @@
   --ui-color-info: var(--ui-blue-700);
   /* новый: производная bg одобренной шкалы — пара к error-bg/success-bg */
   --ui-color-info-bg: var(--ui-blue-50);
+  /* новый: warning-пара для алертов (T4.5); значение — AA-ступень одобренной оранжевой шкалы: --ui-orange-800 = AA-замена T2.3, 4.78:1 на orange-50 (orange-700 давал 4.40:1) */
+  --ui-color-warning: var(--ui-orange-800);
+  /* новый: производная bg одобренной оранжевой шкалы (career-portal --tag-orange-bg) — пара к error-bg/success-bg/info-bg (T4.5) */
+  --ui-color-warning-bg: var(--ui-orange-50);
 
   /* ── Цвета-смыслы: теги (пары bg/text для Badge, T4.2) ── */
 

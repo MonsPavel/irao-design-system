@@ -1,0 +1,138 @@
+/** @define alert */
+
+/*!
+ * irao-ui — ui-alert: статусные сообщения (задача T4.5).
+ *
+ * В career-portal отдельного компонента сообщений нет — только пары токенов
+ * статусов (error/success + bg) и текст ошибок полей. Компонент собирает их
+ * в единый визуальный и семантический паттерн: фон и цвет — пары
+ * «Цветов-смыслов: статусы» слоя 2 (--ui-color-{info,success,warning,error}[-bg]),
+ * радиус — --ui-radius-md, отступы — --ui-space-* (Technical considerations
+ * T4.5). Warning-пара заведена этой задачей: ступени одобренной оранжевой
+ * шкалы (--ui-orange-50 = --tag-orange-bg career-portal, --ui-orange-800 =
+ * AA-замена T2.3), новая запись в таблице диффов.
+ *
+ * Роли по критичности выставляются в HTML-паттерне (копирует интегратор,
+ * не JS): role="status" — info/success (вежливое объявление: результат
+ * операции, не требующий немедленной реакции), role="alert" — warning/error
+ * (немедленное: что-то требует реакции сейчас). Правило выбора и примеры —
+ * README.md; роли живут в разметке, поэтому появляются вместе с алертом.
+ *
+ * Иконка варианта — svg aria-hidden в разметке: красится currentColor
+ * (fill/stroke-атрибуты), CSS-цвет сознательно не задаётся — варианты, темы
+ * и VI-перекраска (проверка T9.1) работают сами. Смысл сообщения дублируется
+ * текстом, не только цветом/иконкой (WCAG 1.4.1) — алерт без текста не имеет
+ * смысла (do/don't — README.md).
+ *
+ * Закрываемый вариант (Scope): кнопка __close с aria-label="Закрыть" и
+ * data-хуком data-ui-alert-close (JS никогда не вешается на стилевые классы,
+ * §2 «Namespace»). Компонент — статичный, JS-модуля нет (Out of scope T4.5):
+ * удаление из DOM делает JS сайта по хуку. Правило живого региона: закрытие
+ * допустимо ТОЛЬКО по явному действию пользователя (Enter/клик по __close) —
+ * регион пустеет синхронно с действием и не «теряет» контент неожиданно;
+ * скрывать алерт таймаутом запрещено (do/don't — README.md). Скрытие —
+ * удаление узла; альтернатива — атрибут hidden (глобальная гарантия
+ * base/reset.css убирает узел из a11y-дерева) — эквивалентна.
+ *
+ * Фокус кнопки закрытия — глобальная гарантия base/focus.css (ADR-0001):
+ * button:focus-visible в списке политики; здесь outline не запрещается и не
+ * заменяется. Hover — производное состояние без одобренного дизайна:
+ * color-mix(in srgb, currentColor 88%, black) (CONTRIBUTING) ТОЛЬКО под
+ * @media (hover: hover) (Context: sticky-hover «залипает» на таче).
+ *
+ * База без модификатора — нейтральное сообщение (прецедент «тихой» базы
+ * ui-button/ui-tag): фон surface-muted, цвет текста — пара text-on-surface-muted
+ * гейта T2.3. Типографика текста — роли base (ui-body и др.) в разметке:
+ * компонент текстовых стилей не переобъявляет (паттерн ui-card__title).
+ */
+
+.ui-alert {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: flex-start;
+  padding: var(--ui-space-4);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+  color: var(--ui-color-text);
+}
+
+/* ── Варианты (Scope: bg+иконка+цвет из семантических пар) ── */
+
+.ui-alert--info {
+  background-color: var(--ui-color-info-bg);
+  color: var(--ui-color-info);
+}
+
+.ui-alert--success {
+  background-color: var(--ui-color-success-bg);
+  color: var(--ui-color-success);
+}
+
+.ui-alert--warning {
+  background-color: var(--ui-color-warning-bg);
+  color: var(--ui-color-warning);
+}
+
+.ui-alert--error {
+  background-color: var(--ui-color-error-bg);
+  color: var(--ui-color-error);
+}
+
+/* ── Слоты ── */
+
+/* Иконка варианта: 24px (--ui-space-5 шкалы §3.2); геометрия задана атрибутами
+   svg, цвет — currentColor из fill/stroke разметки: красится цветом варианта,
+   темы и VI работают сами (паттерн ui-button__icon). */
+.ui-alert__icon {
+  box-sizing: border-box;
+  flex: none;
+  width: var(--ui-space-5);
+  height: var(--ui-space-5);
+}
+
+/* Тело: колонка сообщений (роль типографики + текст) с шагом --ui-space-2;
+   занимает свободное место и прижимает __close к правому краю. */
+.ui-alert__body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: var(--ui-space-2);
+}
+
+/* Кнопка закрытия: 32px (--ui-space-6) — клавиатурная цель; наследует цвет
+   варианта (currentColor глифа = цвету текста/иконки, контраст пары — гейт
+   T2.3). Радиус sm — подложка hover-состояния; фон прозрачный, «тень»/рамок
+   нет — кнопка вторична к содержимому алерта. */
+.ui-alert__close {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--ui-space-6);
+  height: var(--ui-space-6);
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background-color: transparent;
+  color: inherit;
+  transition: color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* Глиф ×: 16px (--ui-space-4); aria-hidden в разметке — имя кнопки несёт
+   aria-label="Закрыть". */
+.ui-alert__close-icon {
+  box-sizing: border-box;
+  width: var(--ui-space-4);
+  height: var(--ui-space-4);
+}
+
+/* ── :hover — только под (hover: hover); производное состояние (CONTRIBUTING) ── */
+
+@media (hover: hover) {
+  .ui-alert__close:hover {
+    color: color-mix(in srgb, currentColor 88%, black);
+  }
+}

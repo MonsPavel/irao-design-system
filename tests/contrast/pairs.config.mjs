@@ -231,7 +231,21 @@ export const PAIRS = [
     fg: '--ui-color-info',
     bg: '--ui-color-info-bg',
     level: 'text',
-    usage: 'info-текст на info-поверхности',
+    usage: 'info-текст на info-поверхности (алерты — T4.5)',
+  },
+  {
+    id: 'warning-on-surface',
+    fg: '--ui-color-warning',
+    bg: '--ui-color-surface',
+    level: 'text',
+    usage: 'warning-текст и иконки на белом (пара заведена T4.5)',
+  },
+  {
+    id: 'warning-on-warning-bg',
+    fg: '--ui-color-warning',
+    bg: '--ui-color-warning-bg',
+    level: 'text',
+    usage: 'warning-текст на warning-поверхности (алерты — T4.5; 4.78:1 — ступень AA-замены T2.3)',
   },
 
   /* ── Некстовые (level: non-text, WCAG 1.4.11) ── */

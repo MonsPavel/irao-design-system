@@ -1,0 +1,148 @@
+<!-- ui-alert (T4.5): канонический паттерн. РОЛЬ выставляется в разметке
+     интегратором (не JS) по критичности: role="status" — info/success
+     (вежливое объявление: результат операции), role="alert" — warning/error
+     (немедленное: требует реакции сейчас) — правило выбора и примеры в
+     README.md. Иконка — svg aria-hidden: смысл дублируется текстом (WCAG
+     1.4.1), алерт без текста не имеет смысла. Типографика текста — роли base
+     (ui-body и др.). Закрываемый вариант: __close с aria-label="Закрыть" и
+     data-хуком data-ui-alert-close — JS сайта удаляет узел ПО ЯВНОМУ действию
+     пользователя (или ставит hidden); компонент работает и без JS, хук —
+     точка интеграции (§2 «Namespace»: JS не вешается на стилевые классы). -->
+<div class="ui-alert ui-alert--info" role="status">
+  <svg
+    class="ui-alert__icon"
+    aria-hidden="true"
+    focusable="false"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+    <path
+      d="M12 8h.01M12 11.5V16"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    ></path>
+  </svg>
+  <div class="ui-alert__body">
+    <p class="ui-body">Приём заявок на осеннюю стажировку открыт до 30 ноября.</p>
+  </div>
+</div>
+
+<div class="ui-alert ui-alert--success" role="status">
+  <svg
+    class="ui-alert__icon"
+    aria-hidden="true"
+    focusable="false"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+    <path
+      d="m8 12.5 2.5 2.5L16 9.5"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    ></path>
+  </svg>
+  <div class="ui-alert__body">
+    <p class="ui-body">Резюме отправлено. Работодатель увидит ваш отклик в списке кандидатов.</p>
+  </div>
+  <button class="ui-alert__close" type="button" data-ui-alert-close aria-label="Закрыть">
+    <svg
+      class="ui-alert__close-icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="m4 4 8 8M12 4l-8 8"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+  </button>
+</div>
+
+<div class="ui-alert ui-alert--warning" role="alert">
+  <svg
+    class="ui-alert__icon"
+    aria-hidden="true"
+    focusable="false"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M12 3.5 21.8 20H2.2Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linejoin="round"
+    ></path>
+    <path
+      d="M12 10v4.5M12 17.5h.01"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    ></path>
+  </svg>
+  <div class="ui-alert__body">
+    <p class="ui-body">
+      Сессия истекает через 5 минут. Сохраните черновик, чтобы не потерять данные.
+    </p>
+  </div>
+</div>
+
+<div class="ui-alert ui-alert--error" role="alert">
+  <svg
+    class="ui-alert__icon"
+    aria-hidden="true"
+    focusable="false"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+  >
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+    <path
+      d="m9 9 6 6M15 9l-6 6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+    ></path>
+  </svg>
+  <div class="ui-alert__body">
+    <p class="ui-body">
+      Не удалось отправить форму: проверьте подключение к сети и попробуйте ещё раз.
+    </p>
+  </div>
+  <button class="ui-alert__close" type="button" data-ui-alert-close aria-label="Закрыть">
+    <svg
+      class="ui-alert__close-icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="m4 4 8 8M12 4l-8 8"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+  </button>
+</div>
