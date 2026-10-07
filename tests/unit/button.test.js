@@ -155,9 +155,10 @@ describe('components/ui-button/ui-button.css — варианты (Scope T4.2)',
     expect(block).toContain('color: var(--ui-color-primary);');
   });
 
-  it('sm: высота из --ui-button-height-sm (Scope: размеры md/sm)', () => {
+  it('sm: высота из --ui-button-height-sm; вертикальный паддинг уплотнён токеном — иначе контент (line-box + паддинг 12px×2 + рамка) выше 32px и min-height никогда не активируется (ревью T4.2 high)', () => {
     const block = blockOf(css, '.ui-button--sm');
     expect(block).toContain('min-height: var(--ui-button-height-sm);');
+    expect(block).toContain('padding-block: var(--ui-space-1);');
   });
 });
 

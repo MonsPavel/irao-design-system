@@ -101,8 +101,13 @@
 
 /* ── Размеры: md — база (--ui-button-height), sm (Scope) ── */
 
+/* sm: вертикальный паддинг уплотнён до --ui-space-1 (4px) — иначе контент
+   (line-box 14×1.35 ≈ 18.9 + паддинг 12×2 + рамка 2×2 ≈ 46.9px) выше токена
+   32px и min-height никогда не активируется (модификатор был no-op, ревью
+   T4.2 high; 4×2 + 18.9 + 4 ≈ 30.9 < 32 → высота ровно 32px). */
 .ui-button--sm {
   min-height: var(--ui-button-height-sm);
+  padding-block: var(--ui-space-1);
 }
 
 /* ── Слоты ── */

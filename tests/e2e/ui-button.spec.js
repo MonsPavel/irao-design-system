@@ -274,6 +274,21 @@ standTest.describe('ui-button (T4.2)', () => {
       const sm = await stateOf(page, BTN.primarySm);
       expect(sm.minHeight, 'sm — --ui-button-height-sm (32px)').toBe('32px');
 
+      // Фактическая (отрисовая) высота, а не только computed min-height:
+      // минимальная высота активируется, только если контент (line-box +
+      // вертикальный паддинг + рамка) меньше токена — иначе размер no-op
+      // (ревью T4.2 high: sm рос до 46.89px при minHeight='32px').
+      const mdBox = await page.locator(`#${BTN.primary}`).boundingBox();
+      expect(
+        Math.abs(mdBox.height - 52),
+        `md: фактическая высота = --ui-button-height (факт ${mdBox.height})`,
+      ).toBeLessThanOrEqual(0.5);
+      const smBox = await page.locator(`#${BTN.primarySm}`).boundingBox();
+      expect(
+        Math.abs(smBox.height - 32),
+        `sm: фактическая высота = --ui-button-height-sm (факт ${smBox.height})`,
+      ).toBeLessThanOrEqual(0.5);
+
       const disabled = await stateOf(page, BTN.primaryDisabled);
       expect(disabled.opacity, 'disabled — затемнение --ui-opacity-disabled').toBe('0.3');
     },
