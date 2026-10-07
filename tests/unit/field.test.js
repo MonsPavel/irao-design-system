@@ -35,8 +35,11 @@ import { describe, expect, it } from 'vitest';
 
 const root = join(import.meta.dirname, '..', '..');
 
-/** CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки. */
-const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+/** CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки.
+ *  \r\n → \n: пины-регэкспы матчат границы строк; рабочая копия Windows
+ *  (core.autocrlf=true) отдаёт CRLF при LF в индексе — нормализация делает
+ *  прогон одинаковым на обеих сторонах (CI Linux уже зелёный). */
+const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\r\n/g, '\n');
 
 /** Тело правила по селектору (начало строки — селектор, до закрывающей скобки). */
 const blockOf = (css, selector) => {
