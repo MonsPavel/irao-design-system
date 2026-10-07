@@ -91,6 +91,9 @@ const COMPONENTS = [
   'ui-empty', // T4.8 — паттерн пустого состояния: медиа-слот, заголовок-роль h2, CTA обязательны
   'ui-error', // T4.8 — паттерн ошибки: inline в секции и полностраничный (--page, 404/500)
   'ui-field', // T5.1 — поле формы: label/req/hint/error + input/textarea (min-height, состояния)
+  'ui-checkbox', // T5.2 — чекбокс: label-обёртка нативного инпута (accent-color primary), группы колонкой
+  'ui-radio', // T5.2 — радио-ярлык: label-обёртка нативного инпута (элемент группы)
+  'ui-radio-group', // T5.2 — группа радио: fieldset/legend + раскладка radio-row
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */

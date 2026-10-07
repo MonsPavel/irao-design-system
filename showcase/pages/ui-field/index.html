@@ -5,7 +5,8 @@
   звёздочка и текст «обязательное поле» скринридеру. Сценарии —
   <code>tests/e2e/ui-field.spec.js</code>; политика placeholder ≠ label, autocomplete-рекомендации
   (WCAG 1.3.5), do/don't — README.md компонента. Фокус-паттерн поля (фон + рамка) дополняет
-  глобальный outline (ADR-0001) — проверьте с клавиатуры.
+  глобальный outline (ADR-0001) — проверьте с клавиатуры. С T5.2 на стенде нативные select,
+  checkbox и radio: сценарии клавиатуры — <code>tests/e2e/ui-forms.spec.js</code>.
 </p>
 
 <section aria-labelledby="uif-types-heading">
@@ -210,5 +211,233 @@
   <p class="ui-small ui-text--muted">
     <code>ui-field--wide</code> растягивает поле на все колонки grid-родителя (здесь —
     layout-примитив <code>ui-grid</code>, T3.4); раскладка форм целиком — ui-form-grid (T5.4).
+  </p>
+</section>
+
+<section aria-labelledby="uif-select-heading">
+  <h2 id="uif-select-heading">Select (нативный выпадающий список)</h2>
+  <div class="ui-grid ui-grid--2">
+    <div class="ui-field ui-field--required">
+      <label class="ui-field__label" for="uif-city-select">
+        Город
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </label>
+      <span class="ui-field__select-wrap">
+        <select
+          class="ui-field__select"
+          id="uif-city-select"
+          name="city"
+          autocomplete="address-level2"
+          required
+        >
+          <option value="" selected>Выберите город</option>
+          <option value="msk">Москва</option>
+          <option value="spb">Санкт-Петербург</option>
+          <option value="ekb">Екатеринбург</option>
+        </select>
+      </span>
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-source-select">Источник информации</label>
+      <span class="ui-field__select-wrap">
+        <select
+          class="ui-field__select"
+          id="uif-source-select"
+          name="source"
+          aria-describedby="uif-source-hint"
+        >
+          <option value="internet" selected>Интернет</option>
+          <option value="social">Социальные сети</option>
+          <option value="friend">Рекомендация знакомого</option>
+        </select>
+      </span>
+      <p class="ui-field__hint" id="uif-source-hint">
+        Список нативный: закрытый контрол стилизован системой, пункты рисует браузер
+      </p>
+    </div>
+    <div class="ui-field ui-field--required ui-field--error">
+      <label class="ui-field__label" for="uif-city-select-err">
+        Город (ошибка)
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </label>
+      <span class="ui-field__select-wrap">
+        <select
+          class="ui-field__select"
+          id="uif-city-select-err"
+          name="city-err"
+          required
+          aria-invalid="true"
+          aria-describedby="uif-city-select-err-hint uif-city-select-err-error"
+        >
+          <option value="" selected>Выберите город</option>
+          <option value="msk">Москва</option>
+          <option value="spb">Санкт-Петербург</option>
+        </select>
+      </span>
+      <p class="ui-field__hint" id="uif-city-select-err-hint">Город нужен для подбора вакансий</p>
+      <p class="ui-field__error" id="uif-city-select-err-error" role="alert">
+        Выберите город из списка
+      </p>
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-city-select-disabled">Город (disabled)</label>
+      <span class="ui-field__select-wrap">
+        <select
+          class="ui-field__select"
+          id="uif-city-select-disabled"
+          name="city-disabled"
+          disabled
+        >
+          <option value="msk" selected>Москва</option>
+        </select>
+      </span>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    <code>appearance: none</code> только вместе со стрелкой-индикатором: маска на
+    <code>::after</code> обёртки, цвет — токен <code>--ui-color-text-muted</code> (темы и
+    VI-режим перекрашивают). Закрытый контрол — из системы, выпадающий список — нативный,
+    клавиатура (↑↓, Alt+↓, Enter) работает без JS. Подмен нативного select нет до кастомного
+    listbox (T7.3).
+  </p>
+</section>
+
+<section aria-labelledby="uif-checkbox-heading">
+  <h2 id="uif-checkbox-heading">Checkbox: согласие и группы</h2>
+  <div class="ui-field ui-field--required ui-field--error">
+    <label class="ui-checkbox">
+      <input
+        class="ui-checkbox__input"
+        type="checkbox"
+        id="uif-consent"
+        name="consent"
+        required
+        aria-invalid="true"
+        aria-describedby="uif-consent-error"
+     >
+      <span>
+        Я даю
+        <a class="ui-link" href="#uif-checkbox-heading">согласие на обработку персональных данных</a>
+        и ознакомлен(а) с
+        <a class="ui-link" href="#uif-doc">политикой конфиденциальности</a>
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </span>
+    </label>
+    <p class="ui-field__error" id="uif-consent-error" role="alert">
+      Без согласия отклик отправить нельзя
+    </p>
+  </div>
+  <div class="ui-field">
+    <h3 class="ui-field__label" id="uif-emp-heading">Тип занятости (группа чекбоксов)</h3>
+    <label class="ui-checkbox">
+      <input
+        class="ui-checkbox__input"
+        type="checkbox"
+        id="uif-emp-full"
+        name="employment-full"
+        value="full"
+     >
+      <span>Полная занятость</span>
+    </label>
+    <label class="ui-checkbox">
+      <input
+        class="ui-checkbox__input"
+        type="checkbox"
+        id="uif-emp-part"
+        name="employment-part"
+        value="part"
+        checked
+     >
+      <span>Частичная занятость</span>
+    </label>
+    <label class="ui-checkbox">
+      <input
+        class="ui-checkbox__input"
+        type="checkbox"
+        id="uif-emp-int"
+        name="employment-intern"
+        value="intern"
+        disabled
+     >
+      <span>Стажировка (набор закрыт)</span>
+    </label>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Нативный инпут не прячется: галочку рисует браузер (<code>accent-color</code> — токен
+    primary). Ссылка внутри label остаётся кликабельной и не переключает чекбокс. <kbd>Space</kbd>
+    переключает чекбокс без JS. Ошибка — на обвязке <code>ui-field--error</code>: текст ВНЕ
+    label (иначе стал бы частью имени чекбокса), инпут связывает его
+    <code>aria-describedby</code>.
+  </p>
+</section>
+
+<section aria-labelledby="uif-radio-heading">
+  <h2 id="uif-radio-heading">Radio: группы с fieldset/legend</h2>
+  <div class="ui-field ui-field--required">
+    <fieldset class="ui-radio-group" aria-describedby="uif-format-hint">
+      <legend class="ui-radio-group__legend">Формат работы</legend>
+      <div class="ui-radio-group__row">
+        <label class="ui-radio">
+          <input
+            class="ui-radio__input"
+            type="radio"
+            name="uif-format"
+            value="full"
+            required
+            checked
+         >
+          Полная занятость
+        </label>
+        <label class="ui-radio">
+          <input class="ui-radio__input" type="radio" name="uif-format" value="part">
+          Частичная занятость
+        </label>
+        <label class="ui-radio">
+          <input class="ui-radio__input" type="radio" name="uif-format" value="shift">
+          Сменный график
+        </label>
+      </div>
+    </fieldset>
+    <p class="ui-field__hint" id="uif-format-hint">
+      Стрелки ←→↑↓ переключают вариант нативно, без JS и tabindex
+    </p>
+  </div>
+  <div class="ui-field ui-field--required ui-field--error">
+    <fieldset class="ui-radio-group" aria-describedby="uif-exp-hint uif-exp-error">
+      <legend class="ui-radio-group__legend">
+        Опыт в IT
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </legend>
+      <div class="ui-radio-group__row">
+        <label class="ui-radio">
+          <input class="ui-radio__input" type="radio" name="uif-exp" value="yes" required>
+          Есть опыт работы
+        </label>
+        <label class="ui-radio">
+          <input class="ui-radio__input" type="radio" name="uif-exp" value="no">
+          Нет опыта работы
+        </label>
+      </div>
+    </fieldset>
+    <p class="ui-field__hint" id="uif-exp-hint">Опыт учитывается при подборе вакансий</p>
+    <p class="ui-field__error" id="uif-exp-error" role="alert">Выберите один из вариантов</p>
+  </div>
+  <p class="ui-small ui-text--muted" id="uif-doc">
+    Группа обязана быть <code>fieldset/legend</code> (гейт <code>irao/radio-group-fieldset</code>):
+    legend именует группу скринридером нативно. Ошибка связывается с группой
+    <code>aria-describedby</code> на fieldset; текст ошибки — с <code>role="alert"</code>.
+    Раскладка ряда — <code>.radio-row</code> career-portal (flex, gap 24px, перенос).
   </p>
 </section>

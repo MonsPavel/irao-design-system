@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Позитивный контроль: радио-группа в fieldset/legend</title>
+  </head>
+  <body>
+    <!-- ПОЗИТИВНЫЙ КОНТРОЛЬ (T5.2): радио-группа (общий name) лежит в
+         fieldset с legend — нативные имя и роль группы из коробки, без ARIA.
+         Ожидаемый зелёный: ни одного замечания. -->
+    <h1>Форма отклика</h1>
+    <form action="/" method="post">
+      <fieldset>
+        <legend>Формат занятости</legend>
+        <label><input type="radio" name="format" value="full" required checked> Полная занятость</label>
+        <label><input type="radio" name="format" value="part"> Частичная занятость</label>
+      </fieldset>
+      <button type="submit">Отправить</button>
+    </form>
+  </body>
+</html>

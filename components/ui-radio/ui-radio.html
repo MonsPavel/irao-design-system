@@ -1,0 +1,13 @@
+<!-- ui-radio (T5.2): одиночный ярлык — элемент группы. Канонический паттерн
+     показывает РОВНО повторяемую единицу: label-обёртка нативного инпута и
+     текста (клик по тексту выбирает вариант нативно). Полную группу —
+     fieldset/legend + раскладка radio-row — оборачивает компонент
+     ui-radio-group: копируйте его паттерн, одиночное радио вне группы не
+     используйте (гейт irao/radio-group-fieldset ловит ≥2 радио с общим
+     name без fieldset/legend). accent-color красит отметку токеном primary —
+     инпут не прячется и не подменяется (принципы ТЗ №16/17). Расширенный
+     стенд групп — showcase/pages/ui-field/index.html; do/don't — README.md. -->
+<label class="ui-radio">
+  <input class="ui-radio__input" type="radio" name="employment" value="full" required checked>
+  Полная занятость
+</label>

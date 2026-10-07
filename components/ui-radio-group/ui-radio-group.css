@@ -1,0 +1,53 @@
+/** @define radio-group */
+
+/*!
+ * irao-ui — ui-radio-group: группа радио на нативном fieldset/legend
+ * (задача T5.2).
+ *
+ * Источник — .radio-row career-portal (components.css:210): flex-ряд с
+ * переносом и шагом 24px (--ui-space-5). Группа обязана быть fieldset
+ * с legend — нативные имя («Формат занятости») и роль group скринридер
+ * объявляет сам, без единой ARIA-костыли (правило доки; гейт
+ * irao/radio-group-fieldset — группа без legend является ошибкой).
+ *
+ * UA-ресет fieldset: рисованная рамка/паддинги браузера не нужны — группа
+ * живёт в потоке обвязки ui-field (T5.1) как обычный блочный ребёнок;
+ * шаг подписи — --ui-space-2, как между строками обвязки.
+ *
+ * Состояние ошибки — на обвязке: ui-field--error показывает __error, а
+ * fieldset несёт aria-describedby на id hint/error (Accessibility
+ * requirements T5.2: ошибка связывается с ГРУПОЙ, aria-invalid остаётся
+ * на усмотрение валидации T5.5 — нативной групповой aria-invalid не
+ * существует). Собственных error-стилей у группы нет — блоку нечего
+ * красить: рамки нет, отметки радио нативны.
+ *
+ * Legend-подпись — в стиле label обвязки (fs-small/fw-small одобренного
+ * .field__label). Без media/:hover — одобренным дизайном не заданы;
+ * цветов вне токенов нет (VI §5).
+ */
+
+.ui-radio-group {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.ui-radio-group__legend {
+  box-sizing: border-box;
+  margin-bottom: var(--ui-space-2);
+  padding: 0;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+}
+
+/* Раскладка radio-row одобренного дизайна (components.css:210):
+   flex-ряд с переносом — длинные ярлыки уходят на следующую строку. */
+.ui-radio-group__row {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-5);
+}

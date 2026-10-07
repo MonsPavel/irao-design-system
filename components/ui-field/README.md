@@ -22,6 +22,8 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 | Элемент `.ui-field__req` | маркер обязательности: видимая звёздочка `*` акцентом (одобренный `.req`, components.css:142) |
 | Элемент `.ui-field__req-text` | текст «обязательное поле» для скринридера внутри `__req`; визуально скрыт клипом (display:none запрещён) |
 | Элемент `.ui-field__input` | контрол: `input` типов text/email/tel/password/date/number |
+| Элемент `.ui-field__select` | нативный `select` в коробке поля (T5.2): `appearance: none` (без индикатора запрещено); выпадающий список остаётся нативным |
+| Элемент `.ui-field__select-wrap` | обёртка select (обязательна): точка позиционирования стрелки — `::after` с `mask-image` по svg без цвета (alpha-маска) и `background-color: var(--ui-color-text-muted)` — цвет стрелки токен-перекрашиваемый |
 | Элемент `.ui-field__textarea` | `textarea`: `min-height` (`--ui-field-textarea-min-height`, 120px), `resize: vertical`, фикс. высоты нет |
 | Элемент `.ui-field__hint` | постоянная подсказка (fs-micro, muted); всегда видима, связывается `aria-describedby` |
 | Элемент `.ui-field__error` | текст ошибки (fs-micro, `--ui-color-error`); вне `--error` скрыт; `role="alert"` в разметке |
@@ -183,7 +185,19 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 
 ## Известные границы
 
-- select / checkbox / radio — T5.2 (та же обвязка `ui-field`), file — T5.3;
+- checkbox / radio — отдельные блоки на той же обвязке (T5.2: ui-checkbox,
+  ui-radio + ui-radio-group), file — T5.3;
+- стрелка select (рендз-замечание T5.2): цвет — `background-color` из
+  токена `--ui-color-text-muted` на `::after` обёртки, форма —
+  alpha-`mask-image` по svg без цвета (цветной hex в data-URI нарушил бы
+  инвариант «hex только в primitives»: stylelint-гейт в url()-строки не
+  заглядывает). Тематическая перекраска работает: переопределение
+  `--ui-color-text-muted` меняет стрелку. VI-режим: vi.css (T9.1)
+  перекрашивает стрелку тем же свойством (`background-color`
+  псевдоэлемента), отдельная передача не требуется;
+- гашение стрелки disabled-поля — `:has()` (evergreen-матрица);
+  в браузерах без `:has()` стрелка disabled-поля остаётся яркой —
+  деградация косметическая;
 - клиентская валидация (фокус на первую ошибку, live-проверки) — T5.5;
 - раскладка форм и сводная ошибка — T5.4, серверный контракт — T5.6;
 - визуал readonly-состояния одобренным дизайном не задан (поведенческое

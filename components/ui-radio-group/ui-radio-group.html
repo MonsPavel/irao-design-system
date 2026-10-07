@@ -1,0 +1,39 @@
+<!-- ui-radio-group (T5.2): группа радио = fieldset/legend + ряд radio-row.
+     Копипаст даёт доступный результат (паттерн 02-architecture §6.3):
+     legend именует группу скринридером нативно; aria-describedby на
+     fieldset связывает hint и error с ГРУПОЙ (ошибка объявляется текстом
+     с role="alert" — показ её переключает ui-field--error обвязки T5.1);
+     required-маркер в legend — звёздочка aria-hidden + текст скринридеру
+     (не только цветом, WCAG 1.4.1). Стрелки ←→↑↓ переключают варианты
+     нативно, без JS и tabindex. Группа без legend — ошибка html-validate
+     (irao/radio-group-fieldset). Расширенный стенд —
+     showcase/pages/ui-field/index.html; do/don't — README.md. -->
+<div class="ui-field ui-field--required ui-field--error">
+  <fieldset class="ui-radio-group" aria-describedby="ui-format-hint ui-format-error">
+    <legend class="ui-radio-group__legend">
+      Формат работы
+      <span class="ui-field__req"
+        ><span aria-hidden="true">*</span
+        ><span class="ui-field__req-text">обязательное поле</span></span
+      >
+    </legend>
+    <div class="ui-radio-group__row">
+      <label class="ui-radio">
+        <input class="ui-radio__input" type="radio" name="format" value="full" required checked>
+        Полная занятость
+      </label>
+      <label class="ui-radio">
+        <input class="ui-radio__input" type="radio" name="format" value="part">
+        Частичная занятость
+      </label>
+      <label class="ui-radio">
+        <input class="ui-radio__input" type="radio" name="format" value="shift">
+        Сменный график
+      </label>
+    </div>
+  </fieldset>
+  <p class="ui-field__hint" id="ui-format-hint">
+    Выберите один вариант — как в трудовом договоре
+  </p>
+  <p class="ui-field__error" id="ui-format-error" role="alert">Выберите формат работы</p>
+</div>

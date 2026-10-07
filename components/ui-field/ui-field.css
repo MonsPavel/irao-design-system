@@ -2,7 +2,7 @@
 
 /*!
  * irao-ui — ui-field: обвязка поля (label/req/hint/error) и контролы
- * input/textarea (задача T5.1 — основа всех контролов форм).
+ * input/textarea/select (T5.1 — основа всех контролов форм; select — T5.2).
  *
  * Источник — .field* career-portal (components.css:130–187): флекс-колонка
  * с шагом 8px (--ui-space-2), label 14/500, контрол 52px с bg surface-muted
@@ -10,9 +10,9 @@
  * коробке), focus → белый фон + рамка primary (фирменный паттерн сохранён),
  * --error → рамка error + фон error-bg, текст ошибки fs-micro. Расширения
  * системы: hint, required-маркер со скринридер-текстом, --wide (grid),
- * состояния disabled/readonly. API классов — единственный контракт: select/
- * checkbox/radio подключатся с теми же модификаторами (T5.2), раскладка —
- * T5.4, валидация — T5.5.
+ * состояния disabled/readonly. API классов — единственный контракт:
+ * checkbox/radio (T5.2) подключаются с той же обвязкой и модификаторами,
+ * раскладка — T5.4, валидация — T5.5.
  *
  * Высота — min-height, не height (Implementation requirements п.1): 32px-база
  * T3.6 растит поле вместе с текстом, значение не обрезается (e2e —
@@ -92,9 +92,10 @@
   clip-path: inset(50%);
 }
 
-/* ── Контролы: input всех типов и textarea — одна коробка ── */
+/* ── Контролы: input всех типов, select и textarea — одна коробка ── */
 
 .ui-field__input,
+.ui-field__select,
 .ui-field__textarea {
   box-sizing: border-box;
   width: 100%;
@@ -120,9 +121,59 @@
   resize: vertical;
 }
 
+/* Select (T5.2): appearance: none убирает только UA-стрелку ЗАКРЫТОГО
+   контрола — сам select и его выпадающий список остаются нативными
+   (Implementation requirements п.1: никаких opacity/position-подмен до
+   T7.3, который сам синхронизируется). appearance none без явного
+   индикатора запрещён (Technical considerations T5.2 — не терять
+   аффорданс): стрелка живёт на ::after обёртки __select-wrap (псевдо-
+   элементы на <select> не работают). Форма — mask-image по svg БЕЗ
+   цвета: маска берёт только альфу, а цветной hex в data-URI (%23…) —
+   тот же инвариант «hex только в tokens/primitives.css» (рендз-замечание
+   T5.2 high: stylelint-гейт в url()-строки не заглядывает). Цвет —
+   background-color: var(--ui-color-text-muted): переопределение темы
+   перекрашивает стрелку токеном, vi.css (T9.1) — тем же свойством.
+   Правый паддинг (--ui-space-6) освобождает место под стрелку, текст
+   на неё не наезжает. */
+.ui-field__select {
+  appearance: none;
+  padding-right: var(--ui-space-6);
+}
+
+/* Обёртка select — точка позиционирования стрелки: блок на месте select
+   в колонке обвязки, габариты не меняет. */
+.ui-field__select-wrap {
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+}
+
+.ui-field__select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--ui-field-select-arrow-offset);
+  width: var(--ui-field-select-arrow-size);
+  height: var(--ui-field-select-arrow-size);
+  background-color: var(--ui-color-text-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+/* Стрелка disabled-поля гаснет вместе с ним: нативное затемнение красит
+   сам select, стрелка — снаружи (решает :has; evergreen-матрица). */
+.ui-field__select-wrap:has(.ui-field__select:disabled)::after {
+  opacity: var(--ui-opacity-disabled);
+}
+
 /* Фирменный паттерн career-portal (.field__input:focus): bg-swap + рамка
    primary. Дополняет глобальный outline ADR-0001 (см. шапку). */
 .ui-field__input:focus-visible,
+.ui-field__select:focus-visible,
 .ui-field__textarea:focus-visible {
   border-color: var(--ui-color-primary);
   background-color: var(--ui-color-surface);
@@ -138,6 +189,7 @@
 
 /* Правило после focus/placeholder: порядок каскада, а не специфичность. */
 .ui-field__input:disabled,
+.ui-field__select:disabled,
 .ui-field__textarea:disabled {
   opacity: var(--ui-opacity-disabled);
 }
@@ -169,6 +221,7 @@
    «ошибка + фокус» виз. паттерн поля остаётся ошибочным, видимый фокус
    несёт outline ADR-0001. */
 .ui-field--error .ui-field__input,
+.ui-field--error .ui-field__select,
 .ui-field--error .ui-field__textarea {
   border-color: var(--ui-color-error);
   background-color: var(--ui-color-error-bg);

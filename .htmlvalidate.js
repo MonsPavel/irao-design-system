@@ -42,6 +42,16 @@
  * tests/lint-cases/html/img-without-dimensions.html, позитивная —
  * img-dimensions-valid.html.
  *
+ * С T5.2: `irao/radio-group-fieldset` — радио-ГРУППА (≥2 инпута с общим
+ * name) обязана лежать в fieldset с legend — нативные имя и роль group
+ * скринридер объявляет сам, без ARIA (спека T5.2: «Группа radio … legend
+ * обязателен»; AC). Одиночное радио с уникальным name группой не является
+ * и гейтом не ловится (повторяемая единица .ui-radio канонического паттерна
+ * легальна сама по себе). Каждый инпут группы проверяется отдельно: у его
+ * ближайшего fieldset-предка должен быть ребёнок legend. Негативная
+ * фикстура — tests/lint-cases/html/radio-without-fieldset.html, позитивная —
+ * radio-group-with-legend.html.
+ *
  * Кастомные правила регистрируются инлайн-плагином (html-validate 11: ключ в
  * plugin.rules — уже полный id правила). Формат файла — CJS: загрузчик конфига
  * html-validate исполняет его в CJS-контексте.
@@ -193,6 +203,45 @@ class ImgDimensions extends Rule {
   }
 }
 
+/** Радио-группа (≥2 радио с общим name) обязана лежать в fieldset с legend (T5.2). */
+class RadioGroupFieldset extends Rule {
+  setup() {
+    this.on('dom:ready', (event) => {
+      const radios = [...event.document.querySelectorAll('input[type="radio"]')];
+      // Группа = имя, встречающееся ≥2 раз; одиночное имя — не группа.
+      const countByName = new Map();
+      for (const radio of radios) {
+        const name = radio.getAttribute('name');
+        const key = name ? name.value : '';
+        countByName.set(key, (countByName.get(key) ?? 0) + 1);
+      }
+      for (const radio of radios) {
+        const name = radio.getAttribute('name');
+        const key = name ? name.value : '';
+        if ((countByName.get(key) ?? 0) < 2) continue;
+        // Ближайший fieldset-предок обязан нести legend прямым ребёнком.
+        let ancestor = radio.parent;
+        let closestFieldset = null;
+        while (ancestor) {
+          if (ancestor.is('fieldset')) {
+            closestFieldset = ancestor;
+            break;
+          }
+          ancestor = ancestor.parent;
+        }
+        const hasLegend =
+          closestFieldset !== null &&
+          closestFieldset.childNodes.some((child) => child.nodeType === 1 && child.is('legend'));
+        if (hasLegend) continue;
+        this.report(
+          radio,
+          'Радио-группа (общий name) обязана лежать в <fieldset> с <legend>: нативные имя и роль группы — без ARIA (T5.2).',
+        );
+      }
+    });
+  }
+}
+
 module.exports = {
   extends: ['html-validate:recommended'],
   plugins: [
@@ -205,6 +254,7 @@ module.exports = {
         'irao/link-external-noopener': LinkExternalNoopener,
         'irao/link-accessible-name': LinkAccessibleName,
         'irao/img-dimensions': ImgDimensions,
+        'irao/radio-group-fieldset': RadioGroupFieldset,
       },
     }),
   ],
@@ -215,6 +265,7 @@ module.exports = {
     'irao/link-external-noopener': 'error',
     'irao/link-accessible-name': 'warn',
     'irao/img-dimensions': 'error',
+    'irao/radio-group-fieldset': 'error',
     'input-missing-label': 'error',
     // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
     'no-implicit-button-type': 'warn',

@@ -239,6 +239,20 @@ const EXPECTATIONS = [
     expect: 'fail',
     rules: [['no-implicit-button-type', 'warning']],
   },
+  {
+    // T5.2 (AC): input[type="radio"] с общим name вне fieldset с legend —
+    // ошибка: группа без нативного имени (legend) скринридером не именуется.
+    file: 'html/radio-without-fieldset.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/radio-group-fieldset'],
+  },
+  {
+    // T5.2: позитивный контроль гейта — группа в fieldset/legend, гейт молчит.
+    file: 'html/radio-group-with-legend.html',
+    tool: 'html',
+    expect: 'pass',
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 

@@ -27,3 +27,7 @@ showcase/pages/base/index.html
 # паттерн (последний — источник стенда и копипасты для интеграторов).
 showcase/pages/ui-field/index.html
 components/ui-field/ui-field.html
+# T5.2: канонические паттерны контролов форм — тот же случай (<input> без слэша).
+components/ui-checkbox/ui-checkbox.html
+components/ui-radio/ui-radio.html
+components/ui-radio-group/ui-radio-group.html
