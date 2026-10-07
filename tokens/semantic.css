@@ -82,6 +82,8 @@
   --ui-color-divider: var(--ui-slate-200);
   /* career-portal: --color-page-head-border (мягкая рамка шапки внутренних страниц) */
   --ui-color-border-muted: var(--ui-slate-100);
+  /* career-portal: components.css:123 — hover-рамка карточки (.card--hover #B9C6DE); семантическое имя заведено T4.4 (решение №1 таблицы диффов: примитив --ui-slate-300 существовал, «имена заведут задачи компонентов») */
+  --ui-color-border-hover: var(--ui-slate-300);
 
   /* ── Цвета-смыслы: статусы ── */
 
@@ -150,6 +152,11 @@
   --ui-tag-letter-spacing: 0.02em;
   /* новый: в career-portal бейджа нет; диаметр круга/min-height одной цифры — ступень шкалы §3.2 (24px), «99+» растёт в pill паддингом из --ui-space-1 */
   --ui-badge-size: 1.5rem;
+
+  /* ── Карточки (ui-card, T4.4): геометрия ── */
+
+  /* career-portal: pages.css:42 — gap .vac-card 14px; ступени шкалы отступов §3.2 кратны 4, значение 14 — перенос «как есть», пересмотр — design-decision владельца */
+  --ui-card-gap: 0.875rem;
 
   /* ── Типографика (rem; тройки fs/lh/fw на роль — §3.2) ── */
 

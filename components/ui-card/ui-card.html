@@ -1,0 +1,31 @@
+<!-- ui-card (T4.4): канонический паттерн. Карточка — коробка (.ui-card) со
+     слотами __media/__title/__body/__footer; типографика слотов — роли base
+     (ui-h3/ui-body), не компонент. Паттерн карточки-ссылки — ПАРА классов:
+     ui-card--link на карточке + ui-card__link на контент-ссылке (одна
+     остановка скринридера, имя = текст ссылки); вложенные интерактивы
+     (кнопка ниже) компонент поднимает над растянутой ссылкой сам. Модификатор
+     --hover — только для hover-устройств (гвард внутри CSS); --filled —
+     приглушённая «бесшовная» карточка. Контентные карточки (vacancy/event) —
+     паттерны EPIC-8 (T8.1) из этих слотов. -->
+<article class="ui-card ui-card--hover ui-card--link">
+  <div class="ui-card__media">
+    <!-- изображение карточки — ui-image (T4.6) -->
+  </div>
+  <h3 class="ui-h3 ui-card__title">
+    <a class="ui-card__link" href="vacancy.html">Вакансия: стажёр в команду разработки</a>
+  </h3>
+  <p class="ui-body ui-card__body">
+    Короткое описание: вся карточка — одна цель ссылки, фокус-обводка проходит по всей площади.
+  </p>
+  <div class="ui-card__footer">
+    <button class="ui-button ui-button--primary" type="button">Откликнуться</button>
+  </div>
+</article>
+
+<article class="ui-card ui-card--filled">
+  <h3 class="ui-h3 ui-card__title">Карточка без ссылки</h3>
+  <p class="ui-body ui-card__body">
+    Приглушённый вариант --filled: фон и рамка surface-muted, ссылки нет — интерактив внутри
+    оформляйте ui-button/ui-link.
+  </p>
+</article>

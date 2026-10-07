@@ -8,7 +8,7 @@
   },
   "scripts": {
     "lint": "npm run lint:css && npm run lint:js && npm run lint:format && npm run lint:html",
-    "lint:css": "stylelint \"**/*.css\" \"!dist/**\" \"!tests/lint-cases/**\" --allow-empty-input",
+    "lint:css": "stylelint \"**/*.css\" \"!dist/**\" \"!showcase/dist/**\" \"!tests/lint-cases/**\" --allow-empty-input",
     "lint:js": "eslint .",
     "lint:format": "prettier --check .",
     "lint:html": "node tools/lint-html.mjs",

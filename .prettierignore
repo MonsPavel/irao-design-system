@@ -5,6 +5,7 @@
 package-lock.json
 node_modules/
 dist/
+showcase/dist/
 .zcode/
 .playwright-mcp/
 .github/

@@ -127,6 +127,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--color-blue-700` (карточки «почему мы») | `--ui-color-surface-blue-deep` → `--ui-blue-700` | разведение дубля #164B89 |
 | `--color-page-head-bg` | (поверхность внутренних страниц — EPIC-4 паттерны) → `--ui-slate-50` | смысловая пара к border-muted |
 | `--color-page-head-border` | `--ui-color-border-muted` → `--ui-slate-100` | |
+| `#B9C6DE` (hover-рамка карточки, components.css:123) | `--ui-color-border-hover` → `--ui-slate-300` | T4.4: семантическое имя по решению №1 ниже («имена заведут задачи компонентов»); пара в контраст-гейте не требуется — осознанное исключение (декоративная рамка) |
 | `--glass-light/dark/blue` | `--ui-color-glass-light/dark/blue` → `--ui-white-80` / `--ui-white-10` / `--ui-blue-800-50` | |
 | `--color-error[-bg]` | `--ui-color-error[-bg]` → `--ui-red-600` / `--ui-red-50` | |
 | `--color-success[-bg]` | `--ui-color-success[-bg]` → `--ui-green-700` / `--ui-green-50` | |
@@ -140,6 +141,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | height `.btn` 52px (components.css:70) | `--ui-button-height: 3.25rem` | T4.2: используется как min-height (32px-база T3.6) |
 | height `.tag` 28px (components.css:99) | `--ui-tag-height: 1.75rem` | T4.3: используется как min-height (тот же прецедент) |
 | gap `.tag` 6px (components.css:100) | `--ui-tag-gap: 0.375rem` | T4.3: ступени шкалы отступов кратны 4 — значение перенесено «как есть», пересмотр — design-decision владельца |
+| gap `.vac-card` 14px (pages.css:42) | `--ui-card-gap: 0.875rem` | T4.4: тот же случай — вне шкалы §3.2, перенос «как есть» |
 | letter-spacing `.tag` 0.02em (components.css:105) | `--ui-tag-letter-spacing: 0.02em` | T4.3: em — от размера роли |
 | рамка `.btn--outline` 2px (components.css:87) | `--ui-button-border-width: 0.125rem` | T4.2: «все значения из токенов» |
 | `.pagination__arrow[disabled]` opacity 0.3 (components.css:269) | `--ui-opacity-disabled: 0.3` | T4.2: единственный disabled-паттерн одобренного дизайна |
@@ -183,9 +185,10 @@ requirements T2.1 п.4): каждое значение career-portal перен�
    `--ui-color-primary-hover`; см. «Перенос» выше и ADR-0010). Из оставшихся
    hover-значений `--ui-blue-100` (фон при наведении: hover `.btn--light` и
    карточек) получило семантическое имя `--ui-color-surface-hover` в T4.2;
-   `--ui-slate-300` (hover-рамка) и `--ui-blue-50-55` (hover dd__trigger)
-   остаются примитивами — имена заведут задачи компонентов (T4.3+) либо
-   состояния выразятся color-mix по конвенции 88% + black (ADR-0010).
+   `--ui-slate-300` (hover-рамка) получило имя `--ui-color-border-hover` в
+   T4.4 (см. «Перенос»); `--ui-blue-50-55` (hover dd__trigger) остаётся
+   примитивом — имя заведёт задача dropdown (T7.x), либо состояние выразится
+   color-mix по конвенции 88% + black (ADR-0010).
 2. **`--ui-color-surface-muted` = blue-50, а не gray-100:** пример §3.1
    (`gray-100`) заменён значением одобренного дизайна — в career-portal
    приглушённый фон карточек и «серых» секций — `--color-surface-blue-50`
