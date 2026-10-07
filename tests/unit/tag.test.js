@@ -234,7 +234,7 @@ describe('подключение и гейты (DoD)', () => {
     );
   });
 
-  it('README компонента: тег не интерактивен (do/don\'t), чипы фильтров — T8.1, VI — T9.1', () => {
+  it("README компонента: тег не интерактивен (do/don't), чипы фильтров — T8.1, VI — T9.1", () => {
     const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
     expect(readme).toMatch(/не интерактивен/i);
     expect(readme).toContain('T8.1');
