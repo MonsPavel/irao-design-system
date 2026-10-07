@@ -1,0 +1,150 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-file (T5.3): доступный файловый инпут — состояния пусто / выбран (демо разметки) / ошибка
+  / disabled. Нативный input скрыт sr-only-клипом (НЕ <code>display: none</code> — анти-паттерн
+  career-portal <code>.field__file input</code> исправлен): Tab доходит до контрола, обводку фокуса
+  рисует кнопка-лейбл. Кнопка-лейбл — единственный label; имя полю задаёт
+  <code>aria-labelledby</code>. Значение выбора — <code>ui-file__value</code> с
+  <code>role="status"</code> (озвучивание), сброс — кнопка «Убрать файл». Сценарии —
+  <code>tests/e2e/ui-file.spec.js</code> (<code>setInputFiles</code>); правило «без display:none на
+  нативных контролах», do/don't — README.md компонента.
+</p>
+
+<section aria-labelledby="uifl-empty-heading">
+  <h2 id="uifl-empty-heading">Базовое состояние (пусто)</h2>
+  <div class="ui-field">
+    <span class="ui-field__label" id="uifl-resume-label">Резюме</span>
+    <div class="ui-file" id="uifl-file-box" data-ui-file>
+      <label class="ui-file__button">
+        <input
+          class="ui-file__input"
+          type="file"
+          id="uifl-file"
+          name="resume"
+          accept=".doc,.docx,.pdf"
+          aria-labelledby="uifl-resume-label"
+          aria-describedby="uifl-resume-hint"
+        >
+        <span class="ui-file__button-text">прикрепить файл</span>
+      </label>
+      <p class="ui-file__value" role="status">Файл не выбран</p>
+      <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
+      <span class="ui-file__hint" id="uifl-resume-hint">
+        doc, docx, pdf — до 5 Мб; файл не обязателен
+      </span>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Tab доходит до sr-only-инпута, обводка фокуса — на кнопке-лейбле (<code>:has</code>, тройка
+    токенов ADR-0001). Выбор файла открывает нативный диалог: имя и размер появятся в значении
+    (озвучится скринридером), появится кнопка «Убрать файл». Отмена диалога (Escape) состояние не
+    ломает. Без JS поле работает нативно: выбор и отправка формы — только обратная связь
+    («выбран»/сброс) остаётся за модулем.
+  </p>
+</section>
+
+<section aria-labelledby="uifl-selected-heading">
+  <h2 id="uifl-selected-heading">Состояние «выбран» (демо разметки)</h2>
+  <div class="ui-field">
+    <span class="ui-field__label" id="uifl-demo-label">Резюме</span>
+    <div class="ui-file" id="uifl-demo-box">
+      <label class="ui-file__button">
+        <input
+          class="ui-file__input"
+          type="file"
+          id="uifl-demo"
+          name="resume-demo"
+          accept=".doc,.docx,.pdf"
+          aria-labelledby="uifl-demo-label"
+          aria-describedby="uifl-demo-hint"
+        >
+        <span class="ui-file__button-text">прикрепить файл</span>
+      </label>
+      <p class="ui-file__value" role="status">Выбран файл: resume-Ivanov.pdf, 245 КБ</p>
+      <button class="ui-file__reset" type="button">Убрать файл</button>
+      <span class="ui-file__hint" id="uifl-demo-hint">
+        doc, docx, pdf — до 5 Мб; файл не обязателен
+      </span>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    В живом поле это состояние рисует модуль после выбора (здесь — статичная демо-разметка без
+    JS-хука <code>data-ui-file</code>: нативный file-инпут не может «содержать файл» статично;
+    скриншот-эталон состояния). Реальные выбор/повтор/сброс — e2e
+    <code>tests/e2e/ui-file.spec.js</code>.
+  </p>
+</section>
+
+<section aria-labelledby="uifl-error-heading">
+  <h2 id="uifl-error-heading">Обязательное поле с ошибкой</h2>
+  <div class="ui-field ui-field--required ui-field--error">
+    <span class="ui-field__label" id="uifl-err-label">
+      Резюме
+      <span class="ui-field__req"
+        ><span aria-hidden="true">*</span
+        ><span class="ui-field__req-text">обязательное поле</span></span
+      >
+    </span>
+    <div class="ui-file" id="uifl-err-box" data-ui-file>
+      <label class="ui-file__button">
+        <input
+          class="ui-file__input"
+          type="file"
+          id="uifl-file-err"
+          name="resume-err"
+          accept=".doc,.docx,.pdf"
+          required
+          aria-invalid="true"
+          aria-labelledby="uifl-err-label"
+          aria-describedby="uifl-err-hint uifl-err-error"
+        >
+        <span class="ui-file__button-text">прикрепить файл</span>
+      </label>
+      <p class="ui-file__value" role="status">Файл не выбран</p>
+      <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
+      <span class="ui-file__hint" id="uifl-err-hint">
+        doc, docx, pdf — до 5 Мб; нужен для отбора на собеседование
+      </span>
+    </div>
+    <p class="ui-field__error" id="uifl-err-error" role="alert">
+      Прикрепите резюме в формате doc, docx или pdf
+    </p>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Ошибка — визуал и aria в одном паттерне обвязки <code>ui-field--error</code>:
+    <code>aria-invalid="true"</code> и <code>aria-describedby</code> на hint и ошибку; текст с
+    <code>role="alert"</code> объявляется сразу. Переключение состояния — за валидацией формы (T5.5)
+    и серверным рендером Bitrix (T5.6).
+  </p>
+</section>
+
+<section aria-labelledby="uifl-disabled-heading">
+  <h2 id="uifl-disabled-heading">Disabled</h2>
+  <div class="ui-field">
+    <span class="ui-field__label" id="uifl-disabled-label">Резюме (приём закрыт)</span>
+    <div class="ui-file" id="uifl-disabled-box" data-ui-file>
+      <label class="ui-file__button">
+        <input
+          class="ui-file__input"
+          type="file"
+          id="uifl-file-disabled"
+          name="resume-disabled"
+          accept=".doc,.docx,.pdf"
+          disabled
+          aria-labelledby="uifl-disabled-label"
+          aria-describedby="uifl-disabled-hint"
+        >
+        <span class="ui-file__button-text">прикрепить файл</span>
+      </label>
+      <p class="ui-file__value" role="status">Файл не выбран</p>
+      <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
+      <span class="ui-file__hint" id="uifl-disabled-hint">
+        Поле неактивно: диалог не открывается, Tab его пропускает нативно
+      </span>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Нативный атрибут <code>disabled</code>: диалог не открывается, Tab не фокусирует; гаснет видимый
+    аффорданс — кнопка (<code>:has</code>, токен <code>--ui-opacity-disabled</code>), значение и
+    подсказка остаются полноконтрастными (гейт контраста axe).
+  </p>
+</section>

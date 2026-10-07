@@ -31,3 +31,6 @@ components/ui-field/ui-field.html
 components/ui-checkbox/ui-checkbox.html
 components/ui-radio/ui-radio.html
 components/ui-radio-group/ui-radio-group.html
+# T5.3: файловый инпут — тот же случай (<input> без слэша): стенд и канонический паттерн.
+showcase/pages/ui-file/index.html
+components/ui-file/ui-file.html

@@ -1,0 +1,197 @@
+/** @define file */
+
+/*!
+ * irao-ui — ui-file: доступный файловый инпут (задача T5.3).
+ *
+ * Источник — .field__file career-portal (css/pages.css:231–244): флекс-коробка
+ * с зазором 12px (--ui-space-3), высота 52px (min-height — прецедент полей
+ * T5.1, --ui-field-height), паддинг 4px 16px, фон surface-blue-50
+ * (--ui-color-surface-muted), радиус sm; кнопка-лейбл — визуал .btn--light
+ * (components.css:92–93: подпись primary на фоне коробки, hover — blue-100 =
+ * --ui-color-surface-hover); подсказка — micro/muted (визуал
+ * .field__file-hint). АНТИ-ПАТТЕРН career-portal (класс D аудита,
+ * pages.css:242: `.field__file input { display: none }`) НЕ переносится:
+ * нативный input визуально скрыт классическим sr-only (клип 1px) — остаётся
+ * в tab-порядке, a11y-дереве и отправке формы. Правило системы «на нативных
+ * контролах запрещены display:none/visibility:hidden» — README.md.
+ *
+ * Кнопка-лейбл — ЕДИНСТВЕННЫЙ label инпута: клик открывает выбор нативно,
+ * без JS; имя полю задаёт разметка обвязки через aria-labelledby на
+ * ui-field__label (второй label дал бы axe form-field-multiple-labels —
+ * README.md). Выбор и сброс без модуля недоступны по природе нативного
+ * file-инпута — обратную связь ведёт ui-file.js (data-ui-file): значение в
+ * ui-file__value (role="status" в разметке — озвучивание, Implementation
+ * requirements п.3), кнопка ui-file__reset ([hidden] вне выбора — допустимо:
+ * скрытая кнопка-действие, не контрол значения), фокус после сброса модуль
+ * возвращает на инпут.
+ *
+ * Фокус: sr-only инпут получает глобальный outline политики ADR-0001
+ * (base/focus.css), но он невидим за клипом — видимый индикатор рисует
+ * кнопка-лейбл через :has(.ui-file__input:focus-visible) той же тройкой
+ * токенов (прецедент :has — стрелка select, T5.2). outline нигде не гасится.
+ *
+ * disabled — нативный атрибут: диалог не открывается нативно, видимый
+ * аффорданс (кнопка-лейбл) гаснет токеном --ui-opacity-disabled — аналог
+ * затемнения инпута в ui-field (:has, сам инпут невидим; прецедент стрелки
+ * select T5.2); значение и подсказка остаются полноконтрастными —
+ * информационный текст затемнению не подлежит (axe color-contrast учитывает
+ * opacity предка).
+ *
+ * hover — только под @media (hover: hover) (EPIC-4), пара одобренного
+ * .btn--light:hover; active одобренным дизайном не задан — color-mix 88% +
+ * black (прецедент ui-button), правила ПОСЛЕ hover — порядок каскада.
+ * Без width-медиа — мобильный поток: длинное имя переносится (flex-wrap
+ * коробки, overflow-wrap значения). VI-режим: цветов вне токенов нет (§5) —
+ * перекраска vi.css накрывает компонент как обычные элементы (T9.1).
+ */
+
+.ui-file {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3);
+  align-items: center;
+  min-height: var(--ui-field-height);
+  padding: var(--ui-space-1) var(--ui-space-4);
+  border-radius: var(--ui-radius-sm);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Кнопка-лейбл — единственный label инпута. Визуал — одобренный .btn--light:
+   подпись primary, фон коробки просвечивает (transparent), высота — 52px
+   минус вертикальный паддинг коробки (2 × --ui-space-1). */
+.ui-file__button {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--ui-field-height) - var(--ui-space-2));
+  padding: var(--ui-space-3) var(--ui-space-5);
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-primary);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  transition:
+    background-color var(--ui-transition),
+    color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* Подпись кнопки — инлайн-узел выравнивания; в имя поля не входит:
+   aria-labelledby указывает на label-текст обвязки (README.md). */
+.ui-file__button-text {
+  box-sizing: border-box;
+}
+
+/* Нативный input — sr-only клипом: классический паттерн (GOV.UK/USWDS) —
+   бокс 1px вне потока, отступ -1px гасит вклад 1px в скролл-переполнение
+   страницы. НЕ display:none/visibility:hidden/opacity: контрол остаётся в
+   tab-порядке, a11y-дереве и отправке формы (класс D аудита). 1px —
+   каноничная геометрия паттерна; токена для неё нет, создавать ради
+   одного значения — анти-overengineering. */
+.ui-file__input {
+  box-sizing: border-box;
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* Значение выбора: текст ведёт модуль (render()); role="status" — в
+   разметке, обновление озвучивается скринридером нативно. Длинное имя
+   файла (без пробелов) переносится, коробку не ломает. */
+.ui-file__value {
+  box-sizing: border-box;
+  min-width: 0;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  overflow-wrap: anywhere;
+}
+
+/* Сброс выбора — доступная нативная кнопка: второстепенный цвет muted,
+   высота sm-токена кнопок. Появляется с выбором ([hidden] ставит разметка/
+   модуль). */
+.ui-file__reset {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ui-button-height-sm);
+  padding: var(--ui-space-1) var(--ui-space-3);
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-text-muted);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  transition:
+    background-color var(--ui-transition),
+    color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* accept-подсказка и ограничения (типы/размер) — внутри коробки, визуал
+   .field__file-hint; связь с инпутом — aria-describedby разметки. */
+.ui-file__hint {
+  box-sizing: border-box;
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-micro);
+  line-height: var(--ui-lh-micro);
+}
+
+/* Видимый фокус: sr-only outline инпута невидим за клипом — обводку той же
+   тройкой токенов ADR-0001 рисует кнопка-лейбл. */
+.ui-file__button:has(.ui-file__input:focus-visible) {
+  outline: var(--ui-focus-width) solid var(--ui-focus-color);
+  outline-offset: var(--ui-focus-offset);
+}
+
+/* Disabled: гаснет видимый аффорданс — кнопка (аналог затемнения инпута в
+   ui-field; :has — сам инпут невидим; прецедент стрелки select T5.2;
+   evergreen-матрица). Значение и подсказка полноконтрастны: axe
+   color-contrast учитывает opacity предка — информационный текст затемнять
+   нельзя. */
+.ui-file:has(.ui-file__input:disabled) .ui-file__button {
+  opacity: var(--ui-opacity-disabled);
+  cursor: default;
+}
+
+.ui-file:has(.ui-file__input:disabled) .ui-file__reset {
+  opacity: var(--ui-opacity-disabled);
+}
+
+/* hover — только под (hover: hover); пара одобренного .btn--light:hover:
+   фон blue-100 (--ui-color-surface-hover), подпись не меняется. */
+@media (hover: hover) {
+  .ui-file__button:hover {
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-primary);
+  }
+
+  .ui-file__reset:hover {
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-text);
+  }
+}
+
+/* active — color-mix 88% + black (одобренным дизайном active не задан;
+   прецедент ui-button). Правила после hover — порядок каскада. */
+.ui-file__button:active {
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
+  color: var(--ui-color-primary);
+}
+
+.ui-file__reset:active {
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
+  color: var(--ui-color-text);
+}
