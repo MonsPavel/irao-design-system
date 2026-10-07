@@ -132,29 +132,52 @@ describe('канонический паттерн (components/ui-breadcrumbs/ui-
   const path = join(root, 'components', 'ui-breadcrumbs', 'ui-breadcrumbs.html');
   const html = readFileSync(path, 'utf8');
 
+  /** Открывающий тег целиком (пины атрибутов устойчивы к переносам prettier). */
+  const tagOf = (source, tag) => {
+    const match = source.match(new RegExp(`<${tag}(?:\\s[^>]*)?>`, 's'));
+    return match ? match[0] : '';
+  };
+
   it('nav[aria-label] > ol[role="list"] > li — семантика упорядоченного списка (Scope)', () => {
-    expect(html).toMatch(/<nav class="ui-breadcrumbs" aria-label="Хлебные крошки">/);
-    expect(html).toMatch(
-      /<ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https:\/\/schema\.org\/BreadcrumbList">/,
-    );
-    expect(html).toMatch(
-      /<li class="ui-breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https:\/\/schema\.org\/ListItem">/,
-    );
+    const navTag = tagOf(html, 'nav');
+    expect(navTag).toContain('class="ui-breadcrumbs"');
+    expect(navTag).toContain('aria-label="Хлебные крошки"');
+
+    const olTag = tagOf(html, 'ol');
+    expect(olTag).toContain('class="ui-breadcrumbs__list"');
+    expect(olTag).toContain('role="list"');
+    expect(olTag).toContain('itemscope');
+    expect(olTag).toContain('itemtype="https://schema.org/BreadcrumbList"');
+
+    const liTag = tagOf(html, 'li');
+    expect(liTag).toContain('class="ui-breadcrumbs__item"');
+    expect(liTag).toContain('itemprop="itemListElement"');
+    expect(liTag).toContain('itemscope');
+    expect(liTag).toContain('itemtype="https://schema.org/ListItem"');
+    expect(
+      (html.match(/itemtype="https:\/\/schema\.org\/ListItem"/g) ?? []).length,
+      'три уровня — три ListItem',
+    ).toBe(3);
   });
 
   it('микроразметка ListItem: itemprop="item" на a, name в span, position в meta (паттерн Google)', () => {
-    expect(html).toMatch(/<a class="ui-breadcrumbs__link" itemprop="item" href="[^"]+"/);
+    const aTag = tagOf(html, 'a');
+    expect(aTag).toContain('class="ui-breadcrumbs__link"');
+    expect(aTag).toContain('itemprop="item"');
+    expect(aTag).toMatch(/href="[^"]+"/);
     expect(html).toContain('<span itemprop="name">');
-    expect(html).toMatch(/<meta itemprop="position" content="[12]">/);
+    expect((html.match(/itemprop="position"/g) ?? []).length, 'position у каждого уровня').toBe(3);
+    expect(html).toMatch(/<meta itemprop="position" content="[12]"\s*\/?>/);
   });
 
   it('текущая страница — span + aria-current="page" (не ссылка), position последнего уровня', () => {
-    expect(html).toMatch(
-      /<span class="ui-breadcrumbs__current" itemprop="name" aria-current="page">/,
-    );
-    expect(html).toMatch(/<meta itemprop="position" content="3">/);
-    expect(html, 'текущая без href (не ссылка)').not.toMatch(
-      /aria-current="page"[^>]*href|href[^>]*aria-current="page"/,
+    const currentTag = html.match(/<span[^>]*ui-breadcrumbs__current[^>]*>/s)?.[0] ?? '';
+    expect(currentTag).toContain('class="ui-breadcrumbs__current"');
+    expect(currentTag).toContain('itemprop="name"');
+    expect(currentTag).toContain('aria-current="page"');
+    expect(html).toMatch(/<meta itemprop="position" content="3"\s*\/?>/);
+    expect(html, 'aria-current не встречается на ссылках (текущая — не ссылка)').not.toMatch(
+      /<a[^>]*aria-current/,
     );
   });
 
@@ -164,7 +187,10 @@ describe('канонический паттерн (components/ui-breadcrumbs/ui-
 });
 
 describe('стенд (showcase/pages/ui-breadcrumbs/index.html)', () => {
-  const stand = readFileSync(join(root, 'showcase', 'pages', 'ui-breadcrumbs', 'index.html'), 'utf8');
+  const stand = readFileSync(
+    join(root, 'showcase', 'pages', 'ui-breadcrumbs', 'index.html'),
+    'utf8',
+  );
 
   it('стенд содержит три навигации-сценария: базовая 3 уровня, длинные названия, уровень без ссылки (AC)', () => {
     for (const id of ['ui-breadcrumbs-basic', 'ui-breadcrumbs-long', 'ui-breadcrumbs-unlinked']) {
@@ -200,7 +226,10 @@ describe('PHP-сниппет (bitrix/snippets/breadcrumbs.php) согласов�
     expect(existsSync(path), 'сниппет на месте').toBe(true);
     expect(snippet).toContain('https://schema.org/BreadcrumbList');
     expect(snippet).toContain('https://schema.org/ListItem');
-    expect(snippet).toContain('aria-label="Хлебные крошки"');
+    expect(snippet, 'конвенция имени лендмарки — параметр по умолчанию').toContain(
+      "$label = 'Хлебные крошки'",
+    );
+    expect(snippet).toContain('aria-label=');
     expect(snippet).toContain('aria-current="page"');
     expect(snippet).toContain('ui-breadcrumbs__');
     expect(snippet).toContain('itemprop="position"');
@@ -236,7 +265,7 @@ describe('подключение и дока (DoD T4.7)', () => {
       'Rich Results',
       'Раздел без ссылки',
       'bitrix:breadcrumb',
-      'усечение',
+      'Усечение',
       'position',
     ]) {
       expect(readme, keyword).toContain(keyword);

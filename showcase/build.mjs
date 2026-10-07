@@ -87,6 +87,7 @@ const COMPONENTS = [
   'ui-alert', // T4.5 — статусные сообщения: 4 варианта, роли status/alert, закрываемый вариант
   'ui-image', // T4.6 — паттерн изображений: alt/размеры/lazy, --cover/--contain, --ratio (шкала пропорций)
   'ui-figure', // T4.6 — фигура с подписью: нативные figure/figcaption, шаг подписи --ui-space-2
+  'ui-breadcrumbs', // T4.7 — хлебные крошки: ol-семантика, микроразметка BreadcrumbList, лента на md-
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */

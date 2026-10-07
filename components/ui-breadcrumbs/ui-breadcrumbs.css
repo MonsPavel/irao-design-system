@@ -1,0 +1,114 @@
+/** @define breadcrumbs */
+
+/*!
+ * irao-ui — ui-breadcrumbs: хлебные крошки с микроразметкой BreadcrumbList
+ * (задача T4.7).
+ *
+ * Источник — .breadcrumbs career-portal (components.css:9–32): caption-типографика,
+ * muted-цвет, hover → accent, разделитель «/» (#C4CDDC), на ≤767 — лента
+ * (nowrap + overflow-x + скрытый скроллбар). Разметка career-portal была
+ * nav > a/span — здесь упорядоченный список (Scope): ol даёт скринридеру
+ * «шаг N из M» бесплатно (Technical considerations), текущая страница —
+ * span + aria-current="page" (в career-portal aria-current применялся в
+ * субнавигации — перенесён на крошки).
+ *
+ * Все значения — токены слоя 2 (Implementation requirements п.1): типографика
+ * --ui-fs/--ui-fw-caption, шаг --ui-space-2 (gap 8px career-portal),
+ * цвета --ui-color-text-muted / --ui-color-divider (токен заведён T2.2 под
+ * разделители крошек #C4CDDC, components.css:22) / --ui-color-accent (пара
+ * одобренного дизайна hover, ADR-0010: значение макета не заменяется
+ * color-mix), переход --ui-transition. Вертикальный ритм career-portal
+ * (padding 20px 0 24px, components.css:13) — отступ страницы «шапка → крошки
+ * → заголовок», а не компонента: на странице задаётся layout-примитивами
+ * (паттерн детали T8.2), компонент остаётся без магических чисел вне шкалы.
+ *
+ * Mobile-first (T2.5): база — поведение ≤767 career-portal (лента: nowrap +
+ * overflow-x: auto + скрытый скроллбар), рост в @media (min-width: 768px) —
+ * перенос цепочки (flex-wrap: wrap, инверсия desktop-first max-width:767).
+ * Скроллбар скрыт на всех ширинах: свайп на touch и колесо работают
+ * (Implementation requirements п.3), на md+ overflow-x: visible — скрытие
+ * деактивируется само. scroll-snap/поля прокрутки не заводились: approved
+ * design их не содержит.
+ *
+ * Подчёркивание ссылок снято — одобренный дизайн (отклонение от правила
+ * «подчёркнутая всегда» ui-link осознанное: крошки — узнаваемый навигационный
+ * паттерн с лендмаркой nav и списком, различимость даёт структура, а не
+ * только цвет; WCAG 1.4.1 — обсуждение в README).
+ *
+ * Фокус — глобальная гарантия base/focus.css (ADR-0001): селектор a в списке
+ * политики; здесь outline не запрещается и не заменяется. VI-режим (EPIC-9):
+ * цветов вне токенов нет — перекраска vi.css накрывает крошки как обычные
+ * элементы (инвариант §5).
+ */
+
+.ui-breadcrumbs {
+  box-sizing: border-box;
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-caption);
+  font-weight: var(--ui-fw-caption);
+}
+
+/* Лента — сам список ol (nav — только лендмарка). Mobile-first база =
+   поведение ≤767 career-portal (components.css:25–30). */
+.ui-breadcrumbs__list {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--ui-space-2);
+  align-items: center;
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+  list-style: none;
+  /* Скрытый скроллбар — функциональность сохраняется: свайп на touch,
+     колесо/тачпад, горизонтальный скролл с клавиатуры. Firefox —
+     scrollbar-width, WebKit — ::-webkit-scrollbar (components.css:29/32). */
+  scrollbar-width: none;
+}
+
+.ui-breadcrumbs__list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Разделитель — псевдоэлемент соседнего li (Implementation requirements п.2:
+   «/» не в тексте ссылок — имя ссылки остаётся чистым для скринридера и
+   микроразметки). Цвет — --ui-color-divider (#C4CDDC → slate-200, токен
+   T2.2 с происхождением «разделители крошек», semantic.css). */
+.ui-breadcrumbs__item + .ui-breadcrumbs__item::before {
+  content: '/';
+  color: var(--ui-color-divider);
+}
+
+/* Текущая страница — span + aria-current="page" (разметка паттерна):
+   одобренный дизайн её не выделяет, стиль наследует блоку — правило не
+   заводится (career-portal: span внутри .breadcrumbs без собственных стилей). */
+
+.ui-breadcrumbs__link {
+  box-sizing: border-box;
+  color: var(--ui-color-text-muted);
+  text-decoration: none;
+  transition: color var(--ui-transition);
+}
+
+/* hover — пара одобренного дизайна (.breadcrumbs a:hover → --color-accent,
+   components.css:21): accent, не color-mix (ADR-0010: пару макета не
+   заменяет). Только под (hover: hover) — sticky-hover не «залипает» на
+   таче (EPIC-4). */
+@media (hover: hover) {
+  .ui-breadcrumbs__link:hover {
+    color: var(--ui-color-accent);
+  }
+}
+
+/* md+: цепочка переносится — инверсия desktop-first career-portal
+   (max-width: 767 → min-width: 768, шкала брейкпоинтов T2.5): flex-wrap: wrap
+   базового правила .breadcrumbs (components.css:10), белый пробел возвращён
+   многострочным названиям. */
+@media (min-width: 768px) {
+  .ui-breadcrumbs__list {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    white-space: normal;
+  }
+}

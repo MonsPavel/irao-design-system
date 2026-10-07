@@ -55,7 +55,9 @@ const parseChain = (page, navId) =>
   page.locator(`#${navId}`).evaluate((nav) => {
     const list = nav.querySelector('[itemtype="https://schema.org/BreadcrumbList"]');
     if (!list) return { error: 'BreadcrumbList (itemscope/itemtype) на ol не найден' };
-    const listItems = [...list.querySelectorAll(':scope > [itemtype="https://schema.org/ListItem"]')];
+    const listItems = [
+      ...list.querySelectorAll(':scope > [itemtype="https://schema.org/ListItem"]'),
+    ];
     return {
       listSemantics: list.tagName === 'OL' && list.getAttribute('role') === 'list',
       items: listItems.map((li) => ({
@@ -113,7 +115,10 @@ standTest.describe('ui-breadcrumbs: микроразметка BreadcrumbList (T
 
       const parsed = await parseChain(page, BC.basic);
       expect(parsed.error, 'BreadcrumbList найден на ol').toBeUndefined();
-      expect(parsed.listSemantics, 'ol + role="list" (семантика «шаг N из M» сохранена при list-style: none)').toBe(true);
+      expect(
+        parsed.listSemantics,
+        'ol + role="list" (семантика «шаг N из M» сохранена при list-style: none)',
+      ).toBe(true);
       expect(parsed.items, 'цепочка из 3 уровней (AC)').toHaveLength(3);
 
       for (const [index, expected] of BASIC_EXPECTED.entries()) {
@@ -189,10 +194,10 @@ standTest.describe('ui-breadcrumbs: микроразметка BreadcrumbList (T
 
       const current = nav.locator('.ui-breadcrumbs__current');
       await expect(current).toHaveAttribute('aria-current', 'page');
-      await expect(current, 'текущая — span, не ссылка (Accessibility requirements)').toHaveJSProperty(
-        'tagName',
-        'SPAN',
-      );
+      await expect(
+        current,
+        'текущая — span, не ссылка (Accessibility requirements)',
+      ).toHaveJSProperty('tagName', 'SPAN');
 
       // Текущая страница — последний элемент разметки (порядок чтения =
       // визуальный порядок: текст «Стажировка» правее «Вакансий»).
@@ -200,9 +205,7 @@ standTest.describe('ui-breadcrumbs: микроразметка BreadcrumbList (T
       await expect(list.locator('.ui-breadcrumbs__item')).toHaveCount(3);
       const currentBox = await current.boundingBox();
       const lastLinkBox = await nav.locator('a').last().boundingBox();
-      expect(currentBox.x, 'текущая страница — визуально последняя').toBeGreaterThan(
-        lastLinkBox.x,
-      );
+      expect(currentBox.x, 'текущая страница — визуально последняя').toBeGreaterThan(lastLinkBox.x);
     },
   );
 
@@ -258,9 +261,10 @@ standTest.describe('ui-breadcrumbs: адаптив и доступность (T4
         strip.clientWidth,
       );
       expect(strip.scrollbarWidth, 'скроллбар скрыт (scrollbar-width: none)').toBe('none');
-      expect(await pageOverflowX(page), 'страница горизонтально не переполняется').toBeLessThanOrEqual(
-        0,
-      );
+      expect(
+        await pageOverflowX(page),
+        'страница горизонтально не переполняется',
+      ).toBeLessThanOrEqual(0);
 
       // Базовая цепочка на 375 помещается: лента — свойство длинных цепочек.
       const basic = await stripState(page, BC.basic);
@@ -270,17 +274,20 @@ standTest.describe('ui-breadcrumbs: адаптив и доступность (T4
     },
   );
 
-  standTest('md+ (768): цепочка переносится (flex-wrap), лента деактивирована', async ({ stand }) => {
-    const page = await stand('ui-breadcrumbs');
-    await page.setViewportSize(VIEWPORTS.tablet);
+  standTest(
+    'md+ (768): цепочка переносится (flex-wrap), лента деактивирована',
+    async ({ stand }) => {
+      const page = await stand('ui-breadcrumbs');
+      await page.setViewportSize(VIEWPORTS.tablet);
 
-    const strip = await stripState(page, BC.long);
-    expect(strip.flexWrap, 'на md+ цепочка переносится (career-portal десктоп)').toBe('wrap');
-    expect(strip.overflowX, 'скролл не активен — перенос решает длину').toBe('visible');
-    expect(strip.scrollWidth, 'перенесённая цепочка не скроллится').toBeLessThanOrEqual(
-      strip.clientWidth,
-    );
-  });
+      const strip = await stripState(page, BC.long);
+      expect(strip.flexWrap, 'на md+ цепочка переносится (career-portal десктоп)').toBe('wrap');
+      expect(strip.overflowX, 'скролл не активен — перенос решает длину').toBe('visible');
+      expect(strip.scrollWidth, 'перенесённая цепочка не скроллится').toBeLessThanOrEqual(
+        strip.clientWidth,
+      );
+    },
+  );
 
   standTest('axe: стенд чист — известных исключений нет (AC)', async ({ stand }) => {
     const page = await stand('ui-breadcrumbs');
@@ -291,10 +298,13 @@ standTest.describe('ui-breadcrumbs: адаптив и доступность (T4
     ).toEqual([]);
   });
 
-  standTest('эталоны ui-breadcrumbs 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({ stand }) => {
-    const page = await stand('ui-breadcrumbs');
-    for (const viewport of Object.keys(VIEWPORTS)) {
-      await shot(page, { name: 'ui-breadcrumbs', viewport });
-    }
-  });
+  standTest(
+    'эталоны ui-breadcrumbs 375/768/1280/1440 — только из контейнера (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('ui-breadcrumbs');
+      for (const viewport of Object.keys(VIEWPORTS)) {
+        await shot(page, { name: 'ui-breadcrumbs', viewport });
+      }
+    },
+  );
 });
