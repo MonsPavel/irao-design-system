@@ -1,0 +1,45 @@
+<!-- ui-file (T5.3): файловый инпут — кнопка-лейбл + sr-only input. АНТИ-ПАТТЕРН
+     career-portal (.field__file input { display: none }, класс D аудита)
+     исправлен: инпут скрыт клипом — tab-порядок, скринридер и отправка формы
+     живы. Кнопка-лейбл — ЕДИНСТВЕННЫЙ label инпута (клик открывает выбор
+     нативно, без JS); имя полю несёт aria-labelledby на текст обвязки
+     (второй label — нарушение axe form-field-multiple-labels). Значение
+     выбора — ui-file__value с role="status" (озвучивание); текст и кнопку
+     сброса ведёт модуль ui-file.js (хук data-ui-file): имя + размер после
+     выбора, «Убрать файл» — нативная очистка с возвратом фокуса на инпут.
+     Подсказка accept/ограничений — ui-file__hint в aria-describedby. Правило
+     «без display:none/visibility:hidden на нативных контролах» и do/don't —
+     README.md. -->
+<div class="ui-field ui-field--required ui-field--error">
+  <span class="ui-field__label" id="ui-resume-label">
+    Резюме
+    <span class="ui-field__req"
+      ><span aria-hidden="true">*</span
+      ><span class="ui-field__req-text">обязательное поле</span></span
+    >
+  </span>
+  <div class="ui-file" data-ui-file>
+    <label class="ui-file__button">
+      <input
+        class="ui-file__input"
+        type="file"
+        id="ui-resume"
+        name="resume"
+        accept=".doc,.docx,.pdf"
+        required
+        aria-invalid="true"
+        aria-labelledby="ui-resume-label"
+        aria-describedby="ui-resume-hint ui-resume-error"
+      >
+      <span class="ui-file__button-text">прикрепить файл</span>
+    </label>
+    <p class="ui-file__value" role="status">Файл не выбран</p>
+    <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
+    <span class="ui-file__hint" id="ui-resume-hint">
+      doc, docx, pdf — до 5 Мб; файл не обязателен
+    </span>
+  </div>
+  <p class="ui-field__error" id="ui-resume-error" role="alert">
+    Прикрепите резюме в формате doc, docx или pdf
+  </p>
+</div>

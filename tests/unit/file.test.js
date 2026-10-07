@@ -147,13 +147,16 @@ describe('components/ui-file/ui-file.css — коробка, кнопка, sr-on
     expect(block).toContain('font-size: var(--ui-fs-micro);');
   });
 
-  it('disabled: коробка гаснет целиком через :has (инпут sr-only — прецедент стрелки select T5.2), курсор default', () => {
-    const box = blockOf(css, '.ui-file:has(.ui-file__input:disabled)');
-    expect(box, 'правило затемнения найдено').toBeTruthy();
-    expect(box).toContain('opacity: var(--ui-opacity-disabled);');
+  it('disabled: гаснет кнопка-лейбл (аналог затемнения инпута ui-field; значение/подсказка полноконтрастны — axe color-contrast учитывает opacity предка), курсор default', () => {
+    const button = blockOf(css, '.ui-file:has(.ui-file__input:disabled) .ui-file__button');
+    expect(button, 'правило затемнения кнопки найдено').toBeTruthy();
+    expect(button).toContain('opacity: var(--ui-opacity-disabled);');
+    expect(button).toContain('cursor: default;');
 
-    const cursor = blockOf(css, '.ui-file:has(.ui-file__input:disabled) .ui-file__button');
-    expect(cursor, 'курсор кнопки disabled').toContain('cursor: default;');
+    const reset = blockOf(css, '.ui-file:has(.ui-file__input:disabled) .ui-file__reset');
+    expect(reset, 'кнопка сброса гаснет вместе с контролом').toContain(
+      'opacity: var(--ui-opacity-disabled);',
+    );
   });
 
   it('hover только под (hover: hover) — пара одобренного .btn--light (blue-100 = surface-hover); width-медиа нет', () => {
@@ -290,7 +293,11 @@ describe('components/ui-file/ui-file.js — контракт module-template и 
   });
 
   it('повторный init не создаёт дублей (guard); клик по сбросу навешан ровно один раз', () => {
-    const { window, document } = makeSandbox({ bodyHtml: liveInstanceHtml });
+    // 'loading': init отложен — шпионы на элементах ставятся ДО инициализации.
+    const { window, document } = makeSandbox({
+      readyState: 'loading',
+      bodyHtml: liveInstanceHtml,
+    });
 
     const clicks = [];
     const reset = document.querySelector('.ui-file__reset');

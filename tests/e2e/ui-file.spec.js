@@ -35,6 +35,7 @@ const IDS = {
   fileErr: 'uifl-file-err', // живой инстанс «ошибка»
   boxDemo: 'uifl-demo-box', // демо «выбран» (статичная разметка, без JS-хука)
   fileDisabled: 'uifl-file-disabled', // живой инстанс «disabled»
+  boxDisabled: 'uifl-disabled-box',
 };
 
 /** Цвета токенов дефолтной темы (примитивы, для computed-пинов). */
@@ -135,7 +136,10 @@ standTest.describe('ui-file: доступный файловый инпут (T5.
       expect(input.position, 'вне потока (не ломает коробку)').toBe('absolute');
       expect(input.width, 'классический sr-only: бокс 1px').toBe('1px');
       expect(input.height).toBe('1px');
-      expect(input.overflow).toBe('hidden');
+      expect(
+        input.overflow,
+        'переполнение гасится (UA нормализует hidden → clip на инпутах — обе формы безразличны для клипа)',
+      ).toMatch(/^(hidden|clip)$/);
       expect(input.clipPath, 'клип — контрол остаётся в tab-порядке и a11y-дереве').toContain(
         'inset(50%)',
       );
@@ -266,26 +270,32 @@ standTest.describe('ui-file: доступный файловый инпут (T5.
   );
 
   standTest(
-    'disabled: Tab не фокусирует; коробка приглушена токеном; диалог не открывается',
+    'disabled: Tab не фокусирует; кнопка-лейбл приглушена токеном (значение/подсказка полноконтрастны); диалог не открывается',
     async ({ stand }) => {
       const page = await stand('ui-file');
 
       const input = page.locator(`#${IDS.fileDisabled}`);
       await expect(input).toBeDisabled();
       expect(
-        await styleOf(page, `#${IDS.fileDisabled}`).then((s) => s.opacity),
-        'коробка гаснет целиком (--ui-opacity-disabled)',
+        await styleOf(page, `#${IDS.boxDisabled} .ui-file__button`).then((s) => s.opacity),
+        'видимый аффорданс гаснет (--ui-opacity-disabled, аналог затемнения инпута ui-field)',
       ).toBe('0.3');
       expect(
-        await styleOf(page, `#${IDS.fileDisabled} .ui-file__button`).then((s) => s.cursor),
+        await styleOf(page, `#${IDS.boxDisabled} .ui-file__button`).then((s) => s.cursor),
         'курсор кнопки default',
       ).toBe('default');
+      expect(
+        await styleOf(page, `#${IDS.boxDisabled} .ui-file__value`).then((s) => s.opacity),
+        'информационный текст не затемняется (axe color-contrast учитывает opacity предка)',
+      ).toBe('1');
 
       let choosers = 0;
       page.on('filechooser', () => {
         choosers += 1;
       });
-      await page.locator(`#${IDS.fileDisabled} .ui-file__button-text`).click();
+      // force: Playwright считает click-цель «not enabled» (label disabled-инпута) —
+      // реальный клик всё равно диспатчится, браузер игнорирует активацию disabled.
+      await page.locator(`#${IDS.boxDisabled} .ui-file__button-text`).click({ force: true });
       await page.waitForTimeout(300);
       expect(choosers, 'disabled не открывает диалог').toBe(0);
 
