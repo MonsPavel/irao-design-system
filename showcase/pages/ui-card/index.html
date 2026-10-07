@@ -1,0 +1,113 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-card (T4.4): варианты одобренного дизайна career-portal (`.card`,
+  components.css:115–127), слоты `__media`/`__title`/`__body`/`__footer` и паттерн карточки-ссылки
+  (`.vac-card`, pages.css:38–83). Сценарии — <code>tests/e2e/ui-card.spec.js</code>:
+  computed-значения вариантов, Tab-порядок карточки-ссылки (ссылка → вложенная кнопка), фокус по
+  всей площади, hover-гвард hasTouch, axe, эталоны 375/768/1280/1440. Контентные карточки
+  (vac-card/event-card) — паттерны EPIC-8 (T8.1); изображение в `__media` — ui-image (T4.6).
+</p>
+
+<style>
+  .ucd-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--ui-space-5);
+    margin: 0 0 var(--ui-space-5);
+  }
+
+  .ucd-media {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--ui-space-6) var(--ui-space-5);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface-muted);
+    color: var(--ui-color-text-muted);
+    font-size: var(--ui-fs-small);
+  }
+</style>
+
+<section aria-labelledby="ui-card-variants-heading">
+  <h2 id="ui-card-variants-heading">Варианты</h2>
+  <div class="ucd-grid">
+    <article class="ui-card" id="ui-card-default">
+      <h3 class="ui-h3 ui-card__title">Базовая карточка</h3>
+      <p class="ui-body ui-card__body">
+        Поверхность --ui-color-surface, рамка --ui-border-color, радиус --ui-radius-md.
+        Модификаторов нет — «тихая» основа: коробка без интерактивности.
+      </p>
+    </article>
+    <article class="ui-card ui-card--hover" id="ui-card-hover">
+      <h3 class="ui-h3 ui-card__title">Карточка --hover</h3>
+      <p class="ui-body ui-card__body">
+        На hover-устройствах рамка --ui-color-border-hover (#B9C6DE) и тень --ui-shadow-md. Эффект
+        под `@media (hover: hover)`: на таче не «залипает».
+      </p>
+    </article>
+    <article class="ui-card ui-card--filled" id="ui-card-filled">
+      <h3 class="ui-h3 ui-card__title">Карточка --filled</h3>
+      <p class="ui-body ui-card__body">
+        Фон и рамка --ui-color-surface-muted (career-portal .card--filled): приглушённая «бесшовная»
+        карточка.
+      </p>
+    </article>
+  </div>
+</section>
+
+<section aria-labelledby="ui-card-slots-heading">
+  <h2 id="ui-card-slots-heading">Слоты</h2>
+  <div class="ucd-grid">
+    <article class="ui-card" id="ui-card-slots">
+      <div class="ui-card__media">
+        <div class="ucd-media">__media — место под ui-image (T4.6)</div>
+      </div>
+      <h3 class="ui-h3 ui-card__title">Слоты карточки</h3>
+      <p class="ui-body ui-card__body">
+        __media, __title, __body, __footer — на flex-колонке: карточка растёт по контенту (никаких
+        фиксированных высот), __footer прижат к низу (margin-top: auto) — в сетке списковых страниц
+        действия выравниваются по нижней кромке.
+      </p>
+      <div class="ui-card__footer">
+        <button class="ui-button ui-button--outline" type="button">Действие</button>
+      </div>
+    </article>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Типографику слотам задаёт разметка ролями base (ui-h3/ui-body) — компонент не переобъявляет
+    шрифты. Паддинг — --ui-space-5 (24px), gap слотов — --ui-card-gap (14px .vac-card, вне шкалы
+    §3.2 — перенос «как есть»).
+  </p>
+</section>
+
+<section aria-labelledby="ui-card-link-heading">
+  <h2 id="ui-card-link-heading">Карточка-ссылка (stretched link)</h2>
+  <div class="ucd-grid">
+    <article class="ui-card ui-card--hover ui-card--link" id="ui-card-link">
+      <div class="ui-card__media">
+        <div class="ucd-media">__media</div>
+      </div>
+      <h3 class="ui-h3 ui-card__title">
+        <a class="ui-card__link" id="ui-card-link-title" href="#ui-card-link">
+          Вакансия: стажёр в команду разработки
+        </a>
+      </h3>
+      <p class="ui-body ui-card__body">
+        Одна остановка скринридера — доступное имя = текст ссылки. Клик в любом месте карточки ведёт
+        по ссылке, фокус-обводка проходит по всей площади (контур ::after, focus-тройка ADR-0001).
+      </p>
+      <div class="ui-card__footer">
+        <button class="ui-button ui-button--primary" id="ui-card-link-button" type="button">
+          Откликнуться
+        </button>
+      </div>
+    </article>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Паттерн — пара классов: <code>ui-card--link</code> на карточке + <code>ui-card__link</code> на
+    контент-ссылке. Вложенные интерактивы (кнопка «Откликнуться») компонент поднимает над растянутой
+    ссылкой сам — <code>position: relative; z-index: 1</code> (паттерн nested-interactive):
+    клик-зона кнопки и её остановка в Tab-порядке сохраняются. Hover перекрашивает ссылку в primary
+    — только на hover-устройствах.
+  </p>
+</section>

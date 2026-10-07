@@ -91,9 +91,9 @@ describe('components/ui-card/ui-card.css — база (Implementation requiremen
     expect(block).toContain('border: var(--ui-border-width) solid var(--ui-border-color);');
     expect(block).toContain('border-radius: var(--ui-radius-md);');
     // career-portal .card: transition border-color, box-shadow (--transition).
-    expect(block).toContain(
-      'transition: border-color var(--ui-transition), box-shadow var(--ui-transition);',
-    );
+    // Формат не пиним — репо-стиль prettier'а переносит список (как в ui-button).
+    expect(block).toMatch(/transition:\s*\n?\s*border-color var\(--ui-transition\),/);
+    expect(block).toContain('box-shadow var(--ui-transition);');
   });
 
   it('инварианты системы: без !important и hex (vi-перекраска, ADR-0002)', () => {

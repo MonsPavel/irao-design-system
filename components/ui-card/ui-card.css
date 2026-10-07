@@ -1,0 +1,146 @@
+/** @define card */
+
+/*!
+ * irao-ui — ui-card: карточка-основа с паттерном «карточка-ссылка»
+ * (задача T4.4).
+ *
+ * Источник — .card career-portal (components.css:115–127): фон surface, рамка
+ * #D6D6D6 → --ui-border-color, радиус --radius-card → --ui-radius-md,
+ * --hover (рамка #B9C6DE + тень 0 12px 32px) и --filled (surface-muted).
+ * Паттерн растянутой ссылки — из .vac-card (pages.css:38–83): контент-ссылка
+ * растягивается на карточку (::after с inset 0), фокус-обводка по всей
+ * карточке (единственный focus-паттерн career-portal, pages.css:52),
+ * вложенные интерактивы поднимаются над ссылкой.
+ *
+ * Все значения — токены слоя 2 (Implementation requirements п.1): рамка
+ * --ui-border-width/--ui-border-color, радиус --ui-radius-md, тень hover —
+ * --ui-shadow-md (Technical considerations), hover-рамка — заведённый T4.4
+ * --ui-color-border-hover (#B9C6DE, решение №1 таблицы диффов), отступы —
+ * --ui-space-5 (24px .vac-card pages.css:43) и --ui-card-gap (14px, вне
+ * шкалы §3.2 — перенос «как есть»). Высот нет: карточка — flex-колонка слотов,
+ * растёт по контенту вместе с 32px-базой T3.6 (Technical considerations).
+ *
+ * position: relative на корне — точка позиционирования растянутой ссылки
+ * (::after с inset 0 разрешается в паддинг-бокс карточки, pages.css:38–39).
+ *
+ * --hover (career-portal .card--hover) — ТОЛЬКО под @media (hover: hover)
+ * (Context: sticky-hover «залипает» на таче — тот же гвард, что у ui-button/
+ * ui-link). --filled — фон и рамка surface-muted: «бесшовная» карточка
+ * (components.css:127); hover-рамка поверх --filled работает как в
+ * career-portal (специфичность 0-2-0 против 0-1-0).
+ *
+ * Паттерн карточки-ссылки (ui-card--link + ui-card__link): доступное имя
+ * остановки скринридера — текст ссылки (Implementation requirements п.2);
+ * ::after покрывает карточку, поэтому клик в любом месте ведёт по ссылке.
+ * Фокус: локальная обводка ссылки ЗАМЕНЕНА контуром ::after по всей карточке
+ * (focus-policy.md «Правило для компонентов»: замена допустима, видимый
+ * индикатор обязан оставаться; outline: none — с inline-disable и e2e-пином
+ * контура). Вложенные интерактивы (кнопки/ссылки контента) подняты
+ * position: relative; z-index: 1 над растянутой ссылкой — паттерн
+ * nested-interactive, клик-зоны и Tab-порядок сохраняются (pages.css:69/83).
+ *
+ * Фокус самой карточки (не ссылки) неприменим: article не интерактивен;
+ * hover-перекраска ссылки — career-portal pages.css:53, под hover-гвардом.
+ */
+
+.ui-card {
+  box-sizing: border-box;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-card-gap);
+  padding: var(--ui-space-5);
+  border: var(--ui-border-width) solid var(--ui-border-color);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
+  transition:
+    border-color var(--ui-transition),
+    box-shadow var(--ui-transition);
+}
+
+/* ── Модификаторы (career-portal .card--*) ── */
+
+/* «Бесшовная» карточка: фон и рамка одного приглушённого цвета. */
+.ui-card--filled {
+  border-color: var(--ui-color-surface-muted);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* ── Слоты (Scope): __media — место под ui-image (T4.6) ── */
+
+.ui-card__media {
+  box-sizing: border-box;
+}
+
+.ui-card__title {
+  box-sizing: border-box;
+}
+
+.ui-card__body {
+  box-sizing: border-box;
+}
+
+/* Действия/мета внизу: в растянутой сетке списковых страниц (T8.1) прижаты
+   к низу карточки — свободное место уходит в auto-отступ, иначе в gap. */
+.ui-card__footer {
+  box-sizing: border-box;
+  margin-top: auto;
+}
+
+/* ── Паттерн карточки-ссылки: ui-card--link на карточке + ui-card__link на
+      контент-ссылке. Класс ссылки без модификатора ничего не растягивает —
+      паттерн включается одной парой (см. README). ── */
+
+/* Цвет наследует заголовку, подчёркивания нет (career-portal pages.css:50 и
+   глобальный сброс ссылок): различитель — вся кликабельная карточка и
+   hover-перекраска. Нужен «документный» стиль ссылки — оберните текст в
+   ui-link: его правила ниже по специфичности не пробиваются. */
+.ui-card--link .ui-card__link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Растяжение на карточку: карточка relative, ссылка НЕ позиционирована —
+   ::after разрешается в её паддинг-бокс (pages.css:51). */
+.ui-card--link .ui-card__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--ui-radius-md);
+}
+
+/* Фокус — по всей площади карточки (pages.css:52, focus-тройка ADR-0001):
+   темы перекрашивают контур сменой --ui-focus-* без правки компонента. */
+.ui-card--link .ui-card__link:focus-visible::after {
+  outline: var(--ui-focus-width) solid var(--ui-focus-color);
+  outline-offset: var(--ui-focus-offset);
+}
+
+/* Замена локальной обводки ссылки (иначе двойное кольцо): индикатор остаётся
+   — контур ::after выше; правило замены и проверка — focus-policy.md
+   («Правило для компонентов»), e2e-пин — tests/e2e/ui-card.spec.js. */
+.ui-card--link .ui-card__link:focus-visible {
+  /* stylelint-disable-next-line declaration-property-value-disallowed-list -- обводка заменена контуром ::after по всей карточке (правило выше, focus-policy.md) */
+  outline: none;
+}
+
+/* Вложенные интерактивы — над растянутой ссылкой (pages.css:69/83): клик-зона
+   кнопки/текстовой ссылки не «съедается» ::after, Tab-порядок осмысленный.
+   Растянутая ссылка исключена — она остаётся нижним слоем карточки. */
+.ui-card--link :is(a, button):not(.ui-card__link) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── :hover — только под (hover: hover); значения одобренного дизайна ── */
+
+@media (hover: hover) {
+  .ui-card--hover:hover {
+    border-color: var(--ui-color-border-hover);
+    box-shadow: var(--ui-shadow-md);
+  }
+
+  .ui-card--link:hover .ui-card__link {
+    color: var(--ui-color-primary);
+  }
+}

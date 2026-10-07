@@ -71,6 +71,7 @@ const focusState = (page) =>
       tag: el.tagName.toLowerCase(),
       focusVisible: el.matches(':focus-visible'),
       outlineWidth: own.outlineWidth,
+      outlineStyle: own.outlineStyle,
       afterOutlineWidth: after.outlineWidth,
       afterOutlineStyle: after.outlineStyle,
       afterOutlineColor: after.outlineColor,
@@ -233,10 +234,9 @@ standTest.describe('ui-card (T4.4)', () => {
       const state = await focusState(page);
       expect(state.id, 'фокус на растянутой ссылке').toBe(CARD.linkTitle);
       expect(state.focusVisible, 'клавиатурный фокус — :focus-visible').toBe(true);
-      expect(
-        parseFloat(state.outlineWidth),
-        'локальная обводка ссылки заменена (0 — см. замену ниже)',
-      ).toBe(0);
+      // Замена локальной обводки: стиль ссылки none — кольцо не рисуется
+      // (ширина при этом вычисляется как medium — пиним именно стиль).
+      expect(state.outlineStyle, 'локальная обводка ссылки заменена — style none').toBe('none');
       expect(
         parseFloat(state.afterOutlineWidth),
         `AC: контур ::after по всей карточке ≥ 3px (факт ${state.afterOutlineWidth})`,
@@ -277,7 +277,9 @@ standTest.describe('ui-card (T4.4)', () => {
 
       // Клик в верхний правый угол карточки — зона паддинга, далеко от текста
       // ссылки: растянутая ::after-ссылка покрывает ВСЮ карточку.
-      const box = await page.locator(`#${CARD.link}`).boundingBox();
+      const card = page.locator(`#${CARD.link}`);
+      await card.scrollIntoViewIfNeeded();
+      const box = await card.boundingBox();
       await page.mouse.click(box.x + box.width - 10, box.y + 10);
       await expect.poll(() => page.url()).toContain('#ui-card-link');
 

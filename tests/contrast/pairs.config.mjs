@@ -304,6 +304,11 @@ export const EXCEPTIONS = [
       'рамка карточек (#D6D6D6) — декоративная; границы интерактивных контролов проверят e2e+axe компонентов (WCAG 1.4.11, EPIC-5)',
   },
   {
+    token: '--ui-color-border-hover',
+    reason:
+      'hover-рамка карточки (#B9C6DE, .card--hover components.css:123, токен заведён T4.4) — декоративная; hover-состояние карточки несёт ещё и тень --ui-shadow-md (T4.4)',
+  },
+  {
     token: '--ui-color-primary-hover',
     reason:
       'hover-пара одобренного дизайна (T2.6, ADR-0010: .btn--primary:hover = blue-700): значение макета не пересчитывается; белая подпись на #164b89 — 8.74:1 (AA), ревизия производных состояний — чек-лист T9.2 (крупные элементы ≥ 3:1 в hover)',
