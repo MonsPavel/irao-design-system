@@ -45,8 +45,8 @@
 
 .ui-card {
   box-sizing: border-box;
-  position: relative;
   display: flex;
+  position: relative;
   flex-direction: column;
   gap: var(--ui-card-gap);
   padding: var(--ui-space-5);
