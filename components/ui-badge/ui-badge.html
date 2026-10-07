@@ -1,0 +1,21 @@
+<!-- ui-badge (T4.3): канонический паттерн. Счётчик — число в кружке.
+     Правило при 0 (README): бейдж не выводится — атрибут hidden (скрытие
+     исполняет глобальная гарантия base/reset.css). Правило дублирования
+     (Implementation requirements п.2): значение, продублированное текстом
+     рядом, — aria-hidden="true"; иначе число обязано войти в доступное имя
+     контрола (текст ссылки «Уведомления: 3» ниже) — aria-hidden НЕ ставится. -->
+<p>
+  <a class="ui-link" href="#ui-badge">Уведомления: <span class="ui-badge">3</span></a>
+</p>
+<p>
+  <a class="ui-link" href="#ui-badge">
+    Уведомления
+    <span class="ui-badge" aria-hidden="true">3</span>
+  </a>
+</p>
+<p>
+  <a class="ui-link" href="#ui-badge">
+    Уведомления
+    <span class="ui-badge" hidden>0</span>
+  </a>
+</p>

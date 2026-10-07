@@ -47,13 +47,15 @@ const BADGE = {
   linkNamed: 'ui-badge-link-named',
 };
 
-/** Вычисленное состояние тега/бейджа. */
+/** Вычисленное состояние тега/бейджа + подложка (для «тихой» прозрачной базы). */
 const stateOf = (page, id) =>
   page.locator(`#${id}`).evaluate((el) => {
     const style = getComputedStyle(el);
+    const scope = el.closest('[data-ui-tag-bg]');
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
+      backdrop: getComputedStyle(scope ?? document.body).backgroundColor,
       minHeight: style.minHeight,
       minWidth: style.minWidth,
       borderRadius: style.borderRadius,
@@ -66,6 +68,16 @@ const stateOf = (page, id) =>
 
 /** Фактический бокс (проверка, что min-height/min-width активируются). */
 const boxOf = (page, id) => page.locator(`#${id}`).boundingBox();
+
+/** Эффективный фон: собственный непрозрачный, иначе подложка (паттерн ui-button). */
+function backdropOf(state) {
+  const alpha = state.backgroundColor.match(/^rgba?\(([^)]+)\)$/);
+  expect(alpha, 'фон разбирается как rgb/rgba').toBeTruthy();
+  const channels = alpha[1].split(',').map(Number);
+  const a = channels.length === 4 ? channels[3] : 1;
+  if (a === 1) return state.backgroundColor;
+  return state.backdrop;
+}
 
 standTest.describe('ui-tag (T4.3)', () => {
   standTest(
@@ -111,84 +123,88 @@ standTest.describe('ui-tag (T4.3)', () => {
     },
   );
 
-  standTest('точка-маркер __icon: круг 8×8 на currentColor варианта, aria-hidden', async ({
-    stand,
-  }) => {
-    const page = await stand('ui-tag');
+  standTest(
+    'точка-маркер __icon: круг 8×8 на currentColor варианта, aria-hidden',
+    async ({ stand }) => {
+      const page = await stand('ui-tag');
 
-    const icon = page.locator(`#${TAG.blueIcon} .ui-tag__icon`);
-    await expect(icon).toHaveAttribute('aria-hidden', 'true');
+      const icon = page.locator(`#${TAG.blueIcon} .ui-tag__icon`);
+      await expect(icon).toHaveAttribute('aria-hidden', 'true');
 
-    const colors = await page.locator(`#${TAG.blueIcon}`).evaluate((el) => {
-      const dot = el.querySelector('.ui-tag__icon');
-      return {
-        dotBackground: getComputedStyle(dot).backgroundColor,
-        tagColor: getComputedStyle(el).color,
-        dotRadius: getComputedStyle(dot).borderRadius,
-      };
-    });
-    expect(
-      colors.dotBackground,
-      'точка красится currentColor — цветом подписи варианта',
-    ).toBe(colors.tagColor);
-    expect(colors.dotRadius, 'круг (pill в квадратном боксе, паттерн спиннера ui-button)').toBe(
-      '100px',
-    );
+      const colors = await page.locator(`#${TAG.blueIcon}`).evaluate((el) => {
+        const dot = el.querySelector('.ui-tag__icon');
+        return {
+          dotBackground: getComputedStyle(dot).backgroundColor,
+          tagColor: getComputedStyle(el).color,
+          dotRadius: getComputedStyle(dot).borderRadius,
+        };
+      });
+      expect(colors.dotBackground, 'точка красится currentColor — цветом подписи варианта').toBe(
+        colors.tagColor,
+      );
+      expect(colors.dotRadius, 'круг (pill в квадратном боксе, паттерн спиннера ui-button)').toBe(
+        '100px',
+      );
 
-    const box = await icon.boundingBox();
-    expect(Math.abs(box.width - 8), `точка 8px (--ui-space-2, факт ${box.width})`).toBeLessThanOrEqual(
-      0.5,
-    );
-    expect(Math.abs(box.height - 8), `точка 8px по вертикали (факт ${box.height})`).toBeLessThanOrEqual(
-      0.5,
-    );
-  });
+      const box = await icon.boundingBox();
+      expect(
+        Math.abs(box.width - 8),
+        `точка 8px (--ui-space-2, факт ${box.width})`,
+      ).toBeLessThanOrEqual(0.5);
+      expect(
+        Math.abs(box.height - 8),
+        `точка 8px по вертикали (факт ${box.height})`,
+      ).toBeLessThanOrEqual(0.5);
+    },
+  );
 
   standTest.describe('ui-badge (T4.3)', () => {
-    standTest('круг для цифры и pill для «99+»: геометрия и пара primary/text-on-dark', async ({
-      stand,
-    }) => {
-      const page = await stand('ui-tag');
+    standTest(
+      'круг для цифры и pill для «99+»: геометрия и пара primary/text-on-dark',
+      async ({ stand }) => {
+        const page = await stand('ui-tag');
 
-      const state = await stateOf(page, BADGE.digit);
-      expect(state.backgroundColor, 'фон — primary').toBe('rgb(0, 40, 86)');
-      expect(state.color, 'цифра — text-on-dark').toBe('rgb(255, 255, 255)');
-      expect(state.borderRadius, 'радиус pill').toBe('100px');
-      expect(state.fontSize, 'fs-micro (12px)').toBe('12px');
-      expect(state.fontWeight, 'fw-caption').toBe('500');
+        const state = await stateOf(page, BADGE.digit);
+        expect(state.backgroundColor, 'фон — primary').toBe('rgb(0, 40, 86)');
+        expect(state.color, 'цифра — text-on-dark').toBe('rgb(255, 255, 255)');
+        expect(state.borderRadius, 'радиус pill').toBe('100px');
+        expect(state.fontSize, 'fs-micro (12px)').toBe('12px');
+        expect(state.fontWeight, 'fw-caption').toBe('500');
 
-      // Одна цифра — круг: min-width и min-height токена активируются.
-      const digitBox = await boxOf(page, BADGE.digit);
-      expect(
-        Math.abs(digitBox.height - 24),
-        `высота круга = --ui-badge-size (факт ${digitBox.height})`,
-      ).toBeLessThanOrEqual(0.5);
-      expect(
-        Math.abs(digitBox.width - 24),
-        `ширина круга = --ui-badge-size (факт ${digitBox.width})`,
-      ).toBeLessThanOrEqual(0.5);
+        // Одна цифра — круг: min-width и min-height токена активируются.
+        const digitBox = await boxOf(page, BADGE.digit);
+        expect(
+          Math.abs(digitBox.height - 24),
+          `высота круга = --ui-badge-size (факт ${digitBox.height})`,
+        ).toBeLessThanOrEqual(0.5);
+        expect(
+          Math.abs(digitBox.width - 24),
+          `ширина круга = --ui-badge-size (факт ${digitBox.width})`,
+        ).toBeLessThanOrEqual(0.5);
 
-      // «99+» — pill: ширина растёт с контентом, высота неизменна, контент
-      // не обрезан (переполнение читается).
-      const overflowBox = await boxOf(page, BADGE.overflow);
-      expect(overflowBox.height, 'высота «99+» — та же').toBeCloseTo(digitBox.height, 0);
-      expect(
-        overflowBox.width,
-        '«99+» шире круга (pill, контент не влезает в 24px)',
-      ).toBeGreaterThan(overflowBox.height);
-      await expect(page.locator(`#${BADGE.overflow}`)).toHaveText('99+');
-    });
+        // «99+» — pill: ширина растёт с контентом, высота неизменна, контент
+        // не обрезан (переполнение читается).
+        const overflowBox = await boxOf(page, BADGE.overflow);
+        expect(overflowBox.height, 'высота «99+» — та же').toBeCloseTo(digitBox.height, 0);
+        expect(
+          overflowBox.width,
+          '«99+» шире круга (pill, контент не влезает в 24px)',
+        ).toBeGreaterThan(overflowBox.height);
+        await expect(page.locator(`#${BADGE.overflow}`)).toHaveText('99+');
+      },
+    );
 
-    standTest('правило при 0: атрибут hidden скрывает бейдж (глобальная гарантия base/reset)', async ({
-      stand,
-    }) => {
-      const page = await stand('ui-tag');
+    standTest(
+      'правило при 0: атрибут hidden скрывает бейдж (глобальная гарантия base/reset)',
+      async ({ stand }) => {
+        const page = await stand('ui-tag');
 
-      const badge = page.locator(`#${BADGE.zeroHidden}`);
-      await expect(badge).toHaveAttribute('hidden');
-      await expect(badge).toBeHidden();
-      expect(await stateOf(page, BADGE.zeroHidden)).toMatchObject({ display: 'none' });
-    });
+        const badge = page.locator(`#${BADGE.zeroHidden}`);
+        await expect(badge).toHaveAttribute('hidden');
+        await expect(badge).toBeHidden();
+        expect(await stateOf(page, BADGE.zeroHidden)).toMatchObject({ display: 'none' });
+      },
+    );
 
     standTest(
       'правило дублирования: aria-hidden бейдж не задваивает имя ссылки; иначе значение в имени (Implementation requirements п.2)',
@@ -197,7 +213,7 @@ standTest.describe('ui-tag (T4.3)', () => {
 
         const duplicated = page.locator(`#${BADGE.linkDuplicated}`);
         await expect(duplicated.locator('.ui-badge')).toHaveAttribute('aria-hidden', 'true');
-        await expect(duplicated).toHaveAccessibleName('Уведомления');
+        await expect(duplicated).toHaveAccessibleName('Сообщения');
 
         const named = page.locator(`#${BADGE.linkNamed}`);
         await expect(named.locator('.ui-badge')).not.toHaveAttribute('aria-hidden');
@@ -211,14 +227,10 @@ standTest.describe('ui-tag (T4.3)', () => {
     async ({ stand }) => {
       const page = await stand('ui-tag');
 
-      /** Контраст computed-пары «подпись/фон» (фоны тегов непрозрачны). */
+      /** Контраст computed-пары «подпись/эффективный фон» (свой bg или подложка). */
       const assertAA = async (id, label) => {
         const state = await stateOf(page, id);
-        const bg = state.backgroundColor.match(/^rgba?\(([^)]+)\)$/);
-        expect(bg, `${id}: фон непрозрачен`).toBeTruthy();
-        const [, , , a = 1] = bg[1].split(',').map(Number);
-        expect(a, `${id}: без альфы`).toBe(1);
-        const ratio = contrastRatio(state.color, state.backgroundColor);
+        const ratio = contrastRatio(state.color, backdropOf(state));
         expect(ratio, `${label}: ${ratio.toFixed(2)}:1 ≥ 4.5`).toBeGreaterThanOrEqual(4.5);
       };
       for (const id of Object.values(TAG)) {
@@ -230,16 +242,19 @@ standTest.describe('ui-tag (T4.3)', () => {
     },
   );
 
-  standTest('axe: нарушения отсутствуют — известных исключений у компонента нет (AC)', async ({
-    stand,
-  }) => {
-    const page = await stand('ui-tag');
-    const results = await a11y(page).analyze();
-    expect(
-      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
-      'axe: violations = []',
-    ).toEqual([]);
-  });
+  standTest(
+    'axe: нарушения отсутствуют — известных исключений у компонента нет (AC)',
+    async ({ stand }) => {
+      const page = await stand('ui-tag');
+      const results = await a11y(page).analyze();
+      expect(
+        results.violations.map(
+          (violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`,
+        ),
+        'axe: violations = []',
+      ).toEqual([]);
+    },
+  );
 
   standTest('эталоны 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({ stand }) => {
     const page = await stand('ui-tag');

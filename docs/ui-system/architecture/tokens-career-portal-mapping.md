@@ -123,6 +123,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--color-surface` | `--ui-color-surface` → `--ui-white` | |
 | `--color-surface-blue-50` | `--ui-color-surface-muted` → `--ui-blue-50` | см. решение №2 ниже |
 | `--color-surface-blue-100` (hover `.btn--light`, components.css:93) | `--ui-color-surface-hover` → `--ui-blue-100` | пара одобренного дизайна (ADR-0010 п.4: color-mix значение не воспроизводит); семантическое имя заведено T4.2 |
+| `--color-surface-blue-100` (bg `.tag--blue`, components.css:108) | `--ui-color-tag-blue-bg` → `--ui-blue-100` | T4.3: та же ступень одобренной шкалы под именем пары тега; до T4.3 пара tag-blue контраст-гейта ссылалась на примитив напрямую |
 | `--color-blue-700` (карточки «почему мы») | `--ui-color-surface-blue-deep` → `--ui-blue-700` | разведение дубля #164B89 |
 | `--color-page-head-bg` | (поверхность внутренних страниц — EPIC-4 паттерны) → `--ui-slate-50` | смысловая пара к border-muted |
 | `--color-page-head-border` | `--ui-color-border-muted` → `--ui-slate-100` | |
@@ -137,6 +138,9 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | тень dropdown `0 16px 40px rgba(0,40,86,.16)` (components.css:375) | `--ui-shadow-lg` | |
 | `--transition` 0.25s ease | `--ui-transition` | fast/slow 0.15/0.4 — §3.2 (новые) |
 | height `.btn` 52px (components.css:70) | `--ui-button-height: 3.25rem` | T4.2: используется как min-height (32px-база T3.6) |
+| height `.tag` 28px (components.css:99) | `--ui-tag-height: 1.75rem` | T4.3: используется как min-height (тот же прецедент) |
+| gap `.tag` 6px (components.css:100) | `--ui-tag-gap: 0.375rem` | T4.3: ступени шкалы отступов кратны 4 — значение перенесено «как есть», пересмотр — design-decision владельца |
+| letter-spacing `.tag` 0.02em (components.css:105) | `--ui-tag-letter-spacing: 0.02em` | T4.3: em — от размера роли |
 | рамка `.btn--outline` 2px (components.css:87) | `--ui-button-border-width: 0.125rem` | T4.2: «все значения из токенов» |
 | `.pagination__arrow[disabled]` opacity 0.3 (components.css:269) | `--ui-opacity-disabled: 0.3` | T4.2: единственный disabled-паттерн одобренного дизайна |
 | `--container-max` 1440px | `--ui-container-max: 90rem` | |
@@ -155,6 +159,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--ui-font-family-mono` | ui-monospace, Consolas, 'Courier New', monospace | §3.2 |
 | `--ui-fs/lh/fw-h5/h6` | ступени lead/body одобренной шкалы | роли §3.2, в career-portal их нет |
 | `--ui-button-height-sm` | 2rem (32px) | T4.2: малый размер кнопки (в career-portal `.btn` один — 52px); ступень 8px-шкалы §3.2, пересмотр — design-decision владельца |
+| `--ui-badge-size` | 1.5rem (24px) | T4.3: диаметр круга/min-height счётчика ui-badge (в career-portal бейджа нет); ступень шкалы §3.2, «99+» растёт в pill паддингом `--ui-space-1` |
 
 ### AA-замены значений (T2.3, design-decision — согласование владельца дизайна)
 

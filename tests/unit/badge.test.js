@@ -89,7 +89,7 @@ describe('components/ui-badge/ui-badge.css — база (ADR-0002, круг и �
   it('компонент не переопределяет [hidden] — скрытие исполняет глобальная гарантия base/reset.css (T3.1)', () => {
     expect(css, 'у компонента нет собственного [hidden]-правила').not.toContain('[hidden]');
     const reset = readFileSync(join(root, 'base', 'reset.css'), 'utf8');
-    expect(reset).toMatch(/\[hidden\]\s*\{[^}]*display:\s*none/;
+    expect(reset).toMatch(/\[hidden\]\s*\{[^}]*display:\s*none/);
   });
 });
 

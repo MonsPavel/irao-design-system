@@ -108,8 +108,10 @@
   --ui-color-tag-green-bg: var(--ui-green-50);
   /* career-portal: --tag-green-text */
   --ui-color-tag-green-text: var(--ui-green-700);
-  /* career-portal: --tag-gray-bg (текст тега — --ui-color-text) */
+  /* career-portal: --tag-gray-bg (текст тега — --ui-color-text-muted, career-portal components.css:111; уточнено T4.3 при переносе .tag) */
   --ui-color-tag-gray-bg: var(--ui-gray-100);
+  /* career-portal: --color-surface-blue-100 как bg .tag--blue (components.css:108) — пара к --ui-color-primary; семантическое имя заведено T4.3 (пара tag-blue контраст-гейта больше не ссылается на примитив напрямую) */
+  --ui-color-tag-blue-bg: var(--ui-blue-100);
 
   /* ── Focus (единая политика :focus-visible, ADR-0001) ── */
 
@@ -137,6 +139,17 @@
   --ui-button-border-width: 0.125rem;
   /* career-portal: components.css:269 — .pagination__arrow[disabled] opacity 0.3, единственный disabled-паттерн одобренного дизайна; контраст неактивных контролов WCAG 1.4.3 не требует (исключение зафиксировано в README ui-button) */
   --ui-opacity-disabled: 0.3;
+
+  /* ── Теги и счётчики (ui-tag / ui-badge, T4.3): геометрия ── */
+
+  /* career-portal: components.css:99 — height .tag 28px → rem; используется как min-height (прецедент T4.2: 32px-база T3.6 растит компонент вместе с текстом) */
+  --ui-tag-height: 1.75rem;
+  /* career-portal: components.css:100 — gap .tag 6px; ступени шкалы отступов §3.2 кратны 4, значение 6 — перенос «как есть», пересмотр — design-decision владельца */
+  --ui-tag-gap: 0.375rem;
+  /* career-portal: components.css:105 — letter-spacing .tag 0.02em; em — от размера роли (как --ui-link-underline-thickness) */
+  --ui-tag-letter-spacing: 0.02em;
+  /* новый: в career-portal бейджа нет; диаметр круга/min-height одной цифры — ступень шкалы §3.2 (24px), «99+» растёт в pill паддингом из --ui-space-1 */
+  --ui-badge-size: 1.5rem;
 
   /* ── Типографика (rem; тройки fs/lh/fw на роль — §3.2) ── */
 
