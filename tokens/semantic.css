@@ -162,6 +162,15 @@
   /* career-portal: pages.css:42 — gap .vac-card 14px; ступени шкалы отступов §3.2 кратны 4, значение 14 — перенос «как есть», пересмотр — design-decision владельца */
   --ui-card-gap: 0.875rem;
 
+  /* ── Поля форм (ui-field, T5.1): геометрия ── */
+
+  /* career-portal: components.css:148 — height .field__input/.field__select/.field__textarea 52px → rem; используется как min-height (прецедент --ui-button-height: 32px-база T3.6 растит поле вместе с текстом) */
+  --ui-field-height: 3.25rem;
+  /* career-portal: components.css:161 — min-height .field__textarea 120px → rem (у textarea фикс. высоты нет, Scope T5.1) */
+  --ui-field-textarea-min-height: 7.5rem;
+  /* career-portal: components.css:162 — вертикальный паддинг .field__textarea 14px; ступени шкалы отступов §3.2 кратны 4, значение перенесено «как есть» — прецедент --ui-card-gap, пересмотр — design-decision владельца */
+  --ui-field-textarea-padding-y: 0.875rem;
+
   /* ── Пропорции (ui-image, T4.6): шкала aspect-ratio ── */
 
   /* новый: шкала пропорций T4.6 (Scope: «aspect-ratio из шкалы»); в career-portal aspect-ratio нет — медиа секций фиксировались высотами + object-fit: cover (pages.css:455/632/697), магические высоты контентной вёрстки не переносятся; ступени — типовые пропорции медиа (квадрат, фото 3:2 и 4:3, видео/обложки 16:9) */

@@ -23,3 +23,7 @@ bitrix/snippets/*.snippet.php
 # void-style html-validate) — HTML5 без слэша. Авторитетный гейт разметки
 # таких файлов — lint:html (T3.2; будущее расширение — решение владельца).
 showcase/pages/base/index.html
+# T5.1: те же файлы с полями форм (<input> без слэша): стенд и канонический
+# паттерн (последний — источник стенда и копипасты для интеграторов).
+showcase/pages/ui-field/index.html
+components/ui-field/ui-field.html

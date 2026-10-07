@@ -90,6 +90,7 @@ const COMPONENTS = [
   'ui-breadcrumbs', // T4.7 — хлебные крошки: ol-семантика, микроразметка BreadcrumbList, лента на md-
   'ui-empty', // T4.8 — паттерн пустого состояния: медиа-слот, заголовок-роль h2, CTA обязательны
   'ui-error', // T4.8 — паттерн ошибки: inline в секции и полностраничный (--page, 404/500)
+  'ui-field', // T5.1 — поле формы: label/req/hint/error + input/textarea (min-height, состояния)
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
