@@ -132,19 +132,19 @@ async function bundle(files, loader) {
   return result.code;
 }
 
-function copyFonts() {
-  const target = join(DIST, 'fonts');
-  mkdirSync(target, { recursive: true });
+function copyFonts(target) {
+  const t = join(target, 'fonts');
+  mkdirSync(t, { recursive: true });
   if (!existsSync(FONTS_SRC)) {
-    warn('assets/fonts/ отсутствует — dist/fonts/ создан пустым');
+    warn('assets/fonts/ отсутствует — fonts/ создан пустым');
     return;
   }
-  cpSync(FONTS_SRC, target, { recursive: true });
+  cpSync(FONTS_SRC, t, { recursive: true });
 }
 
-function copyThemes() {
-  const target = join(DIST, 'themes');
-  mkdirSync(target, { recursive: true });
+function copyThemes(target) {
+  const t = join(target, 'themes');
+  mkdirSync(t, { recursive: true });
   if (!existsSync(THEMES_SRC)) return;
   // В dist едут только theme-файлы: themes/ содержит и README (исходник доки).
   for (const entry of readdirSync(THEMES_SRC)) {
@@ -212,7 +212,11 @@ function frame({
   withVi = true,
   withJs = true,
 }) {
-  const d = `${rel}/dist`;
+  const d = rel; // rel — путь от страницы до КОРНЯ рантайма (dist-содержимого):
+  // стенды лежат на уровень ниже (../), index — рядом (.). Рантайм (css/js/
+  // fonts/themes) сборщик кладёт рядом со стендами (SHOWCASE_DIST) и в dist —
+  // тогда относительные ссылки одинаковы при любой схеме раздачи: локально
+  // (/showcase/dist/…) и на GitHub Pages (корень сайта = showcase/dist).
   // Preload шрифтов ДО CSS-каскада (T3.1, паттерн career-portal). Шрифты
   // грузятся в CORS-режиме даже с того же origin — без crossorigin preload
   // не матчится с загрузкой и шрифт запросится дважды.
@@ -331,7 +335,7 @@ function generateShowcase({ themes }) {
       parseTokensFile(readFileSync(join(ROOT, file), 'utf8'), layer),
     );
     const tokensPage = frame({
-      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
       home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
       title: 'tokens — irao-ui showcase',
       main: renderTokensStand(parsedTokens),
@@ -353,7 +357,7 @@ function generateShowcase({ themes }) {
   const baseStandSource = join(ROOT, 'showcase', 'pages', 'base', 'index.html');
   if (existsSync(baseStandSource)) {
     const page = frame({
-      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
       home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
       title: 'base — irao-ui showcase',
       main: `    <h1>base</h1>\n${readFileSync(baseStandSource, 'utf8').trim()}`,
@@ -373,7 +377,7 @@ function generateShowcase({ themes }) {
   const typographyStandSource = join(ROOT, 'showcase', 'pages', 'typography', 'index.html');
   if (existsSync(typographyStandSource)) {
     const page = frame({
-      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
       home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
       title: 'typography — irao-ui showcase',
       main: `    <h1>typography</h1>\n${readFileSync(typographyStandSource, 'utf8').trim()}`,
@@ -393,7 +397,7 @@ function generateShowcase({ themes }) {
   const layoutStandSource = join(ROOT, 'showcase', 'pages', 'layout', 'index.html');
   if (existsSync(layoutStandSource)) {
     const page = frame({
-      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
       home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
       title: 'layout — irao-ui showcase',
       main: `    <h1>layout</h1>\n${readFileSync(layoutStandSource, 'utf8').trim()}`,
@@ -419,7 +423,7 @@ function generateShowcase({ themes }) {
       continue;
     }
     const page = frame({
-      rel: '../../..', // showcase/dist/stands/ → корень репозитория
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
       home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
       title: `${name} — irao-ui showcase`,
       main: `    <h1>${name}</h1>\n${body.html}`,
@@ -441,7 +445,7 @@ function generateShowcase({ themes }) {
   const distSection = distFiles.map((file) => `      <li><code>${file}</code></li>`).join('\n');
 
   const index = frame({
-    rel: '../..', // showcase/dist/ → корень репозитория
+    rel: '.', // showcase/dist/ → SHOWCASE_DIST (рантайм рядом с index)
     home: 'index.html',
     title: 'irao-ui showcase',
     main: [
@@ -465,7 +469,7 @@ function generateShowcase({ themes }) {
   writeFileSync(join(SHOWCASE_DIST, 'index.html'), index);
 
   const standalone = frame({
-    rel: '../..', // showcase/dist/ → корень репозитория
+    rel: '.', // showcase/dist/ → SHOWCASE_DIST (рантайм рядом с index)
     home: 'index.html',
     title: 'standalone — irao-ui',
     withSwitcher: false,
@@ -501,7 +505,7 @@ function selfChecks({ banner, stands }) {
     const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');
     const match = html.match(sourceRef);
     assert(!match, `${rel} ссылается на исходники, а не на dist: ${match ? match[1] : ''}`);
-    assert(html.includes('dist/ui-core.min.css'), `${rel} не подключает собранный ui-core.min.css`);
+    assert(html.includes('ui-core.min.css'), `${rel} не подключает собранный ui-core.min.css`);
     // Skip-link и его цель в каркасе каждой страницы (T3.5: правило для
     // сайтов «цель существует» исполняет сборка; WCAG 2.4.1).
     assert(
@@ -533,25 +537,35 @@ async function main() {
 
   rmSync(DIST, { recursive: true, force: true });
   rmSync(SHOWCASE_DIST, { recursive: true, force: true });
-  mkdirSync(DIST, { recursive: true });
 
   const coreCss = await bundle(
     [...CSS_CORE_ORDER, ...COMPONENTS.map((name) => `components/${name}/${name}.css`)],
     'css',
   );
-  writeFileSync(join(DIST, 'ui-core.min.css'), banner + coreCss);
 
   const viCss = await bundle(CSS_VI, 'css');
-  writeFileSync(join(DIST, 'ui-vi.min.css'), banner + viCss);
 
   const jsFiles = [...COMPONENTS.map((name) => `components/${name}/${name}.js`), ...JS_VI].filter(
     (rel) => existsSync(join(ROOT, rel)),
   );
   const uiJs = await bundle(jsFiles, 'js');
-  writeFileSync(join(DIST, 'ui.min.js'), banner + uiJs);
 
-  copyFonts();
-  copyThemes();
+  // Рантайм (css/js/fonts/themes) emits в ОБЕ точки раздачи:
+  //  - DIST — дистрибутив для Bitrix-упаковки (release zip);
+  //  - SHOWCASE_DIST — полигон: стенды ссылаются на рантайм ОТНОСИТЕЛЬНО
+  //    страницы (../ui-core…), поэтому он обязан лежать рядом со стендами —
+  //    тогда Pages (корень сайта = showcase/dist) и локальная схема раздачи
+  //    работают одинаково (фикс 07.10: на Pages стили отдавали 404).
+  const emitRuntime = (target) => {
+    mkdirSync(target, { recursive: true });
+    writeFileSync(join(target, 'ui-core.min.css'), banner + coreCss);
+    writeFileSync(join(target, 'ui-vi.min.css'), banner + viCss);
+    writeFileSync(join(target, 'ui.min.js'), banner + uiJs);
+    copyFonts(target);
+    copyThemes(target);
+  };
+  emitRuntime(DIST);
+  emitRuntime(SHOWCASE_DIST);
 
   const stands = generateShowcase({ themes: themeNames() });
   selfChecks({ banner, stands });
