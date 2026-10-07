@@ -163,6 +163,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--ui-fs/lh/fw-h5/h6` | ступени lead/body одобренной шкалы | роли §3.2, в career-portal их нет |
 | `--ui-button-height-sm` | 2rem (32px) | T4.2: малый размер кнопки (в career-portal `.btn` один — 52px); ступень 8px-шкалы §3.2, пересмотр — design-decision владельца |
 | `--ui-badge-size` | 1.5rem (24px) | T4.3: диаметр круга/min-height счётчика ui-badge (в career-portal бейджа нет); ступень шкалы §3.2, «99+» растёт в pill паддингом `--ui-space-1` |
+| `--ui-ratio-{1-1,3-2,4-3,16-9}` | 1/1, 3/2, 4/3, 16/9 | T4.6: шкала пропорций ui-image (aspect-ratio); в career-portal aspect-ratio нет — медиа фиксировались высотами + object-fit: cover (pages.css:455/632/697), магические высоты контентной вёрстки не переносятся |
 
 ### AA-замены значений (T2.3, design-decision — согласование владельца дизайна)
 
