@@ -1,0 +1,116 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-empty (T4.8): пустое состояние — декоративная иллюстрация вне a11y-дерева
+  (<code>aria-hidden</code>), заголовок-роль <code>h2</code> (страница уже имеет <code>h1</code>),
+  пояснение текстом и обязательный CTA: действие — <code>ui-button</code>, переход —
+  <code>ui-link</code>. Паттерн собирается из примитивов, CSS минимален; правила текстов (нет вины
+  пользователя, есть следующее действие) — README.md компонента. Сценарии —
+  <code>tests/e2e/ui-empty.spec.js</code>.
+</p>
+
+<section aria-labelledby="ui-empty-filters-title">
+  <div class="ui-empty">
+    <svg
+      class="ui-empty__media"
+      aria-hidden="true"
+      focusable="false"
+      width="48"
+      height="48"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        cx="10.5"
+        cy="10.5"
+        r="6.75"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      ></circle>
+      <path
+        d="M7.75 13.25h5.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      ></path>
+      <path
+        d="m15.5 15.5 4.75 4.75"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <h2 class="ui-empty__title ui-h3" id="ui-empty-filters-title">Вакансии не найдены</h2>
+    <p class="ui-empty__text ui-body ui-text--muted">
+      Под выбранные фильтры ничего не подошло. Попробуйте смягчить условия — или посмотрите все
+      вакансии.
+    </p>
+    <div class="ui-empty__actions">
+      <button class="ui-button ui-button--primary" type="button">Сбросить фильтры</button>
+      <a class="ui-link" href="#ui-empty-all">Посмотреть все вакансии</a>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Базовый сценарий списка (T8.1 — empty-ветка): два действия — «действие» кнопкой и «переход»
+    ссылкой. Иллюстрация декоративна: смысл состояния несёт текст, скринридер читает заголовок и
+    пояснение в потоке страницы.
+  </p>
+</section>
+
+<section aria-labelledby="ui-empty-search-title">
+  <div class="ui-empty">
+    <svg
+      class="ui-empty__media"
+      aria-hidden="true"
+      focusable="false"
+      width="48"
+      height="48"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        cx="10.5"
+        cy="10.5"
+        r="6.75"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      ></circle>
+      <path
+        d="m15.5 15.5 4.75 4.75"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <h2 class="ui-empty__title ui-h3" id="ui-empty-search-title">Ничего не найдено</h2>
+    <p class="ui-empty__text ui-body ui-text--muted">
+      По запросу «печать документов» вакансий нет. Попробуйте название навыка — или посмотрите все
+      вакансии.
+    </p>
+    <div class="ui-empty__actions">
+      <a class="ui-link" href="#ui-empty-all">Посмотреть все вакансии</a>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    CTA «по смыслу»: когда следующее действие одно и оно — переход, достаточно ссылки
+    (<code>ui-link</code>), кнопка не обязательна. Требование «CTA обязательны» — хотя бы одно
+    действие из паттерна (Implementation requirements п.3).
+  </p>
+</section>
+
+<section aria-labelledby="ui-empty-compact-title">
+  <div class="ui-empty">
+    <h2 class="ui-empty__title ui-h3" id="ui-empty-compact-title">Здесь пока пусто</h2>
+    <p class="ui-empty__text ui-body ui-text--muted">
+      Как только появятся подходящие мероприятия, они появятся в этом разделе.
+    </p>
+    <div class="ui-empty__actions">
+      <a class="ui-button ui-button--outline" href="#ui-empty-all">Смотреть мероприятия</a>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Медиа-слот необязателен: иллюстрация — усиление, не условие (правила слота — README.md).
+    <code>ui-link--button</code> здесь уместен альтернативно: переход, выглядящий как действие.
+  </p>
+</section>

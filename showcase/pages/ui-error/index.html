@@ -1,0 +1,65 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-error (T4.8): inline-вариант — ошибка загрузки в секции страницы (полностраничный 404/500
+  — отдельный стенд <a href="error-404.html">error-404</a>). Заголовок inline-варианта —
+  <code>h2</code> (страница уже имеет <code>h1</code>), состояние объясняется текстом, иллюстрация —
+  декоративный слот. Правила текстов (нет вины пользователя, есть следующее действие), выбор
+  «retry-кнопка или просто ссылка» и граница с <code>ui-alert</code> — README.md компонента.
+  Сценарии — <code>tests/e2e/ui-error.spec.js</code>.
+</p>
+
+<section aria-labelledby="ui-error-retry-title">
+  <div class="ui-error">
+    <svg
+      class="ui-error__media"
+      aria-hidden="true"
+      focusable="false"
+      width="48"
+      height="48"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M7 17h9.75a3.75 3.75 0 0 0 .6-7.45A5.75 5.75 0 0 0 6.1 8.4 4.25 4.25 0 0 0 7 17Z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linejoin="round"
+      ></path>
+      <path
+        d="m4.5 4.5 15 15"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+    <h2 class="ui-error__title ui-h3" id="ui-error-retry-title">Не удалось загрузить вакансии</h2>
+    <p class="ui-error__text ui-body ui-text--muted">
+      Похоже, пропало соединение. Проверьте интернет и попробуйте ещё раз — обычно это помогает.
+    </p>
+    <div class="ui-error__actions">
+      <button class="ui-button ui-button--primary" type="button">Повторить</button>
+      <a class="ui-link" href="#ui-error-report">Сообщить о проблеме</a>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Retry-кнопка — когда повтор имеет смысл: сбой сети, таймаут, мгновенный сбой запроса. JS-логика
+    повторной загрузки — контекст сайта (Out of scope T4.8): кнопка просто доступна с клавиатуры.
+  </p>
+</section>
+
+<section aria-labelledby="ui-error-link-title">
+  <div class="ui-error">
+    <h2 class="ui-error__title ui-h3" id="ui-error-link-title">Раздел временно недоступен</h2>
+    <p class="ui-error__text ui-body ui-text--muted">
+      Мы уже знаем о проблеме и исправляем её. Повтор не поможет — загляните на главную, там всё
+      работает.
+    </p>
+    <div class="ui-error__actions">
+      <a class="ui-link" href="#ui-error-home">На главную</a>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Просто ссылка — когда повтор бессмыслен: раздел недоступен, ошибка известна, данные обновятся
+    позже. Медиа-слот необязателен — текст и действие достаточны.
+  </p>
+</section>

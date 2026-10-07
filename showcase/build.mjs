@@ -88,6 +88,8 @@ const COMPONENTS = [
   'ui-image', // T4.6 — паттерн изображений: alt/размеры/lazy, --cover/--contain, --ratio (шкала пропорций)
   'ui-figure', // T4.6 — фигура с подписью: нативные figure/figcaption, шаг подписи --ui-space-2
   'ui-breadcrumbs', // T4.7 — хлебные крошки: ol-семантика, микроразметка BreadcrumbList, лента на md-
+  'ui-empty', // T4.8 — паттерн пустого состояния: медиа-слот, заголовок-роль h2, CTA обязательны
+  'ui-error', // T4.8 — паттерн ошибки: inline в секции и полностраничный (--page, 404/500)
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
@@ -412,6 +414,26 @@ function generateShowcase({ themes }) {
     stands.push({ name: 'layout', source: 'showcase/pages/layout/index.html' });
   } else {
     warn('showcase/pages/layout/index.html ещё нет — стенд layout не сгенерирован');
+  }
+
+  // Стенд «error-404» (T4.8) — полностраничный вариант ui-error как страница
+  // 404. Каркас БЕЗ служебного <h1> (в отличие от base/typography/layout
+  // выше): заголовок страницы несёт сам паттерн — h1 состояния (правило
+  // спеки T4.8 п.2). Служебный h1 каркаса делал бы демо-страницу невалидной
+  // (два h1 — гейт irao/one-h1) и подменял семантику «страницы-ошибки».
+  const error404StandSource = join(ROOT, 'showcase', 'pages', 'error-404', 'index.html');
+  if (existsSync(error404StandSource)) {
+    const page = frame({
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
+      home: '../index.html', // /showcase/dist/stands/ → showcase/dist/index.html
+      title: 'error-404 — irao-ui showcase',
+      main: readFileSync(error404StandSource, 'utf8').trim(),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'error-404.html'), page);
+    stands.push({ name: 'error-404', source: 'showcase/pages/error-404/index.html' });
+  } else {
+    warn('showcase/pages/error-404/index.html ещё нет — стенд error-404 не сгенерирован');
   }
 
   const discovered = discoverComponents();
