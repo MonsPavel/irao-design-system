@@ -158,6 +158,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--ui-shadow-sm` | 0 2px 8px blue-800-10 | нижняя ступень лестницы теней |
 | `--ui-z-{sticky,header,overlay,modal,vi}` | 100/150/200/300/400 | лестница §3.2, фиксирует «плавающие» z |
 | `--ui-color-info[-bg]` | blue-700 / blue-50 | §3.2 требует info; ступени одобренной шкалы |
+| `--ui-color-warning[-bg]` | orange-800 / orange-50 | T4.5 (алерты) требует warning-пару; ступени одобренной оранжевой шкалы — примитивы существовали (`--ui-orange-50` = `--tag-orange-bg`, `--ui-orange-800` = AA-замена T2.3) |
 | `--ui-font-family-mono` | ui-monospace, Consolas, 'Courier New', monospace | §3.2 |
 | `--ui-fs/lh/fw-h5/h6` | ступени lead/body одобренной шкалы | роли §3.2, в career-portal их нет |
 | `--ui-button-height-sm` | 2rem (32px) | T4.2: малый размер кнопки (в career-portal `.btn` один — 52px); ступень 8px-шкалы §3.2, пересмотр — design-decision владельца |
