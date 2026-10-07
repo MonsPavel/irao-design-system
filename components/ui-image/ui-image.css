@@ -1,0 +1,84 @@
+/** @define image */
+
+/*!
+ * irao-ui — ui-image: паттерн изображений (задача T4.6).
+ *
+ * Источник привычек — career-portal (аудит, класс B): img { display: block;
+ * max-width: 100% } в reset, width/height на лого, loading="lazy" на карточках,
+ * осмысленные alt и alt="" на декоративных. Системной политики размеров не
+ * было — медиа секций фиксировались высотами (pages.css:455/632/697:
+ * width: 100% + height: 280/260px + object-fit: cover); магические высоты
+ * контентной вёрстки не переносятся — место фиксирует aspect-ratio из шкалы
+ * --ui-ratio-* слоя 2 (Implementation requirements п.1: фиксация места под
+ * картинку без знания размеров файла; CLS = 0 — ТЗ №20).
+ *
+ * База: box-sizing на корне (ADR-0002); display: block и max-width: 100%
+ * объявлены на компоненте сознательно — компонент не полагается на
+ * base/reset.css (legacy-сброс сайта подключён позже и побеждает равные
+ * универсальные селекторы). height: auto — атрибутные width/height задают
+ * пропорцию файла, но не запрещают сжатие по ширине: без auto сжатый
+ * max-width'ом бокс сохранял бы атрибутную высоту (искажение).
+ *
+ * Атрибуты width/height обязательны в разметке ВСЕГДА (гейт html-validate
+ * irao/img-dimensions, AC T4.6: img без alt — wcag/h37 из T1.2, img без
+ * размеров — irao/img-dimensions; ошибки): CLS-страховка до загрузки CSS и
+ * intrinsic-пропорция. Класс --ratio-* — второй легитимный путь зафиксировать
+ * место (спека: «width/height или aspect-ratio»), используется для кадрирования.
+ *
+ * Модификаторы ортогональны:
+ *  - --ratio-* — фиксация места: width: 100% + aspect-ratio из шкалы слоя 2.
+ *    Без кадрирования пропорция файла обязана совпадать с пропорцией бокса
+ *    (иначе — сжатие); кадрируйте --cover/--contain;
+ *  - --cover/--contain — object-fit. Работает, когда бокс задан (--ratio-*
+ *    или размеры от сайта); без бокса object-fit — no-op.
+ *
+ * Media-паттерн (карточка/обложка): ui-image ui-image--cover ui-image--ratio-16-9
+ * + width/height атрибуты + loading="lazy" вне первого экрана (README.md —
+ * чек-лист подготовки изображений: alt-виды, retina/srcset, Bitrix, fallback).
+ *
+ * Fallback сломанного src (ТЗ №20): место зарезервировано (атрибуты или
+ * --ratio-*), бокс не схлопывается — сетка не рушится; вместо картинки
+ * рендерится alt-текст, поэтому alt информативного изображения обязан быть
+ * полезным текстом. Компонент статичен: JS-модуля нет, единственный
+ * элемент — img; комплексные изображения описываются aria-describedby
+ * в разметке (README.md, кейс Bitrix).
+ */
+
+.ui-image {
+  box-sizing: border-box;
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Пропорции: фиксация места из шкалы --ui-ratio-* (нет CLS) ── */
+
+.ui-image--ratio-1-1 {
+  width: 100%;
+  aspect-ratio: var(--ui-ratio-1-1);
+}
+
+.ui-image--ratio-3-2 {
+  width: 100%;
+  aspect-ratio: var(--ui-ratio-3-2);
+}
+
+.ui-image--ratio-4-3 {
+  width: 100%;
+  aspect-ratio: var(--ui-ratio-4-3);
+}
+
+.ui-image--ratio-16-9 {
+  width: 100%;
+  aspect-ratio: var(--ui-ratio-16-9);
+}
+
+/* ── Кадрирование: object-fit поверх зафиксированного места ── */
+
+.ui-image--cover {
+  object-fit: cover;
+}
+
+.ui-image--contain {
+  object-fit: contain;
+}
