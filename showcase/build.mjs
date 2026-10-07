@@ -149,7 +149,7 @@ function copyThemes(target) {
   // В dist едут только theme-файлы: themes/ содержит и README (исходник доки).
   for (const entry of readdirSync(THEMES_SRC)) {
     if (entry.endsWith('.css')) {
-      cpSync(join(THEMES_SRC, entry), join(target, entry));
+      cpSync(join(THEMES_SRC, entry), join(t, entry));
     }
   }
 }
