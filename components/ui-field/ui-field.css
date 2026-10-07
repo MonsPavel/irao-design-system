@@ -126,18 +126,48 @@
    (Implementation requirements п.1: никаких opacity/position-подмен до
    T7.3, который сам синхронизируется). appearance none без явного
    индикатора запрещён (Technical considerations T5.2 — не терять
-   аффорданс), поэтому стрелка — фоновая svg. Цвет — text-muted (#616161,
-   серый-700): data-URI не читает var(), значение зафиксировано комментарием
-   происхождения и пином юнит-теста; граница VI-перекраски — README. Правый
-   паддинг (--ui-space-6) освобождает место под стрелку, текст на неё не
-   наезжает. */
+   аффорданс): стрелка живёт на ::after обёртки __select-wrap (псевдо-
+   элементы на <select> не работают). Форма — mask-image по svg БЕЗ
+   цвета: маска берёт только альфу, а цветной hex в data-URI (%23…) —
+   тот же инвариант «hex только в tokens/primitives.css» (рендз-замечание
+   T5.2 high: stylelint-гейт в url()-строки не заглядывает). Цвет —
+   background-color: var(--ui-color-text-muted): переопределение темы
+   перекрашивает стрелку токеном, vi.css (T9.1) — тем же свойством.
+   Правый паддинг (--ui-space-6) освобождает место под стрелку, текст
+   на неё не наезжает. */
 .ui-field__select {
   appearance: none;
   padding-right: var(--ui-space-6);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='%23616161' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--ui-field-select-arrow-offset) center;
-  background-size: var(--ui-field-select-arrow-size);
+}
+
+/* Обёртка select — точка позиционирования стрелки: блок на месте select
+   в колонке обвязки, габариты не меняет. */
+.ui-field__select-wrap {
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+}
+
+.ui-field__select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: var(--ui-field-select-arrow-offset);
+  width: var(--ui-field-select-arrow-size);
+  height: var(--ui-field-select-arrow-size);
+  background-color: var(--ui-color-text-muted);
+  transform: translateY(-50%);
+  pointer-events: none;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M4 6l4 4 4-4' fill='none' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+/* Стрелка disabled-поля гаснет вместе с ним: нативное затемнение красит
+   сам select, стрелка — снаружи (решает :has; evergreen-матрица). */
+.ui-field__select-wrap:has(.ui-field__select:disabled)::after {
+  opacity: var(--ui-opacity-disabled);
 }
 
 /* Фирменный паттерн career-portal (.field__input:focus): bg-swap + рамка

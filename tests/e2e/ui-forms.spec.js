@@ -126,7 +126,7 @@ standTest.describe('ui-forms: select (T5.2)', () => {
       expect(
         arrow.content,
         'стрелка — ::after обёртки (псевдоэлементы на select не работают)',
-      ).toBe('"..."');
+      ).toBe('""');
       expect(arrow.position, 'стрелка поверх поля, из потока обвязки не рвёт').toBe('absolute');
       expect(arrow.width, 'размер стрелки — --ui-field-select-arrow-size (16px)').toBe('16px');
       expect(arrow.right, 'отступ от правого края — --ui-field-select-arrow-offset (12px)').toBe(

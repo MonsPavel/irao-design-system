@@ -126,7 +126,7 @@ describe('components/ui-field/ui-field.css — ui-field__select (T5.2)', () => {
 
     const arrow = blockOf(css, '.ui-field__select-wrap::after');
     expect(arrow, 'правило стрелки найдено').toBeTruthy();
-    expect(arrow).toContain('content: "";');
+    expect(arrow, 'псевдоэлемент объявлен').toMatch(/content:\s*['"]{2}/);
     expect(arrow).toContain('position: absolute;');
     expect(arrow, 'отступ от правого края — токен').toContain(
       'right: var(--ui-field-select-arrow-offset);',
