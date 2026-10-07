@@ -122,6 +122,40 @@ career-portal, перенос T3.1, каждое помечено inline-disable
    шаблон компонентного теста: `tests/README.md` (харнесс T1.4: `stand`,
    `a11y`, `shot`).
 
+## Чек-лист новой компоненты (эталон — T4.2, ui-button)
+
+Каждая компонентная задача проходит полный цикл; эталонный пример —
+`components/ui-button/` (T4.2). Прежде чем выставлять PR на приёмку:
+
+1. **Тесты first** (TDD): юнит-пин исполняемой формы решения
+   (`tests/unit/<name>.test.js`) и e2e-сценарии (`tests/e2e/<name>.spec.js`)
+   написаны ДО реализации и падают (красный шаг зафиксирован коммитом).
+2. **Папка `components/ui-<name>/`**: `ui-<name>.css` (первая строка
+   `/** @define <name> */`, box-sizing на корне — ADR-0002, только токены
+   слоя 2, без `!important`/hex, `:hover` только под `@media (hover: hover)`);
+   `ui-<name>.html` — канонический паттерн; `README.md` — API, состояния,
+   a11y, do/don't, известные границы.
+3. **Токены**: значения — из слоя 2; новый смысловой токен — minor
+   (дефолт в `:root`, комментарий происхождения, строка в таблице диффов
+   `docs/ui-system/architecture/tokens-career-portal-mapping.md`); новый
+   ЦВЕТОВОЙ токен получает пару или исключение в
+   `tests/contrast/pairs.config.mjs` (иначе `npm run test:contrast` красный).
+4. **Подключение**: одна строка в `COMPONENTS` `showcase/build.mjs`.
+5. **Стенд**: `showcase/pages/<name>/index.html` — матрица
+   варианты × размеры × состояния; `data-ui-check-layout` — только если стенд
+   входит в `CHECK_STANDS` гейта масштабирования (пин — scaling.test.js).
+6. **e2e**: computed-стили состояний, поведение (клавиатура Tab/Enter/Space
+   для интерактивных), axe на всём стенде (исключения — только списком
+   `KNOWN_AXE_EXCEPTIONS` в спеке с обоснованием + таблица в
+   `tests/README.md` при отключении правил харнесса), контраст сквозной
+   с T2.3 (`tests/contrast/lib.mjs`), эталоны 375/768/1280/1440 —
+   только из контейнера/CI (`npm run test:docker`, ADR-0003/0004).
+7. **Гейты**: `npm run lint` зелёный; новые html-validate/stylelint-правила —
+   с негативной фикстурой в `tests/lint-cases/` + строка в `EXPECTATIONS`
+   `tools/run-lint-cases.mjs` (`npm run test:lint` зелёный).
+8. **a11y-требования задачи** отмечены в AC файла задачи и исполнены
+   (клавиатурный прогон, accessible name, контраст, семантика).
+
 ## Контракт JS-модуля (эталонный Vitest-тест — в T1.6)
 
 Каждый модуль компонента обязан соответствовать; шаблон уже соответствует,

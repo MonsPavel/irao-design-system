@@ -182,6 +182,14 @@ export const PAIRS = [
     usage: 'btn--light: текст primary на blue-50',
   },
   {
+    id: 'primary-on-surface-hover',
+    fg: '--ui-color-primary',
+    bg: '--ui-color-surface-hover',
+    level: 'text',
+    usage:
+      'btn--light:hover и ghost-hover: текст primary на blue-100 (--ui-color-surface-hover, T4.2)',
+  },
+  {
     id: 'success-on-surface',
     fg: '--ui-color-success',
     bg: '--ui-color-surface',

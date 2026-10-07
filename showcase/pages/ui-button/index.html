@@ -1,0 +1,221 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-button (T4.2 — эталонный компонент): матрица варианты × размеры × состояния — default,
+  hover, focus-visible, active, disabled, loading. Сценарии —
+  <code>tests/e2e/ui-button.spec.js</code> (computed-стили, поведение disabled/loading, клавиатура
+  Tab/Enter/Space, контраст ≥ 4.5:1 сквозной с T2.3 — известный разрыв accent зафиксирован, axe,
+  смена темы — сценарий T2.6 «кнопочная часть»); do/don't «действие → button, переход → ui-link» —
+  README.md компонента. Кнопка в форме управляется модулем T5.5 — на стенде состояния заданы
+  разметкой (<code>disabled</code>; <code>is-loading</code> + <code>aria-busy</code>).
+</p>
+
+<style>
+  .ubn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-3);
+    align-items: center;
+    margin: 0 0 var(--ui-space-4);
+  }
+</style>
+
+<section aria-labelledby="ui-button-matrix-heading">
+  <h2 id="ui-button-matrix-heading">Варианты × размеры (default)</h2>
+  <p class="ubn-row">
+    <button class="ui-button" id="ui-button-ghost" type="button">Отмена</button>
+    <button class="ui-button ui-button--primary" id="ui-button-primary" type="submit">
+      Отправить отклик
+    </button>
+    <button class="ui-button ui-button--accent" id="ui-button-accent" type="button">
+      Записаться
+    </button>
+    <button class="ui-button ui-button--outline" id="ui-button-outline" type="button">
+      Подробнее
+    </button>
+    <button class="ui-button ui-button--light" id="ui-button-light" type="button">
+      Скачать программу
+    </button>
+  </p>
+  <p class="ubn-row">
+    <button class="ui-button ui-button--sm" id="ui-button-ghost-sm" type="button">Отмена</button>
+    <button
+      class="ui-button ui-button--primary ui-button--sm"
+      id="ui-button-primary-sm"
+      type="button"
+    >
+      Отправить отклик
+    </button>
+    <button
+      class="ui-button ui-button--accent ui-button--sm"
+      id="ui-button-accent-sm"
+      type="button"
+    >
+      Записаться
+    </button>
+    <button
+      class="ui-button ui-button--outline ui-button--sm"
+      id="ui-button-outline-sm"
+      type="button"
+    >
+      Подробнее
+    </button>
+    <button class="ui-button ui-button--light ui-button--sm" id="ui-button-light-sm" type="button">
+      Скачать программу
+    </button>
+  </p>
+  <p class="ubn-row ui-small ui-text--muted">
+    md — база (высота <code>--ui-button-height</code>, 52px); sm — компактный
+    (<code>--ui-button-height-sm</code>). Без модификатора — «тихая» кнопка каркаса career-portal.
+  </p>
+</section>
+
+<section aria-labelledby="ui-button-disabled-heading">
+  <h2 id="ui-button-disabled-heading">Состояние disabled (атрибут disabled)</h2>
+  <p class="ubn-row">
+    <button class="ui-button" id="ui-button-ghost-disabled" type="button" disabled>Отмена</button>
+    <button
+      class="ui-button ui-button--primary"
+      id="ui-button-primary-disabled"
+      type="submit"
+      disabled
+    >
+      Отправить отклик
+    </button>
+    <button
+      class="ui-button ui-button--accent"
+      id="ui-button-accent-disabled"
+      type="button"
+      disabled
+    >
+      Записаться
+    </button>
+    <button
+      class="ui-button ui-button--outline"
+      id="ui-button-outline-disabled"
+      type="button"
+      disabled
+    >
+      Подробнее
+    </button>
+    <button class="ui-button ui-button--light" id="ui-button-light-disabled" type="button" disabled>
+      Скачать программу
+    </button>
+  </p>
+  <p class="ubn-row ui-small ui-text--muted">
+    Атрибут <code>disabled</code>: не фокусируется и не кликается нативно; визуал — затемнение
+    <code>--ui-opacity-disabled</code>. Контраст подписи — декоративный (WCAG 1.4.3: неактивные
+    компоненты исключены).
+  </p>
+</section>
+
+<section aria-labelledby="ui-button-loading-heading">
+  <h2 id="ui-button-loading-heading">Состояние loading (is-loading + aria-busy)</h2>
+  <p class="ubn-row">
+    <button
+      class="ui-button ui-button--primary is-loading"
+      id="ui-button-primary-loading"
+      type="submit"
+      aria-busy="true"
+    >
+      <span class="ui-button__spinner" aria-hidden="true"></span>
+      <span class="ui-button__label">Отправить отклик</span>
+    </button>
+    <button
+      class="ui-button ui-button--accent is-loading"
+      id="ui-button-accent-loading"
+      type="button"
+      aria-busy="true"
+    >
+      <span class="ui-button__spinner" aria-hidden="true"></span>
+      <span class="ui-button__label">Записаться</span>
+    </button>
+    <button
+      class="ui-button ui-button--outline is-loading"
+      id="ui-button-outline-loading"
+      type="button"
+      aria-busy="true"
+    >
+      <span class="ui-button__spinner" aria-hidden="true"></span>
+      <span class="ui-button__label">Подробнее</span>
+    </button>
+    <button
+      class="ui-button ui-button--light is-loading"
+      id="ui-button-light-loading"
+      type="button"
+      aria-busy="true"
+    >
+      <span class="ui-button__spinner" aria-hidden="true"></span>
+      <span class="ui-button__label">Скачать программу</span>
+    </button>
+  </p>
+  <p class="ubn-row ui-small ui-text--muted">
+    Спиннер <code>aria-hidden</code>; лейбл остаётся в DOM — accessible name неизменен; повторные
+    клики мышью игнорируются (<code>pointer-events: none</code>). Переключение состояния — за
+    управляющей формой (T5.5): повторные Enter/Space перехватывает она.
+  </p>
+</section>
+
+<section aria-labelledby="ui-button-icon-heading">
+  <h2 id="ui-button-icon-heading">С иконкой (ui-button__icon)</h2>
+  <p class="ubn-row">
+    <button class="ui-button ui-button--primary" id="ui-button-primary-icon" type="button">
+      <span class="ui-button__label">Откликнуться</span>
+      <svg
+        class="ui-button__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M3 8.5 6.5 12 13 4.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </button>
+    <button class="ui-button ui-button--outline" id="ui-button-outline-icon" type="button">
+      <span class="ui-button__label">Скачать прайс-лист</span>
+      <svg
+        class="ui-button__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M8 2v8m0 0 3-3M8 10 5 7M3 12.5h10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </button>
+  </p>
+  <p class="ubn-row ui-small ui-text--muted">
+    Иконка — инлайн-SVG на <code>currentColor</code>, <code>aria-hidden</code> (декоративная):
+    подпись несёт имя кнопки. Icon-only кнопка — отдельное решение с обязательным
+    <code>aria-label</code> (Out of scope T4.2, README.md).
+  </p>
+</section>
+
+<section aria-labelledby="ui-button-action-heading">
+  <h2 id="ui-button-action-heading">Do / Don't: действие против перехода</h2>
+  <p class="ubn-row">
+    <button class="ui-button ui-button--primary" id="ui-button-action-do" type="button">
+      Отменить подписку
+    </button>
+    <a class="ui-link ui-link--button" href="#ui-button-matrix-heading">Все вакансии — переход</a>
+  </p>
+  <p class="ubn-row ui-small ui-text--muted">
+    Действие на странице (отправка, отмена, раскрытие) — <code>ui-button</code>; переход на другой
+    адрес — <code>ui-link</code>, «переход-выглядит-как-действие» — <code>ui-link--button</code>.
+    Подробнее — do/don't в README.md компонента.
+  </p>
+</section>

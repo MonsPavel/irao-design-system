@@ -1,0 +1,43 @@
+<!-- ui-button (T4.2): канонический паттерн. Кнопка — только для действий;
+     переход по адресу — ui-link (do/don't — README.md). type обязателен
+     (умолчание submit — гейт html-validate no-implicit-button-type).
+     Состояния — атрибуты/классы в разметке: disabled — атрибут disabled;
+     loading — is-loading + aria-busy="true", спиннер aria-hidden, лейбл
+     остаётся в DOM (accessible name). -->
+<p>
+  <button class="ui-button ui-button--primary" type="submit">Отправить отклик</button>
+  <button class="ui-button ui-button--outline" type="button">Подробнее</button>
+</p>
+<p>
+  <button class="ui-button ui-button--accent" type="button">Записаться</button>
+  <button class="ui-button ui-button--light" type="button">Скачать программу</button>
+</p>
+<p>
+  <button class="ui-button ui-button--primary ui-button--sm" type="button">
+    <span class="ui-button__label">Откликнуться</span>
+    <svg
+      class="ui-button__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M3 8.5 6.5 12 13 4.5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </button>
+  <button class="ui-button ui-button--light" type="button" disabled>
+    <span class="ui-button__label">Отправка…</span>
+  </button>
+  <button class="ui-button ui-button--primary is-loading" type="button" aria-busy="true">
+    <span class="ui-button__spinner" aria-hidden="true"></span>
+    <span class="ui-button__label">Сохраняю…</span>
+  </button>
+</p>
