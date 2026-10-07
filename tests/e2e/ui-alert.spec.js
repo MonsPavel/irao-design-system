@@ -37,6 +37,8 @@ const ALERT = {
   successClose: 'ui-alert-success-close',
   warningClose: 'ui-alert-warning-close',
   errorClose: 'ui-alert-error-close',
+  infoCloseButton: 'ui-alert-info-close-button',
+  warningCloseButton: 'ui-alert-warning-close-button',
 };
 
 /** Ожидаемые computed-пары вариантов (значения семантических пар слоя 2). */
@@ -95,7 +97,8 @@ const focusState = (page) =>
 /** Клавиатурный обход до элемента с id (паттерн фокус-тестов ui-card). */
 async function focusByKeyboard(page, targetId) {
   const steps = await page.evaluate(
-    ([selector, id]) => [...document.querySelectorAll(selector)].indexOf(document.getElementById(id)),
+    ([selector, id]) =>
+      [...document.querySelectorAll(selector)].indexOf(document.getElementById(id)),
     [FOCUSABLE_SELECTOR, targetId],
   );
   expect(steps, `${targetId} — фокусируемая цель в Tab-порядке`).toBeGreaterThan(-1);
@@ -139,27 +142,30 @@ standTest.describe('ui-alert (T4.5)', () => {
     },
   );
 
-  standTest('иконка варианта: svg aria-hidden 24px на currentColor (WCAG 1.4.1)', async ({ stand }) => {
-    const page = await stand('ui-alert');
+  standTest(
+    'иконка варианта: svg aria-hidden 24px на currentColor (WCAG 1.4.1)',
+    async ({ stand }) => {
+      const page = await stand('ui-alert');
 
-    for (const id of Object.keys(EXPECTED)) {
-      const icon = page.locator(`#${id} .ui-alert__icon`);
-      await expect(icon, `${id}: иконка декоративная — смысл в тексте`).toHaveAttribute(
-        'aria-hidden',
-        'true',
-      );
-      const box = await icon.boundingBox();
-      expect(
-        Math.abs(box.width - 24),
-        `${id}: иконка 24px (--ui-space-5, факт ${box.width})`,
-      ).toBeLessThanOrEqual(0.5);
-      const colors = await page.locator(`#${id}`).evaluate((el) => {
-        const svg = el.querySelector('.ui-alert__icon');
-        return { stroke: getComputedStyle(svg).stroke, color: getComputedStyle(el).color };
-      });
-      expect(colors.stroke, `${id}: svg красится currentColor варианта`).toBe(colors.color);
-    }
-  });
+      for (const id of Object.keys(EXPECTED)) {
+        const icon = page.locator(`#${id} .ui-alert__icon`);
+        await expect(icon, `${id}: иконка декоративная — смысл в тексте`).toHaveAttribute(
+          'aria-hidden',
+          'true',
+        );
+        const box = await icon.boundingBox();
+        expect(
+          Math.abs(box.width - 24),
+          `${id}: иконка 24px (--ui-space-5, факт ${box.width})`,
+        ).toBeLessThanOrEqual(0.5);
+        const colors = await page.locator(`#${id}`).evaluate((el) => {
+          const shape = el.querySelector('.ui-alert__icon path, .ui-alert__icon circle');
+          return { stroke: getComputedStyle(shape).stroke, color: getComputedStyle(el).color };
+        });
+        expect(colors.stroke, `${id}: svg красится currentColor варианта`).toBe(colors.color);
+      }
+    },
+  );
 
   standTest(
     'закрываемый вариант: имя кнопки «Закрыть», клавиатурный фокус виден (ADR-0001)',
@@ -169,9 +175,9 @@ standTest.describe('ui-alert (T4.5)', () => {
       const close = page.locator(`#${ALERT.infoClose} .ui-alert__close`);
       await expect(close).toHaveAccessibleName('Закрыть');
 
-      await focusByKeyboard(page, `${ALERT.infoClose}`);
+      await focusByKeyboard(page, ALERT.infoCloseButton);
       const state = await focusState(page);
-      expect(state.id, 'фокус на кнопке закрытия').toBe(ALERT.infoClose);
+      expect(state.id, 'фокус на кнопке закрытия').toBe(ALERT.infoCloseButton);
       expect(state.focusVisible, 'клавиатурный фокус — :focus-visible').toBe(true);
       expect(
         Number.parseFloat(state.outlineWidth),
@@ -189,9 +195,9 @@ standTest.describe('ui-alert (T4.5)', () => {
       const alert = page.locator(`#${ALERT.warningClose}`);
       await expect(alert).toHaveAttribute('role', 'alert');
 
-      await focusByKeyboard(page, ALERT.warningClose);
+      await focusByKeyboard(page, ALERT.warningCloseButton);
       const state = await focusState(page);
-      expect(state.id, 'фокус клавиатурой на кнопке закрытия').toBe(ALERT.warningClose);
+      expect(state.id, 'фокус клавиатурой на кнопке закрытия').toBe(ALERT.warningCloseButton);
 
       await page.keyboard.press('Enter');
       await expect(alert, 'алерт удалён из DOM (правило закрытия — README)').toHaveCount(0);
@@ -207,6 +213,9 @@ standTest.describe('ui-alert (T4.5)', () => {
     'контраст (сквозной с T2.3): текст варианта на своём фоне ≥ 4.5:1 — включая warning и базу',
     async ({ stand }) => {
       const page = await stand('ui-alert');
+
+      // Ожидания привязаны к реальному стенду: матрица 4×2 + база.
+      await expect(page.locator('.ui-alert')).toHaveCount(9);
 
       for (const [id, want] of Object.entries(EXPECTED)) {
         const ratio = contrastRatio(want.color, want.bg);

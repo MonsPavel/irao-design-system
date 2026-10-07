@@ -103,7 +103,10 @@ describe('components/ui-alert/ui-alert.css — варианты (Scope: пары
 
   it('четыре варианта — bg+цвет из готовых семантических пар', () => {
     const expected = {
-      '.ui-alert--info': ['background-color: var(--ui-color-info-bg);', 'color: var(--ui-color-info);'],
+      '.ui-alert--info': [
+        'background-color: var(--ui-color-info-bg);',
+        'color: var(--ui-color-info);',
+      ],
       '.ui-alert--success': [
         'background-color: var(--ui-color-success-bg);',
         'color: var(--ui-color-success);',
@@ -191,11 +194,13 @@ describe('components/ui-alert/ui-alert.css — слоты (Scope: __icon, __body
 
 describe('канонический паттерн (components/ui-alert/ui-alert.html) — роли и закрытие', () => {
   const html = readFileSync(join(root, 'components', 'ui-alert', 'ui-alert.html'), 'utf8');
+  /** Разметка без HTML-комментариев: пины смотрят на исполняемые теги. */
+  const markup = html.replace(/<!--[\s\S]*?-->/g, '');
 
   it('роли в HTML-паттерне (Technical considerations: role выставляет интегратор, не JS)', () => {
     // info/success — вежливое объявление, warning/error — немедленное.
-    expect((html.match(/role="status"/g) ?? []).length, 'role="status" — info и success').toBe(2);
-    expect((html.match(/role="alert"/g) ?? []).length, 'role="alert" — warning и error').toBe(2);
+    expect((markup.match(/role="status"/g) ?? []).length, 'role="status" — info и success').toBe(2);
+    expect((markup.match(/role="alert"/g) ?? []).length, 'role="alert" — warning и error').toBe(2);
   });
 
   it('иконка варианта — svg aria-hidden: смысл дублируется текстом (WCAG 1.4.1)', () => {
@@ -226,7 +231,7 @@ describe('канонический паттерн (components/ui-alert/ui-alert.
 describe('стенд (showcase/pages/ui-alert/index.html) — матрица 4×2 (AC)', () => {
   const html = readFileSync(join(root, 'showcase', 'pages', 'ui-alert', 'index.html'), 'utf8');
 
-  it('стенд существует: 4 варианта × (статичный / закрываемый) + нейтральная база', () => {
+  it('стенд существует: 4 варианта × (статичный / закрываемый) + нейтральная база; кнопки закрытия с id (цели e2e-обхода)', () => {
     for (const id of [
       'ui-alert-info',
       'ui-alert-success',
@@ -236,6 +241,10 @@ describe('стенд (showcase/pages/ui-alert/index.html) — матрица 4×
       'ui-alert-success-close',
       'ui-alert-warning-close',
       'ui-alert-error-close',
+      'ui-alert-info-close-button',
+      'ui-alert-success-close-button',
+      'ui-alert-warning-close-button',
+      'ui-alert-error-close-button',
       'ui-alert-base',
     ]) {
       expect(html, id).toContain(`id="${id}"`);
@@ -279,7 +288,7 @@ describe('подключение и гейты (DoD)', () => {
     const readme = readFileSync(join(root, 'components', 'ui-alert', 'README.md'), 'utf8');
     expect(readme).toContain('role="status"');
     expect(readme).toContain('role="alert"');
-    expect(readme).toContain('явным действием');
+    expect(readme).toContain('явному действию');
     expect(readme).toContain('1.4.1');
     expect(readme).toContain('T5.4');
     expect(readme).toContain('T4.8');

@@ -1,0 +1,386 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-alert (T4.5): статусные сообщения — 4 варианта из семантических пар статусов
+  (<code>--ui-color-{info,success,warning,error}[-bg]</code>) × (статичный / закрываемый), плюс
+  нейтральная база без модификатора. Роль выставляется в разметке по критичности:
+  <code>role="status"</code> — info/success (вежливое объявление), <code>role="alert"</code> —
+  warning/error (немедленное); правило выбора — README.md компонента. Сценарии —
+  <code>tests/e2e/ui-alert.spec.js</code> (роли в DOM, computed-пары цветов, иконка
+  <code>aria-hidden</code>, закрытие Tab→Enter, axe, эталоны 375/768/1280/1440); контраст пар —
+  сквозной гейт T2.3. Закрываемый вариант: кнопка <code>__close</code> с
+  <code>aria-label="Закрыть"</code> и data-хуком <code>data-ui-alert-close</code>; демо-скрипт
+  стенда удаляет алерт по клику — так же интегрирует его сайт (JS-модуля у компонента нет).
+</p>
+
+<style>
+  .ual-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+  }
+
+  .ual-note {
+    margin: var(--ui-space-4) 0 0;
+  }
+</style>
+
+<section aria-labelledby="ui-alert-matrix-heading">
+  <h2 id="ui-alert-matrix-heading">Матрица 4×2: варианты × (статичный / закрываемый)</h2>
+  <div class="ual-stack">
+    <div class="ui-alert ui-alert--info" id="ui-alert-info" role="status">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="M12 8h.01M12 11.5V16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">Приём заявок на осеннюю стажировку открыт до 30 ноября.</p>
+      </div>
+    </div>
+    <div class="ui-alert ui-alert--success" id="ui-alert-success" role="status">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="m8 12.5 2.5 2.5L16 9.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">Черновик сохранён. Вы сможете вернуться к заполнению в любой момент.</p>
+      </div>
+    </div>
+    <div class="ui-alert ui-alert--warning" id="ui-alert-warning" role="alert">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 3.5 21.8 20H2.2Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linejoin="round"
+        ></path>
+        <path
+          d="M12 10v4.5M12 17.5h.01"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">
+          Сессия истекает через 5 минут. Сохраните черновик, чтобы не потерять данные.
+        </p>
+      </div>
+    </div>
+    <div class="ui-alert ui-alert--error" id="ui-alert-error" role="alert">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="m9 9 6 6M15 9l-6 6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">
+          Не удалось отправить форму: проверьте подключение к сети и попробуйте ещё раз.
+        </p>
+      </div>
+    </div>
+    <div class="ui-alert ui-alert--info" id="ui-alert-info-close" role="status">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="M12 8h.01M12 11.5V16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">Раздел обновляется каждый день — следите за новыми вакансиями.</p>
+      </div>
+      <button
+        class="ui-alert__close"
+        id="ui-alert-info-close-button"
+        type="button"
+        data-ui-alert-close
+        aria-label="Закрыть"
+      >
+        <svg
+          class="ui-alert__close-icon"
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="m4 4 8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+      </button>
+    </div>
+    <div class="ui-alert ui-alert--success" id="ui-alert-success-close" role="status">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="m8 12.5 2.5 2.5L16 9.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">
+          Отклик отправлен. Работодатель увидит ваше резюме в списке кандидатов.
+        </p>
+      </div>
+      <button
+        class="ui-alert__close"
+        id="ui-alert-success-close-button"
+        type="button"
+        data-ui-alert-close
+        aria-label="Закрыть"
+      >
+        <svg
+          class="ui-alert__close-icon"
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="m4 4 8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+      </button>
+    </div>
+    <div class="ui-alert ui-alert--warning" id="ui-alert-warning-close" role="alert">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M12 3.5 21.8 20H2.2Z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linejoin="round"
+        ></path>
+        <path
+          d="M12 10v4.5M12 17.5h.01"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">
+          Заполнено 6 из 10 обязательных полей — форма пока не может быть отправлена.
+        </p>
+      </div>
+      <button
+        class="ui-alert__close"
+        id="ui-alert-warning-close-button"
+        type="button"
+        data-ui-alert-close
+        aria-label="Закрыть"
+      >
+        <svg
+          class="ui-alert__close-icon"
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="m4 4 8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+      </button>
+    </div>
+    <div class="ui-alert ui-alert--error" id="ui-alert-error-close" role="alert">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="m9 9 6 6M15 9l-6 6"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">
+          Поля E-mail и Телефон заполнены неверно. Исправьте значения и отправьте форму ещё раз.
+        </p>
+      </div>
+      <button
+        class="ui-alert__close"
+        id="ui-alert-error-close-button"
+        type="button"
+        data-ui-alert-close
+        aria-label="Закрыть"
+      >
+        <svg
+          class="ui-alert__close-icon"
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="m4 4 8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+  <p class="ual-note ui-small ui-text--muted">
+    Фон и цвет — пары «Цветов-смыслов: статусы» слоя 2; warning-пара заведена T4.5 (ступени
+    одобренной оранжевой шкалы). Геометрия едина: паддинг <code>--ui-space-4</code>, gap
+    <code>--ui-space-3</code>, радиус <code>--ui-radius-md</code>. Иконка — svg
+    <code>aria-hidden</code>, красится <code>currentColor</code>; смысл сообщения всегда дублируется
+    текстом (WCAG 1.4.1) — алерт из одной иконки не имеет смысла. Типографика текста — роли base
+    (<code>ui-body</code>); составное сообщение (заголовок + текст) собирается в
+    <code>ui-alert__body</code> ролями типографики — правило в README.md компонента.
+  </p>
+</section>
+
+<section aria-labelledby="ui-alert-base-heading">
+  <h2 id="ui-alert-base-heading">Без модификатора — нейтральное сообщение</h2>
+  <div class="ual-stack">
+    <div class="ui-alert" id="ui-alert-base">
+      <svg
+        class="ui-alert__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="M12 8h.01M12 11.5V16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <div class="ui-alert__body">
+        <p class="ui-body">
+          Документы можно приложить позже — в личном кабинете в течение трёх рабочих дней.
+        </p>
+      </div>
+    </div>
+  </div>
+  <p class="ual-note ui-small ui-text--muted">
+    База без модификатора — пара <code>--ui-color-surface-muted</code> /
+    <code>--ui-color-text</code> (прецедент «тихой» базы ui-button/ui-tag): примечание без
+    статусного смысла. Живой регион такой заметке не нужен — она не появляется в ответ на действие
+    пользователя.
+  </p>
+</section>
+
+<script>
+  (function () {
+    // Демо-скрипт стенда = интеграция сайта: удаление ПО ЯВНОМУ действию
+    // пользователя (правило живого региона — README.md компонента). Хук —
+    // data-ui-alert-close: JS не вешается на стилевые классы (§2 «Namespace»).
+    var buttons = document.querySelectorAll('[data-ui-alert-close]');
+    for (var i = 0; i < buttons.length; i += 1) {
+      buttons[i].addEventListener('click', function () {
+        var message = this.closest('.ui-alert');
+        if (message) message.remove();
+      });
+    }
+  })();
+</script>
