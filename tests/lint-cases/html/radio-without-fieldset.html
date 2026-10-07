@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Негативный контроль: радио-группа без fieldset/legend</title>
+  </head>
+  <body>
+    <!-- НЕГАТИВНЫЙ КОНТРОЛЬ (T5.2, AC): input[type="radio"] с общим name
+         вне fieldset с legend — группа без нативного имени и роли group:
+         скринридер не объявляет «Формат занятости, группа из 2 вариантов».
+         Ожидаемая ошибка: irao/radio-group-fieldset. -->
+    <h1>Форма отклика</h1>
+    <form action="/" method="post">
+      <label><input type="radio" name="format" value="full" required checked> Полная занятость</label>
+      <label><input type="radio" name="format" value="part"> Частичная занятость</label>
+      <button type="submit">Отправить</button>
+    </form>
+  </body>
+</html>
