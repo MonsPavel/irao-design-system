@@ -1,0 +1,24 @@
+<!-- ui-tag (T4.3): канонический паттерн. Тег — декоративная аннотация:
+     НЕ интерактивен (переход — ui-link, действие — ui-button; кликабельные
+     чипы фильтров — паттерн T8.1 на базе ui-tag + button). Скринридер читает
+     текст тега как текст — контент обязателен (не пустой span). Точка-маркер
+     __icon — декоративная (aria-hidden="true"), красится currentColor
+     варианта. -->
+<p>
+  <span class="ui-tag">черновик</span>
+  <span class="ui-tag ui-tag--blue">новинка</span>
+  <span class="ui-tag ui-tag--orange">горячая вакансия</span>
+  <span class="ui-tag ui-tag--green">идёт набор</span>
+  <span class="ui-tag ui-tag--gray">архив</span>
+  <span class="ui-tag ui-tag--navy">стажировка</span>
+</p>
+<p>
+  <span class="ui-tag ui-tag--blue">
+    <span class="ui-tag__icon" aria-hidden="true"></span>
+    статья
+  </span>
+  <span class="ui-tag ui-tag--orange">
+    <span class="ui-tag__icon" aria-hidden="true"></span>
+    видео
+  </span>
+</p>

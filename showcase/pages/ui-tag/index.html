@@ -1,0 +1,96 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-tag / ui-badge (T4.3): все варианты тега одобренного дизайна career-portal (`.tag`,
+  components.css:96–112), точка-маркер <code>__icon</code> и счётчик <code>ui-badge</code> (круг,
+  переполнение «99+», правило при 0). Сценарии — <code>tests/e2e/ui-tag.spec.js</code>
+  (computed-пары цветов на вариант, геометрия min-height 28px, контраст ≥ 4.5:1 сквозной с T2.3,
+  axe, эталоны 375/768/1280/1440); правило дублирования значения бейджа и правило при 0 — README.md
+  компонентов. Тег — декоративная аннотация и не интерактивен; чипы фильтров — паттерн T8.1.
+  VI-перекраска тегов — функциональная проверка T9.1.
+</p>
+
+<style>
+  .utg-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-3);
+    align-items: center;
+    margin: 0 0 var(--ui-space-4);
+  }
+</style>
+
+<section aria-labelledby="ui-tag-matrix-heading">
+  <h2 id="ui-tag-matrix-heading">Варианты тега</h2>
+  <p class="utg-row">
+    <span class="ui-tag" id="ui-tag-default">черновик</span>
+    <span class="ui-tag ui-tag--blue" id="ui-tag-blue">новинка</span>
+    <span class="ui-tag ui-tag--orange" id="ui-tag-orange">горячая вакансия</span>
+    <span class="ui-tag ui-tag--green" id="ui-tag-green">идёт набор</span>
+    <span class="ui-tag ui-tag--gray" id="ui-tag-gray">архив</span>
+    <span class="ui-tag ui-tag--navy" id="ui-tag-navy">стажировка</span>
+  </p>
+  <p class="utg-row ui-small ui-text--muted">
+    Пары bg/text — «Цвета-смыслы: теги» слоя 2; blue — пара
+    <code>--ui-color-tag-blue-bg</code> / <code>--ui-color-primary</code> (токен заведён T4.3 — до
+    него контраст-гейт ссылался на примитив напрямую). База без модификатора — «тихая»: прозрачный
+    фон, цвет текста. Высота — <code>min-height</code> 28px (<code>--ui-tag-height</code>).
+  </p>
+</section>
+
+<section aria-labelledby="ui-tag-icon-heading">
+  <h2 id="ui-tag-icon-heading">Точка-маркер (__icon)</h2>
+  <p class="utg-row">
+    <span class="ui-tag ui-tag--blue" id="ui-tag-blue-icon">
+      <span class="ui-tag__icon" aria-hidden="true"></span>
+      статья
+    </span>
+    <span class="ui-tag ui-tag--orange">
+      <span class="ui-tag__icon" aria-hidden="true"></span>
+      видео
+    </span>
+    <span class="ui-tag ui-tag--navy">
+      <span class="ui-tag__icon" aria-hidden="true"></span>
+      подкаст
+    </span>
+  </p>
+  <p class="utg-row ui-small ui-text--muted">
+    Наследие <code>media__tag-dot</code> career-portal: круг 8px (<code>--ui-space-2</code>),
+    красится <code>currentColor</code> — цветом подписи варианта; цветные модификаторы точки
+    одобренного дизайна не переносились («как модификатор, если понадобится» — Scope T4.3). Точка —
+    <code>aria-hidden="true"</code>.
+  </p>
+</section>
+
+<section aria-labelledby="ui-badge-heading">
+  <h2 id="ui-badge-heading">ui-badge: счётчик</h2>
+  <p class="utg-row">
+    <a class="ui-link" id="ui-badge-link-named" href="#ui-badge-heading">
+      Уведомления:
+      <span class="ui-badge" id="ui-badge-digit">3</span>
+    </a>
+    <a class="ui-link" href="#ui-badge-heading">
+      Уведомления:
+      <span class="ui-badge" id="ui-badge-overflow">99+</span>
+    </a>
+  </p>
+  <p class="utg-row">
+    <a class="ui-link" id="ui-badge-link-duplicated" href="#ui-badge-heading">
+      Сообщения, 7 новых
+      <span class="ui-badge" aria-hidden="true">7</span>
+    </a>
+    <a class="ui-link" href="#ui-badge-heading">
+      События
+      <span class="ui-badge" id="ui-badge-zero-hidden" hidden>0</span>
+    </a>
+  </p>
+  <p class="utg-row ui-small ui-text--muted">
+    Одна цифра — круг 24px (<code>--ui-badge-size</code>); «99+» растёт в pill паддингом
+    (<code>--ui-space-1</code>), контент не режется. Значение в имени контрола — бейдж без
+    <code>aria-hidden</code> («Уведомления: 3»); продублированное текстом рядом («Сообщения, 7
+    новых») — <code>aria-hidden="true"</code>: значение остаётся в имени, дубль не озвучивается.
+    <code>aria-hidden</code> без дублирующего текста запрещён — счёт не слышно (гейт e2e). При 0
+    бейдж не выводится — атрибут <code>hidden</code> (глобальная гарантия
+    <code>base/reset.css</code>). Правила — README.md компонента; отдельный базовый стенд
+    <code>ui-badge.html</code> — канонический паттерн
+    <code>components/ui-badge/ui-badge.html</code>.
+  </p>
+</section>

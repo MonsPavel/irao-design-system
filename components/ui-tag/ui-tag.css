@@ -1,0 +1,94 @@
+/** @define tag */
+
+/*!
+ * irao-ui — ui-tag: тег-аннотация (задача T4.3).
+ *
+ * Источник — .tag career-portal (components.css:96–112): inline-flex, высота
+ * 28px, pill-радиус, fs 12px / fw --fw-caption (500) / letter-spacing 0.02em,
+ * варианты blue/orange/green/gray/navy. Перенос «как есть» на токены слоя 2:
+ * геометрия — --ui-tag-height/-gap/-letter-spacing (каждая со строкой в
+ * таблице диффов), цвета — готовые пары «Цветов-смыслов: теги» (T2.2/T2.3)
+ * плюс заведённая T4.3 --ui-color-tag-blue-bg. Отступы 4/12px — ступени
+ * --ui-space-1/--ui-space-3 шкалы §3.2.
+ *
+ * Высота — min-height, не height (прецедент T4.2): 32px-база T3.6 растит тег
+ * вместе с текстом (контент line-box 12×1.35 + паддинг 4×2 ≈ 24.2px меньше
+ * токена 28px — min-height активируется, e2e пинит фактическую высоту).
+ *
+ * База без модификатора — «тихая» (прецедент базы ui-button): прозрачный фон,
+ * цвет текста; в career-portal .tag без модификатора не использовался —
+ * база оставлена предсказуемой для legacy-обвязки.
+ *
+ * Тег — декоративная аннотация: НЕ интерактивен по умолчанию (Technical
+ * considerations) — кликабельная метка обязана быть ui-link/ui-button; чипы
+ * фильтров career-portal (.filter-tag) — паттерн T8.1 на базе ui-tag + button.
+ * Скринридер читает текст тега как обычный текст (не пустой span — контент
+ * обязателен). Шрифт наследуется (паттерн ui-link: компонент текста не
+ * переобъявляет font-family — кнопочный кейс UA-шрифта тут не возникает).
+ *
+ * Слот __icon — точка-маркер, наследие media__tag-dot career-portal
+ * (src/blocks/media/media.css:89: 8px, круг). Цвет — currentColor: точка
+ * красится цветом подписи варианта, тема и VI-перекраска (EPIC-9, проверка
+ * T9.1) работают сами; цветные модификаторы точки (primary/accent/podcast
+ * одобренного media__tag-dot) не переносились — «как модификатор, если
+ * понадобится» (Scope T4.3). В разметке — aria-hidden="true".
+ *
+ * Фокус/клавиатура неприменимы: элемент не интерактивен и не попадает в
+ * Tab-порядок (иначе это ссылка/кнопка — do/don't в README.md).
+ */
+
+.ui-tag {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-tag-gap);
+  align-items: center;
+  min-height: var(--ui-tag-height);
+  padding: var(--ui-space-1) var(--ui-space-3);
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-caption);
+  line-height: var(--ui-lh-micro);
+  letter-spacing: var(--ui-tag-letter-spacing);
+}
+
+/* ── Варианты (career-portal .tag--*, цвета — пары токенов слоя 2) ── */
+
+.ui-tag--blue {
+  background-color: var(--ui-color-tag-blue-bg);
+  color: var(--ui-color-primary);
+}
+
+.ui-tag--orange {
+  background-color: var(--ui-color-tag-orange-bg);
+  color: var(--ui-color-tag-orange-text);
+}
+
+.ui-tag--green {
+  background-color: var(--ui-color-tag-green-bg);
+  color: var(--ui-color-tag-green-text);
+}
+
+.ui-tag--gray {
+  background-color: var(--ui-color-tag-gray-bg);
+  color: var(--ui-color-text-muted);
+}
+
+.ui-tag--navy {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* ── Слоты ── */
+
+/* Точка-маркер: 8px (--ui-space-2 шкалы §3.2, media__tag-dot), круг —
+   pill-радиус в квадратном боксе (паттерн спиннера ui-button). Цвет —
+   currentColor: красится подписью варианта, CSS-цвет сознательно не задаётся. */
+.ui-tag__icon {
+  box-sizing: border-box;
+  width: var(--ui-space-2);
+  height: var(--ui-space-2);
+  border-radius: var(--ui-radius-pill);
+  background-color: currentColor;
+}

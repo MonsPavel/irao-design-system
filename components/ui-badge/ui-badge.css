@@ -1,0 +1,49 @@
+/** @define badge */
+
+/*!
+ * irao-ui — ui-badge: счётчик-кружок (задача T4.3).
+ *
+ * В career-portal бейджа нет — компонент новый (значения «новый», не
+ * «перенос»): диаметр круга — ступень шкалы §3.2 --ui-badge-size (24px),
+ * кегль — тройка тегов одобренного дизайна (fs-micro 12px × fw-caption
+ * 500), радиус pill. Пара primary/text-on-dark — та же, что у .tag--navy
+ * и тёмных секций: контраст ~12.6:1 (гейт T2.3, пара on-dark-on-surface-dark).
+ *
+ * Форма «круг → pill»: min-width/min-height = --ui-badge-size дают круг для
+ * одной цифры; «99+» (переполнение, Scope) растёт по ширине через
+ * горизонтальный паддинг --ui-space-1 и становится pill'ом — контент не
+ * режется (overflow по умолчанию visible; ширина не фиксируется).
+ *
+ * Правило при 0 (Implementation requirements п.2, AC «правило badge-при-0
+ * задокументировано»): бейдж при значении 0 не выводится вовсе — атрибутом
+ * `hidden` в разметке (логика счёта — за приложением: компонент CSS-only).
+ * Скрытие исполняет глобальная гарантия base/reset.css ([hidden] сильнее
+ * любых display-правил, T3.1) — собственное [hidden]-правило компонент не
+ * заводит и сломать гарантия не может (правило с !important).
+ *
+ * Правило дублирования (Implementation requirements п.2): число, продублированное
+ * текстом рядом («Уведомления 3»), декоративно — aria-hidden="true" на бейдже;
+ * если значение нигде больше не озвучивается — aria-hidden НЕ ставится и число
+ * обязано войти в доступное имя контрола (текстом ссылки или aria-label:
+ * «Уведомления: 3»). Оба правила — README.md и канонический паттерн.
+ *
+ * Тег бейджа — <span>: внутри строки (ссылка, заголовок) inline-flex
+ * выравнивается по базовой линии текста. VI-перекраска (EPIC-9, T9.1)
+ * накроет бейдж как все элементы — цветов вне токенов нет (инвариант §5).
+ */
+
+.ui-badge {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ui-badge-size);
+  min-height: var(--ui-badge-size);
+  padding: 0 var(--ui-space-1);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-caption);
+  line-height: var(--ui-lh-micro);
+}
