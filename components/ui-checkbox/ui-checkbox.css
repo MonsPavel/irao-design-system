@@ -1,0 +1,61 @@
+/** @define checkbox */
+
+/*!
+ * irao-ui — ui-checkbox: label-обёртка нативного чекбокса (задача T5.2).
+ *
+ * Источник — .checkbox career-portal (components.css:190–207): label-флекс
+ * с прижатым к верху инпутом (align-items: flex-start — длинный текст
+ * согласия переносится под себя, а не под инпут), gap 12px (--ui-space-3),
+ * инпут 20px (--ui-control-size) с accent-color из primary. Единственный
+ * визуальный хук — accent-color: галочку рисует браузер (современный
+ * нативный путь, Technical considerations T5.2), кастомная коробка и
+ * подмены инпута запрещены — нативность даёт клавиатуру и скринридера
+ * «из коробки» (принципы ТЗ №16/17).
+ *
+ * Обвязка и состояния — ui-field (T5.1): «checkbox используют ту же
+ * обвязку и те же модификаторы». Состояние error живёт на wrapper-е:
+ * ui-field--error показывает __error, а инпут несёт aria-describedby на
+ * его id. Текст ошибки НЕ кладут внутрь label: он стал бы частью
+ * accessible name чекбокса (скринридер зачитывал бы ошибку как имя).
+ *
+ * Ссылка согласия (паттерн career-portal internship-apply.html:100–103) —
+ * обычная <a> внутри label: label не перехватывает клики по интерактивным
+ * элементам — ссылка кликабельна, чекбокс не переключается (e2e —
+ * tests/e2e/ui-forms.spec.js). Требуемая ссылка — ui-link (T4.1).
+ *
+ * Групповая раскладка: чекбоксы блочные и складываются в колонку; ритм
+ * соседних — ступень --ui-space-3 (в career-portal групп чекбоксов нет,
+ * значение — решение системы). Без media/:hover — одобренным дизайном не
+ * заданы. VI-режим: цветов вне токенов нет (§5) — перекраска vi.css
+ * накрывает чекбоксы как обычные элементы; инпут с accent-color vi.css
+ * переопределяет собственным правилом (T9.1).
+ */
+
+.ui-checkbox {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: flex-start;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  cursor: pointer;
+}
+
+/* Нативный инпут: размер из токена, цвет отметки — primary. appearance и
+   opacity не трогаем — инпут не прячется и не перерисовывается (класс D
+   аудита — display:none-подмены — в систему не переносится). */
+.ui-checkbox__input {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: var(--ui-control-size);
+  height: var(--ui-control-size);
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--ui-color-primary);
+}
+
+/* Групповая раскладка: соседние чекбоксы — колонка с шагом --ui-space-3. */
+.ui-checkbox + .ui-checkbox {
+  margin-top: var(--ui-space-3);
+}

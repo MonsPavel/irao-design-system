@@ -29,7 +29,7 @@ import { describe, expect, it } from 'vitest';
 const root = join(import.meta.dirname, '..', '..');
 
 /** CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки. */
-const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\r\n/g, '\n');
 
 /** Тело правила по селектору (начало строки — селектор, до закрывающей скобки). */
 const blockOf = (css, selector) => {
@@ -117,12 +117,12 @@ describe('components/ui-field/ui-field.css — ui-field__select (T5.2)', () => {
     ).toContain('padding-right: var(--ui-space-6);');
   });
 
-  it('нативный select не подменяется (Implementation requirements п.1): без opacity/position/pointer-events-трюков', () => {
+  it('нативный select не подменяется (Implementation requirements п.1): без opacity/position/pointer-events/display-деклараций', () => {
     const block = blockOfStandalone(css, '.ui-field__select');
-    expect(block, 'opacity-подмен до T7.3 нет').not.toContain('opacity');
-    expect(block, 'нативный бокс не выносится из потока').not.toContain('position');
-    expect(block, 'нативный select остаётся интерактивным').not.toContain('pointer-events');
-    expect(block, 'нативный список не прячется display-ом').not.toContain('display');
+    expect(
+      block,
+      'opacity/position/display/pointer-events-деклараций нет (background-position — не в счёт)',
+    ).not.toMatch(/(?:^|;)\s*(?:opacity|position|display|pointer-events)\s*:/);
   });
 
   it('select в правилах focus/error/disabled — те же модификаторы, что у input/textarea', () => {

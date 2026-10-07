@@ -1,0 +1,46 @@
+/** @define radio */
+
+/*!
+ * irao-ui — ui-radio: label-обёртка нативной радио-кнопки (задача T5.2).
+ *
+ * Источник — .radio career-portal (components.css:212–227): inline-flex
+ * ярлык с инпутом по центру, gap 10px (--ui-radio-gap, перенос «как есть»
+ * — вне шкалы §3.2), инпут 20px (--ui-control-size) с accent-color из
+ * primary. Галочку/точку рисует браузер — accent-color единственный
+ * визуальный хук; подмены инпута запрещены (нативность — принципы ТЗ
+ * №16/17: клавиатура и скринридер из коробки).
+ *
+ * Одиночный ярлык — ЭЛЕМЕНТ группы: группу из ≥2 радио с общим name
+ * оборачивает ui-radio-group (fieldset/legend — нативные имя и роль;
+ * правило irao/radio-group-fieldset ловит группу без fieldset/legend).
+ * Состояния ошибки — через обвязку ui-field--error + aria-describedby на
+ * fieldset (см. ui-radio-group.html); aria-describedby на fieldset
+ * связывает текст с ГРУППОЙ, а не с отдельной кнопкой — так объявляет
+ * паттерн доки (Accessibility requirements T5.2).
+ *
+ * Без media/:hover — одобренным дизайном не заданы; VI-режим: цветов вне
+ * токенов нет (§5), accent-color перекрашивает vi.css (T9.1).
+ */
+
+.ui-radio {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-radio-gap);
+  align-items: center;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  cursor: pointer;
+}
+
+/* Нативный инпут: размер из токена, цвет отметки — primary; без appearance/
+   opacity — инпут не перерисовывается и не прячется. */
+.ui-radio__input {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: var(--ui-control-size);
+  height: var(--ui-control-size);
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--ui-color-primary);
+}

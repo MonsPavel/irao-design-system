@@ -1,0 +1,37 @@
+<!-- ui-checkbox (T5.2): чекбокс-согласие — канонический паттерн career-portal
+     (internship-apply.html:100–103) с полным aria-контрактом ошибки обвязки
+     ui-field (T5.1). Нативный input внутри label: клик по тексту переключает,
+     Space переключает, ссылка политики остаётся кликабельной (label не
+     перехватывает клики по a). Ссылки — ui-link (T4.1). Текст ошибки ВНЕ
+     label (иначе стал бы частью accessible name чекбокса), инпут связывает
+     его aria-describedby; required-маркер не только цветом: звёздочка
+     aria-hidden + текст «обязательное поле» скринридеру (паттерн T5.1).
+     Нативный checkbox не прячется и не подменяется — галочку рисует браузер
+     через accent-color (принципы ТЗ №16/17). Расширенный стенд (согласие ×
+     группы × состояния) — showcase/pages/ui-field/index.html; правила
+     do/don't — README.md. -->
+<div class="ui-field ui-field--required ui-field--error">
+  <label class="ui-checkbox">
+    <input
+      class="ui-checkbox__input"
+      type="checkbox"
+      id="ui-consent"
+      name="consent"
+      required
+      aria-invalid="true"
+      aria-describedby="ui-consent-error"
+   >
+    <span>
+      Я даю <a class="ui-link" href="/privacy/">согласие на обработку персональных данных</a> и
+      ознакомлен(а) с
+      <a class="ui-link" href="/privacy/">политикой конфиденциальности</a>
+      <span class="ui-field__req"
+        ><span aria-hidden="true">*</span
+        ><span class="ui-field__req-text">обязательное поле</span></span
+      >
+    </span>
+  </label>
+  <p class="ui-field__error" id="ui-consent-error" role="alert">
+    Без согласия отклик отправить нельзя
+  </p>
+</div>

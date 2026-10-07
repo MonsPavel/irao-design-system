@@ -89,7 +89,7 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
   });
 
   it('контролы: box-sizing (ADR-0002), min-height — НЕ height (32px-сценарий T3.6), фон surface-muted и прозрачная рамка одобренного .field', () => {
-    const block = blockOf(css, '.ui-field__input,\n.ui-field__textarea');
+    const block = blockOf(css, '.ui-field__input,\n.ui-field__select,\n.ui-field__textarea');
     expect(block, 'общее правило контролов найдено').toBeTruthy();
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('width: 100%;');
@@ -123,7 +123,7 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
   it('focus-visible — фирменный bg-swap + рамка primary (career-portal .field__input:focus), outline не запрещается (ADR-0001)', () => {
     const block = blockOf(
       css,
-      '.ui-field__input:focus-visible,\n.ui-field__textarea:focus-visible',
+      '.ui-field__input:focus-visible,\n.ui-field__select:focus-visible,\n.ui-field__textarea:focus-visible',
     );
     expect(block, 'правило фокуса найдено').toBeTruthy();
     expect(block).toContain('background-color: var(--ui-color-surface);');
@@ -144,7 +144,7 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
   it('.ui-field--error: рамка error + фон error-bg (одобренный .field--error); текст ошибки — fs-micro, error, скрыт вне --error', () => {
     const input = blockOf(
       css,
-      '.ui-field--error .ui-field__input,\n.ui-field--error .ui-field__textarea',
+      '.ui-field--error .ui-field__input,\n.ui-field--error .ui-field__select,\n.ui-field--error .ui-field__textarea',
     );
     expect(input, 'правило ошибки контролов найдено').toBeTruthy();
     expect(input).toContain('border-color: var(--ui-color-error);');
@@ -169,7 +169,10 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
   });
 
   it('состояния: disabled — затемнение --ui-opacity-disabled (прецедент ui-button); readonly — без правки значений, курсор default', () => {
-    const disabled = blockOf(css, '.ui-field__input:disabled,\n.ui-field__textarea:disabled');
+    const disabled = blockOf(
+      css,
+      '.ui-field__input:disabled,\n.ui-field__select:disabled,\n.ui-field__textarea:disabled',
+    );
     expect(disabled, 'правило disabled найдено').toBeTruthy();
     expect(disabled).toContain('opacity: var(--ui-opacity-disabled);');
 

@@ -145,6 +145,8 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | height `.field__input/.field__select/.field__textarea` 52px (components.css:148) | `--ui-field-height: 3.25rem` | T5.1: используется как min-height (прецедент `--ui-button-height` — 32px-база T3.6) |
 | min-height `.field__textarea` 120px (components.css:161) | `--ui-field-textarea-min-height: 7.5rem` | T5.1: у textarea фикс. высоты нет (Scope) |
 | вертикальный паддинг `.field__textarea` 14px (components.css:162) | `--ui-field-textarea-padding-y: 0.875rem` | T5.1: вне шкалы §3.2, перенос «как есть» (прецедент `--ui-card-gap`) |
+| размер инпута `.checkbox input`/`.radio input` 20px (components.css:203/223) | `--ui-control-size: 1.25rem` | T5.2: единый токен обоих блоков (в career-portal значение продублировано) |
+| gap `.radio` 10px (components.css:215) | `--ui-radio-gap: 0.625rem` | T5.2: вне шкалы §3.2, перенос «как есть» (прецедент `--ui-tag-gap`), пересмотр — design-decision владельца |
 | letter-spacing `.tag` 0.02em (components.css:105) | `--ui-tag-letter-spacing: 0.02em` | T4.3: em — от размера роли |
 | рамка `.btn--outline` 2px (components.css:87) | `--ui-button-border-width: 0.125rem` | T4.2: «все значения из токенов» |
 | `.pagination__arrow[disabled]` opacity 0.3 (components.css:269) | `--ui-opacity-disabled: 0.3` | T4.2: единственный disabled-паттерн одобренного дизайна |
@@ -167,6 +169,8 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--ui-button-height-sm` | 2rem (32px) | T4.2: малый размер кнопки (в career-portal `.btn` один — 52px); ступень 8px-шкалы §3.2, пересмотр — design-decision владельца |
 | `--ui-badge-size` | 1.5rem (24px) | T4.3: диаметр круга/min-height счётчика ui-badge (в career-portal бейджа нет); ступень шкалы §3.2, «99+» растёт в pill паддингом `--ui-space-1` |
 | `--ui-ratio-{1-1,3-2,4-3,16-9}` | 1/1, 3/2, 4/3, 16/9 | T4.6: шкала пропорций ui-image (aspect-ratio); в career-portal aspect-ratio нет — медиа фиксировались высотами + object-fit: cover (pages.css:455/632/697), магические высоты контентной вёрстки не переносятся |
+| `--ui-field-select-arrow-size` | 1rem (16px) | T5.2: стрелка select (appearance none обязан нести явный индикатор — Technical considerations); ступень 16px |
+| `--ui-field-select-arrow-offset` | 0.75rem (12px) | T5.2: отступ стрелки select от правого края; ступень шкалы §3.2 |
 
 ### AA-замены значений (T2.3, design-decision — согласование владельца дизайна)
 
