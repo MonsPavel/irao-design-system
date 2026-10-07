@@ -212,9 +212,13 @@ function inWindow(hour: number): boolean {
   return hour >= 18 || hour < windowEndHour;
 }
 
-/** Разрешён ли старт НОВОЙ задачи: окно И до cutoff (18:00–06:00 при 6/8). */
+/** Разрешён ли старт НОВОЙ задачи. Вечерняя половина окна (18:00–24:00) —
+ * без cutoff; утренняя (0:00–windowEnd) — до cutoff (18:00–06:00 при 6/8).
+ * Наивное `hour < cutoffHour` без ветки вечера ломало запуск в 18:xx
+ * (сравнение «18.1 < 6» отсекало весь вечер — инцидент 07.10). */
 function newTaskAllowed(hour: number): boolean {
-  return inWindow(hour) && hour < cutoffHour;
+  if (!inWindow(hour)) return false;
+  return hour >= 18 ? true : hour < cutoffHour;
 }
 
 async function localHour(): Promise<number | null> {
