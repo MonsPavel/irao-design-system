@@ -1,0 +1,202 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-breadcrumbs (T4.7): хлебные крошки — упорядоченный список
+  <code>nav &gt; ol &gt; li</code> с микроразметкой schema.org BreadcrumbList (microdata по схеме
+  Google — без JS, дружелюбна к Bitrix-шаблонам), текущая страница —
+  <code>span + aria-current="page"</code>. Разделитель «/» — псевдоэлемент CSS, в тексте ссылок его
+  нет. На мобильных (≤767) цепочка — горизонтальная лента (свайп, скроллбар скрыт), на md+ —
+  перенос. Сценарии — <code>tests/e2e/ui-breadcrumbs.spec.js</code> (парсер микроразметки,
+  aria-current, Tab, лента, axe, эталоны 375/768/1280/1440); построение цепочки в Bitrix-шаблонах —
+  <code>bitrix/snippets/breadcrumbs.php</code> и README.md компонента.
+</p>
+
+<section aria-labelledby="ui-breadcrumbs-basic-heading">
+  <h2 id="ui-breadcrumbs-basic-heading">Базовая цепочка: 3 уровня с микроразметкой</h2>
+  <nav
+    class="ui-breadcrumbs"
+    id="ui-breadcrumbs-basic"
+    aria-label="Хлебные крошки: базовая цепочка"
+  >
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <ol
+      class="ui-breadcrumbs__list"
+      role="list"
+      itemscope
+      itemtype="https://schema.org/BreadcrumbList"
+    >
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="#ui-breadcrumbs-home"
+          ><span itemprop="name">Главная</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="1">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="#ui-breadcrumbs-vacancies"
+          ><span itemprop="name">Вакансии</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="2">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page"
+          >Стажировка в ИРАО</span
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="3">
+      </li>
+    </ol>
+  </nav>
+  <p class="ui-small ui-text--muted">
+    Скринридер объявляет навигацию как список («шаг 2 из 3»), текущая страница — не ссылка и не
+    остановка Tab. Имена уровней — только в <code>itemprop="name"</code>: разделитель в них не
+    попадает. Позиции — в <code>meta[itemprop="position"]</code>, у текущей страницы
+    <code>itemprop="item"</code> нет (Google берёт URL самой страницы).
+  </p>
+</section>
+
+<section aria-labelledby="ui-breadcrumbs-long-heading">
+  <h2 id="ui-breadcrumbs-long-heading">Длинные названия: лента на мобильных, перенос на md+</h2>
+  <nav
+    class="ui-breadcrumbs"
+    id="ui-breadcrumbs-long"
+    aria-label="Хлебные крошки: длинные названия"
+  >
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <ol
+      class="ui-breadcrumbs__list"
+      role="list"
+      itemscope
+      itemtype="https://schema.org/BreadcrumbList"
+    >
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="#ui-breadcrumbs-home"
+          ><span itemprop="name">Главная</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="1">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="#ui-breadcrumbs-programs"
+          ><span itemprop="name">Программы и стажировки</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="2">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="#ui-breadcrumbs-practice"
+          ><span itemprop="name">Производственные практики для студентов старших курсов</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="3">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page"
+          >Архив отчётов по практикам за 2025–2026 учебный год</span
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="4">
+      </li>
+    </ol>
+  </nav>
+  <p class="ui-small ui-text--muted">
+    На 375 цепочка уходит в горизонтальную ленту: <code>overflow-x: auto</code> — свайп на touch и
+    колесо мыши работают, скроллбар скрыт (<code>scrollbar-width: none</code>), страница
+    горизонтально не переполняется. С 768 — <code>flex-wrap: wrap</code>: длинные названия
+    переносятся, скролл не активен. Усечение длинных цепочек «…» — сознательно не заведено (Out of
+    scope T4.7), паттерн расширения описан в README.md.
+  </p>
+</section>
+
+<section aria-labelledby="ui-breadcrumbs-unlinked-heading">
+  <h2 id="ui-breadcrumbs-unlinked-heading">Промежуточный уровень без ссылки</h2>
+  <nav
+    class="ui-breadcrumbs"
+    id="ui-breadcrumbs-unlinked"
+    aria-label="Хлебные крошки: уровень без ссылки"
+  >
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <ol
+      class="ui-breadcrumbs__list"
+      role="list"
+      itemscope
+      itemtype="https://schema.org/BreadcrumbList"
+    >
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="#ui-breadcrumbs-home"
+          ><span itemprop="name">Главная</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="1">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span itemprop="name">Каталог материалов</span>
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="2">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page"
+          >Отчёты за 2025 учебный год</span
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="3">
+      </li>
+    </ol>
+  </nav>
+  <p class="ui-small ui-text--muted">
+    Случай «Главная → Раздел без ссылки → Текущая»: у промежуточного уровня нет страницы
+    (подраздел-фильтр, якорь текущей страницы) — это <code>span</code> с
+    <code>itemprop="name"</code> без <code>itemprop="item"</code>. Schema.org это допускает, но
+    Google Rich Results может выдать предупреждение «item отсутствует» для не-последнего уровня:
+    если URL у уровня существует — давайте ссылку (правило и PHP-обработка — README.md).
+  </p>
+</section>

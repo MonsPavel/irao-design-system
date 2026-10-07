@@ -219,4 +219,15 @@ module.exports = {
     // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
     'no-implicit-button-type': 'warn',
   },
+  // T4.7, разметка ui-breadcrumbs: <ol role="list"> — защита семантики списка
+  // от удаления в Safari/VoiceOver (list-style: none + display:flex на ленте
+  // крошек снимают роль; баг актуален, фикс сообщества — role="list").
+  // Технические considerations T4.7: ol-семантика даёт скринридеру «шаг N из M»,
+  // сохранение закреплено пином listSemantics в tests/e2e/ui-breadcrumbs.spec.js.
+  // html-validate считает role="list" на ol избыточным (no-redundant-role) и
+  // предлагает «нативный ul» (prefer-native-element — следствие того же
+  // атрибута): оба правила слепы к Safari-багу. Root-«overrides» html-validate
+  // не поддерживает (SchemaValidationError), поэтому отключение — inline-
+  // директивой перед каждым <ol> (канонический паттерн + стенд), с обоснованием
+  // рядом. Не снимать вместе с role="list".
 };

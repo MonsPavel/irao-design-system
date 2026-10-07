@@ -1,0 +1,65 @@
+<!-- ui-breadcrumbs (T4.7): канонический паттерн. Расширенный стенд (3 уровня,
+     длинные названия/мобильная лента, уровень без ссылки) —
+     showcase/pages/ui-breadcrumbs/index.html; API, микроразметка,
+     построение цепочки в Bitrix-шаблонах — README.md.
+     nav[aria-label="Хлебные крошки"] — конвенция имён лендмарки (career-portal);
+     ol[role="list"] — семантика «шаг N из M»: list-style: none + display:flex
+     ленты удаляют роль списка в Safari/VoiceOver (баг актуален), role="list"
+     возвращает её — html-validate (no-redundant-role, prefer-native-element)
+     считает такое сочетание избыточным, слепо к Safari-багу, поэтому перед
+     ol стоит локальная директива отключения (обоснование — также в шапке
+     .htmlvalidate.js; не снимать вместе с role="list"). Микроразметка —
+     microdata по схеме Google (developers.google.com/search/docs/appearance/
+     structured-data/breadcrumb): BreadcrumbList на ol, ListItem на li, item на
+     ссылке, name в span, position в meta — работает без JS, дружелюбна к
+     Bitrix-шаблонам. Текущая страница — span + aria-current="page" (не
+     ссылка); position последнего уровня = N (здесь 3). Разделитель «/» —
+     псевдоэлемент CSS, в разметке и тексте ссылок его нет;
+     prettier-ignore у meta — конвенция void-элементов без слэша
+     (CONTRIBUTING, гейт void-style). -->
+<nav class="ui-breadcrumbs" aria-label="Хлебные крошки">
+  <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+  <ol
+    class="ui-breadcrumbs__list"
+    role="list"
+    itemscope
+    itemtype="https://schema.org/BreadcrumbList"
+  >
+    <li
+      class="ui-breadcrumbs__item"
+      itemprop="itemListElement"
+      itemscope
+      itemtype="https://schema.org/ListItem"
+    >
+      <a class="ui-breadcrumbs__link" itemprop="item" href="/"
+        ><span itemprop="name">Главная</span></a
+      >
+      <!-- prettier-ignore -->
+      <meta itemprop="position" content="1">
+    </li>
+    <li
+      class="ui-breadcrumbs__item"
+      itemprop="itemListElement"
+      itemscope
+      itemtype="https://schema.org/ListItem"
+    >
+      <a class="ui-breadcrumbs__link" itemprop="item" href="/vacancies/"
+        ><span itemprop="name">Вакансии</span></a
+      >
+      <!-- prettier-ignore -->
+      <meta itemprop="position" content="2">
+    </li>
+    <li
+      class="ui-breadcrumbs__item"
+      itemprop="itemListElement"
+      itemscope
+      itemtype="https://schema.org/ListItem"
+    >
+      <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page"
+        >Стажировка в ИРАО</span
+      >
+      <!-- prettier-ignore -->
+      <meta itemprop="position" content="3">
+    </li>
+  </ol>
+</nav>
