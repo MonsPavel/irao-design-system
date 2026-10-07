@@ -1,0 +1,214 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-field (T5.1): типы input × textarea × состояния — default, focus (клавиатурой), error,
+  disabled, readonly. Связность без JS: <code>label for</code>↔<code>id</code>, hint и error в
+  <code>aria-describedby</code>, <code>aria-invalid="true"</code> при ошибке; required-маркер —
+  звёздочка и текст «обязательное поле» скринридеру. Сценарии —
+  <code>tests/e2e/ui-field.spec.js</code>; политика placeholder ≠ label, autocomplete-рекомендации
+  (WCAG 1.3.5), do/don't — README.md компонента. Фокус-паттерн поля (фон + рамка) дополняет
+  глобальный outline (ADR-0001) — проверьте с клавиатуры.
+</p>
+
+<section aria-labelledby="uif-types-heading">
+  <h2 id="uif-types-heading">Типы input (нативные атрибуты)</h2>
+  <div class="ui-grid ui-grid--2">
+    <div class="ui-field ui-field--required">
+      <label class="ui-field__label" for="uif-name">
+        Имя и фамилия
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-name"
+        name="name"
+        value="Иван Иванов"
+        autocomplete="name"
+        required
+     >
+    </div>
+    <div class="ui-field ui-field--required">
+      <label class="ui-field__label" for="uif-email">
+        E-mail
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </label>
+      <input
+        class="ui-field__input"
+        type="email"
+        id="uif-email"
+        name="email"
+        placeholder="name@example.com"
+        autocomplete="email"
+        required
+        aria-describedby="uif-email-hint"
+     >
+      <p class="ui-field__hint" id="uif-email-hint">
+        Используется для уведомлений о статусе отклика
+      </p>
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-phone">Телефон</label>
+      <input
+        class="ui-field__input"
+        type="tel"
+        id="uif-phone"
+        name="phone"
+        placeholder="+7 900 000-00-00"
+        autocomplete="tel"
+     >
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-pass">Пароль</label>
+      <input
+        class="ui-field__input"
+        type="password"
+        id="uif-pass"
+        name="password"
+        autocomplete="new-password"
+        aria-describedby="uif-pass-hint"
+     >
+      <p class="ui-field__hint" id="uif-pass-hint">Менеджер паролей подставит сгенерированный</p>
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-date">Дата рождения</label>
+      <input class="ui-field__input" type="date" id="uif-date" name="bday" autocomplete="bday">
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-count">Опыт, лет</label>
+      <input
+        class="ui-field__input"
+        type="number"
+        id="uif-count"
+        name="experience"
+        min="0"
+        max="50"
+        placeholder="5"
+     >
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Высота поля — <code>min-height</code> (<code>--ui-field-height</code>, 52px): при 32px-базе
+    (T3.6) поле растёт вместе с текстом, значение не обрезается. <code>placeholder</code> — пример
+    формата, не замена label (политика — README.md).
+  </p>
+</section>
+
+<section aria-labelledby="uif-textarea-heading">
+  <h2 id="uif-textarea-heading">Textarea</h2>
+  <div class="ui-field">
+    <label class="ui-field__label" for="uif-about">О себе</label>
+    <textarea
+      class="ui-field__textarea"
+      id="uif-about"
+      name="about"
+      rows="4"
+      placeholder="Коротко об опыте и достижениях"
+      aria-describedby="uif-about-hint"
+    >
+Пять лет в frontend-разработке: дизайн-системы, доступность, производительность.</textarea>
+    <p class="ui-field__hint" id="uif-about-hint">
+      Фиксированной высоты нет: растёт по контенту; нижний край тянется (resize: vertical)
+    </p>
+  </div>
+  <p class="ui-small ui-text--muted">
+    <code>min-height</code> (<code>--ui-field-textarea-min-height</code>) и
+    <code>resize: vertical</code> одобренного <code>.field__textarea</code>; авто-рост — опция
+    JS-модуля формы (T5.5), в базе не нужен.
+  </p>
+</section>
+
+<section aria-labelledby="uif-states-heading">
+  <h2 id="uif-states-heading">Состояния: error / disabled / readonly</h2>
+  <div class="ui-grid ui-grid--2">
+    <div class="ui-field ui-field--required ui-field--error">
+      <label class="ui-field__label" for="uif-login-err">
+        Логин
+        <span class="ui-field__req"
+          ><span aria-hidden="true">*</span
+          ><span class="ui-field__req-text">обязательное поле</span></span
+        >
+      </label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-login-err"
+        name="login"
+        value="iv@"
+        required
+        aria-invalid="true"
+        aria-describedby="uif-login-err-hint uif-login-err-error"
+     >
+      <p class="ui-field__hint" id="uif-login-err-hint">Латиница, цифры и точка; от 3 символов</p>
+      <p class="ui-field__error" id="uif-login-err-error" role="alert">
+        Адрес неполный: добавьте домен после @
+      </p>
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-city-disabled">Город (disabled)</label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-city-disabled"
+        name="city-disabled"
+        value="Москва"
+        disabled
+     >
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-city-readonly">Город из профиля (readonly)</label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-city-readonly"
+        name="city-readonly"
+        value="Санкт-Петербург"
+        readonly
+     >
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Ошибка — визуал и aria в одном паттерне: модификатор <code>ui-field--error</code>,
+    <code>aria-invalid="true"</code> и <code>aria-describedby</code> на id хинта и ошибки.
+    <code>disabled</code> не фокусируется; <code>readonly</code> фокусируется и копируется, но не
+    редактируется.
+  </p>
+</section>
+
+<section aria-labelledby="uif-wide-heading">
+  <h2 id="uif-wide-heading">Модификатор --wide в сетке</h2>
+  <div class="ui-grid ui-grid--2">
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-branch">Отрасль</label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-branch"
+        name="branch"
+        placeholder="Информационные технологии"
+     >
+    </div>
+    <div class="ui-field">
+      <label class="ui-field__label" for="uif-city-work">Город работы</label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-city-work"
+        name="city-work"
+        placeholder="Екатеринбург"
+     >
+    </div>
+    <div class="ui-field ui-field--wide">
+      <label class="ui-field__label" for="uif-cover">Сопроводительное письмо</label>
+      <textarea class="ui-field__textarea" id="uif-cover" name="cover" rows="3"></textarea>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    <code>ui-field--wide</code> растягивает поле на все колонки grid-родителя (здесь —
+    layout-примитив <code>ui-grid</code>, T3.4); раскладка форм целиком — ui-form-grid (T5.4).
+  </p>
+</section>

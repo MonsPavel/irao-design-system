@@ -91,9 +91,10 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('width: 100%;');
     expect(block).toContain('min-height: var(--ui-field-height);');
-    expect(block, 'фиксированной height нет — только min-height (Implementation requirements п.1)').not.toMatch(
-      /(?:^|;)\s*height:\s/,
-    );
+    expect(
+      block,
+      'фиксированной height нет — только min-height (Implementation requirements п.1)',
+    ).not.toMatch(/(?:^|;)\s*height:\s/);
     expect(block).toContain('padding: var(--ui-space-1) var(--ui-space-5);');
     expect(block).toContain('border: var(--ui-border-width) solid transparent;');
     expect(block).toContain('border-radius: var(--ui-radius-sm);');
@@ -117,27 +118,31 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
   });
 
   it('focus-visible — фирменный bg-swap + рамка primary (career-portal .field__input:focus), outline не запрещается (ADR-0001)', () => {
-    const block = blockOf(css, '.ui-field__input:focus-visible,\n.ui-field__textarea:focus-visible');
+    const block = blockOf(
+      css,
+      '.ui-field__input:focus-visible,\n.ui-field__textarea:focus-visible',
+    );
     expect(block, 'правило фокуса найдено').toBeTruthy();
     expect(block).toContain('background-color: var(--ui-color-surface);');
     expect(block).toContain('border-color: var(--ui-color-primary);');
-    expect(css, 'outline: none в компоненте нет — глобальная политика ADR-0001 не гасится').not.toMatch(
-      /outline[^:]*:\s*(?:none|0)/,
-    );
+    expect(
+      css,
+      'outline: none в компоненте нет — глобальная политика ADR-0001 не гасится',
+    ).not.toMatch(/outline[^:]*:\s*(?:none|0)/);
   });
 
   it('placeholder: приглушённый токен и плотный (opacity 1 — контраст-пара muted-on-surface-muted T2.3 предполагает непрозрачный цвет)', () => {
-    const block = blockOf(
-      css,
-      '.ui-field__input::placeholder,\n.ui-field__textarea::placeholder',
-    );
+    const block = blockOf(css, '.ui-field__input::placeholder,\n.ui-field__textarea::placeholder');
     expect(block, 'правило placeholder найдено').toBeTruthy();
     expect(block).toContain('color: var(--ui-color-text-muted);');
     expect(block).toContain('opacity: 1;');
   });
 
   it('.ui-field--error: рамка error + фон error-bg (одобренный .field--error); текст ошибки — fs-micro, error, скрыт вне --error', () => {
-    const input = blockOf(css, '.ui-field--error .ui-field__input,\n.ui-field--error .ui-field__textarea');
+    const input = blockOf(
+      css,
+      '.ui-field--error .ui-field__input,\n.ui-field--error .ui-field__textarea',
+    );
     expect(input, 'правило ошибки контролов найдено').toBeTruthy();
     expect(input).toContain('border-color: var(--ui-color-error);');
     expect(input).toContain('background-color: var(--ui-color-error-bg);');
@@ -190,7 +195,18 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
   });
 
   it('компонент читает только слой 2: ни одной ссылки на примитивы слоя 1 (гейт ADR-0009, T2.2)', () => {
-    const families = ['blue', 'gray', 'red', 'green', 'orange', 'slate', 'purple', 'peach', 'white', 'black'];
+    const families = [
+      'blue',
+      'gray',
+      'red',
+      'green',
+      'orange',
+      'slate',
+      'purple',
+      'peach',
+      'white',
+      'black',
+    ];
     const primitiveRef = new RegExp(`var\\(--ui-(?:${families.join('|')})-[0-9]`);
     expect(css, 'ссылки на примитивы запрещены вне tokens/').not.toMatch(primitiveRef);
   });
@@ -203,14 +219,27 @@ describe('tokens/semantic.css — геометрия полей (слой 2, T5.
     ['--ui-field-height', '3.25rem', 'components.css:148'],
     ['--ui-field-textarea-min-height', '7.5rem', 'components.css:161'],
     ['--ui-field-textarea-padding-y', '0.875rem', 'components.css:162'],
-  ])('%s = %s перенесён «как есть» (px → rem, происхождение зафиксировано)', (token, value, origin) => {
-    expect(semantic, `${token} объявлен`).toMatch(new RegExp(`${token.replace(/-/g, '\\-')}:\\s*${value.replace('.', '\\.')};`));
-    expect(semantic, `у ${token} комментарий происхождения (гейт tokens-semantic)`).toContain(origin);
-  });
+  ])(
+    '%s = %s перенесён «как есть» (px → rem, происхождение зафиксировано)',
+    (token, value, origin) => {
+      expect(semantic, `${token} объявлен`).toMatch(
+        new RegExp(`${token.replace(/-/g, '\\-')}:\\s*${value.replace('.', '\\.')};`),
+      );
+      expect(semantic, `у ${token} комментарий происхождения (гейт tokens-semantic)`).toContain(
+        origin,
+      );
+    },
+  );
 
   it('ui-field.css читает только эти токены (значения не дублируются в компоненте)', () => {
-    const css = stripCssComments(readFileSync(join(root, 'components', 'ui-field', 'ui-field.css'), 'utf8'));
-    for (const token of ['--ui-field-height', '--ui-field-textarea-min-height', '--ui-field-textarea-padding-y']) {
+    const css = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-field', 'ui-field.css'), 'utf8'),
+    );
+    for (const token of [
+      '--ui-field-height',
+      '--ui-field-textarea-min-height',
+      '--ui-field-textarea-padding-y',
+    ]) {
       expect(css, `${token} используется компонентом`).toContain(`var(${token})`);
     }
   });
@@ -220,7 +249,11 @@ describe('tokens/semantic.css — геометрия полей (слой 2, T5.
       join(root, 'docs', 'ui-system', 'architecture', 'tokens-career-portal-mapping.md'),
       'utf8',
     );
-    for (const token of ['--ui-field-height', '--ui-field-textarea-min-height', '--ui-field-textarea-padding-y']) {
+    for (const token of [
+      '--ui-field-height',
+      '--ui-field-textarea-min-height',
+      '--ui-field-textarea-padding-y',
+    ]) {
       expect(mapping, `${token} — строка в таблице диффов`).toContain(token);
     }
   });
@@ -245,8 +278,9 @@ describe('канонический паттерн ui-field (components/ui-field/
     expect(labelFor, 'for указывает на id поля').toBe(inputId);
 
     expect(html).toContain('class="ui-field__req"');
+    // [\s>]* в закрывающем теге — устойчивость к переносам prettier.
     expect(html, 'видимая звёздочка декоративна (смысл — текстом)').toMatch(
-      /ui-field__req"[^>]*>\s*<span aria-hidden="true">\*<\/span>/,
+      /class="ui-field__req"[^>]*>\s*<span aria-hidden="true">\*<\/span\s*>/,
     );
     const reqText = html.match(/ui-field__req-text">([^<]+)</)?.[1];
     expect(reqText, 'текст маркера для скринридера').toBe('обязательное поле');
@@ -257,10 +291,12 @@ describe('канонический паттерн ui-field (components/ui-field/
     expect(inputTag, 'aria-invalid="true" при ошибке').toContain('aria-invalid="true"');
 
     const describedby = inputTag.match(/aria-describedby="([^"]+)"/)?.[1] ?? '';
-    const hintId = html.match(/class="ui-field__hint"[^>]*id="([^"]+)"/)?.[1]
-      ?? html.match(/id="([^"]+)"[^>]*class="ui-field__hint"/)?.[1];
-    const errorId = html.match(/class="ui-field__error"[^>]*id="([^"]+)"/)?.[1]
-      ?? html.match(/id="([^"]+)"[^>]*class="ui-field__error"/)?.[1];
+    const hintId =
+      html.match(/class="ui-field__hint"[^>]*id="([^"]+)"/)?.[1] ??
+      html.match(/id="([^"]+)"[^>]*class="ui-field__hint"/)?.[1];
+    const errorId =
+      html.match(/class="ui-field__error"[^>]*id="([^"]+)"/)?.[1] ??
+      html.match(/id="([^"]+)"[^>]*class="ui-field__error"/)?.[1];
     expect(hintId, 'id хинта есть').toBeTruthy();
     expect(errorId, 'id ошибки есть').toBeTruthy();
     expect(describedby, 'aria-describedby ведёт и на hint, и на error (список)').toContain(hintId);
@@ -276,7 +312,9 @@ describe('канонический паттерн ui-field (components/ui-field/
   it('поле нативно: required, autocomplete (WCAG 1.3.5 — не отключать), placeholder ≠ label', () => {
     const inputTag = tagOf(html, 'input');
     expect(inputTag).toContain('required');
-    expect(inputTag, 'autocomplete не отключён (off запрещён политикой)').toMatch(/autocomplete="(?!off)/);
+    expect(inputTag, 'autocomplete не отключён (off запрещён политикой)').toMatch(
+      /autocomplete="(?!off)/,
+    );
     expect(inputTag).toMatch(/placeholder="([^"]+)"/);
 
     const labelText = (html.match(/<label[^>]*>([\s\S]*?)<\/label>/)?.[1] ?? '')
@@ -301,11 +339,17 @@ describe('стенд и подключение (Scope T5.1)', () => {
     }
     expect(stand, 'textarea продемонстрирована').toContain('ui-field__textarea');
     expect(stand, 'состояние error').toContain('ui-field--error');
-    expect(stand, 'состояние disabled').toMatch(/ui-field__input[^>]*disabled|disabled[^>]*ui-field__input/);
-    expect(stand, 'состояние readonly').toMatch(/ui-field__input[^>]*readonly|readonly[^>]*ui-field__input/);
+    expect(stand, 'состояние disabled').toMatch(
+      /ui-field__input[^>]*disabled|disabled[^>]*ui-field__input/,
+    );
+    expect(stand, 'состояние readonly').toMatch(
+      /ui-field__input[^>]*readonly|readonly[^>]*ui-field__input/,
+    );
     expect(stand, '--wide в grid продемонстрирован').toContain('ui-field--wide');
     expect(stand, 'сетка layout-примитива (T3.4) как grid-родитель').toContain('ui-grid--2');
-    expect(stand, 'гейт T3.6 не расширяется без CHECK_STANDS').not.toContain('data-ui-check-layout');
+    expect(stand, 'гейт T3.6 не расширяется без CHECK_STANDS').not.toContain(
+      'data-ui-check-layout',
+    );
   });
 
   it("'ui-field' в COMPONENTS showcase/build.mjs — CSS в dist/ui-core.min.css", () => {

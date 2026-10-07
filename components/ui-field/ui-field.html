@@ -1,0 +1,40 @@
+<!-- ui-field (T5.1): канонический паттерн «поле с ошибкой» — визуал и aria в
+     одном паттерне: копипаст даёт доступный результат (Implementation
+     requirements п.3). Полная обвязка: label for↔id; hint и error в списке
+     aria-describedby поля; aria-invalid="true" при ошибке; role="alert" на
+     тексте ошибки — вставленная/обновлённая ошибка объявляется скринридером
+     (паттерн 02-architecture §6.3). Required-маркер не только цветом:
+     звёздочка акцентом (aria-hidden — декоративна) + текст «обязательное
+     поле» скринридеру (ui-field__req-text скрыт клипом, не display:none).
+     Нативные атрибуты: required, autocomplete="email" (WCAG 1.3.5 — не
+     отключать; рекомендации по типам — README.md). Placeholder — пример
+     формата, НЕ замена label (политика — README.md). Расширенный стенд
+     (типы input × textarea × состояния default/focus/error/disabled/readonly)
+     — showcase/pages/ui-field/index.html; правила API, do/don't — README.md. -->
+<div class="ui-field ui-field--required ui-field--error">
+  <label class="ui-field__label" for="ui-field-email">
+    Служебный e-mail
+    <span class="ui-field__req"
+      ><span aria-hidden="true">*</span
+      ><span class="ui-field__req-text">обязательное поле</span></span
+    >
+  </label>
+  <input
+    class="ui-field__input"
+    type="email"
+    id="ui-field-email"
+    name="email"
+    value="resume@"
+    placeholder="name@example.com"
+    autocomplete="email"
+    required
+    aria-invalid="true"
+    aria-describedby="ui-field-email-hint ui-field-email-error"
+ >
+  <p class="ui-field__hint" id="ui-field-email-hint">
+    Используется для уведомлений о статусе отклика
+  </p>
+  <p class="ui-field__error" id="ui-field-email-error" role="alert">
+    Адрес неполный: добавьте домен — name@example.com
+  </p>
+</div>
