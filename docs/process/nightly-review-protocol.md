@@ -4,7 +4,7 @@
 
 ## Где живёт
 
-- **Воркфлоу:** [.zcode/workflows/night-cycle.dwf.ts](../../.zcode/workflows/night-cycle.dwf.ts) — запуск вечером: «Запусти workflow night-cycle до 04:00»; днём — только с `force=true`.
+- **Воркфлоу:** [.zcode/workflows/night-cycle.dwf.ts](../../.zcode/workflows/night-cycle.dwf.ts) — запуск вечером: «Запусти workflow night-cycle до 08:00» (последняя задача — не позже 06:00); днём — только с `force=true`.
 - **Леджер статусов:** [docs/ui-system/STATUS.md](../ui-system/STATUS.md) (`todo / in-progress / done / blocked`) — ведёт конвейер.
 - **CI-контур (детерминированная часть, независимо):** [.github/workflows/nightly.yml](../../.github/workflows/nightly.yml) + [tools/validate-backlog.mjs](../../tools/validate-backlog.mjs).
 
@@ -26,7 +26,7 @@
 
 ## Окно времени (как в health-log)
 
-- Ночное окно **18:00–04:00** (`cutoffHour=4`, решение 05.10 — ужато с 05:30): последняя задача не берётся позже 04:00, начатая доделывается.
+- Ночное окно **18:00–08:00** (решение 07.10 — расширено с 04:00): новые задачи не начинаются позже **06:00** (`cutoffHour=6`), 06:00–08:00 — зона доделывания начатого, после 08:00 цикл завершается.
 - Утренний предел **08:00–12:00**: новые задачи не начинаются.
 - `force=true` — без лимитов времени.
 - Лимит 40 задач на прогон; для запуска нужно чистое рабочее дерево (незакоммиченные `.zcode/` игнорируются).

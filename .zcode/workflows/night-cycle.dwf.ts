@@ -6,26 +6,34 @@ description: "Ночной AFK-конвейер irao-ui (аналог health-log
   независимая приёмка по Acceptance Criteria/DoD, gate (validate-backlog +
   npm lint/test:unit, когда настроены), мердж --no-ff в main и push.
   Неблокирующие medium/low замечания собираются в docs/process/nightly/BACKLOG.md.
-  Окно 18:00–04:00: последняя задача не берётся позже 04:00 (cutoffHour=4,
-  решение 05.10 — окно ужато с 05:30), начатая доделывается. Утренний предел
-  08:00–12:00. force=true — без лимитов времени. Сбой на задаче блокирует
-  только её — ночь продолжается."
+  Окно 18:00–08:00: новые задачи не начинаются позже 06:00 (cutoffHour=6,
+  решение 07.10 — было 04:00), 06:00–08:00 — зона доделывания начатого,
+  после 08:00 цикл завершается. Утренний предел 08:00–12:00 (второй рубеж).
+  force=true — без лимитов времени. Сбой на задаче блокирует только её —
+  ночь продолжается."
 whenToUse: "Вечерний запуск на ночь из корня репозитория irao-design-system:
-  «Запусти workflow night-cycle до 04:00». Днём — только с force=true. Требует
-  чистого рабочего дерева (незакоммиченные .zcode/ игнорируются) и запущенной
-  машины без сна."
+  «Запусти workflow night-cycle до 08:00» (последняя задача — не позже 06:00).
+  Днём — только с force=true. Требует чистого рабочего дерева (незакоммиченные
+  .zcode/ игнорируются) и запущенной машины без сна."
 args:
   cutoffHour:
     type: number
     description: "Локальный час, после которого конвейер не начинает новые задачи
-      (4 = последняя задача не берётся позже 04:00 — решение 05.10; начатая
-      задача спокойно доводится до конца). Окно запуска: после 18:00 или до
-      cutoffHour."
+      (6 = последняя задача не берётся позже 06:00 — решение 07.10; начатая
+      задача спокойно доводится до конца)."
     required: false
-    default: 4
+    default: 6
+  windowEndHour:
+    type: number
+    description: "Локальный час, которым заканчивается ночное окно (8 = окно
+      18:00–08:00, решение 07.10): после этого времени цикл завершается,
+      если ещё работает между задачами; 06:00–08:00 — зона доделывания
+      начатого (новые задачи не берутся с 06:00)."
+    required: false
+    default: 8
   force:
     type: boolean
-    description: "true — игнорировать проверки времени (ночное окно 18:00–04:00
+    description: "true — игнорировать проверки времени (ночное окно 18:00–08:00
       и утренний предел 08:00–12:00): запуск в любое время, остановка по
       исчерпанию реестра, лимиту задач или вручную."
     required: false
@@ -100,11 +108,15 @@ interface WorkflowReport {
   notCovered: string[];
 }
 
-// cutoff 4 (решение 05.10: окно ужато с 5.5/05:30 — последняя задача не берётся позже 04:00).
-const cutoffHour = typeof args.cutoffHour === "number" ? args.cutoffHour : 4;
+// Окно и cutoff (решение 07.10, было cutoff 4/04:00): новые задачи —
+// 18:00–06:00 (cutoff 6); 06:00–08:00 — зона доделывания начатого; после
+// 08:00 цикл завершается (windowEnd 8). morningStop 8–12 — второй рубеж.
+const cutoffHour = typeof args.cutoffHour === "number" ? args.cutoffHour : 6;
+const windowEndHour = typeof args.windowEndHour === "number" ? args.windowEndHour : 8;
 const force = args.force === true;
 // Утренний предел («марафон останавливается к утру», паттерн health-log):
 // в 08:00–12:00 новые задачи не стартуют, начатая доделывается; force обходит.
+// При windowEnd=8 достижим только как страховка при других значениях windowEnd.
 const morningStopHour = 8;
 // Усиление фазы ревью (поручение пользователя 05.10): critical/high правятся
 // всегда — лимит раундов правок поднят с 2 (health-log) до 3.
@@ -195,8 +207,14 @@ async function buildMeta(): Promise<Map<string, TaskMeta>> {
   return map;
 }
 
+/** Ночное окно цикла (18:00–windowEnd): в нём цикл живёт и доделывает начатое. */
 function inWindow(hour: number): boolean {
-  return hour >= 18 || hour < cutoffHour;
+  return hour >= 18 || hour < windowEndHour;
+}
+
+/** Разрешён ли старт НОВОЙ задачи: окно И до cutoff (18:00–06:00 при 6/8). */
+function newTaskAllowed(hour: number): boolean {
+  return inWindow(hour) && hour < cutoffHour;
 }
 
 async function localHour(): Promise<number | null> {
@@ -293,8 +311,13 @@ for (let i = 0; i < 40; i++) {
     break;
   }
   if (!force && !inWindow(hour)) {
-    log(`Локальное время ~${hour.toFixed(1)} ч — вне ночного окна (18:00–${cutoffHour}:00). Новые задачи не начинаю.`);
-    stopReason = "время вышло за ночное окно";
+    log(`Локальное время ~${hour.toFixed(1)} ч — ночное окно закончилось (${windowEndHour}:00). Цикл завершается; начатая задача была доделана ранее.`);
+    stopReason = "время вышло за ночное окно (18:00–" + windowEndHour + ":00)";
+    break;
+  }
+  if (!force && !newTaskAllowed(hour)) {
+    log(`Локальное время ~${hour.toFixed(1)} ч — cutoff (${cutoffHour}:00): новые задачи не начинаю, 06:00–${windowEndHour}:00 — зона доделывания начатого.`);
+    stopReason = "cutoff " + cutoffHour + ":00 — новые задачи не начинаю (зона доделывания)";
     break;
   }
   if (!force && hour >= morningStopHour && hour < 12) {
