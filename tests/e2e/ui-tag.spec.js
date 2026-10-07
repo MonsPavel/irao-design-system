@@ -69,6 +69,30 @@ const stateOf = (page, id) =>
 /** Фактический бокс (проверка, что min-height/min-width активируются). */
 const boxOf = (page, id) => page.locator(`#${id}`).boundingBox();
 
+/**
+ * Гейт правила дублирования (Implementation requirements T4.3 п.2; ревью high):
+ * у каждого aria-hidden-бейджа значение ОБЯЗАНО присутствовать в доступном
+ * имени контрола-родителя — aria-hidden скрывает число от скринридера, и если
+ * рядом нет дублирующего текста, счёт не озвучивается вовсе.
+ */
+async function assertAriaHiddenBadgesNamed(page, label) {
+  const controls = page.locator(
+    'main a:has(.ui-badge[aria-hidden="true"]), main button:has(.ui-badge[aria-hidden="true"])',
+  );
+  const total = await controls.count();
+  expect(total, `${label}: aria-hidden-примеры на стенде есть`).toBeGreaterThan(0);
+  for (let index = 0; index < total; index += 1) {
+    const control = controls.nth(index);
+    const value = (
+      await control.locator('.ui-badge[aria-hidden="true"]').first().textContent()
+    ).trim();
+    await expect(
+      control,
+      `${label}: значение «${value}» продублировано в доступном имени контрола`,
+    ).toHaveAccessibleName(new RegExp(value.replace(/[+]/g, '\\+')));
+  }
+}
+
 /** Эффективный фон: собственный непрозрачный, иначе подложка (паттерн ui-button). */
 function backdropOf(state) {
   const alpha = state.backgroundColor.match(/^rgba?\(([^)]+)\)$/);
@@ -213,11 +237,29 @@ standTest.describe('ui-tag (T4.3)', () => {
 
         const duplicated = page.locator(`#${BADGE.linkDuplicated}`);
         await expect(duplicated.locator('.ui-badge')).toHaveAttribute('aria-hidden', 'true');
-        await expect(duplicated).toHaveAccessibleName('Сообщения');
+        // Дублирующий текст «7 новых» рядом: имя содержит значение РОВНО ОДИН раз
+        // (aria-hidden убрал дубль из бейджа), а не «Сообщения 7» + скрытое «7».
+        await expect(duplicated).toHaveAccessibleName('Сообщения, 7 новых');
 
         const named = page.locator(`#${BADGE.linkNamed}`);
         await expect(named.locator('.ui-badge')).not.toHaveAttribute('aria-hidden');
         await expect(named).toHaveAccessibleName('Уведомления: 3');
+      },
+    );
+
+    standTest(
+      'гейт дублирования: у каждого aria-hidden-бейджа значение есть в имени контрола (ревью T4.3 high)',
+      async ({ stand }) => {
+        const page = await stand('ui-tag');
+        await assertAriaHiddenBadgesNamed(page, 'ui-tag');
+      },
+    );
+
+    standTest(
+      'канонический паттерн ui-badge: aria-hidden-бейдж продублирован текстом рядом (ревью T4.3 high)',
+      async ({ stand }) => {
+        const page = await stand('ui-badge');
+        await assertAriaHiddenBadgesNamed(page, 'ui-badge');
       },
     );
   });

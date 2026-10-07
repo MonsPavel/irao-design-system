@@ -107,6 +107,24 @@ describe('канонический паттерн (components/ui-badge/ui-badge.
     ).toBe(true);
   });
 
+  it('aria-hidden-пример паттерна продублирован текстом рядом: значение бейджа есть в тексте ссылки вне бейджа (ревью T4.3 high)', () => {
+    // aria-hidden скрывает число от скринридера: без дублирующего текста рядом
+    // («Уведомления, 3 новых») счёт не озвучивается вовсе — анти-паттерн,
+    // который канонический паттерн показывать не имеет права.
+    const paragraphs = [...html.matchAll(/<p>[\s\S]*?<\/p>/g)].map(([block]) => block);
+    const withAriaHiddenBadge = paragraphs.filter((block) =>
+      /<span[^>]*ui-badge[^>]*aria-hidden="true"|<span[^>]*aria-hidden="true"[^>]*ui-badge/.test(
+        block,
+      ),
+    );
+    expect(withAriaHiddenBadge.length, 'aria-hidden-пример в паттерне есть').toBeGreaterThan(0);
+    for (const block of withAriaHiddenBadge) {
+      const value = block.match(/aria-hidden="true"[^>]*>([^<]+)<\/span>/)[1].trim();
+      const textOutsideBadges = block.replace(/<span[^>]*>[\s\S]*?<\/span>/g, ' ');
+      expect(textOutsideBadges, `текст рядом содержит значение «${value}»`).toContain(value);
+    }
+  });
+
   it('правило при 0 показано в паттерне атрибутом hidden', () => {
     expect(html).toMatch(/<span[^>]*class="[^"]*ui-badge[^"]*"[^>]*hidden[^>]*>/);
   });

@@ -74,7 +74,7 @@
   </p>
   <p class="utg-row">
     <a class="ui-link" id="ui-badge-link-duplicated" href="#ui-badge-heading">
-      Сообщения
+      Сообщения, 7 новых
       <span class="ui-badge" aria-hidden="true">7</span>
     </a>
     <a class="ui-link" href="#ui-badge-heading">
@@ -85,10 +85,12 @@
   <p class="utg-row ui-small ui-text--muted">
     Одна цифра — круг 24px (<code>--ui-badge-size</code>); «99+» растёт в pill паддингом
     (<code>--ui-space-1</code>), контент не режется. Значение в имени контрола — бейдж без
-    <code>aria-hidden</code> («Уведомления: 3»); продублированное текстом —
-    <code>aria-hidden="true"</code> («Сообщения», без задвоения). При 0 бейдж не выводится — атрибут
-    <code>hidden</code> (глобальная гарантия <code>base/reset.css</code>). Правила — README.md
-    компонента; отдельный базовый стенд <code>ui-badge.html</code> — канонический паттерн
+    <code>aria-hidden</code> («Уведомления: 3»); продублированное текстом рядом («Сообщения, 7
+    новых») — <code>aria-hidden="true"</code>: значение остаётся в имени, дубль не озвучивается.
+    <code>aria-hidden</code> без дублирующего текста запрещён — счёт не слышно (гейт e2e). При 0
+    бейдж не выводится — атрибут <code>hidden</code> (глобальная гарантия
+    <code>base/reset.css</code>). Правила — README.md компонента; отдельный базовый стенд
+    <code>ui-badge.html</code> — канонический паттерн
     <code>components/ui-badge/ui-badge.html</code>.
   </p>
 </section>
