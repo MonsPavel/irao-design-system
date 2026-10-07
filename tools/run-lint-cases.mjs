@@ -173,6 +173,21 @@ const EXPECTATIONS = [
   { file: 'js/valid-module.js', tool: 'eslint', expect: 'pass' },
   // html-validate: alt, один h1, label, tabindex; эталонная страница — чиста
   { file: 'html/img-without-alt.html', tool: 'html', expect: 'fail', rules: ['wcag/h37'] },
+  {
+    // T4.6 (AC): img без width/height и без модификатора ui-image--ratio-* —
+    // место под картинку не зафиксировано, загрузка даёт CLS — ошибка.
+    file: 'html/img-without-dimensions.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/img-dimensions'],
+  },
+  {
+    // T4.6: позитивный контроль гейта размеров — атрибуты width/height и
+    // класс ui-image--ratio-* (место резервирует aspect-ratio) гейт молчит.
+    file: 'html/img-dimensions-valid.html',
+    tool: 'html',
+    expect: 'pass',
+  },
   { file: 'html/two-h1.html', tool: 'html', expect: 'fail', rules: ['irao/one-h1'] },
   {
     // T3.3: пропуск уровня иерархии h1→h3 (SEO h1→h2→h3 без пропусков;

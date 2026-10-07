@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Позитивный контроль: img с зафиксированным местом</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- ПОЗИТИВНЫЙ КОНТРОЛЬ (T4.6): оба легитимных пути зафиксировать место —
+         1) атрибуты width/height (этот путь дополнительно покрыт valid-page.html);
+         2) модификатор ui-image--ratio-* — место резервирует aspect-ratio из CSS
+            (исключение правила irao/img-dimensions). Фикстура — контроль правила,
+            а не образец для копирования (см. README каталога). Канонический
+            паттерн ui-image требует атрибуты ВСЕГДА — они защищают место и до
+            загрузки CSS. Ожидаемый зелёный: irao/img-dimensions молчит. -->
+    <img src="logo.svg" alt="Логотип Ирао" width="120" height="32">
+    <img class="ui-image ui-image--ratio-16-9" src="cover.jpg" alt="Кадр программы стажировок" loading="lazy">
+  </body>
+</html>

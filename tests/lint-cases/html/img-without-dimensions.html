@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: img без размеров</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- НАРУШЕНИЕ (AC T4.6): img с alt, но без width/height и без модификатора
+         ui-image--ratio-* — место под картинку не зафиксировано, загрузка
+         сдвигает контент (CLS). Ожидаемый красный: irao/img-dimensions. -->
+    <img src="photo.jpg" alt="Фото главного офиса">
+  </body>
+</html>
