@@ -160,25 +160,22 @@ standTest.describe('ui-image (T4.6)', () => {
     },
   );
 
-  standTest(
-    'e2e CLS (AC): layout-shift = 0 при lazy-загрузке стенда',
-    async ({ stand }) => {
-      const page = await stand('ui-image');
+  standTest('e2e CLS (AC): layout-shift = 0 при lazy-загрузке стенда', async ({ stand }) => {
+    const page = await stand('ui-image');
 
-      // Счётчик — после networkidle: подмена шрифта (font-display: swap,
-      // база T3.1) уже отыграла и к паттерну изображений не относится.
-      await installClsMeter(page);
-      await settleImages(page);
+    // Счётчик — после networkidle: подмена шрифта (font-display: swap,
+    // база T3.1) уже отыграла и к паттерну изображений не относится.
+    await installClsMeter(page);
+    await settleImages(page);
 
-      const cls = await readCls(page);
-      expect(cls, 'layout-shift за догрузку lazy-изображений = 0').toBe(0);
+    const cls = await readCls(page);
+    expect(cls, 'layout-shift за догрузку lazy-изображений = 0').toBe(0);
 
-      const allComplete = await page.evaluate(
-        () => [...document.images].filter((img) => !img.complete).length,
-      );
-      expect(allComplete, 'все img стенда загрузились (проверка не вакуумна)').toBe(0);
-    },
-  );
+    const allComplete = await page.evaluate(
+      () => [...document.images].filter((img) => !img.complete).length,
+    );
+    expect(allComplete, 'все img стенда загрузились (проверка не вакуумна)').toBe(0);
+  });
 
   standTest(
     'чувствительность наблюдателя (контроль инструмента): безразмерный img в потоке даёт layout-shift > 0',
@@ -282,15 +279,16 @@ standTest.describe('ui-image (T4.6)', () => {
     ).toEqual([]);
   });
 
-  standTest('эталоны ui-image 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({
-    stand,
-  }) => {
-    const page = await stand('ui-image');
-    await settleImages(page); // lazy-изображения догружены до снимков
-    for (const viewport of Object.keys(VIEWPORTS)) {
-      await shot(page, { name: 'ui-image', viewport });
-    }
-  });
+  standTest(
+    'эталоны ui-image 375/768/1280/1440 — только из контейнера (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('ui-image');
+      await settleImages(page); // lazy-изображения догружены до снимков
+      for (const viewport of Object.keys(VIEWPORTS)) {
+        await shot(page, { name: 'ui-image', viewport });
+      }
+    },
+  );
 });
 
 standTest.describe('ui-figure (T4.6)', () => {
@@ -333,13 +331,14 @@ standTest.describe('ui-figure (T4.6)', () => {
     ).toEqual([]);
   });
 
-  standTest('эталоны ui-figure 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({
-    stand,
-  }) => {
-    const page = await stand('ui-figure');
-    await settleImages(page);
-    for (const viewport of Object.keys(VIEWPORTS)) {
-      await shot(page, { name: 'ui-figure', viewport });
-    }
-  });
+  standTest(
+    'эталоны ui-figure 375/768/1280/1440 — только из контейнера (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('ui-figure');
+      await settleImages(page);
+      for (const viewport of Object.keys(VIEWPORTS)) {
+        await shot(page, { name: 'ui-figure', viewport });
+      }
+    },
+  );
 });

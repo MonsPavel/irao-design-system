@@ -145,8 +145,12 @@ describe('канонические паттерны (components/ui-{image,figure
 
   it('ui-figure: figure + figcaption (семантика подписи) + ui-image внутри', () => {
     expect(figureHtml).toMatch(/<figure class="ui-figure"/);
-    expect(figureHtml).toMatch(/<figcaption class="ui-figure__caption"/);
-    expect(figureHtml).toMatch(/<img[^>]*class="[^"]*ui-image/);
+    expect(figureHtml).toContain('ui-figure__caption');
+    // figcaption внутри figure, после изображения (пины порядка, а не разметки
+    // строк: prettier переносит атрибуты).
+    expect(figureHtml.indexOf('<figure')).toBeLessThan(figureHtml.indexOf('<img'));
+    expect(figureHtml.indexOf('<img')).toBeLessThan(figureHtml.indexOf('<figcaption'));
+    expect(figureHtml.indexOf('<figcaption')).toBeLessThan(figureHtml.indexOf('</figure>'));
   });
 
   it('без inline-стилей (VI-инвариант §5)', () => {
@@ -156,7 +160,10 @@ describe('канонические паттерны (components/ui-{image,figure
 });
 
 describe('стенды (showcase/pages/ui-image, showcase/pages/ui-figure)', () => {
-  const imageStand = readFileSync(join(root, 'showcase', 'pages', 'ui-image', 'index.html'), 'utf8');
+  const imageStand = readFileSync(
+    join(root, 'showcase', 'pages', 'ui-image', 'index.html'),
+    'utf8',
+  );
   const figureStand = readFileSync(
     join(root, 'showcase', 'pages', 'ui-figure', 'index.html'),
     'utf8',
@@ -167,7 +174,9 @@ describe('стенды (showcase/pages/ui-image, showcase/pages/ui-figure)', () 
     expect(imageStand).toMatch(/id="ui-image-decorative"[^>]*alt=""/);
     expect(imageStand).toContain('id="ui-image-informative"');
     expect(imageStand).toContain('id="ui-image-complex"');
-    expect(imageStand).toMatch(/id="ui-image-complex"[^>]*aria-describedby="ui-image-complex-desc"/);
+    expect(imageStand).toMatch(
+      /id="ui-image-complex"[^>]*aria-describedby="ui-image-complex-desc"/,
+    );
     expect(imageStand).toContain('id="ui-image-complex-desc"');
   });
 
