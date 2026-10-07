@@ -6,9 +6,12 @@
  * — career-portal components.css:144–227 (.field__select, .checkbox,
  * .radio-row, .radio); исполняемая форма решения:
  *  - components/ui-field/ui-field.css: .ui-field__select в общей коробке
- *    контролов; appearance: none ТОЛЬКО вместе с фоновой svg-стрелкой
- *    (Technical considerations — не терять аффорданс); никаких подмен
- *    нативного списка (opacity/position — Implementation requirements п.1);
+ *    контролов; appearance: none; стрелка — ::after обёртки __select-wrap:
+ *    mask-image по svg БЕЗ цвета (alpha-маска), цвет — background-color
+ *    var(--ui-color-text-muted): data-URI не читает var(), поэтому цветной
+ *    hex в URI (%23…) нарушил бы инвариант «hex только в primitives»
+ *    (рендз-замечание T5.2 high); никаких подмен нативного списка
+ *    (opacity/position — Implementation requirements п.1);
  *    select в правилах focus/error/disabled — те же модификаторы, что у
  *    input/textarea;
  *  - components/ui-checkbox/: label-обёртка input+текст (клик по тексту
@@ -52,11 +55,16 @@ const tagOf = (source, tag) => {
   return match ? match[0] : '';
 };
 
-/** CSS-инварианты компонента: без !important/hex (vi-инвариант §5), без
- * media и :hover (одобренным дизайном не заданы), без ссылок на примитивы. */
+/** CSS-инварианты компонента: без !important/hex (vi-инвариант §5) — hex ловится
+ * и в процентно-кодированной форме (%23… в data-URI, слепое пятно сырого
+ * /#[0-9a-f]{3,8}/ — ревью T5.2), без media и :hover (одобренным дизайном не
+ * заданы), без ссылок на примитивы. */
 const expectSystemInvariants = (css) => {
   expect(css).not.toContain('!important');
-  expect(css).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  expect(css, 'hex только в tokens/primitives.css').not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  expect(css, 'процентно-кодированный hex в data-URI — тот же инвариант').not.toMatch(
+    /%23[0-9a-f]{3,8}\b/i,
+  );
   expect(css, 'media-запросов нет — mobile-first база без изломов').not.toContain('@media');
   expect(css, 'собственных hover-правил нет (в career-portal их нет)').not.toContain(':hover');
   const families = [
@@ -93,28 +101,56 @@ describe('components/ui-field/ui-field.css — ui-field__select (T5.2)', () => {
     expect(block).toContain('font-size: var(--ui-fs-small);');
   });
 
-  it('.ui-field__select: appearance none ТОЛЬКО вместе с фоновой svg-стрелкой (аффорданс сохранён)', () => {
+  it('.ui-field__select: appearance none, стрелке оставлено место; стрелка НЕ фоном select (data-URI не читает var())', () => {
     const block = blockOfStandalone(css, '.ui-field__select');
     expect(block, 'правило select найдено').toBeTruthy();
     expect(block, 'appearance: none — Technical considerations T5.2').toContain(
       'appearance: none;',
     );
-    expect(block, 'стрелка — фоновая svg (Scope)').toContain(
-      'background-image: url("data:image/svg+xml,',
-    );
-    expect(
-      block,
-      'цвет стрелки — текстово-приглушённый (#616161 = --ui-gray-700 = --ui-color-text-muted); data-URI var() не читает',
-    ).toContain('%23616161');
-    expect(block).toContain('background-repeat: no-repeat;');
-    expect(block).toContain(
-      'background-position: right var(--ui-field-select-arrow-offset) center;',
-    );
-    expect(block).toContain('background-size: var(--ui-field-select-arrow-size);');
     expect(
       block,
       'стрелке нужно место: правый паддинг больше левого (текст не наезжает на индикатор)',
     ).toContain('padding-right: var(--ui-space-6);');
+    expect(
+      block,
+      'стрелка НЕ фоном select: цвет в data-URI нарушил бы инвариант «hex только в primitives» (ревью T5.2) — она на обёртке',
+    ).not.toContain('background-image');
+  });
+
+  it('стрелка select — ::after обёртки __select-wrap: mask-image БЕЗ цвета + background-color из токена (токен-перекрашиваемая, ревью T5.2)', () => {
+    const wrap = blockOf(css, '.ui-field__select-wrap');
+    expect(wrap, 'обёртка вокруг select (псевдоэлементы на <select> не работают)').toBeTruthy();
+    expect(wrap).toContain('box-sizing: border-box;');
+    expect(wrap).toContain('position: relative;');
+    expect(wrap).toContain('display: block;');
+
+    const arrow = blockOf(css, '.ui-field__select-wrap::after');
+    expect(arrow, 'правило стрелки найдено').toBeTruthy();
+    expect(arrow).toContain('content: "";');
+    expect(arrow).toContain('position: absolute;');
+    expect(arrow, 'отступ от правого края — токен').toContain(
+      'right: var(--ui-field-select-arrow-offset);',
+    );
+    expect(arrow).toContain('width: var(--ui-field-select-arrow-size);');
+    expect(arrow).toContain('height: var(--ui-field-select-arrow-size);');
+    expect(arrow, 'клики проходят сквозь стрелку к select').toContain('pointer-events: none;');
+    expect(
+      arrow,
+      'цвет стрелки — токен слоя 2: переопределение темы и vi.css (T9.1) перекрашивают',
+    ).toContain('background-color: var(--ui-color-text-muted);');
+    expect(arrow, 'форма стрелки — svg-маска').toContain('mask-image: url("data:image/svg+xml,');
+    expect(
+      arrow,
+      'в data-URI маски нет ЦВЕТА — ни hex, ни процентно-кодированного, ни ключевых слов: маска альфа-режимом берёт только форму (currentColor как нейтральная краска пути цветом не является — инвариант ADR-0009 §1)',
+    ).not.toMatch(
+      /%23[0-9a-f]{3,8}|#[0-9a-f]{3,8}|='(?:black|white|red|green|blue|gray|grey|transparent)'/i,
+    );
+  });
+
+  it('disabled: стрелка гаснет вместе с полем (:has — стрелка вне select, нативное затемнение её не красит)', () => {
+    const dim = blockOf(css, '.ui-field__select-wrap:has(.ui-field__select:disabled)::after');
+    expect(dim, 'приглушение стрелки disabled-поля').toBeTruthy();
+    expect(dim).toContain('opacity: var(--ui-opacity-disabled);');
   });
 
   it('нативный select не подменяется (Implementation requirements п.1): без opacity/position/pointer-events/display-деклараций', () => {

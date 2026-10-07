@@ -4,8 +4,10 @@
  * Поверхность — стенд showcase/pages/ui-field (секции select/checkbox/radio
  * T5.2; визуальные эталоны стенда снимает ui-field.spec.js — единый набор
  * эталонов на страницу). Проверяется:
- *  1. select: computed-стили коробки полей + appearance: none c фоновой
- *     стрелкой (Technical considerations — аффорданс не теряется);
+ *  1. select: computed-стили коробки полей + appearance: none; стрелка —
+ *     маска на ::after обёртки __select-wrap с цветом из токена
+ *     (токен-перекрашиваемая, рендз-замечание T5.2 high — аффорданс не
+ *     теряется, инвариант «hex только в primitives» не нарушается);
  *  2. select управляется клавиатурой нативно, без JS и ARIA-костылей
  *     (AC: Alt+↓/Enter — базовая нативность); клик по label → фокус;
  *  3. select в состоянии error: рамка/фон ошибки + связность aria-describedby;
@@ -65,10 +67,27 @@ const stateOf = (page, id) =>
       borderRadius: style.borderRadius,
       appearance: style.appearance,
       backgroundImage: style.backgroundImage,
-      backgroundPosition: style.backgroundPosition,
       paddingRight: style.paddingRight,
       accentColor: style.accentColor,
       color: style.color,
+    };
+  });
+
+/** Вычисленные стили стрелки select — ::after обёртки __select-wrap
+ * (токен-перекрашиваемая: рендз-замечание T5.2 high — цвет не в data-URI). */
+const arrowOf = (page, id) =>
+  page.locator(`#${id}`).evaluate((el) => {
+    const style = getComputedStyle(el.parentElement, '::after');
+    return {
+      content: style.content,
+      position: style.position,
+      width: style.width,
+      height: style.height,
+      right: style.right,
+      backgroundColor: style.backgroundColor,
+      maskImage: style.maskImage,
+      pointerEvents: style.pointerEvents,
+      opacity: style.opacity,
     };
   });
 
@@ -82,7 +101,7 @@ function colorOf(computed) {
 
 standTest.describe('ui-forms: select (T5.2)', () => {
   standTest(
-    'computed-стили: коробка полей та же, appearance none со стрелкой-аффордансом',
+    'computed-стили: коробка полей та же; стрелка — маска на ::after обёртки, цвет из токена (токен-перекрашиваемая)',
     async ({ stand }) => {
       const page = await stand('ui-field');
 
@@ -96,16 +115,33 @@ standTest.describe('ui-forms: select (T5.2)', () => {
       expect(select.appearance, 'appearance: none — стрелку рисуем сами').toBe('none');
       expect(
         select.backgroundImage,
-        'стрелка — фоновая svg (appearance none без индикатора запрещён)',
-      ).toContain('data:image/svg+xml');
-      expect(
-        select.backgroundPosition,
-        'стрелка справа по центру: right 12px center (chromium сериализует calc(100% - 12px) 50%)',
-      ).toMatch(/12px/);
+        'стрелки фоном select нет: data-URI не читает var() — инвариант «hex только в primitives» (рендз T5.2)',
+      ).toBe('none');
       expect(
         select.paddingRight,
         'правый паддинг освобождает место под стрелку (32px = --ui-space-6)',
       ).toBe('32px');
+
+      const arrow = await arrowOf(page, SEL.city);
+      expect(
+        arrow.content,
+        'стрелка — ::after обёртки (псевдоэлементы на select не работают)',
+      ).toBe('"..."');
+      expect(arrow.position, 'стрелка поверх поля, из потока обвязки не рвёт').toBe('absolute');
+      expect(arrow.width, 'размер стрелки — --ui-field-select-arrow-size (16px)').toBe('16px');
+      expect(arrow.right, 'отступ от правого края — --ui-field-select-arrow-offset (12px)').toBe(
+        '12px',
+      );
+      expect(arrow.pointerEvents, 'клики проходят сквозь стрелку к select').toBe('none');
+      expect(arrow.backgroundColor, 'цвет стрелки — --ui-color-text-muted (gray-700)').toBe(
+        'rgb(97, 97, 97)',
+      );
+      expect(arrow.maskImage, 'форма стрелки — svg-маска без цвета (alpha)').toContain(
+        'data:image/svg+xml',
+      );
+      expect(arrow.maskImage, 'в маске нет процентно-кодированного hex (инвариант)').not.toContain(
+        '%23',
+      );
     },
   );
 
@@ -162,6 +198,11 @@ standTest.describe('ui-forms: select (T5.2)', () => {
 
       const disabled = page.locator(`#${SEL.cityDisabled}`);
       await expect(disabled).toBeDisabled();
+      const arrowOpacity = (await arrowOf(page, SEL.cityDisabled)).opacity;
+      expect(
+        arrowOpacity,
+        'стрелка disabled-поля гаснет вместе с ним (нативное затемнение поле красит целиком, стрелка — снаружи)',
+      ).toBe('0.3');
       for (let step = 0; step < 60; step += 1) {
         await page.keyboard.press('Tab');
         expect(
