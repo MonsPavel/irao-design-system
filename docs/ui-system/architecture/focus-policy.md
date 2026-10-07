@@ -51,10 +51,13 @@ summary:focus-visible,
   `declaration-property-value-disallowed-list` ловит `outline: none`/`0`
   (warning до конца EPIC-4, затем error; негативная фикстура —
   `tests/lint-cases/css/components/ui-modal/outline-none.css`).
-- Замена обводки допустима (например, паттерн `::after`-полосы для «растянутых»
-  ссылок из career-portal — перенесёт T4.4), но видимый индикатор обязан
-  оставаться: проверяется Tab-обходом и axe-правилами фокуса на стенде
-  компонента.
+- Замена обводки допустима, но видимый индикатор обязан оставаться:
+  проверяется Tab-обходом и axe-правилами фокуса на стенде компонента.
+  Исполненный пример — паттерн «карточка-ссылка» ui-card (T4.4): локальная
+  обводка ссылки заменена контуром `::after` по всей карточке
+  (`components/ui-card/ui-card.css`, источник — career-portal pages.css:52);
+  e2e-пин замены и видимости контура — `tests/e2e/ui-card.spec.js`
+  (`outline-style` ссылки `none` + `::after` ≥ 3px solid при фокусе).
 
 ## Как расширить список
 
