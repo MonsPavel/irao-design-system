@@ -75,17 +75,16 @@ describe('components/ui-accordion/ui-accordion.css — база (ADR-0002, те�
     expect(block).toContain('gap: var(--ui-space-4);'); // 16px .faq
   });
 
-  it('анимация — grid-rows на ::details-content (решение по матрице evergreen, зонд 2026-10-08): 0fr закрыто, [open] — 1fr', () => {
+  it('анимация — grid-rows на ::details-content (решение по матрице evergreen, зонд 2026-10-08): 0fr закрыто, [open] — 1fr; в переходе только grid-template-rows токеном', () => {
     const block = blockOf(css, '.ui-accordion__item::details-content');
     expect(block, 'правило ::details-content найдено').toBeTruthy();
     expect(block, 'слот — grid (техника grid-rows)').toContain('display: grid;');
     expect(block).toContain('grid-template-rows: 0fr;');
-    // Переход: grid-template-rows токеном + content-visibility allow-discrete
-    // (отложенное скрытие; формат prettier — построчный).
-    expect(block).toContain('grid-template-rows var(--ui-transition)');
-    expect(block).toContain('content-visibility var(--ui-transition)');
-    expect(block).toContain('allow-discrete');
-    const openBlock = blockOf(css, '.ui-accordion__item[open]::details-content');
+    expect(block).toContain('transition: grid-template-rows var(--ui-transition);');
+    // content-visibility c allow-discrete проверена зондом и отброшена:
+    // плавности закрытия не даёт (мгновенно во всех движках).
+    expect(block).not.toContain('content-visibility');
+    const openBlock = blockOf(css, '.ui-accordion__item:where([open])::details-content');
     expect(openBlock, 'правило открытого слота найдено').toBeTruthy();
     expect(openBlock).toContain('grid-template-rows: 1fr;');
   });
@@ -137,7 +136,7 @@ describe('components/ui-accordion/ui-accordion.css — база (ADR-0002, те�
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('flex: 0 0 auto;');
     expect(block).toContain('transition: transform var(--ui-transition);');
-    const openBlock = blockOf(css, '.ui-accordion__item[open] .ui-accordion__icon');
+    const openBlock = blockOf(css, '.ui-accordion__item:where([open]) .ui-accordion__icon');
     expect(openBlock, 'правило поворота при [open] найдено').toBeTruthy();
     expect(openBlock).toContain('transform: rotate(180deg);');
     expect(css, 'is-open career-portal не переносится: состояние — нативный [open]').not.toContain(
@@ -352,26 +351,30 @@ describe('контракт модуля ui-accordion.js (jsdom; образец �
 
     items[0].open = true;
     fireToggle(sandbox, items[0]);
-    expect(events.map(({ type }) => type), 'первое открытие — open').toEqual(['open']);
+    expect(
+      events.map(({ type }) => type),
+      'первое открытие — open',
+    ).toEqual(['open']);
 
+    // Открытие второго: модуль закрывает первого ПРОГРАММНО (items[i].open =
+    // false). В браузере смена open порождает toggle соседа из очереди
+    // событий; jsdom toggle не генерирует — воспроизводим очередь вручную.
     items[1].open = true;
     fireToggle(sandbox, items[1]);
     expect(items[0].open, 'сосед закрыт (один открыт)').toBe(false);
     expect(items[1].open).toBe(true);
-    expect(events.map(({ type }) => type), 'open второго + close первого').toEqual([
-      'open',
-      'close',
-      'open',
-    ]);
+    fireToggle(sandbox, items[0]); // queued toggle закрытого соседа
+    expect(
+      events.map(({ type }) => type),
+      'open второго + queued close первого',
+    ).toEqual(['open', 'open', 'close']);
 
     items[1].open = false;
     fireToggle(sandbox, items[1]);
-    expect(events.map(({ type }) => type), 'закрытие последнего — close').toEqual([
-      'open',
-      'close',
-      'open',
-      'close',
-    ]);
+    expect(
+      events.map(({ type }) => type),
+      'закрытие последнего — close',
+    ).toEqual(['open', 'open', 'close', 'close']);
     for (const { e } of events) {
       expect(e.bubbles, 'событие всплывает — точка расширения сайта').toBe(true);
     }
@@ -403,7 +406,10 @@ describe('контракт модуля ui-accordion.js (jsdom; образец �
 
     expect(items[0].open, 'multi: соседи независимы (без JS все независимы)').toBe(true);
     expect(items[1].open).toBe(true);
-    expect(events.map(({ type }) => type), 'оба открытия отслежены').toEqual(['open', 'open']);
+    expect(
+      events.map(({ type }) => type),
+      'оба открытия отслежены',
+    ).toEqual(['open', 'open']);
   });
 
   it('destroy снимает слушатели и флаг: toggle после destroy не меняет соседей и не диспатчит', () => {
@@ -424,18 +430,25 @@ describe('контракт модуля ui-accordion.js (jsdom; образец �
 describe('стенд и подключение (DoD T6.4)', () => {
   it("'ui-accordion' в COMPONENTS showcase/build.mjs — CSS/JS попадают в dist", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-accordion'[^\]]*\]/);
+    // Блок целиком (не [^\]]*: комментарии строк COMPONENTS несут скобки —
+    // button[disabled] пагинации T6.3).
+    const components = build.match(/const COMPONENTS = \[([\s\S]*?)\];/);
+    expect(components, 'список COMPONENTS найден').toBeTruthy();
+    expect(components[1]).toContain("'ui-accordion'");
   });
 
   it('стенд showcase/pages/ui-accordion: FAQ-вариант + список + single-open (AC)', () => {
-    const stand = readFileSync(join(root, 'showcase', 'pages', 'ui-accordion', 'index.html'), 'utf8');
+    const stand = readFileSync(
+      join(root, 'showcase', 'pages', 'ui-accordion', 'index.html'),
+      'utf8',
+    );
     expect(stand, 'секция FAQ-варианта').toContain('id="uiacc-faq"');
     expect(stand, 'секция списка').toContain('id="uiacc-list"');
     expect(stand, 'секция single-open').toContain('id="uiacc-single"');
     expect(stand, 'FAQ-вариант — модификатор --faq').toContain('ui-accordion--faq');
     expect(
-      stand.match(/data-ui-accordion="single"/g),
-      'хук single — ровно на одном инстансе',
+      stand.match(/<[a-z]+[^>]*data-ui-accordion="single"[^>]*>/g),
+      'хук single — атрибут ровно на одном инстансе (упоминания в тексте не считаются)',
     ).toHaveLength(1);
   });
 

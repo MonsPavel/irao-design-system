@@ -125,9 +125,7 @@ test.describe('ui-accordion: семантика (T6.4)', () => {
 
     // Исходное состояние: ровно один пункт стенда открыт (первый FAQ,
     // career-portal education — первый вопрос раскрыт).
-    const openCount = await page
-      .locator('.ui-accordion__item[open]')
-      .count();
+    const openCount = await page.locator('.ui-accordion__item[open]').count();
     expect(openCount, 'исходно открыт один пункт — первый FAQ').toBe(1);
   });
 
@@ -174,9 +172,7 @@ test.describe('ui-accordion: клавиатура и no-JS (T6.4)', () => {
     await expect(second.root, 'клик свернул').not.toHaveAttribute('open');
   });
 
-  test('no-JS (AC): аккордеон полностью работает в контексте без JavaScript', async ({
-    stand,
-  }) => {
+  test('no-JS (AC): аккордеон полностью работает в контексте без JavaScript', async ({ stand }) => {
     const page = await stand('ui-accordion');
     const standUrl = page.url();
 
@@ -195,10 +191,16 @@ test.describe('ui-accordion: клавиатура и no-JS (T6.4)', () => {
     await expect(item.root, 'повторный клик свернул').not.toHaveAttribute('open');
 
     // Режим single — JS-усиление: без JS пункты независимы (нативная база).
+    // Над #uiacc-single только что схлопнулся список — пункты сместились;
+    // проверка стабильности Playwright в no-JS-контексте не подтверждается
+    // (rAF-инструментация в javaScriptEnabled: false не тикает — зонд
+    // 2026-10-08), поэтому клики force: это РЕАЛЬНЫЕ клики мышью без
+    // actionability-ожиданий (прецедент — disabled-стрелки ui-pagination).
+    await noJsPage.waitForTimeout(400); // устаканить раскладку после закрытия
     const single = itemOf(noJsPage, ACC.single, 0);
-    await single.q.click();
+    await single.q.click({ force: true });
     const singleSecond = itemOf(noJsPage, ACC.single, 1);
-    await singleSecond.q.click();
+    await singleSecond.q.click({ force: true });
     await expect(single.root, 'no-JS single: первый остался открыт').toHaveAttribute('open', /.*/);
 
     await context.close();

@@ -1,0 +1,140 @@
+/** @define accordion */
+
+/*!
+ * irao-ui — ui-accordion: аккордеон на нативных <details>/<summary> (T6.4).
+ *
+ * Источник — .faq career-portal (components.css:272–317, класс A): FAQ-вариант
+ * (--faq) — приглушённый фон surface-blue-50, радиус карточки, вопрос
+ * fs-body × bold цветом primary, ответ ролью small, шеврон с поворотом.
+ * Управление заменено на нативное: div/button + класс is-open career-portal →
+ * details/summary + атрибут [open] (Enter/Space, состояние и объявление
+ * скринридеру — бесплатно, без ARIA; семантика вместо класса — прецедент
+ * aria-selected ui-tabs T6.2 и aria-current ui-pagination T6.3).
+ *
+ * АНИМАЦИЯ (решение по матрице evergreen, зонды .tmp-probe 2026-10-08,
+ * chromium 153 / firefox 155 / webkit(Safari 26.6), зафиксировано в README):
+ * grid-rows-переход 0fr→1fr техники career-portal (класс A) поставлен на
+ * ::details-content — СЛОТ СОДЕРЖИМОГО details. Варианты зонда:
+ *  - grid-rows на внутренней обёртке (career-portal «как есть», [open] вместо
+ *    is-open): в chromium раскрытие мгновенно — слот содержимого рендерится
+ *    в момент [open], переходу не с чего стартовать (firefox/webkit
+ *    анимируют — их слот персистентен, но полагаться на это нельзя);
+ *  - height 0→auto + interpolate-size на ::details-content (официальный
+ *    приём Chrome): анимирует только chromium 129+ (interpolate-size вне
+ *    матрицы firefox/webkit);
+ *  - ВЫБРАНО: grid-rows на ::details-content — анимирует ОТКРЫТИЕ на всей
+ *    матрице evergreen (слот — постоянный бокс, переходу есть между чем
+ *    идти; interpolate-size не нужен). Закрытие мгновенно во всех движках
+ *    при любой чисто CSS-технике (зонд, вкл. вариант с content-visibility
+ *    allow-discrete в переходе — измеримой плавности закрытия она не дала,
+ *    оставлена за бортом как экзотика без эффекта) — деградация по ТЗ:
+ *    раскрытие без плавности, контент не теряется. В движках без
+ *    ::details-content правило не применяется и аккордеон работает нативно
+ *    без анимации.
+ *
+ * Контракт grid-item: трек 0fr сжимается в ноль только если элемент-слот
+ * (__a) разрешает усадку — min-height: 0 (автоматический минимум
+ * min-content иначе держит трек открытым); клип содержимого при анимации —
+ * overflow: hidden на __a (в career-portal min-height/overflow стояли на
+ * __a-inner — здесь они подняты на grid-item, паддинги остались на inner).
+ * Паддинги 20px career-portal → --ui-space-5 (24px, ступень шкалы §3.2;
+ * прецедент ui-card 28→24, ui-tabs); длительность/линия — токены --ui-
+ * transition и роль small (локальные 0.3s/1.45 career-portal расходились с
+ * его же шкалами --transition 0.25s / --lh-small-regular 1.35; пересмотр —
+ * design-decision владельца, README). reduced-motion: transition: none на
+ * ::details-content — kill-switch base/reset бьёт *::before/*::after, но не
+ * произвольные псевдоэлементы слота. Фокус вопроса рисует глобальная
+ * политика ADR-0001 (base/focus.css: summary:focus-visible). VI-режим:
+ * цветов вне токенов нет (§5) — перекраска vi.css накрывает компонент.
+ */
+
+.ui-accordion {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+}
+
+.ui-accordion__item {
+  box-sizing: border-box;
+}
+
+/* FAQ-вариант — карточка career-portal .faq__item (components.css:274):
+   приглушённый фон, радиус карточки, клип по скруглению. */
+.ui-accordion--faq .ui-accordion__item {
+  box-sizing: border-box;
+  overflow: hidden;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Анимация раскрытия — grid-rows на слоте содержимого (шапка файла).
+   content-visibility НЕ в переходе: discrete-пара с allow-discrete проверена
+   зондом и не даёт плавного закрытия (мгновенно во всех движках) — UA сам
+   переключает скрытие слота мгновенно, что и есть наблюдаемое поведение. */
+.ui-accordion__item::details-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--ui-transition);
+}
+
+.ui-accordion__item:where([open])::details-content {
+  grid-template-rows: 1fr;
+}
+
+/* Вопрос — career-portal .faq__q (components.css:280): текст слева, шеврон
+   справа; маркер disclosure снят (list-style: none — evergreen; видимый
+   индикатор состояния — шеврон разметки с поворотом). Паддинг — touch-запас
+   (24px × 2 + строка fs-body ≥ 44px). */
+.ui-accordion__q {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-6);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ui-space-5);
+  color: var(--ui-color-primary);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-body-bold);
+  list-style: none;
+  cursor: pointer;
+}
+
+/* Шеврон — career-portal .faq__q svg (components.css:293): не сжимается,
+   поворот при раскрытии по нативному [open]. */
+.ui-accordion__icon {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  transition: transform var(--ui-transition);
+}
+
+.ui-accordion__item:where([open]) .ui-accordion__icon {
+  transform: rotate(180deg);
+}
+
+/* Ответ — grid-item слота (шапка файла, контракт усадки). */
+.ui-accordion__a {
+  box-sizing: border-box;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Внутренний блок ответа — career-portal .faq__a-inner (components.css:305):
+   нижний паддинг открытого состояния объединён с горизонтальным (в закрытом
+   контент скрыт клипом — скачок паддинга в анимации не нужен). */
+.ui-accordion__a-inner {
+  box-sizing: border-box;
+  padding: 0 var(--ui-space-5) var(--ui-space-5);
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+}
+
+/* reduced-motion: анимация слота отключена (kill-switch base/reset не
+   проходит по ::details-content — шапка файла). Поворот шеврона гасит
+   kill-switch (реальный элемент). */
+@media (prefers-reduced-motion: reduce) {
+  .ui-accordion__item::details-content {
+    transition: none;
+  }
+}
