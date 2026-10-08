@@ -98,6 +98,7 @@ const COMPONENTS = [
   'ui-form', // T5.4 — форма как целое: раскладка grid/aside, сводная ошибка role="alert", success
   'ui-dropdown', // T6.1 — выпадающее меню двух назначений (APG menu-button): клавиатура, вне-клик, Escape, деградация без JS
   'ui-tabs', // T6.2 — табы (APG tabs, automatic-активация): roving tabindex, стрелки/Home/End, без JS все панели видимы
+  'ui-pagination', // T6.3 — пагинация: touch-цели 44px, aria-current на текущей, недоступные стрелки button[disabled], «…»
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
