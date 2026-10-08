@@ -25,8 +25,9 @@
  * (15px → 0.9375rem) — вне 4px-шкалы §3.2, перенос «как есть» (прецедент
  * --ui-card-gap/--ui-tag-gap в слое токенов T2.2); пересмотр значений —
  * design-decision владельца дизайна. Ширина 312px → min(19.5rem, 100vw −
- * --ui-space-8) — пара мобильной ветки career-portal (min(312px, 100vw −
- * 32px)); коллизия с краем вьюпорта решается сайтом модификатором — заметка
+ * --ui-space-6) — пара мобильной ветки career-portal (min(312px, 100vw −
+ * 32px), header.css:137); 32px = --ui-space-6 шкалы §3.2 (точная пара).
+ * Коллизия с краем вьюпорта решается сайтом модификатором — заметка
  * в README.md.
  *
  * Подпись пункта — роль body типографики T3.3 (16px career-portal = мобильная
@@ -89,7 +90,7 @@
   top: calc(100% + 1.125rem);
   left: 0;
   z-index: var(--ui-z-dropdown);
-  width: min(19.5rem, calc(100vw - var(--ui-space-8)));
+  width: min(19.5rem, calc(100vw - var(--ui-space-6)));
   padding: 0.375rem;
   border: var(--ui-border-width) solid var(--ui-color-border-muted);
   border-radius: 0.875rem;
