@@ -2,9 +2,11 @@
   Стенд ui-form (T5.4): форма как целое — раскладка полей (1 колонка → 2 от md), боковая колонка
   aside (2 колонки от lg, стек на мобиле), сводная ошибка <code>role="alert"</code>, success и
   легенда обязательных полей. Кнопки «демо» исполняют паттерны фокуса задачи (показ summary → фокус
-  на него; успех → фокус на заголовок <code>tabindex="-1"</code>) — реальная логика валидации и
-  свапа остаётся за модулем T5.5 и серверным рендером T5.6. Сценарии —
-  <code>tests/e2e/ui-form.spec.js</code>; API и правила фокуса — README.md компонента.
+  на него; успех → фокус на заголовок <code>tabindex="-1"</code>) — серверный рендер состояний
+  остаётся за контрактом T5.6; живой клиентской валидацией форма ниже не активирована
+  (<code>data-ui-form</code> у неё нет), модуль T5.5 демонстрирует секция
+  «Клиентская валидация». Сценарии — <code>tests/e2e/ui-form.spec.js</code>; API и правила фокуса —
+  README.md компонента.
 </p>
 
 <section aria-labelledby="uifo-live-heading">
@@ -223,6 +225,181 @@
   </p>
 </section>
 
+<section aria-labelledby="uifv-heading">
+  <h2 id="uifv-heading">Клиентская валидация — модуль IraoUI.form (T5.5)</h2>
+  <p class="ui-showcase-stand__note">
+    Прогрессивное усиление: модуль активируется на <code>form[data-ui-form]</code> и ставит
+    <code>novalidate</code> только при инициализации — без JS форма нативно-валидна (ТЗ №14).
+    Правила — из нативных атрибутов (required, type=email, pattern, minlength),
+    <code>data-ui-max-size</code> (лимит файла в байтах) и <code>data-ui-validate</code>
+    (валидатор сайта в <code>IraoUI.form.validators</code> — точка расширения, зарегистрирована
+    демо-скриптом секции); текст правила переопределяет <code>data-ui-error</code> поля. Ошибки —
+    по контракту T5.6 (<code>ui-field--error</code> + aria-invalid + aria-describedby +
+    <code>ui-field__error</code>), сводная ошибка заполняется ссылками и получает фокус (без
+    summary фокус — на первое невалидное поле). Валидный сабмит модуль пропускает (событие
+    <code>irao-ui:form-valid</code>, кнопка — <code>is-loading</code> + aria-busy), повторный
+    блокирует до перезагрузки (AJAX-сайты снимают <code>IraoUI.form.unlock(form)</code>).
+    Сценарии — <code>tests/e2e/ui-form-validate.spec.js</code>; API — README.md компонента.
+  </p>
+
+  <!-- Форма полного цикла: summary + все правила модуля. Скрытая ветка
+       ([hidden]-предок) не валидируется — перенос career-portal; ветка
+       обязана нести и disabled: нативная валидация про [hidden] не знает и
+       без JS заблокировала бы сабмит (модуль пропускает и [hidden], и
+       disabled — юнит-пины). Textarea предзаполнена (≥ minlength), чтобы
+       нативный сабмит без JS проходил. -->
+  <form class="ui-form" id="uifv-form" data-ui-form action="#uifv-heading">
+    <div class="ui-form__summary" id="uifv-summary" role="alert" tabindex="-1" hidden>
+      <h3 class="ui-form__summary-title">В форме есть ошибки</h3>
+      <ul class="ui-form__summary-list">
+        <li><a class="ui-link" href="#uifv-name">Заполните обязательные поля</a></li>
+      </ul>
+    </div>
+    <div class="ui-form__grid">
+      <div class="ui-field ui-field--required">
+        <label class="ui-field__label" for="uifv-name">
+          Имя и фамилия
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="uifv-name"
+          name="name"
+          autocomplete="name"
+          required
+        >
+      </div>
+      <div class="ui-field ui-field--required">
+        <label class="ui-field__label" for="uifv-email">
+          E-mail
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="email"
+          id="uifv-email"
+          name="email"
+          autocomplete="email"
+          required
+          aria-describedby="uifv-email-hint"
+        >
+        <p class="ui-field__hint" id="uifv-email-hint">
+          Используется для уведомлений о статусе заявки
+        </p>
+      </div>
+      <div class="ui-field">
+        <label class="ui-field__label" for="uifv-city">Город</label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="uifv-city"
+          name="city"
+          pattern="[А-ЯЁа-яё\s-]+"
+          data-ui-error="Укажите город по-русски"
+          aria-describedby="uifv-city-hint"
+        >
+        <p class="ui-field__hint" id="uifv-city-hint">
+          Поле необязательное; если заполнено — русские буквы, пробелы и дефисы. Сообщение правила
+          переопределяет data-ui-error поля.
+        </p>
+      </div>
+      <div class="ui-field">
+        <label class="ui-field__label" for="uifv-message">О себе</label>
+        <textarea class="ui-field__textarea" id="uifv-message" name="message" rows="3" minlength="20">Пять лет в frontend-разработке: дизайн-системы, доступность.</textarea>
+      </div>
+      <div class="ui-field ui-field--required ui-field--wide">
+        <label class="ui-checkbox">
+          <input class="ui-checkbox__input" type="checkbox" id="uifv-consent" name="consent" required>
+          <span>
+            Согласие на обработку персональных данных
+            <span class="ui-field__req"
+              ><span aria-hidden="true">*</span
+              ><span class="ui-field__req-text">обязательное поле</span></span
+            >
+          </span>
+        </label>
+      </div>
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="uifv-file">Резюме</label>
+        <input
+          class="ui-field__input"
+          type="file"
+          id="uifv-file"
+          name="resume"
+          data-ui-max-size="1048576"
+          aria-describedby="uifv-file-hint"
+        >
+        <p class="ui-field__hint" id="uifv-file-hint">
+          Лимит размера — data-ui-max-size в байтах (здесь 1048576 = 1 МБ); сообщение называет
+          лимит человекуемо.
+        </p>
+      </div>
+      <div hidden>
+        <div class="ui-field ui-field--required">
+          <label class="ui-field__label" for="uifv-conditional">Скрытая ветка (не валидируется)</label>
+          <input
+            class="ui-field__input"
+            type="text"
+            id="uifv-conditional"
+            name="conditional"
+            required
+            disabled
+          >
+        </div>
+      </div>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__spinner" aria-hidden="true"></span>
+        <span class="ui-button__label">Отправить</span>
+      </button>
+    </div>
+  </form>
+
+  <!-- События и расширение: без summary (фокус при ошибке — на поле) и с
+       кастомным валидатором сайта. Валидный сабмит здесь навигацию по хэшу
+       без query не даёт (пустая форма валидна) — состояние is-loading и
+       блокировка повтора остаются до перезагрузки/unlock: так сайт и
+       управляет циклом (дока README). -->
+  <form class="ui-form" id="uifv-events" data-ui-form action="#uifv-heading">
+    <div class="ui-form__grid">
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="uifv-phone">Телефон</label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="uifv-phone"
+          name="phone"
+          data-ui-validate="uifv-phone"
+          aria-describedby="uifv-phone-hint"
+        >
+        <p class="ui-field__hint" id="uifv-phone-hint">
+          Правило сайта: <code>IraoUI.form.validators['uifv-phone']</code> (демо-скрипт секции).
+        </p>
+      </div>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__label">Отправить</span>
+      </button>
+    </div>
+  </form>
+  <p class="ui-small ui-text--muted">
+    Вторая форма — без сводной ошибки: при невалидном сабмите модуль фокусирует первое невалидное
+    поле (WCAG 3.3.1) и диспатчит <code>irao-ui:form-invalid</code> (detail.errors). Валидный
+    сабмит модуль не отменяет — success-цикл у сайта (событие form-valid, состояние кнопки до
+    перезагрузки или <code>IraoUI.form.unlock(form)</code>).
+  </p>
+</section>
+
+
 <script>
   (function () {
     // Демо стенда (прецедент ui-alert) = интеграция сайта: исполняет ТОЛЬКО
@@ -254,4 +431,20 @@
       });
     }
   })();
+</script>
+<script>
+  // Демо секции T5.5 = код САЙТА (точка расширения модуля): регистрация
+  // кастомного валидатора для data-ui-validate. ui.min.js подключён с defer
+  // и исполняется до DOMContentLoaded, поэтому реестр наполняется на
+  // DOMContentLoaded — к первому сабмиту валидатор уже в IraoUI.form.validators.
+  document.addEventListener('DOMContentLoaded', function () {
+    if (!window.IraoUI || !window.IraoUI.form) return;
+    window.IraoUI.form.validators['uifv-phone'] = function (field) {
+      var value = field.value.trim();
+      if (value === '') return true; // поле необязательное: пустое не проверяется
+      return /^\+7[\s(-]?\d{3}[\s)-]?\d{3}-?\d{2}-?\d{2}$/.test(value)
+        ? true
+        : 'Телефон в формате +7 999 123-45-67';
+    };
+  });
 </script>

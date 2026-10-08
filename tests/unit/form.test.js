@@ -202,9 +202,16 @@ describe('подключение T5.4 в систему', () => {
     expect(stand, 'хук свапа body').toContain('data-ui-form-body');
     expect(stand, 'серверный рендер summary').toContain('id="uifo-summary-srv"');
     expect(stand, 'серверный рендер success').toContain('id="uifo-success-srv"');
-    expect(
-      /novalidate/i.test(stand),
-      'novalidate в разметке недопустим — его ставит только модуль T5.5',
-    ).toBe(false);
+    // Инвариант T5.4 уточнён в T5.5: недопустим АТРИБУТ novalidate в тегах
+    // <form> (ставит только модуль IraoUI.form при инициализации); упоминание
+    // слова в прозе стенда легально — секция T5.5 документирует правило
+    // интеграторам (пин атрибута — tests/unit/form-validation.test.js).
+    const formTags = stand.match(/<form\b[^>]*>/g) ?? [];
+    for (const tag of formTags) {
+      expect(
+        /novalidate/i.test(tag),
+        `атрибут novalidate в ${tag} недопустим — его ставит только модуль T5.5`,
+      ).toBe(false);
+    }
   });
 });

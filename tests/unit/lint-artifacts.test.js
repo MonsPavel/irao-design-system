@@ -27,6 +27,12 @@ describe('lint-пайплайн игнорирует сборочные арте
     expect(script, 'полигон showcase/dist/ исключён из stylelint').toContain('"!showcase/dist/**"');
   });
 
+  it('lint:js исключает dist/ и showcase/dist/ (гейты написаны для исходников; с T5.5 минификатор легально сжимает typeof/null-сравнения до == — eqeqeq бандл не оценивает)', () => {
+    const config = readFileSync(join(root, 'eslint.config.mjs'), 'utf8');
+    expect(config, 'dist/ в globalIgnores flat-конфига').toContain("'dist/**'");
+    expect(config, 'полигон showcase/dist/ в globalIgnores').toContain("'showcase/dist/**'");
+  });
+
   it('.prettierignore покрывает машинные артефакты (секция «Машинные артефакты»)', () => {
     const ignore = readFileSync(join(root, '.prettierignore'), 'utf8');
     expect(ignore).toMatch(/^dist\/$/m);
