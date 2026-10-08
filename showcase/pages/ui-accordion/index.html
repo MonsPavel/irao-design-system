@@ -1,0 +1,159 @@
+<!-- Стенд ui-accordion (T6.4): три сценария (AC «FAQ-вариант + список» + режим
+     single). #uiacc-faq — FAQ-вариант career-portal (.faq: первый вопрос
+     открыт нативным open, как на education/practices/internships); вопросы
+     без ARIA — имя скринридеру даёт текст summary, шеврон svg aria-hidden
+     (Implementation requirements п.2); #uiacc-list — тот же блок без
+     модификатора (список раскрытий, «серый» визуал не задаётся); #uiacc-single
+     — единственный инстанс с JS-хуком data-ui-accordion="single" (режим «один
+     открыт», JS-усиление; без JS все инстансы независимы — Implementation
+     requirements п.3). Анимация раскрытия — grid-rows на ::details-content
+     (решение по матрице evergreen — README компонента); фокус-обводка
+     summary — глобальная политика ADR-0001 (base/focus.css: summary:focus-
+     visible). prettier-ignore у svg — конвенция многострочных глифов. -->
+<section aria-labelledby="uiacc-faq-heading">
+  <h2 id="uiacc-faq-heading">FAQ-вариант (--faq)</h2>
+  <p class="ui-showcase-stand__note">
+    Визуал FAQ career-portal: приглушённый фон, радиус карточки, шеврон с поворотом при раскрытии.
+    Первый вопрос открыт нативным <code>open</code>. Клавиатура: <kbd>Tab</kbd> — к вопросу,
+    <kbd>Enter</kbd>/<kbd>Space</kbd> — раскрыть/свернуть (нативные <code>details/summary</code>,
+    без JS и без ARIA). Инстанс без JS-хука: пункты независимы.
+  </p>
+  <div id="uiacc-faq" class="ui-accordion ui-accordion--faq">
+    <details class="ui-accordion__item" open>
+      <summary class="ui-accordion__q">
+        Работает ли аккордеон без JavaScript?
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Да: база — нативные <code>details/summary</code>, состояние и клавиатура (Enter, Space)
+          обеспечиваются браузером. JavaScript нужен только режиму «один открыт».
+        </div>
+      </div>
+    </details>
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Как подключить компонент к странице?
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Подключите собранные <code>ui-core.min.css</code> и <code>ui.min.js</code> и используйте
+          канонический паттерн разметки из документации компонента.
+        </div>
+      </div>
+    </details>
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Как включить режим «один открыт»?
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Добавьте <code>data-ui-accordion="single"</code> на корень аккордеона — модуль-усиление
+          закроет соседей при открытии нового пункта (демо — сценарий ниже).
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section aria-labelledby="uiacc-list-heading">
+  <h2 id="uiacc-list-heading">Список раскрытий (без --faq)</h2>
+  <p class="ui-showcase-stand__note">
+    Тот же блок без модификатора: пункты без фона и радиуса — раскрывающиеся секции вне FAQ (состав
+    поставки, требования). Содержимое ответа — зона сайта (текст, списки, карточки).
+  </p>
+  <div id="uiacc-list" class="ui-accordion">
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Состав поставки
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          <code>ui-core.min.css</code>, <code>ui-vi.min.css</code>, <code>ui.min.js</code>, шрифты
+          Golos и файлы тем.
+        </div>
+      </div>
+    </details>
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Требования к браузерам
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Аккордеон работает во всех вечнозелёных браузерах; плавная анимация раскрытия — там, где
+          есть <code>::details-content</code>, иначе раскрытие мгновенное (контент не теряется).
+        </div>
+      </div>
+    </details>
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Известные ограничения
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Вложенные аккордеоны и динамическая загрузка содержимого при открытии — вне скоупа
+          компонента.
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section aria-labelledby="uiacc-single-heading">
+  <h2 id="uiacc-single-heading">Режим «один открыт» (single)</h2>
+  <p class="ui-showcase-stand__note">
+    Единственный инстанс стенда с JS-хуком <code>data-ui-accordion="single"</code>: открытие пункта
+    закрывает соседей (модуль <code>IraoUI.accordion</code>). Без JS пункты независимы — усиление не
+    ломает нативную базу.
+  </p>
+  <div id="uiacc-single" class="ui-accordion ui-accordion--faq" data-ui-accordion="single">
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Первый пункт
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Откройте соседний пункт — этот свернётся: открыт ровно один.
+        </div>
+      </div>
+    </details>
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Второй пункт
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          Повторный клик сворачивает и его — «все закрыты» допустимо.
+        </div>
+      </div>
+    </details>
+    <details class="ui-accordion__item">
+      <summary class="ui-accordion__q">
+        Третий пункт
+        <!-- prettier-ignore -->
+        <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </summary>
+      <div class="ui-accordion__a">
+        <div class="ui-accordion__a-inner">
+          События <code>irao-ui:accordion-open</code>/<code>accordion-close</code> на корне — точка
+          расширения сайта.
+        </div>
+      </div>
+    </details>
+  </div>
+</section>
