@@ -130,7 +130,7 @@ describe('components/ui-form/ui-form.js — чистые функции вали
       // валидные
       ['user@example.com', true],
       ['user.name+tag@example.co', true],
-      ['o\'brien@example.ie', true],
+      ["o'brien@example.ie", true],
       ['пример@пример.ру', true],
       ['user@xn--e1afmkfd.xn--p1ai', true],
       ['a@b.cd', true],
@@ -260,7 +260,7 @@ describe('components/ui-form/ui-form.js — validateField: правила одн
     const { window, document } = makeSandbox({
       bodyHtml: `
         <div class="ui-field ui-field--required">
-          <label class="ui-checkbox"><input class="ui-checkbox__input" id="vf" required> Согласен</label>
+          <label class="ui-checkbox"><input class="ui-checkbox__input" id="vf" type="checkbox" required> Согласен</label>
         </div>`,
     });
     const field = document.getElementById('vf');
@@ -315,9 +315,9 @@ describe('components/ui-form/ui-form.js — validateField: правила одн
     // false → сообщение по умолчанию кастомного правила.
     const fallback = makeSandbox({ bodyHtml: fieldHtml('data-ui-validate="nope"') });
     fallback.window.IraoUI.form.validators.nope = () => false;
-    expect(
-      fallback.window.IraoUI.form.validateField(fallback.document.getElementById('vf')),
-    ).toBe('Исправьте значение поля');
+    expect(fallback.window.IraoUI.form.validateField(fallback.document.getElementById('vf'))).toBe(
+      'Исправьте значение поля',
+    );
   });
 
   it('data-ui-validate: имя без валидатора в реестре — правило пропускается (сайт зарегистрирует позже)', () => {
@@ -367,12 +367,16 @@ describe('components/ui-form/ui-form.js — контракт module-template и 
     expect(document.getElementById('tf').hasAttribute('novalidate')).toBe(true);
   });
 
-  it('novalidate ставится ТОЛЬКО инициализацией: в разметке его нет, появляется после init (AC)', () => {
+  it('novalidate в разметке паттернов отсутствует; под JS модуль его проставляет (AC)', () => {
+    // «В разметке его нет» — источник правды: канонический паттерн и стенд.
+    const pattern = readFileSync(join(root, 'components', 'ui-form', 'ui-form.html'), 'utf8');
+    expect(pattern, 'канонический паттерн без novalidate').not.toContain('novalidate');
+
+    // Под JS: init при 'complete' выполняется синхронно в песочнице —
+    // атрибут появляется у всех активированных форм.
     const { document } = makeSandbox({ bodyHtml: liveFormHtml });
-    const form = document.getElementById('tf');
-    expect(form.hasAttribute('novalidate'), 'в разметке novalidate нет').toBe(false);
-    expect(form.hasAttribute('data-ui-form-init'), 'инстанс инициализирован').toBe(true);
-    expect(form.hasAttribute('novalidate'), 'модуль проставил novalidate').toBe(true);
+    expect(document.getElementById('tf').hasAttribute('novalidate')).toBe(true);
+    expect(document.getElementById('tf').getAttribute('data-ui-form-init')).toBe('true');
   });
 
   it('модуль не трогает формы без data-ui-form (активация по селектору)', () => {
@@ -472,9 +476,7 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
     const summary = document.querySelector('.ui-form__summary');
     expect(summary.hidden, 'summary показан (hidden снят)').toBe(false);
     expect(document.activeElement, 'фокус на summary (паттерн T5.4)').toBe(summary);
-    expect(summary.querySelector('.ui-form__summary-title').textContent).toBe(
-      'В форме 2 ошибки',
-    );
+    expect(summary.querySelector('.ui-form__summary-title').textContent).toBe('В форме 2 ошибки');
 
     const links = summary.querySelectorAll('.ui-form__summary-list a');
     expect(links).toHaveLength(2);
@@ -492,9 +494,7 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
       ),
     });
     submitForm(window, document.getElementById('tf'));
-    expect(document.querySelector('.ui-form__summary-title').textContent).toBe(
-      'В форме 1 ошибка',
-    );
+    expect(document.querySelector('.ui-form__summary-title').textContent).toBe('В форме 1 ошибка');
   });
 
   it('полей без summary: фокус на первом невалидном поле (WCAG 3.3.1)', () => {
@@ -574,9 +574,7 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
       'input убрал ошибку из describedby',
     ).toBe(false);
     expect(email.closest('.ui-field').classList.contains('ui-field--error')).toBe(false);
-    expect(document.getElementById('tf-email-error').textContent, 'текст ошибки очищен').toBe(
-      '',
-    );
+    expect(document.getElementById('tf-email-error').textContent, 'текст ошибки очищен').toBe('');
 
     submitForm(window, form);
     expect(document.querySelector('.ui-form__summary').hidden, 'email исправлен — 1 ошибка').toBe(
