@@ -12,10 +12,12 @@
  * контракту T5.6; блокировка повторной отправки — на время валидного сабмита
  * (кнопка is-loading + aria-busy — интеграция с ui-button T4.2).
  *
- * Правила — из нативных атрибутов поля: required, type=email (регэксп
- * career-portal — перенос «как есть»), pattern и minlength (нативная
- * семантика: значение сверяется целиком, пустое значение проходит, битый
- * регэксп игнорируется), + data-ui-max-size (лимит размера файла в байтах)
+ * Правила — из нативных атрибутов поля: required (чекбокс/радио-группа/файл
+ * — по состоянию, не по value), type=email (регэксп career-portal — перенос
+ * «как есть»; пустое опциональное поле проходит — нативная семантика, с JS
+ * форма не строже, чем без JS), pattern и minlength (нативная семантика:
+ * значение сверяется целиком, пустое значение проходит, битый регэксп
+ * игнорируется), + data-ui-max-size (лимит размера файла в байтах)
  * и data-ui-validate (имя валидатора сайта в IraoUI.form.validators — точка
  * расширения вместо кастомных правил бизнес-логики, Out of scope).
  * Сообщение — по типу правила (RU) либо целиком из data-ui-error поля.
@@ -23,7 +25,9 @@
  * Контракт ошибок единый с сервером (T5.6): ui-field--error на обвязке +
  * aria-invalid="true" + aria-describedby (id ошибки дописывается к hint) +
  * текст в ui-field__error (создаётся при отсутствии, role="alert" —
- * объявление при появлении). Скрытые ветки ([hidden]-предок) и disabled-
+ * объявление при появлении). Ошибки radio-группы синхронны: aria на каждом
+ * radio, общий текст обвязки, одна запись в summary; выбор варианта чистит
+ * всю группу. Скрытые ветки ([hidden]-предок) и disabled-
  * поля пропускаются — перенос поведения career-portal и нативной семантики.
  *
  * Поведение: ошибка на change/blur, снятие на input (career-portal).
@@ -59,6 +63,7 @@
   var MESSAGES = {
     required: 'Заполните это поле',
     requiredCheckbox: 'Отметьте этот пункт',
+    requiredRadio: 'Выберите вариант',
     requiredFile: 'Прикрепите файл',
     email: 'Исправьте адрес e-mail',
     pattern: 'Исправьте формат значения',
@@ -186,6 +191,25 @@
     return !field.closest('[hidden]');
   }
 
+  /**
+   * Радио той же группы (тот же name в рамках form-владельца; без формы —
+   * документа). Перебор с equal-сравнением name, а не селектор с
+   * экранированием: значение name произвольно.
+   * @param {Element} field radio-инпут
+   * @returns {Array<Element>} все radio группы, включая само поле
+   */
+  function radioGroupFields(field) {
+    var scope = field.form || document;
+    var radios = scope.querySelectorAll('input[type="radio"]');
+    var group = [];
+    for (var i = 0; i < radios.length; i += 1) {
+      if (radios[i].name === field.name) {
+        group.push(radios[i]);
+      }
+    }
+    return group;
+  }
+
   /** У поля есть хотя бы одно правило модуля? */
   function hasRule(field) {
     return (
@@ -228,24 +252,42 @@
     }
 
     if (field.hasAttribute('required')) {
-      var ok =
-        field.type === 'checkbox'
-          ? field.checked
-          : field.type === 'file'
-            ? !!(field.files && field.files.length > 0)
-            : checkRequired(value);
+      var ok;
+      if (field.type === 'checkbox') {
+        ok = field.checked;
+      } else if (field.type === 'radio') {
+        // Радио: состояние ГРУППЫ — field.value у неотмеченного радио
+        // непуст (value-атрибут), нативная валидация блокирует сабмит по
+        // valueMissing группы (ревью T5.5: без спец-кейса — тихий false pass).
+        var group = radioGroupFields(field);
+        ok = false;
+        for (var g = 0; g < group.length; g += 1) {
+          if (group[g].checked) {
+            ok = true;
+            break;
+          }
+        }
+      } else if (field.type === 'file') {
+        ok = !!(field.files && field.files.length > 0);
+      } else {
+        ok = checkRequired(value);
+      }
       if (!ok) {
-        return message(
+        var requiredKey =
           field.type === 'checkbox'
             ? 'requiredCheckbox'
-            : field.type === 'file'
-              ? 'requiredFile'
-              : 'required',
-        );
+            : field.type === 'radio'
+              ? 'requiredRadio'
+              : field.type === 'file'
+                ? 'requiredFile'
+                : 'required';
+        return message(requiredKey);
       }
     }
 
-    if (field.type === 'email' && !checkEmail(value.trim())) {
+    // Пустое опциональное поле проходит (нативная семантика: typeMismatch
+    // пустого email = false — с JS форма не строже, чем без JS, ревью T5.5).
+    if (field.type === 'email' && value.trim() !== '' && !checkEmail(value.trim())) {
       return message('email');
     }
 
@@ -433,9 +475,8 @@
     var submitting = false;
     var submitButton = null;
 
-    function validateNow(event) {
-      var field = event.currentTarget;
-      var text = validateField(field);
+    /** Ошибка/очистка одного поля (radio-группы синхронизируются отдельно). */
+    function applyError(field, text) {
       if (text) {
         renderError(field, text);
       } else {
@@ -443,10 +484,35 @@
       }
     }
 
+    function validateNow(event) {
+      var field = event.currentTarget;
+      var text = validateField(field);
+      if (field.type === 'radio') {
+        // change/blur на radio — состояние общее для группы: результат
+        // применяется ко ВСЕМ radio (соседи не остаются с висящей ошибкой,
+        // ревью T5.5).
+        var group = radioGroupFields(field);
+        for (var i = 0; i < group.length; i += 1) {
+          applyError(group[i], text);
+        }
+      } else {
+        applyError(field, text);
+      }
+    }
+
     // Ошибка на change/blur, снятие на input (career-portal).
     function onFieldInput() {
       if (this.getAttribute('aria-invalid') === 'true') {
-        clearError(this);
+        if (this.type === 'radio') {
+          var group = radioGroupFields(this);
+          for (var i = 0; i < group.length; i += 1) {
+            if (group[i].getAttribute('aria-invalid') === 'true') {
+              clearError(group[i]);
+            }
+          }
+        } else {
+          clearError(this);
+        }
       }
     }
 
@@ -459,12 +525,31 @@
 
       var errors = [];
       for (var i = 0; i < fields.length; i += 1) {
-        var text = validateField(fields[i]);
+        var field = fields[i];
+        var text = validateField(field);
         if (text) {
-          errors.push({ field: fields[i], message: text });
-          renderError(fields[i], text);
+          renderError(field, text);
+          // Ошибка группы радио — одна запись в summary (нативно браузер
+          // показывает один bubble на группу; aria — на каждом radio).
+          var duplicate = false;
+          if (field.type === 'radio') {
+            for (var d = 0; d < errors.length; d += 1) {
+              var other = errors[d].field;
+              if (
+                other.type === 'radio' &&
+                other.form === field.form &&
+                other.name === field.name
+              ) {
+                duplicate = true;
+                break;
+              }
+            }
+          }
+          if (!duplicate) {
+            errors.push({ field: field, message: text });
+          }
         } else {
-          clearError(fields[i]);
+          clearError(field);
         }
       }
 

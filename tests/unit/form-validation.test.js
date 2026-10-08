@@ -304,7 +304,8 @@ describe('components/ui-form/ui-form.js — validateField: правила одн
     // Отмечен СОСЕДНИЙ radio группы — поле валидно (групповое состояние).
     const checked = radioSandbox();
     checked.document.querySelector('input[name="plan"][value="no"]').checked = true;
-    expect(checked.window.IraoUI.form.validateField(first)).toBeNull();
+    const checkedFirst = checked.document.querySelector('input[name="plan"][value="yes"]');
+    expect(checked.window.IraoUI.form.validateField(checkedFirst)).toBeNull();
 
     // Радио вне формы: группой считаются радио документа с тем же name.
     const noForm = makeSandbox({
@@ -677,6 +678,11 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
         'невалидная группа помечена aria на каждом radio',
       ).toBe('true');
     }
+    // Оба радио в одной обвязке ui-field — текст ошибки групповой, один
+    // элемент __error (паттерн T5.2: fieldset → один текст, describedby).
+    const errorTexts = document.querySelectorAll('.ui-field__error');
+    expect(errorTexts, 'один текст ошибки на обвязку группы').toHaveLength(1);
+    expect(errorTexts[0].textContent).toBe('Выберите вариант');
     const links = document.querySelectorAll('.ui-form__summary-list a');
     expect(links, 'одна запись на группу, а не по числу radio').toHaveLength(1);
     expect(links[0].textContent).toBe('Выберите вариант');
@@ -696,9 +702,10 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
     yes.checked = true;
     yes.dispatchEvent(new window.Event('input', { bubbles: true }));
     expect(no.getAttribute('aria-invalid'), 'сосед по группе очищен по input').toBeNull();
-    expect(document.getElementById('rf-plan-no-error').textContent, 'текст соседа очищен').toBe(
-      '',
-    );
+    expect(
+      document.querySelector('#rf .ui-field__error').textContent,
+      'общий текст группы очищен',
+    ).toBe('');
 
     // …change довалидирует группу — ошибки не возвращаются.
     yes.dispatchEvent(new window.Event('change', { bubbles: true }));
