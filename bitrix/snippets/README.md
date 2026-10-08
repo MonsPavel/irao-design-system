@@ -12,5 +12,15 @@
   микроразметка BreadcrumbList, `aria-current="page"` на текущей, экранирование
   вывода. Правила построения цепочки — `components/ui-breadcrumbs/README.md`.
 
+- [`form-error-render.php`](form-error-render.php) — серверный рендер ошибок
+  формы по контракту irao-ui (T5.6) для `bitrix:form.result.new` / произвольной
+  формы: сводная `ui-form__summary[role=alert]` из `$arResult["FORM_ERRORS"]`,
+  `ui-field--error` + `aria-invalid` + `aria-describedby` +
+  `ui-field__error` (суффикс id `-error` — единый с модулем `IraoUI.form`),
+  inline-сниппет фокуса на summary (работает без модулей); вывод экранируется.
+  Контракт — секция «Серверный контракт ошибок» в
+  `components/ui-form/README.md`; интеграционный стенд —
+  `showcase/pages/integration/form-full-cycle`.
+
 - Можно: копируемые фрагменты PHP/HTML для интеграторов.
 - Нельзя: логика, требующая поддержки — только то, что покрыто integration-guide.md.
