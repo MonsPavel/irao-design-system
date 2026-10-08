@@ -201,7 +201,11 @@ Mobile-first, media только `min-width` из шкалы T2.5 (гейт styl
 
 ```php
 <?php /** серверный рендер после перезагрузки: те же классы и aria, что у
-        клиентской валидации (контракт T5.6); фокус на summary — inline-сниппет */ ?>
+        клиентской валидации (контракт T5.6); фокус на summary — inline-сниппет.
+        Экранирование вывода ОБЯЗАТЕЛЬНО: $message/$field могут содержать
+        пользовательские данные (XSS) — часть контракта T5.6. */
+$charset = defined('SITE_CHARSET') ? SITE_CHARSET : 'UTF-8';
+?>
 <form class="ui-form" method="post" action="/local/ajax/apply.php">
   <?php if (!empty($arResult['FORM_ERRORS'])): ?>
     <div class="ui-form__summary" role="alert" tabindex="-1">
@@ -210,7 +214,9 @@ Mobile-first, media только `min-width` из шкалы T2.5 (гейт styl
       </h2>
       <ul class="ui-form__summary-list">
         <?php foreach ($arResult['FORM_ERRORS'] as $field => $message): ?>
-          <li><a class="ui-link" href="#apply-<?= $field ?>"><?= $message ?></a></li>
+          <?php $anchor = rawurlencode((string) $field); ?>
+          <li><a class="ui-link"
+                 href="#apply-<?= $anchor ?>"><?= htmlspecialchars((string) $message, ENT_QUOTES, $charset) ?></a></li>
         <?php endforeach; ?>
       </ul>
     </div>
