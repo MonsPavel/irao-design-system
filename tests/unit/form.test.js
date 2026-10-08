@@ -133,9 +133,10 @@ describe('components/ui-form/ui-form.css — раскладка (T5.4)', () => {
       /\.ui-form__aside-list,\s*\.ui-form__aside-row,\s*\.ui-form__aside-label,\s*\.ui-form__aside-value\s*\{([^}]*)\}/,
     );
     expect(reset, 'общий ресет отступов aside-семейства найден').toBeTruthy();
-    expect(reset[1], 'UA-дефолты dl {margin: 20px 0} / dd {margin-inline-start: 40px} сброшены').toContain(
-      'margin: 0;',
-    );
+    expect(
+      reset[1],
+      'UA-дефолты dl {margin: 20px 0} / dd {margin-inline-start: 40px} сброшены',
+    ).toContain('margin: 0;');
   });
 
   it('инварианты: без !important и без сырых цветов (гейты stylelint не дублируются — пин на состав)', () => {
