@@ -63,8 +63,7 @@
           <div class="ui-field ui-field--wide">
             <label class="ui-field__label" for="uifo-cover">Сопроводительное письмо</label>
             <textarea class="ui-field__textarea" id="uifo-cover" name="cover" rows="4">
-Пять лет в frontend-разработке: дизайн-системы, доступность.</textarea
-            >
+Пять лет в frontend-разработке: дизайн-системы, доступность.</textarea>
           </div>
         </div>
         <div class="ui-form__actions" id="uifo-actions">
@@ -125,9 +124,7 @@
         участие в этом мероприятии невозможна.
       </p>
       <div class="ui-form__success-actions">
-        <a class="ui-button ui-button--primary" href="#uifo-live-heading"
-          >К списку мероприятий</a
-        >
+        <a class="ui-button ui-button--primary" href="#uifo-live-heading">К списку мероприятий</a>
       </div>
     </div>
   </form>
@@ -135,9 +132,9 @@
     Раскладка мобильная: одна колонка, aside в стеке под полями; от md сетка полей — 2 колонки
     (<code>ui-field--wide</code> растягивается на обе), от lg форма делится на основную колонку и
     aside (400px, sticky). Сводная ошибка скрыта (<code>hidden</code>) до сабмита: показ = снятие
-    атрибута + фокус на summary (<code>role="alert"</code> объявляет содержимое немедленно).
-    Success — свап career-portal: <code>data-ui-form-body</code> скрывается, показывается success,
-    фокус — на заголовке. Без JS форма отправляется нативно; эти состояния рендерит сервер (T5.6).
+    атрибута + фокус на summary (<code>role="alert"</code> объявляет содержимое немедленно). Success
+    — свап career-portal: <code>data-ui-form-body</code> скрывается, показывается success, фокус —
+    на заголовке. Без JS форма отправляется нативно; эти состояния рендерит сервер (T5.6).
   </p>
 </section>
 
@@ -190,9 +187,7 @@
           aria-invalid="true"
           aria-describedby="uifo-email-srv-error"
         >
-        <p class="ui-field__error" id="uifo-email-srv-error" role="alert">
-          Исправьте адрес e-mail
-        </p>
+        <p class="ui-field__error" id="uifo-email-srv-error" role="alert">Исправьте адрес e-mail</p>
       </div>
     </div>
     <div class="ui-form__actions">
@@ -201,8 +196,8 @@
   </form>
   <p class="ui-small ui-text--muted">
     Ветка «перезагрузка страницы» (T5.6): PHP рендерит те же классы и aria, что и клиентская
-    валидация. Ссылки summary — реальные <code>href="#id"</code> полей: клик/переход переносит
-    фокус на поле нативно; серверному рендеру фокус на summary доопределяет inline-сниппет
+    валидация. Ссылки summary — реальные <code>href="#id"</code> полей: клик/переход переносит фокус
+    на поле нативно; серверному рендеру фокус на summary доопределяет inline-сниппет
     (bitrix-сниппеты T5.6).
   </p>
 </section>

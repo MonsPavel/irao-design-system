@@ -225,9 +225,7 @@ standTest.describe('ui-form: сводная ошибка (T5.4)', () => {
         summary,
         'фокус немедленно на summary (правило фокуса T5.4 — паттерн для T5.5/T5.6)',
       ).toBeFocused();
-      expect(await styleOf(page, IDS.summary).then((s) => s.backgroundColor)).toBe(
-        COLORS.errorBg,
-      );
+      expect(await styleOf(page, IDS.summary).then((s) => s.backgroundColor)).toBe(COLORS.errorBg);
     },
   );
 });
