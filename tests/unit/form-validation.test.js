@@ -417,6 +417,14 @@ describe('components/ui-form/ui-form.js — контракт module-template и 
     expect(mixed.document.getElementById('second').hasAttribute('novalidate')).toBe(true);
     expect(typeof mixed.window.IraoUI.form.init).toBe('function');
   });
+
+  it('AC «модуль в ui.min.js»: build.mjs собирает JS компонентов из COMPONENTS (ui-form в списке — пин T5.4)', () => {
+    const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
+    expect(build, 'JS модулей включается в бандл механически из списка COMPONENTS').toContain(
+      'COMPONENTS.map((name) => `components/${name}/${name}.js`)',
+    );
+    expect(build).toMatch(/'ui-form',\s*\/\/\s*T5\.4/);
+  });
 });
 
 describe('components/ui-form/ui-form.js — поведение сабмита и ошибок (jsdom)', () => {
