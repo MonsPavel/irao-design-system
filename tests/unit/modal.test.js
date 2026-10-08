@@ -612,6 +612,57 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     ]);
   });
 
+  it('запаздывающее close-событие прошлого цикла не трогает живой цикл (гонка reopened — ревью T7.2)', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const rootEl = document.documentElement;
+    const api = apiOf({ window });
+
+    // Мгновенное закрытие (reduced-путь) — единственный способ в fake-таймерах
+    // получить «закрыто, но close-таск ещё в очереди»: ровно окно Chromium
+    // (~20ms между синхронным снятием open и отложенным close-событием).
+    window.matchMedia = function (query) {
+      return { matches: query.includes('prefers-reduced-motion'), media: query };
+    };
+
+    let closeEvents = 0;
+    document.addEventListener('irao-ui:modal-close', () => {
+      closeEvents += 1;
+    });
+
+    // Цикл 1: закрыли — чистка синхронна, close-событие висит в таймерах.
+    api.open(dialog);
+    api.close();
+    expect(dialog.hasAttribute('open')).toBe(false);
+    expect(closeEvents).toBe(1);
+
+    // Цикл 2 открыт ДО доставки запаздывающего события прошлого цикла.
+    api.open(dialog);
+    expect(dialog.hasAttribute('open'), 'живой цикл открыт').toBe(true);
+    expect(rootEl.style.overflow, 'лок живого цикла стоит').toBe('hidden');
+
+    vi.advanceTimersByTime(0); // доставили запаздывающее close-событие
+
+    expect(
+      rootEl.style.overflow,
+      'лок живого цикла не снят фантомом — фон не скроллится под открытой модалкой',
+    ).toBe('hidden');
+    expect(dialog.hasAttribute('open'), 'живой цикл не закрыт фантомной чисткой').toBe(true);
+    expect(closeEvents, 'irao-ui:modal-close — один раз, без фантомного второго').toBe(1);
+    expect(
+      document.activeElement,
+      'фокус не выдернут на старого опенера — остался внутри диалога',
+    ).toBe(dialog.querySelector('.ui-modal__close'));
+
+    // Стек цел: верхний инстанс закрывается API; чистка и событие — один раз.
+    api.close();
+    expect(dialog.hasAttribute('open'), 'обычное закрытие живого цикла работает').toBe(false);
+    vi.advanceTimersByTime(0); // отложенный close-таск живого цикла
+    expect(closeEvents, 'второе легитимное irao-ui:modal-close доставлено').toBe(2);
+    expect(rootEl.style.overflow, 'лок снят с закрытием живого цикла').toBe('');
+  });
+
   it('data-ui-modal-target: клик по триггеру открывает целевой диалог; восстановление фокуса — на триггер', () => {
     vi.useFakeTimers();
     const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
