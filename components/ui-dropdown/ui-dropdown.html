@@ -1,0 +1,77 @@
+<!--
+  ui-dropdown (T6.1): выпадающее меню двух назначений по паттерну APG
+  menu-button. Источник поведения — header.js career-portal (класс B):
+  toggle с aria-expanded, вне-клик, Escape с возвратом фокуса на триггер.
+
+  ДВА НАЗНАЧЕНИЯ (правило доки: menu-роль только для командных меню):
+   1. навигация — меню это <nav> с <ul>/<li>/<a>; БЕЗ role="menu"
+      (ссылки-переходы — не команды);
+   2. действия — меню role="menu", пункты <button role="menuitem">.
+
+  Деградация без JS: меню НЕ имеет hidden в разметке и всегда раскрыто, все
+  ссылки доступны; aria-expanded/aria-controls и hidden ставит модуль
+  ui-dropdown.js (хук data-ui-dropdown) при инициализации — тот же приём, что
+  novalidate в ui-form (T5.5): разметка остаётся правдивой без JS. Фокус
+  триггера рисует глобальная политика base/focus.css (ADR-0001).
+-->
+<div class="ui-dropdown" data-ui-dropdown>
+  <button class="ui-dropdown__trigger" type="button" id="ui-sections-trigger">
+    Разделы
+    <svg
+      class="ui-dropdown__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M3 6l5 5 5-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </button>
+  <!-- Назначение 1 — навигация: nav > ul > li > a, без menu-роли.
+       Текущая страница — aria-current="page" (перенос career-portal; хелпер
+       простановки по URL — README.md). -->
+  <nav class="ui-dropdown__menu" id="ui-sections-menu" aria-label="Разделы">
+    <ul class="ui-dropdown__list">
+      <li><a class="ui-dropdown__item" href="/practices/" aria-current="page">Практики</a></li>
+      <li><a class="ui-dropdown__item" href="/vacancies/">Вакансии</a></li>
+      <li><a class="ui-dropdown__item" href="/internships/">Стажировки</a></li>
+    </ul>
+  </nav>
+</div>
+
+<div class="ui-dropdown" data-ui-dropdown>
+  <button class="ui-dropdown__trigger" type="button" id="ui-actions-trigger">
+    Действия
+    <svg
+      class="ui-dropdown__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+    >
+      <path
+        d="M3 6l5 5 5-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </button>
+  <!-- Назначение 2 — действия: role="menu" + role="menuitem" на кнопках. -->
+  <div class="ui-dropdown__menu" id="ui-actions-menu" role="menu" aria-label="Действия с записью">
+    <button class="ui-dropdown__item" type="button" role="menuitem">Редактировать</button>
+    <button class="ui-dropdown__item" type="button" role="menuitem">Дублировать</button>
+    <button class="ui-dropdown__item" type="button" role="menuitem">Удалить</button>
+  </div>
+</div>

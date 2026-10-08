@@ -1,0 +1,177 @@
+/** @define dropdown */
+
+/*!
+ * irao-ui — ui-dropdown: выпадающее меню двух назначений (задача T6.1).
+ *
+ * Источник визуала — .header__dropdown* career-portal (src/blocks/header/
+ * header.css, класс B аудита): меню-карточка на поверхности (--ui-color-
+ * surface) с мягкой рамкой (--ui-color-border-muted — пара .header__
+ * dropdown border), радиусом и тенью dropdown (--ui-shadow-lg — токен заведён
+ * в T2.2 ровно с этой тени, components.css:375), вход-анимация 180ms
+ * cubic-bezier(0.2, 0.8, 0.2, 1) с translateY(-6px) — перенос «как есть» в rem.
+ * Пункты: min-height 44px (2.75rem), подпись primary, фон hover/focus/
+ * aria-current — surface-blue-50 (--ui-color-surface-muted, пары AA-гейта
+ * T2.3), скругление пунктов — --ui-radius-sm (8px .header__dropdown-link).
+ *
+ * Позиционирование — absolute от обёртки .ui-dropdown (position: relative);
+ * z-index — ТОЛЬКО токен лестницы T2.2 --ui-z-dropdown (Technical
+ * considerations задачи). Видимость управляется атрибутом hidden: в разметке
+ * его нет (деградация без JS — меню раскрыто), ставит/снимает модуль
+ * ui-dropdown.js; собственных display-переключений у CSS нет — силуэт
+ * скрытия один на всю систему ([hidden] в base/reset, T3.1).
+ *
+ * Отступ меню от триггера (18px career-portal → 1.125rem), паддинг меню
+ * (6px → 0.375rem), радиус карточки (14px → 0.875rem) и левый паддинг пункта
+ * (15px → 0.9375rem) — вне 4px-шкалы §3.2, перенос «как есть» (прецедент
+ * --ui-card-gap/--ui-tag-gap в слое токенов T2.2); пересмотр значений —
+ * design-decision владельца дизайна. Ширина 312px → min(19.5rem, 100vw −
+ * --ui-space-6) — пара мобильной ветки career-portal (min(312px, 100vw −
+ * 32px), header.css:137); 32px = --ui-space-6 шкалы §3.2 (точная пара).
+ * Коллизия с краем вьюпорта решается сайтом модификатором — заметка
+ * в README.md.
+ *
+ * Подпись пункта — роль body типографики T3.3 (16px career-portal = мобильная
+ * ступень --ui-fs-body; рост по брейкпоинтам — системное поведение ролей,
+ * литеральный 16px ломал бы масштабирование T3.6). Hover-фон — только под
+ * @media (hover: hover) (конвенция EPIC-4). Вход-анимация гасится
+ * prefers-reduced-motion (DoD EPIC-6; kill-switch base/reset гасит и переходы).
+ * Фокус пунктов и триггера рисует глобальная политика ADR-0001 (base/focus.css)
+ * — компонент outline не гасит и не заменяет (кастомный inset-контур
+ * career-portal не переносится: система гарантирует единый минимум). Состояние
+ * is-open — в цепочке с блоком (конвенция §2; прецедент .ui-button.is-loading).
+ * VI-режим: цветов вне токенов нет (§5) — перекраска vi.css накрывает компонент.
+ */
+
+.ui-dropdown {
+  box-sizing: border-box;
+  display: inline-block;
+  position: relative;
+}
+
+/* Триггер — ненавязчивая кнопка-основа: компонент задаёт сброс нативной
+   кнопки и подпись primary; сайт стилизует аффорданс сам или ставит на
+   триггер классы ui-button (совместимо — см. README, do/don't). */
+.ui-dropdown__trigger {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--ui-color-primary);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-body);
+  text-align: start;
+  cursor: pointer;
+}
+
+/* Шеврон-индикатор: декоративный svg (aria-hidden в разметке), цвет —
+   currentColor из атрибутов svg; размер от шрифта (1em), разворот в is-open. */
+.ui-dropdown__icon {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  transition: transform var(--ui-transition-fast);
+}
+
+.ui-dropdown.is-open .ui-dropdown__icon {
+  transform: rotate(180deg);
+}
+
+/* Меню-карточка одобренного дизайна (шапка файла). Видимость — только
+   атрибут hidden (ставит модуль; base/reset делает его сильнее display). */
+.ui-dropdown__menu {
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(100% + 1.125rem);
+  left: 0;
+  z-index: var(--ui-z-dropdown);
+  width: min(19.5rem, calc(100vw - var(--ui-space-6)));
+  padding: 0.375rem;
+  border: var(--ui-border-width) solid var(--ui-color-border-muted);
+  border-radius: 0.875rem;
+  background-color: var(--ui-color-surface);
+  box-shadow: var(--ui-shadow-lg);
+}
+
+.ui-dropdown__menu:not([hidden]) {
+  animation: ui-dropdown-in 0.18s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes ui-dropdown-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.375rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Список навигационного назначения: сброс нативных отступов ul — компонент
+   не полагается на глобальный reset (ADR-0002, legacy-сброс подключён позже). */
+.ui-dropdown__list {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Пункт меню — ссылка (навигация) или кнопка role="menuitem" (действия):
+   одна раскладка на оба назначения (44px-цель касания, career-portal).
+   Сброс нативной кнопки — в общем правиле (border/background/cursor безвредны
+   для ссылки; шрифт и паддинг заданы явно — кнопка их не наследует). */
+.ui-dropdown__item {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: var(--ui-space-2) var(--ui-space-3) var(--ui-space-2) 0.9375rem;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background-color: transparent;
+  color: var(--ui-color-primary);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-body);
+  text-align: start;
+  transition: background-color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* Текущая страница навигации, hover и клавиатурный фокус — одна поверхность
+   одобренного дизайна (career-portal .header__dropdown-link:hover/
+   :focus-visible/[aria-current]). Атрибутный селектор — внутри :where():
+   семантика aria-current остаётся единственным источником правды, вклад в
+   специфичность нулевой (одноклассовое правило системы). Фокус-поверхность
+   не заменяет outline политики ADR-0001 — она рисуется поверх дополнительно. */
+.ui-dropdown__item:where([aria-current='page']) {
+  background-color: var(--ui-color-surface-muted);
+}
+
+.ui-dropdown__item:focus-visible {
+  background-color: var(--ui-color-surface-muted);
+}
+
+@media (hover: hover) {
+  .ui-dropdown__item:hover {
+    background-color: var(--ui-color-surface-muted);
+  }
+}
+
+/* reduced-motion: вход-анимация отключена (появление мгновенное); сам
+   kill-switch base/reset дополнительно гасит и transition шеврона/пунктов. */
+@media (prefers-reduced-motion: reduce) {
+  .ui-dropdown__menu:not([hidden]) {
+    animation: none;
+  }
+}
