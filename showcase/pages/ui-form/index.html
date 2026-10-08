@@ -1,0 +1,262 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-form (T5.4): форма как целое — раскладка полей (1 колонка → 2 от md), боковая колонка
+  aside (2 колонки от lg, стек на мобиле), сводная ошибка <code>role="alert"</code>, success и
+  легенда обязательных полей. Кнопки «демо» исполняют паттерны фокуса задачи (показ summary → фокус
+  на него; успех → фокус на заголовок <code>tabindex="-1"</code>) — реальная логика валидации и
+  свапа остаётся за модулем T5.5 и серверным рендером T5.6. Сценарии —
+  <code>tests/e2e/ui-form.spec.js</code>; API и правила фокуса — README.md компонента.
+</p>
+
+<section aria-labelledby="uifo-live-heading">
+  <h2 id="uifo-live-heading">Форма целиком: раскладка + aside + состояния (демо)</h2>
+  <form class="ui-form" id="uifo-form" action="#uifo-live-heading">
+    <div class="ui-form__summary" id="uifo-summary" role="alert" tabindex="-1" hidden>
+      <h3 class="ui-h4 ui-form__summary-title">В форме 2 ошибки</h3>
+      <ul class="ui-form__summary-list">
+        <li><a class="ui-link" href="#uifo-name">Укажите имя и фамилию</a></li>
+        <li><a class="ui-link" href="#uifo-email">Исправьте адрес e-mail</a></li>
+      </ul>
+    </div>
+    <div class="ui-form__layout" id="uifo-layout">
+      <div class="ui-form__main" id="uifo-main" data-ui-form-body>
+        <div class="ui-form__grid" id="uifo-grid">
+          <div class="ui-field ui-field--required">
+            <label class="ui-field__label" for="uifo-name">
+              Имя и фамилия
+              <span class="ui-field__req"
+                ><span aria-hidden="true">*</span
+                ><span class="ui-field__req-text">обязательное поле</span></span
+              >
+            </label>
+            <input
+              class="ui-field__input"
+              type="text"
+              id="uifo-name"
+              name="name"
+              autocomplete="name"
+              required
+              placeholder="Иван Иванов"
+            >
+          </div>
+          <div class="ui-field ui-field--required">
+            <label class="ui-field__label" for="uifo-email">
+              E-mail
+              <span class="ui-field__req"
+                ><span aria-hidden="true">*</span
+                ><span class="ui-field__req-text">обязательное поле</span></span
+              >
+            </label>
+            <input
+              class="ui-field__input"
+              type="email"
+              id="uifo-email"
+              name="email"
+              autocomplete="email"
+              required
+              placeholder="name@example.com"
+              aria-describedby="uifo-email-hint"
+            >
+            <p class="ui-field__hint" id="uifo-email-hint">
+              Используется для уведомлений о статусе заявки
+            </p>
+          </div>
+          <div class="ui-field ui-field--wide">
+            <label class="ui-field__label" for="uifo-cover">Сопроводительное письмо</label>
+            <textarea class="ui-field__textarea" id="uifo-cover" name="cover" rows="4">
+Пять лет в frontend-разработке: дизайн-системы, доступность.</textarea
+            >
+          </div>
+        </div>
+        <div class="ui-form__actions" id="uifo-actions">
+          <button class="ui-button ui-button--primary" type="submit">Отправить</button>
+          <button
+            class="ui-button ui-button--secondary"
+            type="button"
+            id="uifo-demo-summary"
+            data-ui-form-demo="summary"
+          >
+            Показать сводную ошибку (демо)
+          </button>
+          <button
+            class="ui-button ui-button--secondary"
+            type="button"
+            id="uifo-demo-success"
+            data-ui-form-demo="success"
+          >
+            Имитация успешной отправки (демо)
+          </button>
+        </div>
+      </div>
+      <aside class="ui-form__aside" id="uifo-aside" aria-labelledby="uifo-aside-title">
+        <h3 class="ui-h4 ui-form__aside-title" id="uifo-aside-title">
+          День открытых дверей в «Интер РАО – Электрогенерация»
+        </h3>
+        <p class="ui-body ui-form__aside-text">
+          Расскажем о программе стажировки, этапах отбора и ответим на вопросы.
+        </p>
+        <dl>
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Дата</dt>
+            <dd class="ui-form__aside-value">28.09.2026, 14:00</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Город</dt>
+            <dd class="ui-form__aside-value">Санкт-Петербург</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Формат</dt>
+            <dd class="ui-form__aside-value">Очно</dd>
+          </div>
+        </dl>
+        <a class="ui-button ui-button--outline" href="#uifo-live-heading"
+          >вернуться к мероприятию</a
+        >
+      </aside>
+    </div>
+    <p class="ui-small ui-text--muted ui-form__footnote" id="uifo-footnote">
+      <span class="ui-form__req" aria-hidden="true">*</span> — обязательные поля
+    </p>
+    <div class="ui-form__success" id="uifo-success" hidden>
+      <h3 class="ui-h4 ui-form__success-title" id="uifo-success-title" tabindex="-1">
+        Заявка отправлена
+      </h3>
+      <p class="ui-body ui-form__success-text">
+        Мы отправим подтверждение и детали посещения на указанный e-mail. Повторная заявка на
+        участие в этом мероприятии невозможна.
+      </p>
+      <div class="ui-form__success-actions">
+        <a class="ui-button ui-button--primary" href="#uifo-live-heading"
+          >К списку мероприятий</a
+        >
+      </div>
+    </div>
+  </form>
+  <p class="ui-small ui-text--muted">
+    Раскладка мобильная: одна колонка, aside в стеке под полями; от md сетка полей — 2 колонки
+    (<code>ui-field--wide</code> растягивается на обе), от lg форма делится на основную колонку и
+    aside (400px, sticky). Сводная ошибка скрыта (<code>hidden</code>) до сабмита: показ = снятие
+    атрибута + фокус на summary (<code>role="alert"</code> объявляет содержимое немедленно).
+    Success — свап career-portal: <code>data-ui-form-body</code> скрывается, показывается success,
+    фокус — на заголовке. Без JS форма отправляется нативно; эти состояния рендерит сервер (T5.6).
+  </p>
+</section>
+
+<section aria-labelledby="uifo-summary-srv-heading">
+  <h2 id="uifo-summary-srv-heading">Сводная ошибка (серверный рендер, без JS)</h2>
+  <form class="ui-form" action="#uifo-summary-srv-heading">
+    <div class="ui-form__summary" id="uifo-summary-srv" role="alert" tabindex="-1">
+      <h3 class="ui-h4 ui-form__summary-title">В форме 2 ошибки</h3>
+      <ul class="ui-form__summary-list">
+        <li><a class="ui-link" href="#uifo-name-srv">Укажите имя и фамилию</a></li>
+        <li><a class="ui-link" href="#uifo-email-srv">Исправьте адрес e-mail</a></li>
+      </ul>
+    </div>
+    <div class="ui-form__grid">
+      <div class="ui-field ui-field--required ui-field--error">
+        <label class="ui-field__label" for="uifo-name-srv">
+          Имя и фамилия
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="uifo-name-srv"
+          name="name-srv"
+          value=""
+          required
+          aria-invalid="true"
+          aria-describedby="uifo-name-srv-error"
+        >
+        <p class="ui-field__error" id="uifo-name-srv-error" role="alert">Укажите имя и фамилию</p>
+      </div>
+      <div class="ui-field ui-field--required ui-field--error">
+        <label class="ui-field__label" for="uifo-email-srv">
+          E-mail
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="email"
+          id="uifo-email-srv"
+          name="email-srv"
+          value="resume@"
+          required
+          aria-invalid="true"
+          aria-describedby="uifo-email-srv-error"
+        >
+        <p class="ui-field__error" id="uifo-email-srv-error" role="alert">
+          Исправьте адрес e-mail
+        </p>
+      </div>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">Отправить</button>
+    </div>
+  </form>
+  <p class="ui-small ui-text--muted">
+    Ветка «перезагрузка страницы» (T5.6): PHP рендерит те же классы и aria, что и клиентская
+    валидация. Ссылки summary — реальные <code>href="#id"</code> полей: клик/переход переносит
+    фокус на поле нативно; серверному рендеру фокус на summary доопределяет inline-сниппет
+    (bitrix-сниппеты T5.6).
+  </p>
+</section>
+
+<section aria-labelledby="uifo-success-srv-heading">
+  <h2 id="uifo-success-srv-heading">Success (серверный рендер, без JS)</h2>
+  <div class="ui-form__success" id="uifo-success-srv">
+    <h3 class="ui-h4 ui-form__success-title" id="uifo-success-title-srv" tabindex="-1">
+      Заявка отправлена
+    </h3>
+    <p class="ui-body ui-form__success-text">
+      Мы отправим подтверждение и детали посещения на указанный e-mail.
+    </p>
+    <div class="ui-form__success-actions">
+      <a class="ui-button ui-button--primary" href="#uifo-success-srv-heading">На главную</a>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Вариант Bitrix «серверная success-страница»: блок рендерится сразу видимым, JS не нужен.
+    Заголовок с <code>tabindex="-1"</code> — цель фокуса (inline-сниппет перенесёт его после
+    загрузки): пользователь не теряется после отправки. CTA — ui-button/ui-link в
+    <code>ui-form__success-actions</code>.
+  </p>
+</section>
+
+<script>
+  (function () {
+    // Демо стенда (прецедент ui-alert) = интеграция сайта: исполняет ТОЛЬКО
+    // паттерны фокуса, зафиксированные T5.4 (README). Логика валидации и
+    // серверный контракт — вне стенда: модуль IraoUI.form (T5.5) и сниппеты
+    // Bitrix (T5.6). Хуки — data-ui-*: JS никогда не вешается на стилевые
+    // классы (02-architecture §2 «Namespace»).
+    var triggers = document.querySelectorAll('[data-ui-form-demo]');
+    for (var i = 0; i < triggers.length; i += 1) {
+      triggers[i].addEventListener('click', function () {
+        var form = this.closest('.ui-form');
+        if (!form) return;
+        if (this.getAttribute('data-ui-form-demo') === 'summary') {
+          var summary = form.querySelector('.ui-form__summary');
+          if (summary) {
+            summary.hidden = false;
+            summary.focus();
+          }
+        } else {
+          var body = form.querySelector('[data-ui-form-body]');
+          var success = form.querySelector('.ui-form__success');
+          if (body) body.hidden = true;
+          if (success) {
+            success.hidden = false;
+            var title = success.querySelector('.ui-form__success-title');
+            if (title) title.focus();
+          }
+        }
+      });
+    }
+  })();
+</script>

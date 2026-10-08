@@ -182,6 +182,13 @@
   /* career-portal: components.css:215 — gap .radio 10px; вне шкалы §3.2 — перенос «как есть», прецедент --ui-tag-gap, пересмотр — design-decision владельца */
   --ui-radio-gap: 0.625rem;
 
+  /* ── Формы: раскладка (ui-form, T5.4) ── */
+
+  /* career-portal: pages.css:188 — gap .form-grid 20px; вне шкалы §3.2 — перенос «как есть», прецедент --ui-card-gap, пересмотр — design-decision владельца */
+  --ui-form-grid-gap: 1.25rem;
+  /* career-portal: pages.css:174 — ширина колонки .form-aside в .form-page 400px → rem; перенос «как есть», пересмотр — design-decision владельца */
+  --ui-form-aside-width: 25rem;
+
   /* ── Пропорции (ui-image, T4.6): шкала aspect-ratio ── */
 
   /* новый: шкала пропорций T4.6 (Scope: «aspect-ratio из шкалы»); в career-portal aspect-ratio нет — медиа секций фиксировались высотами + object-fit: cover (pages.css:455/632/697), магические высоты контентной вёрстки не переносятся; ступени — типовые пропорции медиа (квадрат, фото 3:2 и 4:3, видео/обложки 16:9) */

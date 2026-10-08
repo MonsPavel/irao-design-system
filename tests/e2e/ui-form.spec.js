@@ -142,8 +142,11 @@ standTest.describe('ui-form: адаптивная раскладка (T5.4)', ()
     async ({ stand }) => {
       const page = await stand('ui-form');
 
-      const wide = await styleOf(page, IDS.wide);
-      expect(wide.gridColumn, 'wide-поле: grid-column 1 / -1 (модификатор ui-field, T5.1)').toBe(
+      // ui-field--wide живёт на обвязке поля (div.ui-field), не на контроле.
+      const wideColumn = await page
+        .locator(`#${IDS.wide}`)
+        .evaluate((el) => getComputedStyle(el.closest('.ui-field--wide')).gridColumn);
+      expect(wideColumn, 'wide-поле: grid-column 1 / -1 (модификатор ui-field, T5.1)').toBe(
         '1 / -1',
       );
 
