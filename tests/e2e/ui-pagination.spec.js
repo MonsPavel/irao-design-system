@@ -116,6 +116,9 @@ test.describe('ui-pagination: семантика (T6.3)', () => {
     const rendered = await nav.evaluate((el) =>
       [...el.children].map((child) => {
         if (child.classList.contains('ui-pagination__ellipsis')) return '…';
+        if (child.classList.contains('ui-pagination__arrow')) {
+          return child.getAttribute('aria-label') === 'Предыдущая страница' ? '←' : '→';
+        }
         const n = child.textContent.trim();
         if (
           child.classList.contains('ui-pagination__page') &&
@@ -126,7 +129,8 @@ test.describe('ui-pagination: семантика (T6.3)', () => {
         return n;
       }),
     );
-    expect(rendered, '20 страниц, текущая 7: 1 … 6 7 8 … 20').toEqual([
+    expect(rendered, '20 страниц, текущая 7: ← 1 … 6 7 8 … 20 →').toEqual([
+      '←',
       '1',
       '…',
       '6',
@@ -134,6 +138,7 @@ test.describe('ui-pagination: семантика (T6.3)', () => {
       '8',
       '…',
       '20',
+      '→',
     ]);
   });
 

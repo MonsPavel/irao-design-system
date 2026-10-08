@@ -146,6 +146,11 @@
   /* career-portal: components.css:269 — .pagination__arrow[disabled] opacity 0.3, единственный disabled-паттерн одобренного дизайна; контраст неактивных контролов WCAG 1.4.3 не требует (исключение зафиксировано в README ui-button) */
   --ui-opacity-disabled: 0.3;
 
+  /* ── Пагинация (ui-pagination, T6.3): геометрия ── */
+
+  /* career-portal: components.css:240/261 — .pagination__page min-width/height 44px и .pagination__arrow 44×44: touch-цель ≥ 44×44 (требование задачи T6.3); 44px вне шкалы отступов §3.2 — перенос «как есть» (прецедент --ui-card-gap), используется как min-геометрия (прецедент --ui-button-height: 32px-база T3.6 растит компонент вместе с текстом) */
+  --ui-pagination-size: 2.75rem;
+
   /* ── Теги и счётчики (ui-tag / ui-badge, T4.3): геометрия ── */
 
   /* career-portal: components.css:99 — height .tag 28px → rem; используется как min-height (прецедент T4.2: 32px-база T3.6 растит компонент вместе с текстом) */

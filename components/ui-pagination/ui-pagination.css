@@ -1,0 +1,125 @@
+/** @define pagination */
+
+/*!
+ * irao-ui — ui-pagination: пагинация списковых страниц (задача T6.3).
+ *
+ * Источник — .pagination career-portal (components.css:229–269, класс A):
+ * flex-лента с gap 8px, страницы 44×44 (touch-цель) с hover-фоном blue-100,
+ * текущая — заливка primary + белая подпись, disabled-стрелки — opacity 0.3
+ * + pointer-events: none. Значения перенесены «как есть» в токены: размер
+ * touch-цели — --ui-pagination-size (2.75rem = 44px, компонентный токен
+ * слоя 2: 44px вне шкалы отступов §3.2 — перенос «как есть», прецедент
+ * --ui-card-gap), отступы — ступени шкалы (--ui-space-2/3), радиус
+ * --ui-radius-sm (career-portal --radius-small), типографика — роль small
+ * (career-portal --fs-small-regular × --fw-small), hover-поверхность —
+ * --ui-color-surface-hover (blue-100, ADR-0010: пара одобренного дизайна),
+ * disabled — --ui-opacity-disabled (career-portal components.css:269 —
+ * тот самый паттерн, токен заведён T4.2).
+ *
+ * Семантика вместо классов состояний: текущая страница —
+ * :where([aria-current='page']) — атрибут-источник правды без вклада в
+ * специфичность (прецедент aria-selected ui-tabs T6.2 и aria-current
+ * ui-dropdown T6.1); is-active career-portal не переносится. Недоступная
+ * стрелка — button[disabled]: нативно не фокусируется, не кликается и
+ * объявляется неактивной (в career-portal disabled стоял на <a> — атрибут
+ * на ссылке невалиден; решение и альтернативы — README компонента).
+ *
+ * flex-wrap: wrap — в мобильной базе: список из многих страниц (кейса в
+ * career-portal не было — там максимум 3) не должен рвать горизонталь
+ * страницы на 375/320; влезающий список перенос не показывает.
+ *
+ * «…» (ui-pagination__ellipsis) — новый элемент (в career-portal списка
+ * страниц с пропусками не было): декоративный указатель пропуска, стиль
+ * не заводится — наследует блоку (одобренным дизайном отдельного вида
+ * «…» не задано). Фокус страниц и стрелок рисует глобальная политика
+ * ADR-0001 (base/focus.css: a:focus-visible, button:focus-visible) — здесь
+ * outline не запрещается и не заменяется. VI-режим: цветов вне токенов нет
+ * (§5) — перекраска vi.css накрывает компонент.
+ */
+
+.ui-pagination {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+  align-items: center;
+}
+
+/* Страница — ссылка (или span текущей: одна раскладка, span центрируется
+   тем же flex'ом). 44×44 — touch-цель; min-геометрия растит страницу
+   вместе с 32px-базой T3.6. Паддинг 0 12px (career-portal) — запас ширины
+   многозначным номерам сверх min-width. */
+.ui-pagination__page {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ui-pagination-size);
+  min-height: var(--ui-pagination-size);
+  padding: 0 var(--ui-space-3);
+  border-radius: var(--ui-radius-sm);
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  text-decoration: none;
+  transition:
+    background-color var(--ui-transition),
+    color var(--ui-transition);
+}
+
+/* Стрелка — ссылка-переход (доступна) или button[disabled] (нет): одна
+   раскладка на оба элемента — сброс нативной кнопки (border/padding/bg)
+   безвреден ссылке. Глиф — svg 16×16 из разметки (career-portal как есть),
+   цвет — currentColor атрибутами. */
+.ui-pagination__arrow {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--ui-pagination-size);
+  min-height: var(--ui-pagination-size);
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background-color: transparent;
+  color: var(--ui-color-text);
+  transition: background-color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* «…» — не интерактив: только box-sizing (ADR-0002); выравнивание даёт
+   align-items ленты. */
+.ui-pagination__ellipsis {
+  box-sizing: border-box;
+}
+
+/* hover — пара одобренного дизайна (blue-100, components.css:250/268) только
+   под (hover: hover) (EPIC-4: sticky-hover). У ТЕКУЩЕЙ hover-поверхность не
+   меняется — в career-portal is-active сильнее :hover по порядку каскада
+   (одобренный визуал: активная страница не мигает blue-100); у disabled
+   стрелки hover не возникает — pointer-events: none. */
+@media (hover: hover) {
+  .ui-pagination__page:not([aria-current='page']):hover {
+    background-color: var(--ui-color-surface-hover);
+  }
+
+  .ui-pagination__arrow:hover {
+    background-color: var(--ui-color-surface-hover);
+  }
+}
+
+/* Текущая страница — заливка primary + белая подпись (components.css:252).
+   Правило после hover-блока (порядок повествования career-portal);
+   :where() держит специфичность одноклассовой. */
+.ui-pagination__page:where([aria-current='page']) {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Недоступная стрелка (career-portal components.css:269, правило после
+   hover — порядок каскада, а не специфичность, T4.2): opacity из токена
+   disabled; pointer-events: none гасит и мышь (клик), и hover-поверхность. */
+.ui-pagination__arrow:disabled {
+  opacity: var(--ui-opacity-disabled);
+  pointer-events: none;
+}

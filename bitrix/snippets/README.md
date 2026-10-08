@@ -22,5 +22,12 @@
   `components/ui-form/README.md`; интеграционный стенд —
   `showcase/pages/integration/form-full-cycle`.
 
+- [`pagination.php`](pagination.php) — генерация пагинации ui-pagination
+  (T6.3) из общего числа страниц и текущей: окно показа с «…» (края всегда,
+  окно ±side у текущей, разрыв в одну страницу — номером, длиннее — «…»),
+  `aria-current="page"` на текущей, имена «Страница N», недоступные стрелки —
+  `button[disabled]`, экранирование вывода. Правила и решения —
+  `components/ui-pagination/README.md`.
+
 - Можно: копируемые фрагменты PHP/HTML для интеграторов.
 - Нельзя: логика, требующая поддержки — только то, что покрыто integration-guide.md.

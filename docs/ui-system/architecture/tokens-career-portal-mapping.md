@@ -150,6 +150,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | letter-spacing `.tag` 0.02em (components.css:105) | `--ui-tag-letter-spacing: 0.02em` | T4.3: em — от размера роли |
 | рамка `.btn--outline` 2px (components.css:87) | `--ui-button-border-width: 0.125rem` | T4.2: «все значения из токенов» |
 | `.pagination__arrow[disabled]` opacity 0.3 (components.css:269) | `--ui-opacity-disabled: 0.3` | T4.2: единственный disabled-паттерн одобренного дизайна |
+| min-width/height `.pagination__page` и 44×44 `.pagination__arrow` (components.css:240/261) | `--ui-pagination-size: 2.75rem` | T6.3: touch-цель 44×44, 44px вне шкалы отступов §3.2 — перенос «как есть» (прецедент `--ui-card-gap`); min-геометрия (прецедент `--ui-button-height`) |
 | `--container-max` 1440px | `--ui-container-max: 90rem` | |
 | фокус pages.css:52 (outline 3px primary, offset 2px) | `--ui-focus-color/width/offset` | ADR-0001 |
 | z-index: 70 dropdown (components.css:376) | `--ui-z-dropdown: 70` | |

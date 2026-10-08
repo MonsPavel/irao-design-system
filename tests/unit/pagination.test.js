@@ -87,7 +87,10 @@ describe('components/ui-pagination/ui-pagination.css — база (ADR-0002, п�
     expect(block).toContain('font-weight: var(--ui-fw-small);');
     expect(block).toContain('color: var(--ui-color-text);');
     expect(block).toContain('text-decoration: none;');
-    expect(block).toContain('transition: background-color var(--ui-transition),');
+    // Переход — токен (career-portal: background + color, components.css:247);
+    // формат prettier — построчный, проверяем по частям значения.
+    expect(block).toContain('background-color var(--ui-transition),');
+    expect(block).toContain('color var(--ui-transition);');
   });
 
   it("текущая страница — семантика :where([aria-current='page']) без вклада в специфичность: заливка primary + text-on-dark (career-portal components.css:252, взамен is-active)", () => {
@@ -185,15 +188,16 @@ describe('канонический паттерн (components/ui-pagination/ui-p
   });
 
   it('стрелки-ссылки с доступными именами (Technical considerations): «Предыдущая/Следующая страница», глиф — svg aria-hidden', () => {
-    const prevTag = tagOf(html, 'a');
-    expect(prevTag).toContain('class="ui-pagination__arrow"');
+    const arrowLink = html.match(/<a[^>]*ui-pagination__arrow[^>]*>/s)?.[0] ?? '';
+    expect(arrowLink, 'доступная стрелка — ссылка с именем').toContain(
+      'aria-label="Следующая страница"',
+    );
     expect(html).toContain('aria-label="Предыдущая страница"');
-    expect(html).toContain('aria-label="Следующая страница"');
     expect(html, 'глиф стрелки декоративен').toContain('<svg aria-hidden="true"');
   });
 
   it('страницы-ссылки с именами «Страница N» (WCAG 2.4.4: голая цифра — слабое имя)', () => {
-    expect(html).toContain('aria-label="Страница 1"');
+    expect(html).toContain('aria-label="Страница 2"');
     expect(html).toMatch(/aria-label="Страница \d+"/);
   });
 
@@ -213,7 +217,10 @@ describe('канонический паттерн (components/ui-pagination/ui-p
   });
 
   it('JS-модуля у компонента нет: data-ui-* хуков в разметке нет (пагинация работает без JS по построению)', () => {
-    expect(html).not.toContain('data-ui-');
+    // Проверяем РАЗМЕТКУ, а не прозу комментариев (в шапке паттерна
+    // «data-ui-*» упоминается словами).
+    const markup = html.replace(/<!--[\s\S]*?-->/g, '');
+    expect(markup).not.toContain('data-ui-');
   });
 
   it('без inline-стилей (VI-инвариант §5)', () => {

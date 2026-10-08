@@ -1,0 +1,32 @@
+<!-- ui-pagination (T6.3): канонический паттерн — краевой сценарий «первая
+     страница» (в нём живут все особые элементы; 12 страниц, окно ±1 —
+     умолчание сниппета: 1 2 … 12): nav[aria-label="Пагинация"]
+     — конвенция имени лендмарки (Technical considerations; контекстное имя —
+     README); недоступная стрелка «Назад» — button[type="button"][disabled] —
+     нативно не фокусируется, не кликается, объявляется неактивной (в
+     career-portal disabled стоял на <a> — атрибут на ссылке невалиден,
+     решение по нативной семантике и альтернативы — README); текущая
+     страница — span + aria-current="page" (не ссылка: «ссылка на себя» —
+     мусорная остановка Tab, Implementation requirements п.2); страницы —
+     ссылки с именами «Страница N» (голая цифра — слабое имя, WCAG 2.4.4);
+     «…» — span aria-hidden (декоративный указатель пропуска); глиф стрелки —
+     svg aria-hidden 16×16 (career-portal как есть), цвет — currentColor.
+     href — шаблон «?page=N» (вырожденный demo-адрес; реальные URL страниц —
+     зона сайта/шаблона, генератор — bitrix/snippets/pagination.php).
+     Пагинация работает без JS по построению (обычные ссылки) — JS-модуля и
+     data-ui-* хуков у компонента нет. prettier-ignore у svg — конвенция
+     многострочных глифов (CONTRIBUTING). -->
+<nav class="ui-pagination" aria-label="Пагинация">
+  <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">
+    <!-- prettier-ignore -->
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <span class="ui-pagination__page" aria-current="page">1</span>
+  <a class="ui-pagination__page" href="?page=2" aria-label="Страница 2">2</a>
+  <span class="ui-pagination__ellipsis" aria-hidden="true">…</span>
+  <a class="ui-pagination__page" href="?page=12" aria-label="Страница 12">12</a>
+  <a class="ui-pagination__arrow" href="?page=2" aria-label="Следующая страница">
+    <!-- prettier-ignore -->
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </a>
+</nav>

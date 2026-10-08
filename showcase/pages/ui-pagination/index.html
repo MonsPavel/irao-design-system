@@ -1,0 +1,103 @@
+<!-- Стенд ui-pagination (T6.3): четыре навигации-сценария (Scope). Каждая —
+     автономный пример с разведённым aria-label (axe landmark-unique: 4 лендмарки
+     nav на одной странице обязаны различаться; конвенция имени «Пагинация…» —
+     README компонента). #uipag-full — полный список с окном страниц и «…»
+     (20 страниц, текущая 7: контракт окна — bitrix/snippets/pagination.php);
+     #uipag-short — короткий список без пропусков (3 страницы, текущая 2 — все
+     стрелки доступны); #uipag-first/#uipag-last — краевые сценарии (недоступна
+     стрелка назад/вперёд: button[disabled] — решение по нативной семантике,
+     career-portal <a disabled> невалиден). href «?page=N» — demo-адреса:
+     сервер отдаёт ту же страницу, клик по ссылкам безопасен; в бою URL — зона
+     шаблона (сниппет генерирует из шаблона '?page=#PAGE#' и т.п.). Пагинация
+     работает без JS по построению — JS-модуля у компонента нет. -->
+<section aria-labelledby="uipag-full-heading">
+  <h2 id="uipag-full-heading">Полный список (окно страниц с «…»)</h2>
+  <p class="ui-showcase-stand__note">
+    20 страниц, текущая 7: края (1 и последняя) видны всегда, вокруг текущей — окно ±1, длинные
+    разрывы сжаты «…». Текущая — <code>&lt;span aria-current="page"&gt;</code>, не ссылка (не
+    остановка Tab). Клавиатура: <kbd>Tab</kbd> идёт по порядку «стрелка назад → страницы → стрелка
+    вперёд», текущая пропускается; фокус-обводка — глобальная политика (ADR-0001).
+  </p>
+  <nav id="uipag-full" class="ui-pagination" aria-label="Пагинация: полный список">
+    <a class="ui-pagination__arrow" href="?page=6" aria-label="Предыдущая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="ui-pagination__page" href="?page=1" aria-label="Страница 1">1</a>
+    <span class="ui-pagination__ellipsis" aria-hidden="true">…</span>
+    <a class="ui-pagination__page" href="?page=6" aria-label="Страница 6">6</a>
+    <span class="ui-pagination__page" aria-current="page">7</span>
+    <a class="ui-pagination__page" href="?page=8" aria-label="Страница 8">8</a>
+    <span class="ui-pagination__ellipsis" aria-hidden="true">…</span>
+    <a class="ui-pagination__page" href="?page=20" aria-label="Страница 20">20</a>
+    <a class="ui-pagination__arrow" href="?page=8" aria-label="Следующая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </nav>
+</section>
+
+<section aria-labelledby="uipag-short-heading">
+  <h2 id="uipag-short-heading">Короткий список (без «…»)</h2>
+  <p class="ui-showcase-stand__note">
+    3 страницы, текущая 2 — кейс каталога career-portal (education-catalog): все страницы влезают,
+    «…» не появляется, обе стрелки — ссылки. Touch-цель каждой страницы и стрелки — 44×44
+    (--ui-pagination-size, перенос .pagination career-portal).
+  </p>
+  <nav id="uipag-short" class="ui-pagination" aria-label="Пагинация: короткий список">
+    <a class="ui-pagination__arrow" href="?page=1" aria-label="Предыдущая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="ui-pagination__page" href="?page=1" aria-label="Страница 1">1</a>
+    <span class="ui-pagination__page" aria-current="page">2</span>
+    <a class="ui-pagination__page" href="?page=3" aria-label="Страница 3">3</a>
+    <a class="ui-pagination__arrow" href="?page=3" aria-label="Следующая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </nav>
+</section>
+
+<section aria-labelledby="uipag-first-heading">
+  <h2 id="uipag-first-heading">Первая страница (стрелка «Назад» недоступна)</h2>
+  <p class="ui-showcase-stand__note">
+    Текущая 1: «Назад» — <code>&lt;button type="button" disabled&gt;</code> — нативно не
+    фокусируется, не кликается и объявляется неактивной (opacity 0.3 —
+    <code>--ui-opacity-disabled</code>, components.css:269 career-portal). Tab её пропускает.
+  </p>
+  <nav id="uipag-first" class="ui-pagination" aria-label="Пагинация: первая страница">
+    <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="ui-pagination__page" aria-current="page">1</span>
+    <a class="ui-pagination__page" href="?page=2" aria-label="Страница 2">2</a>
+    <a class="ui-pagination__page" href="?page=3" aria-label="Страница 3">3</a>
+    <a class="ui-pagination__arrow" href="?page=2" aria-label="Следующая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </nav>
+</section>
+
+<section aria-labelledby="uipag-last-heading">
+  <h2 id="uipag-last-heading">Последняя страница (стрелка «Вперёд» недоступна)</h2>
+  <p class="ui-showcase-stand__note">
+    Текущая 3 из 3: недоступна «Вперёд» — тот же паттерн
+    <code>button[disabled]</code> зеркально.
+  </p>
+  <nav id="uipag-last" class="ui-pagination" aria-label="Пагинация: последняя страница">
+    <a class="ui-pagination__arrow" href="?page=2" aria-label="Предыдущая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+    <a class="ui-pagination__page" href="?page=1" aria-label="Страница 1">1</a>
+    <a class="ui-pagination__page" href="?page=2" aria-label="Страница 2">2</a>
+    <span class="ui-pagination__page" aria-current="page">3</span>
+    <button class="ui-pagination__arrow" type="button" disabled aria-label="Следующая страница">
+      <!-- prettier-ignore -->
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </nav>
+</section>
