@@ -1,0 +1,197 @@
+/** @define modal */
+
+/*!
+ * irao-ui — ui-modal: модальное окно на native <dialog> (задача T7.2;
+ * решение ADR-0011 — native `showModal()`, собственный оверлей отвергнут:
+ * top-layer переживёт z-index-войны Bitrix-страниц, trap/Escape/инертность
+ * фона даёт платформа).
+ *
+ * Визуальная база — .directions__modal* career-portal (панель/оверлей,
+ * класс B аудита), перенесённая на центрированную панель:
+ *  - оверлей: career-portal .directions__modal-dim rgba(5,13,20,0.25) в
+ *    системе токенизирован как --ui-color-overlay (слой 2, T2.2) — фон
+ *    ::backdrop только им (ADR-0011 К6: перекрашивается оверрайдом токена
+ *    темами/VI без правки компонента);
+ *  - панель: светлая поверхность (--ui-color-surface; панель career-portal
+ *    была тёмной drawer-подложкой blue-700 — для центрированной модалки
+ *    системы поверх контента взята поверхность карточек), радиус
+ *    --ui-radius-md (пара radius-card 16px), тень --ui-shadow-lg (тень
+ *    dropdown — самая глубокая лестницы), паддинг 36px → 2.25rem и зазор
+ *    заголовок/содержимое 28px → 1.75rem — вне 4px-шкалы §3.2, перенос
+ *    «как есть» (прецедент --ui-card-gap; пересмотр — design-decision
+ *    владельца дизайна); мобильный паддинг 16px = --ui-space-4 (точная
+ *    пара career-portal directions.css:233);
+ *  - закрывающая кнопка: 52px → 3.25rem круг (radius-pill), перенос
+ *    «как есть» (≥ 44px-цели касания T6.3); hover — поверхность
+ *    surface-muted (пара peach-100 career-portal), только под
+ *    @media (hover: hover) (конвенция EPIC-4);
+ *  - заголовок: роль h3 одобренного дизайна (fs-h3 career-portal) — роль
+ *    типографики ставится в разметке (прецедент ui-card), компонент
+ *    задает только рамку (сброс отступа, отступ от закрывающей кнопки).
+ *
+ * Размеры (Scope): --sm 24rem / --md 40rem (база) — системные значения
+ * (центрированной модалки в одобренном дизайне нет — новые ступени, не
+ * правка одобренных), с мобильным клампом 100vw − 2×--ui-space-4; рост по
+ * брейкпоинту md шкалы T2.5 (mobile-first). --full — весь вьюпорт
+ * (100vw × 100dvh, без скругления): полноэкранные сценарии (drawer career-
+ * portal заменяется им на мобиле).
+ *
+ * Анимация (ADR-0011 К5): открытие — @starting-style (все три движка
+ * матрицы), закрытие — JS-delayed: класс is-closing (только в цепочке с
+ * блоком, §2) ставит модуль, transitionend transform добирает кадры,
+ * диалог закрывается методом close(); класс снимается НА СОБЫТИИ close —
+ * контракт ADR-0011 (остаточный класс зажимал opacity и ломал повторные
+ * циклы — регресс-кейс career-portal, e2e обязателен). Длительности —
+ * токены переходов; 0.36s cubic-bezier(0.22, 1, 0.36, 1) панели —
+ * перенос карьер-портала (directions.css:105), как у dim 0.25s —
+ * --ui-transition. prefers-reduced-motion гасит глобальный kill-switch
+ * base/reset — с T7.2 он накрывает и *::backdrop (обязательство (а)
+ * ADR-0011).
+ *
+ * z-index НЕТ: диалог в top-layer выше любых значений (К4 ADR-0011) —
+ * Technical considerations («z-index, если собственный») не применяется:
+ * собственный оверлей отвергнут. box-sizing на корне — ADR-0002 (legacy
+ * content-box распирает панель, замерено в T7.1). Отступы заголовка
+ * сбрасываются явно — компонент не полагается на глобальный reset
+ * (ADR-0002). Фокус рисует глобальная политика base/focus.css (ADR-0001).
+ * Цвета вне токенов нет (§5) — перекраска vi.css накрывает компонент.
+ */
+
+.ui-modal {
+  box-sizing: border-box;
+  position: relative;
+  overflow-y: auto;
+  width: calc(100vw - 2 * var(--ui-space-4));
+  max-width: none;
+  max-height: calc(100dvh - 2 * var(--ui-space-4));
+  margin: auto;
+  padding: var(--ui-space-4);
+  border: 0;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  box-shadow: var(--ui-shadow-lg);
+}
+
+/* ── Размеры (Scope): --sm / --md (база) / --full ──
+   max-width: none глушит UA-кламп dialog'а calc(100% − 6px − 2em) — без
+   него --full (100vw) резался до ширины минус полоса и 46px, а узкие
+   ступени искажались на средних вьюпортах; ширины клампятся сами.
+   Мобильная ступень: кламп вьюпорта 16px = --ui-space-4 (career-portal
+   directions.css:233 — панель во всю ширину). Рост — по брейкпоинту md
+   шкалы T2.5: --md 40rem и --sm 24rem с клампом 32px = --ui-space-6.
+   --full — цепочкой с блоком: .ui-modal--full это ОДИН класс (0-1-0),
+   позднейшие одноразмерные ступени .ui-modal в media побеждали бы его по
+   порядку каскада (поймано e2e размеров: --full сжимался до 40rem на md+);
+   цепочка 0-2-0 бьет и базу, и media-ступени независимо от позиции. */
+.ui-modal.ui-modal--full {
+  width: 100vw;
+  height: 100dvh;
+  max-height: none;
+  border-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .ui-modal {
+    width: min(40rem, calc(100vw - 2 * var(--ui-space-6)));
+    padding: 2.25rem;
+  }
+
+  .ui-modal--sm {
+    width: min(24rem, calc(100vw - 2 * var(--ui-space-6)));
+  }
+}
+
+/* ── Закрывающая кнопка (Scope: доступное имя «Закрыть» — aria-label в
+   разметке): первый элемент панели — модуль даёт ей фокус при открытии
+   (перенос career-portal closeButton.focus; нативная делегация showModal
+   ставит фокус на сам диалог — клавиатура оставалась бы «в воздухе»). */
+.ui-modal__close {
+  box-sizing: border-box;
+  display: inline-flex;
+  position: absolute;
+  top: var(--ui-space-3);
+  right: var(--ui-space-3);
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-text);
+  transition: background-color var(--ui-transition-fast);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .ui-modal__close:hover {
+    background-color: var(--ui-color-surface-muted);
+  }
+}
+
+/* Декоративный × (aria-hidden в разметке): currentColor, размер от кнопки. */
+.ui-modal__icon {
+  box-sizing: border-box;
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+/* Заголовок (aria-labelledby диалога ведёт сюда): сброс отступа и отступ
+   от абсолютной закрывающей кнопки — типографика ролью в разметке
+   (прецедент ui-card). */
+.ui-modal__title {
+  box-sizing: border-box;
+  margin: 0;
+  padding-right: 3.75rem;
+}
+
+/* Содержимое (Scope: __body): зазор 28px → 1.75rem — перенос career-portal
+   directions.css:99 (вне шкалы §3.2, «как есть»). */
+.ui-modal__body {
+  box-sizing: border-box;
+  margin-top: 1.75rem;
+}
+
+/* ── Анимация (ADR-0011 К5): открытие @starting-style, закрытие JS-delayed.
+   Модуль ставит is-closing и закрывает по transitionend transform панели
+   (0.36s — самый долгий переход) со страховочным таймером. */
+
+/* Атрибутные селекторы — внутри :where(): вклад в специфичность нулевой,
+   семантика open — единственный источник правды (прецедент aria-current
+   ui-dropdown). */
+.ui-modal:where([open]) {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--ui-transition),
+    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Закрывающее состояние: панель и фон уходят — диалог ещё открыт (top-layer),
+   закрытие методом close() по завершении перехода. */
+.ui-modal:where([open]).is-closing {
+  opacity: 0;
+  transform: translateY(1rem);
+}
+
+.ui-modal:where([open])::backdrop {
+  background-color: var(--ui-color-overlay);
+  transition: background-color var(--ui-transition);
+}
+
+.ui-modal:where([open]).is-closing::backdrop {
+  background-color: transparent;
+}
+
+@starting-style {
+  .ui-modal:where([open]) {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  .ui-modal:where([open])::backdrop {
+    background-color: transparent;
+  }
+}

@@ -1,0 +1,213 @@
+<!-- Стенд ui-modal (T7.2): три размера компонента (Scope) на одной странице —
+     #uimd-sm (--sm, подтверждение действия), #uimd-md (--md, базовый сценарий),
+     #uimd-full (--full, полноэкранный). Диалоги в разметке открыты (open) —
+     деградация без JS, контент доступен инлайн (К9 ADR-0011); модуль снимает
+     open при инициализации. Триггеры — data-ui-modal-target на id диалога.
+     Статус-регион #uimd-status принимает события irao-ui:modal-open/close —
+     поверхность e2e API и событий. #uimd-after — фоновая ссылка: цель
+     trap-сценария «фон недостижим» (К1 ADR-0011). Секция #uimd-scroll —
+     наполнитель прокрутки для сценариев скролл-лока (Implementation
+     requirements п. 1: лок не сдвигает макет). -->
+<section id="uimd-sm" aria-labelledby="uimd-sm-heading">
+  <h2 id="uimd-sm-heading">Размер --sm</h2>
+  <p class="ui-showcase-stand__note">
+    Узкая модалка подтверждения (24rem). <code>aria-labelledby</code> ведёт на заголовок,
+    <code>__close</code> — первый элемент панели: фокус при открытии приходит на него.
+  </p>
+  <button
+    class="ui-button ui-button--primary"
+    type="button"
+    id="uimd-sm-trigger"
+    data-ui-modal-target="uimd-sm-dialog"
+  >
+    Открыть --sm
+  </button>
+  <dialog
+    class="ui-modal ui-modal--sm"
+    id="uimd-sm-dialog"
+    open
+    data-ui-modal
+    aria-labelledby="uimd-sm-title"
+  >
+    <button class="ui-modal__close" type="button" aria-label="Закрыть">
+      <svg
+        class="ui-modal__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M6 6l12 12M18 6L6 18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+    </button>
+    <h3 class="ui-modal__title ui-h3" id="uimd-sm-title">Подтвердить запись?</h3>
+    <div class="ui-modal__body">
+      <p class="ui-body">Направление «Аналитик данных»: очный формат, старт в феврале.</p>
+      <p><button class="ui-button ui-button--primary" type="button">Подтвердить</button></p>
+    </div>
+  </dialog>
+</section>
+
+<section id="uimd-md" aria-labelledby="uimd-md-heading">
+  <h2 id="uimd-md-heading">Размер --md (база)</h2>
+  <p class="ui-showcase-stand__note">
+    Базовый размер (40rem) для контентных модалок. Закрытие — Escape, кнопка <code>__close</code>,
+    программно (<code>IraoUI.modal.close()</code>); фокус возвращается на опенера после каждого
+    цикла.
+  </p>
+  <button
+    class="ui-button ui-button--primary"
+    type="button"
+    id="uimd-md-trigger"
+    data-ui-modal-target="uimd-md-dialog"
+  >
+    Открыть --md
+  </button>
+  <dialog class="ui-modal" id="uimd-md-dialog" open data-ui-modal aria-labelledby="uimd-md-title">
+    <button class="ui-modal__close" type="button" aria-label="Закрыть">
+      <svg
+        class="ui-modal__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M6 6l12 12M18 6L6 18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+    </button>
+    <h3 class="ui-modal__title ui-h3" id="uimd-md-title">Направление «Аналитик данных»</h3>
+    <div class="ui-modal__body">
+      <p class="ui-body">
+        Программа для тех, кто начинает карьеру в данных: SQL, Python, продуктовая аналитика и
+        четыре проекта в портфолио. Длительность — 6 месяцев, формат — вечерние занятия онлайн.
+      </p>
+      <p class="ui-body">
+        Модалка — это <code>&lt;dialog&gt;</code> с showModal(): trap и Escape даёт браузер, фон
+        недоступен без aria-hidden — top-layer блокирует сам (ADR-0011).
+      </p>
+    </div>
+  </dialog>
+</section>
+
+<section id="uimd-full" aria-labelledby="uimd-full-heading">
+  <h2 id="uimd-full-heading">Размер --full</h2>
+  <p class="ui-showcase-stand__note">
+    Полноэкранный сценарий (100vw × 100dvh, без скругления) — мобильные галереи и формы на всю
+    высоту; пара drawer-модалке career-portal на мобиле.
+  </p>
+  <button
+    class="ui-button ui-button--primary"
+    type="button"
+    id="uimd-full-trigger"
+    data-ui-modal-target="uimd-full-dialog"
+  >
+    Открыть --full
+  </button>
+  <dialog
+    class="ui-modal ui-modal--full"
+    id="uimd-full-dialog"
+    open
+    data-ui-modal
+    aria-labelledby="uimd-full-title"
+  >
+    <button class="ui-modal__close" type="button" aria-label="Закрыть">
+      <svg
+        class="ui-modal__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <path
+          d="M6 6l12 12M18 6L6 18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+    </button>
+    <h3 class="ui-modal__title ui-h3" id="uimd-full-title">Галерея направления</h3>
+    <div class="ui-modal__body">
+      <p class="ui-body">
+        Полноэкранная модалка для медиа-контента: длинная прокрутка внутри панели,
+        <code>overflow-y: auto</code> на диалоге, <code>max-height</code> не ограничивает.
+      </p>
+      <p class="ui-body">
+        Кнопка «Подтвердить» здесь не нужна — закрытие кнопкой <code>__close</code> или Escape;
+        фокус вернётся на триггер.
+      </p>
+    </div>
+  </dialog>
+</section>
+
+<section id="uimd-events" aria-labelledby="uimd-events-heading">
+  <h2 id="uimd-events-heading">События (точка расширения сайта)</h2>
+  <p class="ui-showcase-stand__note">
+    Модуль диспетчит <code>irao-ui:modal-open</code> и <code>irao-ui:modal-close</code> на диалоге
+    (<code>bubbles: true</code>) — сайты вешают аналитику и анимации. Статус-регион ниже пишет
+    каждое событие.
+  </p>
+  <p id="uimd-status" role="status">Событий пока не было</p>
+</section>
+
+<section id="uimd-scroll" aria-labelledby="uimd-scroll-heading">
+  <h2 id="uimd-scroll-heading">Наполнитель прокрутки</h2>
+  <p class="ui-body">
+    Страница стенда выше вьюпорта — сценарии скролл-лока открывают модалку из прокрученного
+    состояния и замеряют, что макет не сдвинулся (ширина шапки до/во время лока идентична:
+    <code>scrollbar-gutter: stable</code> из base/reset резервирует полосу заранее).
+  </p>
+  <p class="ui-body">
+    Фоновая ссылка ниже — цель trap-сценария: при открытой модалке Tab/Shift+Tab не достигают её
+    (нюанс К1 ADR-0011: на границе диалога фокус на один шаг уходит на body и возвращается).
+  </p>
+  <p>
+    <a class="ui-link" id="uimd-after" href="#uimd-events">Фоновая ссылка (цель trap-сценария)</a>
+  </p>
+  <p class="ui-body">
+    Модалка — база для search-overlay (T7.6) и всех будущих диалоговых сценариев системы.
+  </p>
+  <p class="ui-body">
+    Вложенные модалки работают на стеке браузера (Escape закрывает только верхнюю) — полноценной
+    поддержки система не обещает, см. README компонента.
+  </p>
+  <p class="ui-body">
+    Скролл-лок ставит overflow hidden на корень и компенсирует фактический сдвиг паддингом body —
+    при стабильной полосе из base/reset компенсация нулевая и остаточного padding не бывает.
+  </p>
+  <p class="ui-body">
+    Повторные open/close циклы обязаны оставлять страницу в исходном состоянии — регресс-кейс
+    design-qa career-portal, закрыт e2e.
+  </p>
+</section>
+
+<script>
+  // Демо-приёмник событий стенда (не часть компонента): irao-ui:modal-open/close
+  // пишутся в status-регион — e2e проверяет, что события дошли до сайта.
+  (function () {
+    var status = document.getElementById('uimd-status');
+    if (!status) return;
+    document.addEventListener('irao-ui:modal-open', function (event) {
+      status.textContent = 'Открыт: ' + event.target.id;
+    });
+    document.addEventListener('irao-ui:modal-close', function (event) {
+      status.textContent = 'Закрыт: ' + event.target.id;
+    });
+  })();
+</script>

@@ -100,6 +100,7 @@ const COMPONENTS = [
   'ui-tabs', // T6.2 — табы (APG tabs, automatic-активация): roving tabindex, стрелки/Home/End, без JS все панели видимы
   'ui-pagination', // T6.3 — пагинация: touch-цели 44px, aria-current на текущей, недоступные стрелки button[disabled], «…»
   'ui-accordion', // T6.4 — аккордеон на <details>/<summary>: без JS полностью работает, анимация grid-rows на ::details-content, --faq, single по data-ui-accordion="single"
+  'ui-modal', // T7.2 — модалка на native <dialog> (ADR-0011): trap/Escape/инертность — платформа, модуль — анимация закрытия/скролл-лок/PE-деградация
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */

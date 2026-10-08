@@ -1,0 +1,52 @@
+<!--
+  ui-modal (T7.2): модальное окно на native <dialog> (ADR-0011 — основа
+  native showModal(), собственный оверлей отвергнут: top-layer выше любых
+  z-index Bitrix-страниц, trap/Escape/инертность фона даёт платформа).
+
+  Деградация без JS (К9 ADR-0011): атрибут open в разметке — диалог
+  статично показан инлайн, контент доступен; модуль ui-modal.js снимает
+  open при инициализации и забирает показ на себя. Триггер — кнопка (или
+  ссылка на страницу с контентом: без JS сработает href, при JS модуль
+  снимет переход) с data-ui-modal-target на id диалога.
+
+  Семантика: role="dialog" у <dialog> нативный, aria-modal при showModal
+  ставит браузер; aria-labelledby → заголовок (модуль генерирует, если
+  нет); aria-hidden фону НЕ ставится — top-layer блокирует сам (п. 3
+  требований). __close — первый элемент панели: модуль даёт ей фокус при
+  открытии (перенос career-portal closeButton.focus); доступное имя
+  «Закрыть». Роль типографики заголовка — в разметке (прецедент ui-card).
+-->
+<button class="ui-button ui-button--primary" type="button" data-ui-modal-target="ui-modal-demo">
+  Открыть модалку
+</button>
+
+<dialog
+  class="ui-modal ui-modal--md"
+  id="ui-modal-demo"
+  open
+  data-ui-modal
+  aria-labelledby="ui-modal-demo-title"
+>
+  <button class="ui-modal__close" type="button" aria-label="Закрыть">
+    <svg
+      class="ui-modal__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+  </button>
+  <h2 class="ui-modal__title ui-h3" id="ui-modal-demo-title">Заголовок модалки</h2>
+  <div class="ui-modal__body">
+    <p>Содержимое диалога: текст, формы, любое содержимое сайта.</p>
+  </div>
+</dialog>
