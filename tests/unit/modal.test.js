@@ -519,10 +519,9 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     end.propertyName = 'transform';
     dialog.dispatchEvent(end);
 
-    expect(
-      dialog.hasAttribute('open'),
-      'close() по завершении перехода, не по таймеру 500ms',
-    ).toBe(false);
+    expect(dialog.hasAttribute('open'), 'close() по завершении перехода, не по таймеру 500ms').toBe(
+      false,
+    );
   });
 
   it('посторонние transitionend (другое свойство, bubbling от детей) закрытие не ускоряют', () => {
@@ -549,6 +548,37 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
 
     vi.advanceTimersByTime(500);
     expect(dialog.hasAttribute('open'), 'страховка по-прежнему закрывает').toBe(false);
+  });
+
+  it('prefers-reduced-motion: close() закрывает сразу — без is-closing и мёртвого окна (Chromium не доставляет transitionend под 0.01ms)', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const api = apiOf({ window });
+
+    // В jsdom matchMedia нет вовсе — ставим вручную; модуль читает его
+    // с typeof-guard'ом (как window.console.warn в контракте шаблона).
+    window.matchMedia = function (query) {
+      return { matches: query.includes('prefers-reduced-motion'), media: query };
+    };
+
+    const events = [];
+    document.addEventListener('irao-ui:modal-close', () => events.push('close'));
+
+    api.open(dialog);
+    api.close();
+
+    expect(
+      dialog.hasAttribute('open'),
+      'закрыто мгновенно — анимировать нечего (kill-switch гасит переходы)',
+    ).toBe(false);
+    expect(
+      dialog.classList.contains('is-closing'),
+      'закрывающий класс не нужен — его нечему доставать',
+    ).toBe(false);
+    expect(events, 'событие irao-ui:modal-close дошло (контракт не зависит от пути)').toEqual([
+      'close',
+    ]);
   });
 
   it('data-ui-modal-target: клик по триггеру открывает целевой диалог; восстановление фокуса — на триггер', () => {

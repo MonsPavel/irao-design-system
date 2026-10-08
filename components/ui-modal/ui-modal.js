@@ -11,9 +11,11 @@
  *  - анимация закрытия JS-delayed (К5): is-closing ставится на close(),
  *    диалог закрывается по transitionend transform панели (0.36s — самый
  *    долгий переход) со страховочным таймером 500ms (career-portal: 400ms);
- *    остаточный класс снимается НА СОБЫТИИ close — контракт ADR-0011
- *    (иначе класс зажимает opacity и ломает повторные циклы — регресс-кейс
- *    career-portal, e2e tests/e2e/ui-modal.spec.js обязателен);
+ *    при prefers-reduced-motion анимировать нечего (kill-switch гасит
+ *    переходы) и закрытие мгновенное — под 0.01ms движки могут вовсе не
+ *    создавать закрывающие переходы; остаточный класс снимается НА СОБЫТИИ
+ *    close — контракт ADR-0011 (иначе класс зажимает opacity и ломает
+ *    повторные циклы — регресс-кейс career-portal, e2e обязателен);
  *  - Escape через cancel → preventDefault → анимированный close (нативное
  *    закрытие мгновенно и анимацию теряет);
  *  - focus(opener, preventScroll) ДО showModal() — Safari не фокусирует
@@ -224,13 +226,45 @@
       root.close();
     }
 
+    /* transitionend transform ПАНЕЛИ (0.36s — самый долгий переход) —
+       основной сигнал завершения анимации: close() сразу по последнему
+       кадру, без мёртвого окна до страховки (невидимый top-layer диалог
+       глотает клики/клавиши). Гард: target — сам диалог (bubbling переходов
+       детей — hover __close и т.п. — не завершает анимацию), свойство —
+       transform (opacity 0.25s отыгрывает раньше). */
+    function onTransitionEnd(event) {
+      if (event.target === root && event.propertyName === 'transform') {
+        finishClose();
+      }
+    }
+
+    /* Живой запрос преференса (MediaQueryList отражает текущее состояние):
+       под prefers-reduced-motion kill-switch base/reset гасит переходы до
+       0.01ms — анимировать нечего, а движки при таком ретаргете могут вовсе
+       не создавать закрывающие переходы и не доставлять transitionend
+       (замерено на chromium: TC входных без RUN закрывающих, закрытие
+       повисало на страховке 500ms) — закрываем сразу. */
+    var reduceQuery = null;
+
+    function prefersReducedMotion() {
+      if (!reduceQuery && typeof window.matchMedia === 'function') {
+        reduceQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      }
+      return Boolean(reduceQuery && reduceQuery.matches);
+    }
+
     /**
      * Закрытие (перенос career-portal close(): класс + таймер; здесь —
-     * transitionend transform + страховка). Повторный close/Escape во время
-     * анимации — no-op (класс не перезапускает переход).
+     * transitionend transform + страховка; reduced-motion — мгновенно).
+     * Повторный close/Escape во время анимации — no-op (класс не
+     * перезапускает переход).
      */
     function close() {
       if (!isOpen() || closing) {
+        return;
+      }
+      if (prefersReducedMotion()) {
+        root.close(); // событие close → onClose: чистка/лок/фокус — как всегда
         return;
       }
       closing = true;
@@ -271,6 +305,7 @@
     root.addEventListener('close', onClose);
     root.addEventListener('cancel', onCancel);
     root.addEventListener('click', onRootClick);
+    root.addEventListener('transitionend', onTransitionEnd);
 
     // Флаг только после успешной привязки (контракт шаблона).
     root.setAttribute(INIT_ATTR, 'true');
@@ -287,6 +322,7 @@
         root.removeEventListener('close', onClose);
         root.removeEventListener('cancel', onCancel);
         root.removeEventListener('click', onRootClick);
+        root.removeEventListener('transitionend', onTransitionEnd);
         closing = false;
         pullStack();
         root.removeAttribute(INIT_ATTR);
