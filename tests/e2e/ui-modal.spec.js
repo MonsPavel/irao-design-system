@@ -90,7 +90,9 @@ test.describe('ui-modal: деградация без JS (К9 ADR-0011)', () => {
     await expectCleanClosed(page, SEL.fullDialog);
   });
 
-  test('без JS содержимое диалогов доступно инлайн (контент — не за кнопкой)', async ({ stand }) => {
+  test('без JS содержимое диалогов доступно инлайн (контент — не за кнопкой)', async ({
+    stand,
+  }) => {
     const page = await stand('ui-modal'); // URL стенда; для сценария JS не нужен
     const standUrl = page.url();
     const context = await page.context().browser().newContext({ javaScriptEnabled: false });
@@ -98,8 +100,14 @@ test.describe('ui-modal: деградация без JS (К9 ADR-0011)', () => {
     try {
       await noJsPage.goto(standUrl, { waitUntil: 'networkidle' });
       for (const dialog of [SEL.smDialog, SEL.mdDialog, SEL.fullDialog]) {
-        await expect(noJsPage.locator(`${dialog} .ui-modal__title`), `заголовок ${dialog}`).toBeVisible();
-        await expect(noJsPage.locator(`${dialog} .ui-modal__body`), `содержимое ${dialog}`).toBeVisible();
+        await expect(
+          noJsPage.locator(`${dialog} .ui-modal__title`),
+          `заголовок ${dialog}`,
+        ).toBeVisible();
+        await expect(
+          noJsPage.locator(`${dialog} .ui-modal__body`),
+          `содержимое ${dialog}`,
+        ).toBeVisible();
       }
     } finally {
       await context.close();
@@ -116,11 +124,8 @@ test.describe('ui-modal: открытие и фокус (AC)', () => {
     await expectOpen(page, SEL.mdDialog);
     await expect(
       page.locator(SEL.closeOf(SEL.mdDialog)),
-      'первый фокус — закрывающая кнопка (career-portal)',
+      'первый фокус — закрывающая кнопка внутри диалога (career-portal closeButton.focus)',
     ).toBeFocused();
-    await expect(page.locator(SEL.mdDialog), 'фокус внутри диалога').toContainText(
-      await page.evaluate(() => document.activeElement.className),
-    );
   });
 
   test('Enter на сфокусированном триггере открывает (клавиатурный паритет)', async ({ stand }) => {
@@ -201,7 +206,9 @@ test.describe('ui-modal: Escape и восстановление фокуса (AC
     await expect(page.locator(SEL.smTrigger)).toBeFocused();
   });
 
-  test('восстановление фокуса после каждого цикла из трёх (регресс design-qa)', async ({ stand }) => {
+  test('восстановление фокуса после каждого цикла из трёх (регресс design-qa)', async ({
+    stand,
+  }) => {
     const page = await stand('ui-modal');
     for (let cycle = 1; cycle <= 3; cycle += 1) {
       await page.locator(SEL.mdTrigger).click();
@@ -249,15 +256,16 @@ test.describe('ui-modal: скролл-лок (Implementation requirements п.1)'
   }) => {
     const page = await stand('ui-modal');
 
-    // Длинный контент стенда даёт прокрутку; фиксируем ширину шапки до лока.
+    // Длинный контент стенда даёт прокрутку; высота стенда — величина
+    // переменная, поэтому прокручиваем в самый низ (высотно-независимо)
+    // и работаем с фактическим scrollY.
     const before = await page.evaluate(() => ({
       headerWidth: document.querySelector('.ui-showcase-header').getBoundingClientRect().width,
       scrollY: window.scrollY,
     }));
-    await page.evaluate(() => window.scrollTo(0, 800));
-    expect(await page.evaluate(() => window.scrollY), 'страница прокручивается до лока').toBe(
-      800,
-    );
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+    const scrolled = await page.evaluate(() => window.scrollY);
+    expect(scrolled, 'страница прокручивается до лока').toBeGreaterThan(100);
 
     await page.locator(SEL.mdTrigger).click();
     await expectOpen(page, SEL.mdDialog);
@@ -268,6 +276,7 @@ test.describe('ui-modal: скролл-лок (Implementation requirements п.1)'
       rootOverflow: document.documentElement.style.overflow,
     }));
     expect(during.rootOverflow, 'overflow hidden на корне').toBe('hidden');
+    expect(during.scrollY, 'позиция прокрутки погашена локом (overflow hidden)').toBe(0);
     expect(
       during.headerWidth,
       `ширина шапки не изменилась (${before.headerWidth} → ${during.headerWidth})`,
@@ -331,9 +340,10 @@ test.describe('ui-modal: API и события (AC)', () => {
       window.IraoUI.modal.open(document.getElementById('uimd-sm-dialog'));
     });
     await expectOpen(page, SEL.smDialog);
-    await expect(page.locator(SEL.status), 'событие irao-ui:modal-open дошло до сайта').toContainText(
-      'uimd-sm-dialog',
-    );
+    await expect(
+      page.locator(SEL.status),
+      'событие irao-ui:modal-open дошло до сайта',
+    ).toContainText('uimd-sm-dialog');
 
     await page.evaluate(() => {
       window.IraoUI.modal.close();

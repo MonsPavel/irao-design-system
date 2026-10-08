@@ -54,7 +54,9 @@ describe('tokens/semantic.css — лестница T2.2 (Technical consideration
 
   it('--ui-z-modal = 300 существует, но компонент его НЕ читает (top-layer выше любых z-index)', () => {
     expect(source).toMatch(/--ui-z-modal:\s*300;/);
-    const css = stripCssComments(readFileSync(join(root, 'components', 'ui-modal', 'ui-modal.css'), 'utf8'));
+    const css = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-modal', 'ui-modal.css'), 'utf8'),
+    );
     expect(css, 'z-index в ui-modal.css нет — нативный top-layer (ADR-0011 К4)').not.toMatch(
       /z-index\s*:/,
     );
@@ -81,7 +83,9 @@ describe('components/ui-modal/ui-modal.css — база (ADR-0002, ADR-0011)', (
   });
 
   it('::backdrop — фон только токен --ui-color-overlay (ADR-0011 К6)', () => {
-    const backdrop = css.match(/\.ui-modal\[open\]::backdrop\s*\{([^}]*)\}/);
+    // Атрибут open может быть записан прямо или внутри :where() (конвенция
+    // нулевой специфичности — прецедент aria-current ui-dropdown).
+    const backdrop = css.match(/\.ui-modal(?:\[open\]|:where\(\[open\]\))::backdrop\s*\{([^}]*)\}/);
     expect(backdrop, 'правило ::backdrop найдено').toBeTruthy();
     expect(backdrop[1]).toContain('background-color: var(--ui-color-overlay);');
   });
@@ -93,8 +97,8 @@ describe('components/ui-modal/ui-modal.css — база (ADR-0002, ADR-0011)', (
   it('закрывающее состояние — .is-closing только в цепочке с блоком (§2)', () => {
     // is-closing без .ui-modal в селекторе — нарушение конвенции состояний.
     const orphans = css.match(/^\.is-closing[^{]*\{/gm) ?? [];
-    expect(orphans, 'is-closing живёт в цепочке (.ui-modal[open].is-closing)').toEqual([]);
-    expect(css).toMatch(/\.ui-modal\[open\]\.is-closing/);
+    expect(orphans, 'is-closing живёт в цепочке (.ui-modal…is-closing)').toEqual([]);
+    expect(css).toMatch(/\.ui-modal[^{]*\.is-closing/);
   });
 
   it('цвета — только токены слоя 2; без !important и hex (инварианты системы)', () => {
@@ -112,7 +116,9 @@ describe('components/ui-modal/ui-modal.css — база (ADR-0002, ADR-0011)', (
   });
 
   it('рост — только mobile-first min-width из шкалы T2.5 (02-architecture §3.2)', () => {
-    expect(css, 'max-width-медиазапросов нет').not.toMatch(/max-width\s*[=:]/);
+    // max-width-МЕДИАЗАПРОСОВ нет (свойство max-width: none — кламп UA
+    // dialog'а, не media-фича).
+    expect(css, 'max-width-медиазапросов нет').not.toMatch(/@media[^{]*max-width/);
     const minWidths = [...css.matchAll(/min-width:\s*(\d+)px/g)].map((m) => Number(m[1]));
     expect(minWidths.length, 'media-рост присутствует').toBeGreaterThan(0);
     for (const value of minWidths) {
@@ -136,8 +142,9 @@ describe('base/reset.css — kill-switch reduced-motion накрывает ::bac
   });
 
   it('инвариант «!important только в a11y/vi.css» с двумя осознанными исключениями не расширен', () => {
-    // T7.2 меняет только СПИСОК селекторов kill-switch, не механику исключений.
-    expect((css.match(/!important/g) ?? []).length).toBe(4);
+    // T7.2 меняет только СПИСОК селекторов kill-switch, не механику
+    // исключений: 1 в [hidden] + 4 в kill-switch — как до T7.2.
+    expect((css.match(/!important/g) ?? []).length).toBe(5);
   });
 });
 
@@ -163,7 +170,11 @@ describe('канонический паттерн (components/ui-modal/ui-modal.
   it('aria-labelledby на диалоге ведёт на .ui-modal__title (Implementation requirements п.3)', () => {
     const labelledby = html.match(/<dialog[^>]*aria-labelledby="([^"]+)"/);
     expect(labelledby, 'aria-labelledby указан').toBeTruthy();
-    expect(html).toMatch(new RegExp(`id="${labelledby[1]}"[^>]*class="ui-modal__title"`));
+    const titleTag = html.match(/<[a-z0-9]+[^>]*ui-modal__title[^>]*>/);
+    expect(titleTag, 'заголовок в паттерне').toBeTruthy();
+    expect(titleTag[0], `id заголовка = aria-labelledby (${labelledby[1]})`).toContain(
+      `id="${labelledby[1]}"`,
+    );
   });
 
   it('__close — <button type="button"> с доступным именем «Закрыть» (Scope)', () => {
@@ -174,9 +185,13 @@ describe('канонический паттерн (components/ui-modal/ui-modal.
   });
 
   it('__title и __body на месте (Scope); фоновой aria-hidden НЕ ставится (п.3: native top-layer)', () => {
-    expect(html).toMatch(/class="ui-modal__title"/);
+    // Роль типографики может соседствовать в классе (прецедент ui-card).
+    expect(html).toMatch(/class="ui-modal__title[ "]/);
     expect(html).toMatch(/class="ui-modal__body"/);
-    expect(html, 'aria-hidden фону не ставится').not.toContain('aria-hidden');
+    // aria-hidden допустим только на декоративной иконке ВНУТРИ диалога;
+    // фону (разметка вне <dialog>…) он не ставится — top-layer блокирует сам.
+    const outside = html.replace(/<dialog[\s\S]*?<\/dialog>/g, '');
+    expect(outside, 'aria-hidden вне диалога нет').not.toContain('aria-hidden');
   });
 
   it('у каждой <button> явный type; без inline-стилей (VI-инвариант §5)', () => {
@@ -511,7 +526,8 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
 describe('подключение и гейты (DoD T7.2)', () => {
   it("'ui-modal' в COMPONENTS showcase/build.mjs — CSS/JS попадают в dist", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-modal'[^\]]*\]/);
+    // [\s\S] а не [^\]]: комментарии строк массива содержат ']' (button[disabled]).
+    expect(build).toMatch(/const COMPONENTS = \[[\s\S]*?'ui-modal'[\s\S]*?\]/);
   });
 
   it('стенд showcase/pages/ui-modal: три размера с якорями + статус-регион событий', () => {

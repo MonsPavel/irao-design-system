@@ -67,11 +67,15 @@ ol {
   list-style: none;
 }
 
-/* Уважение к настройке «уменьшить движение» (глобальный kill-switch) */
+/* Уважение к настройке «уменьшить движение» (глобальный kill-switch).
+   *::backdrop в списке с T7.2 (обязательство (а) ADR-0011): псевдоэлементы
+   ::before/::after ::backdrop не накрывают — без него фон модалки
+   анимируется при reduced-motion на всех трёх движках (замер T7.1). */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
-  *::after {
+  *::after,
+  *::backdrop {
     /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): kill-switch обязан бить transition компонентов */
     transition-duration: 0.01ms !important;
     /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): kill-switch обязан бить animation компонентов */
