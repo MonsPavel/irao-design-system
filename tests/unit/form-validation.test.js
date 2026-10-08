@@ -244,6 +244,15 @@ describe('components/ui-form/ui-form.js — validateField: правила одн
     expect(validate('type="email"', 'пример@пример.ру').message).toBeNull();
   });
 
+  it('type=email: ПУСТОЕ опциональное поле проходит (нативная семантика, ревью T5.5 high) — с JS не строже, чем без JS', () => {
+    // Зонд ревью: без JS typeMismatch/valueMatching пустого optional email = false —
+    // браузер сабмит пропускает; модуль обязан вести себя так же.
+    expect(validate('type="email"').message, 'пустой optional email → null').toBeNull();
+    expect(validate('type="email"', '   ').message, 'пробелы — тоже пустое').toBeNull();
+    // required-email на пустое по-прежнему ругается требованием заполнить.
+    expect(validate('type="email" required').message).toBe('Заполните это поле');
+  });
+
   it('pattern: нативная семантика (вся строка, пустое проходит)', () => {
     expect(validate('pattern="[0-9]+"', 'abc').message).toBe('Исправьте формат значения');
     expect(validate('pattern="[0-9]+"').message).toBeNull();
@@ -267,6 +276,45 @@ describe('components/ui-form/ui-form.js — validateField: правила одн
     expect(window.IraoUI.form.validateField(field)).toBe('Отметьте этот пункт');
     field.checked = true;
     expect(window.IraoUI.form.validateField(field)).toBeNull();
+  });
+
+  it('radio: required — состояние группы, а не value-атрибута (ревью T5.5 high): unchecked value="q" не проходит молча', () => {
+    // Зонд ревью: field.value у радио — непустой value-атрибут; нативно
+    // unchecked required radio БЛОКИРУЕТ сабмит (valueMissing), модуль
+    // обязан требовать отмеченный radio той же группы.
+    const radioSandbox = () =>
+      makeSandbox({
+        bodyHtml: `
+          <form id="rf" action="#x">
+            <fieldset class="ui-field ui-field--required">
+              <legend>Формат</legend>
+              <label class="ui-radio"><input class="ui-radio__input" type="radio" name="plan" value="yes" required> Да</label>
+              <label class="ui-radio"><input class="ui-radio__input" type="radio" name="plan" value="no" required> Нет</label>
+            </fieldset>
+          </form>`,
+      });
+
+    const unchecked = radioSandbox();
+    const first = unchecked.document.querySelector('input[name="plan"][value="yes"]');
+    expect(
+      unchecked.window.IraoUI.form.validateField(first),
+      'ни один radio группы не отмечен → «Выберите вариант»',
+    ).toBe('Выберите вариант');
+
+    // Отмечен СОСЕДНИЙ radio группы — поле валидно (групповое состояние).
+    const checked = radioSandbox();
+    checked.document.querySelector('input[name="plan"][value="no"]').checked = true;
+    expect(checked.window.IraoUI.form.validateField(first)).toBeNull();
+
+    // Радио вне формы: группой считаются радио документа с тем же name.
+    const noForm = makeSandbox({
+      bodyHtml: `
+        <input type="radio" name="solo" value="a" required>
+        <input type="radio" name="solo" value="b" required>`,
+    });
+    expect(noForm.window.IraoUI.form.validateField(noForm.document.querySelector('input'))).toBe(
+      'Выберите вариант',
+    );
   });
 
   it('file: data-ui-max-size — человечий лимит в сообщении; в лимите — null', () => {
@@ -599,5 +647,70 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
     link.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 
     expect(document.activeElement).toBe(document.getElementById('tf-name'));
+  });
+
+  /** Форма с required-radio-группой (ревью T5.5 high): оба radio с required. */
+  const radioFormHtml = `
+    <form class="ui-form" id="rf" action="#target" data-ui-form>
+      <div class="ui-form__summary" role="alert" tabindex="-1" hidden>
+        <h3 class="ui-form__summary-title"></h3>
+        <ul class="ui-form__summary-list"></ul>
+      </div>
+      <fieldset class="ui-field ui-field--required">
+        <legend>Формат</legend>
+        <label class="ui-radio"><input class="ui-radio__input" type="radio" id="rf-plan-yes" name="plan" value="yes" required> Да</label>
+        <label class="ui-radio"><input class="ui-radio__input" type="radio" id="rf-plan-no" name="plan" value="no" required> Нет</label>
+      </fieldset>
+      <button type="submit">Отправить</button>
+    </form>`;
+
+  it('radio-группа: сабмит с ошибками — ошибка на всех radio группы, в summary ОДНА запись (не дубль на каждый radio)', () => {
+    const { window, document } = makeSandbox({ bodyHtml: radioFormHtml });
+    const form = document.getElementById('rf');
+    const radios = document.querySelectorAll('input[name="plan"]');
+
+    submitForm(window, form);
+
+    for (const radio of radios) {
+      expect(
+        radio.getAttribute('aria-invalid'),
+        'невалидная группа помечена aria на каждом radio',
+      ).toBe('true');
+    }
+    const links = document.querySelectorAll('.ui-form__summary-list a');
+    expect(links, 'одна запись на группу, а не по числу radio').toHaveLength(1);
+    expect(links[0].textContent).toBe('Выберите вариант');
+    expect(links[0].getAttribute('href'), 'ссылка ведёт на radio группы').toBe('#rf-plan-yes');
+  });
+
+  it('radio-группа: снятие по input/change чистит ошибку ВСЕЙ группы (ревью T5.5 high — соседи не остаются висеть)', () => {
+    const { window, document } = makeSandbox({ bodyHtml: radioFormHtml });
+    const form = document.getElementById('rf');
+    const [yes, no] = document.querySelectorAll('input[name="plan"]');
+
+    submitForm(window, form);
+    expect(yes.getAttribute('aria-invalid')).toBe('true');
+    expect(no.getAttribute('aria-invalid')).toBe('true');
+
+    // Выбор варианта: input (клик) снимает ошибку со ВСЕХ radio группы…
+    yes.checked = true;
+    yes.dispatchEvent(new window.Event('input', { bubbles: true }));
+    expect(no.getAttribute('aria-invalid'), 'сосед по группе очищен по input').toBeNull();
+    expect(document.getElementById('rf-plan-no-error').textContent, 'текст соседа очищен').toBe(
+      '',
+    );
+
+    // …change довалидирует группу — ошибки не возвращаются.
+    yes.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(yes.hasAttribute('aria-invalid')).toBe(false);
+    expect(no.hasAttribute('aria-invalid')).toBe(false);
+
+    // Возврат в невалидное состояние: change по-прежнему валидирует группу.
+    yes.checked = false;
+    yes.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(yes.getAttribute('aria-invalid'), 'группа снова без выбора — ошибки возвращены').toBe(
+      'true',
+    );
+    expect(no.getAttribute('aria-invalid')).toBe('true');
   });
 });
