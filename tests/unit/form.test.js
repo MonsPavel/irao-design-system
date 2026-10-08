@@ -125,6 +125,19 @@ describe('components/ui-form/ui-form.css — раскладка (T5.4)', () => {
     expect(req).toContain('color: var(--ui-color-accent);');
   });
 
+  it('aside: UA-отступы dl/dt/dd сброшены компонентом (ADR-0002 — класс полностью определяет вид; ревью T5.4 high: dd{margin-inline-start:40px} уезжал из-под метки)', () => {
+    // Общий ресет aside-семейства: список размечается элементом __aside-list
+    // (класс на <dl>) — голый dl в селекторе не проходит БЭМ-гейт (инвариант
+    // «селектор = класс ui-form*»). Ритм строки «метка — значение» несёт gap.
+    const reset = css.match(
+      /\.ui-form__aside-list,\s*\.ui-form__aside-row,\s*\.ui-form__aside-label,\s*\.ui-form__aside-value\s*\{([^}]*)\}/,
+    );
+    expect(reset, 'общий ресет отступов aside-семейства найден').toBeTruthy();
+    expect(reset[1], 'UA-дефолты dl {margin: 20px 0} / dd {margin-inline-start: 40px} сброшены').toContain(
+      'margin: 0;',
+    );
+  });
+
   it('инварианты: без !important и без сырых цветов (гейты stylelint не дублируются — пин на состав)', () => {
     expect(css, '!important только в a11y/vi.css').not.toContain('!important');
     expect(css, 'hex вне tokens/primitives.css запрещён').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
@@ -151,6 +164,10 @@ describe('components/ui-form/ui-form.html — канонический патт�
   it('легенда обязательных: маркер aria-hidden, смысл в тексте footnote (не только цветом, WCAG 1.4.1)', () => {
     expect(html).toMatch(/class="ui-form__req" aria-hidden="true"/);
     expect(html).toContain('— обязательные поля');
+  });
+
+  it('aside-список размечен элементом __aside-list (класс на <dl> — носитель ресета UA-отступов, ADR-0002)', () => {
+    expect(html).toContain('<dl class="ui-form__aside-list">');
   });
 
   it('полная ширина поля в grid — модификатор ui-field--wide (T5.1), сам ui-form никаких --wide не вводит', () => {

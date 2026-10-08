@@ -135,6 +135,22 @@
   box-sizing: border-box;
 }
 
+/* ADR-0002 «класс компонента полностью определяет свой вид»: UA-дефолты
+   dl { margin: 20px 0 } и dd { margin-inline-start: 40px } проникали в
+   одобренный порт .form-aside — значение уезжало на 40px вправо от метки,
+   а на legacy-сайте со своими margin-правилами вид зависел бы от чужого
+   CSS (ревью T5.4 high; UA-дефолты списков не входят в ресет
+   base/reset.css:55–68). Ритм строки «метка — значение» несёт gap
+   __aside/__aside-row, отступы — нули. Список размечается элементом
+   __aside-list (класс на <dl>): голый dl в селекторе не проходит БЭМ-гейт
+   (инвариант «селектор компонента = класс ui-form*»). */
+.ui-form__aside-list,
+.ui-form__aside-row,
+.ui-form__aside-label,
+.ui-form__aside-value {
+  margin: 0;
+}
+
 .ui-form__aside-row {
   box-sizing: border-box;
   display: flex;

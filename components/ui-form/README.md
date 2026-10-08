@@ -17,7 +17,7 @@ JS-модуля у компонента нет сознательно (логи�
 | Поле на все колонки | `ui-field--wide` (T5.1): `grid-column: 1 / -1` — textarea, согласие, группы; вне grid-родителя инертно |
 | Элемент `.ui-form__layout` | лейаут формы: стек на мобиле → 2 колонки **от lg** (1024): `minmax(0, 1fr) var(--ui-form-aside-width)` (400px одобренного `.form-page`), gap `--ui-space-7` (48px точно) |
 | Элемент `.ui-form__main` | основная колонка: держит `__grid` и `__actions` одним блоком лейаута; data-хук сайта для свапа состояния — `data-ui-form-body` (демо стенда; контракт свапа — сайт/T5.5) |
-| Элемент `.ui-form__aside` | боковая колонка (в разметке — `<aside>` с `aria-labelledby`): фон `--ui-color-surface-muted`, радиус md, от lg — `position: sticky; top: var(--ui-space-5)` (одобренный `.form-aside`; в стеке — статична); внутри — `__aside-title` (цвет primary), `__aside-text`, пары `__aside-row > __aside-label + __aside-value` (семантика `<dl>`: `<div>`-обёртки допустимы) |
+| Элемент `.ui-form__aside` | боковая колонка (в разметке — `<aside>` с `aria-labelledby`): фон `--ui-color-surface-muted`, радиус md, от lg — `position: sticky; top: var(--ui-space-5)` (одобренный `.form-aside`; в стеке — статична); внутри — `__aside-title` (цвет primary), `__aside-text`, список пар `__aside-list` (класс на `<dl>`) → `__aside-row > __aside-label + __aside-value` |
 | Элемент `.ui-form__summary` | сводная ошибка: **`role="alert"`** (немедленное объявление при появлении после сабмита) + **`tabindex="-1"`** (цель фокуса); фон `--ui-color-error-bg`; внутри — `__summary-title` (цвет `--ui-color-error`) и `__summary-list` — список ссылок на id полей; до момента скрыт атрибутом `hidden` |
 | Ссылки summary | реальные `href="#id"` полей: переход фокуса по хэшу нативен во всех браузерах матрицы (проверено e2e chromium/firefox/webkit); доопределение краевых случаев (например, цель появляется скриптом) — фокус-скрипт T5.5 (Implementation requirements T5.4 п.2) |
 | Элемент `.ui-form__success` | блок успеха: фон `--ui-color-success-bg`, gap `--ui-space-3` (12px одобренного), паддинг `--ui-space-5` (дифф 28 → 24, как в ui-card); до момента — `hidden`; работает и без JS (серверный рендер success-страницы — вариант Bitrix) |
@@ -97,7 +97,9 @@ Mobile-first, media только `min-width` из шкалы T2.5 (гейт styl
   немедленно (Technical considerations T5.4); ссылки внутри — обычные
   ui-link (клавиатура и фокус — нативные);
 - `<aside>` с `aria-labelledby` — именованная complementary-область;
-  строки «label/value» — `<dl>`-семантика;
+  строки «label/value» — `<dl>`-семантика (список — элемент `__aside-list`:
+  класс носит ресет UA-отступов dl/dt/dd — ADR-0002, вид определяет
+  компонент, не браузер и не чужой CSS legacy-сайта);
 - легенда обязательных — текстом, не только цветом: звёздочка декоративна
   (`aria-hidden`), смысл несёт видимый текст footnote;
 - контраст пар (error-bg/error, success-bg/success, surface-muted/*) —

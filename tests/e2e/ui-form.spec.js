@@ -155,6 +155,69 @@ standTest.describe('ui-form: адаптивная раскладка (T5.4)', ()
       expect(form.gap, 'шаг блоков формы — 24px одобренного .form-card').toBe('24px');
     },
   );
+
+  standTest(
+    'aside: UA-отступы dl/dt/dd сброшены компонентом (ADR-0002: класс полностью определяет вид — и на legacy-сайте со своими dd{margin})',
+    async ({ stand }) => {
+      const page = await stand('ui-form');
+
+      // Ревью T5.4 (high): UA-дефолт dl{margin: 20px 0} / dd{margin-inline-start: 40px}
+      // проникал в одобренный порт .form-aside — значение уезжало на 40px вправо
+      // от метки (видно в эталонах до фикса), а на legacy-сайте вид зависел бы
+      // от чужих margin-правил. Пин — на вычисленные значения (браузерная
+      // правда, не источник).
+      const dl = await page.locator(`#${IDS.aside} dl`).evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          marginTop: style.marginTop,
+          marginBottom: style.marginBottom,
+          marginLeft: style.marginLeft,
+          marginRight: style.marginRight,
+        };
+      });
+      expect(dl, 'dl: UA margin 20px 0 сброшен — шаг задаёт gap __aside').toEqual({
+        marginTop: '0px',
+        marginBottom: '0px',
+        marginLeft: '0px',
+        marginRight: '0px',
+      });
+
+      const term = await page
+        .locator(`#${IDS.aside} dt`)
+        .first()
+        .evaluate((el) => {
+          const style = getComputedStyle(el);
+          return { marginTop: style.marginTop, marginBottom: style.marginBottom };
+        });
+      expect(term, 'dt: UA-отступов нет').toEqual({ marginTop: '0px', marginBottom: '0px' });
+
+      const description = await page
+        .locator(`#${IDS.aside} dd`)
+        .first()
+        .evaluate((el) => {
+          const style = getComputedStyle(el);
+          return { marginInlineStart: style.marginInlineStart };
+        });
+      expect(
+        description.marginInlineStart,
+        'dd: UA margin-inline-start 40px сброшен — value выровнен по метке (label-over-value)',
+      ).toBe('0px');
+
+      for (const element of ['.ui-form__aside-row', '.ui-form__aside-label']) {
+        const margins = await page
+          .locator(`#${IDS.aside} ${element}`)
+          .first()
+          .evaluate((el) => {
+            const style = getComputedStyle(el);
+            return { marginTop: style.marginTop, marginBottom: style.marginBottom };
+          });
+        expect(margins, `${element}: отступов нет — ритм несёт gap`).toEqual({
+          marginTop: '0px',
+          marginBottom: '0px',
+        });
+      }
+    },
+  );
 });
 
 standTest.describe('ui-form: сводная ошибка (T5.4)', () => {
