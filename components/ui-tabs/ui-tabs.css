@@ -1,0 +1,107 @@
+/** @define tabs */
+
+/*!
+ * irao-ui — ui-tabs: табы по паттерну APG tabs (задача T6.2).
+ *
+ * Источник визуала — .track-tabs career-portal (css/pages.css:485–487,
+ * класс B аудита): лента таб-кнопок с gap 16px и отступом снизу 32px, сами
+ * кнопки — .btn--outline (2px-рамка primary, радиус pill, высота 52px),
+ * активный таб — заливка primary + белая подпись (.track-tabs .btn.is-active),
+ * hover — та же заливка (.btn--outline:hover, components.css:90). Значения
+ * перенесены «как есть» в токены: высота/рамка — кнопочные --ui-button-*
+ * (эталон T4.2), отступы — ступени шкалы §3.2 (--ui-space-4/6, паддинг
+ * --ui-space-3/5 как в ui-button), радиус --ui-radius-pill, подпись — роль
+ * small типографики T3.3 (fs-small/fw-small .btn).
+ *
+ * Состояния: активный таб — :where([aria-selected='true']): семантика
+ * aria-selected — единственный источник правды (ставит модуль ui-tabs.js при
+ * инициализации и переключении), вклад в специфичность нулевой — прецедент
+ * aria-current ui-dropdown (T6.1). Без JS aria-selected в разметке нет и все
+ * табы равны — деградация: все панели видимы, табы-ссылки ведут на панели.
+ *
+ * flex-wrap: wrap — в базе: мобильная ветка career-portal (pages.css:732,
+ * flex-wrap для экранов уже 768px) в mobile-first переносится в базу как
+ * поведение узких экранов — перенос длинных подписей не рвёт ленту на 320px.
+ *
+ * Панель стилизуется минимально: контент панели — зона сайта; видимостью
+ * управляет атрибут hidden (ставит/снимает модуль; силуэт скрытия один на
+ * систему — [hidden] в base/reset, T3.1), собственных display-переключений у
+ * CSS нет (Implementation requirements п.2). «Подчёркивание активного таба»
+ * одобренным дизайном не задано (активный — заливка; Technical considerations
+ * задачи), z-index табам не нужен (не оверлей). Фокус табов и панелей рисует
+ * глобальная политика ADR-0001 (base/focus.css: a:focus-visible,
+ * [tabindex]:focus-visible) — компонент outline не гасит и не заменяет.
+ * Hover — только под @media (hover: hover) (конвенция EPIC-4); собственных
+ * анимаций нет, переходы цветов гасит kill-switch reduced-motion base/reset
+ * (DoD EPIC-6). VI-режим: цветов вне токенов нет (§5) — перекраска vi.css
+ * накрывает компонент.
+ */
+
+.ui-tabs {
+  box-sizing: border-box;
+}
+
+/* Лента табов — career-portal .track-tabs (pages.css:485): flex, gap 16px,
+   отступ снизу 32px. Перенос строк — в базе (шапка файла, mobile-first). */
+.ui-tabs__list {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-4);
+  margin: 0 0 var(--ui-space-6);
+}
+
+/* Таб — outline-кнопка одобренного дизайна (шапка файла). Канонический
+   паттерн — ссылка на панель (деградация без JS), JS-гарантированный
+   контекст — кнопка: одна раскладка на оба элемента (сброс нативной кнопки
+   безвреден для ссылки, шрифт и паддинг заданы явно). */
+.ui-tabs__tab {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ui-button-height);
+  padding: var(--ui-space-3) var(--ui-space-5);
+  border: var(--ui-button-border-width) solid var(--ui-color-primary);
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-primary);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color var(--ui-transition),
+    color var(--ui-transition),
+    border-color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* Активный таб — заливка primary + белая подпись (career-portal pages.css:487,
+   .track-tabs .btn.is-active). Атрибутный селектор внутри :where(): вклад в
+   специфичность нулевой (одноклассовое правило системы). */
+.ui-tabs__tab:where([aria-selected='true']) {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* hover — career-portal .btn--outline:hover (components.css:90): заливка
+   primary, подпись белая; у выбранного таба hover поверхность не меняет
+   (одобренным дизайном отдельного hover для .is-active не задано). */
+@media (hover: hover) {
+  .ui-tabs__tab:hover {
+    background-color: var(--ui-color-primary);
+    color: var(--ui-color-text-on-dark);
+  }
+}
+
+/* Панель: контент — зона сайта. Скрытие неактивной панели — атрибут hidden
+   (ставит модуль ui-tabs.js, Implementation requirements п.2); display-
+   переключений нет — base/reset делает [hidden] сильным. Фокус панели
+   (Tab с активного таба, tabindex="0" ставит модуль) подсвечивает политика
+   ADR-0001 ([tabindex]:focus-visible). */
+.ui-tabs__panel {
+  box-sizing: border-box;
+}

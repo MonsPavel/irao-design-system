@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>T6.2: сломанные id-связки tab↔panel — таб без панели, панель без имени</title>
+  </head>
+  <body>
+    <main>
+      <h1>ui-tabs: битые id-связки</h1>
+      <div class="ui-tabs" data-ui-tabs>
+        <div class="ui-tabs__list">
+          <!-- href ведёт на несуществующий id: без JS ссылка — в никуда -->
+          <a class="ui-tabs__tab" href="#panel-missing" id="tab-a">Вкладка А</a>
+        </div>
+        <!-- панель не названа табом (нет aria-labelledby) -->
+        <section class="ui-tabs__panel" id="panel-a"><p>Контент</p></section>
+      </div>
+    </main>
+  </body>
+</html>

@@ -253,6 +253,21 @@ const EXPECTATIONS = [
     tool: 'html',
     expect: 'pass',
   },
+  {
+    // T6.2 (Implementation requirements п.1): id-связки tab↔panel обязательны —
+    // таб без панели (href в никуда) и панель без имени табом — ошибки.
+    file: 'html/tabs-id-links-broken.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/tabs-id-links'],
+  },
+  {
+    // T6.2: позитивный контроль гейта — связки на месте (href→id, aria-labelledby
+    // на таб), гейт молчит.
+    file: 'html/tabs-id-links-valid.html',
+    tool: 'html',
+    expect: 'pass',
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 

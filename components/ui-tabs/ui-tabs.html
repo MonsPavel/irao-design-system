@@ -1,0 +1,44 @@
+<!--
+  ui-tabs (T6.2): табы по паттерну APG tabs. Источник поведения — .track-tabs
+  career-portal (js/tracks.js): таб-кнопки с is-active, данные карьерных
+  треков из <script type="application/json">.
+
+  Деградация без JS (принцип ТЗ №14): в разметке НЕТ hidden на панелях и НЕТ
+  ролей/tabindex/aria-selected — все панели видимы, табы — ссылки на якоря
+  панелей (переход работает), панели названы табами (aria-labelledby).
+  Роли APG (tablist/tab/tabpanel), roving tabindex, aria-selected/aria-controls
+  и скрытие неактивных панелей ставит модуль ui-tabs.js (хук data-ui-tabs)
+  при инициализации — разметка остаётся правдивой без JS (тот же приём, что
+  novalidate в ui-form T5.5 и aria-expanded в ui-dropdown T6.1).
+
+  id-связки tab↔panel обязательны (Implementation requirements п.1; гейт
+  html-validate irao/tabs-id-links): href="#panel-id" на табе, aria-labelledby
+  с id таба на панели. Фокус рисует глобальная политика base/focus.css
+  (ADR-0001).
+-->
+<div class="ui-tabs" data-ui-tabs>
+  <div class="ui-tabs__list">
+    <a class="ui-tabs__tab" href="#uitab-college" id="uitab-college-tab">Я учусь в колледже</a>
+    <a class="ui-tabs__tab" href="#uitab-university" id="uitab-university-tab">
+      Я учусь в университете
+    </a>
+  </div>
+  <section class="ui-tabs__panel" id="uitab-college" aria-labelledby="uitab-college-tab">
+    <p>Ступени карьерного трека колледжа — от техника до мастера участка:</p>
+    <ul>
+      <li>Техник-теплоэнергетик — 4 года учёбы;</li>
+      <li>Инженер участка — 2–3 года;</li>
+      <li>Старший инженер — 3–4 года;</li>
+      <li>Мастер участка — 4–5 лет.</li>
+    </ul>
+  </section>
+  <section class="ui-tabs__panel" id="uitab-university" aria-labelledby="uitab-university-tab">
+    <p>Ступени карьерного трека университета — от инженера до начальника цеха:</p>
+    <ul>
+      <li>Инженер — 4–6 лет учёбы;</li>
+      <li>Ведущий инженер — 2–3 года;</li>
+      <li>Начальник смены цеха — 3–4 года;</li>
+      <li>Начальник цеха — 5+ лет.</li>
+    </ul>
+  </section>
+</div>

@@ -52,6 +52,15 @@
  * фикстура — tests/lint-cases/html/radio-without-fieldset.html, позитивная —
  * radio-group-with-legend.html.
  *
+ * С T6.2: `irao/tabs-id-links` — id-связки tab↔panel в разметке ui-tabs
+ * обязательны (спека T6.2, Implementation requirements п.1). Таб-ссылка
+ * обязана вести href="#id" на существующую панель (без JS якорь —
+ * единственный путь к контенту), таб-кнопка — нести aria-controls на
+ * существующий id; панель .ui-tabs__panel обязана быть названа табом
+ * (aria-labelledby на .ui-tabs__tab — панель объявляется при переключении).
+ * Негативная фикстура — tests/lint-cases/html/tabs-id-links-broken.html,
+ * позитивная — tabs-id-links-valid.html.
+ *
  * Кастомные правила регистрируются инлайн-плагином (html-validate 11: ключ в
  * plugin.rules — уже полный id правила). Формат файла — CJS: загрузчик конфига
  * html-validate исполняет его в CJS-контексте.
@@ -242,6 +251,70 @@ class RadioGroupFieldset extends Rule {
   }
 }
 
+/** Элемент имеет заданный класс (значение атрибута class — регэксп по границе). */
+const hasClass = (node, className) => {
+  const attr = node.getAttribute('class');
+  const value = attr ? attr.value : '';
+  return new RegExp(`(?:^|\\s)${className}(?:\\s|$)`).test(value);
+};
+
+/** Элемент по id внутри документа (attr-селектор с guarding-проверкой имени —
+ *  без CSS.escape, которого нет в контексте конфига). */
+const byId = (doc, id) => {
+  if (!/^[a-zA-Z][a-zA-Z0-9_-]*$/.test(id)) return null;
+  const found = doc.querySelectorAll(`[id="${id}"]`);
+  return found.length ? found[0] : null;
+};
+
+/** T6.2: id-связки tab↔panel в разметке ui-tabs обязательны
+ *  (Implementation requirements п.1). Таб-ссылка ведёт href="#id" на
+ *  существующую панель (без JS якорь — единственный путь к панели), таб-кнопка
+ *  несёт aria-controls; панель названа табом (aria-labelledby на
+ *  .ui-tabs__tab) — панель объявляется скринридеру при переключении. */
+class TabsIdLinks extends Rule {
+  setup() {
+    this.on('dom:ready', (event) => {
+      const doc = event.document;
+      for (const tab of doc.querySelectorAll('.ui-tabs__tab')) {
+        if (tab.is('a')) {
+          const href = tab.getAttribute('href');
+          const value = href ? href.value : '';
+          const id = value.startsWith('#') ? value.slice(1) : '';
+          if (!id || !byId(doc, id)) {
+            this.report(
+              tab,
+              'Таб-ссылка .ui-tabs__tab обязана вести href="#id" на существующую панель: id-связка tab↔panel обязательна, без JS ссылка — единственный путь к панели (T6.2).',
+            );
+          }
+          continue;
+        }
+        const controls = tab.getAttribute('aria-controls');
+        const id = controls ? controls.value : '';
+        if (!id || !byId(doc, id)) {
+          this.report(
+            tab,
+            'Таб-кнопка .ui-tabs__tab обязана нести aria-controls на существующую панель: id-связка tab↔panel обязательна (T6.2).',
+          );
+        }
+      }
+      for (const panel of doc.querySelectorAll('.ui-tabs__panel')) {
+        const labelledby = panel.getAttribute('aria-labelledby');
+        const value = labelledby ? labelledby.value.trim() : '';
+        const namedByTab = value.split(/\s+/).some((id) => {
+          const el = id ? byId(doc, id) : null;
+          return el !== null && hasClass(el, 'ui-tabs__tab');
+        });
+        if (!namedByTab) {
+          this.report(
+            panel,
+            'Панель .ui-tabs__panel обязана быть названа табом: aria-labelledby с id элемента .ui-tabs__tab — панель объявляется при переключении (T6.2).',
+          );
+        }
+      }
+    });
+  }
+}
+
 module.exports = {
   extends: ['html-validate:recommended'],
   plugins: [
@@ -255,6 +328,7 @@ module.exports = {
         'irao/link-accessible-name': LinkAccessibleName,
         'irao/img-dimensions': ImgDimensions,
         'irao/radio-group-fieldset': RadioGroupFieldset,
+        'irao/tabs-id-links': TabsIdLinks,
       },
     }),
   ],
@@ -266,6 +340,7 @@ module.exports = {
     'irao/link-accessible-name': 'warn',
     'irao/img-dimensions': 'error',
     'irao/radio-group-fieldset': 'error',
+    'irao/tabs-id-links': 'error',
     'input-missing-label': 'error',
     // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
     'no-implicit-button-type': 'warn',

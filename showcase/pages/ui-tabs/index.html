@@ -1,0 +1,167 @@
+<!-- Стенд ui-tabs (T6.2): две секции. #uitab-static — статические табы
+     канонического паттерна (контент карьерных треков career-portal, .track-tabs
+     js/tracks.js): табы — ссылки на панели, БЕЗ hidden/ролей/aria-selected в
+     разметке — их ставит модуль (без JS все панели видимы, e2e проверяет
+     источник и no-JS контекст). #uitab-json — JSON-паттерн Bitrix
+     (02-architecture §6.3): данные в <script type="application/json"
+     data-ui-tabs-data>, рендер канонической разметки — демо-скрипт стенда
+     (данные — зона сайта), модуль IraoUI.tabs инициализирует готовую разметку
+     сам (defer ui.min.js выполняется после парсинга); событие
+     irao-ui:tabs-select пишется в статус-регион #uitab-json-status. Ссылки
+     после секций — цели сценариев Tab-выхода. -->
+<section id="uitab-static" aria-labelledby="uitab-static-heading">
+  <h2 id="uitab-static-heading">Статические табы (канонический паттерн)</h2>
+  <p class="ui-showcase-stand__note">
+    Табы — <code>&lt;a href="#panel"&gt;</code>: без JS все панели видимы, ссылки работают якорями.
+    Роли APG (<code>tablist/tab/tabpanel</code>), <code>aria-selected</code>/aria-controls, roving
+    tabindex и скрытие неактивных панелей ставит модуль. Клавиатура: <kbd>←</kbd>/<kbd>→</kbd> с
+    зацикливанием и automatic-активацией, <kbd>Home</kbd>/<kbd>End</kbd>; <kbd>Tab</kbd> с активного
+    таба уходит в панель.
+  </p>
+  <div class="ui-tabs" data-ui-tabs>
+    <div class="ui-tabs__list">
+      <a class="ui-tabs__tab" href="#uitab-college" id="uitab-college-tab">Я учусь в колледже</a>
+      <a class="ui-tabs__tab" href="#uitab-university" id="uitab-university-tab">
+        Я учусь в университете
+      </a>
+    </div>
+    <section class="ui-tabs__panel" id="uitab-college" aria-labelledby="uitab-college-tab">
+      <p>Ступени карьерного трека колледжа — от техника до мастера участка:</p>
+      <ul>
+        <li>Техник-теплоэнергетик — 4 года учёбы;</li>
+        <li>Инженер участка — 2–3 года;</li>
+        <li>Старший инженер — 3–4 года;</li>
+        <li>Мастер участка — 4–5 лет.</li>
+      </ul>
+    </section>
+    <section class="ui-tabs__panel" id="uitab-university" aria-labelledby="uitab-university-tab">
+      <p>Ступени карьерного трека университета — от инженера до начальника цеха:</p>
+      <ul>
+        <li>Инженер — 4–6 лет учёбы;</li>
+        <li>Ведущий инженер — 2–3 года;</li>
+        <li>Начальник смены цеха — 3–4 года;</li>
+        <li>Начальник цеха — 5+ лет.</li>
+      </ul>
+    </section>
+  </div>
+  <p>
+    <a class="ui-link" id="uitab-after-static" href="#uitab-static"
+      >Элемент после табов (цель Tab-выхода)</a
+    >
+  </p>
+</section>
+
+<section id="uitab-json" aria-labelledby="uitab-json-heading">
+  <h2 id="uitab-json-heading">Табы из данных — JSON-паттерн (кейс Bitrix)</h2>
+  <p class="ui-showcase-stand__note">
+    Данные из инфоблока приезжают <code>json_encode</code>’ом в
+    <code>&lt;script type="application/json" data-ui-tabs-data&gt;</code> (02-architecture §6.3).
+    Рендер канонической разметки из JSON — зона сайта (демо-скрипт стенда; проверенный паттерн
+    career-portal <code>tracks.js</code>), модуль инициализирует готовую разметку сам. Смена выбора
+    диспатчит <code>irao-ui:tabs-select</code> — статус-регион ниже это показывает.
+  </p>
+  <div class="ui-tabs" id="uitab-json-tabs" data-ui-tabs></div>
+  <script type="application/json" data-ui-tabs-data>
+    {
+      "tabs": [
+        {
+          "id": "energetik",
+          "label": "Теплоэнергетик тепловых сетей",
+          "intro": "От техника-теплоэнергетика до мастера участка тепловых сетей:",
+          "steps": [
+            "Техник-теплоэнергетик — 4 года учёбы",
+            "Инженер участка — 2–3 года",
+            "Старший инженер — 3–4 года",
+            "Мастер участка — 4–5 лет"
+          ]
+        },
+        {
+          "id": "elektromonter",
+          "label": "Электромонтёр подстанции",
+          "intro": "От электромонтёра до начальника подстанции:",
+          "steps": [
+            "Электромонтёр — 3–4 года учёбы",
+            "Электромонтёр высшего разряда — 3 года",
+            "Мастер подстанции — 3–4 года",
+            "Начальник подстанции — 4–5 лет"
+          ]
+        },
+        {
+          "id": "it",
+          "label": "ИТ-специалист в энергетике",
+          "intro": "От младшего специалиста до руководителя направления:",
+          "steps": [
+            "Младший специалист — 4–6 лет учёбы",
+            "Специалист — 2 года",
+            "Ведущий специалист — 3 года",
+            "Руководитель направления — 4–5 лет"
+          ]
+        }
+      ]
+    }
+  </script>
+  <p id="uitab-json-status" role="status">Выбор не сделан</p>
+  <p>
+    <a class="ui-link" id="uitab-after-json" href="#uitab-json"
+      >Элемент после табов (цель Tab-выхода)</a
+    >
+  </p>
+</section>
+
+<script>
+  // Демо-скрипт стенда (зона сайта, НЕ компонент): рендер канонического
+  // паттерна ui-tabs из JSON-данных (модель career-portal tracks.js — данные
+  // из инфоблока). В боевом Bitrix-шаблоне данные экранируются на сервере
+  // (json_encode, 02-architecture §6.3) либо разметка рендерится PHP'ем.
+  // Модуль IraoUI.tabs (defer ui.min.js) инициализирует разметку сам; событие
+  // irao-ui:tabs-select пишется в статус-регион.
+  (function () {
+    var root = document.getElementById('uitab-json-tabs');
+    var dataScript = document.querySelector('script[data-ui-tabs-data]');
+    var status = document.getElementById('uitab-json-status');
+    if (!root || !dataScript || !status) return;
+
+    var data = JSON.parse(dataScript.textContent);
+    // Канонический паттерн: лента табов — .ui-tabs__list, панели — siblings
+    // за ней (модуль ищет список .ui-tabs__list внутри корня).
+    var listHtml =
+      '<div class="ui-tabs__list">' +
+      data.tabs
+        .map(function (tab) {
+          return (
+            '<a class="ui-tabs__tab" href="#uitab-json-panel-' +
+            tab.id +
+            '" id="uitab-json-tab-' +
+            tab.id +
+            '">' +
+            tab.label +
+            '</a>'
+          );
+        })
+        .join('') +
+      '</div>';
+    var panelsHtml = data.tabs
+      .map(function (tab) {
+        return (
+          '<section class="ui-tabs__panel" id="uitab-json-panel-' +
+          tab.id +
+          '" aria-labelledby="uitab-json-tab-' +
+          tab.id +
+          '"><p>' +
+          tab.intro +
+          '</p><ul><li>' +
+          tab.steps.join('</li><li>') +
+          '</li></ul></section>'
+        );
+      })
+      .join('');
+    root.innerHTML = listHtml + panelsHtml;
+
+    root.addEventListener('irao-ui:tabs-select', function () {
+      var selected = root.querySelector('.ui-tabs__tab[aria-selected="true"]');
+      if (selected) {
+        status.textContent = 'Выбрано: ' + selected.textContent.trim();
+      }
+    });
+  })();
+</script>
