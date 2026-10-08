@@ -52,19 +52,17 @@ const submitOf = (formSelector) => `${formSelector} button[type="submit"]`;
  * состояний, а не совпадение id (они у веток разные по определению).
  */
 const errorStateOf = (page, id) =>
-  page.locator(`#${id}`).evaluate((el) => {
+  page.locator(`#${id}`).evaluate((el, fieldId) => {
     const wrap = el.closest('.ui-field');
     const error = wrap ? wrap.querySelector('.ui-field__error') : null;
     const inputStyle = getComputedStyle(el);
     const errorStyle = error ? getComputedStyle(error) : null;
-    const describedby = (el.getAttribute('aria-describedby') ?? '')
-      .split(/\s+/)
-      .filter(Boolean);
+    const describedby = (el.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
     return {
       wrapHasErrorClass: wrap ? wrap.classList.contains('ui-field--error') : null,
       ariaInvalid: el.getAttribute('aria-invalid'),
       describedbyTokens: describedby.map((token) =>
-        token === `${id}-error` ? '<error>' : token.endsWith('-hint') ? '<hint>' : token,
+        token === `${fieldId}-error` ? '<error>' : token.endsWith('-hint') ? '<hint>' : token,
       ),
       errorRole: error ? error.getAttribute('role') : null,
       errorDisplayed: errorStyle ? errorStyle.display !== 'none' : null,
@@ -72,7 +70,7 @@ const errorStateOf = (page, id) =>
       inputBorderColor: inputStyle.borderColor,
       inputBackgroundColor: inputStyle.backgroundColor,
     };
-  });
+  }, id);
 
 standTest.describe('form-full-cycle: ветка 1 — без JS (нативная валидация, ТЗ №14)', () => {
   standTest(
@@ -168,7 +166,9 @@ standTest.describe('form-full-cycle: ветка 2 — с JS (блокировк�
 
       for (const [id, message] of [
         ['ffc-name', 'Заполните это поле'],
-        ['ffc-email', 'Заполните это поле'],
+        // Email предзаполнен битым значением (как вернул бы сервер) —
+        // правило required проходит, ругается проверка формата.
+        ['ffc-email', 'Исправьте адрес e-mail'],
         ['ffc-consent', 'Отметьте этот пункт'],
       ]) {
         const state = await errorStateOf(page, id);
@@ -186,69 +186,77 @@ standTest.describe('form-full-cycle: ветка 2 — с JS (блокировк�
   );
 });
 
-standTest.describe('form-full-cycle: ветка 3 — «серверный ответ» (pre-rendered, контракт T5.6)', () => {
-  standTest(
-    'inline-сниппет фокуса: после «перезагрузки» фокус на summary (role=alert); ссылки ведут на поля',
-    async ({ stand }) => {
-      const page = await stand('integration/form-full-cycle');
+standTest.describe(
+  'form-full-cycle: ветка 3 — «серверный ответ» (pre-rendered, контракт T5.6)',
+  () => {
+    standTest(
+      'inline-сниппет фокуса: после «перезагрузки» фокус на summary (role=alert); ссылки ведут на поля',
+      async ({ stand }) => {
+        const page = await stand('integration/form-full-cycle');
 
-      const summary = page.locator(SEL.serverSummary);
-      await expect(summary, 'сервер отрендерил сводную ошибку видимой').toBeVisible();
-      await expect(summary).toHaveAttribute('role', 'alert');
-      await expect(summary, 'tabindex="-1" — цель программного фокуса').toHaveAttribute(
-        'tabindex',
-        '-1',
-      );
-      await expect(
-        summary,
-        'inline-сниппет (bitrix/snippets/form-error-render.php) перевёл фокус на summary при загрузке',
-      ).toBeFocused();
-
-      const links = page.locator(SEL.serverLinks);
-      await expect(links).toHaveCount(3);
-      for (let i = 0; i < 3; i += 1) {
-        const href = await links.nth(i).getAttribute('href');
-        const target = page.locator(href);
-        await expect(target, `цель ${href} существует на странице`).toHaveCount(1);
-      }
-      await links.nth(0).click();
-      await expect(
-        page.locator(SEL.srvName),
-        'клик по ссылке серверного summary фокусирует поле',
-      ).toBeFocused();
-    },
-  );
-
-  standTest(
-    'идентичность client/server ошибки: у пары полей ОДИНАКОВЫЕ computed состояния (Testing requirements T5.6)',
-    async ({ stand }) => {
-      const page = await stand('integration/form-full-cycle');
-
-      // Клиентская ошибка: сабмит живой формы под JS (ветка 2).
-      await page.locator(submitOf(SEL.form)).click();
-      await expect(page.locator(SEL.summary)).toBeVisible();
-
-      // Серверная ошибка уже в DOM (ветка 3, pre-rendered статикой).
-      for (const [clientId, serverId] of [
-        ['ffc-name', 'ffc-srv-name'],
-        ['ffc-email', 'ffc-srv-email'],
-        ['ffc-consent', 'ffc-srv-consent'],
-      ]) {
-        const client = await errorStateOf(page, clientId);
-        const server = await errorStateOf(page, serverId);
-        expect(
-          server,
-          `${clientId} ↔ ${serverId}: классы, aria, computed-стили идентичны`,
-        ).toEqual(client);
-        const clientText = await page.locator(`#${clientId}-error`).textContent();
-        const serverText = await page.locator(`#${serverId}-error`).textContent();
-        expect(serverText, `${serverId}: текст ошибки тот же, что рендерит клиент`).toBe(
-          clientText,
+        const summary = page.locator(SEL.serverSummary);
+        await expect(summary, 'сервер отрендерил сводную ошибку видимой').toBeVisible();
+        await expect(summary).toHaveAttribute('role', 'alert');
+        await expect(summary, 'tabindex="-1" — цель программного фокуса').toHaveAttribute(
+          'tabindex',
+          '-1',
         );
-      }
-    },
-  );
-});
+        await expect(
+          summary,
+          'inline-сниппет (bitrix/snippets/form-error-render.php) перевёл фокус на summary при загрузке',
+        ).toBeFocused();
+
+        const links = page.locator(SEL.serverLinks);
+        await expect(links).toHaveCount(3);
+        for (let i = 0; i < 3; i += 1) {
+          const href = await links.nth(i).getAttribute('href');
+          const target = page.locator(href);
+          await expect(target, `цель ${href} существует на странице`).toHaveCount(1);
+        }
+        await links.nth(0).click();
+        await expect(
+          page.locator(SEL.srvName),
+          'клик по ссылке серверного summary фокусирует поле',
+        ).toBeFocused();
+      },
+    );
+
+    standTest(
+      'идентичность client/server ошибки: у пары полей ОДИНАКОВЫЕ computed состояния (Testing requirements T5.6)',
+      async ({ stand }) => {
+        const page = await stand('integration/form-full-cycle');
+
+        // Клиентская ошибка: сабмит живой формы под JS (ветка 2).
+        await page.locator(submitOf(SEL.form)).click();
+        await expect(page.locator(SEL.summary)).toBeVisible();
+        // Computed-стили снимаем ПОСЛЕ CSS-перехода рамки/фона контрола
+        // (ui-field: transition border-color/background-color
+        // var(--ui-transition)): иначе клиентское поле сравнится в середине
+        // анимации, а серверное (ошибка с загрузки страницы) уже стабильно.
+        await page.waitForTimeout(300);
+
+        // Серверная ошибка уже в DOM (ветка 3, pre-rendered статикой).
+        for (const [clientId, serverId] of [
+          ['ffc-name', 'ffc-srv-name'],
+          ['ffc-email', 'ffc-srv-email'],
+          ['ffc-consent', 'ffc-srv-consent'],
+        ]) {
+          const client = await errorStateOf(page, clientId);
+          const server = await errorStateOf(page, serverId);
+          expect(
+            server,
+            `${clientId} ↔ ${serverId}: классы, aria, computed-стили идентичны`,
+          ).toEqual(client);
+          const clientText = await page.locator(`#${clientId}-error`).textContent();
+          const serverText = await page.locator(`#${serverId}-error`).textContent();
+          expect(serverText, `${serverId}: текст ошибки тот же, что рендерит клиент`).toBe(
+            clientText,
+          );
+        }
+      },
+    );
+  },
+);
 
 standTest.describe('form-full-cycle: ветка 4 — success (серверная success-страница)', () => {
   standTest(
@@ -274,7 +282,9 @@ standTest.describe('form-full-cycle: axe по веткам (AC «axe на каж
       const page = await stand('integration/form-full-cycle');
       const results = await a11y(page).analyze();
       expect(
-        results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
+        results.violations.map(
+          (violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`,
+        ),
         'axe: violations = []',
       ).toEqual([]);
     },
@@ -289,7 +299,9 @@ standTest.describe('form-full-cycle: axe по веткам (AC «axe на каж
 
       const results = await a11y(page).analyze();
       expect(
-        results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
+        results.violations.map(
+          (violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`,
+        ),
         'axe: violations = []',
       ).toEqual([]);
     },

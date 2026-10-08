@@ -442,6 +442,43 @@ function generateShowcase({ themes }) {
     warn('showcase/pages/error-404/index.html ещё нет — стенд error-404 не сгенерирован');
   }
 
+  // Стенд «integration/form-full-cycle» (T5.6) — интеграционный стенд «форма
+  // целиком»: четыре ветки полного цикла (без JS → с JS → «серверный ответ» →
+  // success), каждая — якорь-состояние для e2e и visual (Tests first —
+  // tests/e2e/form-full-cycle.spec.js). Имя вложенное — Technical
+  // considerations T5.6 («стенд живёт в showcase как
+  // "integration/form-full-cycle"»): страница лежит на два уровня ниже
+  // SHOWCASE_DIST, поэтому рантайм подключается относительным ../..
+  // (механика frame(), глубже, чем у плоских стендов).
+  const fullCycleStandSource = join(
+    ROOT,
+    'showcase',
+    'pages',
+    'integration',
+    'form-full-cycle',
+    'index.html',
+  );
+  if (existsSync(fullCycleStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'integration'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/integration/form-full-cycle.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'integration/form-full-cycle — irao-ui showcase',
+      main: `    <h1>integration/form-full-cycle</h1>\n${readFileSync(fullCycleStandSource, 'utf8').trim()}`,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'integration', 'form-full-cycle.html'), page);
+    stands.push({
+      name: 'integration/form-full-cycle',
+      source: 'showcase/pages/integration/form-full-cycle/index.html',
+    });
+  } else {
+    warn(
+      'showcase/pages/integration/form-full-cycle/index.html ещё нет — ' +
+        'стенд integration/form-full-cycle не сгенерирован',
+    );
+  }
+
   const discovered = discoverComponents();
   for (const name of discovered) {
     if (!COMPONENTS.includes(name)) {

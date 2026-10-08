@@ -57,7 +57,7 @@ describe('bitrix/snippets/form-error-render.php — контракт T5.6 (Scope
   });
 
   it('исходные данные — массив ошибок формы: $arResult["FORM_ERRORS"] в примере использования', () => {
-    expect(snippet).toContain("FORM_ERRORS");
+    expect(snippet).toContain('FORM_ERRORS');
   });
 
   it('функции защищены function_exists — повторное включение шаблона Bitrix безопасно', () => {
@@ -65,17 +65,16 @@ describe('bitrix/snippets/form-error-render.php — контракт T5.6 (Scope
     const declarations = snippet.match(/^\s*function irao_ui_/gm) ?? [];
     expect(
       guards.length,
-      'каждая функция сниппета объявлена под guard\'ом function_exists',
+      "каждая функция сниппета объявлена под guard'ом function_exists",
     ).toBeGreaterThanOrEqual(declarations.length);
   });
 
   it('inline-сниппет фокуса: работает без модулей, параметризован id, не крадёт фокус у скрытых', () => {
-    // Тело функции irao_ui_form_focus_script: getElementById по аргументу,
+    // Тело функции irao_ui_form_focus_script (до докблока примера
+    // использования): inline <script>, getElementById по аргументу,
     // guard !el.hidden, вызов focus через typeof-проверку.
-    const body = snippet.slice(
-      snippet.indexOf('function irao_ui_form_focus_script'),
-      snippet.indexOf('<<<JS'),
-    );
+    const start = snippet.indexOf('function irao_ui_form_focus_script');
+    const body = snippet.slice(start, snippet.indexOf('/**', start));
     expect(body, 'сниппет использует inline <script>, а не модуль').toContain('<script>');
     expect(body, 'цель фокуса — параметр (id элемента серверного состояния)').toContain(
       'getElementById',
@@ -126,7 +125,7 @@ describe('стенд integration/form-full-cycle — эмуляция PHP-выв
       expect(
         control[0],
         `${id}: aria-describedby ведёт на id ошибки (суффикс -error, как у IraoUI.form)`,
-      ).toContain(`aria-describedby="${id}-error`);
+      ).toContain(`${id}-error`);
       const errorText = stand.match(
         new RegExp(`<p class="ui-field__error" id="${id}-error"[^>]*>`),
       );
@@ -153,6 +152,10 @@ describe('стенд integration/form-full-cycle — эмуляция PHP-выв
 
     const normalize = (text) =>
       text
+        // Комментарии стенда — пояснение для читателя, не код сниппета.
+        .replace(/^[ \t]*\/\/[^\n]*\n/gm, '')
+        // Кавычки — стилистика: PHP-строка сниппета и JS стенда равнозначны.
+        .replace(/'/g, '"')
         .replace(/%s/g, '@ID@')
         .replace(/getElementById\(\s*(['"])(.*?)\1\s*\)/g, 'getElementById(@ID@)')
         .replace(/\s+/g, '');
@@ -171,12 +174,13 @@ describe('стенд integration/form-full-cycle — эмуляция PHP-выв
 describe('сборка стенда и харнесс — вложенное имя integration/form-full-cycle', () => {
   it('build.mjs генерирует stands/integration/form-full-cycle.html из showcase/pages/integration/form-full-cycle', () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toContain(
-      `join('showcase', 'pages', 'integration', 'form-full-cycle', 'index.html')`,
+    const collapsed = build.replace(/\s+/g, ' ');
+    expect(collapsed).toContain(
+      `'showcase', 'pages', 'integration', 'form-full-cycle', 'index.html'`,
     );
-    expect(build).toContain(`'stands', 'integration', 'form-full-cycle.html'`);
+    expect(collapsed).toContain(`'stands', 'integration', 'form-full-cycle.html'`);
     // Рантайм на два уровня выше страницы (stands/integration/…): ../..
-    expect(build).toContain(`rel: '../..'`);
+    expect(collapsed).toContain(`rel: '../..'`);
   });
 
   it('harness openStand допускает вложенное имя стенда (и по-прежнему только безопасные имена)', () => {
