@@ -91,7 +91,7 @@ describe('components/ui-tabs/ui-tabs.css — база (ADR-0002, одобрен�
     expect(block).toContain('cursor: pointer;');
   });
 
-  it('активный таб — :where([aria-selected=\'true\']): заливка primary + белая подпись (.btn.is-active)', () => {
+  it("активный таб — :where([aria-selected='true']): заливка primary + белая подпись (.btn.is-active)", () => {
     expect(css).toMatch(/\.ui-tabs__tab:where\(\[aria-selected='true'\]\)/);
     const block = blockOf(css, ".ui-tabs__tab:where([aria-selected='true'])");
     expect(block).toContain('background-color: var(--ui-color-primary);');
@@ -103,7 +103,9 @@ describe('components/ui-tabs/ui-tabs.css — база (ADR-0002, одобрен�
     expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
     expect(css.slice(0, mediaIndex), 'до media-обёртки :hover нет').not.toContain(':hover');
     const media = css.slice(mediaIndex);
-    expect(media).toMatch(/\.ui-tabs__tab:hover\s*\{[^}]*background-color: var\(--ui-color-primary\);/);
+    expect(media).toMatch(
+      /\.ui-tabs__tab:hover\s*\{[^}]*background-color: var\(--ui-color-primary\);/,
+    );
     expect(media).toMatch(/\.ui-tabs__tab:hover\s*\{[^}]*color: var\(--ui-color-text-on-dark\);/);
   });
 
@@ -325,8 +327,14 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
 
   it('id-связка кнопкой (aria-controls вместо href) — легитимный альтернативный паттерн', () => {
     const buttons = instanceHtml
-      .replace(/<a class="ui-tabs__tab" href="#uitab-a" id="uitab-a-tab">/g, '<button class="ui-tabs__tab" type="button" id="uitab-a-tab" aria-controls="uitab-a">')
-      .replace(/<a class="ui-tabs__tab" href="#uitab-b" id="uitab-b-tab">/g, '<button class="ui-tabs__tab" type="button" id="uitab-b-tab" aria-controls="uitab-b">')
+      .replace(
+        /<a class="ui-tabs__tab" href="#uitab-a" id="uitab-a-tab">/g,
+        '<button class="ui-tabs__tab" type="button" id="uitab-a-tab" aria-controls="uitab-a">',
+      )
+      .replace(
+        /<a class="ui-tabs__tab" href="#uitab-b" id="uitab-b-tab">/g,
+        '<button class="ui-tabs__tab" type="button" id="uitab-b-tab" aria-controls="uitab-b">',
+      )
       .replace(/<\/a>/g, '</button>');
     const sandbox = makeSandbox({ readyState: 'complete', bodyHtml: buttons });
 
@@ -396,18 +404,21 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
   });
 
   it('событие irao-ui:tabs-select (bubbles) — на смене выбора; при инициализации НЕ диспатчится', () => {
-    const sandbox = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    // Deferred-режим: слушатель сайта подключается ДО init — тогда проверка
+    // «silent-старт» настоящая (в 'complete' init уходит раньше подписки).
+    const sandbox = makeSandbox({ readyState: 'loading', bodyHtml: instanceHtml });
     const root = sandbox.document.querySelector('[data-ui-tabs]');
 
     const events = [];
     root.addEventListener('irao-ui:tabs-select', (event) => events.push(event));
-    // Инициализация уже прошла (silent-старт) — событий нет.
-    expect(events).toHaveLength(0);
+
+    fireDOMContentLoaded(sandbox.window);
+    expect(events, 'инициализация не диспатчит событие (silent-старт)').toHaveLength(0);
 
     tabsOf(sandbox)[1].dispatchEvent(
       new sandbox.window.MouseEvent('click', { bubbles: true, cancelable: true }),
     );
-    expect(events).toHaveLength(1);
+    expect(events, 'смена выбора диспатчит событие').toHaveLength(1);
     expect(events[0].bubbles, 'событие всплывает — точка расширения сайта').toBe(true);
   });
 

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>T6.2: корректные id-связки tab↔panel — гейт молчит</title>
+  </head>
+  <body>
+    <main>
+      <!-- ПОЗИТИВНЫЙ КОНТРОЛЬ (T6.2): таб-ссылки ведут href="#id" на
+           существующие панели, панели названы табами (aria-labelledby).
+           Ожидаемый зелёный: ни одного замечания. -->
+      <h1>ui-tabs: корректные id-связки</h1>
+      <div class="ui-tabs" data-ui-tabs>
+        <div class="ui-tabs__list">
+          <a class="ui-tabs__tab" href="#panel-a" id="tab-a">Вкладка А</a>
+          <a class="ui-tabs__tab" href="#panel-b" id="tab-b">Вкладка Б</a>
+        </div>
+        <section class="ui-tabs__panel" id="panel-a" aria-labelledby="tab-a"><p>Контент А</p></section>
+        <section class="ui-tabs__panel" id="panel-b" aria-labelledby="tab-b"><p>Контент Б</p></section>
+      </div>
+    </main>
+  </body>
+</html>

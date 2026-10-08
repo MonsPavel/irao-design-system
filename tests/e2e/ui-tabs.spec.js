@@ -71,7 +71,7 @@ async function expectInstanceConsistent(page, tabsSel, panelsSel) {
   expect(selected, 'ровно один выбранный таб (APG)').toHaveLength(1);
 
   // Панели: выбранная видима без hidden, остальные скрыты; роль и имя — таб.
-  for (let i = 0; i < await panels.count(); i += 1) {
+  for (let i = 0; i < (await panels.count()); i += 1) {
     await expect(panels.nth(i)).toHaveAttribute('role', 'tabpanel');
     if (i === selected[0]) {
       await expect(panels.nth(i), `активная панель ${i} видима`).toBeVisible();
@@ -265,12 +265,14 @@ test.describe('ui-tabs: клик и JSON-кейс (Bitrix)', () => {
 test.describe('ui-tabs: axe (AC)', () => {
   test('стенд чист в исходном и переключённом состояниях (AC)', async ({ stand }) => {
     const page = await stand('ui-tabs');
+    // Анализ финальных состояний, не кадров перехода цветов таба (заливка
+    // primary 0.25s даёт axe color-contrast на промежуточном кадре) — приём
+    // ui-dropdown.spec.js: reduced-motion гасит переходы (kill-switch base/reset).
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     const violationsOf = (results) =>
       results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`);
 
-    expect(violationsOf(await a11y(page).analyze()), 'axe: violations = [] (исходное)').toEqual(
-      [],
-    );
+    expect(violationsOf(await a11y(page).analyze()), 'axe: violations = [] (исходное)').toEqual([]);
 
     // Переключённое состояние: второй таб выбран, панель сменена.
     await page.locator(SEL.staticTabs).nth(0).focus();
