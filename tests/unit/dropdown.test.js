@@ -81,6 +81,16 @@ describe('components/ui-dropdown/ui-dropdown.css — база (ADR-0002, Technic
     }
   });
 
+  it('ширина меню: кламп вьюпорта — 32px career-portal (header.css:137), не 64px --ui-space-8 (ревью T6.1 high)', () => {
+    // Одобренный дизайн: width: min(312px, calc(100vw - 32px)) — мобильная
+    // ветка career-portal header.css:137. 32px = --ui-space-6 шкалы §3.2
+    // (точная пара); --ui-space-8 = 4rem = 64px сужал бы меню против
+    // одобренных значений на вьюпортах < 376px.
+    const block = blockOf(css, '.ui-dropdown__menu');
+    expect(block).toContain('width: min(19.5rem, calc(100vw - var(--ui-space-6)));');
+    expect(css, '64px-кламп (--ui-space-8) не используется').not.toContain('--ui-space-8');
+  });
+
   it('видимость меню управляется [hidden] (ставит модуль); собственных display-переключений нет', () => {
     // Деградация без JS: в CSS нет правил вида .ui-dropdown__menu { display: none }
     // — скрытие живёт на атрибуте hidden (base/reset делает его сильным).
