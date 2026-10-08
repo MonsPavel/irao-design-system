@@ -71,8 +71,14 @@ describe('components/ui-dropdown/ui-dropdown.css — база (ADR-0002, Technic
     const block = blockOf(css, '.ui-dropdown__menu');
     expect(block, 'правило .ui-dropdown__menu найдено').toBeTruthy();
     expect(block).toContain('position: absolute;');
-    expect(block).toContain('z-index: var(--ui-z-dropdown);');
-    expect(css, 'других z-index в компоненте нет').not.toMatch(/z-index:\s*(?!var\()/);
+    // Каждое объявление z-index в компоненте — ровно токен лестницы T2.2
+    // (разбор значений, а не регэксп по всему файлу: \s* бэктрекит в ноль
+    // и lookahead пропускает пробел перед var).
+    const values = [...css.matchAll(/z-index:\s*([^;]+);/g)].map((m) => m[1]);
+    expect(values.length, 'z-index объявлен').toBeGreaterThan(0);
+    for (const value of values) {
+      expect(value, 'z-index — только var(--ui-z-dropdown)').toBe('var(--ui-z-dropdown)');
+    }
   });
 
   it('видимость меню управляется [hidden] (ставит модуль); собственных display-переключений нет', () => {
@@ -94,16 +100,19 @@ describe('components/ui-dropdown/ui-dropdown.css — база (ADR-0002, Technic
 
   it('вход-анимация меню объявлена и гасится prefers-reduced-motion (DoD EPIC-6)', () => {
     expect(css).toMatch(/@keyframes ui-dropdown-in\s*\{/);
-    const reduceBlock = css.match(
-      /@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\}/,
-    );
+    const reduceBlock = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\}/);
     expect(reduceBlock, 'преференс-блок есть').toBeTruthy();
     expect(reduceBlock[0]).toContain('animation: none');
   });
 });
 
 describe('канонический паттерн (components/ui-dropdown/ui-dropdown.html) — деградация и назначения', () => {
-  const html = readFileSync(join(root, 'components', 'ui-dropdown', 'ui-dropdown.html'), 'utf8');
+  // Разметка без комментариев: пины смотрят на теги, а не на прозу
+  // (комментарий «пункты <button role="menuitem">» — не элемент).
+  const stripHtmlComments = (html) => html.replace(/<!--[\s\S]*?-->/g, '');
+  const html = stripHtmlComments(
+    readFileSync(join(root, 'components', 'ui-dropdown', 'ui-dropdown.html'), 'utf8'),
+  );
 
   it('хук модуля data-ui-dropdown в разметке (JS-хуки — только data-ui-*, ADR-0005)', () => {
     expect(html).toContain('data-ui-dropdown');
@@ -227,7 +236,10 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
     expect(source).toContain("var MODULE_NAME = 'dropdown';");
     expect(source).toContain("var SELECTOR = '[data-ui-dropdown]';");
     expect(source).toContain("var INIT_ATTR = 'data-ui-' + MODULE_NAME + '-init';");
-    expect(source).not.toContain('dataset');
+    // Флаг — через get/removeAttribute: обращения к dataset-свойству нет
+    // (DOMStringMap запрещает дефисы — контракт T1.6, п. 6).
+    expect(source).toContain('root.getAttribute(INIT_ATTR)');
+    expect(source).not.toMatch(/dataset\s*\./);
   });
 
   it("readyState 'loading': init отложен (одна подписка), регистрация в IraoUI — сразу; 'complete' — синхронно", () => {
@@ -274,9 +286,9 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
 
     // С существующим id (канонический паттерн) — id не меняется.
     const preset = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
-    expect(preset.document.querySelector('.ui-dropdown__trigger').getAttribute('aria-controls')).toBe(
-      'dd-menu-1',
-    );
+    expect(
+      preset.document.querySelector('.ui-dropdown__trigger').getAttribute('aria-controls'),
+    ).toBe('dd-menu-1');
   });
 
   it('неполная разметка (нет триггера/меню) — console.warn, соседние инстансы живы (контракт шаблона п.4)', () => {
@@ -308,14 +320,17 @@ describe('подключение и гейты (DoD T6.1)', () => {
   });
 
   it('стенд showcase/pages/ui-dropdown: навигационная и действия-секции с якорями', () => {
-    const stand = readFileSync(join(root, 'showcase', 'pages', 'ui-dropdown', 'index.html'), 'utf8');
+    const stand = readFileSync(
+      join(root, 'showcase', 'pages', 'ui-dropdown', 'index.html'),
+      'utf8',
+    );
     expect(stand, 'секция навигационного меню').toContain('id="uidd-nav"');
     expect(stand, 'секция меню действий').toContain('id="uidd-actions"');
     expect(stand, 'aria-current в навигационном демо').toContain('aria-current="page"');
     expect(stand, 'статус активации действия').toContain('id="uidd-actions-status"');
   });
 
-  it("README компонента: APG menu-button чек-лист, правило menu-роли, хелпер aria-current, деградация без JS", () => {
+  it('README компонента: APG menu-button чек-лист, правило menu-роли, хелпер aria-current, деградация без JS', () => {
     const readme = readFileSync(join(root, 'components', 'ui-dropdown', 'README.md'), 'utf8');
     expect(readme).toMatch(/menu-button/i);
     expect(readme).toMatch(/menu-рол[ия] только для командных меню|только для командных меню/i);

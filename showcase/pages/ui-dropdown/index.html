@@ -1,0 +1,112 @@
+<!-- Стенд ui-dropdown (T6.1): два назначения компонента на одной странице —
+     навигационное меню (#uidd-nav, nav > ul > li > a, без menu-роли,
+     aria-current="page" на текущей странице — перенос career-portal header.js;
+     хелпер простановки по URL — README компонента) и меню действий
+     (#uidd-actions, role="menu" + role="menuitem", активация пишется в
+     status-регион #uidd-actions-status). В разметке НЕТ hidden на меню и НЕТ
+     aria-expanded/aria-controls на триггерах: их ставит модуль при
+     инициализации — без JS оба меню раскрыты и всё содержимое доступно
+     (e2e проверяет источник и no-JS контекст). Ссылки после каждого меню —
+     цели сценариев Tab-выхода. -->
+<section id="uidd-nav" aria-labelledby="uidd-nav-heading">
+  <h2 id="uidd-nav-heading">Навигационное меню (ссылки)</h2>
+  <p class="ui-showcase-stand__note">
+    Меню — <code>nav &gt; ul &gt; li &gt; a</code> <strong>без role="menu"</strong>: переходы — не
+    команды, menu-роль только для командных меню (README, do/don't). Текущая страница помечена
+    <code>aria-current="page"</code>. Без JS меню раскрыто.
+  </p>
+  <div class="ui-dropdown" data-ui-dropdown>
+    <button class="ui-dropdown__trigger" type="button" id="uidd-nav-trigger">
+      Разделы
+      <svg
+        class="ui-dropdown__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M3 6l5 5 5-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </button>
+    <nav class="ui-dropdown__menu" id="uidd-nav-menu" aria-label="Разделы сайта">
+      <ul class="ui-dropdown__list">
+        <li><a class="ui-dropdown__item" href="#uidd-nav" aria-current="page">Практики</a></li>
+        <li><a class="ui-dropdown__item" href="#uidd-nav">Вакансии</a></li>
+        <li><a class="ui-dropdown__item" href="#uidd-nav">Стажировки</a></li>
+      </ul>
+    </nav>
+  </div>
+  <p>
+    <a class="ui-link" id="uidd-after-nav" href="#uidd-nav">Элемент после меню (цель Tab-выхода)</a>
+  </p>
+</section>
+
+<section id="uidd-actions" aria-labelledby="uidd-actions-heading">
+  <h2 id="uidd-actions-heading">Меню действий (role="menu")</h2>
+  <p class="ui-showcase-stand__note">
+    Команды над объектом — <code>role="menu"</code> + пункты <code>role="menuitem"</code>; активация
+    закрывает меню и возвращает фокус на триггер (APG). Результат действия — в статус-регионе ниже.
+  </p>
+  <div class="ui-dropdown" data-ui-dropdown>
+    <button class="ui-dropdown__trigger" type="button" id="uidd-actions-trigger">
+      Действия
+      <svg
+        class="ui-dropdown__icon"
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M3 6l5 5 5-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </button>
+    <div
+      class="ui-dropdown__menu"
+      id="uidd-actions-menu"
+      role="menu"
+      aria-label="Действия с записью"
+    >
+      <button class="ui-dropdown__item" type="button" role="menuitem">Редактировать</button>
+      <button class="ui-dropdown__item" type="button" role="menuitem">Дублировать</button>
+      <button class="ui-dropdown__item" type="button" role="menuitem">Удалить</button>
+    </div>
+  </div>
+  <p id="uidd-actions-status" role="status">Действие не выбрано</p>
+  <p>
+    <a class="ui-link" id="uidd-after-actions" href="#uidd-actions"
+      >Элемент после меню (цель Tab-выхода)</a
+    >
+  </p>
+</section>
+
+<script>
+  // Демо-приёмник действий стенда (не часть компонента): клик по menuitem
+  // пишется в status-регион — e2e проверяет, что действие дошло до сайта.
+  (function () {
+    var menu = document.getElementById('uidd-actions-menu');
+    var status = document.getElementById('uidd-actions-status');
+    if (!menu || !status) return;
+    menu.addEventListener('click', function (event) {
+      var item = event.target.closest('[role="menuitem"]');
+      if (item) {
+        status.textContent = 'Выполнено: ' + item.textContent;
+      }
+    });
+  })();
+</script>

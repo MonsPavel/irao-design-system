@@ -108,10 +108,8 @@ test.describe('ui-dropdown: деградация без JS (AC; ТЗ №14)', ()
       for (let i = 0; i < 3; i += 1) {
         await expect(actionButtons.nth(i), `пункт ${i} видим и доступен`).toBeEnabled();
       }
-
-      // Активация действия работает без модуля (нативный click).
-      await actionButtons.first().click();
-      await expect(noJsPage.locator(SEL.actionsStatus)).toHaveText('Выполнено: Редактировать');
+      // Активация команд без JS — зона сайта (дублирующие кнопки страницы,
+      // README don't): приёмник стенда — тоже inline-скрипт и тут не работает.
     } finally {
       await context.close();
     }
@@ -208,7 +206,8 @@ test.describe('ui-dropdown: закрытие (AC: Escape/вне-клик/Tab)', 
     // (перенос career-portal: слушатель документа).
     await trigger.click();
     await expectOpen(page, trigger, menu);
-    await page.locator('h1').focus();
+    await page.locator('.ui-showcase-header__home').focus();
+    await expect(page.locator('.ui-showcase-header__home')).toBeFocused();
     await page.keyboard.press('Escape');
     await expectClosed(page, trigger, menu);
     await expect(trigger, 'фокус на триггере и при внешнем Escape').toBeFocused();
@@ -374,26 +373,32 @@ test.describe('ui-dropdown: reduced-motion и axe (AC)', () => {
     ).toBe('none');
   });
 
-  test('axe: стенд чист закрытым и в открытом состоянии обоих назначений (AC)', async ({
+  test('axe: стенд чист закрытым и в открытом состоянии каждого назначения (AC)', async ({
     stand,
   }) => {
     const page = await stand('ui-dropdown');
-    const results = await a11y(page).analyze();
-    expect(
-      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
-      'axe: violations = [] (закрыто)',
-    ).toEqual([]);
+    // Анализ финальных состояний, не кадров входной анимации (opacity 0→1 даёт
+    // axe color-contrast на пунктах); сам reduced-motion режим — соседний тест.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const violationsOf = (results) =>
+      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`);
 
-    // Открытые состояния обоих назначений: динамическая aria и видимые меню.
+    expect(violationsOf(await a11y(page).analyze()), 'axe: violations = [] (закрыто)').toEqual([]);
+
+    // Открытое навигационное меню: динамическая aria и видимое меню.
     await page.locator(SEL.navTrigger).click();
+    expect(
+      violationsOf(await a11y(page).analyze()),
+      'axe: violations = [] (открыта навигация)',
+    ).toEqual([]);
+    await page.keyboard.press('Escape');
+
+    // Открытое меню действий (оба одновременно открыты быть не могут — closeAll).
     await page.locator(SEL.actionsTrigger).focus();
     await page.keyboard.press('ArrowDown');
-    const openResults = await a11y(page).analyze();
     expect(
-      openResults.violations.map(
-        (violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`,
-      ),
-      'axe: violations = [] (открыто)',
+      violationsOf(await a11y(page).analyze()),
+      'axe: violations = [] (открыты действия)',
     ).toEqual([]);
   });
 });
