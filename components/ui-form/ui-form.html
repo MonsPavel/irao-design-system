@@ -1,0 +1,100 @@
+<!-- ui-form (T5.4): канонический паттерн «форма целиком» — раскладка, aside,
+     сводная ошибка, success. Копипаст даёт доступный результат: summary —
+     role="alert" (немедленное объявление при появлении после сабмита) и
+     tabindex="-1" (фокус переводится на него при показе — правило фокуса
+     T5.4); ссылки summary ведут на id полей (href="#apply-name") — переход
+     фокуса реален, доопределение — модуль T5.5 (Implementation requirements
+     п.2). Success-заголовок несёт tabindex="-1" — паттерн работает и без JS
+     (серверный рендер success-страницы, вариант Bitrix). Заголовки на стенде
+     получают уровень по иерархии страницы (здесь h2 с ролью ui-h4 — визуал
+     одобренного fs-h4). Скрытие до момента — атрибут hidden (показ = снятие
+     атрибута; JS-логика свапа — сайт/T5.5, паттерн выше). Поля — ui-field
+     (T5.1); ui-field--wide растягивает поле на все колонки grid'а. -->
+<form class="ui-form" action="/apply/" method="post">
+  <div class="ui-form__summary" role="alert" tabindex="-1">
+    <h2 class="ui-h4 ui-form__summary-title">В форме 2 ошибки</h2>
+    <ul class="ui-form__summary-list">
+      <li><a class="ui-link" href="#apply-name">Укажите имя и фамилию</a></li>
+      <li><a class="ui-link" href="#apply-email">Исправьте адрес e-mail</a></li>
+    </ul>
+  </div>
+  <div class="ui-form__layout">
+    <div class="ui-form__main">
+      <div class="ui-form__grid">
+        <div class="ui-field ui-field--required ui-field--error">
+          <label class="ui-field__label" for="apply-name">
+            Имя и фамилия
+            <span class="ui-field__req"
+              ><span aria-hidden="true">*</span
+              ><span class="ui-field__req-text">обязательное поле</span></span
+            >
+          </label>
+          <input
+            class="ui-field__input"
+            type="text"
+            id="apply-name"
+            name="name"
+            required
+            aria-invalid="true"
+            aria-describedby="apply-name-error"
+          >
+          <p class="ui-field__error" id="apply-name-error" role="alert">Укажите имя и фамилию</p>
+        </div>
+        <div class="ui-field ui-field--required ui-field--error">
+          <label class="ui-field__label" for="apply-email">
+            E-mail
+            <span class="ui-field__req"
+              ><span aria-hidden="true">*</span
+              ><span class="ui-field__req-text">обязательное поле</span></span
+            >
+          </label>
+          <input
+            class="ui-field__input"
+            type="email"
+            id="apply-email"
+            name="email"
+            value="resume@"
+            autocomplete="email"
+            required
+            aria-invalid="true"
+            aria-describedby="apply-email-error"
+          >
+          <p class="ui-field__error" id="apply-email-error" role="alert">Исправьте адрес e-mail</p>
+        </div>
+        <div class="ui-field ui-field--wide">
+          <label class="ui-field__label" for="apply-cover">Сопроводительное письмо</label>
+          <textarea class="ui-field__textarea" id="apply-cover" name="cover" rows="4"></textarea>
+        </div>
+      </div>
+      <div class="ui-form__actions">
+        <button class="ui-button ui-button--primary" type="submit">Отправить</button>
+      </div>
+    </div>
+    <aside class="ui-form__aside" aria-labelledby="apply-aside-title">
+      <h2 class="ui-h4 ui-form__aside-title" id="apply-aside-title">День открытых дверей</h2>
+      <p class="ui-body ui-form__aside-text">
+        Расскажем о программе стажировки и ответим на вопросы.
+      </p>
+      <dl class="ui-form__aside-list">
+        <div class="ui-form__aside-row">
+          <dt class="ui-form__aside-label">Дата</dt>
+          <dd class="ui-form__aside-value">28.09.2026, 14:00</dd>
+        </div>
+        <div class="ui-form__aside-row">
+          <dt class="ui-form__aside-label">Город</dt>
+          <dd class="ui-form__aside-value">Санкт-Петербург</dd>
+        </div>
+      </dl>
+    </aside>
+  </div>
+  <p class="ui-small ui-text--muted ui-form__footnote">
+    <span class="ui-form__req" aria-hidden="true">*</span> — обязательные поля
+  </p>
+  <div class="ui-form__success" hidden>
+    <h2 class="ui-h4 ui-form__success-title" tabindex="-1">Заявка отправлена</h2>
+    <p class="ui-body ui-form__success-text">Мы отправим подтверждение на указанный e-mail.</p>
+    <div class="ui-form__success-actions">
+      <a class="ui-button ui-button--outline" href="/">К списку мероприятий</a>
+    </div>
+  </div>
+</form>

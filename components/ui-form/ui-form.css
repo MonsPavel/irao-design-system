@@ -1,0 +1,248 @@
+/** @define form */
+
+/*!
+ * irao-ui — ui-form: форма как целое (задача T5.4) — раскладка полей,
+ * сводная ошибка, success-состояние, легенда обязательных полей.
+ *
+ * Источники — career-portal pages.css:174–228: .form-page (main + aside
+ * 1fr/400px, gap 48px, стек ≤1023), .form-grid (2 колонки, gap 20px,
+ * ≤767 — одна) и .form-success (success-bg, gap 12px, 28px); success-свап
+ * и scrollIntoView — js/forms.js. Перенос в mobile-first (инверсия
+ * media-запросов T2.5): стек — база, рост в min-width 768 (md — 2 колонки
+ * grid'а полей, «2 от md» — Scope) и 1024 (lg — двухколоночный лейаут с
+ * aside, стык career-portal ≤1023 → 1024−1).
+ *
+ * Размеры — токены (Implementation requirements п.1): 48px зазор лейаута —
+ * ступень --ui-space-7; 16/12/4px aside — --ui-space-4/3/1 точно; 28px
+ * паддинг aside/success вне шкалы — --ui-space-5 (24px), дифф как в
+ * ui-card (28 → 24, T4.4); gap grid'а 20px — новый токен
+ * --ui-form-grid-gap (перенос «как есть», прецедент --ui-card-gap);
+ * ширина aside 400px — --ui-form-aside-width (то же правило). Треки —
+ * minmax(0, 1fr) (Implementation requirements п.1: длинное слово не
+ * распирает колонку — T3.4).
+ *
+ * Элементы:
+ *  - __layout/__main — двухколоночный лейаут и основная колонка;
+ *    aside — <aside> в разметке (complementary-семантика одобренного
+ *    event-apply.html); sticky top 24px — только на десктопе (правило
+ *    в lg-media, мобильная база статична);
+ *  - __summary — сводная ошибка: role="alert" и tabindex="-1" живут в
+ *    разметке (появление после сабмита = вставка узла/снятие hidden —
+ *    немедленное объявление скринридером; Technical considerations).
+ *    Одобренного дизайна нет (новое) — собирается из пар системы: фон
+ *    --ui-color-error-bg (пара гейта T2.3), радиус/паддинг — как у
+ *    __success; заголовок красится --ui-color-error;
+ *  - __success — блок успеха career-portal: success-bg, заголовок
+ *    --ui-color-success. Заголовок несёт tabindex="-1" в разметке —
+ *    фокус после показа работает и без JS (серверный рендер success-
+ *    страницы — вариант Bitrix, Technical considerations);
+ *  - __footnote + __req — легенда обязательных полей: типографику даёт
+ *    роль разметки (ui-small/ui-text--muted), маркер — цвет одобренного
+ *    .req (та же пара, что ui-field__req); смысл «обязательности» несёт
+ *    текст footnote, не цвет (WCAG 1.4.1).
+ *
+ * Состояния и JS: скрытие до момента — атрибут hidden (глобальная
+ * гарантия base/reset.css: [hidden] бьёт любые display); JS-логики в
+ * компоненте нет (Out of scope — модуль T5.5 и серверный контракт T5.6).
+ * Правила фокуса, зафиксированные этой задачей как паттерны (README):
+ * показ summary → фокус на summary; успех → фокус на __success-заголовок
+ * (tabindex="-1"); ссылки __summary — href="#id" на поля (переход фокуса
+ * реален, Implementation requirements п.2).
+ *
+ * Типографика заголовков/текстов — роли base в разметке (ui-h4/ui-body/
+ * ui-small — паттерн ui-alert/ui-card: компонент текстовые стили не
+ * переобъявляет); элементам-крючкам остаётся только смысловой цвет.
+ * VI-режим: цветов вне токенов нет (инвариант §5). !important нет;
+ * box-sizing на корнях (ADR-0002).
+ */
+
+.ui-form {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+}
+
+/* ── Раскладка: сетка полей (одобренный .form-grid) ── */
+
+.ui-form__grid {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-form-grid-gap);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* 2 колонки от md (Scope T5.4 «1 колонка mobile → 2 от md»); полная ширина
+   поля — ui-field--wide (grid-column: 1 / -1, T5.1). */
+@media (min-width: 768px) {
+  .ui-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ── Раскладка: лейаут с aside (одобренный .form-page, стек → 2 колонки) ── */
+
+.ui-form__layout {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-7);
+  align-items: start;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Основная колонка: держит grid полей и __actions одним блоком лейаута;
+   шаг внутри — 24px одобренного .form-card (gap .ui-form). */
+.ui-form__main {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+}
+
+@media (min-width: 1024px) {
+  .ui-form__layout {
+    grid-template-columns: minmax(0, 1fr) var(--ui-form-aside-width);
+  }
+
+  /* Aside прилипает только на десктопе (одобренный .form-aside; в стеке
+     позиционирование бессмысленно). */
+  .ui-form__aside {
+    position: sticky;
+    top: var(--ui-space-5);
+  }
+}
+
+/* ── Aside (одобренный .form-aside*) ── */
+
+.ui-form__aside {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  padding: var(--ui-space-5);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Элементы-крючки: типографику дают роли разметки (шапка). */
+
+.ui-form__aside-title {
+  box-sizing: border-box;
+  color: var(--ui-color-primary);
+}
+
+.ui-form__aside-text {
+  box-sizing: border-box;
+}
+
+/* ADR-0002 «класс компонента полностью определяет свой вид»: UA-дефолты
+   dl { margin: 20px 0 } и dd { margin-inline-start: 40px } проникали в
+   одобренный порт .form-aside — значение уезжало на 40px вправо от метки,
+   а на legacy-сайте со своими margin-правилами вид зависел бы от чужого
+   CSS (ревью T5.4 high; UA-дефолты списков не входят в ресет
+   base/reset.css:55–68). Ритм строки «метка — значение» несёт gap
+   __aside/__aside-row, отступы — нули. Список размечается элементом
+   __aside-list (класс на <dl>): голый dl в селекторе не проходит БЭМ-гейт
+   (инвариант «селектор компонента = класс ui-form*»). */
+.ui-form__aside-list,
+.ui-form__aside-row,
+.ui-form__aside-label,
+.ui-form__aside-value {
+  margin: 0;
+}
+
+.ui-form__aside-row {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+}
+
+.ui-form__aside-label {
+  box-sizing: border-box;
+  color: var(--ui-color-text-muted);
+}
+
+.ui-form__aside-value {
+  box-sizing: border-box;
+}
+
+/* ── Кнопки формы (одобренный .form-card__submit: слева, не на всю ширину) ── */
+
+.ui-form__actions {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3);
+  align-items: center;
+}
+
+/* ── Сводная ошибка (новое; пары системы — см. шапку) ── */
+
+.ui-form__summary {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-5);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-error-bg);
+}
+
+.ui-form__summary-title {
+  box-sizing: border-box;
+  color: var(--ui-color-error);
+}
+
+/* Список ссылок на поля: ссылки размечаются ui-link (стили не
+   дублируются); список — колонкой с шагом --ui-space-2. */
+.ui-form__summary-list {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+/* ── Success (одобренный .form-success*) ── */
+
+.ui-form__success {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-5);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-success-bg);
+}
+
+.ui-form__success-title {
+  box-sizing: border-box;
+  color: var(--ui-color-success);
+}
+
+.ui-form__success-text {
+  box-sizing: border-box;
+}
+
+/* CTA-лента успеха — переносимая (паттерн ui-error__actions). */
+.ui-form__success-actions {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3);
+  align-items: center;
+}
+
+/* ── Легенда обязательных полей (footnote) ── */
+
+/* Типографика — роль разметки (ui-small ui-text--muted). */
+.ui-form__footnote {
+  box-sizing: border-box;
+}
+
+/* Маркер — цвет одобренного .field__label .req (та же пара, что
+   ui-field__req); смысл «обязательности» несёт текст footnote. */
+.ui-form__req {
+  box-sizing: border-box;
+  color: var(--ui-color-accent);
+}

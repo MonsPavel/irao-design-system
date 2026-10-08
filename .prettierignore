@@ -34,3 +34,6 @@ components/ui-radio-group/ui-radio-group.html
 # T5.3: файловый инпут — тот же случай (<input> без слэша): стенд и канонический паттерн.
 showcase/pages/ui-file/index.html
 components/ui-file/ui-file.html
+# T5.4: форма целиком — тот же случай (<input> без слэша): стенд и канонический паттерн.
+showcase/pages/ui-form/index.html
+components/ui-form/ui-form.html

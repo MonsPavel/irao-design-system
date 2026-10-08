@@ -95,6 +95,7 @@ const COMPONENTS = [
   'ui-radio', // T5.2 — радио-ярлык: label-обёртка нативного инпута (элемент группы)
   'ui-radio-group', // T5.2 — группа радио: fieldset/legend + раскладка radio-row
   'ui-file', // T5.3 — файловый инпут: кнопка-лейбл + sr-only input (клип), value role="status", сброс
+  'ui-form', // T5.4 — форма как целое: раскладка grid/aside, сводная ошибка role="alert", success
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
