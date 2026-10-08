@@ -504,6 +504,53 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     expect(dialog.hasAttribute('open')).toBe(false);
   });
 
+  it('transitionend transform на диалоге закрывает РАНЬШЕ страховочного таймера (контракт К5 в доке = код)', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const api = apiOf({ window });
+
+    api.open(dialog);
+    api.close();
+    expect(dialog.hasAttribute('open')).toBe(true);
+
+    // Событие с панели (target — диалог): закрывает без прокрутки таймеров.
+    const end = new window.Event('transitionend', { bubbles: true });
+    end.propertyName = 'transform';
+    dialog.dispatchEvent(end);
+
+    expect(
+      dialog.hasAttribute('open'),
+      'close() по завершении перехода, не по таймеру 500ms',
+    ).toBe(false);
+  });
+
+  it('посторонние transitionend (другое свойство, bubbling от детей) закрытие не ускоряют', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const api = apiOf({ window });
+
+    api.open(dialog);
+    api.close();
+
+    // opacity (0.25s) — не самый долгий переход; закрывает только transform.
+    const opacity = new window.Event('transitionend', { bubbles: true });
+    opacity.propertyName = 'opacity';
+    dialog.dispatchEvent(opacity);
+    expect(dialog.hasAttribute('open'), 'opacity не завершает анимацию панели').toBe(true);
+
+    // Bubbling от ребёнка (hover __close и т.п.) — target не диалог, игнор.
+    const child = dialog.querySelector('.ui-modal__close');
+    const bubbled = new window.Event('transitionend', { bubbles: true });
+    bubbled.propertyName = 'transform';
+    child.dispatchEvent(bubbled);
+    expect(dialog.hasAttribute('open'), 'чужой target не завершает анимацию').toBe(true);
+
+    vi.advanceTimersByTime(500);
+    expect(dialog.hasAttribute('open'), 'страховка по-прежнему закрывает').toBe(false);
+  });
+
   it('data-ui-modal-target: клик по триггеру открывает целевой диалог; восстановление фокуса — на триггер', () => {
     vi.useFakeTimers();
     const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });

@@ -197,6 +197,52 @@ test.describe('ui-modal: Escape и восстановление фокуса (AC
     await expect(page.locator(SEL.mdTrigger), 'фокус на опенере (AC)').toBeFocused();
   });
 
+  test('латентность cancel→close ≈ длительности анимации (transitionend, не страховочный таймер)', async ({
+    stand,
+  }) => {
+    // Контракт К5 ADR-0011: close() по transitionend transform панели
+    // (0.36s); таймер 500ms — только страховка. Иначе невидимый top-layer
+    // диалог глотает клики/клавиши ~150ms после видимой анимации.
+    const page = await stand('ui-modal');
+    await page.locator(SEL.mdTrigger).click();
+    await expectOpen(page, SEL.mdDialog);
+
+    const t0 = Date.now();
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(
+      () => !document.getElementById('uimd-md-dialog').hasAttribute('open'),
+    );
+    const latency = Date.now() - t0;
+
+    expect(
+      latency,
+      `cancel→close = ${latency}ms: завершение по переходу (~360ms), не по таймеру 500ms`,
+    ).toBeLessThan(480);
+    expect(latency, `cancel→close = ${latency}ms: анимация успевает отыграть`).toBeGreaterThanOrEqual(
+      250,
+    );
+  });
+
+  test('при prefers-reduced-motion закрытие мгновенное (kill-switch 0.01ms — transitionend сразу)', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-modal');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.locator(SEL.mdTrigger).click();
+    await expectOpen(page, SEL.mdDialog);
+
+    const t0 = Date.now();
+    await page.keyboard.press('Escape');
+    await page.waitForFunction(
+      () => !document.getElementById('uimd-md-dialog').hasAttribute('open'),
+    );
+    const latency = Date.now() - t0;
+    expect(latency, `cancel→close = ${latency}ms при reduced-motion — без мёртвого окна`).toBeLessThan(
+      50,
+    );
+    await expect(page.locator(SEL.mdTrigger)).toBeFocused();
+  });
+
   test('клик по __close закрывает, фокус на опенере', async ({ stand }) => {
     const page = await stand('ui-modal');
     await page.locator(SEL.smTrigger).click();
