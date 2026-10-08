@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>probe — SPIKE T7.1 dialog</title>
+    <link rel="stylesheet" href="../../dist/ui-core.min.css" />
+    <style>
+      /* ═══ Зонд SPIKE T7.1: техника native <dialog> на матрице. Страница
+         полностью статическая (без JS) — измеряет браузер, не прототип.
+         Сценарии — tests/e2e/spike-dialog.spec.js (describe «probe»). ═══ */
+
+      /* П2/К6: backdrop токеном слоя 2 — резолвится ли var() в ::backdrop? */
+      dialog.spike-probe::backdrop {
+        background: var(--ui-color-overlay);
+        opacity: 1;
+        transition:
+          opacity var(--ui-transition) allow-discrete,
+          overlay var(--ui-transition) allow-discrete,
+          display var(--ui-transition) allow-discrete;
+      }
+
+      /* П1/К5: pure-CSS анимация открытия/закрытия — @starting-style даёт
+         стартовые кадры открытия, allow-discrete держит бокс в переходе при
+         display none↔block и overlay top-layer↔none (закрытие). */
+      dialog.spike-probe {
+        opacity: 0;
+        transform: translateY(1rem);
+        transition:
+          opacity var(--ui-transition),
+          transform var(--ui-transition),
+          overlay var(--ui-transition) allow-discrete,
+          display var(--ui-transition) allow-discrete;
+      }
+      dialog.spike-probe[open] {
+        opacity: 1;
+        transform: none;
+      }
+      @starting-style {
+        dialog.spike-probe[open],
+        dialog.spike-probe[open]::backdrop {
+          opacity: 0;
+        }
+        dialog.spike-probe[open] {
+          transform: translateY(1rem);
+        }
+      }
+
+      /* П4: :modal — модальное состояние селектором (позиционирование
+         модалки fixed не должно трогать PE-режим, см. П5). */
+      dialog.spike-probe:modal {
+        position: fixed;
+        inset: 0;
+        margin: auto;
+        width: min(24rem, calc(100vw - 2rem));
+        height: fit-content;
+      }
+
+      /* П5/К9: PE-деградация — dialog[open] в разметке без JS должен
+         показывать контент ИНЛАЙН, а не UA-боксом по центру. */
+      dialog.spike-pe[open] {
+        position: static;
+        display: block;
+        margin: var(--ui-space-4) 0;
+      }
+
+      /* П3: имитация VI-перекраски токеном на корне (как темы ADR-0009) —
+         перекрашивается ли ::backdrop сам, по наследованию. */
+      html[data-spike-vi] {
+        --ui-color-overlay: rgba(0, 0, 0, 0.92);
+      }
+
+      /* Зондовый маркер для скриншот-проверки перекраски (без скриншотов —
+         только computed style). */
+      .spike-probe-stage {
+        display: grid;
+        gap: var(--ui-space-4);
+        max-width: 40rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="spike-probe-stage">
+      <h1>probe: техника native dialog (SPIKE T7.1)</h1>
+
+      <p>Страница без JS — измеряет браузер, не прототип.</p>
+
+      <!-- П1/П2/П4/П6/П7: диалог зонда; showModal() зовёт сам сценарий —
+           страница измеряет браузер, а не JS-прототип -->
+      <button type="button" id="spike-probe-opener">Открыть probe-диалог</button>
+
+      <dialog id="spike-probe-dialog" class="spike-probe" aria-labelledby="spike-probe-title">
+        <h2 id="spike-probe-title">Probe-диалог</h2>
+        <p>Проверка: pure-CSS анимация, backdrop-токен, restore фокуса.</p>
+        <!-- П7: method="dialog" — отправка формы закрывает модалку нативно -->
+        <form method="dialog">
+          <button type="submit" value="probe-cancel">Закрыть (method=dialog)</button>
+        </form>
+      </dialog>
+
+      <!-- П5/К9: PE-деградация — «open» в разметке, JS не снимает (страница статическая) -->
+      <dialog id="spike-pe-dialog" class="spike-pe" open aria-labelledby="spike-pe-title">
+        <h2 id="spike-pe-title">PE-деградация (open в разметке, без JS)</h2>
+        <p>Контент должен быть виден инлайн, position: static.</p>
+      </dialog>
+    </main>
+  </body>
+</html>
