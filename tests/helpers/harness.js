@@ -63,10 +63,12 @@ export async function freezeClock(page) {
 
 /**
  * Фикстура `stand(name)` (см. test.extend): открыть стенд, networkidle.
- * Имя валидируется — из него строится URL.
+ * Имя валидируется — из него строится URL. Имя может быть вложенным
+ * («integration/form-full-cycle», T5.6) — сегменты без путей и прочего
+ * мусора: из имени строится URL запроса.
  */
 export async function openStand(page, name) {
-  if (!/^[a-z][a-z0-9-]*$/.test(name)) {
+  if (!/^[a-z][a-z0-9-]*(?:\/[a-z0-9-]+)*$/.test(name)) {
     throw new Error(`openStand: некорректное имя стенда «${name}»`);
   }
   await freezeClock(page);

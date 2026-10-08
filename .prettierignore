@@ -37,3 +37,7 @@ components/ui-file/ui-file.html
 # T5.4: форма целиком — тот же случай (<input> без слэша): стенд и канонический паттерн.
 showcase/pages/ui-form/index.html
 components/ui-form/ui-form.html
+# T5.6: интеграционный стенд «форма целиком» — тот же случай (<input> без
+# слэша): гейт разметки — lint:html (void-style), prettier здесь печатал бы
+# только самозакрытые void-элементы.
+showcase/pages/integration/form-full-cycle/index.html

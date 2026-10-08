@@ -1,0 +1,290 @@
+<p class="ui-showcase-stand__note">
+  Интеграционный стенд T5.6 «форма целиком»: полный цикл из четырёх веток — без JS (нативная
+  валидация) → с JS (блокировка сабмита, сводная ошибка, фокус — модуль
+  <code>IraoUI.form</code>, T5.5) → «серверный ответ» (pre-rendered ошибки: PHP рендерит те же
+  классы и aria, что клиентская валидация) → success. Правило цикла:
+  <strong>серверная валидация всегда включена</strong> — JS только улучшает UX. Каждая ветка —
+  отдельный якорь-состояние (<code>#ffc-nojs</code> / <code>#ffc-client</code> /
+  <code>#ffc-server</code> / <code>#ffc-success</code>) для e2e и visual. Ветка 3 — статическая
+  эмуляция вывода сниппета <code>bitrix/snippets/form-error-render.php</code>; контракт и таблица
+  «состояние → классы → aria → фокус» — components/ui-form/README.md. Сценарии —
+  <code>tests/e2e/form-full-cycle.spec.js</code>. На реальном сайте ветки — разные загрузки страницы
+  (перезагрузка после сабмита); здесь они стоят рядом, чтобы состояния можно было сверить.
+</p>
+
+<section aria-labelledby="ffc-live-heading" id="ffc-live">
+  <h2 id="ffc-live-heading">Форма полного цикла: ветки 1 и 2</h2>
+  <h3 id="ffc-nojs">Ветка 1 — без JS: нативная валидация</h3>
+  <p class="ui-showcase-stand__note">
+    В разметке формы нет <code>novalidate</code>: без JS браузерная валидация работает как есть (ТЗ
+    №14) — пустое обязательное поле блокирует отправку, заполненная форма уходит на сервер (GET).
+    <code>novalidate</code> ставит только модуль <code>IraoUI.form</code> при инициализации. e2e
+    открывает эту форму в контексте без JavaScript. E-mail предзаполнен битым значением — так сервер
+    возвращает ввод пользователя вместе с ошибками.
+  </p>
+  <form class="ui-form" id="ffc-form" data-ui-form action="#ffc-nojs">
+    <div class="ui-form__summary" id="ffc-summary" role="alert" tabindex="-1" hidden>
+      <h4 class="ui-h4 ui-form__summary-title">В форме есть ошибки</h4>
+      <ul class="ui-form__summary-list"></ul>
+    </div>
+    <div class="ui-form__grid">
+      <div class="ui-field ui-field--required">
+        <label class="ui-field__label" for="ffc-name">
+          Имя и фамилия
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="ffc-name"
+          name="name"
+          autocomplete="name"
+          required
+          placeholder="Иван Иванов"
+       >
+      </div>
+      <div class="ui-field ui-field--required">
+        <label class="ui-field__label" for="ffc-email">
+          E-mail
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="email"
+          id="ffc-email"
+          name="email"
+          autocomplete="email"
+          required
+          value="resume@"
+          aria-describedby="ffc-email-hint"
+       >
+        <p class="ui-field__hint" id="ffc-email-hint">
+          Используется для уведомлений о статусе заявки
+        </p>
+      </div>
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="ffc-cover">Сопроводительное письмо</label>
+        <textarea class="ui-field__textarea" id="ffc-cover" name="cover" rows="3"></textarea>
+      </div>
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="ffc-resume">Резюме</label>
+        <input
+          class="ui-field__input"
+          type="file"
+          id="ffc-resume"
+          name="resume"
+          data-ui-max-size="1048576"
+          aria-describedby="ffc-resume-hint"
+       >
+        <p class="ui-field__hint" id="ffc-resume-hint">
+          Лимит размера — data-ui-max-size в байтах (здесь 1048576 = 1 МБ)
+        </p>
+      </div>
+      <div class="ui-field ui-field--required ui-field--wide">
+        <label class="ui-checkbox">
+          <input
+            class="ui-checkbox__input"
+            type="checkbox"
+            id="ffc-consent"
+            name="consent"
+            required
+         >
+          <span>
+            Согласие на обработку персональных данных
+            <span class="ui-field__req"
+              ><span aria-hidden="true">*</span
+              ><span class="ui-field__req-text">обязательное поле</span></span
+            >
+          </span>
+        </label>
+      </div>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__spinner" aria-hidden="true"></span>
+        <span class="ui-button__label">Отправить</span>
+      </button>
+    </div>
+    <p class="ui-small ui-text--muted ui-form__footnote">
+      <span class="ui-form__req" aria-hidden="true">*</span> — обязательные поля
+    </p>
+  </form>
+  <h3 id="ffc-client">Ветка 2 — с JS: блокировка сабмита, сводная ошибка, фокус</h3>
+  <p class="ui-showcase-stand__note">
+    Та же форма выше: сабмит с ошибками модуль блокирует (<code>preventDefault</code> — данные не
+    уйдут на сервер, ведь серверная валидация всё равно включена), заполняет сводную ошибку ссылками
+    на поля («В форме N ошибк(и/ок)») и переводит фокус на <code>#ffc-summary</code>; ошибки полей —
+    по контракту T5.6. Валидный сабмит модуль пропускает: страницу перезагружает сервер и рендерит
+    следующую ветку.
+  </p>
+</section>
+
+<section aria-labelledby="ffc-server-heading" id="ffc-server">
+  <h2 id="ffc-server-heading">
+    Ветка 3 — «серверный ответ»: PHP-рендер после перезагрузки (статика)
+  </h2>
+  <p class="ui-showcase-stand__note">
+    Эмуляция вывода сниппета <code>bitrix/snippets/form-error-render.php</code>: сервер вернул форму
+    с вводом пользователя и ошибками валидации. Разметка ошибки та же, что у клиентской валидации:
+    <code>ui-field--error</code> + <code>aria-invalid="true"</code> +
+    <code>aria-describedby</code> + <code>&lt;p class="ui-field__error"&gt;</code> (суффикс id
+    <code>-error</code> — единый с модулем T5.5), сводная —
+    <code>ui-form__summary[role=alert]</code>. Идентичность computed-состояний полей веток 2 и 3 —
+    ключевой e2e-сценарий T5.6 (tests/e2e/form-full-cycle.spec.js). Фокус на summary после
+    перезагрузки ставит inline-сниппет под формой — точная копия вывода
+    <code>irao_ui_form_focus_script()</code> из сниппета.
+  </p>
+  <form class="ui-form" id="ffc-server-form" data-ui-form action="#ffc-server">
+    <div class="ui-form__summary" id="ffc-server-summary" role="alert" tabindex="-1">
+      <h3 class="ui-h4 ui-form__summary-title">В форме 3 ошибки</h3>
+      <ul class="ui-form__summary-list">
+        <li><a class="ui-link" href="#ffc-srv-name">Заполните это поле</a></li>
+        <li><a class="ui-link" href="#ffc-srv-email">Исправьте адрес e-mail</a></li>
+        <li><a class="ui-link" href="#ffc-srv-consent">Отметьте этот пункт</a></li>
+      </ul>
+    </div>
+    <div class="ui-form__grid">
+      <div class="ui-field ui-field--required ui-field--error">
+        <label class="ui-field__label" for="ffc-srv-name">
+          Имя и фамилия
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="ffc-srv-name"
+          name="name"
+          autocomplete="name"
+          required
+          value=""
+          aria-invalid="true"
+          aria-describedby="ffc-srv-name-error"
+       >
+        <p class="ui-field__error" id="ffc-srv-name-error" role="alert">Заполните это поле</p>
+      </div>
+      <div class="ui-field ui-field--required ui-field--error">
+        <label class="ui-field__label" for="ffc-srv-email">
+          E-mail
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="email"
+          id="ffc-srv-email"
+          name="email"
+          autocomplete="email"
+          required
+          value="resume@"
+          aria-invalid="true"
+          aria-describedby="ffc-srv-email-hint ffc-srv-email-error"
+       >
+        <p class="ui-field__hint" id="ffc-srv-email-hint">
+          Используется для уведомлений о статусе заявки
+        </p>
+        <p class="ui-field__error" id="ffc-srv-email-error" role="alert">Исправьте адрес e-mail</p>
+      </div>
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="ffc-srv-cover">Сопроводительное письмо</label>
+        <textarea class="ui-field__textarea" id="ffc-srv-cover" name="cover" rows="3"></textarea>
+      </div>
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="ffc-srv-resume">Резюме</label>
+        <input
+          class="ui-field__input"
+          type="file"
+          id="ffc-srv-resume"
+          name="resume"
+          data-ui-max-size="1048576"
+          aria-describedby="ffc-srv-resume-hint"
+       >
+        <p class="ui-field__hint" id="ffc-srv-resume-hint">
+          Лимит размера — data-ui-max-size в байтах (здесь 1048576 = 1 МБ)
+        </p>
+      </div>
+      <div class="ui-field ui-field--required ui-field--wide ui-field--error">
+        <label class="ui-checkbox">
+          <input
+            class="ui-checkbox__input"
+            type="checkbox"
+            id="ffc-srv-consent"
+            name="consent"
+            aria-invalid="true"
+            aria-describedby="ffc-srv-consent-error"
+         >
+          <span>
+            Согласие на обработку персональных данных
+            <span class="ui-field__req"
+              ><span aria-hidden="true">*</span
+              ><span class="ui-field__req-text">обязательное поле</span></span
+            >
+          </span>
+        </label>
+        <p class="ui-field__error" id="ffc-srv-consent-error" role="alert">Отметьте этот пункт</p>
+      </div>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__spinner" aria-hidden="true"></span>
+        <span class="ui-button__label">Отправить</span>
+      </button>
+    </div>
+    <p class="ui-small ui-text--muted ui-form__footnote">
+      <span class="ui-form__req" aria-hidden="true">*</span> — обязательные поля
+    </p>
+  </form>
+  <script>
+    // T5.6: точная копия inline-сниппета из bitrix/snippets/form-error-render.php
+    // (irao_ui_form_focus_script('ffc-server-summary')) — работает без модулей:
+    // после перезагрузки страницы с ошибками фокус встаёт на сводную ошибку
+    // (role="alert" объявит её, ссылки поведут к полям). Согласованность
+    // сниппета и стенда пиннит tests/unit/form-server-contract.test.js.
+    (function () {
+      var el = document.getElementById('ffc-server-summary');
+      if (el && !el.hidden && typeof el.focus === 'function') {
+        el.focus();
+      }
+    })();
+  </script>
+  <p class="ui-showcase-stand__note">
+    Форма несёт <code>data-ui-form</code>: на реальном сайте модуль инициализируется и после
+    перезагрузки — пользователь исправляет поля (ошибка снимается на <code>input</code>), повторный
+    сабмит снова валидируется клиентом, а сервер остаётся источником истины. Клик по ссылке summary
+    переносит фокус на поле.
+  </p>
+</section>
+
+<section aria-labelledby="ffc-success-heading" id="ffc-success">
+  <h2 id="ffc-success-heading">Ветка 4 — success: серверная success-страница</h2>
+  <p class="ui-showcase-stand__note">
+    Валидные данные сервер принял: success-блок рендерится сразу видимым, без JS (вариант Bitrix).
+    Заголовок с <code>tabindex="-1"</code> — цель фокуса: success-вариант inline-сниппета
+    (<code>irao_ui_form_focus_script('…-success-title')</code>) переводит фокус после загрузки. На
+    стенде ветки соседствуют на одной странице (в реальности это отдельные загрузки), поэтому
+    success-скрипт здесь не исполняется — поведение заголовка проверяет e2e программным фокусом,
+    живой свап показывает стенд ui-form (T5.4).
+  </p>
+  <div class="ui-form__success" id="ffc-success-block">
+    <h3 class="ui-h4 ui-form__success-title" id="ffc-success-title" tabindex="-1">
+      Заявка отправлена
+    </h3>
+    <p class="ui-body ui-form__success-text">
+      Мы отправим подтверждение и детали посещения на указанный e-mail. Повторная заявка на участие
+      в этом мероприятии невозможна.
+    </p>
+    <div class="ui-form__success-actions">
+      <a class="ui-button ui-button--primary" href="#ffc-success-heading">К списку мероприятий</a>
+    </div>
+  </div>
+</section>
