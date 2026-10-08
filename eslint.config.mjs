@@ -40,10 +40,23 @@ const sharedRules = Object.freeze({
  *    в flat config абсолютны и не переопределяются дописыванием блоков —
  *    поэтому раннер грузит только configForLintCases (overrideConfigFile: true),
  *    и этот блок на него не действует;
- *  - машинные артефакты воркфлоу — зеркалит .gitignore.
+ *  - машинные артефакты воркфлоу — зеркалит .gitignore;
+ *  - dist/** и showcase/dist/** — машинный вывод build.mjs, не исходники
+ *    (та же логика, что "!dist/**" в lint:css — гейты написаны для
+ *    исходников). История: с T5.5 минификатор (esbuild compress) легально
+ *    сжимает typeof/null-сравнения модулей до `'function'==typeof x` /
+ *    `x!=null` — eqeqeq не должен оценивать бандл (ревью гейта
+ *    `npm run build && npm run lint`, регрессия-пин — tests/unit/
+ *    lint-artifacts.test.js).
  */
 const globalIgnores = {
-  ignores: ['tests/lint-cases/**', '**/.zcode/**', '**/.playwright-mcp/**'],
+  ignores: [
+    'tests/lint-cases/**',
+    '**/.zcode/**',
+    '**/.playwright-mcp/**',
+    'dist/**',
+    'showcase/dist/**',
+  ],
 };
 
 /** Конфиги линтеров в корне: CJS-файлы (загрузчики исполняют их в CJS). */
