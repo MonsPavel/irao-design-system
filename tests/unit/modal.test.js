@@ -227,9 +227,11 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
 
   /**
    * jsdom не реализует методы <dialog>: минимальный полифилл с нативной
-   * семантикой контракта (showModal ставит open; close снимает open и
-   *_dispatch'ит close) — достаточно для пинов логики модуля; нативное
-   * поведение (trap/top-layer/Escape) — tests/e2e/ui-modal.spec.js.
+   * семантикой контракта (showModal ставит open; close снимает open, а
+   * событие close доставляет ОТЛОЖЕННЫМ таском — Chromium снимает open
+   * синхронно и шлёт close очередью, замерено e2e-инструментацией) —
+   * достаточно для пинов логики модуля; нативное поведение
+   * (trap/top-layer/Escape) — tests/e2e/ui-modal.spec.js.
    */
   function polyfillDialog(window) {
     const proto = window.HTMLDialogElement.prototype;
@@ -242,7 +244,9 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     proto.close = function close() {
       if (!this.hasAttribute('open')) return;
       this.removeAttribute('open');
-      this.dispatchEvent(new window.Event('close'));
+      window.setTimeout(() => {
+        this.dispatchEvent(new window.Event('close'));
+      }, 0);
     };
   }
 
@@ -522,6 +526,33 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     expect(dialog.hasAttribute('open'), 'close() по завершении перехода, не по таймеру 500ms').toBe(
       false,
     );
+    vi.advanceTimersByTime(0); // отложенный таск close-события (как в Chromium)
+  });
+
+  it('диалог скрыт УЖЕ без is-closing: чистка синхронна с close(), окно «скрыт, но закрывающийся» исключено (гонка e2e)', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const api = apiOf({ window });
+
+    api.open(dialog);
+    api.close();
+
+    const end = new window.Event('transitionend', { bubbles: true });
+    end.propertyName = 'transform';
+    dialog.dispatchEvent(end);
+
+    // Chromium: open снимается синхронно, close-событие — очередью (замер
+    // e2e-инструментацией: ~20ms между «скрыт» и «событие»). Если чистка
+    // класса живёт только в обработчике close, в этом окне диалог скрыт,
+    // но с is-closing — на нём спотыкаются регресс-циклы (toBeHidden +
+    // evaluate). Чистка обязана быть синхронной с close().
+    expect(dialog.hasAttribute('open')).toBe(false);
+    expect(
+      dialog.classList.contains('is-closing'),
+      'класс снят синхронно с close(), а не в отложенном close-событии',
+    ).toBe(false);
+    vi.advanceTimersByTime(0);
   });
 
   it('посторонние transitionend (другое свойство, bubbling от детей) закрытие не ускоряют', () => {

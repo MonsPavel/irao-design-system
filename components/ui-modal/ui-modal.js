@@ -13,9 +13,12 @@
  *    долгий переход) со страховочным таймером 500ms (career-portal: 400ms);
  *    при prefers-reduced-motion анимировать нечего (kill-switch гасит
  *    переходы) и закрытие мгновенное — под 0.01ms движки могут вовсе не
- *    создавать закрывающие переходы; остаточный класс снимается НА СОБЫТИИ
- *    close — контракт ADR-0011 (иначе класс зажимает opacity и ломает
- *    повторные циклы — регресс-кейс career-portal, e2e обязателен);
+ *    создавать закрывающие переходы. Чистка (остаточный класс/лок/фокус)
+ *    выполняется СИНХРОННО с root.close(): Chromium снимает open сразу,
+ *    а событие close доставляет отложенным таском — чистка в обработчике
+ *    события оставляла окно «диалог скрыт, но с is-closing» и ломала
+ *    повторные циклы (регресс-кейс career-portal; ADR-0011 «класс снимается
+ *    на close» — про момент close(), не про асинхронное событие);
  *  - Escape через cancel → preventDefault → анимированный close (нативное
  *    закрытие мгновенно и анимацию теряет);
  *  - focus(opener, preventScroll) ДО showModal() — Safari не фокусирует
@@ -196,6 +199,7 @@
       }
       window.clearTimeout(closeTimer);
       closing = false;
+      cleanedUp = false; // новый цикл: чистка снова обязательна при закрытии
       root.classList.remove('is-closing');
       if (opener) {
         opener.focus({ preventScroll: true });
@@ -217,13 +221,14 @@
       dispatch('open');
     }
 
-    /** Завершение анимации: закрыть диалог (событие close → onClose). */
+    /** Завершение анимации: закрыть диалог, чистка — синхронно с close(). */
     function finishClose() {
       window.clearTimeout(closeTimer);
       if (!closing) {
         return;
       }
-      root.close();
+      root.close(); // open снимается синхронно, close-событие браузер шлёт очередью
+      cleanupAfterClose();
     }
 
     /* transitionend transform ПАНЕЛИ (0.36s — самый долгий переход) —
@@ -264,7 +269,8 @@
         return;
       }
       if (prefersReducedMotion()) {
-        root.close(); // событие close → onClose: чистка/лок/фокус — как всегда
+        root.close(); // open синхронно
+        cleanupAfterClose(); // чистка не ждёт отложенный таск close-события
         return;
       }
       closing = true;
@@ -272,10 +278,23 @@
       closeTimer = window.setTimeout(finishClose, CLOSE_FALLBACK_MS);
     }
 
-    /* Очистка ПО СОБЫТИЮ close — контракт ADR-0011: остаточный is-closing
-       снимается здесь, поэтому любой путь закрытия (наша анимация, form
-       method="dialog" — К11) остаётся чистым для повторных циклов. */
-    function onClose() {
+    /* Очистка после закрытия. Контракт ADR-0011 «остаточный класс снимается
+       на close» исполняется СИНХРОННО с root.close() во всех наших путях:
+       Chromium снимает open сразу, а событие close доставляет отложенным
+       таском (~20ms, замер e2e-инструментацией) — чистка в обработчике
+       события оставляла окно «диалог скрыт, но с is-closing/локом», на
+       котором ломаются повторные циклы (регресс design-qa career-portal,
+       ловился флаки-прогонами). Для чужих путей закрытия (form
+       method="dialog" — К11) чистку делает сам close-событие. Флаг делает
+       двойной вызов (наш + событие) безопасным: чистка и событие — ровно
+       один раз. */
+    var cleanedUp = true;
+
+    function cleanupAfterClose() {
+      if (cleanedUp) {
+        return;
+      }
+      cleanedUp = true;
       closing = false;
       window.clearTimeout(closeTimer);
       root.classList.remove('is-closing');
@@ -285,6 +304,13 @@
         opener.focus({ preventScroll: true }); // restore (AC)
       }
       dispatch('close');
+    }
+
+    /* Событие close от браузера: для наших путей чистка уже сделана
+       синхронно (no-op по флагу); чужие пути (form method="dialog")
+       чистятся здесь. */
+    function onClose() {
+      cleanupAfterClose();
     }
 
     /** Escape: нативное закрытие мгновенно — заменяем анимированным (К5). */
@@ -317,14 +343,14 @@
       destroy: function () {
         window.clearTimeout(closeTimer);
         if (isOpen()) {
-          root.close(); // событие close ещё слушается — очистка пройдёт по контракту
+          root.close(); // open снимется синхронно; событие close — очередью
         }
         root.removeEventListener('close', onClose);
         root.removeEventListener('cancel', onCancel);
         root.removeEventListener('click', onRootClick);
         root.removeEventListener('transitionend', onTransitionEnd);
-        closing = false;
-        pullStack();
+        // Чистка ПРЯМО: отложенный close-таск придёт после снятия слушателей.
+        cleanupAfterClose();
         root.removeAttribute(INIT_ATTR);
       },
     };
