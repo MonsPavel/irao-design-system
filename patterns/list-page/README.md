@@ -81,13 +81,18 @@
 <div class="ui-grid ui-grid--3">
   <article class="ui-card ui-card--hover ui-card--link">
     <p><span class="ui-tag ui-tag--blue">Электроэнергетика</span>…</p>
-    <h3 class="ui-h3 ui-card__title"><a class="ui-card__link" href="/vacancy/123/">…</a></h3>
+    <h2 class="ui-h3 ui-card__title"><a class="ui-card__link" href="/vacancy/123/">…</a></h2>
     <p class="ui-body ui-card__body">Короткое описание…</p>
     <div class="ui-card__footer"><button class="ui-button ui-button--outline" type="button">Откликнуться</button></div>
   </article>
 </div>
 <nav class="ui-pagination" aria-label="Пагинация: вакансии">…</nav>
 ```
+
+Заголовок карточки — `h2` по семантике страницы (h1 → h2 без пропусков, иначе
+нарушение гейта `irao/heading-order`); **уровень тега определяет контекст
+страницы, роль `ui-h3` — вид** («классы, а не теги», T3.3) — канон `ui-card`
+не задаёт уровень тега.
 
 Ссылки страниц пагинации **сохраняют применённые GET-параметры фильтров**
 (`?city=msk&page=2`), иначе смена страницы сбрасывает фильтр.
@@ -119,7 +124,9 @@
   с результатов. Сервер ставит сниппет только когда фильтр реально применён:
 
   ```php
-  <?php if (!empty($_GET['city']) || !empty($_GET['direction'])): ?>
+  <?php // Гвард — по всем фильтрам формы (city/direction/experience),
+     // синхронно со сниппетом канона list-page.html. ?>
+  <?php if (!empty($_GET['city']) || !empty($_GET['direction']) || !empty($_GET['experience'])): ?>
     <script>document.getElementById('page-title').focus();</script>
   <?php endif; ?>
   ```
@@ -138,6 +145,8 @@
 // GET-параметры фильтров — только через экранирование; фильтрация ИБ —
 // в result_modifier.php / кастомном компоненте: arFilter по $_GET.
 $sCity = isset($_GET['city']) ? htmlspecialcharsbx((string)$_GET['city']) : '';
+$sDirection = isset($_GET['direction']) ? htmlspecialcharsbx((string)$_GET['direction']) : '';
+$sExperience = isset($_GET['experience']) ? htmlspecialcharsbx((string)$_GET['experience']) : '';
 $iCount = count($arResult['ITEMS']);
 ?>
 <h1 class="ui-h1" id="page-title" tabindex="-1">Вакансии</h1>
@@ -166,8 +175,9 @@ $iCount = count($arResult['ITEMS']);
   <!-- empty-ветка: ui-empty со сбросом-ссылкой на чистый URL -->
 <?php endif; ?>
 
-<?php // Фокус на заголовок результатов — только когда фильтр применён. ?>
-<?php if ($sCity !== ''): ?>
+<?php // Фокус на заголовок результатов — когда применён любой из фильтров
+   // формы (все три, как в сниппете канона list-page.html и в A11y выше). ?>
+<?php if ($sCity !== '' || $sDirection !== '' || $sExperience !== ''): ?>
   <script>document.getElementById('page-title').focus();</script>
 <?php endif; ?>
 ```

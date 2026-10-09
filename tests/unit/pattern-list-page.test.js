@@ -220,10 +220,9 @@ describe('patterns/list-page/README.md — дока паттерна (AC: Bitrix
     expect(readme, 'эскиз экранирует experience').toContain(
       "$sExperience = isset($_GET['experience'])",
     );
-    expect(
-      readme,
-      'фокус-гвард эскиза покрывает все три фильтра формы паттерна',
-    ).toMatch(/\$sCity !== '' \|\| \$sDirection !== '' \|\| \$sExperience !== ''/);
+    expect(readme, 'фокус-гвард эскиза покрывает все три фильтра формы паттерна').toMatch(
+      /\$sCity !== '' \|\| \$sDirection !== '' \|\| \$sExperience !== ''/,
+    );
   });
 });
 
