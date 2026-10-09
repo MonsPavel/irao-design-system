@@ -28,9 +28,12 @@ describe('patterns/footer/footer.html — контракт эталонной с
     // Красный шаг TDD: файла ещё нет — пины ниже упадут с понятным сообщением.
     pattern = '';
   }
+  // Разметка без док-комментариев: литералы «<footer>» в тексте комментариев —
+  // не элементы (пины ленмарк считают только разметку).
+  const markup = pattern.replace(/<!--[\s\S]*?-->/g, '');
 
   it('<footer> — один contentinfo-лендмарка сниппета (после main на странице сайта)', () => {
-    const footers = pattern.match(/<footer\b/g) ?? [];
+    const footers = markup.match(/<footer\b/g) ?? [];
     expect(footers.length, 'ровно один подвал в сниппете').toBe(1);
   });
 

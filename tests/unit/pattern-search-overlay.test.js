@@ -40,10 +40,9 @@ describe('patterns/search-overlay/search-overlay.html — контракт эт�
     expect(dialog[0], 'JS-хук data-ui-modal (модуль T7.2)').toContain('data-ui-modal');
     const labelledby = dialog[0].match(/aria-labelledby="([^"]+)"/) ?? [];
     expect(labelledby[1], 'aria-labelledby ведёт на заголовок').toBeTruthy();
-    expect(
-      pattern,
-      `цель aria-labelledby — .ui-modal__title с id ${labelledby[1]}`,
-    ).toContain(`id="${labelledby[1]}"`);
+    expect(pattern, `цель aria-labelledby — .ui-modal__title с id ${labelledby[1]}`).toContain(
+      `id="${labelledby[1]}"`,
+    );
     expect(pattern).toMatch(/class="[^"]*ui-modal__title/);
   });
 
@@ -64,13 +63,12 @@ describe('patterns/search-overlay/search-overlay.html — контракт эт�
   it('форма поиска — нативный GET с role="search": без JS работает как переход', () => {
     const form = pattern.match(/<form\b[^>]*>[\s\S]*?<\/form>/) ?? [''];
     expect(form[0], 'форма поиска на месте').not.toBe('');
-    expect(form[0], 'method="get" — переход на страницу результатов (Implementation req)').toContain(
-      'method="get"',
-    );
+    expect(
+      form[0],
+      'method="get" — переход на страницу результатов (Implementation req)',
+    ).toContain('method="get"');
     expect(form[0], 'action — страница результатов сайта').toContain('action="/search/"');
-    expect(form[0], 'роль search — лендмарка поиска (правила ленмарк)').toContain(
-      'role="search"',
-    );
+    expect(form[0], 'роль search — лендмарка поиска (правила ленмарк)').toContain('role="search"');
     const input = pattern.match(/<input\b[^>]*type="search"[^>]*>/) ?? [''];
     expect(input[0], 'нативный input type="search"').toBeTruthy();
     expect(input[0], 'имя параметра GET — name="q" (career-portal)').toContain('name="q"');
@@ -91,10 +89,9 @@ describe('patterns/search-overlay/search-overlay.html — контракт эт�
     expect(trigger[0], 'триггер — ссылка (переход без JS)').not.toBe('');
     expect(trigger[0], 'href ведёт на страницу результатов').toContain('href="/search/"');
     const dialog = pattern.match(/<dialog\b[^>]*id="([^"]+)"[^>]*>/) ?? [];
-    expect(
-      trigger[0],
-      'data-ui-modal-target ведёт на id диалога этого же сниппета',
-    ).toContain(`data-ui-modal-target="${dialog[1]}"`);
+    expect(trigger[0], 'data-ui-modal-target ведёт на id диалога этого же сниппета').toContain(
+      `data-ui-modal-target="${dialog[1]}"`,
+    );
   });
 
   it('сниппет фокуса в поле: подписка на irao-ui:modal-open (модуль даёт первый фокус __close)', () => {
@@ -104,9 +101,7 @@ describe('patterns/search-overlay/search-overlay.html — контракт эт�
     );
     const input = pattern.match(/<input\b[^>]*type="search"[^>]*>/) ?? [''];
     const id = (input[0].match(/id="([^"]+)"/) ?? [])[1];
-    expect(pattern, 'сниппет переносит фокус в поле поиска').toContain(
-      `getElementById('${id}')`,
-    );
+    expect(pattern, 'сниппет переносит фокус в поле поиска').toContain(`getElementById('${id}')`);
     expect(pattern, 'фокус переносится только при наличии поля (guard)').toContain('focus()');
   });
 

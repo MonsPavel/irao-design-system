@@ -31,20 +31,22 @@ describe('patterns/header/header.html — контракт эталонной с
     // Красный шаг TDD: файла ещё нет — пины ниже упадут с понятным сообщением.
     pattern = '';
   }
+  // Разметка без док-комментариев: литералы «<header>» в тексте комментариев —
+  // не элементы (пины ленмарк считают только разметку).
+  const markup = pattern.replace(/<!--[\s\S]*?-->/g, '');
 
   it('skip-link (T3.5) — первый элемент сниппета, до <header> (WCAG 2.4.1)', () => {
-    const skip = pattern.indexOf('<a class="ui-skip-link" href="#main">');
-    const header = pattern.indexOf('<header');
+    const skip = markup.indexOf('<a class="ui-skip-link" href="#main">');
+    const header = markup.indexOf('<header');
     expect(skip, 'skip-link на месте (канон ui-skip-link)').toBeGreaterThan(-1);
     expect(header, 'шапка на месте').toBeGreaterThan(-1);
-    expect(
-      skip,
-      'skip-link раньше шапки — первый интерактивный элемент (T3.5)',
-    ).toBeLessThan(header);
+    expect(skip, 'skip-link раньше шапки — первый интерактивный элемент (T3.5)').toBeLessThan(
+      header,
+    );
   });
 
   it('<header> — один banner-лендмарка снппета; на странице сайта — до <main>', () => {
-    const headers = pattern.match(/<header\b/g) ?? [];
+    const headers = markup.match(/<header\b/g) ?? [];
     expect(headers.length, 'ровно одна шапка в сниппете').toBe(1);
   });
 
@@ -61,7 +63,9 @@ describe('patterns/header/header.html — контракт эталонной с
   });
 
   it('dropdown (T6.1) — навигационное назначение: nav/ul/li/a, без menu-роли', () => {
-    const dropdown = pattern.match(/<div[^>]*class="[^"]*ui-dropdown[^"]*"[^>]*data-ui-dropdown[^>]*>/);
+    const dropdown = pattern.match(
+      /<div[^>]*class="[^"]*ui-dropdown[^"]*"[^>]*data-ui-dropdown[^>]*>/,
+    );
     expect(dropdown, 'хук data-ui-dropdown на месте (модуль T6.1)').toBeTruthy();
     expect(pattern, 'триггер — button.ui-dropdown__trigger').toContain(
       'class="ui-dropdown__trigger"',
@@ -81,7 +85,10 @@ describe('patterns/header/header.html — контракт эталонной с
     expect(logo[0], 'href — главная страница').toMatch(/href="(?:\/|index\.html)"/);
     const name =
       (logo[0].match(/aria-label="([^"]+)"/) ?? [])[1] ??
-      logo[0].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+      logo[0]
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     expect(name.length, 'у ссылки-логотипа есть доступное имя').toBeGreaterThan(0);
   });
 
