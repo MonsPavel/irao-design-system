@@ -2,28 +2,31 @@
      (#uiss-basic, с disabled-опцией «Казань» — сценарии пропуска), optgroup-
      группы (#uiss-optgroups), модификатор data-ui-select="wrap" в обёртке-
      «пилюле» сайта (#uiss-wrap — замена хака vacancy-search__select-wrap
-     career-portal; обёртка — label, чтобы имя поля получали и нативный
-     select, и триггер) и форма фильтра (#uiss-form, POST /submit, статус-
-     регион #uiss-form-status — приёмник change-событий модуля). В разметке
-     select НИКАК не скрыт: без JS это нативные контролы (e2e проверяет
-     источник и no-JS контекст). Секция #uiss-disabled — disabled-состояние.
+     career-portal; подпись — label[for] РЯДОМ с пилюлей: имя поля получают
+     и нативный select, и триггер, а триггер не накрывает подпись) и форма
+     фильтра (#uiss-form, POST /submit, статус-регион #uiss-form-status —
+     приёмник change-событий модуля). В разметке select НИКАК не скрыт:
+     без JS это нативные контролы (e2e проверяет источник и no-JS контекст).
+     Секция #uiss-disabled — disabled-состояние.
      Ссылка #uiss-after-basic — цель сценария Tab-выхода. -->
 <style>
   /* Стили СТЕНДА (обёртка сайта — зона сайта, не компонента): «пилюля»
-     фильтра из career-portal vacancy-search__select-wrap. Модуль гарантирует
-     позиционный контекст, геометрию и рамку рисует обёртка. */
+     фильтра из career-portal vacancy-search__select-wrap. Позиционный
+     контекст — у обёртки (relative явно, модуль страхует static), геометрию
+     и рамку рисует обёртка. */
   .uiss-pill {
     box-sizing: border-box;
     display: inline-flex;
-    gap: var(--ui-space-3);
     align-items: center;
-    padding: 0 var(--ui-space-5);
+    position: relative;
+    padding: var(--ui-space-2) var(--ui-space-5);
     border: var(--ui-border-width) solid var(--ui-color-border);
     border-radius: var(--ui-radius-pill);
     background-color: var(--ui-color-surface);
   }
 
   .uiss-pill__label {
+    margin-right: var(--ui-space-3);
     font-family: var(--ui-font-family);
     font-size: var(--ui-fs-small);
     font-weight: var(--ui-fw-small);
@@ -86,16 +89,17 @@
     <code>vacancy-search__select-wrap</code> career-portal: системный модуль не знает классов
     проекта (правило CONTRIBUTING).
   </p>
-  <!-- label-обёртка (без for — контрол вложен): имя поля получают и нативный
-       select, и триггер (модуль переносит его в aria-labelledby/aria-label). -->
-  <label class="uiss-pill">
-    <span class="uiss-pill__label">Город:</span>
+  <!-- Подпись — label[for] РЯДОМ с обёрткой (не внутри: триггер накрывает
+       пилюлю целиком): имя поля получают и нативный select, и триггер
+       (модуль переносит его в aria-labelledby/aria-label). -->
+  <label class="uiss-pill__label" for="uiss-wrap-city">Город:</label>
+  <div class="uiss-pill">
     <select id="uiss-wrap-city" name="wrap-city" data-ui-select="wrap">
       <option value="">Любой город</option>
       <option value="msk">Москва</option>
       <option value="spb">Санкт-Петербург</option>
     </select>
-  </label>
+  </div>
 </section>
 
 <section id="uiss-disabled" aria-labelledby="uiss-disabled-heading">
