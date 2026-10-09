@@ -19,7 +19,7 @@ Skeleton-плейсхолдеры и progress-bar с процентами — P2
 | Что | Значение |
 |---|---|
 | Блок `.ui-loader` | inline-строка «спиннер + текст» (gap `--ui-space-3`); цвет не задаётся — `currentColor` наследует контекст |
-| Элемент `.ui-loader__spinner` | слот спиннера на `<svg aria-hidden="true">`; md-диаметр `--ui-space-5` (24px); вращение `ui-loader-spin` на `--ui-transition-slow` |
+| Элемент `.ui-loader__spinner` | слот спиннера на `<svg aria-hidden="true">`; md-диаметр `--ui-space-5` (24px); вращение `ui-loader-spin` 0.4s linear (значение `--ui-transition-slow`; duration сырым временем — см. примечание выше) |
 | Элемент `.ui-loader__text` | **обязателен**: доступный текст с `role="status"` («Загрузка…»); правило доки — текст всегда присутствует |
 | Модификатор `.ui-loader--sm` | малый размер: диаметр спиннера `--ui-space-4` (16px) — в потоке текста |
 | Модификатор `.ui-loader--block` | блочная загрузка секции: строка по центру, шаг `--ui-space-6` |
