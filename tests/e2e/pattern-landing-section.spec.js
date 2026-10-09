@@ -194,13 +194,15 @@ standTest.describe('patterns/landing-section: тёмная секция (on-dark
   );
 
   standTest(
-    'карточки внутри тёмной секции — светлые ui-card (текст в паре text-on-surface)',
+    'карточки внутри тёмной секции — светлые ui-card, текст в паре text-on-surface (не наследует on-dark)',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
       const card = page.locator(`${SEL.dark} .ui-card`).first();
       const style = await card.evaluate((el) => ({
         bg: getComputedStyle(el).backgroundColor,
         fg: getComputedStyle(el).color,
+        linkFg: getComputedStyle(el.querySelector('.ui-card__title a')).color,
+        bodyFg: getComputedStyle(el.querySelector('.ui-card__body')).color,
       }));
       // Проба обычной карточки вне тёмной секции — фон обязан совпасть (не перекрашена).
       const reference = await page
@@ -210,7 +212,30 @@ standTest.describe('patterns/landing-section: тёмная секция (on-dark
       expect(style.bg, 'фон карточки на тёмном = фон обычной ui-card (светлая поверхность)').toBe(
         reference,
       );
-      expect(style.fg, 'текст карточки — дефолтный (пара text-on-surface)').toBeTruthy();
+
+      // Проба пары текста карточки: ui-card цвет текста не задаёт, а
+      // .ui-card__link несёт color: inherit — без восстановления пары в
+      // связке тёмной секции текст карточки наследует белый on-dark и
+      // становится невидимым (белое на белом; axe color-contrast это
+      // пропускает — проверено прогоном, violations = []). Пин —
+      // детерминированная страховка: цвет текста = --ui-color-text.
+      await page.addStyleTag({ content: '.lsp-probe-text { color: var(--ui-color-text); }' });
+      const textPair = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.className = 'lsp-probe-text';
+        document.body.appendChild(probe);
+        const color = getComputedStyle(probe).color;
+        probe.remove();
+        return color;
+      });
+      expect(
+        style.fg,
+        'цвет текста карточки — пара text-on-surface, не унаследованный on-dark',
+      ).toBe(textPair);
+      expect(style.linkFg, 'заголовок-ссылка карточки — не белый (иначе невидим на карточке)').toBe(
+        textPair,
+      );
+      expect(style.bodyFg, 'текст тела карточки — не белый').toBe(textPair);
     },
   );
 });

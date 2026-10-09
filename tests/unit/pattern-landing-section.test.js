@@ -101,6 +101,13 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     // text-on-surface (контраст-гейт), перекраска карточек не требуется.
     const dark = pattern.match(/id="lsp-dark"[\s\S]*?(?=id="lsp-image")/) ?? [''];
     expect(dark[0], 'в тёмной секции карточки — обычные светлые ui-card').toContain('ui-card');
+    // Связка ОБЯЗАНА восстановить пару текста карточек: ui-card цвет текста
+    // не задаёт, .ui-card__link несёт color: inherit — без этого текст
+    // карточки наследует белый on-dark и невидим на белой карточке.
+    expect(
+      style[1],
+      'связка .lsp-dark .ui-card восстанавливает --ui-color-text (иначе белый текст на белой карточке)',
+    ).toMatch(/\.lsp-dark \.ui-card\s*\{[^}]*color:\s*var\(--ui-color-text\)/);
   });
 
   it('full-bleed внутри контейнера (Technical considerations): width+margin от container-pad', () => {
