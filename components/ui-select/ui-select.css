@@ -228,3 +228,24 @@
     background-color: var(--ui-color-surface-hover);
   }
 }
+
+/* ── forced-colors (Windows High Contrast, T9.2): граница кастомного
+      оверлея. Кастомные слои — единственные контролы, теряющие границу
+      в forced-colors: у триггера border: 0, список держится на тени
+      (--ui-shadow-lg), которую forced-colors не рисует, а фоны Canvas
+      совпадают со страницей (прозрачные значения режим сохраняет как
+      есть; непрозрачные подменяет системными). Нативные button/input/
+      select UA дорисовывает границу сам (e2e — tests/e2e/forced-colors.
+      spec.js). Цвет границы — currentColor: текст в forced-colors
+      подменяется системным цветом (CanvasText/ButtonText), граница
+      следует за ним в любой теме ОС; ширина — токен рамки (box-sizing:
+      border-box базы — габариты триггера не меняются). */
+@media (forced-colors: active) {
+  .ui-select__trigger {
+    border: var(--ui-border-width) solid currentColor;
+  }
+
+  .ui-select__list {
+    border: var(--ui-border-width) solid currentColor;
+  }
+}
