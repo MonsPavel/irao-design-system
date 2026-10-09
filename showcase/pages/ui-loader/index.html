@@ -1,0 +1,146 @@
+<!-- Стенд ui-loader (T7.5): inline-загрузка (база md + --sm в приглушённом
+     контексте — цвет наследуется), блочная загрузка секции (--block) и
+     aria-busy-паттерн: контейнер области aria-busy="true" + лоадер-оверлей
+     --overlay. Правило доки «текст всегда присутствует (не голый
+     спиннер)» соблюдено в каждом лоадере стенда — гейт html-validate
+     irao/loader-text-status гоняется по этому файлу в npm run lint:html. -->
+<p class="ui-showcase-stand__note">
+  Стенд ui-loader (T7.5): спиннер — svg <code>aria-hidden</code> (декоративен), состояние загрузки
+  объявляет текст с <code>role="status"</code> — правило «не голый спиннер»: текст присутствует
+  всегда. Цвет не задаётся компонентом: кольцо на <code>currentColor</code> красит контекст.
+  Анимация вращения уважает <code>prefers-reduced-motion</code>: спиннер остаётся статичным кольцом.
+  Сценарии — <code>tests/e2e/ui-loader.spec.js</code>, aria-busy-обвязка — README.md.
+</p>
+
+<section id="uiloader-inline-section" aria-labelledby="uiloader-inline-heading">
+  <h2 id="uiloader-inline-heading">Inline-загрузка</h2>
+  <p class="ui-showcase-stand__note">
+    База (md, 24px) — самостоятельная строка рядом с контентом; <code>--sm</code> (16px) — в потоке
+    текста. Строка ниже приглушена ролью <code>ui-small</code> + <code>ui-text--muted</code> —
+    лоадер наследует её цвет и размер (currentColor).
+  </p>
+  <p>
+    <span class="ui-loader" id="uiloader-inline">
+      <svg
+        class="ui-loader__spinner"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          pathLength="100"
+          stroke-dasharray="75 25"
+          stroke-linecap="round"
+        ></circle>
+      </svg>
+      <span class="ui-loader__text" role="status">Загрузка…</span>
+    </span>
+  </p>
+  <p class="ui-small ui-text--muted">
+    <span class="ui-loader ui-loader--sm" id="uiloader-inline-sm">
+      <svg
+        class="ui-loader__spinner"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          pathLength="100"
+          stroke-dasharray="75 25"
+          stroke-linecap="round"
+        ></circle>
+      </svg>
+      <span class="ui-loader__text" role="status">Обновляем список вакансий…</span>
+    </span>
+  </p>
+</section>
+
+<section id="uiloader-block-section" aria-labelledby="uiloader-block-heading">
+  <h2 id="uiloader-block-heading">Блочная загрузка секции</h2>
+  <p class="ui-showcase-stand__note">
+    <code>--block</code>: лоадер — содержимое загружаемой секции, строка по центру с вертикальным
+    шагом шкалы. Данные придут на место лоадера — контент секции сайт подставит сам (JS — зона
+    сайта, Out of scope T7.5).
+  </p>
+  <div class="ui-loader ui-loader--block" id="uiloader-block">
+    <svg
+      class="ui-loader__spinner"
+      aria-hidden="true"
+      focusable="false"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        cx="12"
+        cy="12"
+        r="10"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        pathLength="100"
+        stroke-dasharray="75 25"
+        stroke-linecap="round"
+      ></circle>
+    </svg>
+    <span class="ui-loader__text" role="status">Загружаем направления подготовки…</span>
+  </div>
+</section>
+
+<section id="uiloader-busy-section" aria-labelledby="uiloader-busy-heading">
+  <h2 id="uiloader-busy-heading">Паттерн aria-busy: контейнер + оверлей</h2>
+  <p class="ui-showcase-stand__note">
+    Контейнер области на время загрузки получает <code>aria-busy="true"</code>, поверх контента —
+    лоадер-оверлей <code>--overlay</code>: полупрозрачная поверхность, контент области читается
+    сквозь. Контейнеру нужен <code>position: relative</code> — в бою его задаёт CSS сайта (ниже —
+    демо, inline только на стенде). Когда данные готовы, сайт снимает <code>aria-busy</code> и
+    удаляет (или прячет) лоадер.
+  </p>
+  <!-- html-validate-disable-next no-inline-style -->
+  <div aria-busy="true" id="uiloader-busy" style="position: relative">
+    <div class="ui-loader ui-loader--overlay" id="uiloader-busy-loader">
+      <svg
+        class="ui-loader__spinner"
+        aria-hidden="true"
+        focusable="false"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.5"
+          pathLength="100"
+          stroke-dasharray="75 25"
+          stroke-linecap="round"
+        ></circle>
+      </svg>
+      <span class="ui-loader__text" role="status">Загружаем вакансии…</span>
+    </div>
+    <ul>
+      <li>Электромонтёр подстанции — ООО «Энергосервис»</li>
+      <li>Инженер-теплоэнергетик — АО «Теплосеть»</li>
+      <li>Мастер участка — ПАО «ГидроОборудование»</li>
+    </ul>
+  </div>
+</section>
