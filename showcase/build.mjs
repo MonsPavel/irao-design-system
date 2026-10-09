@@ -539,6 +539,65 @@ function generateShowcase({ themes }) {
     );
   }
 
+  // Стенд «patterns/form-page» (T8.3) — паттерн «Страница формы»: эталонная
+  // сборка страницы-формы с информационной колонкой (крошки → page-head →
+  // ui-form с aside-сводкой вакансии; полный форма-цикл T5.6 — ветки «живая
+  // форма» / «серверный ответ» / success — рядом как якоря-состояния) БЕЗ
+  // нового CSS; связки паттерна (fpp-*) — <style> в нём (зона сайта, в dist
+  // не попадает). Каркас БЕЗ служебного <h1>: заголовок страницы несёт сам
+  // паттерн — h1 page-head (как patterns/list-page; два h1 — гейт irao/one-h1).
+  const formPageStandSource = join(ROOT, 'patterns', 'form-page', 'form-page.html');
+  if (existsSync(formPageStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/form-page.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/form-page — irao-ui showcase',
+      // Без служебного h1: h1 несёт сам паттерн (page-head страницы формы).
+      main: readFileSync(formPageStandSource, 'utf8').trim(),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'form-page.html'), page);
+    stands.push({ name: 'patterns/form-page', source: 'patterns/form-page/form-page.html' });
+  } else {
+    warn('patterns/form-page/form-page.html ещё нет — стенд patterns/form-page не сгенерирован');
+  }
+
+  // Стенд «patterns/landing-section» (T8.3) — паттерн «Landing-секция»:
+  // правила сборки лендинг-секций + mini-эталон из трёх секций (светлая /
+  // тёмная on-dark / с-изображением full-bleed) БЕЗ нового CSS; связки
+  // паттерна (lsp-*) — <style> в нём (зона сайта, в dist не попадает).
+  // Каркас БЕЗ служебного <h1>: лендинг-секция — не страница, h1 у неё нет
+  // по определению; заголовки секций — h2 с ролью ui-h2 (axe page-has-
+  // heading-one проходит по h2, гейт irao/one-h1 не нарушается — h1 нет).
+  const landingSectionStandSource = join(
+    ROOT,
+    'patterns',
+    'landing-section',
+    'landing-section.html',
+  );
+  if (existsSync(landingSectionStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/landing-section.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/landing-section — irao-ui showcase',
+      // Без служебного h1: секции лендинга несут h2 (лендинг-секция — не страница).
+      main: readFileSync(landingSectionStandSource, 'utf8').trim(),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'landing-section.html'), page);
+    stands.push({
+      name: 'patterns/landing-section',
+      source: 'patterns/landing-section/landing-section.html',
+    });
+  } else {
+    warn(
+      'patterns/landing-section/landing-section.html ещё нет — ' +
+        'стенд patterns/landing-section не сгенерирован',
+    );
+  }
+
   // Стенды «ui-table-scroll» / «ui-table-cards» (T7.4) — второй и третий
   // паттерны компонента ui-table: AC задачи — «три стенда», компонент при
   // этом один (components/ui-table/, CSS попадает в dist через COMPONENTS).

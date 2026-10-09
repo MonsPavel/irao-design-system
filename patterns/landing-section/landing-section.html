@@ -1,0 +1,222 @@
+<!--
+  Паттерн «Landing-секция» (T8.3): правила сборки лендинг-секций из
+  системных примитивов + mini-эталон из трёх секций — светлая, тёмная,
+  с-изображением full-bleed.
+
+  Формула секции (Scope): ui-section (вертикальный ритм, T3.4) + ui-container
+  (центрируемый контейнер, T3.4) + заголовок-роль (ui-h2, «классы, а не
+  теги», T3.3) + сетка карточек (ui-grid--3 + ui-card, T4.4).
+
+  Границы (правило EPIC-8, README паттерна и CONTRIBUTING): КОНТЕНТ и
+  уникальный дизайн секции (герой-блоки, коллажи, анимации — класс C
+  career-portal: hero/production/holding/why-us) — зона САЙТА; КАРКАС
+  (секция/сетка/типографика/карточки/кнопки) — СИСТЕМА. НОВОГО CSS В СИСТЕМЕ
+  НЕТ — подключены только компоненты; связующие стили ниже (lsp-*) — зона
+  сайта (в бою — template_styles.css), на стенде они живут <style>'ом рядом
+  (showcase, не в dist).
+
+  Тёмная секция (Technical considerations T8.3): фон — семантика
+  --ui-color-primary-deep (surface-inverse-пара), текст — on-dark-пары
+  токенов (--ui-color-text-on-dark[-muted]); обе пары проходят контраст-гейт
+  T2.3 (npm run test:contrast). Карточки внутри тёмной секции — обычные
+  светлые ui-card: их текст остаётся в паре text-on-surface, перекраска не
+  требуется.
+
+  Full-bleed внутри контейнера (Technical considerations T8.3): изображение
+  шире колонки контента тянется до краёв секции отрицательными margin от
+  container-pad (токенизированные ступени --ui-container-pad{-md,-lg});
+  само изображение — правила T4.6 (ui-image--cover + ui-image--ratio-* —
+  кадрирование и фиксация места, атрибуты width/height, lazy вне первого
+  экрана).
+-->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+
+  /* Ритм внутри секции (reset системы обнуляет margin p/h): lead после
+     заголовка, сетка после заголовка/lead. */
+  .lsp-lead {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-3);
+  }
+
+  .lsp-grid {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-5);
+  }
+
+  /* Тёмная секция: фон — семантика primary-deep (Technical considerations
+     T8.3, surface-inverse-пара); текст и lead — on-dark-пары (гейт T2.3).
+     Перекрашивается только СЕКЦИЯ: карточки внутри остаются светлыми
+     ui-card — их пары (text-on-surface) не трогаем. */
+  .lsp-dark {
+    box-sizing: border-box;
+    background-color: var(--ui-color-primary-deep);
+    color: var(--ui-color-text-on-dark);
+  }
+
+  .lsp-dark .lsp-lead {
+    color: var(--ui-color-text-on-dark-muted);
+  }
+
+  /* Full-bleed внутри контейнера (Technical considerations T8.3): бокс
+     изображения расширяется на горизонтальные паддинги контейнера —
+     значения только токенами, ступени повторяют лестницу ui-container. */
+  .lsp-bleed {
+    box-sizing: border-box;
+    margin-inline: calc(-1 * var(--ui-container-pad));
+  }
+
+  @media (min-width: 768px) {
+    .lsp-bleed {
+      margin-inline: calc(-1 * var(--ui-container-pad-md));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .lsp-bleed {
+      margin-inline: calc(-1 * var(--ui-container-pad-lg));
+    }
+  }
+</style>
+
+<!-- Вариант 1 — светлая секция: каркас формулы (ui-section + ui-container +
+     заголовок-роль h2 + lead + сетка ui-grid--3 карточек T4.4). Заголовки
+     карточек — h3: у секции есть свой h2 (h2 → h3 без пропусков, гейт
+     irao/heading-order); вид — роль ui-h3 («классы, а не теги», T3.3). -->
+<section class="ui-section" id="lsp-light" aria-labelledby="lsp-light-title">
+  <p class="ui-showcase-stand__note">
+    Вариант «светлая»: базовый каркас лендинг-секции — секция + контейнер + заголовок-роль + сетка
+    карточек. Ничего сверх компонентов: новый CSS секции — зона сайта (связки ритма
+    <code>lsp-*</code>).
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-light-title">Направления деятельности</h2>
+    <p class="ui-lead lsp-lead">
+      От производственных до офисных направлений — выберите своё и откликнитесь на вакансию.
+    </p>
+    <div class="ui-grid ui-grid--3 lsp-grid">
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h3 class="ui-h3 ui-card__title">
+          <a class="ui-card__link" href="list-page.html">Электроэнергетика</a>
+        </h3>
+        <p class="ui-body ui-card__body">
+          Генерация и передача энергии: станции, подстанции, сетевые компании.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--outline" type="button">25 вакансий</button>
+        </div>
+      </article>
+
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h3 class="ui-h3 ui-card__title">
+          <a class="ui-card__link" href="list-page.html">Теплоэнергетика</a>
+        </h3>
+        <p class="ui-body ui-card__body">
+          Тепловые станции и котельные: режимы, наладка, эксплуатация оборудования.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--outline" type="button">13 вакансий</button>
+        </div>
+      </article>
+
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h3 class="ui-h3 ui-card__title">
+          <a class="ui-card__link" href="list-page.html">Информационные технологии</a>
+        </h3>
+        <p class="ui-body ui-card__body">
+          Цифровые решения энергетики: разработка, поддержка, информационная безопасность.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--outline" type="button">10 вакансий</button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 2 — тёмная секция: фон — семантика primary-deep, текст —
+     on-dark-пары (связка lsp-dark); карточки — ОБЫЧНЫЕ светлые ui-card
+     (перекраска не требуется: пары text-on-surface не меняются). -->
+<section class="ui-section lsp-dark" id="lsp-dark" aria-labelledby="lsp-dark-title">
+  <p class="ui-showcase-stand__note">
+    Вариант «тёмная»: фон секции — <code>--ui-color-primary-deep</code> (surface-inverse-пара),
+    текст — пары <code>--ui-color-text-on-dark</code>/<code>-muted</code> (контраст-гейт T2.3).
+    Карточки внутри — обычные светлые <code>ui-card</code>.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-dark-title">
+      Работа в «Интер РАО» — участие в развитии ключевой отрасли
+    </h2>
+    <p class="ui-lead lsp-lead">
+      Более 100 образовательных программ, наставничество и сообщества — карьера в масштабе страны.
+    </p>
+    <div class="ui-grid ui-grid--3 lsp-grid">
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h3 class="ui-h3 ui-card__title">
+          <a class="ui-card__link" href="detail-page.html">Лучшие возможности для роста</a>
+        </h3>
+        <p class="ui-body ui-card__body">
+          Корпоративный университет, тренинги, курсы и доступ к библиотеке.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--outline" type="button">Подробнее</button>
+        </div>
+      </article>
+
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h3 class="ui-h3 ui-card__title">
+          <a class="ui-card__link" href="detail-page.html">Наставничество в реальном времени</a>
+        </h3>
+        <p class="ui-body ui-card__body">
+          Опытный наставник, мгновенная обратная связь, практика на реальных задачах.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--outline" type="button">Подробнее</button>
+        </div>
+      </article>
+
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h3 class="ui-h3 ui-card__title">
+          <a class="ui-card__link" href="detail-page.html">Личная самореализация</a>
+        </h3>
+        <p class="ui-body ui-card__body">
+          Более 70 сообществ по интересам: от волонтёрства и спорта до книжных клубов.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--outline" type="button">Подробнее</button>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 3 — секция с изображением full-bleed: изображение шире колонки
+     контента тянется до краёв секции связкой lsp-bleed (отрицательные margin
+     от container-pad); место и кадрирование — правила T4.6 (--ratio-16-9
+     фиксирует место без CLS, --cover кадрирует файл 16:9). -->
+<section class="ui-section" id="lsp-image" aria-labelledby="lsp-image-title">
+  <p class="ui-showcase-stand__note">
+    Вариант «с-изображением»: full-bleed внутри контейнера — изображение расширяется на паддинги
+    контейнера отрицательными margin от <code>--ui-container-pad{-md,-lg}</code>. Место и
+    кадрирование — правила T4.6: <code>ui-image--ratio-16-9</code> + <code>ui-image--cover</code>.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-image-title">Один из крупнейших энергетических холдингов России</h2>
+    <p class="ui-body lsp-lead">
+      Секция с изображением: контент несёт сайт (заголовок, текст, данные), каркас — система
+      (секция, контейнер, типографика, изображение по правилам T4.6).
+    </p>
+    <img
+      class="ui-image ui-image--cover ui-image--ratio-16-9 lsp-bleed lsp-grid"
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%271300%27%20cy%3D%27180%27%20r%3D%27320%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27180%27%20cy%3D%27760%27%20r%3D%27240%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+      alt="Панорама энергетического объекта: силуэты оборудования на синем фоне"
+      width="1600"
+      height="900"
+      loading="lazy"
+       >
+  </div>
+</section>

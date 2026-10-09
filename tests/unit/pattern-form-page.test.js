@@ -41,7 +41,7 @@ describe('patterns/form-page/form-page.html — контракт эталонн�
   }
 
   it('page-head: крошки → h1 «Отклик» → lead (Scope: крошки + h1 + lead)', () => {
-    const h1 = pattern.match(/<h1\b[^>]*>/g) ?? [];
+    const h1 = pattern.match(/<h1\b[^>]*>[\s\S]*?<\/h1>/g) ?? [];
     expect(h1, 'ровно один h1 — страница формы (гейт irao/one-h1)').toHaveLength(1);
     expect(h1[0], 'h1 — «Отклик» (Context: h1 «Отклик» career-portal)').toContain('Отклик');
     const markup = markupOf(pattern);
