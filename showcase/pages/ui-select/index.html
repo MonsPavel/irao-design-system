@@ -1,0 +1,149 @@
+<!-- Стенд ui-select (T7.3): четыре секции — базовый select в ui-field
+     (#uiss-basic, с disabled-опцией «Казань» — сценарии пропуска), optgroup-
+     группы (#uiss-optgroups), модификатор data-ui-select="wrap" в обёртке-
+     «пилюле» сайта (#uiss-wrap — замена хака vacancy-search__select-wrap
+     career-portal; обёртка — label, чтобы имя поля получали и нативный
+     select, и триггер) и форма фильтра (#uiss-form, POST /submit, статус-
+     регион #uiss-form-status — приёмник change-событий модуля). В разметке
+     select НИКАК не скрыт: без JS это нативные контролы (e2e проверяет
+     источник и no-JS контекст). Секция #uiss-disabled — disabled-состояние.
+     Ссылка #uiss-after-basic — цель сценария Tab-выхода. -->
+<style>
+  /* Стили СТЕНДА (обёртка сайта — зона сайта, не компонента): «пилюля»
+     фильтра из career-portal vacancy-search__select-wrap. Модуль гарантирует
+     позиционный контекст, геометрию и рамку рисует обёртка. */
+  .uiss-pill {
+    box-sizing: border-box;
+    display: inline-flex;
+    gap: var(--ui-space-3);
+    align-items: center;
+    padding: 0 var(--ui-space-5);
+    border: var(--ui-border-width) solid var(--ui-color-border);
+    border-radius: var(--ui-radius-pill);
+    background-color: var(--ui-color-surface);
+  }
+
+  .uiss-pill__label {
+    font-family: var(--ui-font-family);
+    font-size: var(--ui-fs-small);
+    font-weight: var(--ui-fw-small);
+    line-height: var(--ui-lh-small);
+  }
+</style>
+
+<section id="uiss-basic" aria-labelledby="uiss-basic-heading">
+  <h2 id="uiss-basic-heading">Базовый select в ui-field</h2>
+  <p class="ui-showcase-stand__note">
+    Нативный <code>select</code> остаётся в DOM (класс скрытия ставит модуль); выбор
+    синхронизируется и диспатчит <code>change</code>. Опция «Казань» — <code>disabled</code>:
+    стрелки и typahead её пропускают.
+  </p>
+  <div class="ui-field">
+    <label class="ui-field__label" for="uiss-city">Город</label>
+    <select class="ui-field__select" id="uiss-city" name="city" data-ui-select>
+      <option value="">Любой город</option>
+      <option value="msk">Москва</option>
+      <option value="mnk">Минск</option>
+      <option value="kzn" disabled>Казань</option>
+      <option value="spb">Санкт-Петербург</option>
+    </select>
+  </div>
+  <p>
+    <a class="ui-link" id="uiss-after-basic" href="#uiss-basic"
+      >Элемент после селекта (цель Tab-выхода)</a
+    >
+  </p>
+</section>
+
+<section id="uiss-optgroups" aria-labelledby="uiss-optgroups-heading">
+  <h2 id="uiss-optgroups-heading">Группы optgroup</h2>
+  <p class="ui-showcase-stand__note">
+    <code>optgroup</code> переносится в список как <code>role="group"</code> с
+    <code>aria-label</code> группы; опции остаются в документном порядке.
+  </p>
+  <div class="ui-field">
+    <label class="ui-field__label" for="uiss-spec">Специализация</label>
+    <select class="ui-field__select" id="uiss-spec" name="spec" data-ui-select>
+      <option value="">Все специализации</option>
+      <optgroup label="Разработка">
+        <option value="fe">Frontend</option>
+        <option value="be">Backend</option>
+        <option value="qa">Тестирование</option>
+      </optgroup>
+      <optgroup label="Дизайн">
+        <option value="ux">UX/UI</option>
+        <option value="gfx">Графика</option>
+      </optgroup>
+    </select>
+  </div>
+</section>
+
+<section id="uiss-wrap" aria-labelledby="uiss-wrap-heading">
+  <h2 id="uiss-wrap-heading">Модификатор «wrap»: обёртка сайта</h2>
+  <p class="ui-showcase-stand__note">
+    <code>data-ui-select="wrap"</code> — обёртку («пилюля» фильтра) и её геометрию рисует сайт;
+    триггер растягивается на неё. Замена хака
+    <code>vacancy-search__select-wrap</code> career-portal: системный модуль не знает классов
+    проекта (правило CONTRIBUTING).
+  </p>
+  <!-- label-обёртка (без for — контрол вложен): имя поля получают и нативный
+       select, и триггер (модуль переносит его в aria-labelledby/aria-label). -->
+  <label class="uiss-pill">
+    <span class="uiss-pill__label">Город:</span>
+    <select id="uiss-wrap-city" name="wrap-city" data-ui-select="wrap">
+      <option value="">Любой город</option>
+      <option value="msk">Москва</option>
+      <option value="spb">Санкт-Петербург</option>
+    </select>
+  </label>
+</section>
+
+<section id="uiss-disabled" aria-labelledby="uiss-disabled-heading">
+  <h2 id="uiss-disabled-heading">Disabled</h2>
+  <p class="ui-showcase-stand__note">
+    <code>disabled</code> нативного select — disabled-триггер: активация и клавиатура закрыты,
+    значение из формы не уходит (нативное поведение).
+  </p>
+  <div class="ui-field">
+    <label class="ui-field__label" for="uiss-locked">Направление</label>
+    <select class="ui-field__select" id="uiss-locked" name="locked" disabled data-ui-select>
+      <option value="">Недоступно</option>
+    </select>
+  </div>
+</section>
+
+<section id="uiss-form" aria-labelledby="uiss-form-heading">
+  <h2 id="uiss-form-heading">Форма фильтра</h2>
+  <p class="ui-showcase-stand__note">
+    Выбор диспатчит <code>change</code> (bubbles) — форма работает как с нативным контролом:
+    статус-регион ниже ловит событие на форме; отправка — нативный POST (e2e перехватывает маршрут
+    <code>/submit</code>).
+  </p>
+  <form id="uiss-filter" class="uiss-filter" method="post" action="/submit">
+    <div class="ui-field">
+      <label class="ui-field__label" for="uiss-form-city">Город</label>
+      <select class="ui-field__select" id="uiss-form-city" name="city" data-ui-select>
+        <option value="">Любой город</option>
+        <option value="msk">Москва</option>
+        <option value="spb">Санкт-Петербург</option>
+      </select>
+    </div>
+    <button class="ui-button ui-button--primary" type="submit">Применить</button>
+  </form>
+  <p id="uiss-form-status" role="status">Фильтр не применён</p>
+</section>
+
+<script>
+  // Приёмник стенда (не часть компонента): change-события формы пишутся в
+  // статус-регион — e2e проверяет, что выбор диспатчится и пузырится.
+  (function () {
+    var form = document.getElementById('uiss-form');
+    var status = document.getElementById('uiss-form-status');
+    if (!form || !status) return;
+    form.addEventListener('change', function (event) {
+      if (event.target && event.target.tagName === 'SELECT') {
+        status.textContent = 'Фильтр: город = ' + (event.target.value || '—');
+      }
+    });
+  })();
+</script>

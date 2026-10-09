@@ -170,7 +170,10 @@ describe('чистая функция синхронизации viewOf (Impleme
 
   /** Песочница с исполненным модулем; select с заданным содержимым. */
   function makeApi() {
-    const dom = new JSDOM('<!doctype html><body></body>', { url: 'https://showcase.test/' });
+    const dom = new JSDOM('<!doctype html><body></body>', {
+      url: 'https://showcase.test/',
+      runScripts: 'outside-only',
+    });
     dom.window.eval(source);
     return dom.window.IraoUI.select;
   }
@@ -203,7 +206,14 @@ describe('чистая функция синхронизации viewOf (Impleme
       kind: 'option',
       value: '',
       text: 'Любой город',
-      selected: true,
+      selected: false,
+      disabled: false,
+    });
+    expect(view[1]).toEqual({
+      kind: 'option',
+      value: 'msk',
+      text: 'Москва',
+      selected: false,
       disabled: false,
     });
     expect(view[2]).toEqual({
@@ -240,11 +250,15 @@ describe('чистая функция синхронизации viewOf (Impleme
       { url: 'https://showcase.test/' },
     );
     const view = api.viewOf(dom.window.document.querySelector('select'));
-    expect(view).toHaveLength(4);
+    // Документный порядок: группа — перед своими опциями; options — индексы
+    // опций в select.options (они же индексы плоского списка кнопок UI).
+    expect(view).toHaveLength(6);
     expect(view[0]).toMatchObject({ kind: 'option', value: '' });
     expect(view[1]).toEqual({ kind: 'group', label: 'Разработка', options: [1, 2] });
-    expect(view[2]).toEqual({ kind: 'group', label: 'Дизайн', options: [3] });
-    expect(view[3]).toMatchObject({ kind: 'option', value: 'ux', text: 'UX/UI' });
+    expect(view[2]).toMatchObject({ kind: 'option', value: 'fe', text: 'Frontend' });
+    expect(view[3]).toMatchObject({ kind: 'option', value: 'be', text: 'Backend' });
+    expect(view[4]).toEqual({ kind: 'group', label: 'Дизайн', options: [3] });
+    expect(view[5]).toMatchObject({ kind: 'option', value: 'ux', text: 'UX/UI' });
   });
 
   it('повторный вызов и после мутаций отражает текущее состояние select (состояние ↔ модель)', () => {
@@ -270,7 +284,10 @@ describe('чистый typeahead по первой букве (Scope: APG type-a
   const source = readFileSync(join(root, 'components', 'ui-select', 'ui-select.js'), 'utf8');
 
   function api() {
-    const dom = new JSDOM('<!doctype html><body></body>', { url: 'https://showcase.test/' });
+    const dom = new JSDOM('<!doctype html><body></body>', {
+      url: 'https://showcase.test/',
+      runScripts: 'outside-only',
+    });
     dom.window.eval(source);
     return dom.window.IraoUI.select;
   }
@@ -304,7 +321,9 @@ describe('чистый typeahead по первой букве (Scope: APG type-a
 describe('контракт модуля ui-select.js (jsdom; образец tests/unit/module-template.test.js)', () => {
   const source = readFileSync(join(root, 'components', 'ui-select', 'ui-select.js'), 'utf8');
 
-  const SELECTOR = 'select[data-ui-select]';
+  // Селектор — по атрибуту (как data-ui-modal): не-select с хуком получает
+  // диагностику console.warn (контракт шаблона п.4), а не молчаливый пропуск.
+  const SELECTOR = '[data-ui-select]';
   const INIT_ATTR = 'data-ui-select-init';
 
   const instanceHtml = `
@@ -576,7 +595,7 @@ describe('контракт модуля ui-select.js (jsdom; образец test
 describe('подключение и гейты (DoD T7.3)', () => {
   it("'ui-select' в COMPONENTS showcase/build.mjs — CSS/JS попадают в dist", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-select'[^\]]*\]/);
+    expect(build).toMatch(/const COMPONENTS = \[[\s\S]*?'ui-select'/);
   });
 
   it('стенд showcase/pages/ui-select: базовый/optgroup/wrap/форма-фильтр со статусом change', () => {

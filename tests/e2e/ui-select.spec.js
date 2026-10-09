@@ -81,15 +81,26 @@ test.describe('ui-select: деградация без JS и мобильная �
     const source = await page.request
       .get('/showcase/dist/stands/ui-select.html')
       .then((r) => r.text());
-    const selectTags = source.match(/<select[^>]*>/g) ?? [];
-    expect(selectTags.length, 'на стенде четыре select').toBe(4);
+    // Селекты КОМПОНЕНТА (с хуком): шестой select на странице — переключатель
+    // темы каркаса, не часть стенда.
+    const selectTags = source.match(/<select[^>]*data-ui-select[^>]*>/g) ?? [];
+    expect(selectTags.length, 'на стенде пять select компонента').toBe(5);
     for (const tag of selectTags) {
       expect(tag, `select не скрыт в разметке (AC): ${tag}`).not.toMatch(/ui-select__native/);
     }
 
-    // Под JS модуль активировался: select скрыт классом, триггер/список на месте.
+    // Под JS модуль активировался: select скрыт паттерном custom-select-hidden
+    // (opacity 0 + pointer-events none — бокс остаётся в потоке и держит
+    // габариты триггера, поэтому «видимость» бокса — не пин; пин — computed).
     await expect(page.locator(SEL.basicTrigger)).toBeVisible();
-    await expect(page.locator(SEL.basicSelect)).toBeHidden();
+    const nativeState = await page.locator(SEL.basicSelect).evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { opacity: style.opacity, pointerEvents: style.pointerEvents };
+    });
+    expect(nativeState, 'нативный select скрыт визуально (AC)').toEqual({
+      opacity: '0',
+      pointerEvents: 'none',
+    });
   });
 
   test('без JS — нативный select работает: виден, операбелен, listbox не построен (AC)', async ({
@@ -210,11 +221,14 @@ test.describe('ui-select: навигация по списку (APG listbox)', (
     await page.keyboard.press('ArrowDown');
     await expect(options.nth(1), '↓ ко второй').toBeFocused();
     await page.keyboard.press('ArrowDown');
-    await expect(options.nth(2), '↓ пропустил disabled Казань').toBeFocused();
+    await expect(options.nth(2), '↓ к третьей (Минск)').toBeFocused();
     await page.keyboard.press('ArrowDown');
-    await expect(options.nth(3), '↓ к последней').toBeFocused();
+    await expect(
+      options.nth(4),
+      '↓ пропустил disabled Казань (3-я) → Санкт-Петербург',
+    ).toBeFocused();
     await page.keyboard.press('ArrowDown');
-    await expect(options.nth(3), '↓ на последней — без зацикливания (APG listbox)').toBeFocused();
+    await expect(options.nth(4), '↓ на последней — без зацикливания (APG listbox)').toBeFocused();
 
     await page.keyboard.press('ArrowUp');
     await expect(options.nth(2), '↑ назад (disabled снова пропущен)').toBeFocused();
@@ -222,7 +236,7 @@ test.describe('ui-select: навигация по списку (APG listbox)', (
     await page.keyboard.press('Home');
     await expect(options.nth(0), 'Home — первая').toBeFocused();
     await page.keyboard.press('End');
-    await expect(options.nth(3), 'End — последняя').toBeFocused();
+    await expect(options.nth(4), 'End — последняя').toBeFocused();
   });
 
   test('typeahead по первой букве: совпадение, цикл по совпадениям, disabled не матчится (APG)', async ({
@@ -235,17 +249,27 @@ test.describe('ui-select: навигация по списку (APG listbox)', (
     await page.keyboard.press('ArrowDown');
     await expect(options.nth(0)).toBeFocused();
 
-    await page.keyboard.press('м');
+    // Печатный символ: keyboard.type для не-ASCII диспатчит только input
+    // (без keydown), а контракт модуля — keydown (как у реальной кириллической
+    // раскладки) — поэтому KeyboardEvent на сфокусированном элементе.
+    const typeChar = (char) =>
+      page.evaluate((key) => {
+        document.activeElement.dispatchEvent(
+          new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+        );
+      }, char);
+
+    await typeChar('м');
     await expect(options.nth(1), '«м» → Москва').toBeFocused();
-    await page.keyboard.press('м');
+    await typeChar('м');
     await expect(
       options.nth(2),
       'повторная «м» → следующее совпадение, Минск (цикл)',
     ).toBeFocused();
-    await page.keyboard.press('м');
+    await typeChar('м');
     await expect(options.nth(1), 'после последнего совпадения — снова первое (цикл)').toBeFocused();
 
-    await page.keyboard.press('к');
+    await typeChar('к');
     await expect(
       options.nth(1),
       '«к» совпадает только с disabled Казанью — фокус не уходит',
@@ -272,13 +296,13 @@ test.describe('ui-select: навигация по списку (APG listbox)', (
     expect(await groups.nth(0).locator('.ui-select__option').count()).toBe(3);
     expect(await groups.nth(1).locator('.ui-select__option').count()).toBe(2);
 
-    await options.nth(4).click(); // «Графика» из группы «Дизайн»
+    await options.nth(5).click(); // «Графика» из группы «Дизайн»
     await expectClosed(page, trigger, list);
     await expect(trigger, 'label триггера обновлён').toContainText('Графика');
     await expect(page.locator('#uiss-spec'), 'value нативного select синхронизован').toHaveValue(
       'gfx',
     );
-    await expect(options.nth(4)).toHaveAttribute('aria-selected', 'true');
+    await expect(options.nth(5)).toHaveAttribute('aria-selected', 'true');
   });
 });
 
@@ -368,7 +392,7 @@ test.describe('ui-select: выбор и синхронизация (AC)', () => 
     // change-приёмник стенда (делегирование на форме) — статус-регион.
     await trigger.click();
     await expectOpen(page, trigger, list);
-    await options.nth(3).click(); // Санкт-Петербург
+    await options.nth(4).click(); // Санкт-Петербург
 
     await expectClosed(page, trigger, list);
     await expect(trigger, 'фокус на триггере (career-portal btn.focus)').toBeFocused();
@@ -377,8 +401,8 @@ test.describe('ui-select: выбор и синхронизация (AC)', () => 
       page.locator(SEL.basicSelect),
       'value нативного select синхронизован (AC)',
     ).toHaveValue('spb');
-    await expect(options.nth(3)).toHaveAttribute('aria-selected', 'true');
-    await expect(options.nth(3), 'галочка выбранного').toHaveClass(/is-selected/);
+    await expect(options.nth(4)).toHaveAttribute('aria-selected', 'true');
+    await expect(options.nth(4), 'галочка выбранного').toHaveClass(/is-selected/);
     await expect(options.nth(0)).toHaveAttribute('aria-selected', 'false');
     await expect(trigger, 'placeholder снят').not.toHaveClass(/is-placeholder/);
   });
