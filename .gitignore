@@ -20,3 +20,6 @@ showcase/dist/
 Thumbs.db
 .DS_Store
 .playwright-mcp/
+
+# Windows-артефакт редиректов (зарезервированное имя устройства)
+nul
