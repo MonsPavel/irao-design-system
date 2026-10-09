@@ -1,0 +1,133 @@
+<!--
+  Паттерн «Search overlay» (T7.6): полноэкранный поиск сайта на базе
+  ui-modal (T7.2, модификатор --full) — закрывает пробел аудита career-portal
+  (src/blocks/search-screen: оверлей без диалоговой семантики — класс B):
+  trap/Escape/restore/aria-modal даёт платформа (native showModal) + модуль
+  ui-modal, паттерн добавляет только поисковую форму и фокус в поле.
+
+  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
+  подключены только компоненты; связующие стили ниже (sop-*) — зона сайта
+  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
+  (showcase, не в dist).
+
+  Деградация без JS (Implementation requirements): диалог открыт в разметке
+  (open) — контент доступен инлайн, форма — нативный GET: сабмит ведёт на
+  страницу результатов /search/?q=… как обычный переход. Триггер — ССЫЛКА
+  data-ui-modal-target: без JS срабатывает href, с JS модуль снимает переход
+  и открывает диалог (README ui-modal).
+
+  Фокус в поле при открытии: модуль ui-modal даёт первый фокус закрывающей
+  кнопке (перенос career-portal closeButton.focus); паттерн-сниппет внизу
+  переносит фокус в поле по событию irao-ui:modal-open — точка расширения
+  сайта (README ui-modal, «события»).
+-->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+  .sop-form {
+    box-sizing: border-box; /* ADR-0002: корень связки объявляет сам */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--ui-space-3);
+    max-width: 40rem;
+  }
+
+  .sop-form .ui-field {
+    flex: 1 1 16rem;
+  }
+
+  .sop-hint {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-3);
+  }
+</style>
+
+<!-- Триггер — в контейнере страницы (ui-container, T3.4): у демо-кнопки не
+     должно быть среза по краю вьюпорта; диалог — вне контейнера не обязан
+     (top-layer поднимает его над страницей из любой точки DOM). -->
+<div class="ui-container">
+  <p class="ui-showcase-stand__note">
+    Полноэкранный поиск (ui-modal--full, T7.2): триггер-ссылка открывает диалог, фокус — в поле,
+    Escape закрывает с возвратом фокуса на триггер, форма — нативный GET (без JS — переход на
+    <code>/search/?q=…</code>). Разметку копируйте в шаблон сайта; диалог держите перед
+    <code>&lt;/body&gt;</code>.
+  </p>
+
+  <!-- Триггер — ссылка: без JS ведёт на страницу результатов, с JS модуль
+       откроет диалог (href снимается). Кнопка VI и «Поиск» шапки — паттерн
+       header (T7.6). -->
+  <a class="ui-button ui-button--outline" href="/search/" data-ui-modal-target="sop-dialog">
+    Поиск по сайту
+  </a>
+</div>
+
+<!-- Диалог: open в разметке — деградация без JS (К9 ADR-0011); модуль снимает.
+     --full — весь вьюпорт (100vw × 100dvh). aria-labelledby → заголовок. -->
+<dialog
+  class="ui-modal ui-modal--full"
+  id="sop-dialog"
+  open
+  data-ui-modal
+  aria-labelledby="sop-title"
+>
+  <button class="ui-modal__close" type="button" aria-label="Закрыть">
+    <svg
+      class="ui-modal__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+  </button>
+  <h2 class="ui-modal__title ui-h3" id="sop-title">Поиск по сайту</h2>
+  <div class="ui-modal__body">
+    <!-- Форма поиска: нативный GET — без JS работает как переход;
+         role="search" — лендмарка поиска. label[for] обязателен
+         (placeholder — пример, не подпись: README ui-field). -->
+    <form class="sop-form" action="/search/" method="get" role="search">
+      <div class="ui-field">
+        <label class="ui-field__label" for="sop-query">Поисковый запрос</label>
+        <!-- prettier-ignore -->
+        <input
+          class="ui-field__input"
+          type="search"
+          id="sop-query"
+          name="q"
+          placeholder="Например: стажировка в Москве"
+          autocomplete="off"
+        >
+      </div>
+      <button class="ui-button ui-button--primary" type="submit">Найти</button>
+    </form>
+    <p class="sop-hint ui-small ui-text--muted">
+      Enter — отправить запрос; Escape — закрыть поиск.
+    </p>
+  </div>
+</dialog>
+
+<script>
+  // T7.6, Implementation requirements: фокус в поле при открытии. Модуль
+  // ui-modal даёт первый фокус закрывающей кнопке (перенос career-portal);
+  // для поискового оверлея сайт переносит фокус в поле по событию open —
+  // без своего JS-файла, одним сниппетом рядом с диалогом.
+  (function () {
+    var dialog = document.getElementById('sop-dialog');
+    if (!dialog) return;
+    dialog.addEventListener('irao-ui:modal-open', function () {
+      var input = document.getElementById('sop-query');
+      if (input && typeof input.focus === 'function') {
+        input.focus();
+      }
+    });
+  })();
+</script>

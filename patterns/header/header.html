@@ -1,0 +1,289 @@
+<!--
+  Паттерн «Header» (T7.6): референс-разметка шапки сайта — skip-link (T3.5)
+  + header-лендмарка (banner) + nav-лендмарки с уникальными aria-label + dropdown
+  (T6.1) + логотип (T4.6) + кнопка VI (T9.1) + поиск. Источник решений —
+  header.html career-portal: переносится КОМПОЗИЦИЯ, не стили (визуал —
+  зона сайта, Out of scope).
+
+  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
+  подключены только компоненты; связующие стили ниже (hdp-*) — зона сайта
+  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
+  (style-under-body на стенде легален по inline-директиве перед style:
+  фрагмент — не полный документ; на стенде он идёт на уровень body,
+  чтобы дать шапке честную роль banner).
+
+  Разметка ставится НА УРОВНЕ body: skip-link → header → main → footer —
+  тогда у шапки честная роль banner (внутри main роли banner нет).
+
+  Dropdown — навигационное назначение T6.1: меню это <nav> с <ul>/<li>/<a>,
+  БЕЗ role="menu"; в разметке меню раскрыто (hidden/aria-expanded ставит
+  модуль) — без JS все ссылки доступны (README ui-dropdown).
+
+  Диалог поиска внизу сниппета — пара к триггеру «Поиск»; разметка диалога —
+  из паттерна search-overlay (T7.6, источник правды — он); в бою держите её
+  перед </body> (README ui-modal, Bitrix).
+-->
+<!-- Связки hdp-* (зона сайта) живут <style> рядом — подставка стенда; в бою
+     переносите их в template_styles.css (README паттерна). На стенде
+     фрагмент идёт на уровень body (banner) — исключение «style прямо в body»
+     объявляет сборка стенда (showcase/build.mjs), не этот файл. -->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+  .hdp-header {
+    box-sizing: border-box; /* ADR-0002: корень связки объявляет сам */
+    border-bottom: var(--ui-border-width) solid var(--ui-color-border);
+    background-color: var(--ui-color-surface);
+  }
+
+  /* Мобильная база: колонки без позиционирования; рост — min-width из
+     шкалы брейкпоинтов T2.5 (медиазапрос ниже — от md). */
+  .hdp-header__inner {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+    padding-top: var(--ui-space-3);
+    padding-bottom: var(--ui-space-3);
+  }
+
+  .hdp-header__nav {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ui-space-2) var(--ui-space-4);
+  }
+
+  .hdp-logo {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    font-weight: var(--ui-fw-h3);
+  }
+
+  /* Кнопка VI и триггер поиска: ghost-кнопка сайта (замена
+     .header__link--vi/--search career-portal). Фокус рисует
+     base/focus.css (ADR-0001) — outline не переопределяется. */
+  .hdp-vi,
+  .hdp-search {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: var(--ui-border-width) solid var(--ui-color-border);
+    border-radius: var(--ui-radius-pill);
+    color: var(--ui-color-text);
+  }
+
+  @media (min-width: 768px) {
+    .hdp-header__inner {
+      flex-direction: row;
+      justify-content: space-between;
+    }
+  }
+
+  /* Связка скопированного диалога search-overlay (источник правды —
+     patterns/search-overlay/search-overlay.html, стиль sop-form — там же). */
+  .sop-form {
+    box-sizing: border-box; /* ADR-0002: корень связки объявляет сам */
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: var(--ui-space-3);
+    max-width: 40rem;
+  }
+
+  .sop-form .ui-field {
+    flex: 1 1 16rem;
+  }
+</style>
+
+<!-- Skip-link (T3.5): первый элемент body, до шапки и любого контента;
+     цель — <main id="main" tabindex="-1"> (ставит каркас страницы). -->
+<a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>
+
+<header class="hdp-header">
+  <div class="ui-container hdp-header__inner">
+    <!-- Основная навигация: nav-лендмарка с aria-label (лендмарк должен
+         иметь имя, когда их несколько). Dropdown T6.1: nav > ul > li > a,
+         без role="menu" (ссылки-переходы — не команды). -->
+    <nav class="hdp-header__nav" aria-label="Основное меню">
+      <a class="ui-link" href="/vacancies/">Вакансии</a>
+
+      <div class="ui-dropdown" data-ui-dropdown>
+        <button class="ui-dropdown__trigger" type="button" id="hdp-sections-trigger">
+          Школьникам и студентам
+          <svg
+            class="ui-dropdown__icon"
+            aria-hidden="true"
+            focusable="false"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+          >
+            <path
+              d="M3 6l5 5 5-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            ></path>
+          </svg>
+        </button>
+        <nav class="ui-dropdown__menu" id="hdp-sections-menu" aria-label="Школьникам и студентам">
+          <ul class="ui-dropdown__list">
+            <li><a class="ui-dropdown__item" href="/practices/">Стажировки и практики</a></li>
+            <li><a class="ui-dropdown__item" href="/education/">Целевое обучение</a></li>
+            <li><a class="ui-dropdown__item" href="/events/">Каталог мероприятий</a></li>
+          </ul>
+        </nav>
+      </div>
+
+      <a class="ui-link" href="/media/">Медиа</a>
+    </nav>
+
+    <!-- Логотип (T4.6): ссылка на главную с доступным именем. Демо —
+         инлайновый svg + текст (без внешних файлов); в бою — img по правилам
+         T4.6: alt + width/height (см. README паттерна). -->
+    <a class="hdp-logo" href="/" aria-label="Интер РАО — на главную">
+      <svg
+        class="hdp-logo__mark"
+        aria-hidden="true"
+        focusable="false"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+      >
+        <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="M9 20h14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+        <path
+          d="M12 12h8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <span class="hdp-logo__text">Интер РАО</span>
+    </a>
+
+    <!-- Дополнительная навигация: aria-label отличается от основной —
+         лендмарки navigation различимы скринридеру (Accessibility
+         requirements T7.6). Кнопка VI (T9.1) — на каждой странице. -->
+    <nav class="hdp-header__nav" aria-label="Дополнительное меню">
+      <button class="hdp-vi" type="button" data-ui-vi-toggle aria-pressed="false">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <path
+            d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z"
+            stroke="currentColor"
+            stroke-width="2"
+          ></path>
+          <circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="2"></circle>
+        </svg>
+        <span>Версия для слабовидящих</span>
+      </button>
+      <a class="ui-link" href="/contacts/">Контакты</a>
+
+      <!-- Поиск: триггер-ссылка к диалогу search-overlay (T7.6) —
+           без JS переход на страницу результатов, с JS модуль откроет
+           диалог (он в конце сниппета). -->
+      <a class="hdp-search" href="/search/" data-ui-modal-target="sop-dialog">
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+        >
+          <circle cx="10.5" cy="10.5" r="7" stroke="currentColor" stroke-width="2"></circle>
+          <path d="M16 16l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+        Поиск
+      </a>
+    </nav>
+  </div>
+</header>
+
+<!--
+  Диалог поиска — копия паттерна search-overlay (T7.6): в бою держите перед
+  </body>; здесь — рядом с шапкой для самодостаточности сниппета. Подробная
+  дока и связующие стили (sop-*) — patterns/search-overlay/.
+-->
+<dialog
+  class="ui-modal ui-modal--full"
+  id="sop-dialog"
+  open
+  data-ui-modal
+  aria-labelledby="sop-title"
+>
+  <button class="ui-modal__close" type="button" aria-label="Закрыть">
+    <svg
+      class="ui-modal__icon"
+      aria-hidden="true"
+      focusable="false"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M6 6l12 12M18 6L6 18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+      ></path>
+    </svg>
+  </button>
+  <h2 class="ui-modal__title ui-h3" id="sop-title">Поиск по сайту</h2>
+  <div class="ui-modal__body">
+    <form class="sop-form" action="/search/" method="get" role="search">
+      <div class="ui-field">
+        <label class="ui-field__label" for="sop-query">Поисковый запрос</label>
+        <!-- prettier-ignore -->
+        <input
+          class="ui-field__input"
+          type="search"
+          id="sop-query"
+          name="q"
+          placeholder="Например: стажировка в Москве"
+          autocomplete="off"
+        >
+      </div>
+      <button class="ui-button ui-button--primary" type="submit">Найти</button>
+    </form>
+  </div>
+</dialog>
+
+<script>
+  // Фокус в поле при открытии — сниппет паттерна search-overlay (T7.6):
+  // модуль даёт первый фокус закрывающей кнопке, сайт переносит его в поле
+  // по событию irao-ui:modal-open.
+  (function () {
+    var dialog = document.getElementById('sop-dialog');
+    if (!dialog) return;
+    dialog.addEventListener('irao-ui:modal-open', function () {
+      var input = document.getElementById('sop-query');
+      if (input && typeof input.focus === 'function') {
+        input.focus();
+      }
+    });
+  })();
+</script>

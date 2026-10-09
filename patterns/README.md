@@ -20,3 +20,13 @@
   формула секции, тёмные секции (on-dark-пары), full-bleed в контейнере,
   правило границы «система / сайт»; mini-эталон из 3 секций; стенд —
   `stands/patterns/landing-section.html`.
+- [`search-overlay/`](search-overlay/README.md) — «Поисковый оверлей» (T7.6):
+  полноэкранный поиск на ui-modal--full (T7.2): фокус в поле при открытии,
+  полный диалог-чек, GET-форма (без JS — переход); стенд —
+  `stands/patterns/search-overlay.html`.
+- [`header/`](header/README.md) — «Шапка» (T7.6): skip-link + header (banner)
+  + навигации с уникальными aria-label + dropdown (T6.1) + логотип (T4.6) +
+  кнопка VI (T9.1) + поиск; стенд — `stands/patterns/header.html`.
+- [`footer/`](footer/README.md) — «Подвал» (T7.6): footer (contentinfo) +
+  колонки ссылок + контакты в address + переход кверху; стенд —
+  `stands/patterns/footer.html`.

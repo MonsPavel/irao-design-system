@@ -116,13 +116,22 @@ describe('каркас showcase (Scope: включён по умолчанию; 
   });
 
   it('frame(): skip-link — первый элемент body, до header и до main', () => {
-    const bodyBlock = build.match(/const body = \[[\s\S]*?\];/)[0];
+    // T7.6: сборка тела переведена на условный каркас (frameHeader/preMain/
+    // pageFooter для паттернов-каркасов); порядок инвариантов не изменился.
+    const bodyBlock = build.slice(build.indexOf('const body = [];'), build.indexOf('if (withJs)'));
     const skip = bodyBlock.indexOf('<a class="ui-skip-link" href="#main">');
     const header = bodyBlock.indexOf('...header');
     const main = bodyBlock.indexOf('<main id="main" tabindex="-1">');
     expect(skip, 'skip-link в теле каркаса').toBeGreaterThan(-1);
     expect(header, 'header после skip-link').toBeGreaterThan(skip);
     expect(main, 'цель #main после header').toBeGreaterThan(header);
+    // T7.6: preMain (паттерн шапки на уровне body, несёт свой skip-link) —
+    // между шапкой каркаса и main; pageFooter (паттерн подвала) — после main.
+    const preMain = bodyBlock.indexOf('...(preMain');
+    const footer = bodyBlock.indexOf('...(pageFooter');
+    expect(preMain, 'preMain после header').toBeGreaterThan(header);
+    expect(preMain, 'preMain до main').toBeLessThan(main);
+    expect(footer, 'pageFooter после main').toBeGreaterThan(main);
   });
 
   it('frame(): цель #main несёт tabindex="-1" — фокус переносится реально (Safari-кейс)', () => {

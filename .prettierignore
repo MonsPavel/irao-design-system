@@ -49,3 +49,8 @@ patterns/landing-section/landing-section.html
 # T9.1: стенд VI-модуля (<img>, <input> без слэша) — тот же случай: гейт
 # разметки — lint:html (void-style).
 showcase/pages/ui-vi/index.html
+# T7.6: паттерны с полями форм (<input> без слэша, гейт void-style) — тот же
+# случай, что ui-field/form-page: гейт разметки — lint:html, prettier печатал
+# бы только самозакрытые void-элементы.
+patterns/search-overlay/search-overlay.html
+patterns/header/header.html

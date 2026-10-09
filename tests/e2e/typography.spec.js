@@ -227,10 +227,15 @@ test.describe('типографика (T3.3)', () => {
       await page.goto(url);
       await page.waitForLoadState('networkidle');
 
+      // Иерархия — правило об ОТРЕНДЕРЕННОМ документе (его же проверяет axe
+      // heading-order): скрытые заголовки не входят в outline страницы.
+      // С T7.6 это не теория: на стенде patterns/header заголовок диалога
+      // поиска (h2 в preMain) при загрузке скрыт — модуль ui-modal (T7.2)
+      // снял open, UA-правило dialog:not([open]) даёт display:none.
       const levels = await page.evaluate(() =>
         Array.from(document.querySelectorAll('h1, h2, h3, h4, h5, h6'), (h) =>
-          Number(h.tagName[1]),
-        ),
+          h.getClientRects().length > 0 ? Number(h.tagName[1]) : 0,
+        ).filter((level) => level > 0),
       );
       const label = `${url} [${levels.join(', ')}]`;
 

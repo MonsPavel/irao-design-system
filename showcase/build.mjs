@@ -225,7 +225,16 @@ function standBody(name) {
 /** Каркас showcase-страницы: skip-link, header-заглушка, <main id="main">,
  * подключение dist, переключатель темы ?theme= (требование T1.3.3).
  * rel — относительный путь от страницы до корня репозитория (для dist);
- * home — относительная ссылка на index.html каталога стендов. */
+ * home — относительная ссылка на index.html каталога стендов.
+ * Опции паттернов-каркасов страницы (T7.6):
+ *  - frameHeader: false — служебный блок «skip-link + шапка каталога» не
+ *    выводится; вызывающий сам ставит preMain (паттерн шапки приносит свой
+ *    skip-link). Нужно, чтобы на стенде header-паттерна роль banner несла
+ *    ИМЕННО его шапка: вторая header-лендмарка уровня body — нарушение axe
+ *    landmark-no-duplicate-banner;
+ *  - preMain — html между <body> и <main> (паттерн шапки на уровне body);
+ *  - pageFooter — html после </main> (паттерн подвала на уровне body —
+ *    честная роль contentinfo). */
 function frame({
   rel,
   home,
@@ -235,6 +244,9 @@ function frame({
   withSwitcher = true,
   withVi = true,
   withJs = true,
+  frameHeader = true,
+  preMain = '',
+  pageFooter = '',
 }) {
   const d = rel; // rel — путь от страницы до КОРНЯ рантайма (dist-содержимого):
   // стенды лежат на уровень ниже (../), index — рядом (.). Рантайм (css/js/
@@ -253,25 +265,32 @@ function frame({
   ];
   if (withVi) head.push(`  <link rel="stylesheet" href="${d}/ui-vi.min.css">`);
 
-  const header = [
-    '  <header class="ui-showcase-header">',
-    `    <a class="ui-showcase-header__home" href="${home}">irao-ui showcase</a>`,
-  ];
-  if (withSwitcher) {
+  const header = [];
+  if (frameHeader) {
     header.push(
-      '    <label class="ui-showcase-header__theme-label" for="ui-showcase-theme">Тема</label>',
-      '    <select class="ui-showcase-header__theme" id="ui-showcase-theme"',
-      `           data-theme-base="${d}/themes">`,
-      '      <option value="">По умолчанию</option>',
-      ...themes.map((theme) => `      <option value="${theme}">${theme}</option>`),
-      '    </select>',
+      '  <header class="ui-showcase-header">',
+      `    <a class="ui-showcase-header__home" href="${home}">irao-ui showcase</a>`,
     );
+    if (withSwitcher) {
+      header.push(
+        '    <label class="ui-showcase-header__theme-label" for="ui-showcase-theme">Тема</label>',
+        '    <select class="ui-showcase-header__theme" id="ui-showcase-theme"',
+        `           data-theme-base="${d}/themes">`,
+        '      <option value="">По умолчанию</option>',
+        ...themes.map((theme) => `      <option value="${theme}">${theme}</option>`),
+        '    </select>',
+      );
+    }
+    header.push('  </header>');
   }
-  header.push('  </header>');
 
-  const body = [
-    '  <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>',
+  const body = [];
+  if (frameHeader) {
+    body.push('  <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>');
+  }
+  body.push(
     ...header,
+    ...(preMain ? [preMain.trim()] : []),
     // tabindex="-1" на цели skip-link: Enter переносит фокус РЕАЛЬНО в main
     // (без него браузеры меняют только хэш, activeElement уходит на body —
     // Safari-кейс, T3.5 п.2; проверено зондом chromium 2026-10-06 и e2e
@@ -280,7 +299,8 @@ function frame({
     '  <main id="main" tabindex="-1">',
     main,
     '  </main>',
-  ];
+    ...(pageFooter ? [pageFooter.trim()] : []),
+  );
   if (withJs) body.push(`  <script src="${d}/ui.min.js" defer></script>`);
   if (withSwitcher) body.push(THEME_SCRIPT);
 
@@ -602,6 +622,121 @@ function generateShowcase({ themes }) {
     );
   }
 
+  // Стенд «patterns/search-overlay» (T7.6) — паттерн «Поисковый оверлей»:
+  // полноэкранный поиск на ui-modal--full (T7.2) с GET-формой и фокусом в
+  // поле при открытии (сниппет паттерна по событию irao-ui:modal-open).
+  // Источник — канонический файл паттерна
+  // patterns/search-overlay/search-overlay.html (он же стенд), связки
+  // паттерна (sop-*) — <style> в нём (зона сайта, в dist не попадает).
+  // Каркас СО СЛУЖЕБНЫМ <h1> (как base/typography/layout/integration):
+  // оверлей — фрагмент страницы, не страница; axe page-has-heading-one
+  // требует h1, диалог в разметке скрыт (модуль снял open).
+  const searchOverlayStandSource = join(ROOT, 'patterns', 'search-overlay', 'search-overlay.html');
+  if (existsSync(searchOverlayStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/search-overlay.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/search-overlay — irao-ui showcase',
+      // Служебный h1: оверлей — фрагмент, h1 несёт каркас демо-страницы.
+      main: `    <h1>patterns/search-overlay</h1>\n${readFileSync(searchOverlayStandSource, 'utf8').trim()}`,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'search-overlay.html'), page);
+    stands.push({
+      name: 'patterns/search-overlay',
+      source: 'patterns/search-overlay/search-overlay.html',
+    });
+  } else {
+    warn(
+      'patterns/search-overlay/search-overlay.html ещё нет — ' +
+        'стенд patterns/search-overlay не сгенерирован',
+    );
+  }
+
+  // Стенд «patterns/header» (T7.6) — паттерн «Шапка»: разметка паттерна
+  // ставится НА УРОВНЕ body (preMain — между <body> и <main>), как на
+  // реальном сайте: у копируемого <header> честная роль banner, у nav —
+  // navigation (правила ленмарк — README паттерна). Служебная шапка каркаса
+  // выключена (frameHeader: false): она была бы ВТОРОЙ banner-лендмаркой
+  // уровня body — нарушение axe landmark-no-duplicate-banner; вместе с ней
+  // уходят skip-link (его приносит сам паттерн) и переключатель темы
+  // (withSwitcher: false — THEME_SCRIPT ссылается на select каркаса).
+  const headerStandSource = join(ROOT, 'patterns', 'header', 'header.html');
+  if (existsSync(headerStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/header.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/header — irao-ui showcase',
+      frameHeader: false,
+      withSwitcher: false,
+      // Паттерн несёт свой skip-link (первый элемент сниппета) — гейт
+      // selfChecks «skip-link до <header>» исполняет разметка паттерна.
+      // Директива html-validate — ЗДЕСЬ, не в источнике паттерна: во
+      // фрагменте без <body> правило element-permitted-content не срабатывает
+      // (no-unused-disable), а на стенде <style> паттерна встаёт прямым
+      // ребёнком body (подставка связок зоны сайта; в бою —
+      // template_styles.css, README паттерна).
+      preMain:
+        '<!-- html-validate-disable element-permitted-content -->\n' +
+        readFileSync(headerStandSource, 'utf8'),
+      // Служебный h1 в main: шапка — каркас без заголовков; axe
+      // page-has-heading-one требует h1, ссылка ведёт в каталог стендов.
+      main: [
+        '    <h1>patterns/header</h1>',
+        '    <p class="ui-showcase-stand__note">',
+        '      Демо-страница стенда: разметка паттерна стоит на уровне body — у',
+        '      <code>&lt;header&gt;</code> роль banner, у навигаций — navigation. Каталог стендов:',
+        '      <a href="../../index.html">irao-ui showcase</a>. Дока и Bitrix-заметки —',
+        '      patterns/header/README.md.',
+        '    </p>',
+      ].join('\n'),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'header.html'), page);
+    stands.push({ name: 'patterns/header', source: 'patterns/header/header.html' });
+  } else {
+    warn('patterns/header/header.html ещё нет — стенд patterns/header не сгенерирован');
+  }
+
+  // Стенд «patterns/footer» (T7.6) — паттерн «Подвал»: разметка паттерна
+  // ставится НА УРОВНЕ body ПОСЛЕ main (pageFooter) — у копируемого
+  // <footer> честная роль contentinfo (правила ленмарк — README паттерна).
+  // Служебная шапка каркаса остаётся (подвал не спорит с banner).
+  const footerStandSource = join(ROOT, 'patterns', 'footer', 'footer.html');
+  if (existsSync(footerStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/footer.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/footer — irao-ui showcase',
+      // Служебный h1 — он же цель «Наверх» (#top, tabindex="-1"): переход
+      // кверху паттерна переносит фокус реально (пара T3.5).
+      main: [
+        '    <h1 id="top" tabindex="-1">patterns/footer</h1>',
+        '    <p class="ui-showcase-stand__note">',
+        '      Демо-страница стенда: разметка паттерна стоит на уровне body после',
+        '      <code>&lt;main&gt;</code> — у <code>&lt;footer&gt;</code> роль contentinfo, контакты — в',
+        '      <code>&lt;address&gt;</code>. Ссылка «Наверх» ведёт на якорь #top (начало страницы).',
+        '      Каталог стендов: <a href="../../index.html">irao-ui showcase</a>. Дока и',
+        '      Bitrix-заметки — patterns/footer/README.md.',
+        '    </p>',
+      ].join('\n'),
+      // Директива html-validate — здесь, не в источнике паттерна (причина —
+      // в блоке стенда header выше): <style> подвала встаёт прямым ребёнком
+      // body (подставка связок зоны сайта; в бою — template_styles.css).
+      pageFooter:
+        '<!-- html-validate-disable element-permitted-content -->\n' +
+        readFileSync(footerStandSource, 'utf8'),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'footer.html'), page);
+    stands.push({ name: 'patterns/footer', source: 'patterns/footer/footer.html' });
+  } else {
+    warn('patterns/footer/footer.html ещё нет — стенд patterns/footer не сгенерирован');
+  }
+
   // Стенды «ui-table-scroll» / «ui-table-cards» (T7.4) — второй и третий
   // паттерны компонента ui-table: AC задачи — «три стенда», компонент при
   // этом один (components/ui-table/, CSS попадает в dist через COMPONENTS).
@@ -729,7 +864,11 @@ function selfChecks({ banner, stands }) {
       `${rel}: skip-link отсутствует в каркасе (T3.5)`,
     );
     assert(
-      html.indexOf('<a class="ui-skip-link"') < html.indexOf('<header'),
+      html.indexOf('<a class="ui-skip-link"') <
+        // Первая шапка ПОСЛЕ skip-link (литерал «<header» в док-комментарии
+        // паттерна шапки — не элемент): с T7.6 паттерн шапки несёт свой
+        // skip-link в preMain, инвариант «skip-link до <header>» — на нём.
+        html.indexOf('<header', html.indexOf('<a class="ui-skip-link"')),
       `${rel}: skip-link — не первый интерактивный элемент каркаса`,
     );
     assert(

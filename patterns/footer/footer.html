@@ -1,0 +1,282 @@
+<!--
+  Паттерн «Footer» (T7.6): референс-разметка подвала сайта — <footer>
+  (contentinfo) + колонки ссылок (nav-лендмарки с уникальными aria-label) +
+  контакты в <address> (Technical considerations: address-семантика —
+  контактная информация организации) + переход кверху. Источник решений —
+  footer.html career-portal: переносится КОМПОЗИЦИЯ, не стили (визуал —
+  зона сайта, Out of scope).
+
+  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
+  подключены только компоненты; связующие стили ниже (fdp-*) — зона сайта
+  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
+  (style-under-body на стенде легален по inline-директиве перед style:
+  фрагмент — не полный документ; на стенде он идёт на уровень body,
+  чтобы дать подвалу честную роль contentinfo).
+
+  Разметка ставится НА УРОВНЕ body ПОСЛЕ main: у footer-элемента прямого
+  ребёнка body — роль contentinfo (внутри main роли contentinfo нет).
+
+  Icon-only ссылки соцсетей несут aria-label (T4.1, гейт
+  irao/link-accessible-name); svg — декоративные (aria-hidden).
+-->
+<!-- Связки fdp-* (зона сайта) живут <style> рядом — подставка стенда; в бою
+     переносите их в template_styles.css (README паттерна). На стенде
+     фрагмент идёт на уровень body (contentinfo) — исключение «style прямо
+     в body» объявляет сборка стенда (showcase/build.mjs), не этот файл. -->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+  .fdp-footer {
+    box-sizing: border-box; /* ADR-0002: корень связки объявляет сам */
+    margin-top: var(--ui-space-8);
+    padding-top: var(--ui-space-6);
+    padding-bottom: var(--ui-space-6);
+    border-top: var(--ui-border-width) solid var(--ui-color-border);
+    background-color: var(--ui-color-surface-muted);
+  }
+
+  /* Мобильная база: одна колонка; рост — min-width из шкалы брейкпоинтов
+     T2.5 (медиазапросы ниже — от md/lg). */
+  .fdp-footer__inner {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-5);
+  }
+
+  .fdp-footer__columns {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-5);
+  }
+
+  .fdp-footer__links {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fdp-footer__links li + li {
+    margin-top: var(--ui-space-2);
+  }
+
+  .fdp-logo {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    font-weight: var(--ui-fw-h3);
+  }
+
+  /* Контакты: address (курсив UA-дефолта гасим — контактные строки
+     читаются обычным текстом роли ui-body). */
+  .fdp-footer__contacts {
+    box-sizing: border-box;
+    font-style: normal;
+  }
+
+  .fdp-footer__contact {
+    box-sizing: border-box;
+    margin: 0 0 var(--ui-space-2);
+  }
+
+  .fdp-footer__label {
+    box-sizing: border-box;
+    display: block;
+    font-size: var(--ui-fs-micro);
+    font-weight: var(--ui-fw-micro);
+    line-height: var(--ui-lh-micro);
+    color: var(--ui-color-text-muted);
+  }
+
+  .fdp-footer__right {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+  }
+
+  .fdp-footer__socials {
+    box-sizing: border-box;
+    display: flex;
+    gap: var(--ui-space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fdp-footer__social {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem; /* touch-цель 44px (шкала T2.5) */
+    height: 2.75rem;
+    border: var(--ui-border-width) solid var(--ui-color-border);
+    border-radius: var(--ui-radius-pill);
+    color: var(--ui-color-text);
+  }
+
+  .fdp-footer__copyright {
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  @media (min-width: 768px) {
+    .fdp-footer__inner {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .fdp-footer__columns {
+      flex-direction: row;
+      gap: var(--ui-space-7);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .fdp-footer__right {
+      align-items: flex-end;
+      text-align: right;
+    }
+  }
+</style>
+
+<footer class="fdp-footer">
+  <div class="ui-container fdp-footer__inner">
+    <!-- Логотип (T4.6): ссылка на главную с доступным именем; в бою — img
+         по правилам T4.6 (alt + width/height), см. README паттерна. -->
+    <a class="fdp-logo" href="/" aria-label="Интер РАО — на главную">
+      <svg
+        class="hdp-logo__mark"
+        aria-hidden="true"
+        focusable="false"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+      >
+        <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" stroke-width="2"></circle>
+        <path
+          d="M9 20h14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+        <path
+          d="M12 12h8"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+        ></path>
+      </svg>
+      <span class="hdp-logo__text">Интер РАО</span>
+    </a>
+
+    <!-- Колонки ссылок: каждая колонка — nav-лендмарка со своим aria-label
+         (лендмарки navigation различимы скринридеру). -->
+    <div class="fdp-footer__columns">
+      <nav class="fdp-footer__nav" aria-label="Навигация по сайту">
+        <ul class="fdp-footer__links">
+          <li><a class="ui-link" href="/vacancies/">Вакансии</a></li>
+          <li><a class="ui-link" href="/internships/">Школьникам и студентам</a></li>
+          <li><a class="ui-link" href="/media/">Медиа</a></li>
+          <li><a class="ui-link" href="/contacts/">Контакты</a></li>
+        </ul>
+      </nav>
+
+      <nav class="fdp-footer__nav" aria-label="Документы">
+        <ul class="fdp-footer__links">
+          <li><a class="ui-link" href="/privacy/">Политика конфиденциальности</a></li>
+          <li>
+            <a class="ui-link" href="/personal-data/">Правила обработки персональных данных</a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Контакты: address-семантика (Technical considerations T7.6) —
+         контактная информация организации/страницы. Телефон и почта —
+         ссылки tel:/mailto: (работают без JS). -->
+    <address class="fdp-footer__contacts">
+      <p class="fdp-footer__contact">
+        <span class="fdp-footer__label">Адрес</span>
+        ул. Большая Пироговская, д.&nbsp;27, стр.&nbsp;1, г.&nbsp;Москва, Россия, 119435
+      </p>
+      <p class="fdp-footer__contact">
+        <span class="fdp-footer__label">Телефон</span>
+        <!-- prettier-ignore -->
+        <a class="ui-link" href="tel:+74956648840">+7&nbsp;495&nbsp;664&#8209;88&#8209;40</a>
+      </p>
+      <p class="fdp-footer__contact">
+        <span class="fdp-footer__label">E-mail</span>
+        <a class="ui-link" href="mailto:career@interrao.ru">career@interrao.ru</a>
+      </p>
+    </address>
+
+    <div class="fdp-footer__right">
+      <!-- Соцсети: icon-only ссылки — aria-label обязателен (T4.1);
+           svg — декоративные (aria-hidden). -->
+      <ul class="fdp-footer__socials">
+        <li>
+          <a class="fdp-footer__social" href="https://vk.com/" aria-label="ВКонтакте">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12.7 17.4c-4.9 0-7.7-3.4-7.8-9h2.5c.1 4.2 1.9 5.9 3.4 6.3V8.4h2.3v3.6c1.4-.2 2.9-1.8 3.4-3.6h2.3c-.4 2.2-2 3.9-3.1 4.5 1.1.6 2.9 2 3.6 4.5h-2.6c-.5-1.7-1.9-3-3.7-3.2v3.2h-.3z"
+              ></path>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a class="fdp-footer__social" href="https://ok.ru/" aria-label="Одноклассники">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M12 3.8a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zM6.4 7.2a5.6 5.6 0 1111.2 0 5.6 5.6 0 01-11.2 0zm1.2 7.3c1.3.5 2.8.8 4.4.8 1.6 0 3-.3 4.4-.8l.8 1.8c-1 .4-2 .7-3.2.8l2.9 4.2-1.8 1.2-3.1-4.5-3.1 4.5-1.8-1.2 2.9-4.2c-1.2-.1-2.2-.4-3.2-.8l.8-1.8z"
+              ></path>
+            </svg>
+          </a>
+        </li>
+        <li>
+          <a class="fdp-footer__social" href="https://rutube.ru/" aria-label="Rutube">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                d="M4 4h10.5A5.5 5.5 0 0120 9.5c0 2.6-1.8 4.8-4.2 5.4L20 20h-4l-3.8-4.8H8V20H4V4zm4 3.6v4h6.3a2 2 0 000-4H8z"
+              ></path>
+            </svg>
+          </a>
+        </li>
+      </ul>
+
+      <p class="fdp-footer__copyright ui-small ui-text--muted">© 1998–2026, ПАО «Интер РАО»</p>
+
+      <!-- Переход кверху: цель — id="top" в начале страницы (на каркасе:
+           <body id="top"> или id на первом контентном блоке). -->
+      <a class="fdp-footer__top ui-link" href="#top">Наверх</a>
+    </div>
+  </div>
+</footer>
