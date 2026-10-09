@@ -1,0 +1,519 @@
+<!--
+  Паттерн «Страница формы» (T8.3): эталонная сборка страницы-формы с
+  информационной колонкой (vacancy-apply career-portal) — крошки (T4.7) →
+  page-head (h1 «Отклик» + lead) → форма ui-form (T5.4) с aside-сводкой
+  вакансии (ui-form__aside: title/text/rows — перенос form-aside) и
+  возвратом к вакансии → полный форма-цикл (стенд T5.6 встраивается сюда):
+  живая форма (без JS — нативная валидация, с JS — модуль IraoUI.form),
+  ветка «серверный ответ» (pre-rendered ошибки по контракту T5.6 + inline-
+  сниппет фокуса) и ветка success.
+
+  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
+  подключены только компоненты; связующие стили ниже (fpp-*) — зона сайта
+  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
+  (showcase, не в dist).
+
+  Референс: career-portal src/pages/vacancy-apply.html — переносится
+  КОМПОЗИЦИЯ, не стили: двухколоночная раскладка «форма + aside-сводка»,
+  h1 «Отклик», дисклеймер ПД (чекбокс согласия).
+
+  РЕШЕНИЕ «aside на мобиле» (Implementation requirements п.1 + Accessibility
+  requirements): сводка вакансии идёт ДО формы в порядке чтения НА ВСЕХ
+  вьюпортах — aside стоит в DOM раньше основной колонки (UX-логика: пользователь
+  сначала видит, на какую вакансию откликается, потом заполняет анкету; DOM-
+  порядок = порядок чтения скринридера и порядок фокуса). От lg (1024) связка
+  сайта ставит aside в ПРАВУЮ колонку grid'а (grid-column: 2) — одобренная
+  раскладка .form-page career-portal (форма слева, aside 400px справа);
+  DOM при этом не переставляется, порядок чтения не зависит от вьюпорта.
+-->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+
+  /* page-head: вертикальный ритм (reset системы обнуляет margin p/h). */
+  .fpp-head {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-5);
+  }
+
+  .fpp-lead {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-3);
+  }
+
+  /* Форма — после page-head (reset обнуляет margin у form-блока ui-form). */
+  .fpp-form {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-6);
+  }
+
+  /* lg (1024, шкала T2.5): одобренная раскладка .form-page — форма слева
+     (колонка 1), aside-сводка справа (колонка 2). DOM-порядок не меняется:
+     aside остаётся раньше полей (решение выше). grid-row: 1 — оба элемента
+     в одной строке лейаута ui-form__layout. */
+  @media (min-width: 1024px) {
+    .fpp-form .ui-form__main {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .fpp-form .ui-form__aside {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+
+  /* Ветки цикла на стенде (реальность — отдельные загрузки страницы):
+     отступ содержимого ветки от заголовка/ноты (reset обнуляет margin form). */
+  .fpp-branch-body {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-5);
+  }
+</style>
+
+<section class="ui-section" id="fpp-page">
+  <p class="ui-showcase-stand__note">
+    Эталон страницы-формы: крошки, page-head (h1 «Отклик» + lead), форма ui-form (T5.4) с
+    aside-сводкой вакансии и возвратом. Aside-сводка идёт ДО формы в порядке чтения на всех
+    вьюпортах (решение спеки T8.3); от lg она уезжает в правую колонку (<code>grid-column</code>,
+    одобренная раскладка career-portal). Форма работает БЕЗ JS (нативная валидация); с JS модуль
+    <code>IraoUI.form</code> (T5.5) предваряет ошибки на клиенте. Полный цикл — ветки ниже
+    («серверный ответ», success): интеграция стенда T5.6 на страницу-форму.
+  </p>
+
+  <!-- Крошки (T4.7): nav[aria-label] > ol[role="list"], микроразметка
+       BreadcrumbList; текущая страница («Отклик») — span + aria-current="page"
+       (не ссылка). Крошки в DOM раньше page-head (конвенция паттернов T8.2). -->
+  <nav class="ui-breadcrumbs" id="fpp-breadcrumbs" aria-label="Хлебные крошки">
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <ol
+      class="ui-breadcrumbs__list"
+      role="list"
+      itemscope
+      itemtype="https://schema.org/BreadcrumbList"
+    >
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="/"
+          ><span itemprop="name">Главная</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="1">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="/vacancies/"
+          ><span itemprop="name">Вакансии</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="2">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="detail-page.html"
+          ><span itemprop="name">Ведущий инженер по эксплуатации энергоблоков</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="3">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page"
+          >Отклик на вакансию</span
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="4">
+      </li>
+    </ol>
+  </nav>
+
+  <!-- page-head: h1 «Отклик» (Context T8.3) → lead (подроль типографики T3.3). -->
+  <h1 class="ui-h1 fpp-head" id="fpp-title">Отклик на вакансию</h1>
+  <p class="ui-lead fpp-lead" id="fpp-lead">
+    Заполните анкету — компания рассмотрит отклик и свяжется с вами по телефону или e-mail в течение
+    10 рабочих дней.
+  </p>
+
+  <!-- Живая форма (ветки 1–2 цикла): ui-form (T5.4) + модуль IraoUI.form
+       (T5.5). В разметке НЕТ novalidate: без JS браузерная валидация работает
+       как есть (ТЗ №14), novalidate ставит модуль при инициализации. action
+       на стенде — якорь заголовка (после серверной обработки браузер
+       возвращается к началу страницы); в бою — URL страницы отклика.
+       Порядок внутри формы (Do T5.4): summary — первым ребёнком; лейаут
+       __layout: aside-сводка РАНЬШЕ __main (решение «до формы в порядке
+       чтения»), от lg aside уходит в правую колонку связкой fpp-*. -->
+  <form class="ui-form fpp-form" id="fpp-form" method="post" action="#fpp-title" data-ui-form>
+    <div class="ui-form__summary" id="fpp-summary" role="alert" tabindex="-1" hidden>
+      <h2 class="ui-h4 ui-form__summary-title">В форме есть ошибки</h2>
+      <ul class="ui-form__summary-list"></ul>
+    </div>
+
+    <div class="ui-form__layout" id="fpp-layout" data-ui-check-layout>
+      <!-- Aside-сводка вакансии (перенос form-aside career-portal): title
+           (цвет primary даёт ui-form__aside-title), text, пары «метка —
+           значение» (dl-семантика) + возврат к вакансии (ССЫЛКА — переход
+           работает без JS). Доступна до формы в порядке чтения (Accessibility
+           requirements T8.3). -->
+      <aside
+        class="ui-form__aside"
+        id="fpp-aside"
+        data-ui-check-layout
+        aria-labelledby="fpp-aside-title"
+      >
+        <h2 class="ui-h4 ui-form__aside-title" id="fpp-aside-title">
+          Ведущий инженер по эксплуатации энергоблоков
+        </h2>
+        <p class="ui-body ui-form__aside-text">
+          АО «Интер РАО – Электрогенерация», Москва. Зарплата от 120 000 ₽, ДМС, корпоративное
+          обучение.
+        </p>
+        <dl class="ui-form__aside-list">
+          <div class="ui-form__aside-row">
+            <dt class="ui-small ui-text--muted ui-form__aside-label">Опыт работы</dt>
+            <dd class="ui-small ui-form__aside-value">От 3 лет</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-small ui-text--muted ui-form__aside-label">Направление</dt>
+            <dd class="ui-small ui-form__aside-value">Электроэнергетика</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-small ui-text--muted ui-form__aside-label">Занятость</dt>
+            <dd class="ui-small ui-form__aside-value">Полный день</dd>
+          </div>
+        </dl>
+        <a class="ui-button ui-button--outline" id="fpp-aside-back" href="detail-page.html"
+          >Вернуться к вакансии</a
+        >
+      </aside>
+
+      <!-- Основная колонка: grid полей (2 колонки от md — T5.4), actions,
+           footnote. data-ui-form-body — хук свапа состояния (демо стенда
+           ui-form); в бою свап делает сайт/сервер (success-страница). -->
+      <div class="ui-form__main" id="fpp-main" data-ui-check-layout data-ui-form-body>
+        <div class="ui-form__grid">
+          <div class="ui-field ui-field--required">
+            <label class="ui-field__label" for="fpp-lastname">
+              Фамилия
+              <span class="ui-field__req"
+                ><span aria-hidden="true">*</span
+                ><span class="ui-field__req-text">обязательное поле</span></span
+              >
+            </label>
+            <input
+              class="ui-field__input"
+              type="text"
+              id="fpp-lastname"
+              name="lastname"
+              autocomplete="family-name"
+              required
+              placeholder="Иванов"
+       >
+          </div>
+          <div class="ui-field ui-field--required">
+            <label class="ui-field__label" for="fpp-firstname">
+              Имя
+              <span class="ui-field__req"
+                ><span aria-hidden="true">*</span
+                ><span class="ui-field__req-text">обязательное поле</span></span
+              >
+            </label>
+            <input
+              class="ui-field__input"
+              type="text"
+              id="fpp-firstname"
+              name="firstname"
+              autocomplete="given-name"
+              required
+              placeholder="Иван"
+       >
+          </div>
+          <div class="ui-field ui-field--required">
+            <label class="ui-field__label" for="fpp-phone">
+              Телефон
+              <span class="ui-field__req"
+                ><span aria-hidden="true">*</span
+                ><span class="ui-field__req-text">обязательное поле</span></span
+              >
+            </label>
+            <input
+              class="ui-field__input"
+              type="tel"
+              id="fpp-phone"
+              name="phone"
+              autocomplete="tel"
+              required
+              placeholder="+7 (___) ___-__-__"
+       >
+          </div>
+          <div class="ui-field ui-field--required">
+            <label class="ui-field__label" for="fpp-email">
+              E-mail
+              <span class="ui-field__req"
+                ><span aria-hidden="true">*</span
+                ><span class="ui-field__req-text">обязательное поле</span></span
+              >
+            </label>
+            <input
+              class="ui-field__input"
+              type="email"
+              id="fpp-email"
+              name="email"
+              autocomplete="email"
+              required
+              placeholder="you@example.ru"
+       >
+          </div>
+          <div class="ui-field ui-field--wide">
+            <label class="ui-field__label" for="fpp-resume">Резюме</label>
+            <input
+              class="ui-field__input"
+              type="file"
+              id="fpp-resume"
+              name="resume"
+              accept=".doc,.docx,.pdf"
+              data-ui-max-size="5242880"
+              aria-describedby="fpp-resume-hint"
+       >
+            <p class="ui-field__hint" id="fpp-resume-hint">
+              doc, docx, pdf — до 5 Мб; не обязательно
+            </p>
+          </div>
+          <div class="ui-field ui-field--wide">
+            <label class="ui-field__label" for="fpp-extra">Дополнительная информация</label>
+            <textarea
+              class="ui-field__textarea"
+              id="fpp-extra"
+              name="extra"
+              rows="3"
+              placeholder="Расскажите о релевантном опыте"
+            ></textarea>
+          </div>
+          <div class="ui-field ui-field--required ui-field--wide">
+            <label class="ui-checkbox">
+              <input
+                class="ui-checkbox__input"
+                type="checkbox"
+                id="fpp-consent"
+                name="consent"
+                required
+                aria-describedby="fpp-consent-hint"
+       >
+              <span>Я даю согласие на обработку персональных данных</span>
+            </label>
+            <p class="ui-field__hint" id="fpp-consent-hint">
+              Текст согласия и <a class="ui-link" href="/privacy/">Политика конфиденциальности</a> —
+              на сайте компании. Ссылки вне подписи поля: клик по ним не переключает чекбокс.
+            </p>
+          </div>
+        </div>
+        <div class="ui-form__actions">
+          <button class="ui-button ui-button--primary" type="submit">
+            <span class="ui-button__spinner" aria-hidden="true"></span>
+            <span class="ui-button__label">Отправить отклик</span>
+          </button>
+        </div>
+        <p class="ui-small ui-text--muted ui-form__footnote">
+          <span class="ui-form__req" aria-hidden="true">*</span> — обязательные поля
+        </p>
+      </div>
+    </div>
+  </form>
+</section>
+
+<!-- Ветка 3 цикла — «серверный ответ»: сервер вернул форму с вводом
+     пользователя и ошибками валидации (статическая эмуляция вывода сниппета
+     bitrix/snippets/form-error-render.php, T5.6). Разметка ошибки ТА ЖЕ, что
+     у клиентской валидации: ui-field--error + aria-invalid="true" +
+     aria-describedby (суффикс id -error — единый с модулем T5.5), сводная —
+     видимой (role="alert" объявит её при загрузке). Focus-сниппет под формой —
+     точная копия irao_ui_form_focus_script() (T5.6). -->
+<section class="ui-section" id="fpp-server" aria-labelledby="fpp-server-heading">
+  <p class="ui-showcase-stand__note">
+    Ветка «серверный ответ»: та же страница после перезагрузки — PHP отрендерил сводную ошибку, ввод
+    пользователя и ошибки полей по контракту T5.6 (идентично клиентской валидации). На реальном
+    сайте это отдельная загрузка; здесь ветка стоит рядом как якорь-состояние. Aside-сводка на ветке
+    опущена: серверу достаточно вернуть ошибочный ввод — сводка и aside не зависят друг от друга
+    (см. README паттерна).
+  </p>
+
+  <h2 class="ui-h3" id="fpp-server-heading">Ветка «серверный ответ»: ошибки после перезагрузки</h2>
+
+  <form
+    class="ui-form fpp-branch-body"
+    id="fpp-server-form"
+    method="post"
+    action="#fpp-server"
+    data-ui-form
+  >
+    <div class="ui-form__summary" id="fpp-server-summary" role="alert" tabindex="-1">
+      <h3 class="ui-h4 ui-form__summary-title">В форме 3 ошибки</h3>
+      <ul class="ui-form__summary-list">
+        <li><a class="ui-link" href="#fpp-srv-lastname">Заполните это поле</a></li>
+        <li><a class="ui-link" href="#fpp-srv-email">Исправьте адрес e-mail</a></li>
+        <li><a class="ui-link" href="#fpp-srv-consent">Отметьте этот пункт</a></li>
+      </ul>
+    </div>
+    <div class="ui-form__grid">
+      <div class="ui-field ui-field--required ui-field--error">
+        <label class="ui-field__label" for="fpp-srv-lastname">
+          Фамилия
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="fpp-srv-lastname"
+          name="lastname"
+          autocomplete="family-name"
+          required
+          value=""
+          aria-invalid="true"
+          aria-describedby="fpp-srv-lastname-error"
+       >
+        <p class="ui-field__error" id="fpp-srv-lastname-error" role="alert">Заполните это поле</p>
+      </div>
+      <div class="ui-field ui-field--required">
+        <label class="ui-field__label" for="fpp-srv-firstname">
+          Имя
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="text"
+          id="fpp-srv-firstname"
+          name="firstname"
+          autocomplete="given-name"
+          required
+          value="Иван"
+       >
+      </div>
+      <div class="ui-field ui-field--required ui-field--error">
+        <label class="ui-field__label" for="fpp-srv-email">
+          E-mail
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </label>
+        <input
+          class="ui-field__input"
+          type="email"
+          id="fpp-srv-email"
+          name="email"
+          autocomplete="email"
+          required
+          value="ivan@"
+          aria-invalid="true"
+          aria-describedby="fpp-srv-email-hint fpp-srv-email-error"
+       >
+        <p class="ui-field__hint" id="fpp-srv-email-hint">
+          Используется для уведомлений о статусе отклика
+        </p>
+        <p class="ui-field__error" id="fpp-srv-email-error" role="alert">Исправьте адрес e-mail</p>
+      </div>
+      <div class="ui-field ui-field--wide">
+        <label class="ui-field__label" for="fpp-srv-resume">Резюме</label>
+        <input
+          class="ui-field__input"
+          type="file"
+          id="fpp-srv-resume"
+          name="resume"
+          accept=".doc,.docx,.pdf"
+          data-ui-max-size="5242880"
+          aria-describedby="fpp-srv-resume-hint"
+       >
+        <p class="ui-field__hint" id="fpp-srv-resume-hint">
+          doc, docx, pdf — до 5 Мб; не обязательно
+        </p>
+      </div>
+      <div class="ui-field ui-field--required ui-field--wide ui-field--error">
+        <label class="ui-checkbox">
+          <input
+            class="ui-checkbox__input"
+            type="checkbox"
+            id="fpp-srv-consent"
+            name="consent"
+            aria-invalid="true"
+            aria-describedby="fpp-srv-consent-error"
+       >
+          <span>Я даю согласие на обработку персональных данных</span>
+        </label>
+        <p class="ui-field__error" id="fpp-srv-consent-error" role="alert">Отметьте этот пункт</p>
+      </div>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__spinner" aria-hidden="true"></span>
+        <span class="ui-button__label">Отправить отклик</span>
+      </button>
+    </div>
+    <p class="ui-small ui-text--muted ui-form__footnote">
+      <span class="ui-form__req" aria-hidden="true">*</span> — обязательные поля
+    </p>
+  </form>
+  <script>
+    // T5.6: точная копия inline-сниппета из bitrix/snippets/form-error-render.php
+    // (irao_ui_form_focus_script('fpp-server-summary')) — работает без модулей:
+    // после перезагрузки страницы с ошибками фокус встаёт на сводную ошибку
+    // (role="alert" объявит её, ссылки поведут к полям).
+    (function () {
+      var el = document.getElementById('fpp-server-summary');
+      if (el && !el.hidden && typeof el.focus === 'function') {
+        el.focus();
+      }
+    })();
+  </script>
+</section>
+
+<!-- Ветка 4 цикла — success: валидные данные сервер принял, success-блок
+     рендерится сразу видимым, без JS (вариант Bitrix). Заголовок с
+     tabindex="-1" — цель фокуса (success-вариант inline-сниппета переводит
+     фокус после загрузки; здесь ветки соседствуют на одной странице, поэтому
+     сниппет не исполняется — живой свап показывает стенд ui-form, T5.4). -->
+<section class="ui-section" id="fpp-success" aria-labelledby="fpp-success-heading">
+  <p class="ui-showcase-stand__note">
+    Ветка success: «Отклик отправлен» вместо формы — сервер отрендерил success-страницу. Заголовок
+    несёт <code>tabindex="-1"</code>: inline-сниппет сервера ставит на него фокус после загрузки
+    (сниппет — <code>irao_ui_form_focus_script('fpp-success-title')</code>). CTA ведёт назад к
+    списку вакансий (паттерн T8.1).
+  </p>
+
+  <h2 class="ui-h3" id="fpp-success-heading">Ветка success: отклик принят</h2>
+
+  <div class="ui-form__success fpp-branch-body" id="fpp-success-block">
+    <h3 class="ui-h4 ui-form__success-title" id="fpp-success-title" tabindex="-1">
+      Отклик отправлен
+    </h3>
+    <p class="ui-body ui-form__success-text">
+      Компания рассмотрит ваш отклик и свяжется с вами по телефону или e-mail в течение 10 рабочих
+      дней.
+    </p>
+    <div class="ui-form__success-actions">
+      <a class="ui-button ui-button--primary" id="fpp-success-cta" href="list-page.html"
+        >К списку вакансий</a
+      >
+    </div>
+  </div>
+</section>

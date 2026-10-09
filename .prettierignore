@@ -41,3 +41,8 @@ components/ui-form/ui-form.html
 # слэша): гейт разметки — lint:html (void-style), prettier здесь печатал бы
 # только самозакрытые void-элементы.
 showcase/pages/integration/form-full-cycle/index.html
+# T8.3: эталоны паттернов «Страница формы» (<input>) и «Landing-секция»
+# (<img>) — тот же случай (void-элементы без слэша): гейт разметки —
+# lint:html (void-style).
+patterns/form-page/form-page.html
+patterns/landing-section/landing-section.html
