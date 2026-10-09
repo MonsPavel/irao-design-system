@@ -260,4 +260,34 @@ describe('подключение и дока (DoD T7.5)', () => {
       expect(readme, keyword).toContain(keyword);
     }
   });
+
+  it('README синхронен коду о duration вращения (ревью T7.5 high): IACVT-формы нет, токен перехода — только с оговоркой', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-loader', 'README.md'), 'utf8');
+
+    // 1) README не воспроизводит невалидную запись: var(--ui-transition-slow)
+    //    в шорткате с явным linear — два easing, декларация целиком невалидна
+    //    (IACVT); копирующий читатель получил бы статичный спиннер.
+    expect(readme, 'IACVT-форма в доке запрещена').not.toMatch(
+      /animation:\s*ui-loader-spin\s+var\(--ui-transition-slow\)/,
+    );
+
+    // 2) API-ячейка спиннера описывает исполняемую форму кода
+    //    (ui-loader.css: «animation: ui-loader-spin 0.4s linear infinite»):
+    //    обещание «вращение … на --ui-transition-slow» — рассинхрон.
+    const spinnerRow = readme.match(/^\|.*`\.ui-loader__spinner`.*$/m);
+    expect(spinnerRow, 'строка API-таблицы про __spinner найдена').toBeTruthy();
+    expect(spinnerRow[0], 'исполняемая форма duration — 0.4s linear').toContain('0.4s linear');
+    expect(spinnerRow[0], 'ячейка не связывает вращение напрямую с токеном перехода').not.toMatch(
+      /вращение[^|]*на\s+`--ui-transition-slow`/,
+    );
+
+    // 3) Любое упоминание --ui-transition-slow в README несёт оговорку про
+    //    сырой duration (в своём блоке текста) — читатель не скопирует баг.
+    for (const block of readme.split(/\n\s*\n/)) {
+      if (!block.includes('--ui-transition-slow')) continue;
+      expect(block, `блок доки с токеном без оговорки: ${block.slice(0, 80)}…`).toContain(
+        'сырым временем',
+      );
+    }
+  });
 });
