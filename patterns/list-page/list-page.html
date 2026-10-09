@@ -50,6 +50,14 @@
     line-height: var(--ui-lh-small);
   }
 
+  /* Ширину пилюли задаёт сайт (career-portal: flex-basis 260px) — без неё
+     бокс нативного select'а сжимается до самой длинной опции и подпись
+     триггера подрезается. Нативный select скрыт модулем (opacity 0) — стилим
+     только геометрию. */
+  .lpp-pill select {
+    width: 12rem;
+  }
+
   /* Вертикальный ритм page-head (reset системы обнуляет margin p/h). */
   .lpp-count {
     margin-top: var(--ui-space-2);
