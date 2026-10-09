@@ -45,7 +45,7 @@ describe('patterns/list-page/list-page.html — контракт эталонн�
 
   it('счётчик результатов — aria-live="polite" (Technical considerations)', () => {
     expect(pattern, 'счётчик id="lpp-count" на месте').toContain('id="lpp-count"');
-    expect(pattern).toMatch(/aria-live="polite"[^>]*>Найдено: 6 вакансий</);
+    expect(pattern).toMatch(/aria-live="polite"[^>]*>\s*Найдено: 6 вакансий\s*</);
   });
 
   it('lead-подзаголовок page-head — роль ui-lead', () => {
@@ -69,26 +69,39 @@ describe('patterns/list-page/list-page.html — контракт эталонн�
 
   it('select-пилюли — data-ui-select="wrap" в label-обёртке сайта (замена хака career-portal)', () => {
     const hooks = pattern.match(/data-ui-select="wrap"/g) ?? [];
-    expect(hooks.length, 'минимум три фильтра-пилюли (город/направление/опыт)').toBeGreaterThanOrEqual(
-      3,
-    );
-    // Каждая пилюля — label-обёртка: имя поля получают и select, и триггер
-    // (модуль переносит текст обёртки в aria-label без поддерева select).
+    expect(
+      hooks.length,
+      'минимум три фильтра-пилюли (город/направление/опыт)',
+    ).toBeGreaterThanOrEqual(3);
+    // Каждая пилюля: подпись — label[for] РЯДОМ (имя поля получают и нативный
+    // select, и триггер — пара APG listbox-button), обёртка-пилюля содержит
+    // ТОЛЬКО select: триггер модуля накрывает обёртку inset:0 целиком.
     for (const id of ['lpp-city', 'lpp-direction', 'lpp-experience']) {
       const select = pattern.match(new RegExp(`<select[^>]*id="${id}"[^>]*>`, 's')) ?? [''];
       expect(select[0], `пилюля ${id}: data-ui-select="wrap"`).toContain('data-ui-select="wrap"');
+      const label = pattern.match(new RegExp(`<label[^>]*for="${id}"[^>]*>[\\s\\S]*?</label>`)) ?? [
+        '',
+      ];
+      expect(label[0], `пилюля ${id}: подпись label[for] рядом`).not.toBe('');
     }
-    // Первая опция — placeholder с текстом имени поля (пара career-portal).
-    expect(pattern).toMatch(/<option value=""[^>]*>Город<\/option>/);
+    // Первая опция — placeholder с пустым value (пара career-portal).
+    const cityBlock = pattern.match(/<select[^>]*id="lpp-city"[\s\S]*?<\/select>/) ?? [''];
+    expect(cityBlock[0], 'первая опция пилюли — placeholder value=""').toMatch(
+      /<option value=""[^>]*>/,
+    );
   });
 
   it('выдача — сетка ui-grid--3, карточки T4.4 (ссылочные, --hover) с тегами T4.3', () => {
-    expect(pattern, 'сетка --3 паттерна (Scope)').toMatch(
-      /class="ui-grid ui-grid--3"/,
-    );
+    expect(pattern, 'сетка --3 паттерна (Scope)').toMatch(/class="ui-grid ui-grid--3"/);
     const cards = pattern.match(/ui-card--link/g) ?? [];
     expect(cards.length, 'карточки-ссылки — паттерн T4.4').toBeGreaterThanOrEqual(6);
     expect(pattern, 'теги T4.3 в карточках').toContain('ui-tag ui-tag--');
+    // Заголовки карточек — h2 по семантике страницы (h1 → h2 без пропусков),
+    // вид — роль ui-h3 («классы, а не теги», T3.3).
+    const cardTitles = pattern.match(/<h2 class="ui-h3 ui-card__title">/g) ?? [];
+    expect(cardTitles.length, 'заголовки карточек — тег h2 с ролью ui-h3').toBeGreaterThanOrEqual(
+      6,
+    );
   });
 
   it('пагинация T6.3 — nav.ui-pagination с именем лендмарки', () => {
@@ -99,14 +112,14 @@ describe('patterns/list-page/list-page.html — контракт эталонн�
 
   it('empty-ветка: счётчик 0, ui-empty (T4.8) с h2 и кнопкой сброса на чистый URL', () => {
     expect(pattern, 'счётчик пустой выдачи').toMatch(
-      /aria-live="polite"[^>]*>Найдено: 0 вакансий</,
+      /aria-live="polite"[^>]*>\s*Найдено: 0 вакансий\s*</,
     );
     expect(pattern, 'empty-state компонента T4.8').toContain('class="ui-empty"');
     const emptyTitle = pattern.match(/<h2[^>]*class="[^"]*ui-empty__title[^"]*"[^>]*>/) ?? [''];
     expect(emptyTitle[0], 'заголовок состояния — h2 (правило T4.8)').not.toBe('');
     // Сброс — ССЫЛКА на страницу списка без параметров: работает без JS
     // (Implementation requirements п.3), в отличие от client-side reset формы.
-    const reset = pattern.match(/<a[^>]*href="list-page.html"[^>]*>[\s\S]*?<\/a>/) ?? [''];
+    const reset = pattern.match(/<a[^>]*href="list-page.html"[^>]*>[\s\S]*?<\/a\s*>/) ?? [''];
     expect(reset[0], 'сброс empty-ветки — ссылка на чистый URL (GET, без JS)').not.toBe('');
     expect(reset[0], 'сброс выглядит действием — ui-button (link-button)').toContain('ui-button');
   });
@@ -122,7 +135,9 @@ describe('patterns/list-page/list-page.html — контракт эталонн�
   it('связующие стили паттерна — только токены, без hex и !important (граница «showcase, не dist»)', () => {
     expect(pattern, 'связки живут <style> стенда, не в dist').toContain('<style>');
     const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(
+      /#[0-9a-fA-F]{3,8}\b/,
+    );
     expect(style[1], '!important в связках запрещён (инвариант системы)').not.toContain(
       '!important',
     );
