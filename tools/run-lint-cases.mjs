@@ -285,6 +285,23 @@ const EXPECTATIONS = [
     tool: 'html',
     expect: 'pass',
   },
+  {
+    // T7.5 (Accessibility requirements, правило доки): «текст всегда
+    // присутствует (не голый спиннер)» — лоадер без .ui-loader__text и
+    // .ui-loader__text без role="status" ловятся гейтом
+    // irao/loader-text-status.
+    file: 'html/loader-missing-text.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/loader-text-status'],
+  },
+  {
+    // T7.5: позитивный контроль гейта — текст с role="status" при каждом
+    // .ui-loader (база и aria-busy-оверлей), гейт молчит.
+    file: 'html/loader-valid.html',
+    tool: 'html',
+    expect: 'pass',
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 
