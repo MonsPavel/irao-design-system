@@ -103,12 +103,20 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     expect(dark[0], 'в тёмной секции карточки — обычные светлые ui-card').toContain('ui-card');
   });
 
-  it('full-bleed внутри контейнера (Technical considerations): отрицательные margin от container-pad', () => {
+  it('full-bleed внутри контейнера (Technical considerations): width+margin от container-pad', () => {
     const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
     expect(
       style[1],
       'база — отрицательный margin от --ui-container-pad (токенизированный, не «-16px»)',
     ).toMatch(/calc\(-1 \* var\(--ui-container-pad\)\)/);
+    expect(
+      style[1],
+      'ширина бокса тоже токенизирована: 100% + 2 паддинга (width: 100% ui-image — контент-бокс контейнера, одни margin только смещают)',
+    ).toMatch(/calc\(100% \+ 2 \* var\(--ui-container-pad\)\)/);
+    expect(
+      style[1],
+      'max-width: none — снятие базы ui-image (иначе max-width: 100% сжимает расширенный бокс к колонке)',
+    ).toMatch(/max-width:\s*none/);
     expect(style[1], 'ступень md — --ui-container-pad-md (768)').toMatch(
       /@media \(min-width: 768px\)[\s\S]*?var\(--ui-container-pad-md\)/,
     );
@@ -224,9 +232,17 @@ describe('сборка: стенд паттерна генерируется в 
     expect(collapsed).toContain(`rel: '../..'`);
   });
 
-  it('каркас стенда БЕЗ служебного h1: секции лендинга несут h2 (лендинг-секция не страница)', () => {
+  it('каркас стенда СО СЛУЖЕБНЫМ h1 (лендинг-секция — фрагмент; axe page-has-heading-one)', () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
     const block = build.slice(build.indexOf('patterns/landing-section'));
-    expect(block).toContain('Без служебного h1');
+    // Лендинг-секция — не страница: h1 несёт каркас демо-страницы (как
+    // base/typography/layout/integration), заголовки секций — h2.
+    expect(block).toContain('<h1>patterns/landing-section</h1>');
+    // h1 добавляется в main каркаса; источник паттерна остаётся фрагментом.
+    const pattern = readFileSync(
+      join(root, 'patterns', 'landing-section', 'landing-section.html'),
+      'utf8',
+    );
+    expect(pattern, 'в самом эталоне секций h1 нет (фрагмент, не страница)').not.toContain('<h1');
   });
 });

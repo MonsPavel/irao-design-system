@@ -567,9 +567,10 @@ function generateShowcase({ themes }) {
   // правила сборки лендинг-секций + mini-эталон из трёх секций (светлая /
   // тёмная on-dark / с-изображением full-bleed) БЕЗ нового CSS; связки
   // паттерна (lsp-*) — <style> в нём (зона сайта, в dist не попадает).
-  // Каркас БЕЗ служебного <h1>: лендинг-секция — не страница, h1 у неё нет
-  // по определению; заголовки секций — h2 с ролью ui-h2 (axe page-has-
-  // heading-one проходит по h2, гейт irao/one-h1 не нарушается — h1 нет).
+  // Каркас СО СЛУЖЕБНЫМ <h1> (как base/typography/layout/integration):
+  // лендинг-секция — не страница, h1 у неё нет по определению, а стенд —
+  // демо-страница полигона; axe page-has-heading-one требует h1, заголовки
+  // секций — h2 с ролью ui-h2 (иерархия h1 → h2 → h3 без пропусков).
   const landingSectionStandSource = join(
     ROOT,
     'patterns',
@@ -582,8 +583,8 @@ function generateShowcase({ themes }) {
       rel: '../..', // stands/patterns/landing-section.html → SHOWCASE_DIST (на два уровня выше)
       home: '../../index.html', // → index.html каталога стендов
       title: 'patterns/landing-section — irao-ui showcase',
-      // Без служебного h1: секции лендинга несут h2 (лендинг-секция — не страница).
-      main: readFileSync(landingSectionStandSource, 'utf8').trim(),
+      // Служебный h1: лендинг-секция — фрагмент, h1 несёт каркас демо-страницы.
+      main: `    <h1>patterns/landing-section</h1>\n${readFileSync(landingSectionStandSource, 'utf8').trim()}`,
       themes,
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'landing-section.html'), page);

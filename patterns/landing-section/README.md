@@ -89,27 +89,39 @@
 ## Full-bleed внутри контейнера (правила T4.6)
 
 Изображение шире колонки контента (панорама, обложка секции) тянется до краёв
-секции **отрицательными margin от container-pad** — значения только токенами,
-ступени повторяют лестницу `ui-container`:
+секции **шириной и отрицательными margin от container-pad** — значения только
+токенами, ступени повторяют лестницу `ui-container`:
 
 ```css
 .lsp-bleed {
   box-sizing: border-box;
+  width: calc(100% + 2 * var(--ui-container-pad));
+  max-width: none;
   margin-inline: calc(-1 * var(--ui-container-pad));
 }
 
 @media (min-width: 768px) {
   .lsp-bleed {
+    width: calc(100% + 2 * var(--ui-container-pad-md));
     margin-inline: calc(-1 * var(--ui-container-pad-md));
   }
 }
 
 @media (min-width: 1024px) {
   .lsp-bleed {
+    width: calc(100% + 2 * var(--ui-container-pad-lg));
     margin-inline: calc(-1 * var(--ui-container-pad-lg));
   }
 }
 ```
+
+Важно, связка переопределяет **два** ограничения базы `ui-image`:
+
+- `width: 100%` (его даёт `ui-image--ratio-*`) считается от **контент-бокса
+  контейнера**, а margin только смещает элемент — ширину добавляем явно
+  (`calc(100% + 2 * pad)`), иначе справа останется зазор в один паддинг;
+- `max-width: 100%` (база `ui-image`) сжимает расширенный бокс обратно к
+  колонке контента — снимаем (`max-width: none`).
 
 Само изображение — правила T4.6: `ui-image ui-image--cover ui-image--ratio-16-9`
 (место зафиксировано `aspect-ratio` из шкалы — CLS = 0; `--cover` кадрирует

@@ -60,21 +60,29 @@
   }
 
   /* Full-bleed внутри контейнера (Technical considerations T8.3): бокс
-     изображения расширяется на горизонтальные паддинги контейнера —
-     значения только токенами, ступени повторяют лестницу ui-container. */
+     изображения расширяется на горизонтальные паддинги контейнера. Двух
+     переопределений недостаточно сделать по одному margin'у:
+      - width: 100% (ui-image--ratio-*) — ширина КОНТЕНТ-бокса контейнера,
+        margin только смещает элемент → ширину добавляем явно;
+      - max-width: 100% (база ui-image) сжимает бокс обратно → снимаем.
+     Значения только токенами, ступени повторяют лестницу ui-container. */
   .lsp-bleed {
     box-sizing: border-box;
+    width: calc(100% + 2 * var(--ui-container-pad));
+    max-width: none;
     margin-inline: calc(-1 * var(--ui-container-pad));
   }
 
   @media (min-width: 768px) {
     .lsp-bleed {
+      width: calc(100% + 2 * var(--ui-container-pad-md));
       margin-inline: calc(-1 * var(--ui-container-pad-md));
     }
   }
 
   @media (min-width: 1024px) {
     .lsp-bleed {
+      width: calc(100% + 2 * var(--ui-container-pad-lg));
       margin-inline: calc(-1 * var(--ui-container-pad-lg));
     }
   }
