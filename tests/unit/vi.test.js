@@ -27,9 +27,15 @@ import { join } from 'node:path';
 import { JSDOM } from 'jsdom';
 import { describe, expect, it, vi } from 'vitest';
 
+import { contrastRatio, declarationsFromTokenFile, resolveTokenColor } from '../contrast/lib.mjs';
+
 const viSource = readFileSync(join(import.meta.dirname, '../../a11y/vi.js'), 'utf8');
+const viCss = readFileSync(join(import.meta.dirname, '../../a11y/vi.css'), 'utf8');
 
 const STORAGE_KEY = 'irao-ui-vi';
+
+/** Темы ГОСТ Р 52872 (career-portal vi.css, «как есть»). */
+const THEMES_GOST = ['baw', 'wb', 'bb', 'beige', 'green'];
 
 /** Панель и кнопки для DOM-проверок apply (сокращённый канонический паттерн). */
 const panelHtml = [
@@ -478,5 +484,92 @@ describe('a11y/vi.js — guard-ы модуля (контракт docs/templates/
     window.IraoUI.vi.init();
 
     expect(clickListeners).toBe(1);
+  });
+});
+
+describe('a11y/vi.css — гарантированные пары тем ГОСТ (Accessibility requirements T9.1)', () => {
+  /**
+   * VI-темы — не токены, обычный контраст-гейт T2.3 их не видит (осознанное
+   * исключение в шапке tests/contrast/pairs.config.mjs): «проверка в T9.1».
+   * Здесь — машин-контроль: константы пар из :root vi.css против порога AA
+   * текста (4.5:1); соответствие computed на страницах — e2e-матрица
+   * «тема × стенды EPIC-4/5» (tests/e2e/ui-vi.spec.js).
+   */
+  const THRESHOLD_TEXT = 4.5;
+
+  /** Константы пар из :root-блока vi.css: имя → hex. */
+  const viConstants = new Map(
+    [
+      ...viCss.match(/:root\s*\{([^}]*)\}/)[1].matchAll(/(--ui-vi-[a-z0-9-]+):\s*(#[0-9a-f]{6})/gi),
+    ].map((match) => [match[1], match[2]]),
+  );
+
+  const themePair = (theme) => ({
+    bg: viConstants.get(`--ui-vi-theme-${theme}-bg`),
+    text: viConstants.get(`--ui-vi-theme-${theme}-text`),
+  });
+
+  it('константы всех пяти тем на месте (перенос career-portal «как есть»)', () => {
+    expect([...viConstants.keys()].sort()).toEqual(
+      [
+        '--ui-vi-swatch-border-baw',
+        '--ui-vi-swatch-border-beige',
+        '--ui-vi-theme-baw-bg',
+        '--ui-vi-theme-baw-text',
+        '--ui-vi-theme-bb-bg',
+        '--ui-vi-theme-bb-text',
+        '--ui-vi-theme-beige-bg',
+        '--ui-vi-theme-beige-text',
+        '--ui-vi-theme-green-bg',
+        '--ui-vi-theme-green-btn-text',
+        '--ui-vi-theme-green-text',
+        '--ui-vi-theme-wb-bg',
+        '--ui-vi-theme-wb-text',
+      ].sort(),
+    );
+  });
+
+  it.each(THEMES_GOST)('пара темы %s — контраст ≥ 4.5:1 (AA текста)', (theme) => {
+    const { bg, text } = themePair(theme);
+    expect(contrastRatio(text, bg)).toBeGreaterThanOrEqual(THRESHOLD_TEXT);
+  });
+
+  it('кнопочные пары тем (bg = текст темы) — контраст ≥ 4.5:1', () => {
+    // Кнопки перекрашиваются фоном = цвет текста темы (vi.css: .ui-button);
+    // подписка — white (bb/beige, токен --ui-color-text-on-dark) и
+    // тёмно-зелёный (green, --ui-vi-theme-green-btn-text).
+    const declarations = new Map([
+      ...declarationsFromTokenFile(
+        readFileSync(join(import.meta.dirname, '../../tokens/primitives.css'), 'utf8'),
+        'primitive',
+      ),
+      ...declarationsFromTokenFile(
+        readFileSync(join(import.meta.dirname, '../../tokens/semantic.css'), 'utf8'),
+        'semantic',
+      ),
+    ]);
+    const white = resolveTokenColor('--ui-color-text-on-dark', declarations);
+
+    expect(contrastRatio(white, viConstants.get('--ui-vi-theme-bb-text'))).toBeGreaterThanOrEqual(
+      THRESHOLD_TEXT,
+    );
+    expect(
+      contrastRatio(white, viConstants.get('--ui-vi-theme-beige-text')),
+    ).toBeGreaterThanOrEqual(THRESHOLD_TEXT);
+    expect(
+      contrastRatio(
+        viConstants.get('--ui-vi-theme-green-btn-text'),
+        viConstants.get('--ui-vi-theme-green-text'),
+      ),
+    ).toBeGreaterThanOrEqual(THRESHOLD_TEXT);
+  });
+
+  it('hex в vi.css — только в :root-блоке констант (осознанное исключение инварианта hex)', () => {
+    // Инвариант «hex только в tokens/primitives.css»: для ГОСТ-модуля
+    // исключение — один блок констант (цвета не бренд-палитра, в tokens/ не
+    // попадают — §3.2). Комментарии не считаются (пины смотрят на код).
+    const code = viCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    const rootBlock = code.match(/:root\s*\{[^}]*\}/)[0];
+    expect(code.replace(rootBlock, '')).not.toMatch(/#[0-9a-f]{3,8}\b/i);
   });
 });

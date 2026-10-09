@@ -106,7 +106,10 @@ const COMPONENTS = [
   'ui-loader', // T7.5 — индикация загрузки: спиннер svg + текст role="status" (не голый спиннер, гейт irao/loader-text-status), --sm/--block/--overlay, aria-busy-паттерн
 ];
 
-/** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
+/** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css.
+ * Панель components/ui-vi/ — паттерн без CSS в ui-core (сознательно: сайты
+ * подключают ui-vi.min.css осознанно, последним в каскаде), поэтому ui-vi
+ * исключён из предупреждения discoverComponents ниже. */
 const CSS_VI = ['a11y/vi.css'];
 
 /** JS vi-модуля — последним в ui.min.js (как JS_ORDER career-portal). */
@@ -624,7 +627,7 @@ function generateShowcase({ themes }) {
 
   const discovered = discoverComponents();
   for (const name of discovered) {
-    if (!COMPONENTS.includes(name)) {
+    if (!COMPONENTS.includes(name) && name !== 'ui-vi') {
       warn(
         `components/${name}/ есть, но имя не добавлено в COMPONENTS showcase/build.mjs — ` +
           'CSS не попадёт в ui-core.min.css (добавление компонента = одна строка)',
