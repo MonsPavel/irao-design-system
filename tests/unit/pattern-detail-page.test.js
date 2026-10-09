@@ -48,8 +48,9 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
   });
 
   it('крошки T4.7 идут перед page-head: BreadcrumbList, текущая — span + aria-current', () => {
-    expect(pattern.indexOf('ui-breadcrumbs'), 'крошки в DOM раньше h1').toBeGreaterThan(-1);
-    expect(pattern.indexOf('ui-breadcrumbs')).toBeLessThan(pattern.indexOf('<h1'));
+    const markup = pattern.replace(/<style>[\s\S]*?<\/style>/, '');
+    expect(markup.indexOf('ui-breadcrumbs'), 'крошки в DOM раньше h1').toBeGreaterThan(-1);
+    expect(markup.indexOf('ui-breadcrumbs')).toBeLessThan(markup.indexOf('<h1'));
     expect(pattern, 'микроразметка BreadcrumbList (T4.7)').toContain(
       'itemtype="https://schema.org/BreadcrumbList"',
     );
@@ -63,10 +64,9 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
     expect(pattern, 'JobPosting-микроразметка на эталоне вакансии').toContain(
       'itemtype="https://schema.org/JobPosting"',
     );
-    expect(
-      pattern,
-      'hiringOrganization — вложенный itemscope Organization с name',
-    ).toContain('itemtype="https://schema.org/Organization"');
+    expect(pattern, 'hiringOrganization — вложенный itemscope Organization с name').toContain(
+      'itemtype="https://schema.org/Organization"',
+    );
     expect(pattern, 'имя организации — itemprop="name"').toContain('itemprop="name"');
     expect(pattern, 'jobLocation — вложенный Place с PostalAddress').toContain(
       'itemtype="https://schema.org/PostalAddress"',
@@ -81,9 +81,10 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
   it('page-head: теги T4.3 и мета-строка; метаданные времени — <time> с datetime', () => {
     expect(pattern, 'теги T4.3 в page-head').toContain('ui-tag ui-tag--');
     const times = pattern.match(/<time\b[^>]*datetime="[^"]+"[^>]*>/g) ?? [];
-    expect(times.length, 'время — элемент <time datetime> (Technical considerations)').toBeGreaterThanOrEqual(
-      1,
-    );
+    expect(
+      times.length,
+      'время — элемент <time datetime> (Technical considerations)',
+    ).toBeGreaterThanOrEqual(1);
   });
 
   it('двухколоночный лейаут: .dpp-main + aside.dpp-aside (перенос form-aside-структуры)', () => {
@@ -100,9 +101,7 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
 
   it('CTA-панель aside: кнопка + дисклеймер «обработка ПД» (перенос паттерна согласия career-portal)', () => {
     const cta = pattern.match(/<a[^>]*class="[^"]*ui-button[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
-    expect(cta[0], 'CTA aside — ссылка-кнопка ui-button (работает без JS)').toContain(
-      'ui-button',
-    );
+    expect(cta[0], 'CTA aside — ссылка-кнопка ui-button (работает без JS)').toContain('ui-button');
     expect(cta[0]).toContain('Откликнуться');
     expect(pattern, 'дисклеймер про обработку персональных данных').toContain(
       'обработку персональных данных',
@@ -122,27 +121,28 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
   });
 
   it('related: заголовок h2 + сетка ui-grid--3 с карточками-ссылками T4.4', () => {
-    expect(pattern, 'related-блок с заголовком «Похожие вакансии»').toContain(
-      'Похожие вакансии',
-    );
-    expect(pattern, 'сетка --3 паттерна (T3.4)').toMatch(/class="ui-grid ui-grid--3"/);
+    expect(pattern, 'related-блок с заголовком «Похожие вакансии»').toContain('Похожие вакансии');
+    expect(pattern, 'сетка --3 паттерна (T3.4)').toMatch(/class="ui-grid ui-grid--3[ "]/);
     const cards = pattern.match(/ui-card--link/g) ?? [];
     expect(cards.length, 'карточки-ссылки — паттерн T4.4').toBeGreaterThanOrEqual(3);
     // Внутри related есть свой h2 → заголовки карточек — h3 (без пропуска
     // уровня, гейт irao/heading-order), вид — роль ui-h3.
     const cardTitles = pattern.match(/<h3 class="ui-h3 ui-card__title">/g) ?? [];
-    expect(cardTitles.length, 'заголовки карточек related — тег h3 с ролью ui-h3').toBeGreaterThanOrEqual(
-      3,
-    );
+    expect(
+      cardTitles.length,
+      'заголовки карточек related — тег h3 с ролью ui-h3',
+    ).toBeGreaterThanOrEqual(3);
   });
 
   it('порядок чтения: крошки → h1 → контент → aside → related (DOM-порядок = смысловой)', () => {
+    // Порядок меряется по разметке (без <style>: связки в CSS упоминаются раньше).
+    const markup = pattern.replace(/<style>[\s\S]*?<\/style>/, '');
     const positions = [
-      ['крошки', pattern.indexOf('ui-breadcrumbs')],
-      ['h1', pattern.indexOf('<h1')],
-      ['контент', pattern.indexOf('dpp-main')],
-      ['aside', pattern.indexOf('dpp-aside"')],
-      ['related', pattern.indexOf('dpp-related')],
+      ['крошки', markup.indexOf('ui-breadcrumbs')],
+      ['h1', markup.indexOf('<h1')],
+      ['контент', markup.indexOf('dpp-main')],
+      ['aside', markup.indexOf('dpp-aside"')],
+      ['related', markup.indexOf('dpp-related')],
     ];
     for (const [name, index] of positions) {
       expect(index, `${name} найден в разметке`).toBeGreaterThan(-1);
@@ -155,42 +155,48 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
     }
   });
 
+  /** Стили паттерна: из кода без HTML-комментариев (упоминание <style> в
+   * шапке-комментарии не должно попадать в срез). */
+  const styleOf = (source) => {
+    const code = source.replace(/<!--[\s\S]*?-->/g, '');
+    return code.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
+  };
+
   it('sticky только ≥md: в мобильной базе позиционирования нет (aside — после контента)', () => {
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'связки живут <style> стенда, не в dist').toContain('.dpp-aside');
+    const style = styleOf(pattern)[1];
+    expect(style, 'связки живут <style> стенда, не в dist').toContain('.dpp-aside');
     // База (до первого media) — мобильная: sticky в ней нет (IR 1).
-    const base = style[1].slice(0, style[1].indexOf('@media'));
+    const base = style.slice(0, style.indexOf('@media'));
     expect(base, 'база mobile-first: без position: sticky').not.toContain('position: sticky');
-    // Sticky — внутри min-width: 768px (шкала T2.5).
-    const md = style[1].match(/@media \(min-width: 768px\)\s*\{([\s\S]*?)\n\}/) ?? [''];
+    // Sticky — внутри min-width: 768px (шкала T2.5). Блок media в связках
+    // стенда закрывается на отступе 2 (правила внутри — на 4).
+    const md = style.match(/@media \(min-width: 768px\)\s*\{([\s\S]*?)\n {2}\}/) ?? [''];
     expect(md[0], 'sticky-правило в min-width: 768px (md)').toContain('position: sticky');
     expect(md[0]).toContain('.dpp-aside');
   });
 
   it('media связок — только min-width из шкалы брейкпоинтов T2.5', () => {
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    const medias = [...style[1].matchAll(/@media \(min-width: (\d+)px\)/g)].map((m) => m[1]);
+    const style = styleOf(pattern)[1];
+    const medias = [...style.matchAll(/@media \(min-width: (\d+)px\)/g)].map((m) => m[1]);
     expect(medias.length, 'медиа-точки в связках есть').toBeGreaterThan(0);
     for (const value of medias) {
       expect(BREAKPOINTS, `значение ${value}px — из шкалы T2.5`).toContain(value);
     }
-    expect(style[1], 'max-width в связках не используется (mobile-first)').not.toContain(
-      'max-width',
-    );
+    expect(style, 'max-width в связках не используется (mobile-first)').not.toContain('max-width');
   });
 
   it('связующие стили паттерна — только токены: без hex и !important (инварианты системы)', () => {
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'hex в связках запрещён (hex только в tokens/primitives.css)').not.toMatch(
+    const style = styleOf(pattern)[1];
+    expect(style, 'hex в связках запрещён (hex только в tokens/primitives.css)').not.toMatch(
       /#[0-9a-fA-F]{3,8}\b/,
     );
-    expect(style[1], '!important запрещён (только a11y/vi.css)').not.toContain('!important');
+    expect(style, '!important запрещён (только a11y/vi.css)').not.toContain('!important');
   });
 
   it('корни блоков связок — box-sizing: border-box (ADR-0002)', () => {
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
+    const style = styleOf(pattern)[1];
     for (const selector of ['.dpp-layout', '.dpp-main', '.dpp-aside']) {
-      const rule = style[1].match(new RegExp(`${selector.replace(/[-]/g, '\\-')}\\s*\\{([^}]*)\\}`));
+      const rule = style.match(new RegExp(`${selector.replace(/[-]/g, '\\-')}\\s*\\{([^}]*)\\}`));
       expect(rule, `правило ${selector} найдено`).toBeTruthy();
       expect(rule[1], `${selector}: box-sizing на корне (ADR-0002)`).toContain(
         'box-sizing: border-box;',
@@ -241,10 +247,13 @@ describe('patterns/detail-page/README.md — дока паттерна (AC: Bitr
     expect(readme, 'правило «не ради галочки» (когда уместно)').toContain('уместно');
   });
 
-  it('sticky × overflow: док-предупреждение о wrapper'+"'"+'ах (Technical considerations)', () => {
-    expect(readme, 'предупреждение про overflow-контексты').toContain('overflow');
-    expect(readme, 'предупреждение про wrapper-обёртки').toContain('обёртк');
-  });
+  it(
+    'sticky × overflow: док-предупреждение о wrapper' + "'" + 'ах (Technical considerations)',
+    () => {
+      expect(readme, 'предупреждение про overflow-контексты').toContain('overflow');
+      expect(readme, 'предупреждение про wrapper-обёртки').toContain('обёртк');
+    },
+  );
 
   it('Bitrix-заметки (AC): news.detail, свойства ИБ в теги/мету, связанные блоки', () => {
     expect(readme, 'детальная страница — bitrix:news.detail').toContain('news.detail');

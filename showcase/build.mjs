@@ -512,6 +512,33 @@ function generateShowcase({ themes }) {
     warn('patterns/list-page/list-page.html ещё нет — стенд patterns/list-page не сгенерирован');
   }
 
+  // Стенд «patterns/detail-page» (T8.2) — паттерн «Детальная страница»:
+  // эталонная сборка детальной страницы (крошки → page-head → контент+aside
+  // → related) из готовых компонентов БЕЗ нового CSS; JobPosting-микроразметка
+  // эталона — поверхность schema-парсера e2e. Источник — канонический файл
+  // паттерна patterns/detail-page/detail-page.html (он же стенд), связки
+  // паттерна — <style> в нём (зона сайта, в dist не попадает). Каркас БЕЗ
+  // служебного <h1>: заголовок страницы несёт сам паттерн — h1 page-head
+  // (как patterns/list-page; два h1 — гейт irao/one-h1).
+  const detailPageStandSource = join(ROOT, 'patterns', 'detail-page', 'detail-page.html');
+  if (existsSync(detailPageStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/detail-page.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/detail-page — irao-ui showcase',
+      // Без служебного h1: h1 несёт сам паттерн (page-head детальной страницы).
+      main: readFileSync(detailPageStandSource, 'utf8').trim(),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'detail-page.html'), page);
+    stands.push({ name: 'patterns/detail-page', source: 'patterns/detail-page/detail-page.html' });
+  } else {
+    warn(
+      'patterns/detail-page/detail-page.html ещё нет — стенд patterns/detail-page не сгенерирован',
+    );
+  }
+
   // Стенды «ui-table-scroll» / «ui-table-cards» (T7.4) — второй и третий
   // паттерны компонента ui-table: AC задачи — «три стенда», компонент при
   // этом один (components/ui-table/, CSS попадает в dist через COMPONENTS).

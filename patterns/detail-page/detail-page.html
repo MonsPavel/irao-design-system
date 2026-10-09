@@ -1,0 +1,375 @@
+<!--
+  Паттерн «Детальная страница» (T8.2): эталонная сборка детальной страницы
+  (вакансия) из готовых компонентов системы — крошки (T4.7) → page-head
+  (h1 + зарплата + теги T4.3 + мета с <time datetime>) → двухколоночный
+  лейаут «контент + aside» (типографика T3.3; aside — sticky ≥md: CTA-кнопка,
+  справочная панель — перенос form-aside-структуры, дисклеймер «обработка
+  ПД») → related (h2 + сетка карточек T4.4). Вакансия размечена
+  schema.org/JobPosting (title, hiringOrganization, jobLocation, datePosted)
+  как пример «когда уместно» (ТЗ №7); для статей — Article (README паттерна).
+
+  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
+  подключены только компоненты; связующие стили ниже (dpp-*) — зона сайта
+  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
+  (showcase, не в dist). Ссылка «Откликнуться» ведёт на страницу отклика
+  (T8.3) и работает без JS.
+
+  Референс: career-portal src/pages/vacancy.html + event.html (aside с
+  деталями) + build.py render_vacancy_detail/form-aside — переносится
+  КОМПОЗИЦИЯ, не стили. Sticky-aside: только ≥md (спека T8.2; одобренный
+  .form-aside — position: sticky, top 24px, в стеке статичен); на мобиле
+  aside — в конце потока (DOM-порядок = смысловой: заголовок → контент →
+  aside). Осторожно с wrapper'ами: sticky не работает внутри предков с
+  overflow: hidden/auto и у flex-родителей без align-items: start
+  (Технические considerations — README паттерна).
+-->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+
+  /* page-head: вертикальный ритм (reset системы обнуляет margin p/h). */
+  .dpp-head {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-5);
+  }
+
+  .dpp-salary {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-3);
+  }
+
+  .dpp-tags {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-3);
+  }
+
+  .dpp-meta {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-3);
+  }
+
+  /* Лейаут «контент + aside»: мобильная база — одна колонка, aside в конце
+     потока (после контента — Accessibility requirements). Рост — только
+     min-width из шкалы брейкпоинтов T2.5. */
+  .dpp-layout {
+    box-sizing: border-box;
+    display: grid;
+    gap: var(--ui-space-7);
+    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Основная колонка: ритм секций контента (типографика — роли T3.3). */
+  .dpp-main {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-5);
+  }
+
+  /* Aside: порт .form-aside career-portal (панель на surface-muted, паддинг
+     и радиус — как у ui-form__aside, T5.4). Sticky включается только от md —
+     в мобильной базе позиционирования нет (Implementation requirements п.1). */
+  .dpp-aside {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-5);
+    border-radius: var(--ui-radius-md);
+    background-color: var(--ui-color-surface-muted);
+  }
+
+  /* Пары «метка — значение»: UA-дефолты dl/dd обнуляются (урок ui-form:
+     dd уезжал на 40px вправо от метки на legacy-сайте со своими margin). */
+  .dpp-aside__list,
+  .dpp-aside__row,
+  .dpp-aside__label,
+  .dpp-aside__value {
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  .dpp-aside__row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-1);
+  }
+
+  /* Сетка related-карточек: отступ от заголовка секции (reset обнуляет). */
+  .dpp-related__grid {
+    box-sizing: border-box;
+    margin-top: var(--ui-space-5);
+  }
+
+  /* md (768, шкала T2.5): aside — вторая колонка и sticky (top — одобренный
+     24px .form-aside). DOM-порядок не меняется: чтение — контент → aside. */
+  @media (min-width: 768px) {
+    .dpp-layout {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+
+    .dpp-aside {
+      position: sticky;
+      top: var(--ui-space-5);
+    }
+  }
+
+  /* lg (1024): aside получает ширину одобренного .form-aside — токен
+     --ui-form-aside-width (400px, слой 2). */
+  @media (min-width: 1024px) {
+    .dpp-layout {
+      grid-template-columns: minmax(0, 1fr) var(--ui-form-aside-width);
+    }
+  }
+</style>
+
+<section class="ui-section" id="dpp-page">
+  <p class="ui-showcase-stand__note">
+    Эталон детальной страницы: крошки, page-head (заголовок, зарплата, теги, мета), контент с
+    секциями h2 и sticky-aside (справочная панель + CTA). На мобиле aside идёт после контента; от md
+    — вторая колонка с <code>position: sticky</code>. Разметка копируется в шаблон сайта целиком;
+    связки <code>dpp-*</code> — зона сайта (см. README паттерна).
+  </p>
+
+  <!-- Крошки (T4.7): nav[aria-label] > ol[role="list"], микроразметка
+       BreadcrumbList; текущая страница — span + aria-current="page" (не
+       ссылка). Крошки в DOM раньше page-head (Context T8.2). -->
+  <nav class="ui-breadcrumbs" id="dpp-breadcrumbs" aria-label="Хлебные крошки">
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <ol
+      class="ui-breadcrumbs__list"
+      role="list"
+      itemscope
+      itemtype="https://schema.org/BreadcrumbList"
+    >
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="/"
+          ><span itemprop="name">Главная</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="1">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="/vacancies/"
+          ><span itemprop="name">Вакансии</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="2">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page"
+          >Ведущий инженер по эксплуатации энергоблоков</span
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="3">
+      </li>
+    </ol>
+  </nav>
+
+  <!-- page-head + контент + aside: JobPosting-микроразметка (ТЗ №7 — «когда
+       уместно»: у страницы есть машиночитаемые поля). Поля — title (h1),
+       hiringOrganization, jobLocation, datePosted (<time datetime> —
+       Technical considerations). Крошки вне article: самостоятельная
+       top-level разметка BreadcrumbList. -->
+  <article class="dpp-article" itemscope itemtype="https://schema.org/JobPosting">
+    <!-- page-head: h1 → зарплата → теги (T4.3) → мета. Порядок чтения
+         начинается с заголовка (Accessibility requirements). -->
+    <header class="dpp-head">
+      <h1 class="ui-h1" id="dpp-title" itemprop="title">
+        Ведущий инженер по эксплуатации энергоблоков
+      </h1>
+      <p class="dpp-salary ui-h3">от 120 000 ₽ до вычета налога</p>
+      <p class="dpp-tags">
+        <span class="ui-tag ui-tag--blue">Электроэнергетика</span>
+        <span class="ui-tag ui-tag--gray">От 3 лет</span>
+        <span class="ui-tag ui-tag--orange">Горячая вакансия</span>
+      </p>
+      <p class="dpp-meta ui-small ui-text--muted" id="dpp-meta">
+        <span itemprop="hiringOrganization" itemscope itemtype="https://schema.org/Organization">
+          <span itemprop="name">АО «Интер РАО – Электрогенерация»</span>
+        </span>
+        <span aria-hidden="true">·</span>
+        <span itemprop="jobLocation" itemscope itemtype="https://schema.org/Place">
+          <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+            <span itemprop="addressLocality">Москва</span>,
+            <span itemprop="streetAddress">ул. Энергетическая, д. 10</span>
+          </span>
+        </span>
+        <span aria-hidden="true">·</span>
+        Опубликовано
+        <time itemprop="datePosted" datetime="2026-09-12">12 сентября 2026</time>
+      </p>
+    </header>
+
+    <!-- Лейаут «контент + aside»: мобильная база — одна колонка (aside после
+         контента), от md — две (aside sticky). align-items: start — sticky
+         внутри grid-элемента имеет пространство, чтобы прилипать. -->
+    <div class="dpp-layout" id="dpp-layout">
+      <div class="dpp-main" id="dpp-main" data-ui-check-layout>
+        <!-- Контент: секции h2 с ролями типографики T3.3 («классы, а не
+             теги»: уровень тега — семантика страницы, роль — вид). -->
+        <section>
+          <h2 class="ui-h4">Что предстоит</h2>
+          <p class="ui-body">
+            Контроль режимов работы основного и вспомогательного оборудования энергоблоков ТЭЦ,
+            планирование ремонтов и координация оперативного персонала. Работа ведётся на объекте
+            «Московская ТЭЦ» в составе оперативной команды подразделения, с наставником на период
+            адаптации.
+          </p>
+          <ul class="ui-list">
+            <li>
+              Ведение режимов работы энергооборудования в соответствии с диспетчерскими графиками;
+            </li>
+            <li>Анализ технического состояния оборудования и подготовка заявок на ремонт;</li>
+            <li>Участие в испытаниях и вводе оборудования после ремонтов;</li>
+            <li>Ведение технической документации и отчётности.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="ui-h4">Требования</h2>
+          <ul class="ui-list">
+            <li>Высшее техническое образование (энергетика, электроэнергетика);</li>
+            <li>Опыт работы в эксплуатации энергообъектов от 3 лет;</li>
+            <li>Знание правил технической эксплуатации и охраны труда в энергетике;</li>
+            <li>Уверенный пользователь MS Office, желательно знание 1С.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="ui-h4">Условия</h2>
+          <ul class="ui-list">
+            <li>оформление по ТК РФ, белая заработная плата, годовая премия;</li>
+            <li>ДМС с расширенным покрытием и программа телемедицины;</li>
+            <li>корпоративное обучение и программы повышения квалификации;</li>
+            <li>компенсация питания и занятий спортом.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="ui-h4">Где предстоит работать</h2>
+          <p class="ui-body"><b>Адрес:</b> г. Москва, ул. Энергетическая, д. 10</p>
+        </section>
+      </div>
+
+      <!-- Aside (перенос form-aside career-portal): справочная панель
+           (dl «метка — значение») + CTA-кнопка (ссылка на страницу отклика —
+           работает без JS) + дисклеймер переноса паттерна «согласие на
+           обработку ПД». CTA доступен с клавиатуры в sticky-зоне (обычная
+           ссылка в DOM-порядке). -->
+      <aside
+        class="dpp-aside"
+        id="dpp-aside"
+        data-ui-check-layout
+        aria-labelledby="dpp-aside-title"
+      >
+        <h2 class="ui-h4 dpp-aside__title" id="dpp-aside-title">Детали вакансии</h2>
+        <dl class="dpp-aside__list">
+          <div class="dpp-aside__row">
+            <dt class="ui-micro ui-text--muted dpp-aside__label">Опыт работы</dt>
+            <dd class="ui-small dpp-aside__value">От 3 лет</dd>
+          </div>
+          <div class="dpp-aside__row">
+            <dt class="ui-micro ui-text--muted dpp-aside__label">Направление</dt>
+            <dd class="ui-small dpp-aside__value">Электроэнергетика</dd>
+          </div>
+          <div class="dpp-aside__row">
+            <dt class="ui-micro ui-text--muted dpp-aside__label">Занятость</dt>
+            <dd class="ui-small dpp-aside__value">Полный день</dd>
+          </div>
+          <div class="dpp-aside__row">
+            <dt class="ui-micro ui-text--muted dpp-aside__label">Город</dt>
+            <dd class="ui-small dpp-aside__value">Москва</dd>
+          </div>
+        </dl>
+        <a class="ui-button ui-button--primary" id="dpp-cta" href="/vacancy-apply/">Откликнуться</a>
+        <p class="ui-small ui-text--muted dpp-aside__note">
+          Отправляя отклик, вы соглашаетесь на обработку персональных данных согласно
+          <a class="ui-link" href="/privacy/">Политике конфиденциальности</a>.
+        </p>
+      </aside>
+    </div>
+  </article>
+</section>
+
+<section class="ui-section" id="dpp-related" aria-labelledby="dpp-related-title">
+  <p class="ui-showcase-stand__note">
+    Related-блоки идут после main (Accessibility requirements): заголовок h2 + сетка карточек T4.4.
+    На реальном сайте это выборка «похожих» записей — см. Bitrix-заметки в README паттерна.
+  </p>
+
+  <!-- Related: заголовок секции h2 → заголовки карточек h3 (без пропуска
+       уровня, гейт irao/heading-order), вид — роль ui-h3 («классы, а не
+       теги», T3.3). href — demo-адреса, реальные URL — зона шаблона. -->
+  <h2 class="ui-h3" id="dpp-related-title">Похожие вакансии</h2>
+  <div class="ui-grid ui-grid--3 dpp-related__grid" id="dpp-related-grid" data-ui-check-layout>
+    <article class="ui-card ui-card--hover ui-card--link">
+      <p>
+        <span class="ui-tag ui-tag--blue">Теплоэнергетика</span>
+        <span class="ui-tag ui-tag--gray">От 1 года</span>
+      </p>
+      <h3 class="ui-h3 ui-card__title">
+        <a class="ui-card__link" href="/vacancies/kotelnaya/">Оператор котельной</a>
+      </h3>
+      <p class="ui-body ui-card__body">
+        Ведение режима работы котельного оборудования, контроль параметров теплоносителя.
+      </p>
+      <div class="ui-card__footer">
+        <button class="ui-button ui-button--outline" type="button">Откликнуться</button>
+      </div>
+    </article>
+
+    <article class="ui-card ui-card--hover ui-card--link">
+      <p>
+        <span class="ui-tag ui-tag--orange">Горячая вакансия</span>
+        <span class="ui-tag ui-tag--gray">Без опыта</span>
+      </p>
+      <h3 class="ui-h3 ui-card__title">
+        <a class="ui-card__link" href="/vacancies/stazher/">Стажёр в команду разработки</a>
+      </h3>
+      <p class="ui-body ui-card__body">
+        Участие в разработке внутренних сервисов: наставник, учебный контур, гибкий график.
+      </p>
+      <div class="ui-card__footer">
+        <button class="ui-button ui-button--outline" type="button">Откликнуться</button>
+      </div>
+    </article>
+
+    <article class="ui-card ui-card--hover ui-card--link">
+      <p>
+        <span class="ui-tag ui-tag--blue">Экономика и управление</span>
+        <span class="ui-tag ui-tag--gray">От 1 года</span>
+      </p>
+      <h3 class="ui-h3 ui-card__title">
+        <a class="ui-card__link" href="/vacancies/ekonomist/"
+          >Экономист планово-экономического отдела</a
+        >
+      </h3>
+      <p class="ui-body ui-card__body">
+        Планирование себестоимости, анализ отклонений, подготовка управленческой отчётности.
+      </p>
+      <div class="ui-card__footer">
+        <button class="ui-button ui-button--outline" type="button">Откликнуться</button>
+      </div>
+    </article>
+  </div>
+</section>

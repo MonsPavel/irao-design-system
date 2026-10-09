@@ -73,9 +73,7 @@ const collectLayoutViolations = (page) =>
     const violations = [];
     const doc = document.documentElement;
     if (doc.scrollWidth > doc.clientWidth) {
-      violations.push(
-        `hscroll: scrollWidth ${doc.scrollWidth} > clientWidth ${doc.clientWidth}`,
-      );
+      violations.push(`hscroll: scrollWidth ${doc.scrollWidth} > clientWidth ${doc.clientWidth}`);
     }
     const nodes = [...document.querySelectorAll('[data-ui-check-layout]')];
     const boxes = nodes.map((el) => el.getBoundingClientRect());
@@ -140,21 +138,16 @@ standTest.describe(
         const h1 = page.locator('h1');
         await expect(h1, 'один h1 — заголовок детальной страницы').toHaveCount(1);
         await expect(page.locator(SEL.breadcrumbs), 'крошки T4.7').toBeVisible();
-        await expect(page.locator(SEL.breadcrumbs)).toHaveAttribute(
-          'aria-label',
-          /Хлебные крошки/,
-        );
+        await expect(page.locator(SEL.breadcrumbs)).toHaveAttribute('aria-label', /Хлебные крошки/);
         await expect(page.locator(SEL.main), 'контентная колонка').toBeVisible();
         await expect(page.locator(SEL.aside), 'aside — справочная панель').toBeVisible();
-        await expect(
-          page.locator(`${SEL.aside} .ui-button`),
-          'CTA-кнопка в aside',
-        ).toBeVisible();
+        await expect(page.locator(`${SEL.aside} .ui-button`), 'CTA-кнопка в aside').toBeVisible();
         await expect(page.locator(SEL.relatedGrid), 'related — сетка карточек').toBeVisible();
         const cards = page.locator(`${SEL.relatedGrid} .ui-card--link`);
-        expect(await cards.count(), 'карточки related — паттерн карточки-ссылки T4.4').toBeGreaterThanOrEqual(
-          3,
-        );
+        expect(
+          await cards.count(),
+          'карточки related — паттерн карточки-ссылки T4.4',
+        ).toBeGreaterThanOrEqual(3);
       },
     );
 
@@ -187,84 +180,88 @@ standTest.describe(
         expect(datetimes.length, 'в мета-строке есть <time datetime>').toBeGreaterThanOrEqual(1);
         for (const time of datetimes) {
           const value = await time.getAttribute('datetime');
-          expect(
-            Number.isNaN(Date.parse(value)),
-            `datetime «${value}» парсится как дата`,
-          ).toBe(false);
+          expect(Number.isNaN(Date.parse(value)), `datetime «${value}» парсится как дата`).toBe(
+            false,
+          );
         }
       },
     );
   },
 );
 
-standTest.describe(
-  'patterns/detail-page: sticky-aside (Implementation requirements п.1)',
-  () => {
-    standTest(
-      'мобильная база (375): aside статичен и идёт после контента (не перекрывает)',
-      async ({ stand }) => {
-        const page = await stand('patterns/detail-page');
-        await page.setViewportSize(VIEWPORTS.mobile);
+standTest.describe('patterns/detail-page: sticky-aside (Implementation requirements п.1)', () => {
+  standTest(
+    'мобильная база (375): aside статичен и идёт после контента (не перекрывает)',
+    async ({ stand }) => {
+      const page = await stand('patterns/detail-page');
+      await page.setViewportSize(VIEWPORTS.mobile);
 
-        const position = await page
-          .locator(SEL.aside)
-          .evaluate((el) => getComputedStyle(el).position);
-        expect(position, 'на мобиле sticky выключен — обычный поток').toBe('static');
+      const position = await page
+        .locator(SEL.aside)
+        .evaluate((el) => getComputedStyle(el).position);
+      expect(position, 'на мобиле sticky выключен — обычный поток').toBe('static');
 
-        const boxes = await page.evaluate(() => {
-          const main = document.getElementById('dpp-main').getBoundingClientRect();
-          const aside = document.getElementById('dpp-aside').getBoundingClientRect();
-          return { mainBottom: main.bottom, asideTop: aside.top, asideLeft: aside.left };
-        });
-        expect(
-          boxes.asideTop,
-          'aside начинается после контента (в конце потока)',
-        ).toBeGreaterThanOrEqual(boxes.mainBottom - 1);
-        expect(boxes.asideLeft, 'aside в той же колонке — перекрытия нет').toBeCloseTo(
-          await page.locator(SEL.main).evaluate((el) => el.getBoundingClientRect().left),
+      const boxes = await page.evaluate(() => {
+        const main = document.getElementById('dpp-main').getBoundingClientRect();
+        const aside = document.getElementById('dpp-aside').getBoundingClientRect();
+        return { mainBottom: main.bottom, asideTop: aside.top, asideLeft: aside.left };
+      });
+      expect(
+        boxes.asideTop,
+        'aside начинается после контента (в конце потока)',
+      ).toBeGreaterThanOrEqual(boxes.mainBottom - 1);
+      expect(boxes.asideLeft, 'aside в той же колонке — перекрытия нет').toBeCloseTo(
+        await page.locator(SEL.main).evaluate((el) => el.getBoundingClientRect().left),
+        0,
+      );
+    },
+  );
+
+  standTest(
+    'md+ (768): aside — position: sticky; прилипает к --ui-space-5 при прокрутке',
+    async ({ stand }) => {
+      const page = await stand('patterns/detail-page');
+      await page.setViewportSize(VIEWPORTS.tablet);
+
+      const position = await page
+        .locator(SEL.aside)
+        .evaluate((el) => getComputedStyle(el).position);
+      expect(position, 'от md aside — sticky (Implementation requirements п.1)').toBe('sticky');
+
+      // Прокрутка в середину контентной колонки: natural top aside далеко
+      // выше вьюпорта — sticky прилипает к top (--ui-space-5 = 24px), но
+      // диапазон прилипания ещё не исчерпан (низ документа не достигнут:
+      // у конца grid-трека aside «доезжает» до его дна и уезжает дальше).
+      await page.evaluate(() => {
+        const main = document.getElementById('dpp-main');
+        window.scrollTo(
           0,
+          main.getBoundingClientRect().top + window.scrollY + main.offsetHeight / 2,
         );
-      },
-    );
+      });
+      await page.waitForFunction(() => window.scrollY > 0);
+      const top = await page.locator(SEL.aside).evaluate((el) => el.getBoundingClientRect().top);
+      expect(top, 'aside прилип к отступу от верха (24px ± допуск сглаживания)').toBeGreaterThan(
+        18,
+      );
+      expect(top).toBeLessThan(40);
+    },
+  );
 
-    standTest(
-      'md+ (768): aside — position: sticky; прилипает к --ui-space-5 при прокрутке',
-      async ({ stand }) => {
-        const page = await stand('patterns/detail-page');
-        await page.setViewportSize(VIEWPORTS.tablet);
+  standTest(
+    'CTA доступен с клавиатуры в sticky-зоне (Accessibility requirements)',
+    async ({ stand }) => {
+      const page = await stand('patterns/detail-page');
+      await page.setViewportSize(VIEWPORTS.desktop);
 
-        const position = await page
-          .locator(SEL.aside)
-          .evaluate((el) => getComputedStyle(el).position);
-        expect(position, 'от md aside — sticky (Implementation requirements п.1)').toBe('sticky');
-
-        // Прокрутка в конец: sticky-элемент останавливается на top (--ui-space-5 = 24px),
-        // а не уезжает вместе с потоком.
-        await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-        await page.waitForFunction(() => window.scrollY > 0);
-        const top = await page.locator(SEL.aside).evaluate((el) => el.getBoundingClientRect().top);
-        expect(top, 'aside прилип к отступу от верха (24px ± допуск сглаживания)').toBeGreaterThan(
-          18,
-        );
-        expect(top).toBeLessThan(40);
-      },
-    );
-
-    standTest(
-      'CTA доступен с клавиатуры в sticky-зоне (Accessibility requirements)',
-      async ({ stand }) => {
-        const page = await stand('patterns/detail-page');
-        await page.setViewportSize(VIEWPORTS.desktop);
-
-        // Tab от первой ссылки крошек доходит до CTA aside (DOM-порядок =
-        // смысловой, в main нет промежуточных остановок).
-        await tabTo(page, page.locator(`${SEL.breadcrumbs} a`).first());
-        await tabTo(page, page.locator(SEL.asideCta));
-        await expect(page.locator(SEL.asideCta), 'CTA получил фокус с клавиатуры').toBeFocused();
-      },
-    );
-  },
-);
+      // Tab от первой ссылки крошек доходит до CTA aside (DOM-порядок =
+      // смысловой, в main нет промежуточных остановок).
+      await tabTo(page, page.locator(`${SEL.breadcrumbs} a`).first());
+      await tabTo(page, page.locator(SEL.asideCta));
+      await expect(page.locator(SEL.asideCta), 'CTA получил фокус с клавиатуры').toBeFocused();
+    },
+  );
+});
 
 standTest.describe(
   'patterns/detail-page: 32px-сценарий (Implementation requirements п.1 — не перекрывает)',
@@ -326,22 +323,18 @@ standTest.describe('patterns/detail-page: a11y страницы (AC)', () => {
     async ({ stand }) => {
       const page = await stand('patterns/detail-page');
       const order = await page.evaluate(() => {
-        const parts = [
-          'dpp-breadcrumbs',
-          'dpp-title',
-          'dpp-main',
-          'dpp-aside',
-          'dpp-related',
-        ].map((id) => document.getElementById(id));
+        const parts = ['dpp-breadcrumbs', 'dpp-title', 'dpp-main', 'dpp-aside', 'dpp-related'].map(
+          (id) => document.getElementById(id),
+        );
         return parts.every((el, i) => {
           if (i === 0) return true;
           // Каждый следующий элемент идёт ПОСЛЕ предыдущего в документе.
-          return Boolean(parts[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+          return Boolean(
+            parts[i - 1].compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING,
+          );
         });
       });
-      expect(order, 'DOM-порядок = смысловой (заголовок → контент → aside → related)').toBe(
-        true,
-      );
+      expect(order, 'DOM-порядок = смысловой (заголовок → контент → aside → related)').toBe(true);
     },
   );
 });
