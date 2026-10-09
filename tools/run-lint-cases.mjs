@@ -268,6 +268,23 @@ const EXPECTATIONS = [
     tool: 'html',
     expect: 'pass',
   },
+  {
+    // T7.4 (Implementation requirements п.1): ячейки таблицы в карточном
+    // режиме (.ui-table--cards) обязаны нести непустой data-label — на <md
+    // шапка скрыта, пару «заголовок–значение» читает ::before
+    // { content: attr(data-label) }; ячейка без data-label теряет имя.
+    file: 'html/table-card-missing-label.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/table-card-data-label'],
+  },
+  {
+    // T7.4: позитивный контроль гейта — data-label на каждой ячейке
+    // (th scope="row" и td), гейт молчит.
+    file: 'html/table-card-valid.html',
+    tool: 'html',
+    expect: 'pass',
+  },
   { file: 'html/valid-page.html', tool: 'html', expect: 'pass' },
 ];
 
