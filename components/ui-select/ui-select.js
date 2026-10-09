@@ -34,10 +34,13 @@
  *    (career-portal btn.focus());
  *  - N инстансов: открытие одного закрывает другие (closeAll career-portal);
  *  - aria: триггер — aria-haspopup="listbox"/aria-expanded/aria-controls;
- *    имя поля переносится с нативного select (label[for]/label-обёртка →
- *    aria-labelledby триггера и aria-label списка — без этого триггер
- *    терял бы имя «Город», оставшееся на select); опции — aria-selected,
- *    optgroup → role="group" + aria-label группы.
+ *    имя поля переносится с нативного select: label[for] → aria-labelledby
+ *    триггера (label + собственный текст — выбранное значение в имени, пара
+ *    APG listbox-button); label-обёртка → aria-label триггера и списка
+ *    чистым текстом label БЕЗ поддерева select (наивный textContent дал бы
+ *    весь инвентарь опций, а живая обёртка после init содержит построенный
+ *    UI — ревью T7.3 high); без имени на select триггер терял бы «Город»;
+ *    опции — aria-selected, optgroup → role="group" + aria-label группы.
  *
  * Мобильная стратегия (Implementation requirements п.3, решение ADR-0012):
  * на устройствах с coarse-указателем (matchMedia('(pointer: coarse)')) модуль
@@ -218,9 +221,24 @@
         ancestor = ancestor.parentElement;
       }
     }
-    var labelText = labelElement
-      ? (labelElement.textContent || '').replace(/\s+/g, ' ').trim()
-      : '';
+    // Label-обёртка содержит select: наивный textContent дал бы имя со ВСЕМИ
+    // опциями (нативная ассоциация label-обёртки контрол исключает), а после
+    // init её текст включает и построенный UI — поэтому имя считается по
+    // клону label без поддерева select (ревью T7.3 high).
+    var labelWrapsSelect = Boolean(labelElement && labelElement.contains(root));
+    var labelText = '';
+    if (labelElement) {
+      if (labelWrapsSelect) {
+        var labelClone = labelElement.cloneNode(true);
+        var selectClone = labelClone.querySelector('select');
+        if (selectClone && selectClone.parentElement) {
+          selectClone.parentElement.removeChild(selectClone);
+        }
+        labelText = (labelClone.textContent || '').replace(/\s+/g, ' ').trim();
+      } else {
+        labelText = (labelElement.textContent || '').replace(/\s+/g, ' ').trim();
+      }
+    }
 
     /* ── сборка UI ── */
 
@@ -257,12 +275,19 @@
     trigger.appendChild(chevron);
 
     var labelIdGenerated = false;
-    if (labelElement) {
+    if (labelElement && !labelWrapsSelect) {
+      // label[for] статичен (текст вне контрола) — пара APG listbox-button:
+      // имя триггера = label + собственный текст (выбранное значение).
       if (!labelElement.id) {
         labelElement.id = 'ui-select-label-' + (uid += 1);
         labelIdGenerated = true;
       }
       trigger.setAttribute('aria-labelledby', labelElement.id + ' ' + trigger.id);
+    } else if (labelWrapsSelect && labelText) {
+      // На живую label-обёртку aria-labelledby не ссылается: её текст после
+      // init содержит построенный UI (инвентарь опций) — имя триггера задаёт
+      // aria-label чистым текстом label (ревью T7.3 high).
+      trigger.setAttribute('aria-label', labelText);
     }
 
     var list = document.createElement('div');
