@@ -191,6 +191,40 @@ describe('patterns/list-page/README.md — дока паттерна (AC: Bitrix
     expect(readme, 'GET-форма работает без JS').toContain('без JS');
     expect(readme, 'AJAX-фильтрация — за границей паттерна').toContain('зона сайта');
   });
+
+  it('сниппет выдачи — h2-заголовки карточек: копипаст из доки не даёт пропуск h1→h3 (ревью high)', () => {
+    expect(
+      readme,
+      'в доке нет <h3 class="ui-h3 ui-card__title">: вставка сниппета на страницу с h1 дала бы пропуск уровня (irao/heading-order)',
+    ).not.toContain('<h3 class="ui-h3 ui-card__title">');
+    expect(readme, 'канон паттерна — h2 с ролью ui-h3 (семантика страницы, вид — роль)').toContain(
+      '<h2 class="ui-h3 ui-card__title">',
+    );
+    // Пометка об уровне тега — чтобы копирующий не вернул h3 «по канону ui-card».
+    expect(readme, 'уровень тега и роль разведены в доке').toContain('уровень тега');
+  });
+
+  it('сниппет фокуса гвардит по всем трём фильтрам формы (ревью high: city/direction/experience)', () => {
+    expect(
+      readme,
+      'условие фокуса синхронно с гвардом канона (list-page.html: city+direction+experience)',
+    ).toMatch(
+      /!empty\(\$_GET\['city'\]\) \|\| !empty\(\$_GET\['direction'\]\) \|\| !empty\(\$_GET\['experience'\]\)/,
+    );
+  });
+
+  it('Bitrix-эскиз: фокус по всем применённым фильтрам, не только городу (ревью high)', () => {
+    expect(readme, 'эскиз экранирует direction').toContain(
+      "$sDirection = isset($_GET['direction'])",
+    );
+    expect(readme, 'эскиз экранирует experience').toContain(
+      "$sExperience = isset($_GET['experience'])",
+    );
+    expect(
+      readme,
+      'фокус-гвард эскиза покрывает все три фильтра формы паттерна',
+    ).toMatch(/\$sCity !== '' \|\| \$sDirection !== '' \|\| \$sExperience !== ''/);
+  });
 });
 
 describe('сборка: стенд паттерна генерируется в stands/patterns/list-page.html', () => {
