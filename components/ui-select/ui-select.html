@@ -1,0 +1,32 @@
+<!--
+  ui-select (T7.3): кастомный listbox поверх нативного <select> по паттерну
+  APG «Listbox and associated button». Источник поведения — dropdowns.js
+  career-portal (класс B): нативный select жив, listbox синхронизируется,
+  выбор диспатчит change (bubbles) — формы работают как с нативным контролом.
+
+  Деградация без JS: в разметке select НИКАК не скрыт — это обычный нативный
+  select (значение уходит с формой, скринридер и клавиатура работают с ним).
+  Модуль ui-select.js (хук data-ui-select) при инициализации прячет select
+  классом ui-select__native (opacity 0 + pointer-events none — custom-select-
+  hidden career-portal: бокс остаётся в потоке и держит габариты триггера) и
+  строит поверх кнопку-триггер и список role="listbox" с role="option".
+  destroy(select) возвращает разметку к этому состоянию.
+
+  Хук ставится только на <select>. Модификатор data-ui-select="wrap" —
+  для селекта внутри обёртки сайта («пилюля» фильтра, замена хака
+  vacancy-search__select-wrap career-portal): обёртку и её геометрию рисует
+  сайт, триггер растягивается на неё (пример — README, Do/Don't).
+-->
+<div class="ui-field">
+  <label class="ui-field__label" for="ui-select-city">Город</label>
+  <select class="ui-field__select" id="ui-select-city" name="city" data-ui-select>
+    <option value="">Любой город</option>
+    <optgroup label="Россия">
+      <option value="msk">Москва</option>
+      <option value="spb">Санкт-Петербург</option>
+    </optgroup>
+    <optgroup label="Другие страны">
+      <option value="minsk">Минск</option>
+    </optgroup>
+  </select>
+</div>

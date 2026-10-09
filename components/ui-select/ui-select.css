@@ -1,0 +1,230 @@
+/** @define select */
+
+/*!
+ * irao-ui — ui-select: кастомный listbox поверх нативного select (задача
+ * T7.3). Источник визуала — .dd* career-portal (css/components.css:339–420,
+ * класс B аудита): триггер — АБСОЛЮТНЫЙ слой inset:0 поверх нативного select
+ * (select остаётся в потоке и задаёт триггеру габариты — форма «растяжки»
+ * вместо подмены), поверхность trigger — surface-muted (--ui-color-surface-
+ * muted, пара одобренного .dd__trigger bg surface-blue-50), радиус полей sm,
+ * список-карточка на поверхности (--ui-color-surface) c радиусом 12px
+ * (0.75rem — вне 8/16/24px шкалы радиусов, перенос «как есть», прецедент
+ * 0.875rem меню ui-dropdown), тенью dropdown (--ui-shadow-lg — тот же токен
+ * T2.2 с этой тени) и z-index --ui-z-dropdown (Technical considerations:
+ * components.css:376 = 70). Пункты: паддинг 10px/14px career-portal
+ * (0.625rem/0.875rem — вне 4px-шкалы §3.2, перенос «как есть», прецедент
+ * --ui-card-gap), выбранное — primary + fw-small + «✓» (::after, перенос
+ * career-portal components.css:399), сброс-опция (value="") — muted
+ * (components.css:401). Hover-поверхности — производные/пары ADR-0010 ТОЛЬКО
+ * под @media (hover: hover) (конвенция EPIC-4): триггер — color-mix 55%
+ * surface-muted (rgba(241,245,254,.55) career-portal components.css:359),
+ * в wrap-модификаторе — --ui-color-surface-hover (components.css:412).
+ *
+ * Видимость списка — атрибут hidden (ставит модуль; base/reset делает его
+ * сильнее display). Скрытие нативного select — ТОЛЬКО класс __native
+ * (opacity 0 + pointer-events none — custom-select-hidden components.css:339,
+ * перенос БЕЗ !important: система гарантирует специфичность одного класса,
+ * бокс остаётся в потоке и держит габариты триггера). Вход-анимации списка
+ * в career-portal нет (только transition шеврона/поверхностей) — не
+ * вводим; prefers-reduced-motion накрывает kill-switch base/reset (T3.1).
+ * Фокус рисует глобальная политика ADR-0001 (button:focus-visible) —
+ * компонент outline не гасит; поверх фокуса пункту добавляется поверхность
+ * (пара hover, как в ui-dropdown). is-open/is-placeholder — в цепочке с
+ * блоком (§2, прецедент .ui-button.is-loading). Модификатор --wrap —
+ * обёртка сайта («пилюля»): корень static (контекст позиционирования —
+ * обёртка, перенос dd--in-wrap components.css:404), триггер — паддинг
+ * 4px/20px career-portal (20px → 1.25rem, вне шкалы, «как есть»), радиус
+ * pill, placeholder читается как значение (components.css:414). VI-режим:
+ * цветов вне токенов нет (§5) — перекраска vi.css накрывает компонент.
+ */
+
+.ui-select {
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* Нативный select — живой форм-контрол, скрытый визуально (кастомный
+   listbox строится поверх; без JS класс не ставится и select нативен). */
+.ui-select__native {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Триггер — прозрачная кнопка-слой поверх select (inset:0 = бокс select,
+   который остаётся в потоке): сброс нативной кнопки + подпись роли small
+   (fs-small-regular career-portal = --ui-fs-small × fw-body 400). */
+.ui-select__trigger {
+  box-sizing: border-box;
+  display: flex;
+  position: absolute;
+  inset: 0;
+  gap: var(--ui-space-3);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ui-space-1) var(--ui-space-4);
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background-color: var(--ui-color-surface-muted);
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-body);
+  line-height: var(--ui-lh-small);
+  text-align: start;
+  transition: background-color var(--ui-transition);
+  cursor: pointer;
+}
+
+.ui-select__trigger:disabled {
+  opacity: var(--ui-opacity-disabled);
+  cursor: default;
+}
+
+.ui-select__label {
+  box-sizing: border-box;
+  overflow: hidden;
+  color: var(--ui-color-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Шеврон: байты dd__chevron career-portal; размер от шрифта, разворот в
+   is-open (пара .dd.is-open .dd__chevron, components.css:365). */
+.ui-select__icon {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: 1em;
+  height: 1em;
+  transition: transform var(--ui-transition);
+}
+
+.ui-select.is-open .ui-select__icon {
+  transform: rotate(180deg);
+}
+
+/* Список-карточка (dd__list, components.css:367): позиция от корня, z-index —
+   ТОЛЬКО токен лестницы T2.2; видимость — атрибут hidden (ставит модуль),
+   собственных display-переключений нет. */
+.ui-select__list {
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(100% + 0.375rem);
+  left: 0;
+  z-index: var(--ui-z-dropdown);
+  overflow-y: auto;
+  min-width: 100%;
+  max-height: 18.75rem;
+  padding: var(--ui-space-2);
+  border-radius: 0.75rem;
+  background-color: var(--ui-color-surface);
+  box-shadow: var(--ui-shadow-lg);
+}
+
+/* Группа optgroup (расширение системы; в career-portal групп не было):
+   заголовок — роль micro в muted, объявляет себя aria-label группы. */
+.ui-select__group {
+  box-sizing: border-box;
+}
+
+.ui-select__group-label {
+  box-sizing: border-box;
+  display: block;
+  padding: var(--ui-space-1) var(--ui-space-3);
+  color: var(--ui-color-text-muted);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-micro);
+}
+
+/* Опция-кнопка (dd__option, components.css:381): паддинг 10px/14px —
+   перенос «как есть» (вне шкалы §3.2, прецедент --ui-card-gap); сброс
+   нативной кнопки — в общем правиле (кнопка не наследует шрифт — задан
+   явно). */
+.ui-select__option {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 0;
+  border-radius: var(--ui-radius-sm);
+  background-color: transparent;
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-body);
+  line-height: var(--ui-lh-small);
+  text-align: start;
+  transition: background-color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* Выбранная опция — primary + fw-small (approved .dd__option.is-selected,
+   components.css:398) и перенос паттерна «✓» (::after, components.css:399).
+   Пустое значение (сброс) is-selected не получает — модуль держит пару
+   «placeholder триггера ↔ ни одна кнопка не выбрана» (components.css:68). */
+.ui-select__option.is-selected {
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-fw-small);
+}
+
+.ui-select__option.is-selected::after {
+  content: '✓';
+}
+
+/* Сброс-опция (dd__option--reset, components.css:401): value="" — muted. */
+.ui-select__option--reset {
+  color: var(--ui-color-text-muted);
+}
+
+/* Hover — только на hover-устройствах (конвенция EPIC-4, sticky-hover тача):
+   триггер — 55%-ная производная surface (rgba(241,245,254,.55) — color-mix
+   над токеном, ADR-0010); клавиатурный фокус пункта — та же поверхность
+   (пара hover, как в ui-dropdown; outline несёт политика ADR-0001). */
+@media (hover: hover) {
+  .ui-select__trigger:where(:not([disabled])):hover {
+    background-color: color-mix(in srgb, var(--ui-color-surface-muted) 55%, transparent);
+  }
+
+  .ui-select__option:where(:not([disabled])):hover {
+    background-color: var(--ui-color-surface-muted);
+  }
+}
+
+.ui-select__option:focus-visible {
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* ── Модификатор --wrap: select живёт в обёртке сайта («пилюля» фильтра) ──
+   Замена хака dd--in-wrap + vacancy-search__select-wrap career-portal
+   (components.css:404): корень static — позиционный контекст триггера и
+   списка даёт обёртка сайта (модуль гарантирует position: relative на
+   статичной обёртке); геометрию (рамку, высоту, фон) рисует сайт. */
+.ui-select--wrap {
+  position: static;
+}
+
+.ui-select--wrap .ui-select__trigger {
+  padding: var(--ui-space-1) 1.25rem;
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-surface-muted);
+}
+
+.ui-select--wrap .ui-select__list {
+  top: calc(100% + 0.5rem);
+}
+
+/* Placeholder в пилюле читается как значение (components.css:414): фильтр
+   без выбора выглядит выбранным («Любой город»), а не пустым полем. */
+.ui-select--wrap .ui-select__trigger.is-placeholder .ui-select__label {
+  color: var(--ui-color-text);
+}
+
+@media (hover: hover) {
+  .ui-select--wrap .ui-select__trigger:where(:not([disabled])):hover {
+    background-color: var(--ui-color-surface-hover);
+  }
+}
