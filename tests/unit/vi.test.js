@@ -117,10 +117,14 @@ describe('a11y/vi.js — публичный API и ключ хранения (br
     expect(typeof sync.window.IraoUI.vi.init).toBe('function');
   });
 
-  it("ключ localStorage — 'irao-ui-vi' (career-portal 'vi-settings' не переносится); старого ключа в коде нет", () => {
+  it("ключ localStorage — 'irao-ui-vi' (career-portal 'vi-settings' не переносится); старого ключа в исполняемом коде нет", () => {
     const { window } = makeSandbox({ readyState: 'complete' });
     expect(window.IraoUI.vi.STORAGE_KEY).toBe('irao-ui-vi');
-    expect(viSource).not.toContain('vi-settings');
+    // Пин — по исполняемому коду: шапка-комментарий вправе упоминать старый
+    // ключ как историю breaking-изменения (тот же приём, что stripCssComments
+    // в dropdown.test.js).
+    const code = viSource.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');
+    expect(code).not.toContain('vi-settings');
   });
 
   it('дефолты ГОСТ-панели: off, md, baw, on, normal', () => {
@@ -152,7 +156,7 @@ describe('a11y/vi.js — parse: мусор хранилища не роняет 
     expect(window.IraoUI.vi.parseSaved('{"theme":"bb"}')).toEqual({ theme: 'bb' });
   });
 
-  it('битый JSON в localStorage: состояние — дефолты, страница жива', () => {
+  it('битый JSON в localStorage: состояние — дефолты, страница жива (классов режимов нет — режим off)', () => {
     const { window, document } = makeSandbox({
       readyState: 'loading',
       bodyHtml: panelHtml,
@@ -161,7 +165,14 @@ describe('a11y/vi.js — parse: мусор хранилища не роняет 
 
     fireDOMContentLoaded(window);
 
-    expect(viClasses(document.body).sort()).toEqual(['vi-size--md', 'vi-theme--baw']);
+    expect(viClasses(document.body)).toEqual([]);
+    expect(window.IraoUI.vi.state).toEqual({
+      on: false,
+      size: 'md',
+      theme: 'baw',
+      img: 'on',
+      kern: 'normal',
+    });
   });
 
   it('localStorage недоступен (бросает): состояние — дефолты, страница жива', () => {
@@ -173,8 +184,9 @@ describe('a11y/vi.js — parse: мусор хранилища не роняет 
 
     fireDOMContentLoaded(window);
 
-    expect(viClasses(document.body).sort()).toEqual(['vi-size--md', 'vi-theme--baw']);
+    expect(viClasses(document.body)).toEqual([]);
     expect(document.body.classList.contains('vi')).toBe(false);
+    expect(window.IraoUI.vi.state).toEqual(window.IraoUI.vi.DEFAULTS);
   });
 });
 
@@ -211,7 +223,13 @@ describe('a11y/vi.js — загрузка сохранённого состоя�
       readyState: 'loading',
       bodyHtml: panelHtml,
       storage: {
-        [STORAGE_KEY]: JSON.stringify({ on: true, theme: 'bb', size: 'lg', img: 'off', kern: 'wide' }),
+        [STORAGE_KEY]: JSON.stringify({
+          on: true,
+          theme: 'bb',
+          size: 'lg',
+          img: 'off',
+          kern: 'wide',
+        }),
       },
     });
 
@@ -270,6 +288,9 @@ describe('a11y/vi.js — apply: классы, aria-pressed, панель, paddin
     });
 
     fireDOMContentLoaded(window);
+    // Сегментные кнопки живут в панели — доступны только в режиме (панель
+    // hidden вне режима): сначала вход, затем переключение темы.
+    document.querySelector('[data-ui-vi-toggle]').click();
     document.querySelector('[data-ui-vi-set="theme:bb"]').click();
 
     expect(document.body.classList.contains('vi-theme--bb')).toBe(true);
@@ -286,6 +307,8 @@ describe('a11y/vi.js — apply: классы, aria-pressed, панель, paddin
     });
 
     fireDOMContentLoaded(window);
+    document.querySelector('[data-ui-vi-toggle]').click();
+
     document.querySelector('[data-ui-vi-set="img:off"]').click();
     expect(document.body.classList.contains('vi-img--off')).toBe(true);
 
@@ -331,7 +354,13 @@ describe('a11y/vi.js — поведение входа/выхода (career-port
       readyState: 'loading',
       bodyHtml: panelHtml,
       storage: {
-        [STORAGE_KEY]: JSON.stringify({ on: true, theme: 'beige', size: 'sm', img: 'gray', kern: 'wide' }),
+        [STORAGE_KEY]: JSON.stringify({
+          on: true,
+          theme: 'beige',
+          size: 'sm',
+          img: 'gray',
+          kern: 'wide',
+        }),
       },
     });
 
@@ -382,6 +411,8 @@ describe('a11y/vi.js — save: JSON под ключом irao-ui-vi, сбои з�
       throw new Error('QuotaExceededError');
     });
 
+    // Вход в режим (панель доступна только в нём), затем смена темы.
+    document.querySelector('[data-ui-vi-toggle]').click();
     expect(() => window.IraoUI.vi.set('theme', 'bb')).not.toThrow();
     expect(document.body.classList.contains('vi-theme--bb')).toBe(true);
     expect(originalSetItem).toBeDefined();
@@ -389,6 +420,8 @@ describe('a11y/vi.js — save: JSON под ключом irao-ui-vi, сбои з�
 });
 
 describe('a11y/vi.js — guard-ы модуля (контракт docs/templates/module-template.js)', () => {
+  // Применение состояния при off наблюдаем по синхронизации aria-pressed
+  // сегментной кнопки (классы режимов при off на body не ставятся — AC T9.1).
   it("readyState 'loading': применение отложено одной подпиской на DOMContentLoaded", () => {
     const { window, document, domContentLoadedSubscriptions } = makeSandbox({
       readyState: 'loading',
@@ -397,15 +430,25 @@ describe('a11y/vi.js — guard-ы модуля (контракт docs/templates/
 
     expect(domContentLoadedSubscriptions).toHaveLength(1);
     expect(document.body.className).not.toContain('vi');
+    expect(document.querySelector('[data-ui-vi-set="size:md"]').getAttribute('aria-pressed')).toBe(
+      'false',
+    );
 
     fireDOMContentLoaded(window);
-    expect(document.body.classList.contains('vi-size--md')).toBe(true);
+    expect(document.querySelector('[data-ui-vi-set="size:md"]').getAttribute('aria-pressed')).toBe(
+      'true',
+    );
   });
 
   it("readyState 'complete'/'interactive': применяется синхронно, без подписки", () => {
     for (const readyState of ['complete', 'interactive']) {
-      const { document, domContentLoadedSubscriptions } = makeSandbox({ readyState });
-      expect(document.body.classList.contains('vi-size--md')).toBe(true);
+      const { document, domContentLoadedSubscriptions } = makeSandbox({
+        readyState,
+        bodyHtml: panelHtml,
+      });
+      expect(
+        document.querySelector('[data-ui-vi-set="size:md"]').getAttribute('aria-pressed'),
+      ).toBe('true');
       expect(domContentLoadedSubscriptions).toHaveLength(0);
     }
   });
