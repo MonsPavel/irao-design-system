@@ -460,6 +460,56 @@ describe('контракт модуля ui-select.js (jsdom; образец test
     expect(list.getAttribute('aria-label')).toBe('Город');
   });
 
+  it('label-обёртка (ревью T7.3 high): имя поля БЕЗ поддерева select; aria-labelledby на живую обёртку не ссылается — имя триггера и списка задаёт aria-label', () => {
+    // label содержит select: наивный textContent дал бы «Город: Любой
+    // городМоскваСанкт-Петербург» (весь инвентарь опций — нативная
+    // ассоциация label-обёртки контрол исключает), а после init её текст
+    // включает и построенный UI — aria-labelledby на неё ссылаться нельзя.
+    const { document } = makeSandbox({
+      readyState: 'complete',
+      bodyHtml: `
+        <label>Город:
+          <select name="city" data-ui-select>
+            <option value="">Любой город</option>
+            <option value="msk">Москва</option>
+            <option value="spb">Санкт-Петербург</option>
+          </select>
+        </label>`,
+    });
+    const trigger = document.querySelector('.ui-select__trigger');
+    const list = document.querySelector('.ui-select__list');
+
+    expect(list.getAttribute('aria-label'), 'имя списка — только текст label вне контрола').toBe(
+      'Город:',
+    );
+    expect(trigger.getAttribute('aria-label'), 'имя триггера — aria-label (обёртка живая)').toBe(
+      'Город:',
+    );
+    expect(
+      trigger.hasAttribute('aria-labelledby'),
+      'aria-labelledby на label-обёртку не ставится (её текст после init содержит построенный UI)',
+    ).toBe(false);
+    // id на обёртку не генерируется — ссылаться на неё нечем и не нужно.
+    expect(document.querySelector('label').hasAttribute('id')).toBe(false);
+  });
+
+  it('label-обёртка только с select (текста вне контрола нет): имён aria нет — имя триггера даёт его собственный текст', () => {
+    const { document } = makeSandbox({
+      readyState: 'complete',
+      bodyHtml: `
+        <label>
+          <select name="city" data-ui-select>
+            <option value="">Любой город</option>
+          </select>
+        </label>`,
+    });
+    const trigger = document.querySelector('.ui-select__trigger');
+    const list = document.querySelector('.ui-select__list');
+    expect(list.hasAttribute('aria-label'), 'пустое имя не ставится').toBe(false);
+    expect(trigger.hasAttribute('aria-label')).toBe(false);
+    expect(trigger.hasAttribute('aria-labelledby')).toBe(false);
+  });
+
   it('синхронизация: label триггера = текст выбранного; выбранный — is-selected + aria-selected', () => {
     const { document, window } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
     const select = document.querySelector('select');
