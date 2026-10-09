@@ -67,25 +67,20 @@ standTest.describe('ui-loader: роли и текст (T7.5)', () => {
 });
 
 standTest.describe('ui-loader: анимация, размеры, цвет (Implementation requirements)', () => {
-  standTest(
-    'вращение объявлено: ui-loader-spin, бесконечно',
-    async ({ stand }) => {
-      const page = await stand('ui-loader');
-      const animation = await page.locator(`${SEL.inlineMd} .ui-loader__spinner`).evaluate((el) => {
-        const style = getComputedStyle(el);
-        return {
-          name: style.animationName,
-          duration: style.animationDuration,
-          iteration: style.animationIterationCount,
-        };
-      });
-      expect(animation.name, 'rotate-анимация применена').toBe('ui-loader-spin');
-      expect(animation.iteration, 'вращение бесконечное').toBe('infinite');
-      expect(Number.parseFloat(animation.duration), 'период — из токена перехода').toBeGreaterThan(
-        0,
-      );
-    },
-  );
+  standTest('вращение объявлено: ui-loader-spin, бесконечно', async ({ stand }) => {
+    const page = await stand('ui-loader');
+    const animation = await page.locator(`${SEL.inlineMd} .ui-loader__spinner`).evaluate((el) => {
+      const style = getComputedStyle(el);
+      return {
+        name: style.animationName,
+        duration: style.animationDuration,
+        iteration: style.animationIterationCount,
+      };
+    });
+    expect(animation.name, 'rotate-анимация применена').toBe('ui-loader-spin');
+    expect(animation.iteration, 'вращение бесконечное').toBe('infinite');
+    expect(Number.parseFloat(animation.duration), 'период — из токена перехода').toBeGreaterThan(0);
+  });
 
   standTest('размеры sm/md — ступени шкалы (md 24px, sm 16px)', async ({ stand }) => {
     const page = await stand('ui-loader');
