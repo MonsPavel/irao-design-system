@@ -487,6 +487,31 @@ function generateShowcase({ themes }) {
     );
   }
 
+  // Стенд «patterns/list-page» (T8.1) — паттерн «Страница списка»: эталонная
+  // сборка страницы списка из готовых компонентов БЕЗ нового CSS (доки-
+  // паттерны живут в patterns/<name>/, CONTRIBUTING). Источник — канонический
+  // файл паттерна patterns/list-page/list-page.html: он же стенд (обе ветки —
+  // «с данными» и «пустая выдача» — рядом, как якоря-состояния T5.6), связки
+  // паттерна — <style> в нём (зона сайта, в dist не попадает). Каркас БЕЗ
+  // служебного <h1>: заголовок страницы несёт сам паттерн — h1 page-head
+  // (как error-404; два h1 — гейт irao/one-h1).
+  const listPageStandSource = join(ROOT, 'patterns', 'list-page', 'list-page.html');
+  if (existsSync(listPageStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/list-page.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/list-page — irao-ui showcase',
+      // Без служебного h1: h1 несёт сам паттерн (page-head страницы списка).
+      main: readFileSync(listPageStandSource, 'utf8').trim(),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'list-page.html'), page);
+    stands.push({ name: 'patterns/list-page', source: 'patterns/list-page/list-page.html' });
+  } else {
+    warn('patterns/list-page/list-page.html ещё нет — стенд patterns/list-page не сгенерирован');
+  }
+
   // Стенды «ui-table-scroll» / «ui-table-cards» (T7.4) — второй и третий
   // паттерны компонента ui-table: AC задачи — «три стенда», компонент при
   // этом один (components/ui-table/, CSS попадает в dist через COMPONENTS).
