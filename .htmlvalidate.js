@@ -61,6 +61,27 @@
  * Негативная фикстура — tests/lint-cases/html/tabs-id-links-broken.html,
  * позитивная — tabs-id-links-valid.html.
  *
+ * С T7.4: `irao/table-card-data-label` — ячейки таблицы в карточном режиме
+ * (`table.ui-table--cards`) обязаны нести непустой data-label (спека T7.4,
+ * Implementation requirements п.1): на <md шапка .ui-table__head скрыта,
+ * пару «заголовок–значение» читает ::before { content: attr(data-label) } —
+ * ячейка без data-label теряет имя значения. Негативная фикстура —
+ * tests/lint-cases/html/table-card-missing-label.html, позитивная —
+ * table-card-valid.html. Правило шапку (thead) не проверяет: th шапки и
+ * есть имена колонок.
+ *
+ * С T7.4, разметка ui-table-scroll (исключение разметки, не правила):
+ * скролл-зона — `<div role="region" tabindex="0" aria-label>` — div, а не
+ * нативная section: роль региона задаётся ЯВНЫМ атрибутом role="region" —
+ * контракт спеки T7.4 (атрибут тестируем e2e и копипастабелен интегратору).
+ * prefer-native-element предлагает section (тот же implicit-регион), слеп к
+ * контракту атрибута — перед зоной стоит локальная директива отключения с
+ * обоснованием (канонический приём breadcrumbs/role="list"); не снимать
+ * вместе с role="region". Демо-высота sticky-зоны стенда ui-table-scroll
+ * (`style="max-height: 20rem"`) — no-inline-style отключён локально: в бою
+ * высоту зоны задаёт сайт (README ui-table «Геометрия»), в бою inline
+ * не нужен.
+ *
  * Кастомные правила регистрируются инлайн-плагином (html-validate 11: ключ в
  * plugin.rules — уже полный id правила). Формат файла — CJS: загрузчик конфига
  * html-validate исполняет его в CJS-контексте.
@@ -258,6 +279,17 @@ const hasClass = (node, className) => {
   return new RegExp(`(?:^|\\s)${className}(?:\\s|$)`).test(value);
 };
 
+/** Ячейка лежит в thead (предок-таблица разметки, без браузерного
+ *  ре-парентинга — структура DOM повторяет исходник). */
+const insideThead = (cell) => {
+  let ancestor = cell.parent;
+  while (ancestor) {
+    if (ancestor.is('thead')) return true;
+    ancestor = ancestor.parent;
+  }
+  return false;
+};
+
 /** Элемент по id внутри документа (attr-селектор с guarding-проверкой имени —
  *  без CSS.escape, которого нет в контексте конфига). */
 const byId = (doc, id) => {
@@ -315,6 +347,32 @@ class TabsIdLinks extends Rule {
   }
 }
 
+/** T7.4: ячейки таблицы в карточном режиме (.ui-table--cards) обязаны нести
+ *  непустой data-label (Implementation requirements п.1). На <md шапка
+ *  .ui-table__head скрыта (display: none), имя значения читает
+ *  ::before { content: attr(data-label) } — ячейка без data-label теряет пару
+ *  «заголовок–значение», данные карточки остаются безымянными. */
+class TableCardDataLabel extends Rule {
+  setup() {
+    this.on('dom:ready', (event) => {
+      for (const table of event.document.querySelectorAll('table')) {
+        if (!hasClass(table, 'ui-table--cards')) continue;
+        for (const cell of table.querySelectorAll('td, th')) {
+          // Шапку не проверяем: th шапки и есть имена колонок — data-label
+          // повторяет их текст в ячейках ТЕЛА (td и th scope="row").
+          if (insideThead(cell)) continue;
+          const label = cell.getAttribute('data-label');
+          if (label && label.value.trim() !== '') continue;
+          this.report(
+            cell,
+            'Ячейка таблицы в карточном режиме (.ui-table--cards) обязана нести непустой data-label с текстом заголовка колонки: на <md шапка скрыта, пару «заголовок–значение» читает ::before { content: attr(data-label) } — без data-label значение теряет имя (T7.4).',
+          );
+        }
+      }
+    });
+  }
+}
+
 module.exports = {
   extends: ['html-validate:recommended'],
   plugins: [
@@ -329,6 +387,7 @@ module.exports = {
         'irao/img-dimensions': ImgDimensions,
         'irao/radio-group-fieldset': RadioGroupFieldset,
         'irao/tabs-id-links': TabsIdLinks,
+        'irao/table-card-data-label': TableCardDataLabel,
       },
     }),
   ],
@@ -341,6 +400,7 @@ module.exports = {
     'irao/img-dimensions': 'error',
     'irao/radio-group-fieldset': 'error',
     'irao/tabs-id-links': 'error',
+    'irao/table-card-data-label': 'error',
     'input-missing-label': 'error',
     // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
     'no-implicit-button-type': 'warn',

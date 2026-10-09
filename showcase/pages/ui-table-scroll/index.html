@@ -1,0 +1,193 @@
+<!-- Стенд ui-table-scroll (T7.4): скролл-зона — данных много, сравнение по
+     колонкам важно, table-семантика сохраняется полностью. #uitable-scroll —
+     широкая матрица (11 колонок): переполняет контейнер на любом вьюпорте
+     шкалы, зона прокручивается нативно; обязательные атрибуты региона —
+     tabindex="0" role="region" aria-label; индикация — градиент правой
+     кромки. #uitable-sticky — sticky-заголовок (--sticky-head) в зоне со
+     стеснённой высотой: max-height задан inline ТОЛЬКО для демонстрации —
+     в бою высоту зоны задаёт сайт (README «Геометрия»); шапка прилипает к
+     верхней кромке ЗОНЫ при её вертикальном прокруте. -->
+<section id="uitable-scroll" aria-labelledby="uitable-scroll-heading">
+  <h2 id="uitable-scroll-heading">Скролл-зона (широкая таблица)</h2>
+  <p class="ui-showcase-stand__note">
+    Колонок больше, чем помещается, — сравнение по колонкам важно, поэтому таблица сохраняет
+    семантику, а не превращается в карточки. Зона —
+    <code>tabindex="0"</code> <code>role="region"</code> с <code>aria-label</code>: Tab ставит фокус
+    (контур — политика ADR-0001), стрелки ←/→ прокручивают нативно. Справа — градиент-индикация
+    обрезки.
+  </p>
+  <!-- div, а не section: роль региона задаётся явной role="region" —
+       контракт спеки T7.4 (атрибут тестируем и копипастабелен);
+       html-validate (prefer-native-element) предлагает нативную section —
+       она даёт тот же implicit-регион, слепа к контракту атрибута.
+       Обоснование — также в шапке .htmlvalidate.js; не снимать вместе с
+       role="region". -->
+  <!-- html-validate-disable-next prefer-native-element -->
+  <div
+    class="ui-table__scroll"
+    tabindex="0"
+    role="region"
+    aria-label="Направления подготовки: полная матрица"
+  >
+    <table class="ui-table">
+      <caption class="ui-table__caption">
+        Полная матрица направлений
+      </caption>
+      <thead class="ui-table__head">
+        <tr class="ui-table__row">
+          <th class="ui-table__col" scope="col">Направление</th>
+          <th class="ui-table__col" scope="col">Код</th>
+          <th class="ui-table__col" scope="col">Срок обучения</th>
+          <th class="ui-table__col" scope="col">Форма</th>
+          <th class="ui-table__col" scope="col">Ступень</th>
+          <th class="ui-table__col" scope="col">Стажировка</th>
+          <th class="ui-table__col" scope="col">Вступительные испытания</th>
+          <th class="ui-table__col" scope="col">Бюджетные места</th>
+          <th class="ui-table__col" scope="col">Итоговая аттестация</th>
+          <th class="ui-table__col" scope="col">Документ</th>
+          <th class="ui-table__col" scope="col">Перспектива</th>
+        </tr>
+      </thead>
+      <tbody class="ui-table__body">
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Электромонтажник подстанции</th>
+          <td class="ui-table__cell">13.02.11</td>
+          <td class="ui-table__cell">2 года 10 месяцев</td>
+          <td class="ui-table__cell">Очная</td>
+          <td class="ui-table__cell">Колледж</td>
+          <td class="ui-table__cell">Обязательна</td>
+          <td class="ui-table__cell">Математика, русский язык</td>
+          <td class="ui-table__cell">25</td>
+          <td class="ui-table__cell">Демонстрационный экзамен</td>
+          <td class="ui-table__cell">Диплом</td>
+          <td class="ui-table__cell">Начальник смены</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Кондитер-декоратор</th>
+          <td class="ui-table__cell">13.02.14</td>
+          <td class="ui-table__cell">1 год 6 месяцев</td>
+          <td class="ui-table__cell">Очно-заочная</td>
+          <td class="ui-table__cell">Переподготовка</td>
+          <td class="ui-table__cell">По договорённости</td>
+          <td class="ui-table__cell">Собеседование</td>
+          <td class="ui-table__cell">0</td>
+          <td class="ui-table__cell">Практическая работа</td>
+          <td class="ui-table__cell">Удостоверение</td>
+          <td class="ui-table__cell">Шеф-кондитер</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Лаборант химического анализа</th>
+          <td class="ui-table__cell">13.02.16</td>
+          <td class="ui-table__cell">2 года 6 месяцев</td>
+          <td class="ui-table__cell">Очная</td>
+          <td class="ui-table__cell">Колледж</td>
+          <td class="ui-table__cell">Обязательна</td>
+          <td class="ui-table__cell">Химия, русский язык</td>
+          <td class="ui-table__cell">18</td>
+          <td class="ui-table__cell">Демонстрационный экзамен</td>
+          <td class="ui-table__cell">Диплом</td>
+          <td class="ui-table__cell">Инженер-химик</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Мастер участка</th>
+          <td class="ui-table__cell">13.02.18</td>
+          <td class="ui-table__cell">4–5 лет</td>
+          <td class="ui-table__cell">Очно-заочная</td>
+          <td class="ui-table__cell">Переподготовка</td>
+          <td class="ui-table__cell">На своём производстве</td>
+          <td class="ui-table__cell">Портфолио, защита проекта</td>
+          <td class="ui-table__cell">0</td>
+          <td class="ui-table__cell">Квалификационный экзамен</td>
+          <td class="ui-table__cell">Удостоверение</td>
+          <td class="ui-table__cell">Начальник цеха</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="uitable-sticky" aria-labelledby="uitable-sticky-heading">
+  <h2 id="uitable-sticky-heading">Sticky-заголовок (--sticky-head)</h2>
+  <p class="ui-showcase-stand__note">
+    Опция для длинных таблиц в зоне со стеснённой высотой: шапка прилипает к верхней кромке
+    <em>зоны</em> при её вертикальном прокруте. Высоту зоны задаёт сайт — здесь
+    <code>max-height: 20rem</code> поставлен inline только для демонстрации. Шапке нужен
+    непрозрачный фон, иначе строки светятся сквозь неё (компонент делает это сам).
+  </p>
+  <!-- max-height inline — ТОЛЬКО демонстрация стеснённой высоты зоны
+       (без неё sticky-шапке не о чем прилипать): в бою высоту задаёт сайт
+       (README «Геометрия»); no-inline-style отключён локально по этой
+       причине. -->
+  <!-- html-validate-disable-next prefer-native-element, no-inline-style -->
+  <div
+    class="ui-table__scroll"
+    tabindex="0"
+    role="region"
+    aria-label="График стажировок"
+    style="max-height: 20rem"
+  >
+    <table class="ui-table ui-table--sticky-head ui-table--zebra">
+      <caption class="ui-table__caption">
+        График стажировок на производстве
+      </caption>
+      <thead class="ui-table__head">
+        <tr class="ui-table__row">
+          <th class="ui-table__col" scope="col">Направление</th>
+          <th class="ui-table__col" scope="col">Предприятие</th>
+          <th class="ui-table__col" scope="col">Сроки</th>
+          <th class="ui-table__col" scope="col">Мест</th>
+        </tr>
+      </thead>
+      <tbody class="ui-table__body">
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Электромонтажник подстанции</th>
+          <td class="ui-table__cell">Подстанция «Восточная»</td>
+          <td class="ui-table__cell">июнь–август</td>
+          <td class="ui-table__cell">12</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Кондитер-декоратор</th>
+          <td class="ui-table__cell">Кондитерская «Гостиная»</td>
+          <td class="ui-table__cell">июль–сентябрь</td>
+          <td class="ui-table__cell">6</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Лаборант химического анализа</th>
+          <td class="ui-table__cell">Городская лаборатория</td>
+          <td class="ui-table__cell">июнь–июль</td>
+          <td class="ui-table__cell">8</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Мастер участка</th>
+          <td class="ui-table__cell">Механический завод</td>
+          <td class="ui-table__cell">круглый год</td>
+          <td class="ui-table__cell">4</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Дежурный щита управления</th>
+          <td class="ui-table__cell">Подстанция «Центральная»</td>
+          <td class="ui-table__cell">май–август</td>
+          <td class="ui-table__cell">10</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Электрогазосварщик</th>
+          <td class="ui-table__cell">Монтажное управление</td>
+          <td class="ui-table__cell">июль–сентябрь</td>
+          <td class="ui-table__cell">14</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Слесарь КИПиА</th>
+          <td class="ui-table__cell">Приборостроительный завод</td>
+          <td class="ui-table__cell">июнь–сентябрь</td>
+          <td class="ui-table__cell">9</td>
+        </tr>
+        <tr class="ui-table__row">
+          <th class="ui-table__rowhead" scope="row">Оператор котельной</th>
+          <td class="ui-table__cell">Тепловые сети</td>
+          <td class="ui-table__cell">май–июль</td>
+          <td class="ui-table__cell">7</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>

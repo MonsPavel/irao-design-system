@@ -16,9 +16,13 @@
  *     шапка остаётся у верхней кромки зоны (Implementation requirements п.3);
  *  4. карточный режим (375): данные не теряются — каждая ячейка видима и
  *     несёт data-label, повторяющий текст заголовка колонки; подпись
- *     рендерится ::before; шапка скрыта; table-семантика ОТСУТСТВУЕТ —
- *     осознанная потеря, зафиксированная в доке (AC + Technical
- *     considerations); на ≥md семантика возвращается, подписи сняты;
+ *     рендерится ::before и входит в доступное имя ячейки (пара
+ *     «заголовок–значение» читается без таблицы); шапка скрыта. Потеря
+ *     table-ролей при display: block движко-зависима (chromium сохраняет
+ *     дерево таблицы — зонд 2026-10; firefox/webkit исторически снимают,
+ *     поверхность — матрица nightly) — осознанный компромисс, правила
+ *     допустимости зафиксированы в README (Technical considerations); на
+ *     ≥md — table-раскладка, подписи сняты;
  *  5. axe: все три стенда чисты (AC);
  *  6. эталоны: три стенда × 4 вьюпорта (375/768/1280/1440, вкл. 375 — AC) +
  *     состояние «зона прокручена» (desktop, ADR-0004: создаются только в
@@ -115,16 +119,17 @@ test.describe('ui-table-scroll: скролл-зона (AC — фокус и кл
     for (const viewport of [VIEWPORTS.mobile, VIEWPORTS.desktop]) {
       await page.setViewportSize(viewport);
       // Предусловие паттерна: таблица шире зоны — есть что прокручивать.
-      const overflow = await zone.evaluate(
-        (el) => el.scrollWidth - el.clientWidth,
-      );
+      const overflow = await zone.evaluate((el) => el.scrollWidth - el.clientWidth);
       expect(overflow, `горизонтальное переполнение на ${viewport.width}px`).toBeGreaterThan(0);
 
       await zone.focus();
       const before = await zone.evaluate((el) => el.scrollLeft);
       await zone.press('ArrowRight');
-      const after = await zone.evaluate((el) => el.scrollLeft);
-      expect(after, `→ прокрутил зону на ${viewport.width}px`).toBeGreaterThan(before);
+      // Нативный скролл применяет сдвиг в ближайшие кадры (зонд chromium:
+      // «сразу — 0, через кадр — 40») — опрашиваем.
+      await expect
+        .poll(() => zone.evaluate((el) => el.scrollLeft), { timeout: 5000 })
+        .toBeGreaterThan(before);
     }
   });
 
@@ -159,9 +164,7 @@ test.describe('ui-table-cards: карточный режим (AC — данны�
     await page.setViewportSize(VIEWPORTS.mobile);
 
     const table = page.locator(SEL.cardsTable);
-    const headers = (await table.locator('thead th').allTextContents()).map((text) =>
-      text.trim(),
-    );
+    const headers = (await table.locator('thead th').allTextContents()).map((text) => text.trim());
     expect(headers.length, 'колонки на месте').toBeGreaterThan(2);
 
     await expect(table.locator('thead'), 'шапка скрыта в карточном режиме').toBeHidden();
@@ -181,32 +184,64 @@ test.describe('ui-table-cards: карточный режим (AC — данны�
           headers[c],
         );
         const content = await cell.evaluate((el) => getComputedStyle(el, '::before').content);
-        expect(
-          content,
-          `подпись ${headers[c]} рендерится ::before в ячейке ${r}/${c}`,
-        ).toContain(headers[c]);
+        expect(content, `подпись ${headers[c]} рендерится ::before в ячейке ${r}/${c}`).toContain(
+          headers[c],
+        );
       }
     }
   });
 
-  test('375: table-семантика ОТСУТСТВУЕТ — осознанная потеря, задокументированная в доке; 1440: семантика возвращается, подписи сняты', async ({
+  test('375: таблица — блоки (механизм трансформации), доступные имена ячеек несут пару «заголовок–значение»; 1440: table-раскладка возвращается', async ({
     stand,
   }) => {
     const page = await stand('ui-table-cards');
 
     await page.setViewportSize(VIEWPORTS.mobile);
     const table = page.locator(SEL.cardsTable);
-    await expect(
-      table.getByRole('cell'),
-      'в карточном режиме роли ячеек сняты display: block (CSS Display: таблица → блоки) — потеря задокументирована в README',
-    ).toHaveCount(0);
 
-    await page.setViewportSize(VIEWPORTS.desktop);
+    // Механизм трансформации: display: block на ячейках. Потеря table-ролей
+    // при этом ДВИЖКО-ЗАВИСИМА (зонд chromium 2026-10: дерево таблицы
+    // СОХРАНЯЕТСЯ — cell/rowheader остаются, потому пин ролей ниже фиксирует
+    // сохранение; firefox/webkit исторически роли снимают — их поверхность —
+    // матрица nightly): паттерн в любом случае не опирается на table-
+    // навигацию — пары «заголовок–значение» самодостаточны, а для сравнения
+    // по колонкам матрица выбора (README) предписывает скролл-зону.
+    expect(
+      await table
+        .locator('tbody td')
+        .first()
+        .evaluate((el) => getComputedStyle(el).display),
+      'ячейки — блоки: таблица трансформирована',
+    ).toBe('block');
+
+    // Связность данных для скринридера: доступное имя ячейки =
+    // «data-label значение» (::before входит в accName) — пара читается
+    // без таблицы. Проверяем первую строку (полнота — тестом выше).
+    const headers = (await table.locator('thead th').allTextContents()).map((text) => text.trim());
+    const firstRow = table.locator('tbody tr').first();
+    const firstRowCells = firstRow.locator('th, td');
+    for (let c = 0; c < headers.length; c += 1) {
+      await expect(
+        firstRowCells.nth(c),
+        `accName ячейки ${c} несёт data-label`,
+      ).toHaveAccessibleName(new RegExp(headers[c]));
+    }
+
+    // Дерево таблицы в chromium сохраняется (см. комментарий выше) —
+    // фиксируем как наблюдаемое поведение движка.
     const cellCount = await table.locator('tbody td').count();
     expect(cellCount, 'ячейки на месте').toBeGreaterThan(2);
-    await expect(table.getByRole('cell'), 'на ≥md роли ячеек возвращаются').toHaveCount(
-      cellCount,
-    );
+    await expect(table.getByRole('cell'), 'chromium: роли ячеек сохранены').toHaveCount(cellCount);
+
+    await page.setViewportSize(VIEWPORTS.desktop);
+    await expect(table.getByRole('cell'), 'на ≥md таблица — таблица').toHaveCount(cellCount);
+    expect(
+      await table
+        .locator('tbody td')
+        .first()
+        .evaluate((el) => getComputedStyle(el).display),
+      'на ≥md ячейки — table-cell',
+    ).toBe('table-cell');
     const content = await table
       .locator('tbody td')
       .first()
@@ -246,9 +281,7 @@ test.describe('ui-table: эталоны (AC; ADR-0004 — только конт�
     }
   });
 
-  test('скролл-стенд — 4 вьюпорта + состояние «зона прокручена» (desktop)', async ({
-    stand,
-  }) => {
+  test('скролл-стенд — 4 вьюпорта + состояние «зона прокручена» (desktop)', async ({ stand }) => {
     const page = await stand('ui-table-scroll');
     for (const viewport of Object.keys(VIEWPORTS)) {
       await shot(page, { name: 'ui-table-scroll-default', viewport });

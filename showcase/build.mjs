@@ -102,6 +102,7 @@ const COMPONENTS = [
   'ui-accordion', // T6.4 — аккордеон на <details>/<summary>: без JS полностью работает, анимация grid-rows на ::details-content, --faq, single по data-ui-accordion="single"
   'ui-modal', // T7.2 — модалка на native <dialog> (ADR-0011): trap/Escape/инертность — платформа, модуль — анимация закрытия/скролл-лок/PE-деградация
   'ui-select', // T7.3 — кастомный listbox поверх нативного select (APG listbox-button): выбор синхронизирует select + change (bubbles), стрелки/Home/End/typahead, optgroup → role=group, вне-клик/Escape из T6.1, pointer:coarse — остаётся нативным (ADR-0012), деградация без JS
+  'ui-table', // T7.4 — таблицы: базовая/--zebra/--compact, скролл-зона (регион tabindex+role+aria-label, градиент кромки), sticky-заголовок, карточная трансформация --cards (<md пары «заголовок–значение» из data-label; гейт irao/table-card-data-label)
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */
@@ -483,6 +484,29 @@ function generateShowcase({ themes }) {
       'showcase/pages/integration/form-full-cycle/index.html ещё нет — ' +
         'стенд integration/form-full-cycle не сгенерирован',
     );
+  }
+
+  // Стенды «ui-table-scroll» / «ui-table-cards» (T7.4) — второй и третий
+  // паттерны компонента ui-table: AC задачи — «три стенда», компонент при
+  // этом один (components/ui-table/, CSS попадает в dist через COMPONENTS).
+  // Базовый паттерн живёт в стандартном стенде ui-table (showcase/pages/
+  // ui-table); эти два — спец-страницы как base/typography: источник —
+  // showcase/pages/<имя>/index.html.
+  for (const name of ['ui-table-scroll', 'ui-table-cards']) {
+    const source = join(ROOT, 'showcase', 'pages', name, 'index.html');
+    if (!existsSync(source)) {
+      warn(`showcase/pages/${name}/index.html ещё нет — стенд ${name} не сгенерирован`);
+      continue;
+    }
+    const page = frame({
+      rel: '..', // showcase/dist/stands/ → SHOWCASE_DIST (рантайм рядом со стендами)
+      home: '../index.html', // /showcase/dist/stands/ → index.html каталога стендов
+      title: `${name} — irao-ui showcase`,
+      main: `    <h1>${name}</h1>\n${readFileSync(source, 'utf8').trim()}`,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', `${name}.html`), page);
+    stands.push({ name, source: `showcase/pages/${name}/index.html` });
   }
 
   const discovered = discoverComponents();

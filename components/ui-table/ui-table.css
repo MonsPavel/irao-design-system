@@ -1,0 +1,255 @@
+/** @define table */
+
+/*!
+ * irao-ui — ui-table: адаптивные паттерны таблиц (задача T7.4).
+ *
+ * В career-portal таблиц не было — компонент новый, «значения из токенов,
+ * происхождение — 02-architecture §3.2» (цвета/геометрия — ступени шкалы
+ * отступов и существующие семантические пары, пересмотр — design-decision
+ * владельца). Компонент — ПАТТЕРНЫ, не «умная таблица» (Notes задачи):
+ * JS-модуля нет, вся адаптивность — CSS + разметка.
+ *
+ * Три паттерна (матрица выбора — README компонента):
+ *  1. базовая .ui-table (+ --zebra, --compact) — колонки помещаются;
+ *  2. скролл-зона .ui-table__scroll[tabindex="0"][role="region"][aria-label]
+ *     — данных много, сравнение по колонкам важно: table-семантика
+ *     сохраняется полностью, прокрутка — нативная с фокуса (стрелки),
+ *     видимость фокуса даёт глобальная политика ADR-0001
+ *     (base/focus.css: [tabindex]:focus-visible); индикация прокрутки —
+ *     градиент кромки (background-attachment по умолчанию = не едет вместе
+ *     с контентом); статический, виден всегда — динамическое скрытие у
+ *     края (scroll-событие) — зона сайта, паттерн не умнеет;
+ *  3. карточная трансформация --cards — на <md таблица превращается в
+ *     карточки-строки с парами «заголовок–значение»: mobile-first (база =
+ *     карточки, возврат в @media (min-width: 768px) — md шкалы T2.5);
+ *     display: block меняет table-представление в дереве доступности
+ *     движко-зависимо (зонд chromium 153: дерево таблицы сохраняется, пары
+ *     «заголовок–значение» входят в accName ячеек; firefox/webkit
+ *     исторически роли снимают) — компромисс ОСОЗНАННЫЙ и
+ *     задокументированный (README «Потеря table-семантики»): допустим для
+ *     самодостаточных строк-записей, недопустим, когда данные сравниваются
+ *     по колонкам; имена значений несут data-label ячеек (::before {
+ *     content: attr(data-label) }) — их обязательность исполняет гейт
+ *     html-validate irao/table-card-data-label (Implementation
+ *     requirements п.1).
+ *
+ * КЛАССИЧЕСКИЙ ГЕЙТ vs Scope: Scope называет обёртку «ui-table-scroll», но
+ * гейт БЭМ (stylelint.config.mjs, паттерн ui-{block}__{elem}--{mod}) отверг
+ * селектор .ui-table-scroll (проба: Invalid component selector — одиночное
+ * тире не элемент и не модификатор); обёртка — ЭЛЕМЕНТ блока .ui-table__scroll
+ * (тот же контракт атрибутов), отступление от литерала Scope — в README и
+ * summary задачи.
+ *
+ * border-collapse: separate + border-spacing: 0 (а не collapse): при collapse
+ * рамки sticky-заголовка уезжают вместе с прокруткой — известный баг Chrome;
+ * отдельная модель рисует разделители на ячейках и работает со sticky
+ * (Implementation requirements п.3).
+ *
+ * sticky-заголовок --sticky-head: sticking работает В ПРЕДЕЛАХ скролл-зоны
+ * (Technical considerations): зона — scroll-контейнер (overflow-x: auto
+ * вычисляет overflow-y в auto), поэтому шапка прилипает, когда вертикально
+ * прокручивается САМА ЗОНА (высоту ограничивает сайт: max-height на
+ * .ui-table__scroll); прилипание к вьюпорту при прокрутке страницы из
+ * overflow-контейнера не работает платформенно. Фон — непрозрачный
+ * --ui-color-surface, иначе строки светятся сквозь шапку; z-index — ступень
+ * лестницы --ui-z-sticky.
+ *
+ * hover — только под @media (hover: hover) (конвенция EPIC-4), пара
+ * одобренного дизайна --ui-color-surface-hover (ADR-0010). zebra —
+ * --ui-color-surface-muted. VI-режим: цветов вне токенов нет (§5) —
+ * перекраска vi.css накрывает компонент. Фокус ячеек/зоны — политика
+ * ADR-0001, компонент outline не гасит.
+ */
+
+.ui-table {
+  box-sizing: border-box;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+/* Нативное имя таблицы: caption — доступное имя без ARIA (a11y-требование:
+   скролл-регион назван aria-label, таблица — caption). */
+.ui-table__caption {
+  box-sizing: border-box;
+  padding: 0 0 var(--ui-space-3);
+  font-weight: var(--ui-fw-body-bold);
+  text-align: left;
+}
+
+/* Скролл-зона: обёртка таблицы, атрибуты региона задаёт разметка
+   (tabindex="0" role="region" aria-label=… — WCAG 2.4.1/4.1.2, пины e2e).
+   Индикация прокрутки — градиент правой кромки: собственный фон контейнера
+   не прокручивается вместе с контентом (attachment local мы не ставим),
+   полупрозрачный конец — ключевое слово transparent (гейт цветов пропускает).
+   Ширина — ступень шкалы §3.2 (24px). */
+.ui-table__scroll {
+  box-sizing: border-box;
+  overflow-x: auto;
+  background-image: linear-gradient(to left, var(--ui-color-surface), transparent);
+  background-repeat: no-repeat;
+  background-position: top right;
+  background-size: var(--ui-space-5) 100%;
+}
+
+/* Группы и строки: box-sizing (ADR-0002); карточный режим --cards ниже
+   переключает их раскладку. */
+.ui-table__head,
+.ui-table__body,
+.ui-table__row {
+  box-sizing: border-box;
+}
+
+/* Ячейки: паддинг — ступени шкалы §3.2 (12/16), разделитель строк —
+   --ui-color-divider (slate-200). Заголовки (колонок и строк) — вес bold-тело
+   (--ui-fw-body-bold, как вопрос аккордеона), выравнивание влево —
+   нативный center у th не читается в русских таблицах. */
+.ui-table__col,
+.ui-table__rowhead,
+.ui-table__cell {
+  box-sizing: border-box;
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
+  text-align: left;
+}
+
+.ui-table__col,
+.ui-table__rowhead {
+  font-weight: var(--ui-fw-body-bold);
+}
+
+/* zebra — опция: чётные строки тела приглушены (--ui-color-surface-muted,
+   фон «серых» секций career-portal). nth-child по строкам тела. */
+.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__col,
+.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__rowhead,
+.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__cell {
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* compact — опция: плотные таблицы (ступени 8/12). */
+.ui-table--compact .ui-table__col,
+.ui-table--compact .ui-table__rowhead,
+.ui-table--compact .ui-table__cell {
+  padding: var(--ui-space-2) var(--ui-space-3);
+}
+
+/* sticky-заголовок — опция для длинных таблиц внутри скролл-зоны с
+   ограниченной высотой (см. шапку файла). Правило после zebra/hover-блока не
+   нужно: sticky-ячейки — шапки, zebra красит тело. */
+.ui-table--sticky-head .ui-table__col {
+  position: sticky;
+  top: 0;
+  z-index: var(--ui-z-sticky);
+  background-color: var(--ui-color-surface);
+}
+
+/* hover — ТОЛЬКО под (hover: hover) (конвенция EPIC-4): на таче строка не
+   «залипает». База компонента: строка подсвечивается парой одобренного
+   дизайна (ADR-0010). Правило ПОСЛЕ zebra — hover виден и на полосатых
+   строках (равная специфичность, порядок каскада). */
+@media (hover: hover) {
+  .ui-table .ui-table__body .ui-table__row:hover .ui-table__col,
+  .ui-table .ui-table__body .ui-table__row:hover .ui-table__rowhead,
+  .ui-table .ui-table__body .ui-table__row:hover .ui-table__cell {
+    background-color: var(--ui-color-surface-hover);
+  }
+}
+
+/* ── Карточная трансформация --cards: база (<md) — карточки ──
+   Mobile-first: базовые правила — мобильный вид (Шкала брейкпоинтов T2.5);
+   возврат к table-раскладке — в @media (min-width: 768px) ниже. display:
+   block на table-элементах снимает их роли в дереве доступности — осознанная
+   потеря, условие допустимости: README «Потеря table-семантики». */
+.ui-table--cards,
+.ui-table--cards .ui-table__body,
+.ui-table--cards .ui-table__row {
+  display: block;
+}
+
+/* Шапка скрыта целиком (и визуально, и из дерева доступности): каждое имя
+   колонки продублировано в data-label ячеек — обязательность исполняет гейт
+   irao/table-card-data-label, без него данные теряли бы имена. */
+.ui-table--cards .ui-table__head {
+  display: none;
+}
+
+/* Карточка-строка: коробка ui-card (рамка --ui-border-color, радиус
+   --ui-radius-md, фон surface). margin между карточками — через + смежность:
+   на table-row в md-режиме margin не действует (table-internal box). */
+.ui-table--cards .ui-table__row {
+  padding: var(--ui-space-4);
+  border: var(--ui-border-width) solid var(--ui-border-color);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
+}
+
+.ui-table--cards .ui-table__row + .ui-table__row {
+  margin-top: var(--ui-space-3);
+}
+
+/* Ячейки-строки без разделителей: пару «заголовок–значение» читает подпись.
+   Заголовок строки (th scope="row") — такая же ячейка-пара, имя несёт
+   data-label («Направление: Аналитик данных»). */
+.ui-table--cards .ui-table__rowhead,
+.ui-table--cards .ui-table__cell {
+  display: block;
+  padding: 0;
+  border-bottom: none;
+}
+
+.ui-table--cards .ui-table__rowhead + .ui-table__cell,
+.ui-table--cards .ui-table__cell + .ui-table__cell,
+.ui-table--cards .ui-table__cell + .ui-table__rowhead {
+  margin-top: var(--ui-space-3);
+}
+
+/* Подпись значения — data-label ячейки: приглушённый caption-текст (роль
+   small-предок T3.3, muted-цвет). content: attr(data-label) — значение видно
+   скринридеру (generated content входит в дерево доступности) — пары
+   «заголовок–значение» читаются без таблицы (Technical considerations). */
+.ui-table--cards .ui-table__rowhead::before,
+.ui-table--cards .ui-table__cell::before {
+  content: attr(data-label);
+  display: block;
+  margin-bottom: var(--ui-space-1);
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-caption);
+  font-weight: var(--ui-fw-caption);
+}
+
+/* ── md (768px, шкала T2.5): возврат к table-раскладке ──
+   Явные table-значения (не display: revert): детерминированно во всех
+   движках, без опоры на UA-таблицу. Правила идут ПОСЛЕ базовых карточных —
+   равная специфичность, побеждает порядок каскада. Сброс карточной коробки
+   строки: padding/margin/border на table-row не действуют платформенно,
+   background-color сбрасываем явно (фон строки рисуется и в table-режиме). */
+@media (min-width: 768px) {
+  .ui-table--cards {
+    display: table;
+  }
+
+  .ui-table--cards .ui-table__head {
+    display: table-header-group;
+  }
+
+  .ui-table--cards .ui-table__body {
+    display: table-row-group;
+  }
+
+  .ui-table--cards .ui-table__row {
+    display: table-row;
+    background-color: transparent;
+  }
+
+  .ui-table--cards .ui-table__rowhead,
+  .ui-table--cards .ui-table__cell {
+    display: table-cell;
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
+  }
+
+  .ui-table--cards .ui-table__rowhead::before,
+  .ui-table--cards .ui-table__cell::before {
+    content: none;
+  }
+}

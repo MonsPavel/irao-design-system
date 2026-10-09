@@ -140,9 +140,9 @@ describe('components/ui-table/ui-table.css — база (ADR-0002, токены)
     expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
     const beforeMedia = css.slice(0, mediaIndex);
     expect(beforeMedia, 'до media-обёртки :hover-селекторов нет').not.toContain(':hover');
-    const rowHover = blockOf(css.slice(mediaIndex), '.ui-table__row:hover');
-    expect(rowHover, 'правило hover строки найдено').toBeTruthy();
-    expect(rowHover).toContain('background-color: var(--ui-color-surface-hover);');
+    const rowHover = rulesOf(css.slice(mediaIndex), '.ui-table__row:hover');
+    expect(rowHover.length, 'правило hover строки найдено').toBeGreaterThan(0);
+    expect(rowHover[0]).toContain('background-color: var(--ui-color-surface-hover);');
   });
 
   it('инварианты системы: без !important и без hex в исполняемом коде (VI §5)', () => {
@@ -156,12 +156,12 @@ describe('components/ui-table/ui-table.css — карточная трансфо
   const css = stripCssComments(readFileSync(path, 'utf8'));
 
   it('база (<md): таблица, группы и строки — блоки; шапка скрыта (имена колонок несёт data-label)', () => {
-    const table = blockOf(css, '.ui-table--cards');
-    expect(table, 'правило корня карточного режима найдено').toBeTruthy();
-    expect(table).toContain('display: block;');
-    const body = blockOf(css, '.ui-table--cards .ui-table__body');
-    expect(body, 'тело — блок').toBeTruthy();
-    expect(body).toContain('display: block;');
+    // Базовое правило — группированный селектор (корень, тело, строка):
+    // rulesOf сопоставляет по включению, blockOf требует селектор в начале
+    // строки до «{» (после prettier групповые селекторы многострочные).
+    const base = rulesOf(css, '.ui-table--cards .ui-table__body')[0];
+    expect(base, 'правило корня карточного режима найдено').toBeTruthy();
+    expect(base).toContain('display: block;');
     const head = blockOf(css, '.ui-table--cards .ui-table__head');
     expect(head, 'правило скрытия шапки найдено').toBeTruthy();
     expect(head).toContain('display: none;');
@@ -169,8 +169,8 @@ describe('components/ui-table/ui-table.css — карточная трансфо
 
   it('карточка-строка: рамка/радиус/фон из токенов карточки (ui-card)', () => {
     const blocks = rulesOf(css, '.ui-table--cards .ui-table__row');
-    const withBorder = blocks.filter(
-      (block) => block.includes('border-radius: var(--ui-radius-md);'),
+    const withBorder = blocks.filter((block) =>
+      block.includes('border-radius: var(--ui-radius-md);'),
     );
     expect(withBorder.length, 'радиус карточки найден').toBeGreaterThan(0);
     expect(withBorder[0]).toContain('background-color: var(--ui-color-surface);');
@@ -182,9 +182,7 @@ describe('components/ui-table/ui-table.css — карточная трансфо
     const displayBlock = cellBlocks.filter((block) => block.includes('display: block;'));
     expect(displayBlock.length, 'ячейки — блоки').toBeGreaterThan(0);
     const labelBlocks = rulesOf(css, '.ui-table--cards .ui-table__cell::before');
-    const withContent = labelBlocks.filter((block) =>
-      block.includes('content: attr(data-label);'),
-    );
+    const withContent = labelBlocks.filter((block) => block.includes('content: attr(data-label);'));
     expect(withContent.length, '::before с data-label найден').toBeGreaterThan(0);
     expect(withContent[0]).toContain('color: var(--ui-color-text-muted);');
     const rowHeadLabels = rulesOf(css, '.ui-table--cards .ui-table__rowhead::before');
@@ -251,7 +249,7 @@ describe('стенды (showcase/pages/ui-table*) — контракты раз�
       'utf8',
     );
     const markup = html.replace(/<!--[\s\S]*?-->/g, '');
-    const scrollZone = markup.match(/<div class="ui-table__scroll"[^>]*>/g) ?? [];
+    const scrollZone = markup.match(/<div\s+class="ui-table__scroll"[\s\S]*?>/g) ?? [];
     expect(scrollZone.length, 'скролл-зоны на стенде').toBeGreaterThan(0);
     for (const zone of scrollZone) {
       expect(zone, `role=region: ${zone}`).toContain('role="region"');
@@ -267,13 +265,17 @@ describe('стенды (showcase/pages/ui-table*) — контракты раз�
       'utf8',
     );
     const markup = html.replace(/<!--[\s\S]*?-->/g, '');
-    const cardsTable = markup.match(
-      /<table class="ui-table ui-table--cards">[\s\S]*?<\/table>/,
-    );
+    const cardsTable = markup.match(/<table class="ui-table ui-table--cards">[\s\S]*?<\/table>/);
     expect(cardsTable, '--cards-таблица на стенде').toBeTruthy();
-    const cells = cardsTable[0].match(/<t[dh]\b/g) ?? [];
-    const labels = cardsTable[0].match(/data-label="/g) ?? [];
-    expect(labels.length, `каждая ячейка с data-label (${cells.length} ячеек)`).toBe(cells.length);
+    // Гейт требует data-label на ячейках ТЕЛА (шапка — имена колонок,
+    // data-label не несёт): считаем ячейки и подписи по tbody.
+    const tbody = cardsTable[0].match(/<tbody[\s\S]*<\/tbody>/);
+    expect(tbody, 'тело таблицы найдено').toBeTruthy();
+    const cells = tbody[0].match(/<t[dh]\b/g) ?? [];
+    const labels = tbody[0].match(/data-label="/g) ?? [];
+    expect(labels.length, `каждая ячейка тела с data-label (${cells.length} ячеек)`).toBe(
+      cells.length,
+    );
     expect(cells.length, 'в таблице есть ячейки').toBeGreaterThan(3);
   });
 
@@ -306,7 +308,11 @@ describe('сборка и гейты — подключение и контро�
     expect(runner).toContain("'irao/table-card-data-label'");
     expect(runner).toContain("file: 'html/table-card-valid.html'");
 
-    expect(existsSync(join(root, 'tests', 'lint-cases', 'html', 'table-card-missing-label.html'))).toBe(true);
-    expect(existsSync(join(root, 'tests', 'lint-cases', 'html', 'table-card-valid.html'))).toBe(true);
+    expect(
+      existsSync(join(root, 'tests', 'lint-cases', 'html', 'table-card-missing-label.html')),
+    ).toBe(true);
+    expect(existsSync(join(root, 'tests', 'lint-cases', 'html', 'table-card-valid.html'))).toBe(
+      true,
+    );
   });
 });
