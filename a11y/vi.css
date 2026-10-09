@@ -1,0 +1,408 @@
+/*!
+ * irao-ui — a11y/vi.css: версия для слабовидящих (ГОСТ Р 52872), задача T9.1.
+ *
+ * Порт css/vi.css career-portal (класс A аудита). Панель настроек → БЭМ
+ * `ui-vi-*`, значения — токены слоя 2 `--ui-*`; режимы (темы/размер/
+ * картинки/интервал) — «как есть» career-portal: классы на <body> ведёт
+ * a11y/vi.js (IraoUI.vi), селекторы требуют body.vi.
+ *
+ * !important — единственное место системы (stylelint-разрешение T1.2):
+ * перекраска по ГОСТ обязана побеждать любые правила сайтов. Инвариант
+ * §5 02-architecture делает её корректной: компоненты системы не используют
+ * inline-стили и не держат цветов вне токенов — перекраска накрывает всё.
+ *
+ * Гарантированные пары тем — константы ГОСТ в :root (--ui-vi-theme-*):
+ * это НЕ бренд-палитра, поэтому в tokens/ они не попадают (§3.2: VI-режим
+ * работает классами, токены не переопределяются). Hex в одном блоке ниже —
+ * осознанное исключение инварианта «hex только в tokens/primitives.css»;
+ * дальше файла сырых цветов нет — всё через эти константы и токены слоя 2.
+ * Машинный контроль: контраст пар ≥ 4.5:1 и отсутствие hex вне :root-блока —
+ * tests/unit/vi.test.js (T9.1).
+ *
+ * Подключение: ui-vi.min.css ПОСЛЕДНИМ — после ui-core и CSS сайта (перекраска
+ * обязана быть последним словом каскада; сниппет — bitrix/snippets, T11.1).
+ * zoom в масштабе типографики — стандартизован; протокол перепроверки при
+ * обновлении браузеров — чек-лист README ui-vi.
+ *
+ * Не переносилось из career-portal (селекторы страниц того сайта; приёмы
+ * для сайтов с фото-секциями — в чек-листе README ui-vi): .header* (кнопка
+ * входа — header-паттерн T7.6), .production__body и секция .production--v1,
+ * ::after-оверлеи .hero__bg/.production__bg/.holding__bg, .test__photo.
+ * Конвенционные селекторы [class*='__bg']/[class*='__photo']/[class*='__glow']
+ * перенесены как есть — на них опираются режимы «картинки выкл» и тонировка
+ * фото (та же конвенция имён слоёв, дока — README ui-vi).
+ */
+
+/* ── Гарантированные пары тем (ГОСТ Р 52872, значения career-portal vi.css) ── */
+
+:root {
+  /* Ч/Б — базовая: дизайн уже тёмное на светлом (пара системы surface/text) */
+  --ui-vi-theme-baw-bg: #ffffff;
+  --ui-vi-theme-baw-text: #000000;
+  /* Б/Ч — инверсия корня (html-фильтр), фон body чёрный */
+  --ui-vi-theme-wb-bg: #000000;
+  --ui-vi-theme-wb-text: #ffffff;
+  /* С/Б — явная перекраска: тёмно-синий на голубом */
+  --ui-vi-theme-bb-bg: #9dd1ff;
+  --ui-vi-theme-bb-text: #063462;
+  /* Бежевая: бежевый фон, коричневый текст */
+  --ui-vi-theme-beige-bg: #f5e7ce;
+  --ui-vi-theme-beige-text: #4a3728;
+  /* Зелёная: зелёный текст на тёмно-коричневом */
+  --ui-vi-theme-green-bg: #3b2716;
+  --ui-vi-theme-green-text: #4dff00;
+  /* Пара кнопок зелёной темы (career-portal vi.css:170) */
+  --ui-vi-theme-green-btn-text: #1a2e0a;
+  /* Рамки свотчей панели (career-portal vi.css:70/73) */
+  --ui-vi-swatch-border-baw: #c4cddc;
+  --ui-vi-swatch-border-beige: #c9b48f;
+}
+
+/* ── Панель настроек (БЭМ ui-vi-*, значения — токены слоя 2) ── */
+
+.ui-vi-bar {
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: var(--ui-z-vi);
+  border-bottom: 2px solid var(--ui-color-primary);
+  background: var(--ui-color-surface);
+}
+
+/* База — мобильная (career-portal vi.css @media (max-width: 1023px)), рост —
+   min-width: 1024px (шкала брейкпоинтов T2.5): паддинг 8/16, интервал 10/20. */
+.ui-vi-bar__inner {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.625rem 1.25rem;
+  align-items: center;
+  max-width: var(--ui-container-max);
+  margin: 0 auto;
+  padding: var(--ui-space-2) var(--ui-space-4);
+}
+
+.ui-vi-group {
+  box-sizing: border-box;
+  display: flex;
+  gap: 0.625rem;
+  align-items: center;
+}
+
+.ui-vi-group__label {
+  display: none;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-caption);
+  font-weight: var(--ui-fw-small);
+}
+
+.ui-vi-seg {
+  box-sizing: border-box;
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--ui-color-primary);
+  border-radius: var(--ui-radius-sm);
+}
+
+.ui-vi-seg__btn {
+  box-sizing: border-box;
+  min-width: 2.5rem;
+  height: 2.25rem;
+  padding: 0 var(--ui-space-3);
+  border-left: 1px solid var(--ui-color-primary);
+  background: var(--ui-color-surface);
+  color: var(--ui-color-primary);
+  font-family: inherit;
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  cursor: pointer;
+}
+
+.ui-vi-seg__btn:first-child {
+  border-left: none;
+}
+
+/* Hover-гвард (конвенция EPIC-4) и перед aria-pressed: нажатая кнопка
+   остаётся выделенной и под курсором. */
+@media (hover: hover) {
+  .ui-vi-seg__btn:hover {
+    background: var(--ui-color-surface-muted);
+  }
+
+  .ui-vi-exit:hover {
+    background: var(--ui-color-primary-hover);
+  }
+}
+
+.ui-vi-seg__btn[aria-pressed='true'] {
+  background: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Размеры кнопок сегмента «Шрифт»: 13/14/16/19px career-portal (vi.css:55–57).
+   13px = --ui-fs-caption, 14px = --ui-fs-small; 16/19px — вне типографической
+   шкалы (fs-body медиа-переменный — панели не подходит): rem-перенос «как есть». */
+.ui-vi-seg__btn--sm {
+  font-size: var(--ui-fs-caption);
+}
+
+.ui-vi-seg__btn--md {
+  font-size: 1rem;
+}
+
+.ui-vi-seg__btn--lg {
+  font-size: 1.1875rem;
+}
+
+.ui-vi-swatch {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 1.375rem;
+  border-radius: 0.25rem;
+  font-size: var(--ui-fs-caption);
+  font-weight: var(--ui-fw-body-bold);
+}
+
+/* Свотчи — предпросмотр гарантированной пары темы (константы выше). */
+.ui-vi-swatch--baw {
+  border: 1px solid var(--ui-vi-swatch-border-baw);
+  background: var(--ui-vi-theme-baw-bg);
+  color: var(--ui-vi-theme-baw-text);
+}
+
+.ui-vi-swatch--wb {
+  background: var(--ui-vi-theme-wb-bg);
+  color: var(--ui-vi-theme-wb-text);
+}
+
+.ui-vi-swatch--bb {
+  background: var(--ui-vi-theme-bb-bg);
+  color: var(--ui-vi-theme-bb-text);
+}
+
+.ui-vi-swatch--beige {
+  border: 1px solid var(--ui-vi-swatch-border-beige);
+  background: var(--ui-vi-theme-beige-bg);
+  color: var(--ui-vi-theme-beige-text);
+}
+
+.ui-vi-swatch--green {
+  border: 1px solid var(--ui-vi-theme-green-text);
+  background: var(--ui-vi-theme-green-bg);
+  color: var(--ui-vi-theme-green-text);
+}
+
+.ui-vi-exit {
+  box-sizing: border-box;
+  height: 2.25rem;
+  margin-left: auto;
+  padding: 0 var(--ui-space-5);
+  border-radius: var(--ui-radius-pill);
+  background: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+  font-family: inherit;
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  cursor: pointer;
+}
+
+/* Десктоп панели: career-portal vi.css @media (min-width: 1024px)
+   (паддинг 10/40, интервал 16/32, подписки групп видимы). */
+@media (min-width: 1024px) {
+  .ui-vi-bar__inner {
+    gap: var(--ui-space-4) var(--ui-space-6);
+    padding: 0.625rem 2.5rem;
+  }
+
+  .ui-vi-group__label {
+    display: inline;
+  }
+}
+
+/* ── Режим: body.vi (+ модификаторы vi-size--, vi-theme--, vi-img--, vi-kern--) ── */
+
+/* Резерв под панель до JS-уточнения: a11y/vi.js ставит padding-top по
+   фактической высоте панели (66px career-portal vi.css:98). */
+body.vi {
+  padding-top: 4.125rem;
+}
+
+/* Размер шрифта: масштаб всей вёрстки (в режиме по умолчанию — средний). */
+body.vi.vi-size--sm {
+  zoom: 1;
+}
+
+body.vi.vi-size--md {
+  zoom: 1.2;
+}
+
+body.vi.vi-size--lg {
+  zoom: 1.45;
+}
+
+/* Цветовые темы.
+   Ч/Б — базовая: дизайн уже тёмное на светлом, без преобразований.
+   Б/Ч — инверсия корня с возвратом фото к исходному виду.
+   С/Б — явная перекраска: тёмно-синий #063462 на голубом #9DD1FF. */
+body.vi.vi-theme--wb {
+  background: var(--ui-vi-theme-wb-bg);
+}
+
+body.vi.vi-theme--wb:not(.vi-img--off) img,
+body.vi.vi-theme--wb video {
+  filter: invert(1) grayscale(1);
+}
+
+/* Панель не инвертируется повторно — она внутри html-фильтра. */
+html:has(body.vi.vi-theme--wb) {
+  filter: invert(1) grayscale(1);
+}
+
+body.vi.vi-theme--bb {
+  background: var(--ui-vi-theme-bb-bg);
+}
+
+/* Перекраска всех элементов, кроме панели настроек и графики; модалки
+   (native <dialog>, ADR-0011) исключены — как .modal в career-portal. */
+body.vi.vi-theme--bb
+  *:not(.ui-vi-bar):not(.ui-vi-bar *):not(svg):not(path):not(circle):not(rect):not(img):not(
+    video
+  ):not(.ui-modal):not(.ui-modal *) {
+  background-color: var(--ui-vi-theme-bb-bg) !important;
+  color: var(--ui-vi-theme-bb-text) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+/* Кнопки — тёмно-синие с белым текстом для контраста. */
+body.vi.vi-theme--bb .ui-button,
+body.vi.vi-theme--bb .ui-button--primary,
+body.vi.vi-theme--bb .ui-button--accent {
+  background-color: var(--ui-vi-theme-bb-text) !important;
+  color: var(--ui-color-text-on-dark) !important;
+}
+
+/* Бежевая тема: бежевый фон, коричневый текст. */
+body.vi.vi-theme--beige {
+  background: var(--ui-vi-theme-beige-bg);
+}
+
+body.vi.vi-theme--beige
+  *:not(.ui-vi-bar):not(.ui-vi-bar *):not(svg):not(img):not(video):not(.ui-modal):not(.ui-modal *) {
+  border-color: var(--ui-vi-theme-beige-text) !important;
+  background-color: var(--ui-vi-theme-beige-bg) !important;
+  color: var(--ui-vi-theme-beige-text) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+body.vi.vi-theme--beige .ui-button,
+body.vi.vi-theme--beige .ui-button--primary,
+body.vi.vi-theme--beige .ui-button--accent {
+  background-color: var(--ui-vi-theme-beige-text) !important;
+  color: var(--ui-color-text-on-dark) !important;
+}
+
+/* Зелёная тема: зелёный текст на тёмно-коричневом. */
+body.vi.vi-theme--green {
+  background: var(--ui-vi-theme-green-bg);
+}
+
+body.vi.vi-theme--green
+  *:not(.ui-vi-bar):not(.ui-vi-bar *):not(svg):not(img):not(video):not(.ui-modal):not(.ui-modal *) {
+  background-color: var(--ui-vi-theme-green-bg) !important;
+  color: var(--ui-vi-theme-green-text) !important;
+  text-shadow: none !important;
+  box-shadow: none !important;
+}
+
+body.vi.vi-theme--green .ui-button,
+body.vi.vi-theme--green .ui-button--primary,
+body.vi.vi-theme--green .ui-button--accent {
+  background-color: var(--ui-vi-theme-green-text) !important;
+  color: var(--ui-vi-theme-green-btn-text) !important;
+}
+
+/* Декоративные свечения (полупрозрачные градиенты поверх фото) в режиме
+   отключаются: универсальная перекраска зальёт их цветом темы непрозрачным
+   пятном (конвенция career-portal: блок-элемент __glow). */
+body.vi [class*='__glow'] {
+  display: none !important;
+}
+
+/* Фото-слои и контент секций: фото видно над фоном секции, текст над фото. */
+body.vi [class*='__bg'],
+body.vi [class*='__photo'] {
+  z-index: 0 !important;
+}
+
+body.vi section > *:not([class*='__bg']):not([class*='__photo']),
+body.vi [class*='__content'],
+body.vi [class*='__body'] {
+  position: relative;
+  z-index: 1;
+}
+
+/* Тонирование фото под цветовую схему (конвенция __bg/__photo-слоёв). */
+body.vi.vi-theme--green [class*='__bg'] img,
+body.vi.vi-theme--green [class*='__photo'] img,
+body.vi.vi-theme--green img[class*='__photo'] {
+  filter: grayscale(1) brightness(0.65) sepia(1) saturate(2) hue-rotate(-18deg);
+}
+
+body.vi.vi-theme--beige [class*='__bg'] img,
+body.vi.vi-theme--beige [class*='__photo'] img,
+body.vi.vi-theme--beige img[class*='__photo'] {
+  filter: grayscale(1) brightness(1.06) sepia(0.45);
+}
+
+body.vi.vi-theme--bb [class*='__bg'] img,
+body.vi.vi-theme--bb [class*='__photo'] img,
+body.vi.vi-theme--bb img[class*='__photo'] {
+  filter: grayscale(1);
+}
+
+/* Изображения: скрыть растровые фото и декоративные фоны,
+   иконки-интерфейса (svg) остаются. */
+body.vi.vi-img--off img,
+body.vi.vi-img--off [class*='__bg'],
+body.vi.vi-img--off [class*='__photo'],
+body.vi.vi-img--off [class*='-photo'],
+body.vi.vi-img--off video {
+  display: none !important;
+}
+
+/* Чёрно-белые изображения. */
+body.vi.vi-img--gray img {
+  filter: grayscale(1);
+}
+
+/* Интервал. */
+body.vi.vi-kern--wide,
+body.vi.vi-kern--wide * {
+  letter-spacing: 0.06em !important;
+}
+
+/* В режиме — без анимаций и декоративных затемнений. */
+body.vi *,
+body.vi *::before,
+body.vi *::after {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Плейсхолдеры и поля ввода перекрашиваются вместе с темой. */
+body.vi ::placeholder {
+  color: currentColor !important;
+  opacity: 0.65 !important;
+}
+
+body.vi input,
+body.vi textarea {
+  color: inherit;
+}

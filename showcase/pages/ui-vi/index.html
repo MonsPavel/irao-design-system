@@ -1,0 +1,337 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-vi (T9.1): версия для слабовидящих по ГОСТ Р 52872 — панель настроек, 3 размера (zoom
+  1/1.2/1.45), 5 цветовых тем, режимы изображений, межбуквенный интервал, localStorage
+  (<code>irao-ui-vi</code>). CSS — <code>a11y/vi.css</code> (отдельный
+  <code>dist/ui-vi.min.css</code>), JS — <code>window.IraoUI.vi</code> (a11y/vi.js); канонический
+  паттерн панели — <code>components/ui-vi/ui-vi.html</code>. Сценарии —
+  <code>tests/e2e/ui-vi.spec.js</code>
+  (включение/темы/размеры/персистентность/выключение, матрица «тема × стенды EPIC-4/5», axe).
+  Чек-лист проверки страниц сайта в VI — README.md компонента.
+</p>
+
+<style>
+  /* Демо-связки стенда (зона сайта — в dist не попадают). Значения — токены;
+     цвета пар тем — константы :root из a11y/vi.css. */
+  .uvid-pairs {
+    display: grid;
+    gap: var(--ui-space-3);
+    max-width: 40rem;
+  }
+
+  .uvid-pair {
+    padding: var(--ui-space-4) var(--ui-space-5);
+    border-radius: var(--ui-radius-md);
+    font-size: var(--ui-fs-body);
+  }
+
+  .uvid-pair__name {
+    display: block;
+    font-weight: var(--ui-fw-small);
+  }
+
+  .uvid-pair__value {
+    display: block;
+    font-size: var(--ui-fs-small);
+    opacity: 0.8;
+  }
+
+  .uvid-pair--baw {
+    border: 1px solid var(--ui-vi-swatch-border-baw);
+    background: var(--ui-vi-theme-baw-bg);
+    color: var(--ui-vi-theme-baw-text);
+  }
+
+  .uvid-pair--wb {
+    background: var(--ui-vi-theme-wb-bg);
+    color: var(--ui-vi-theme-wb-text);
+  }
+
+  .uvid-pair--bb {
+    background: var(--ui-vi-theme-bb-bg);
+    color: var(--ui-vi-theme-bb-text);
+  }
+
+  .uvid-pair--beige {
+    background: var(--ui-vi-theme-beige-bg);
+    color: var(--ui-vi-theme-beige-text);
+  }
+
+  .uvid-pair--green {
+    background: var(--ui-vi-theme-green-bg);
+    color: var(--ui-vi-theme-green-text);
+  }
+
+  /* Проба zoom: фиксированная ширина 100px — в режиме md 120px, lg 145px
+     (поверхность e2e «переключение размера»). */
+  .uvid-zoom {
+    display: inline-block;
+    width: 100px;
+    padding: var(--ui-space-2) 0;
+    border: 1px solid var(--ui-border-color);
+    background: var(--ui-color-surface-muted);
+    text-align: center;
+  }
+
+  /* Слой-«фото» по конвенции __photo: режим «картинки выкл» скрывает его
+     ([class*='__photo']) наравне с img/video (a11y/vi.css). */
+  .uvid-demo__photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 6rem;
+    border-radius: var(--ui-radius-md);
+    background: var(--ui-color-surface-blue-deep);
+    color: var(--ui-color-text-on-dark);
+  }
+</style>
+
+<!-- Панель — копия канонического паттерна components/ui-vi/ui-vi.html
+     (первый блок стенда: в режиме фиксирована сверху, кнопка выхода —
+     последний интерактив панели, escape-путь с клавиатуры). -->
+<div class="ui-vi-bar" data-ui-vi-panel hidden>
+  <div class="ui-vi-bar__inner">
+    <div class="ui-vi-group" role="group" aria-label="Размер шрифта">
+      <span class="ui-vi-group__label">Шрифт</span>
+      <div class="ui-vi-seg">
+        <button
+          class="ui-vi-seg__btn ui-vi-seg__btn--sm"
+          type="button"
+          data-ui-vi-set="size:sm"
+          aria-pressed="false"
+          aria-label="Мелкий шрифт"
+        >
+          A
+        </button>
+        <button
+          class="ui-vi-seg__btn ui-vi-seg__btn--md"
+          type="button"
+          data-ui-vi-set="size:md"
+          aria-pressed="true"
+          aria-label="Средний шрифт"
+        >
+          A
+        </button>
+        <button
+          class="ui-vi-seg__btn ui-vi-seg__btn--lg"
+          type="button"
+          data-ui-vi-set="size:lg"
+          aria-pressed="false"
+          aria-label="Крупный шрифт"
+        >
+          A
+        </button>
+      </div>
+    </div>
+
+    <div class="ui-vi-group" role="group" aria-label="Цвета сайта">
+      <span class="ui-vi-group__label">Цвета</span>
+      <div class="ui-vi-seg">
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="theme:baw"
+          aria-pressed="true"
+          title="Чёрным по белому"
+          aria-label="Чёрным по белому"
+        >
+          <span class="ui-vi-swatch ui-vi-swatch--baw" aria-hidden="true">Аа</span>
+        </button>
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="theme:wb"
+          aria-pressed="false"
+          title="Белым по чёрному"
+          aria-label="Белым по чёрному"
+        >
+          <span class="ui-vi-swatch ui-vi-swatch--wb" aria-hidden="true">Аа</span>
+        </button>
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="theme:bb"
+          aria-pressed="false"
+          title="Синим по голубому"
+          aria-label="Синим по голубому"
+        >
+          <span class="ui-vi-swatch ui-vi-swatch--bb" aria-hidden="true">Аа</span>
+        </button>
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="theme:beige"
+          aria-pressed="false"
+          title="Бежевым по коричневому"
+          aria-label="Бежевым по коричневому"
+        >
+          <span class="ui-vi-swatch ui-vi-swatch--beige" aria-hidden="true">Аа</span>
+        </button>
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="theme:green"
+          aria-pressed="false"
+          title="Зелёным на тёмно-коричневом"
+          aria-label="Зелёным на тёмно-коричневом"
+        >
+          <span class="ui-vi-swatch ui-vi-swatch--green" aria-hidden="true">Аа</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="ui-vi-group" role="group" aria-label="Изображения">
+      <span class="ui-vi-group__label">Изображения</span>
+      <div class="ui-vi-seg">
+        <button class="ui-vi-seg__btn" type="button" data-ui-vi-set="img:on" aria-pressed="true">
+          обычные
+        </button>
+        <button class="ui-vi-seg__btn" type="button" data-ui-vi-set="img:gray" aria-pressed="false">
+          чёрно-белые
+        </button>
+        <button class="ui-vi-seg__btn" type="button" data-ui-vi-set="img:off" aria-pressed="false">
+          выкл
+        </button>
+      </div>
+    </div>
+
+    <div class="ui-vi-group" role="group" aria-label="Межбуквенный интервал">
+      <span class="ui-vi-group__label">Интервал</span>
+      <div class="ui-vi-seg">
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="kern:normal"
+          aria-pressed="true"
+        >
+          обычный
+        </button>
+        <button
+          class="ui-vi-seg__btn"
+          type="button"
+          data-ui-vi-set="kern:wide"
+          aria-pressed="false"
+        >
+          широкий
+        </button>
+      </div>
+    </div>
+
+    <button class="ui-vi-exit" type="button" data-ui-vi-toggle>Обычная версия сайта</button>
+  </div>
+</div>
+
+<section class="ui-section" aria-labelledby="uvid-entry-heading">
+  <div class="ui-container">
+    <h2 id="uvid-entry-heading">Вход в режим</h2>
+    <p class="ui-body">
+      На сайтах кнопка входа живёт в шапке (header-паттерн, T7.6). Вход сбрасывает настройки к
+      стандартным ГОСТ-панели; состояние хранится в localStorage под ключом
+      <code>irao-ui-vi</code> и переживает перезагрузку; «Обычная версия сайта» полностью снимает
+      режим.
+    </p>
+    <p>
+      <button class="ui-button ui-button--primary" type="button" data-ui-vi-toggle>
+        Версия для слабовидящих
+      </button>
+    </p>
+  </div>
+</section>
+
+<section class="ui-section ui-section--muted" aria-labelledby="uvid-pairs-heading">
+  <div class="ui-container">
+    <h2 id="uvid-pairs-heading">Гарантированные пары тем (ключевая пара цветов)</h2>
+    <p class="ui-body">
+      Значения — константы <code>--ui-vi-theme-*</code> из <code>a11y/vi.css</code> (перенос
+      career-portal «как есть»); контраст каждой пары ≥ 4.5:1 — контроль
+      <code>tests/unit/vi.test.js</code>, соответствие computed на стендах EPIC-4/5 — e2e-матрица
+      «тема × стенд».
+    </p>
+    <div class="uvid-pairs">
+      <div class="uvid-pair uvid-pair--baw">
+        <span class="uvid-pair__name">Чёрным по белому (baw)</span>
+        <span class="uvid-pair__value">#000000 на #FFFFFF — базовая, без перекраски</span>
+      </div>
+      <div class="uvid-pair uvid-pair--wb">
+        <span class="uvid-pair__name">Белым по чёрному (wb)</span>
+        <span class="uvid-pair__value">#FFFFFF на #000000 — инверсия корня (фильтр html)</span>
+      </div>
+      <div class="uvid-pair uvid-pair--bb">
+        <span class="uvid-pair__name">Синим по голубому (bb)</span>
+        <span class="uvid-pair__value">#063462 на #9DD1FF</span>
+      </div>
+      <div class="uvid-pair uvid-pair--beige">
+        <span class="uvid-pair__name">Бежевым по коричневому (beige)</span>
+        <span class="uvid-pair__value">#4A3728 на #F5E7CE</span>
+      </div>
+      <div class="uvid-pair uvid-pair--green">
+        <span class="uvid-pair__name">Зелёным на тёмно-коричневом (green)</span>
+        <span class="uvid-pair__value">#4DFF00 на #3B2716</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="ui-section" aria-labelledby="uvid-size-heading">
+  <div class="ui-container">
+    <h2 id="uvid-size-heading">Размер шрифта (масштаб всей вёрстки)</h2>
+    <p class="ui-body">
+      Размер — <code>zoom</code> на <code>body</code>: sm 1, md 1.2 (по умолчанию), lg 1.45. Проба
+      ниже имеет фиксированную ширину 100px: в режиме md — 120px, lg — 145px (поверхность
+      e2e-сценария размера).
+    </p>
+    <p><span class="uvid-zoom" data-uvid-zoom>проба 100px</span></p>
+    <p class="ui-lead">Lead: масштабируется вместе со всей вёрсткой.</p>
+    <p class="ui-body">Body: обычный текст страницы.</p>
+    <p class="ui-small">Small: вторичный текст.</p>
+  </div>
+</section>
+
+<section class="ui-section ui-section--muted" aria-labelledby="uvid-content-heading">
+  <div class="ui-container">
+    <h2 id="uvid-content-heading">Контент в режиме</h2>
+    <p class="ui-body">
+      Перекраска <code>!important</code> накрывает компоненты системы (инвариант «компоненты без
+      inline-стилей и цветов вне токенов»); изображения — обычные / чёрно-белые / выкл; слой по
+      конвенции <code>__photo</code> скрывается вместе с картинками.
+    </p>
+    <div class="ui-grid ui-grid--2">
+      <article class="ui-card">
+        <h3 class="ui-h3 ui-card__title">Карточка в VI-режиме</h3>
+        <p class="ui-body ui-card__body">
+          Фон, текст, рамки и тени перекрашиваются парой активной темы; кнопки получают контрастную
+          пару темы.
+        </p>
+        <div class="ui-card__footer">
+          <button class="ui-button ui-button--primary" type="button">Действие</button>
+        </div>
+      </article>
+      <div>
+        <p data-uvid-photo>
+          <img
+            class="ui-image"
+            src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27320%27%20height%3D%27180%27%3E%3Crect%20width%3D%27320%27%20height%3D%27180%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27260%27%20cy%3D%2740%27%20r%3D%2760%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+            alt="Демонстрационное изображение: оранжевый круг на синем фоне"
+            width="320"
+            height="180"
+          >
+          <span class="ui-small">
+            Изображение: в режиме «выкл» скрывается вместе со слоем ниже, «чёрно-белые» —
+            обесцвечивается.
+          </span>
+        </p>
+        <div class="uvid-demo__photo" data-uvid-photo-layer>
+          декоративный слой __photo — скрывается в режиме «картинки выкл»
+        </div>
+        <p class="ui-body">
+          Поле ввода: плейсхолдер перекрашивается текущим цветом темы (currentColor).
+          <input
+            class="ui-field__input"
+            type="text"
+            aria-label="Пример поля ввода в VI-режиме"
+            placeholder="Пример плейсхолдера"
+          >
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

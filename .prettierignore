@@ -46,3 +46,6 @@ showcase/pages/integration/form-full-cycle/index.html
 # lint:html (void-style).
 patterns/form-page/form-page.html
 patterns/landing-section/landing-section.html
+# T9.1: стенд VI-модуля (<img>, <input> без слэша) — тот же случай: гейт
+# разметки — lint:html (void-style).
+showcase/pages/ui-vi/index.html
