@@ -20,7 +20,7 @@
  */
 import { expect } from '@playwright/test';
 
-import { a11y, shot, standTest as test, VIEWPORTS } from '../helpers/harness.js';
+import { a11y, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js';
 
 /** id-селекторы стенда showcase/pages/ui-loader (заданы в разметке стенда). */
 const SEL = {
@@ -68,7 +68,7 @@ standTest.describe('ui-loader: роли и текст (T7.5)', () => {
 
 standTest.describe('ui-loader: анимация, размеры, цвет (Implementation requirements)', () => {
   standTest(
-    'вращение объявлено: ui-loader-spin, бесконечно, на токене перехода',
+    'вращение объявлено: ui-loader-spin, бесконечно',
     async ({ stand }) => {
       const page = await stand('ui-loader');
       const animation = await page.locator(`${SEL.inlineMd} .ui-loader__spinner`).evaluate((el) => {

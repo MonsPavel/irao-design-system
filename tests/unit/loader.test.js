@@ -5,7 +5,7 @@
  * JS не нужен — управление состоянием загрузки зона сайта). Пины исполняемой
  * формы решения:
  *  - components/ui-loader/ui-loader.css: box-sizing на корнях (ADR-0002);
- *    спиннер — SVG-слот с rotate-анимацией на токене перехода (Implementation
+ *    спиннер — SVG-слот с rotate-анимацией, duration сырым временем (Implementation
  *    requirements п.1); размеры sm/md — ступени шкалы отступов §3.2 (п.2);
  *    цвет НЕ задаётся — currentColor наследует контекст (п.2); оверлей
  *    aria-busy-паттерна — --overlay на полупрозрачной поверхности;
@@ -77,14 +77,20 @@ describe('components/ui-loader/ui-loader.css — спиннер и вариан�
     ).not.toMatch(/(?:^|;)\s*(?:color|fill|stroke):/);
   });
 
-  it('.ui-loader__spinner: md-размер — ступень шкалы §3.2 (--ui-space-5); rotate-анимация на токене перехода', () => {
+  it('.ui-loader__spinner: md-размер — ступень шкалы §3.2 (--ui-space-5); rotate-анимация с сырым duration', () => {
     const block = blockOf(css, '.ui-loader__spinner');
     expect(block, 'правило .ui-loader__spinner найдено').toBeTruthy();
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('flex: none;');
     expect(block).toContain('width: var(--ui-space-5);');
     expect(block).toContain('height: var(--ui-space-5);');
-    expect(block).toContain('animation: ui-loader-spin var(--ui-transition-slow) linear infinite;');
+    // Duration — сырым временем (0.4s = значение --ui-transition-slow, задумка
+    // кнопки T4.2): var() в шорткате с явным linear даёт два easing —
+    // декларация невалидна целиком (IACVT, поймано e2e-пином computed-name).
+    expect(block).toContain('animation: ui-loader-spin 0.4s linear infinite;');
+    expect(block, 'var()-токен перехода в animation-шорткате запрещён (IACVT)').not.toContain(
+      'var(--ui-transition',
+    );
   });
 
   it('--sm: размер спиннера — ступень шкалы §3.2 (--ui-space-4)', () => {
@@ -209,7 +215,11 @@ describe('стенд ui-loader (showcase/pages/ui-loader): inline + block + aria
 describe('подключение и дока (DoD T7.5)', () => {
   it("'ui-loader' в COMPONENTS showcase/build.mjs — CSS в dist/ui-core.min.css", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-loader'[^\]]*\]/);
+    // Форма пина — как в table.test.js (T7.4): `[^\]]*` ломается на комментариях
+    // со скобками в списке (button[disabled] у T6.3) — после них только [\s\S].
+    const components = build.match(/const COMPONENTS = \[([\s\S]*?)\];/);
+    expect(components, 'список COMPONENTS найден').toBeTruthy();
+    expect(components[1]).toContain("'ui-loader'");
   });
 
   it('гейт html-validate irao/loader-text-status зарегистрирован (правило доки «не голый спиннер»)', () => {

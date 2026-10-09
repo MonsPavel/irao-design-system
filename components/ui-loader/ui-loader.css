@@ -1,0 +1,108 @@
+/** @define loader */
+
+/*!
+ * irao-ui — ui-loader: индикация загрузки области (задача T7.5).
+ *
+ * В career-portal loader'а нет (Context T7.5) — компонент новый: спиннер +
+ * доступный текст и оверлей aria-busy-паттерна. Визуал спиннера согласован
+ * с кнопкой-loading T4.2: кольцо на currentColor (у кнопки — border-кольцо,
+ * здесь — svg-контур по Scope «спиннер — svg»), период вращения — 0.4s
+ * (значение --ui-transition-slow; сырым временем — см. комментарий правила),
+ * шаг строки «спиннер–текст» — --ui-space-3.
+ *
+ * Спиннер (Implementation requirements п.1): svg-слот с animation: rotate
+ * (@keyframes ui-loader-spin). Кольцо рисует разметка (circle
+ * stroke="currentColor" с разрывом pathLength/stroke-dasharray) — CSS не
+ * задаёт цвет: currentColor наследует контекст (п.2), перекраска вариантов
+ * сайта и VI-режима работает сама (инвариант §5).
+ *
+ * Размеры (Implementation requirements п.2): md — база, sm — модификатор;
+ * диаметры — ступени шкалы отступов §3.2 (--ui-space-5 24px и
+ * --ui-space-4 16px). Цвет текста и типографику задаёт контекст разметки
+ * (роли T3.3: ui-small/ui-text--muted) — компонент только структура.
+ *
+ * Варианты размещения (Scope: «стенд: inline-загрузка секции + блочная»):
+ *  - база — inline-строка «спиннер + текст» в потоке;
+ *  - --block — блочная загрузка секции: строка по центру с вертикальным
+ *    шагом --ui-space-6;
+ *  - --overlay — оверлей aria-busy-паттерна: покрывает контейнер с
+ *    aria-busy="true" (позиционирование контейнера — CSS сайта, README);
+ *    полупрозрачная поверхность --ui-color-surface-translucent
+ *    (career-portal pages.css:164) — контент области читается сквозь.
+ *
+ * Reduced-motion (Technical considerations T7.5) — двойная проверка:
+ * глобальный kill-switch base/reset.css (animation-duration 0.01ms +
+ * iteration-count 1) и локальное правило animation: none ниже. Спиннер
+ * остаётся видимым статичным кольцом (точка-индикатор), текст «Загрузка…»
+ * присутствует всегда — состояние читается и без анимации (Scope:
+ * «пульсация → точка/текст»).
+ *
+ * JS не требуется (Out of scope T7.5): aria-busy ставит/снимает и лоадер
+ * удаляет код сайта; CSS-компонент работает без JS по построению.
+ */
+
+.ui-loader {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-3);
+  align-items: center;
+}
+
+/* Спиннер-слот: геометрия — md из шкалы; вращение — период 0.4s, задумка
+   кнопки-loading T4.2 (--ui-transition-slow). Duration — сырым временем,
+   не var(): токен перехода несёт «0.4s ease», и в шорткате animation
+   рядом с явным linear даёт ДВА easing — декларация невалидна целиком
+   (IACVT: computed animation-name: none; зонд chromium, ревью T7.5).
+   Прецедент сырого duration в анимации — ui-dropdown (0.18s). Цвет — из
+   разметки (currentColor), CSS сознательно не задаётся (см. шапку). */
+.ui-loader__spinner {
+  box-sizing: border-box;
+  flex: none;
+  width: var(--ui-space-5);
+  height: var(--ui-space-5);
+  animation: ui-loader-spin 0.4s linear infinite;
+}
+
+/* sm: диаметр — ступень шкалы §3.2 (16px) — рядом с текстом роли small. */
+.ui-loader--sm .ui-loader__spinner {
+  width: var(--ui-space-4);
+  height: var(--ui-space-4);
+}
+
+/* Блочная загрузка секции: строка по центру, вертикальный шаг шкалы.
+   Правило после базы — перекрытие display по порядку каскада. */
+.ui-loader--block {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--ui-space-6);
+}
+
+/* Оверлей aria-busy-паттерна: контейнер области получает aria-busy="true"
+   и position: relative (CSS сайта), лоадер --overlay покрывает его.
+   Z-лестницу не тратим: оверлей выше только собственных потомков
+   контейнера — локальный стек, не глобальный (§3.2: --ui-z-overlay —
+   для подложек уровня страницы). */
+.ui-loader--overlay {
+  box-sizing: border-box;
+  display: flex;
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--ui-color-surface-translucent);
+}
+
+@keyframes ui-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Двойная проверка reduced-motion (Technical considerations): локальное
+   правило снимает анимацию независимо от kill-switch base/reset.css —
+   переживает вынос/перекрытие глобального блока. */
+@media (prefers-reduced-motion: reduce) {
+  .ui-loader__spinner {
+    animation: none;
+  }
+}

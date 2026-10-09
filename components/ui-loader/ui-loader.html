@@ -1,0 +1,34 @@
+<!-- ui-loader (T7.5): канонический паттерн. Спиннер — svg aria-hidden:
+     декоративен, смысл состояния несёт доступный текст (WCAG 1.1.1).
+     Текст «Загрузка…» обязателен (правило доки «не голый спиннер», гейт
+     html-validate irao/loader-text-status): .ui-loader__text с role="status"
+     объявляет состояние скринридеру живой областью. Цвет — из разметки:
+     кольцо stroke="currentColor" наследует контекст (Implementation
+     requirements п.2); размер md задаёт CSS (--ui-space-5), атрибуты
+     width/height — fallback без CSS (md-значение шкалы). Варианты --sm/
+     --block/--overlay и aria-busy-обвязка контейнера — README.md и стенд
+     showcase/pages/ui-loader. Без tabindex/JS: лоадер появляется в потоке,
+     управление загрузкой — зона сайта. -->
+<span class="ui-loader">
+  <svg
+    class="ui-loader__spinner"
+    aria-hidden="true"
+    focusable="false"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      cx="12"
+      cy="12"
+      r="10"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2.5"
+      pathLength="100"
+      stroke-dasharray="75 25"
+      stroke-linecap="round"
+    ></circle>
+  </svg>
+  <span class="ui-loader__text" role="status">Загрузка…</span>
+</span>

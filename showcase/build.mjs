@@ -103,6 +103,7 @@ const COMPONENTS = [
   'ui-modal', // T7.2 — модалка на native <dialog> (ADR-0011): trap/Escape/инертность — платформа, модуль — анимация закрытия/скролл-лок/PE-деградация
   'ui-select', // T7.3 — кастомный listbox поверх нативного select (APG listbox-button): выбор синхронизирует select + change (bubbles), стрелки/Home/End/typahead, optgroup → role=group, вне-клик/Escape из T6.1, pointer:coarse — остаётся нативным (ADR-0012), деградация без JS
   'ui-table', // T7.4 — таблицы: базовая/--zebra/--compact, скролл-зона (регион tabindex+role+aria-label, градиент кромки), sticky-заголовок, карточная трансформация --cards (<md пары «заголовок–значение» из data-label; гейт irao/table-card-data-label)
+  'ui-loader', // T7.5 — индикация загрузки: спиннер svg + текст role="status" (не голый спиннер, гейт irao/loader-text-status), --sm/--block/--overlay, aria-busy-паттерн
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css. */

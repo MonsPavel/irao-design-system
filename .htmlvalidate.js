@@ -70,6 +70,16 @@
  * table-card-valid.html. Правило шапку (thead) не проверяет: th шапки и
  * есть имена колонок.
  *
+ * С T7.5: `irao/loader-text-status` — каждый `.ui-loader` обязан нести
+ * `.ui-loader__text` с `role="status"` и непустым текстом (спека T7.5,
+ * правило доки: «текст всегда присутствует (не голый спиннер)»).
+ * Спиннер декоративен (`aria-hidden`), состояние загрузки скринридеру
+ * объявляет только текст-живая-область: голый спиннер или текст без
+ * role="status" оставляют пользователя без объявления (Accessibility
+ * requirements T7.5). Негативная фикстура —
+ * tests/lint-cases/html/loader-missing-text.html, позитивная —
+ * loader-valid.html.
+ *
  * С T7.4, разметка ui-table-scroll (исключение разметки, не правила):
  * скролл-зона — `<div role="region" tabindex="0" aria-label>` — div, а не
  * нативная section: роль региона задаётся ЯВНЫМ атрибутом role="region" —
@@ -373,6 +383,44 @@ class TableCardDataLabel extends Rule {
   }
 }
 
+/** T7.5: правило доки «текст всегда присутствует (не голый спиннер)» —
+ *  каждый .ui-loader обязан нести .ui-loader__text с role="status" и
+ *  непустым текстом. Спиннер декоративен (aria-hidden в разметке),
+ *  состояние загрузки скринридеру объявляет только текст-живая-область. */
+class LoaderTextStatus extends Rule {
+  setup() {
+    this.on('dom:ready', (event) => {
+      for (const loader of event.document.querySelectorAll('.ui-loader')) {
+        const texts = loader.querySelectorAll('.ui-loader__text');
+        if (texts.length !== 1) {
+          this.report(
+            loader,
+            'Лоадер .ui-loader обязан нести ровно один .ui-loader__text: правило доки «текст всегда присутствует (не голый спиннер)» — состояние загрузки объявляет текст, спиннер декоративен (T7.5).',
+          );
+          continue;
+        }
+        const role = texts[0].getAttribute('role');
+        if (!role || role.value !== 'status') {
+          this.report(
+            texts[0],
+            'Текст лоадера .ui-loader__text обязан нести role="status": смена состояния загрузки объявляется живой областью (Accessibility requirements T7.5).',
+          );
+          continue;
+        }
+        const hasText = texts[0].childNodes.some(
+          (child) => child.nodeType === 3 && child.textContent.trim() !== '',
+        );
+        if (!hasText) {
+          this.report(
+            texts[0],
+            'Текст лоадера .ui-loader__text обязан быть непустым: текстовая альтернатива обязательна (Accessibility requirements T7.5).',
+          );
+        }
+      }
+    });
+  }
+}
+
 module.exports = {
   extends: ['html-validate:recommended'],
   plugins: [
@@ -388,6 +436,7 @@ module.exports = {
         'irao/radio-group-fieldset': RadioGroupFieldset,
         'irao/tabs-id-links': TabsIdLinks,
         'irao/table-card-data-label': TableCardDataLabel,
+        'irao/loader-text-status': LoaderTextStatus,
       },
     }),
   ],
@@ -401,6 +450,7 @@ module.exports = {
     'irao/radio-group-fieldset': 'error',
     'irao/tabs-id-links': 'error',
     'irao/table-card-data-label': 'error',
+    'irao/loader-text-status': 'error',
     'input-missing-label': 'error',
     // T4.2 (Scope): <button> без явного type — предупреждение (умолчание submit).
     'no-implicit-button-type': 'warn',
