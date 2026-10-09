@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>T7.4: ячейки карточного режима без data-label — гейт обязан поймать</title>
+  </head>
+  <body>
+    <main>
+      <h1>ui-table: карточный режим без data-label</h1>
+      <!-- НЕГАТИВНЫЙ КОНТРОЛЬ (T7.4, Implementation requirements п.1): на <md
+           шапка .ui-table__head скрыта (display: none), имя значения несёт
+           ::before { content: attr(data-label) }. Ячейка без data-label и
+           ячейка с пустым data-label теряют пару «заголовок–значение» —
+           irao/table-card-data-label, error. -->
+      <table class="ui-table ui-table--cards">
+        <thead class="ui-table__head">
+          <tr class="ui-table__row">
+            <th class="ui-table__col" scope="col">Направление</th>
+            <th class="ui-table__col" scope="col">Срок обучения</th>
+          </tr>
+        </thead>
+        <tbody class="ui-table__body">
+          <tr class="ui-table__row">
+            <th class="ui-table__rowhead" scope="row" data-label="Направление">Электромонтёр подстанции</th>
+            <td class="ui-table__cell">2 года</td>
+            <td class="ui-table__cell" data-label="">Очная</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>

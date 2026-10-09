@@ -1,0 +1,150 @@
+<!-- Стенд ui-table (T7.4): базовый паттерн — таблица, колонки которой
+     помещаются в контейнер. Три секции: #uitable-basic — базовая таблица
+     (caption как имя, th scope="col"/"row"), #uitable-zebra — модификатор
+     --zebra (полосы --ui-color-surface-muted по чётным строкам тела),
+     #uitable-compact — --compact + --zebra (плотный режим больших списков).
+     hover строк — пара --ui-color-surface-hover только под (hover: hover).
+     Другие паттерны компонента — стенды ui-table-scroll (скролл-зона,
+     sticky) и ui-table-cards (карточная трансформация, матрица выбора). -->
+<section id="uitable-basic" aria-labelledby="uitable-basic-heading">
+  <h2 id="uitable-basic-heading">Базовая таблица</h2>
+  <p class="ui-showcase-stand__note">
+    Колонки помещаются — трансформация не нужна. Имя таблицы — нативный
+    <code>&lt;caption&gt;</code>; заголовки связаны нативно: <code>th scope="col"</code> в шапке,
+    <code>th scope="row"</code> на первой колонке тела. Разделители строк —
+    <code>--ui-color-divider</code>; при наведении строка подсвечивается парой
+    <code>--ui-color-surface-hover</code> (только под <code>(hover: hover)</code>).
+  </p>
+  <table class="ui-table">
+    <caption class="ui-table__caption">
+      Направления подготовки
+    </caption>
+    <thead class="ui-table__head">
+      <tr class="ui-table__row">
+        <th class="ui-table__col" scope="col">Направление</th>
+        <th class="ui-table__col" scope="col">Срок обучения</th>
+        <th class="ui-table__col" scope="col">Форма</th>
+        <th class="ui-table__col" scope="col">Ступень</th>
+      </tr>
+    </thead>
+    <tbody class="ui-table__body">
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Электромонтёр подстанции</th>
+        <td class="ui-table__cell">2 года</td>
+        <td class="ui-table__cell">Очная</td>
+        <td class="ui-table__cell">Колледж</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Мастер участка</th>
+        <td class="ui-table__cell">4–5 лет</td>
+        <td class="ui-table__cell">Очно-заочная</td>
+        <td class="ui-table__cell">Переподготовка</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Инженер-энергетик</th>
+        <td class="ui-table__cell">5 лет</td>
+        <td class="ui-table__cell">Очная</td>
+        <td class="ui-table__cell">Университет</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Специалист по охране труда</th>
+        <td class="ui-table__cell">3 года</td>
+        <td class="ui-table__cell">Заочная</td>
+        <td class="ui-table__cell">Переподготовка</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="uitable-zebra" aria-labelledby="uitable-zebra-heading">
+  <h2 id="uitable-zebra-heading">Полосы (--zebra)</h2>
+  <p class="ui-showcase-stand__note">
+    Чётные строки тела приглушены <code>--ui-color-surface-muted</code> — глаз ведёт по строке
+    wide-таблицы. Полосы — только оформление: смысл полосам не вкладывайте (Don't в README).
+  </p>
+  <table class="ui-table ui-table--zebra">
+    <caption class="ui-table__caption">
+      График приёма заявок
+    </caption>
+    <thead class="ui-table__head">
+      <tr class="ui-table__row">
+        <th class="ui-table__col" scope="col">Направление</th>
+        <th class="ui-table__col" scope="col">Приём документов</th>
+        <th class="ui-table__col" scope="col">Старт обучения</th>
+      </tr>
+    </thead>
+    <tbody class="ui-table__body">
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Электромонтёр подстанции</th>
+        <td class="ui-table__cell">до 15 августа</td>
+        <td class="ui-table__cell">1 сентября</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Мастер участка</th>
+        <td class="ui-table__cell">до 20 сентября</td>
+        <td class="ui-table__cell">1 октября</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Кондитер-декоратор</th>
+        <td class="ui-table__cell">до 15 декабря</td>
+        <td class="ui-table__cell">15 января</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Лаборант химического анализа</th>
+        <td class="ui-table__cell">до 15 февраля</td>
+        <td class="ui-table__cell">1 марта</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="uitable-compact" aria-labelledby="uitable-compact-heading">
+  <h2 id="uitable-compact-heading">Плотный режим (--compact)</h2>
+  <p class="ui-showcase-stand__note">
+    Отступы ячеек 8/12 вместо 12/16 — реестры на десятки строк. Сочетается с <code>--zebra</code>.
+  </p>
+  <table class="ui-table ui-table--compact ui-table--zebra">
+    <caption class="ui-table__caption">
+      Кодификатор рабочих профессий
+    </caption>
+    <thead class="ui-table__head">
+      <tr class="ui-table__row">
+        <th class="ui-table__col" scope="col">Код</th>
+        <th class="ui-table__col" scope="col">Профессия</th>
+        <th class="ui-table__col" scope="col">Уровень квалификации</th>
+      </tr>
+    </thead>
+    <tbody class="ui-table__body">
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">13.02.11</th>
+        <td class="ui-table__cell">Электромонтёр подстанции</td>
+        <td class="ui-table__cell">2-й разряд</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">13.02.12</th>
+        <td class="ui-table__cell">Электромонтажник</td>
+        <td class="ui-table__cell">3-й разряд</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">13.02.14</th>
+        <td class="ui-table__cell">Кондитер-декоратор</td>
+        <td class="ui-table__cell">4-й разряд</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">13.02.16</th>
+        <td class="ui-table__cell">Лаборант химического анализа</td>
+        <td class="ui-table__cell">3-й разряд</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">13.02.18</th>
+        <td class="ui-table__cell">Мастер участка</td>
+        <td class="ui-table__cell">5-й разряд</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">13.02.20</th>
+        <td class="ui-table__cell">Дежурный щита управления</td>
+        <td class="ui-table__cell">4-й разряд</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

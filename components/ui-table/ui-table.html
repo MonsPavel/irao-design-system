@@ -1,0 +1,52 @@
+<!--
+  ui-table (T7.4): базовый паттерн таблицы. Компонент — ПАТТЕРНЫ, не «умная
+  таблица»: JS-модуля нет, вся адаптивность — CSS + разметка (Notes задачи).
+
+  Канонический паттерн — базовая таблица: колонки помещаются в контейнер,
+  трансформация не нужна. Каждая часть несёт класс (БЭМ-гейт системы не
+  пропускает селекторы по голым тегам): thead→__head, tbody→__body,
+  tr→__row, th колонки→__col, th строки→__rowhead, td→__cell.
+
+  Семантика и a11y: имя таблицы — нативный <caption> (класс __caption);
+  заголовки связаны scope: th scope="col" в шапке, th scope="row" на первой
+  колонке тела — скринридер читает «строка: Электромонтёр подстанции» и
+  связывает значения с колонками без ARIA.
+
+  Другие паттерны того же компонента (матрица выбора — README):
+  - скролл-зона: обёртка <div class="ui-table__scroll" tabindex="0"
+    role="region" aria-label="Имя данных"> вокруг этой же таблицы — когда
+    колонок много, а сравнение по колонкам важно (семантика сохраняется);
+  - карточная трансформация: класс ui-table--cards на <table> + data-label
+    на КАЖДОЙ ячейке (копия текста заголовка колонки) — на <md таблица
+    становится карточками с парами «заголовок–значение»; обязательность
+    data-label исполняет гейт html-validate irao/table-card-data-label.
+-->
+<table class="ui-table">
+  <caption class="ui-table__caption">
+    Направления подготовки
+  </caption>
+  <thead class="ui-table__head">
+    <tr class="ui-table__row">
+      <th class="ui-table__col" scope="col">Направление</th>
+      <th class="ui-table__col" scope="col">Срок обучения</th>
+      <th class="ui-table__col" scope="col">Форма</th>
+    </tr>
+  </thead>
+  <tbody class="ui-table__body">
+    <tr class="ui-table__row">
+      <th class="ui-table__rowhead" scope="row">Электромонтёр подстанции</th>
+      <td class="ui-table__cell">2 года</td>
+      <td class="ui-table__cell">Очная</td>
+    </tr>
+    <tr class="ui-table__row">
+      <th class="ui-table__rowhead" scope="row">Мастер участка</th>
+      <td class="ui-table__cell">4–5 лет</td>
+      <td class="ui-table__cell">Очно-заочная</td>
+    </tr>
+    <tr class="ui-table__row">
+      <th class="ui-table__rowhead" scope="row">Инженер-энергетик</th>
+      <td class="ui-table__cell">5 лет</td>
+      <td class="ui-table__cell">Очная</td>
+    </tr>
+  </tbody>
+</table>

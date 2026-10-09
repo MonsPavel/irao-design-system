@@ -1,0 +1,107 @@
+<!-- Стенд ui-table-cards (T7.4): карточная трансформация — на <md таблица
+     становится карточками-строками с парами «заголовок–значение» (data-label
+     читает ::before { content: attr(data-label) }), на ≥md — обычная таблица.
+     data-label на КАЖДОЙ ячейке тела обязателен (копия текста заголовка
+     колонки) — исполняет гейт html-validate irao/table-card-data-label;
+     ячейки шапки data-label не несут (они и есть имена колонок).
+     #uitable-cards — паттерн на данных «Направления подготовки» (строка =
+     самодостаточная запись: потеря table-семантики допустима).
+     #uitable-matrix — дока-матрица выбора паттерна (обязательна по DoD);
+     сама — обычная ui-table без --cards (гейт data-label на неё не
+     распространяется). Полная версия матрицы и условия допустимости потери
+     table-семантики — README компонента. -->
+<section id="uitable-cards" aria-labelledby="uitable-cards-heading">
+  <h2 id="uitable-cards-heading">Карточная трансформация (--cards)</h2>
+  <p class="ui-showcase-stand__note">
+    Уже эту страницу: на экранах уже 768px таблица ниже — карточки, каждая ячейка подписана
+    <code>data-label</code> (копия текста заголовка колонки), шапка скрыта. На 768px и шире —
+    обычная таблица. Строка здесь — самодостаточная запись («Направление: …, Срок: …»), поэтому
+    потеря table-семантики в карточном режиме допустима; для сравнения по колонкам берите
+    скролл-зону (матрица ниже).
+  </p>
+  <table class="ui-table ui-table--cards">
+    <caption class="ui-table__caption">
+      Направления подготовки
+    </caption>
+    <thead class="ui-table__head">
+      <tr class="ui-table__row">
+        <th class="ui-table__col" scope="col">Направление</th>
+        <th class="ui-table__col" scope="col">Срок обучения</th>
+        <th class="ui-table__col" scope="col">Форма</th>
+        <th class="ui-table__col" scope="col">Ступень</th>
+      </tr>
+    </thead>
+    <tbody class="ui-table__body">
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row" data-label="Направление">
+          Электромонтёр подстанции
+        </th>
+        <td class="ui-table__cell" data-label="Срок обучения">2 года</td>
+        <td class="ui-table__cell" data-label="Форма">Очная</td>
+        <td class="ui-table__cell" data-label="Ступень">Колледж</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row" data-label="Направление">Мастер участка</th>
+        <td class="ui-table__cell" data-label="Срок обучения">4–5 лет</td>
+        <td class="ui-table__cell" data-label="Форма">Очно-заочная</td>
+        <td class="ui-table__cell" data-label="Ступень">Переподготовка</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row" data-label="Направление">Инженер-энергетик</th>
+        <td class="ui-table__cell" data-label="Срок обучения">5 лет</td>
+        <td class="ui-table__cell" data-label="Форма">Очная</td>
+        <td class="ui-table__cell" data-label="Ступень">Университет</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="uitable-matrix" aria-labelledby="uitable-matrix-heading">
+  <h2 id="uitable-matrix-heading">Как выбрать паттерн (дока-матрица)</h2>
+  <p class="ui-showcase-stand__note">
+    Правило большого пальца:
+    <strong>карточки — когда осмысленна строка; скролл — когда осмысленна колонка.</strong> Полная
+    версия с условиями допустимости потери table-семантики — README компонента
+    (<code>components/ui-table/README.md</code>).
+  </p>
+  <table class="ui-table">
+    <caption class="ui-table__caption">
+      Матрица выбора паттерна
+    </caption>
+    <thead class="ui-table__head">
+      <tr class="ui-table__row">
+        <th class="ui-table__col" scope="col">Паттерн</th>
+        <th class="ui-table__col" scope="col">Когда выбирать</th>
+        <th class="ui-table__col" scope="col">Когда не выбирать</th>
+      </tr>
+    </thead>
+    <tbody class="ui-table__body">
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Базовая (.ui-table)</th>
+        <td class="ui-table__cell">Колонки помещаются в контейнер (2–4 короткие)</td>
+        <td class="ui-table__cell">Контент обрезается или не помещается</td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Скролл-зона (.ui-table__scroll)</th>
+        <td class="ui-table__cell">
+          Колонок много, сравнение по колонкам важно (тарифы, характеристики, расписания) —
+          семантика таблицы сохраняется полностью
+        </td>
+        <td class="ui-table__cell">
+          Строки самодостаточны — карточка подаст их удобнее без длинного горизонтального скролла
+        </td>
+      </tr>
+      <tr class="ui-table__row">
+        <th class="ui-table__rowhead" scope="row">Карточки (.ui-table--cards)</th>
+        <td class="ui-table__cell">
+          Строка = самодостаточная запись (имя + атрибуты); на мобиле читается сверху вниз без
+          скролла
+        </td>
+        <td class="ui-table__cell">
+          Сравнение по колонкам, числовые сетки, десятки строк — колонка рвётся между карточками;
+          длинную таблицу ведите скролл-зоной со sticky-шапкой
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</section>

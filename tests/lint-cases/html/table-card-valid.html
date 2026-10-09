@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>T7.4: data-label на каждой ячейке карточного режима — гейт молчит</title>
+  </head>
+  <body>
+    <main>
+      <h1>ui-table: корректный карточный режим</h1>
+      <!-- ПОЗИТИВНЫЙ КОНТРОЛЬ (T7.4): у каждой ячейки (th scope="row" и td)
+           непустой data-label, повторяющий текст заголовка колонки, — гейт
+           irao/table-card-data-label молчит. Ожидаемый зелёный. -->
+      <table class="ui-table ui-table--cards">
+        <thead class="ui-table__head">
+          <tr class="ui-table__row">
+            <th class="ui-table__col" scope="col">Направление</th>
+            <th class="ui-table__col" scope="col">Срок обучения</th>
+            <th class="ui-table__col" scope="col">Форма</th>
+          </tr>
+        </thead>
+        <tbody class="ui-table__body">
+          <tr class="ui-table__row">
+            <th class="ui-table__rowhead" scope="row" data-label="Направление">Электромонтёр подстанции</th>
+            <td class="ui-table__cell" data-label="Срок обучения">2 года</td>
+            <td class="ui-table__cell" data-label="Форма">Очная</td>
+          </tr>
+          <tr class="ui-table__row">
+            <th class="ui-table__rowhead" scope="row" data-label="Направление">Мастер участка</th>
+            <td class="ui-table__cell" data-label="Срок обучения">4–5 лет</td>
+            <td class="ui-table__cell" data-label="Форма">Очно-заочная</td>
+          </tr>
+        </tbody>
+      </table>
+    </main>
+  </body>
+</html>
