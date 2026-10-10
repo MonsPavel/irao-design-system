@@ -524,64 +524,14 @@ function checkCi(name, doc) {
     }
   }
 
-  // visual — advisory: Job-level continue-on-error ЗАПРЕЩЁН (GitHub ставит
-  // упавшей джобе check-run conclusion=success — именованный чек всегда
-  // зелёный и «Visual-падение отражается отдельным check-результатом» не
-  // выполняется). Механика: continue-on-error ТОЛЬКО на step'е (дифы
-  // собираются), финальный шаг красит джобу по steps.visual.outcome; чек и
-  // прогон красные, merge не блокируется — visual не в required checks до
-  // v1.0 (ADR-0004, ревью T1.5 high).
+  // visual — advisory: механика контрактов — общий хелпер
+  // checkAdvisoryVisualJob (общий с nightly.yml, T12.1); здесь — только
+  // порядок (needs build). Merge не блокируется — visual не в required
+  // checks до v1.0 (ADR-0004, ревью T1.5 high).
   if (jobs.visual) {
-    if (jobs.visual['continue-on-error'] === true) {
-      problem(
-        name,
-        'visual: continue-on-error: true на джобе запрещён — GitHub даёт упавшей джобе conclusion=success, именованный чек всегда зелёный (AC «отражается отдельным check-результатом» нарушен); флаг оставлен только на step id: visual',
-      );
-    }
     const needs = jobs.visual.needs ?? [];
     if (!needs.includes('build')) problem(name, 'visual: needs не содержит build');
-    if (!jobs.visual.container)
-      problem(name, 'visual: нет container (паритет эталонов с test:docker, ADR-0004)');
-    const visualStep = (jobs.visual.steps ?? []).find((s) => s?.id === 'visual');
-    if (!visualStep) problem(name, 'visual: нет step id: visual');
-    else {
-      if (visualStep['continue-on-error'] !== true) {
-        problem(
-          name,
-          'visual: step visual без continue-on-error: true (последующие шаги собирают дифы)',
-        );
-      }
-      if (visualStep.env?.IRAO_SNAPSHOTS !== '1') {
-        problem(
-          name,
-          "visual: env IRAO_SNAPSHOTS !== '1' (сравнение/запись эталонов — гейт харнесса)",
-        );
-      }
-      if (!String(visualStep.run ?? '').includes('--project=chromium')) {
-        problem(name, 'visual: прогон не ограничен chromium (эталоны пишет только он, ADR-0004)');
-      }
-    }
-    const diffUpload = (jobs.visual.steps ?? []).find(
-      (s) =>
-        s?.uses === 'actions/upload-artifact@v4' &&
-        String(s.with?.path ?? '').includes('-diff.png'),
-    );
-    if (!diffUpload)
-      problem(name, 'visual: нет артефакта визуальных дифов (test-results *-diff.png)');
-    else if (diffUpload.if !== 'always()') {
-      problem(name, 'visual: артефакт дифов без if: always() (дифы нужны и при красном step)');
-    }
-    const reFail = (jobs.visual.steps ?? []).some(
-      (s) =>
-        String(s?.if ?? '').includes('steps.visual.outcome') &&
-        anyRunContains({ steps: [s] }, 'exit 1'),
-    );
-    if (!reFail) {
-      problem(
-        name,
-        'visual: нет финального шага, красящего джобу по steps.visual.outcome (именованный чек должен отражать расхождение)',
-      );
-    }
+    checkAdvisoryVisualJob(name, jobs.visual);
   }
 }
 
@@ -684,34 +634,196 @@ function checkPages(name, doc) {
   }
 }
 
+/**
+ * Контракты advisory-visual джобы — общие для ci.yml (PR-гейт) и nightly.yml
+ * (ночной детектор деградации, T12.1); политика ADR-0004. Job-level
+ * continue-on-error ЗАПРЕЩЁН (GitHub ставит упавшей джобе check-run
+ * conclusion=success — чек всегда зелёный); continue-on-error — только на
+ * шаге прогона (дифы собираются), финальный шаг красит джобу по outcome.
+ */
+function checkAdvisoryVisualJob(name, job) {
+  if (job['continue-on-error'] === true) {
+    problem(
+      name,
+      'visual: continue-on-error: true на джобе запрещён — GitHub даёт упавшей джобе conclusion=success, именованный чек всегда зелёный (AC «отражается отдельным check-результатом» нарушен); флаг оставлен только на step id: visual',
+    );
+  }
+  if (!job.container)
+    problem(name, 'visual: нет container (паритет эталонов с test:docker, ADR-0004)');
+  const visualStep = (job.steps ?? []).find((s) => s?.id === 'visual');
+  if (!visualStep) {
+    problem(name, 'visual: нет step id: visual');
+  } else {
+    if (visualStep['continue-on-error'] !== true) {
+      problem(
+        name,
+        'visual: step visual без continue-on-error: true (последующие шаги собирают дифы)',
+      );
+    }
+    if (visualStep.env?.IRAO_SNAPSHOTS !== '1') {
+      problem(
+        name,
+        "visual: env IRAO_SNAPSHOTS !== '1' (сравнение/запись эталонов — гейт харнесса)",
+      );
+    }
+    if (!String(visualStep.run ?? '').includes('--project=chromium')) {
+      problem(name, 'visual: прогон не ограничен chromium (эталоны пишет только он, ADR-0004)');
+    }
+  }
+  const diffUpload = (job.steps ?? []).find(
+    (s) =>
+      s?.uses === 'actions/upload-artifact@v4' &&
+      String(s.with?.path ?? '').includes('-diff.png'),
+  );
+  if (!diffUpload) {
+    problem(name, 'visual: нет артефакта визуальных дифов (test-results *-diff.png)');
+  } else if (diffUpload.if !== 'always()') {
+    problem(name, 'visual: артефакт дифов без if: always() (дифы нужны и при красном step)');
+  }
+  const reFail = (job.steps ?? []).some(
+    (s) =>
+      String(s?.if ?? '').includes('steps.visual.outcome') &&
+      anyRunContains({ steps: [s] }, 'exit 1'),
+  );
+  if (!reFail) {
+    problem(
+      name,
+      'visual: нет финального шага, красящего джобу по steps.visual.outcome (именованный чек должен отражать расхождение)',
+    );
+  }
+}
+
 function checkRelease(name, doc) {
   const on = doc.on ?? {};
   const tags = get(on, 'push.tags', name, 'on.push.tags') ?? [];
   if (!tags.includes('v*')) problem(name, "on.push.tags не содержит 'v*'");
   if (!('workflow_dispatch' in on)) problem(name, 'нет on.workflow_dispatch');
+  if (get(doc, 'permissions.contents', name, 'permissions.contents') !== 'read') {
+    problem(
+      name,
+      'permissions.contents на уровне workflow обязан быть read (write — только у джобы публикации)',
+    );
+  }
   const jobs = get(doc, 'jobs', name, 'jobs') ?? {};
-  const buildDist = Object.keys(jobs).find((j) =>
-    jobs[j]?.steps?.some((s) => String(s?.run ?? '').includes('zip ')),
-  );
-  if (!buildDist) problem(name, 'нет джобы сборки dist-zip артефакта');
-  const matrixJob = Object.values(jobs).find((j) => j?.strategy?.matrix);
-  if (!matrixJob) {
-    problem(name, 'нет джобы с матрицей (каркас T12.1 — матрица + артефакты)');
-  } else {
-    const browsers = matrixJob.strategy.matrix.browser ?? [];
+
+  // Боевой конвейер T12.1: gates → matrix → vi-smoke → build-dist → release.
+  // Все пять — блокирующие (job-level continue-on-error запрещён: красная
+  // джоба обязана красить релиз).
+  const pipeline = ['gates', 'matrix', 'vi-smoke', 'build-dist', 'release'];
+  for (const j of pipeline)
+    if (!(j in jobs)) problem(name, `release: нет джобы ${j} (конвейер T12.1)`);
+  for (const j of Object.keys(jobs))
+    if (!pipeline.includes(j)) problem(name, `release: неожиданная джоба ${j} (T12.1)`);
+  for (const j of pipeline) {
+    if (jobs[j] && jobs[j]['continue-on-error'] === true) {
+      problem(name, `release: ${j}: job-level continue-on-error запрещён (блокирующая джоба релиза)`);
+    }
+  }
+
+  // gates: changelog-запись тега + версия = тегу (ADR-0007, T1.3) и протокол
+  // скринридеров (T9.2: «релиз T12.1 обязан запускать его и получать exit 0»).
+  if (jobs.gates) {
+    if (!anyRunContains(jobs.gates, 'tools/release-gate.mjs')) {
+      problem(name, 'gates: нет шага tools/release-gate.mjs (changelog-запись тега, версия = тегу)');
+    }
+    if (!anyRunContains(jobs.gates, 'tests/a11y/protocol-gate.mjs')) {
+      problem(name, 'gates: нет шага tests/a11y/protocol-gate.mjs (релиз обязан получать exit 0 — T9.2)');
+    }
+  }
+
+  // Матрица — блокирующая, после гейтов; полный прогон несёт гейт
+  // масштабирования T3.6 и сравнение эталонов (chromium).
+  const matrixJob = jobs.matrix;
+  if (matrixJob) {
+    const needs = matrixJob.needs ?? [];
+    if (!needs.includes('gates'))
+      problem(name, 'матрица release: needs не содержит gates (гейты до матрицы)');
+    const browsers = matrixJob.strategy?.matrix?.browser ?? [];
     for (const b of BROWSERS) if (!browsers.includes(b)) problem(name, `матрица release без ${b}`);
-    if (matrixJob.strategy['fail-fast'] !== false)
+    if (matrixJob.strategy?.['fail-fast'] !== false)
       problem(
         name,
         'матрица release: fail-fast обязан быть false (один браузер не роняет остальные)',
       );
     if (!matrixJob.container) problem(name, 'матрица release: нет container (ADR-0004)');
-    if (!matrixJob.needs) problem(name, 'матрица release: нет needs (порядок build → матрица)');
     if (!runSteps(matrixJob).some((r) => r.includes('npx playwright test'))) {
       problem(
         name,
         'матрица release: нет прогона npx playwright test (e2e и гейт масштабирования T3.6 обязаны блокировать релиз)',
       );
+    }
+  }
+
+  // VI-smoke — блокирующий релизный smoke (T9.1/T12.1): VI-включение и
+  // axe-обход стендов; chromium — после матрицы (порядок Scope T12.1).
+  const viSmoke = jobs['vi-smoke'];
+  if (viSmoke) {
+    const needs = viSmoke.needs ?? [];
+    if (!needs.includes('matrix'))
+      problem(name, 'vi-smoke: needs не содержит matrix (матрица и smoke — блокирующие джобы релиза)');
+    if (!viSmoke.container)
+      problem(name, 'vi-smoke: нет container (браузерная джоба — ADR-0004)');
+    for (const spec of ['tests/e2e/ui-vi.spec.js', 'tests/a11y/stands-sweep.spec.js']) {
+      if (!anyRunContains(viSmoke, spec)) problem(name, `vi-smoke: нет прогона ${spec}`);
+    }
+  }
+
+  // build-dist: zip всего dist (вкл. fonts/themes) + проверка структуры §6.1
+  // в джобе (implementation requirements 1) + баннер версии = тег (T1.3).
+  const buildDist = jobs['build-dist'];
+  if (buildDist) {
+    const needs = buildDist.needs ?? [];
+    if (!needs.includes('matrix') || !needs.includes('vi-smoke')) {
+      problem(
+        name,
+        'build-dist: needs не содержит matrix и vi-smoke (матрица и smoke — блокирующие джобы релиза)',
+      );
+    }
+    if (!anyRunContains(buildDist, 'zip ')) problem(name, 'build-dist: нет zip dist-артефакта');
+    const zipChecks = [
+      'unzip -l',
+      'dist/ui-core.min.css',
+      'dist/ui-vi.min.css',
+      'dist/ui.min.js',
+      'dist/fonts/',
+      'dist/themes/',
+    ];
+    for (const needle of zipChecks) {
+      if (!anyRunContains(buildDist, needle)) {
+        problem(name, `build-dist: нет проверки структуры zip (§6.1): ${needle}`);
+      }
+    }
+    if (!anyRunContains(buildDist, 'irao-ui v')) {
+      problem(name, 'build-dist: нет проверки баннера версии в dist = тег (T1.3)');
+    }
+    const upload = (buildDist.steps ?? []).find((s) => s?.uses === 'actions/upload-artifact@v4');
+    if (!upload) problem(name, 'build-dist: нет upload-artifact dist-zip');
+    else if (upload.with?.['if-no-files-found'] !== 'error') {
+      problem(name, 'build-dist: upload-artifact без if-no-files-found: error');
+    }
+  }
+
+  // release: GitHub Release через gh CLI (allowlist actions — сторонних нет),
+  // артефакт из build-dist, release notes = запись CHANGELOG (--extract),
+  // права contents: write, публикация только на тегах.
+  const releaseJob = jobs.release;
+  if (releaseJob) {
+    if ((releaseJob.permissions ?? {}).contents !== 'write') {
+      problem(name, 'release: permissions.contents !== write (публикация Release)');
+    }
+    const needs = releaseJob.needs ?? [];
+    if (!needs.includes('build-dist')) problem(name, 'release: needs не содержит build-dist');
+    if (!hasStepUsing(releaseJob, 'actions/download-artifact@v4')) {
+      problem(name, 'release: нет download-artifact (артефакт dist-zip из build-dist)');
+    }
+    if (!anyRunContains(releaseJob, 'gh release create')) {
+      problem(name, 'release: нет джобы публикации GitHub Release (gh release create)');
+    }
+    if (!anyRunContains(releaseJob, '--extract')) {
+      problem(name, 'release: release notes не из CHANGELOG (нет --extract гейта)');
+    }
+    if (!String(releaseJob.if ?? '').includes('refs/tags/')) {
+      problem(name, 'release: нет guard refs/tags/ (workflow_dispatch не публикует Release)');
     }
   }
 }
@@ -739,6 +851,17 @@ function checkNightly(name, doc) {
         'матрица nightly: IRAO_SNAPSHOTS задан — ночь эталоны не пишет и не сравнивает',
       );
     }
+  }
+
+  // T12.1: nightly = матрица + advisory-visual (до v1.0, ADR-0004): сравнение
+  // эталонов в контейнере по расписанию — детектор деградации визуала между
+  // PR. Красная visual = красная ночь = investigate; контракты механики —
+  // общий хелпер checkAdvisoryVisualJob (как в ci.yml).
+  const visualJob = jobs.visual;
+  if (!visualJob) {
+    problem(name, 'nightly: нет advisory-visual джобы (T12.1, ADR-0004)');
+  } else {
+    checkAdvisoryVisualJob(name, visualJob);
   }
 }
 
