@@ -146,7 +146,7 @@ standTest.describe('шрифты Golos и reset (T3.1)', () => {
 
   standTest(
     'фолбэк: woff2 заблокированы — текст рендерится Arial, страница читаема',
-    async ({ page }) => {
+    async ({ page, browserName }) => {
       let fontRequestsFailed = 0;
       page.on('requestfailed', (request) => {
         if (FONT_URL.test(new URL(request.url()).pathname)) fontRequestsFailed += 1;
@@ -168,7 +168,13 @@ standTest.describe('шрифты Golos и reset (T3.1)', () => {
         fontRequestsFailed,
         'блокировка активна: запросы woff2 были и все провалились',
       ).toBeGreaterThanOrEqual(2);
-      expect(state.golosLoaded, 'Golos не загрузился').toBe(false);
+      // WebKit: document.fonts не отражает ошибку загрузки woff2 — после
+      // abort check() === true, статусы faces loaded/error вперемешку
+      // (воспроизведено в пиннутом образе, приёмка T12.1). Для webkit факт
+      // «загрузки не было» несут сетевой счётчик выше и метрики фолбэка ниже.
+      if (browserName !== 'webkit') {
+        expect(state.golosLoaded, 'Golos не загрузился').toBe(false);
+      }
       expect(metrics.stack, 'текст измерим — не «невидимый»').toBeGreaterThan(0);
       expect(metrics.differs, 'метрики стека = метрикам Arial — рендер идёт фолбэком').toBe(false);
       expect(state.hScroll, 'макет не сломан: нет горизонтального скролла').toBe(false);

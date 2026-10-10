@@ -12,6 +12,8 @@ docs/ui-system/
 ├── TRACEABILITY.md            # требование → epic → task → верификация
 ├── architecture/
 │   └── README.md              # указатель на архитектуру и ADR-журнал
+├── release/
+│   └── release-checklist.md   # релизный чек-лист (T12.1): предусловия тега, конвейер, 7 ночей, mandatory visual
 └── epics/
     ├── EPIC-01-foundation/          # README.md + файлы задач
     ├── EPIC-02-design-tokens/

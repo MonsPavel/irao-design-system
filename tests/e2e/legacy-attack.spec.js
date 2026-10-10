@@ -65,18 +65,37 @@ const probeStyles = (page, selector, props, pseudo = undefined) =>
  * начало документа, поэтому граница — два полных цикла: покрытие любого
  * стартового положения и «выхода/входа» фокуса. Возвращает число шагов;
  * падает, если цель не достигнута.
+ *
+ * Движковая компенсация (приёмка T12.1, контейнер firefox/webkit): Tab с
+ * ПОСЛЕДНЕГО фокусируемого в Firefox/WebKit уходит в chrome браузера — в
+ * headless фокус застревает на элементе, цикл не замыкается (Chromium
+ * оборачивается в начало). Застревание детектится (activeElement не сменился
+ * после Tab) и сбрасывается blur() — дальнейший обход остаётся честным
+ * клавиатурным, следующий Tab — реальное нажатие. Бюджет — три цикла: любого
+ * стартового положения хватает с запасом на один сброс.
  */
 async function tabTo(page, selector) {
   const limit = await page.evaluate((sel) => document.querySelectorAll(sel).length, FOCUSABLE);
-  for (let step = 0; step <= limit * 2 + 2; step += 1) {
+  const signature = () =>
+    page.evaluate(() => {
+      const el = document.activeElement;
+      return el
+        ? `${el.tagName}|${el.id}|${typeof el.className === 'string' ? el.className : ''}`
+        : 'none';
+    });
+  for (let step = 0; step <= limit * 3 + 4; step += 1) {
     const onTarget = await page.evaluate(
       ({ selector }) => Boolean(document.activeElement?.matches(selector)),
       { selector },
     );
     if (onTarget) return step;
+    const before = await signature();
     await page.keyboard.press('Tab');
+    if ((await signature()) === before) {
+      await page.evaluate(() => document.activeElement?.blur());
+    }
   }
-  throw new Error(`tabTo: ${selector} не достигнут за ${limit * 2 + 2} Tab-шагов`);
+  throw new Error(`tabTo: ${selector} не достигнут за ${limit * 3 + 4} Tab-шагов`);
 }
 
 /** Состояние фокуса активного элемента (как в focus.spec.js, T3.2). */

@@ -189,13 +189,30 @@ async function armClickCounters(page) {
 
 const clicksOf = (page, id) => page.evaluate((btnId) => window.__buttonClicks[btnId] ?? -1, id);
 
-/** Клавиатурный обход до кнопки (фокус с клавиатуры — :focus-visible, ADR-0001). */
+/** Клавиатурный обход до кнопки (фокус с клавиатуры — :focus-visible, ADR-0001).
+ *
+ *  Движковая компенсация (приёмка T12.1, контейнер firefox/webkit): Tab с
+ *  ПОСЛЕДНЕГО фокусируемого в Firefox/WebKit уходит в chrome браузера — в
+ *  headless фокус застревает на элементе, цикл не замыкается (Chromium
+ *  оборачивается в начало). Застревание (activeElement не сменился после Tab)
+ *  сбрасывается blur() — дальнейший обход остаётся честным клавиатурным. */
 async function tabTo(page, locator) {
-  for (let step = 0; step < 30; step += 1) {
+  const signature = () =>
+    page.evaluate(() => {
+      const el = document.activeElement;
+      return el
+        ? `${el.tagName}|${el.id}|${typeof el.className === 'string' ? el.className : ''}`
+        : 'none';
+    });
+  for (let step = 0; step < 60; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
+    const before = await signature();
     await page.keyboard.press('Tab');
+    if ((await signature()) === before) {
+      await page.evaluate(() => document.activeElement?.blur());
+    }
   }
-  throw new Error('фокус не дошёл до кнопки за 30 Tab');
+  throw new Error('фокус не дошёл до кнопки за 60 Tab');
 }
 
 /** Физический клик мышью по центру кнопки (без actionability-проверок

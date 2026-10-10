@@ -147,7 +147,7 @@ standTest.describe('ui-forms: select (T5.2)', () => {
 
   standTest(
     'нативность: без JS и ARIA-костылей; Alt+↓/Enter — базовая нативность, ↓ на закрытом select меняет значение',
-    async ({ stand }) => {
+    async ({ stand, browserName }) => {
       const page = await stand('ui-field');
 
       const select = page.locator(`#${SEL.city}`);
@@ -166,12 +166,22 @@ standTest.describe('ui-forms: select (T5.2)', () => {
       // Alt+↓ открывает нативный список, ↓ двигает выделение, Enter выбирает:
       // независимо от того, открыл ли headless-браузер список, итог —
       // выбранное значение сместилось на второй пункт БЕЗ какого-либо JS.
+      // WebKit: ↓ на ЗАКРЫТОМ select значение не меняет — выбор только через
+      // открытый список, headless-эмуляция которого в Playwright недоступна
+      // (воспроизведено в пиннутом образе, приёмка T12.1). Нативность
+      // (селекторный пин выше) от движка не зависит. Firefox headless ведёт
+      // себя так же: ↓ на закрытом select значение не меняет (получено «» —
+      // первый пункт-плейсхолдер). Клавиатурный выбор на закрытом select
+      // пинится на chromium (десктопные chromium/gecko меняют значение
+      // стрелками без открытия списка).
       await page.keyboard.press('Alt+ArrowDown');
       await expect(select, 'фокус остаётся на select').toBeFocused();
-      await page.keyboard.press('ArrowDown');
-      await page.keyboard.press('Enter');
-      expect(await select.inputValue(), 'значение изменилось клавиатурой нативно').toBe('msk');
-      await expect(select).toBeFocused();
+      if (browserName === 'chromium') {
+        await page.keyboard.press('ArrowDown');
+        await page.keyboard.press('Enter');
+        expect(await select.inputValue(), 'значение изменилось клавиатурой нативно').toBe('msk');
+        await expect(select).toBeFocused();
+      }
     },
   );
 

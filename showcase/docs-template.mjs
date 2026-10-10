@@ -394,16 +394,11 @@ const DOCS_STYLE = `<style>
   }
 </style>`;
 
-/** Секция шаблона. title: null — секция без h2 и без aria-labelledby
- *  (канон сам открывает страницу своим h1 — pageHeading: false, страница
- *  обязана начинаться с h1: пин e2e иерархии, CI 10.10 — ui-error). */
-function section(id, title, body) {
-  if (title === null) {
-    return ['<section data-ui-docs-section="' + id + '">', body, '</section>'].join('\n');
-  }
+function section(id, title, body, { withHeading = true } = {}) {
+  const label = withHeading ? `aria-labelledby="ui-docs-${id}-heading"` : `aria-label="${title}"`;
   return [
-    `<section data-ui-docs-section="${id}" aria-labelledby="ui-docs-${id}-heading">`,
-    `<h2 id="ui-docs-${id}-heading">${title}</h2>`,
+    `<section data-ui-docs-section="${id}" ${label}>`,
+    ...(withHeading ? [`<h2 id="ui-docs-${id}-heading">${title}</h2>`] : []),
     body,
     '</section>',
   ].join('\n');
@@ -470,13 +465,15 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   doc.push(DOCS_STYLE);
 
   /* 1. Живые примеры: каноническая разметка как есть (не картинка, не копия).
-   *  Заголовок секции — только когда h1 страницы несёт каркас; для канона
-   *  с собственным h1 (ui-error, правило T4.8 «h1 несёт сам паттерн») секция
-   *  без h2 — иначе outline страницы начинается с h2 (пин e2e иерархии). */
+    pageHeading: false (ui-error, T4.8) — h1 страницы несёт сам паттерн, поэтому
+    секция примеров БЕЗ своего h2: любой заголовок перед разметкой делал бы
+    страницу «начинающейся с h2» (гейт иерархии заголовков полигона — красный
+    на всех движках матрицы до исправления, приёмка T12.1). Порядок секций
+    шаблона и все остальные пины (verifyDocPageHtml, e2e) не меняются. */
   doc.push(
     section(
       'examples',
-      pageHeading ? 'Живые примеры' : null,
+      'Живые примеры',
       [
         `<p class="${STAND_NOTE}">Канонический паттерн ` +
           `<code>components/${name}/${name}.html</code> вживую. Полный набор вариантов ` +
@@ -487,6 +484,7 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
         '<!-- ui-docs-examples:end -->',
         '</div>',
       ].join('\n'),
+      { withHeading: pageHeading },
     ),
   );
 

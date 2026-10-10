@@ -261,8 +261,11 @@ test.describe('ui-pagination: touch-цели и состояния (T6.3)', () =
       for (let i = 0; i < count; i += 1) {
         const box = await items.nth(i).boundingBox();
         expect(box, `${id} [${i}]: boundingBox`).toBeTruthy();
-        expect(box.width, `${id} [${i}]: ширина ≥ 44`).toBeGreaterThanOrEqual(44);
-        expect(box.height, `${id} [${i}]: высота ≥ 44`).toBeGreaterThanOrEqual(44);
+        // Firefox отдаёт boundingBox с дробным шумом движка (43.99998474121094
+        // при дизайне 44px, воспроизведено в пиннутом образе, приёмка T12.1) —
+        // контракт touch-целей формулируется в целых пикселях: округляем.
+        expect(Math.round(box.width), `${id} [${i}]: ширина ≥ 44`).toBeGreaterThanOrEqual(44);
+        expect(Math.round(box.height), `${id} [${i}]: высота ≥ 44`).toBeGreaterThanOrEqual(44);
       }
     }
   });

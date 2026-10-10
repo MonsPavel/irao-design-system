@@ -17,6 +17,9 @@
 #   T3.6 (готово) — шрифто-зум-гейт масштабирования (tests/e2e/scaling.spec.js:
 #               zoom 200% — chromium, 32px-база — все браузеры) исполняется
 #               полным прогоном e2e-matrix ниже; VI-smoke (T9.1) — следующим.
+#   T12.1 (готово) — advisory-visual (до v1.0, ADR-0004): сравнение эталонов
+#               chromium по расписанию — детектор визуальной деградации main
+#               между PR (джоба visual ниже). VI-smoke релиза — release.yml.
 name: Nightly cycle
 
 on:
@@ -147,7 +150,13 @@ jobs:
           - chromium
           - firefox
           - webkit
-    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage
+      # uid 1001 (pwuser образа) — официальный рецепт Playwright для GH Actions
+      # container-джоб: HOME=/github/home смонтирован с владельцем uid 1001, и
+      # запуск от root валит Firefox («$HOME isn't owned by the current user»);
+      # воспроизведено и проверено фиксом в том же образе (приёмка T12.1, AC3).
+      options: --user 1001
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -180,3 +189,62 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+
+  # Advisory-visual в ночи (T12.1, до v1.0 — ADR-0004): сравнение эталонов
+  # chromium по расписанию — детектор визуальной деградации main между PR
+  # (в PR тот же advisory-чек — ci.yml; с «заморозки» компонентного набора
+  # перед v1.0 гейт переводится в mandatory — операция описана в релизном
+  # чек-листе docs/ui-system/release/release-checklist.md). Контракты
+  # механики — общие с ci.yml (checkAdvisoryVisualJob валидатора):
+  # continue-on-error ТОЛЬКО на шаге прогона (дифы собираются), джоба красится
+  # финальным шагом по outcome — красная visual = красная ночь = investigate.
+  visual:
+    name: Visual regression (advisory, ADR-0004)
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build showcase
+        run: npm run build
+
+      # IRAO_SNAPSHOTS=1 — окружение сравнения эталонов (гейт харнесса);
+      # chromium — единственный проект, сравнивающий эталоны (ADR-0004),
+      # порог нулевой (контейнер-паритет). Ночь эталоны НЕ пишет: без
+      # --update-snapshots расхождение падает — дифы в артефакте.
+      - name: Visual regression (chromium)
+        id: visual
+        continue-on-error: true # диф-артефакты собираются следующими шагами
+        env:
+          IRAO_SNAPSHOTS: '1'
+        run: npx playwright test --project=chromium
+
+      - name: Upload visual diffs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-visual-diffs
+          path: |
+            test-results/**/*-diff.png
+            test-results/**/*-actual.png
+            test-results/**/*-expected.png
+            playwright-report/
+          if-no-files-found: ignore
+
+      # Чек обязан отражать расхождение (red = investigate, не «зелёный мусор»).
+      - name: Fail check on visual diff
+        if: always() && steps.visual.outcome == 'failure'
+        run: |
+          echo "nightly visual: расхождение эталонов на main — investigate по протоколу docs/process/nightly-review-protocol.md; обновление эталонов: npm run test:docker -- --update-snapshots или update-snapshots.yml"
+          exit 1

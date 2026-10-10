@@ -166,11 +166,17 @@ standTest.describe('ui-field: матрица и состояния (T5.1)', () =
 
       const input = page.locator(`#${FLD.name}`);
       await tabTo(page, input);
-      // Переход bg/border анимирован (--ui-transition): ждём устоявшийся кадр.
+      // Переход bg/border анимирован (--ui-transition): ждём устоявшийся кадр —
+      // в firefox мгновенное чтение ловит середину перехода border-color
+      // (rgba(…, 0.995), воспроизведено в пиннутом образе, приёмка T12.1).
+      // Ассерты дизайна (bg → surface, border → primary) — в устоявшемся кадре.
       await expect(async () => {
         const settled = await stateOf(page, FLD.name);
         expect(settled.focusVisible, 'фокус пришёл с клавиатуры').toBe(true);
         expect(settled.backgroundColor, 'фон → surface (белый)').toBe(COLORS.surface);
+        expect(settled.borderColor, 'рамка → primary — фирменный паттерн поля').toBe(
+          COLORS.primary,
+        );
       }).toPass({ timeout: 5000 });
       const state = await stateOf(page, FLD.name);
       expect(state.focusVisible, 'фокус пришёл с клавиатуры').toBe(true);
