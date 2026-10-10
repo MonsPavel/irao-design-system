@@ -103,3 +103,52 @@ describe('nightly.yml: матрица + advisory-visual (до v1.0, ADR-0004)', 
     }
   });
 });
+
+describe('имена zip/артефактов — безопасные на workflow_dispatch (ревью T12.1 high)', () => {
+  it('имя zip в build-dist константное: ref_name на ветках содержит «/» (task/T12.1)', () => {
+    expect(release, 'константное имя zip без интерполяции ref_name').toContain(
+      'zip -r irao-ui-dist.zip dist',
+    );
+    expect(
+      release,
+      'версия в имени ассета появляется только в release-джобе (только теги)',
+    ).toContain('irao-ui-dist-${GITHUB_REF_NAME}.zip');
+    const buildDistBlock = release.slice(
+      release.indexOf('build-dist:'),
+      release.indexOf('release:'),
+    );
+    expect(buildDistBlock, 'build-dist не интерполирует ref_name в имя zip').not.toContain(
+      'irao-ui-dist-${',
+    );
+  });
+
+  it('имена артефактов upload/download константные (upload-artifact v4 отклоняет «/»)', () => {
+    expect(release, 'константное имя артефакта dist-zip').toContain('name: dist-release');
+    expect(release).not.toMatch(/name: dist-\$\{\{ github\.ref_name \}\}/);
+  });
+
+  it('валидатор закрепляет контракт безопасных имён (исполняемая спецификация)', () => {
+    for (const contract of [
+      'release: имя zip в build-dist интерполирует ref_name',
+      'release: артефактное имя',
+    ]) {
+      expect(validator, `контракт валидатора: ${contract}`).toContain(contract);
+    }
+  });
+});
+
+describe('релизный чек-лист: приёмочный демо-тег (AC1, ревью T12.1 high)', () => {
+  const checklist = readFileSync(
+    join(root, 'docs', 'ui-system', 'release', 'release-checklist.md'),
+    'utf8',
+  );
+
+  it('AC1 «демо-тег проходит полный конвейер» закреплён как явный пункт приёмки', () => {
+    expect(checklist, 'пункт приёмочного демо-тега присутствует').toContain('приёмочный демо-тег');
+    expect(
+      checklist,
+      'критерий приёмки — зелёный release.yml на первом теге после T12.2',
+    ).toContain('release.yml зелёным');
+    expect(checklist, 'AC закрывается только по факту прогона').toContain('по факту');
+  });
+});

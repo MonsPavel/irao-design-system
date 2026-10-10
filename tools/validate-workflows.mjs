@@ -811,6 +811,19 @@ function checkRelease(name, doc) {
     else if (upload.with?.['if-no-files-found'] !== 'error') {
       problem(name, 'build-dist: upload-artifact без if-no-files-found: error');
     }
+    // Ревью T12.1 (high): на workflow_dispatch ref_name — имя ветки с «/»
+    // (конвенция task/T12.1). Интерполяция ref_name в имя zip ломает
+    // репетицию: zip не создаёт каталоги-родители («irao-ui-dist-task/T12.1.zip»
+    // — несуществующий путь). Имя zip константное; версия появляется в имени
+    // ассета в джобе release (только теги, ref_name = vX.Y.Z без «/»).
+    for (const r of runSteps(buildDist)) {
+      if (r.includes('irao-ui-dist-${')) {
+        problem(
+          name,
+          'release: имя zip в build-dist интерполирует ref_name — на workflow_dispatch это имя ветки с «/»: zip не создаёт каталоги-родители, репетиция красная; константное имя zip, версия — в имени ассета джобы release (ревью T12.1 high)',
+        );
+      }
+    }
   }
 
   // release: GitHub Release через gh CLI (allowlist actions — сторонних нет),
@@ -834,6 +847,25 @@ function checkRelease(name, doc) {
     }
     if (!String(releaseJob.if ?? '').includes('refs/tags/')) {
       problem(name, 'release: нет guard refs/tags/ (workflow_dispatch не публикует Release)');
+    }
+  }
+
+  // Ревью T12.1 (high): «/» имени ветки недопустимо в имени артефакта
+  // (upload-artifact v4 отклоняет) — имена upload/download в release.yml
+  // константные, без интерполяции github.ref_name. На тегах download всё
+  // равно единственный, а константное имя совпадает между джобами.
+  for (const j of pipeline) {
+    for (const step of jobs[j]?.steps ?? []) {
+      const uses = step?.uses ?? '';
+      if (
+        (uses === 'actions/upload-artifact@v4' || uses === 'actions/download-artifact@v4') &&
+        String(step.with?.name ?? '').includes('github.ref_name')
+      ) {
+        problem(
+          name,
+          `release: артефактное имя «${step.with.name}» (${uses}) зависит от ref_name — «/» имени ветки недопустимо в имени артефакта; константное имя (ревью T12.1 high)`,
+        );
+      }
     }
   }
 }

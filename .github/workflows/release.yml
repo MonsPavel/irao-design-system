@@ -187,20 +187,21 @@ jobs:
       - name: Build dist + showcase
         run: npm run build
 
+      # Имя zip константное (ревью T12.1 high): на workflow_dispatch ref_name —
+      # имя ветки с «/» (конвенция task/T12.1) — zip не создаёт каталоги-родители
+      # («irao-ui-dist-task/T12.1.zip» — несуществующий путь), а upload-artifact
+      # v4 отклоняет имена с «/». Версия появляется в имени ассета Release
+      # (джоба release — только теги, ref_name = vX.Y.Z).
       - name: Zip dist
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
-        run: zip -r "irao-ui-dist-${GITHUB_REF_NAME}.zip" dist
+        run: zip -r irao-ui-dist.zip dist
 
       # Проверка содержимого артефакта в джобе (implementation requirements 1):
       # полный dist по 02-architecture §6.1 — ui-core/ui-vi/ui.min.js + fonts/
       # + themes/. Баннер версии сверяется с package.json — на теге гейт gates
       # уже гарантировал совпадение версии с тегом, значит в артефакте = тег.
       - name: Verify zip structure (02-architecture §6.1) and banner (T1.3)
-        env:
-          GITHUB_REF_NAME: ${{ github.ref_name }}
         run: |
-          ZIP="irao-ui-dist-${GITHUB_REF_NAME}.zip"
+          ZIP="irao-ui-dist.zip"
           CONTENT="$(unzip -l "$ZIP")"
           for path in dist/ui-core.min.css dist/ui-vi.min.css dist/ui.min.js dist/fonts/ dist/themes/; do
             if ! echo "$CONTENT" | grep -qF "$path"; then
@@ -218,8 +219,8 @@ jobs:
       - name: Upload dist-zip artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
-          path: irao-ui-dist-*.zip
+          name: dist-release
+          path: irao-ui-dist.zip
           if-no-files-found: error
 
   release:
@@ -252,11 +253,15 @@ jobs:
       - name: Download dist-zip artifact
         uses: actions/download-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
+          name: dist-release # константное имя — совпадает с upload в build-dist
           path: artifact
 
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
-        run: gh release create "$GITHUB_REF_NAME" --title "irao-ui ${GITHUB_REF_NAME}" --notes-file release-notes.md "artifact/irao-ui-dist-${GITHUB_REF_NAME}.zip"
+        run: |
+          # Имя ассета с версией: джоба — только теги (guard выше), ref_name =
+          # vX.Y.Z без «/» — безопасно для имени файла (ревью T12.1 high).
+          cp "artifact/irao-ui-dist.zip" "irao-ui-dist-${GITHUB_REF_NAME}.zip"
+          gh release create "$GITHUB_REF_NAME" --title "irao-ui ${GITHUB_REF_NAME}" --notes-file release-notes.md "irao-ui-dist-${GITHUB_REF_NAME}.zip"
