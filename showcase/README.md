@@ -30,6 +30,7 @@ showcase/dist/             # сгенерированный полигон (giti
 ├── stands/layout.html     # стенд layout-примитивов (T3.4) — из showcase/pages/layout/index.html
 ├── stands/ui-skip-link.html # стенд ui-skip-link (T3.5) — из канонического паттерна components/ui-skip-link/
 ├── docs/<name>.html       # дока компонента по шаблону T10.1 (см. «Доки по шаблону»)
+├── docs/<гайд>.html       # гайды внедрения T10.3: bitrix/*.md → страница (см. «Гайды внедрения»)
 └── stands/<name>.html     # стенд компонента из components/<name>/<name>.html
 ```
 
@@ -129,6 +130,23 @@ showcase/dist/             # сгенерированный полигон (giti
 - Эталоны T10.1 — `ui-button` (CSS-only), `ui-field` (CSS+разметка-паттерн),
   `ui-modal` (JS-компонент); полный прогон по всем компонентам — T10.2
   (добавление страницы = один файл метаданных).
+
+### Гайды внедрения (T10.3)
+
+Три документа внедрения публикуются как страницы `dist/docs/<гайд>.html`
+(раздел индекса «Гайды внедрения (Bitrix)»): living-источники —
+`bitrix/quickstart.md`, `bitrix/integration-guide.md`,
+`bitrix/bitrix-30-minutes.md`. Рендер — [`guides.mjs`](guides.mjs):
+первая «#»-строка источника не дублируется (h1 — из реестра `GUIDES`),
+«##»-разделы становятся h2 страницы.
+
+- Синхронность «сниппет в гайде = файл»: кодовые блоки с маркером
+  `snippet=<репо-путь>` в info-строке fence обязаны быть точным
+  (под)куском файла-источника (`bitrix/snippets/*.php` или канонический
+  `components/<имя>/<имя>.html`) — selfChecks сборки («диф на билде»)
+  и `tests/unit/guides.test.js`. Расхождение уронит сборку.
+- Полнота: каждый файл `bitrix/snippets/*.php` упомянут хотя бы в одном
+  гайде (гайды — единая точка входа интегратора) — selfChecks.
 
 ### Идемпотентность
 
