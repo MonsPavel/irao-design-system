@@ -111,9 +111,13 @@ test.describe('типографика (T3.3)', () => {
 
       const lh = await tokenRem(page, `--ui-lh-${role}`);
       if (state.lineHeightPx !== null) {
+        // WebKit округляет computed line-height до целого px (24px × 1.3 = 31.2
+        // → «31px»); Chromium/Firefox возвращают дробное значение. Допуск 0.5px
+        // — ровно округление движка (воспроизведено в контейнере, приёмка
+        // T12.1): дизайн-контракт «lh = токен × fs» остаётся точным.
         expect(state.lineHeightPx, `${cls}: line-height = --ui-lh-${role} × font-size`).toBeCloseTo(
           lh * state.fontSize,
-          6,
+          0,
         );
       } else {
         expect(state.lineHeightUnitless, `${cls}: line-height = --ui-lh-${role}`).toBeCloseTo(
@@ -206,6 +210,12 @@ test.describe('типографика (T3.3)', () => {
   });
 
   test('иерархия заголовков зелёная на всех страницах showcase', async ({ page }) => {
+    // Обход всего полигона (~75 страниц: стенды, доки, гайды, standalone) —
+    // бюджет по умолчанию 30s рассчитан на быстрый прогон одной страницы;
+    // полный обход на медленных машинах в него не укладывается (дефект был
+    // скрыт ранним падением на ui-error, исправленным в приёмке T12.1).
+    // Явный бюджет не ослабляет ни одного ассерта.
+    test.setTimeout(120_000);
     await openIndex(page);
 
     const links = await page.evaluate(() =>

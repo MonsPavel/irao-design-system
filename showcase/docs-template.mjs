@@ -390,10 +390,11 @@ const DOCS_STYLE = `<style>
   }
 </style>`;
 
-function section(id, title, body) {
+function section(id, title, body, { withHeading = true } = {}) {
+  const label = withHeading ? `aria-labelledby="ui-docs-${id}-heading"` : `aria-label="${title}"`;
   return [
-    `<section data-ui-docs-section="${id}" aria-labelledby="ui-docs-${id}-heading">`,
-    `<h2 id="ui-docs-${id}-heading">${title}</h2>`,
+    `<section data-ui-docs-section="${id}" ${label}>`,
+    ...(withHeading ? [`<h2 id="ui-docs-${id}-heading">${title}</h2>`] : []),
     body,
     '</section>',
   ].join('\n');
@@ -459,7 +460,12 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   );
   doc.push(DOCS_STYLE);
 
-  /* 1. Живые примеры: каноническая разметка как есть (не картинка, не копия). */
+  /* 1. Живые примеры: каноническая разметка как есть (не картинка, не копия).
+    pageHeading: false (ui-error, T4.8) — h1 страницы несёт сам паттерн, поэтому
+    секция примеров БЕЗ своего h2: любой заголовок перед разметкой делал бы
+    страницу «начинающейся с h2» (гейт иерархии заголовков полигона — красный
+    на всех движках матрицы до исправления, приёмка T12.1). Порядок секций
+    шаблона и все остальные пины (verifyDocPageHtml, e2e) не меняются. */
   doc.push(
     section(
       'examples',
@@ -474,6 +480,7 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
         '<!-- ui-docs-examples:end -->',
         '</div>',
       ].join('\n'),
+      { withHeading: pageHeading },
     ),
   );
 

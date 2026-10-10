@@ -58,7 +58,12 @@ async function expectVisibleBorder(locator, label) {
 }
 
 standTest.describe('forced-colors: active — границы контролов (T9.2)', () => {
-  standTest('ui-button: граница каждого варианта видима', async ({ stand }) => {
+  standTest('ui-button: граница каждого варианта видима', async ({ stand, browserName }) => {
+    // Playwright WebKit не эмулирует forced-colors (emulateMedia игнорируется
+    // движком) — ассерты увидят обычный рендер; сверка реального Safari/
+    // Windows High Contrast — ручной протокол T9.2. Воспроизведено в образе
+    // (приёмка T12.1).
+    standTest.skip(browserName === 'webkit', 'WebKit: forced-colors не эмулируется в Playwright');
     const page = await stand('ui-button');
     await page.emulateMedia({ forcedColors: 'active' });
 
@@ -70,15 +75,20 @@ standTest.describe('forced-colors: active — границы контролов 
     await expectVisibleBorder(page.locator('#ui-button-primary-sm'), 'ui-button--primary--sm');
   });
 
-  standTest('ui-field: граница input/textarea/select и поля ошибки видима', async ({ stand }) => {
-    const page = await stand('ui-field');
-    await page.emulateMedia({ forcedColors: 'active' });
+  standTest(
+    'ui-field: граница input/textarea/select и поля ошибки видима',
+    async ({ stand, browserName }) => {
+      // WebKit: forced-colors не эмулируется (см. ui-button выше).
+      standTest.skip(browserName === 'webkit', 'WebKit: forced-colors не эмулируется в Playwright');
+      const page = await stand('ui-field');
+      await page.emulateMedia({ forcedColors: 'active' });
 
-    await expectVisibleBorder(page.locator('#uif-name'), 'ui-field__input text');
-    await expectVisibleBorder(page.locator('#uif-about'), 'ui-field__textarea');
-    await expectVisibleBorder(page.locator('#uif-city-select'), 'ui-field__select');
-    await expectVisibleBorder(page.locator('#uif-login-err'), 'ui-field__input в --error');
-  });
+      await expectVisibleBorder(page.locator('#uif-name'), 'ui-field__input text');
+      await expectVisibleBorder(page.locator('#uif-about'), 'ui-field__textarea');
+      await expectVisibleBorder(page.locator('#uif-city-select'), 'ui-field__select');
+      await expectVisibleBorder(page.locator('#uif-login-err'), 'ui-field__input в --error');
+    },
+  );
 
   standTest('ui-file: граница коробки поля и кнопки-лейбла видима', async ({ stand }) => {
     const page = await stand('ui-file');
