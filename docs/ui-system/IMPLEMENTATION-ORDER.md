@@ -81,6 +81,14 @@ Iteration 0 (Foundation) → 1 (Tokens) → 2 (Base) → 3 (Primitives)
 - **Dependencies:** Iterations 6, 9.
 - **DoD:** два сайта на системе; upgrade ≤ 0.5 дня; v1.0.0 выпущена.
 
+> **10.10 — решение владельца:** пилоты EPIC-11 (T11.2–T11.4) выведены в `blocked` до выбора площадок — работа концентрируется на системе и релизной ветке. Достижимая граница без пилотов: T10.3 → T12.1 → T12.2 → backlog-hardening (ниже).
+
+## Iteration 11 — Backlog hardening (EPIC-13, решение владельца 10.10)
+
+- **Задачи:** [T13.1](epics/EPIC-13-backlog-hardening/T13.1-destroy-contract.md) … [T13.9](epics/EPIC-13-backlog-hardening/T13.9-test-hygiene.md) — обработка 101 неблокирующего замечания ночного ревью ([BACKLOG.md](../process/nightly/BACKLOG.md), кластеры A–F); кластер П — решения владельца.
+- **Dependencies:** Iterations 0–9 (фактически закрыты); идёт после релизной ветки T10.3 → T12.1 → T12.2 в порядке реестра.
+- **DoD:** открытые замечания бэклога обработаны («Снято» с датами), кластер П передан владельцу; гейты зелёные.
+
 ---
 
 ## Critical path
