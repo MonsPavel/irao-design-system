@@ -51,12 +51,26 @@ function normalizeDom(html) {
 for (const name of REFERENCE_COMPONENTS) {
   test.describe(`дока ${name} (шаблон T10.1)`, () => {
     let page;
+    let badResponses;
 
     test.beforeEach(async ({ page: newPage }) => {
       page = newPage;
+      // Сетевой пин: каркас подключает рантайм dist относительно СВОЕЙ
+      // глубины (docs/<имя>.html на уровень ниже SHOWCASE_DIST → «../»).
+      // Любой ответ ≥ 400 — сломанный путь: рендер без CSS/JS (живые примеры
+      // нестилизованы, модуль компонента мёртв); другие гейты этого не видят —
+      // без CSS axe, наоборот, «зеленеет» (нет стилевых нарушений).
+      badResponses = [];
+      page.on('response', (response) => {
+        if (response.status() >= 400) badResponses.push(`${response.status()} ${response.url()}`);
+      });
       await freezeClock(page);
       await page.goto(`/showcase/dist/docs/${name}.html`);
       await page.waitForLoadState('networkidle');
+    });
+
+    test('нет сетевых ошибок: каркас и рантайм резолвятся (все ответы < 400)', async () => {
+      expect(badResponses, `${name}: ответы ≥ 400`).toEqual([]);
     });
 
     test('9 секций шаблона присутствуют и видимы по порядку', async () => {
