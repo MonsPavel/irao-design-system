@@ -39,6 +39,21 @@
 </nav>
 ```
 
+## Состояния
+
+- **default** — muted-цвет уровней (`--ui-color-text-muted`), caption-типографика;
+  различимость навигации даёт контекст (лендмарка + список), а не подчёркивание
+  (исключение из правила ui-link зафиксировано в do/don't).
+- **hover** — `--ui-color-accent` — пара одобренного дизайна (ADR-0010), только
+  под `@media (hover: hover)` — на таче не «залипает» (пин —
+  `components/ui-breadcrumbs/ui-breadcrumbs.css`, e2e стенда).
+- **focus-visible** — глобальный outline политики ADR-0001, компонент его
+  не заменяет.
+- **current** — `aria-current="page"` на span текущей страницы: не ссылка,
+  не остановка Tab (пин — `tests/e2e/ui-breadcrumbs.spec.js`).
+- **≤767 (лента)** — горизонтальная прокрутка со скрытым скроллбаром;
+  на md+ (`min-width` шкалы T2.5) лента деактивируется, уровни переносятся.
+
 ## Микроразметка BreadcrumbList (ТЗ №7)
 
 - **Формат — microdata** (itemscope/itemprop в HTML), по схеме Google
