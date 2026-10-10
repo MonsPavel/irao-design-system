@@ -84,10 +84,9 @@ for (const name of REFERENCE_COMPONENTS) {
       await expect(frames).toHaveCount(3);
       for (const width of ['375', '768', '1440']) {
         const frame = page.frameLocator(`iframe[width="${width}"]`);
-        await expect(
-          frame.locator('h1'),
-          `стенд в iframe шириной ${width} загрузился`,
-        ).toHaveText(name);
+        await expect(frame.locator('h1'), `стенд в iframe шириной ${width} загрузился`).toHaveText(
+          name,
+        );
       }
       // Ссылка на полный стенд с док-страницы ведёт на тот же файл.
       await expect(

@@ -813,7 +813,7 @@ async function generateShowcase({ themes }) {
     try {
       main = renderDocPage({ name, markup, readme: readFileSync(readmePath, 'utf8'), metadata });
     } catch (error) {
-      throw new Error(`дока ${name}: ${error.message}`);
+      throw new Error(`дока ${name}: ${error.message}`, { cause: error });
     }
     const page = frame({
       rel: '../..', // docs/<имя>.html → SHOWCASE_DIST (на два уровня выше)

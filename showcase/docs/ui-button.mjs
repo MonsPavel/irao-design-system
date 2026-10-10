@@ -54,8 +54,7 @@ export default {
     rows: [
       {
         scenario: 'Tab к кнопке',
-        expect:
-          '«Отправить отклик, кнопка» — имя из подписи, роль нативная; ARIA не дублирует',
+        expect: '«Отправить отклик, кнопка» — имя из подписи, роль нативная; ARIA не дублирует',
         pin: 'tests/e2e/ui-button.spec.js',
       },
       {
@@ -70,8 +69,7 @@ export default {
       },
       {
         scenario: 'is-loading + aria-busy',
-        expect:
-          'Имя кнопки неизменно (лейбл скрыт клипом, но в DOM); спиннер декоративен',
+        expect: 'Имя кнопки неизменно (лейбл скрыт клипом, но в DOM); спиннер декоративен',
         pin: 'tests/e2e/ui-button.spec.js',
       },
     ],

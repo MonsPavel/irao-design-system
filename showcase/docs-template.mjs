@@ -227,7 +227,8 @@ export function renderMarkdown(markdown, { doDont = false } = {}) {
           let liClass = '';
           if (doDont) {
             if (content.startsWith('<strong>Do</strong>')) liClass = ' class="ui-docs-do"';
-            else if (content.startsWith("<strong>Don't</strong>")) liClass = ' class="ui-docs-dont"';
+            else if (content.startsWith("<strong>Don't</strong>"))
+              liClass = ' class="ui-docs-dont"';
           }
           items.push(`<li${liClass}>${content}</li>`);
           item = [];
@@ -471,7 +472,10 @@ export function renderDocPage({ name, markup, readme, metadata }) {
 
   /* 5. A11y: клавиатурная таблица + ARIA + README-блоки + чек-лист скринридера. */
   const keyboardRows = metadata.keyboard
-    .map((row) => `<tr><td><kbd>${escapeHtml(row.keys)}</kbd></td><td>${renderInline(row.action)}</td></tr>`)
+    .map(
+      (row) =>
+        `<tr><td><kbd>${escapeHtml(row.keys)}</kbd></td><td>${renderInline(row.action)}</td></tr>`,
+    )
     .join('\n');
   const ariaRows = metadata.aria
     .map((row) => `<tr><td>${renderInline(row.what)}</td><td>${renderInline(row.why)}</td></tr>`)
@@ -568,9 +572,9 @@ export function renderDocPage({ name, markup, readme, metadata }) {
       metadata.schema
         ? renderMarkdown(metadata.schema)
         : `<p>Микроразметка schema.org для компонента не предусмотрена (н/п): семантика — ` +
-          `нативная HTML-разметка компонента. Schema-паттерны системы (BreadcrumbList, ` +
-          `JobPosting и др.) документируются на страницах своих компонентов и паттернов ` +
-          `(см. правило «не ради галочки» — 02-architecture §0).</p>`,
+            `нативная HTML-разметка компонента. Schema-паттерны системы (BreadcrumbList, ` +
+            `JobPosting и др.) документируются на страницах своих компонентов и паттернов ` +
+            `(см. правило «не ради галочки» — 02-architecture §0).</p>`,
     ),
   );
 
@@ -610,9 +614,8 @@ export function renderDocPage({ name, markup, readme, metadata }) {
  * сниппет разэкранируется — обе строки сравнимы с каноническим файлом.
  */
 export function extractDocPageChecks(html) {
-  const examples = /<!-- ui-docs-examples:start -->\n([\s\S]*?)\n<!-- ui-docs-examples:end -->/.exec(
-    html,
-  );
+  const examples =
+    /<!-- ui-docs-examples:start -->\n([\s\S]*?)\n<!-- ui-docs-examples:end -->/.exec(html);
   const snippet = /data-ui-docs-snippet><code>([\s\S]*?)<\/code><\/pre>/.exec(html);
   return {
     examples: examples ? examples[1].trim() : null,

@@ -181,10 +181,7 @@ describe('сгенерированная страница несёт все се
 
     it(`${name}: responsive-секция — три iframe 375/768/1440 на стенд`, async () => {
       const { html } = await buildPage(name);
-      const frames = Array.from(
-        html.matchAll(/<iframe[^>]*>/g),
-        (match) => match[0],
-      );
+      const frames = Array.from(html.matchAll(/<iframe[^>]*>/g), (match) => match[0]);
       expect(frames.length).toBe(3);
       for (const frame of frames) {
         expect(frame).toContain(`src="../stands/${name}.html"`);

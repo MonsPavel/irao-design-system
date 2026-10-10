@@ -65,8 +65,7 @@ export default {
     rows: [
       {
         scenario: 'Enter на триггере (M1)',
-        expect:
-          '«Заголовок модалки, диалог» (`aria-labelledby`), фокус на кнопке «Закрыть»',
+        expect: '«Заголовок модалки, диалог» (`aria-labelledby`), фокус на кнопке «Закрыть»',
         pin: 'tests/e2e/ui-modal.spec.js',
       },
       {
