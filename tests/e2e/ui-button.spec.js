@@ -40,7 +40,13 @@
 import { expect } from '@playwright/test';
 
 import { contrastRatio } from '../contrast/lib.mjs';
-import { a11y, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js';
+import {
+  a11y,
+  shot,
+  test as standTest,
+  unexpectedViolations,
+  VIEWPORTS,
+} from '../helpers/harness.js';
 
 /** Идентификаторы кнопок стенда (showcase/pages/ui-button/index.html). */
 const BTN = {
@@ -57,34 +63,11 @@ const BTN = {
 };
 
 /**
- * Осознанные исключения axe на стенде: id правила + подстрока цели узла.
- * Каждое — с обоснованием (конвенция tests/README.md; расширять только сюда).
+ * Осознанные исключения axe на стенде — общий реестр харнесса (T9.2 поднял
+ * его из этого спека для сквозного axe-обхода всех страниц): id правила +
+ * подстрока цели узла + обоснование. Таблица — KNOWN_AXE_EXCEPTIONS в
+ * tests/helpers/harness.js и tests/README.md; расширять только туда.
  */
-const KNOWN_AXE_EXCEPTIONS = Object.freeze([
-  {
-    id: 'color-contrast',
-    match: /ui-button-accent/,
-    reason:
-      'белая подпись на accent — одобренный дизайн 3.12:1 (2.91:1 на hover): ' +
-      'изменение — design-decision владельца; исключение токен-уровня — ' +
-      'tests/contrast/pairs.config.mjs (T2.6/ADR-0010), ревизия — T9.2',
-  },
-  {
-    id: 'color-contrast',
-    match: /-disabled/,
-    reason:
-      'контраст disabled — декоративный (AC T4.2): WCAG 1.4.3 исключает ' +
-      'неактивные компоненты; визуал — затемнение --ui-opacity-disabled',
-  },
-  {
-    id: 'color-contrast',
-    match: /-loading/,
-    reason:
-      'лейбл в is-loading визуально скрыт (clip-path, accessible name ' +
-      'сохраняется — Implementation requirements T4.2 п.3): axe видит бокс ' +
-      'текста без краски; спиннер aria-hidden',
-  },
-]);
 
 /** Вычисленное состояние кнопки + контекст (data-ui-button-bg или body). */
 const stateOf = (page, id) =>
@@ -547,18 +530,7 @@ standTest.describe('ui-button (T4.2)', () => {
   standTest('axe: нарушения вне известных исключений отсутствуют (AC)', async ({ stand }) => {
     const page = await stand('ui-button');
     const results = await a11y(page).analyze();
-
-    const unexpected = [];
-    for (const violation of results.violations) {
-      for (const node of violation.nodes) {
-        const target = node.target.join(' ');
-        const known = KNOWN_AXE_EXCEPTIONS.find(
-          (exception) => exception.id === violation.id && exception.match.test(target),
-        );
-        if (!known) unexpected.push(`${violation.id} → ${target}`);
-      }
-    }
-    expect(unexpected, 'axe: нарушения вне известных исключений').toEqual([]);
+    expect(unexpectedViolations(results), 'axe: нарушения вне известных исключений').toEqual([]);
   });
 
   standTest.describe('сценарий T2.6, кнопочная часть (tests/e2e/README.md)', () => {

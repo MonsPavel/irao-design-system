@@ -39,6 +39,63 @@ export const VIEWPORTS = Object.freeze({
 export const DISABLED_AXE_RULES = Object.freeze({});
 
 /**
+ * Осознанные исключения axe ДЛЯ СКВОЗНЫХ ПРОГОНОВ (T9.2): id правила +
+ * подстрока-регэксп цели узла + обоснование. Пустое DISABLED_AXE_RULES
+ * выключает правила глобально — слишком грубо; реестр точечный: нарушение
+ * остаётся в результатах axe, фильтр допускает только узлы, попавшие в
+ * запись. Потребители: компонентные спеки (например, ui-button) и
+ * сквозной обход tests/a11y/stands-sweep.spec.js (AC T9.2 «axe=0» —
+ * ноль нарушений ВНЕ реестра). Расширять — только записью сюда + в
+ * таблицу tests/README.md, каждое исключение — фикс-задача или
+ * design-decision/ADR-исключение (Implementation requirements T9.2 п.2).
+ */
+export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
+  {
+    id: 'color-contrast',
+    match: /#ui-button-accent/,
+    reason:
+      'белая подпись на accent — одобренный дизайн 3.12:1 (2.91:1 на hover): ' +
+      'изменение — design-decision владельца; исключение токен-уровня — ' +
+      'tests/contrast/pairs.config.mjs (T2.6/ADR-0010), ревизия производных — ' +
+      'tests/contrast/derived.config.mjs (T9.2)',
+  },
+  {
+    id: 'color-contrast',
+    match: /#ui-button-[a-z-]*-disabled/,
+    reason:
+      'контраст disabled — декоративный (AC T4.2): WCAG 1.4.3 исключает ' +
+      'неактивные компоненты; визуал — затемнение --ui-opacity-disabled',
+  },
+  {
+    id: 'color-contrast',
+    match: /#ui-button-[a-z-]*-loading/,
+    reason:
+      'лейбл в is-loading визуально скрыт (clip-path, accessible name ' +
+      'сохраняется — Implementation requirements T4.2 п.3): axe видит бокс ' +
+      'текста без краски; спиннер aria-hidden',
+  },
+]);
+
+/**
+ * Нарушения axe ВНЕ реестра KNOWN_AXE_EXCEPTIONS: список строк
+ * «id → цель» (пустой = чисто). Исключение считается, если id правила
+ * совпал и цель узла отвечает match-регэкспу записи.
+ */
+export function unexpectedViolations(results) {
+  const unexpected = [];
+  for (const violation of results.violations) {
+    for (const node of violation.nodes) {
+      const target = node.target.join(' ');
+      const known = KNOWN_AXE_EXCEPTIONS.some(
+        (exception) => exception.id === violation.id && exception.match.test(target),
+      );
+      if (!known) unexpected.push(`${violation.id} → ${target}`);
+    }
+  }
+  return unexpected;
+}
+
+/**
  * Эталоны пишутся только в окружении создания (ADR-0004): явный opt-in
  * `IRAO_SNAPSHOTS=1`, который выставляет `npm run test:docker` (официальный
  * Playwright-образ) и джоба update-snapshots (T1.5). Хост-прогоны не пишут.
