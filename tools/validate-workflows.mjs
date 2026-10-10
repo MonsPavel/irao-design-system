@@ -754,6 +754,12 @@ function checkRelease(name, doc) {
         'матрица release: fail-fast обязан быть false (один браузер не роняет остальные)',
       );
     if (!matrixJob.container) problem(name, 'матрица release: нет container (ADR-0004)');
+    if (!String(matrixJob.container?.options ?? '').includes('--user 1001')) {
+      problem(
+        name,
+        'матрица release: container без options --user 1001 — в GH Actions-контейнере Firefox не запускается (HOME=/github/home не в собственности uid job-процесса; воспроизведено в пиннутом образе, приёмка T12.1)',
+      );
+    }
     if (!runSteps(matrixJob).some((r) => r.includes('npx playwright test'))) {
       problem(
         name,
@@ -884,6 +890,12 @@ function checkNightly(name, doc) {
     if (matrixJob.strategy['fail-fast'] !== false)
       problem(name, 'матрица nightly: fail-fast обязан быть false');
     if (!matrixJob.container) problem(name, 'матрица nightly: нет container (ADR-0004)');
+    if (!String(matrixJob.container?.options ?? '').includes('--user 1001')) {
+      problem(
+        name,
+        'матрица nightly: container без options --user 1001 — в GH Actions-контейнере Firefox не запускается (HOME=/github/home не в собственности uid job-процесса; воспроизведено в пиннутом образе, приёмка T12.1)',
+      );
+    }
     if (!runSteps(matrixJob).some((r) => r.includes('npx playwright test'))) {
       problem(name, 'матрица nightly: нет прогона npx playwright test');
     }

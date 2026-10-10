@@ -97,6 +97,8 @@ describe('nightly.yml: матрица + advisory-visual (до v1.0, ADR-0004)', 
       'build-dist: нет проверки структуры zip (§6.1): ',
       'release: нет джобы публикации GitHub Release (gh release create)',
       'release: нет guard refs/tags/ (workflow_dispatch не публикует Release)',
+      'матрица release: container без options --user 1001',
+      'матрица nightly: container без options --user 1001',
       'nightly: нет advisory-visual джобы (T12.1, ADR-0004)',
     ]) {
       expect(validator, `контракт валидатора: ${contract}`).toContain(contract);

@@ -30,7 +30,11 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
 
 Все браузерные джобы — в пиннутом образе `mcr.microsoft.com/playwright:v1.63.0-jammy`
 (тот же, что локальный `npm run test:docker`; пин — `package.json → iraoUi.playwrightImage`,
-совпадение с каждым воркфлоу проверяет валидатор). Кэш npm — во всех джобах
+совпадение с каждым воркфлоу проверяет валидатор). Матричные джобы nightly/release
+запускают контейнер как uid 1001 (`options: --user 1001`, официальный рецепт Playwright
+для GH Actions container-джоб): `HOME=/github/home` смонтирован с владельцем uid 1001, и
+запуск от root валит Firefox («$HOME isn't owned by the current user») — воспроизведено
+и проверено в том же образе (приёмка T12.1). Кэш npm — во всех джобах
 (`setup-node → cache: npm`). Кэш Playwright-браузеров не нужен: браузеры предустановлены
 в образе, runner-уровневых браузерных шагов нет; если появится такая джоба —
 `actions/cache` на `~/.cache/ms-playwright` + `npx playwright install`.

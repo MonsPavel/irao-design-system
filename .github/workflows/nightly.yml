@@ -150,7 +150,13 @@ jobs:
           - chromium
           - firefox
           - webkit
-    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage
+      # uid 1001 (pwuser образа) — официальный рецепт Playwright для GH Actions
+      # container-джоб: HOME=/github/home смонтирован с владельцем uid 1001, и
+      # запуск от root валит Firefox («$HOME isn't owned by the current user»);
+      # воспроизведено и проверено фиксом в том же образе (приёмка T12.1, AC3).
+      options: --user 1001
     steps:
       - name: Checkout
         uses: actions/checkout@v4

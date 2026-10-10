@@ -86,7 +86,13 @@ jobs:
           - chromium
           - firefox
           - webkit
-    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+      # uid 1001 (pwuser образа) — официальный рецепт Playwright для GH Actions
+      # container-джоб: HOME=/github/home смонтирован с владельцем uid 1001, и
+      # запуск от root валит Firefox; воспроизведено и проверено в том же
+      # образе (приёмка T12.1 — релизная матрица обязана быть запускаемой).
+      options: --user 1001
     timeout-minutes: 20
     steps:
       - name: Checkout
