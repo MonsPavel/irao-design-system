@@ -31,8 +31,8 @@
  *    в warning (Severity спеки T4.2), негативная фикстура — в EXPECTATIONS
  *    tools/run-lint-cases.mjs;
  *  - README компонента с do/don't «действие → button, переход → ui-link»
- *    (Scope) и CONTRIBUTING-чек-лист новой компоненты (AC: заводится здесь,
- *    на эталоне).
+ *    (Scope) и CONTRIBUTING-чек-лист ревью компонента (AC: заводится здесь,
+ *    на эталоне; имя секции — с T10.4).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -395,9 +395,9 @@ describe('подключение и гейты (DoD)', () => {
     expect(readme).toContain('type=');
   });
 
-  it('CONTRIBUTING: чек-лист новой компоненты заведён на эталоне (AC T4.2)', () => {
+  it('CONTRIBUTING: чек-лист ревью компонента заведён на эталоне (AC T4.2; имя секции — с T10.4)', () => {
     const contributing = readFileSync(join(root, 'CONTRIBUTING.md'), 'utf8');
-    expect(contributing).toMatch(/Чек-лист (новой )?компонент/i);
+    expect(contributing).toMatch(/Чек-лист ревью компонент/i);
     expect(contributing).toContain('T4.2');
   });
 
