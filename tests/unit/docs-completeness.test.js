@@ -255,6 +255,25 @@ describe('brokenDocLinks: относительные href/src обязаны р�
     expect(problems[0]).toContain('../stands/ui-nope.html');
   });
 
+  it('учебные href в код-примерах (сниппет, do/don\'t) — не ссылки страницы', () => {
+    const html = [
+      '<pre><code>&lt;a class="ui-link" href="/notifications"&gt;…&lt;/a&gt;</code></pre>',
+      '<ul><li>Don\'t: <code>&lt;a href="…"&gt;Отправить&lt;/a&gt;</code></li></ul>',
+      '<a href="../stands/ui-x.html">настоящая ссылка</a>',
+    ].join('\n');
+    expect(brokenDocLinks(html, base)).toEqual([]);
+  });
+
+  it('демо-ссылки секции «Живые примеры» (канонический паттерн) — не ссылки страницы', () => {
+    const html = [
+      '<!-- ui-docs-examples:start -->',
+      '<a class="ui-breadcrumbs__link" itemprop="item" href="/vacancies/">Вакансии</a>',
+      '<!-- ui-docs-examples:end -->',
+      '<a href="../stands/ui-x.html">настоящая ссылка</a>',
+    ].join('\n');
+    expect(brokenDocLinks(html, base)).toEqual([]);
+  });
+
   it('битый src фрейма/скрипта тоже ловится', () => {
     const html = '<iframe src="../stands/ui-nope.html"></iframe>';
     expect(brokenDocLinks(html, base).length).toBe(1);

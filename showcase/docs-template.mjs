@@ -159,6 +159,8 @@ function renderInline(text) {
     if (doc) return `<a href="../docs/${doc[1]}.html">${text2}</a>`;
     const stand = /^stand:([\w/-]+)$/.exec(target);
     if (stand) return `<a href="../stands/${stand[1]}.html">${text2}</a>`;
+    // Якорь той же док-страницы (id заголовков секций генерирует шаблон).
+    if (target.startsWith('#')) return `<a href="${target}">${text2}</a>`;
     const clean = target.replace(/^(?:\.\.\/)+/, '').replace(/^\.\//, '');
     return text2 === clean ? `<code>${clean}</code>` : `${text2} (<code>${clean}</code>)`;
   });
@@ -837,11 +839,18 @@ export async function docCompletenessProblems(root) {
  * нет битых»): относительные href/src разрешаются относительно baseDir
  * (каталог страницы в полигоне) и обязаны существовать. Схемы-цели
  * (якоря, http(s), mailto, data) — не файлы полигона, пропускаются.
+ * Код-примеры (сниппет, do/don't, README-код) и разметка секции «Живые
+ * примеры» вырезаются до сканирования: учебные href="/notifications" в коде
+ * и демо-ссылки канонического паттерна — цели САЙТА, а не ссылки полигона.
  * Возвращает список проблем (пустой = все ссылки резолвятся).
  */
 export function brokenDocLinks(html, baseDir) {
   const problems = [];
-  for (const match of html.matchAll(/(?:href|src)="([^"]*)"/g)) {
+  const withoutCode = html
+    .replace(/<!-- ui-docs-examples:start -->[\s\S]*?<!-- ui-docs-examples:end -->/g, '')
+    .replace(/<pre[\s\S]*?<\/pre>/g, '')
+    .replace(/<code>[\s\S]*?<\/code>/g, '');
+  for (const match of withoutCode.matchAll(/(?:href|src)="([^"]*)"/g)) {
     const target = match[1];
     if (target === '' || /^(?:https?:|mailto:|data:|#)/.test(target)) continue;
     const clean = target.split('#')[0].split('?')[0];
