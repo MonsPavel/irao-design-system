@@ -221,7 +221,12 @@ standTest.describe('legacy-атака: констрейнты раздела 6 �
       const state = await focusState(page);
       expect(state.tag, 'фокус на ссылке карточки').toBe('a');
       expect(state.focusVisible, ':focus-visible применён').toBe(true);
-      const linkOutline = await probeStyles(page, '#ui-card-link-title', ['outline-width'], '::after');
+      const linkOutline = await probeStyles(
+        page,
+        '#ui-card-link-title',
+        ['outline-width'],
+        '::after',
+      );
       expect(
         parseFloat(linkOutline['outline-width']),
         `контур ::after по всей карточке ≥ 2px (факт ${linkOutline['outline-width']})`,
@@ -249,7 +254,10 @@ standTest.describe('legacy-атака: констрейнты раздела 6 �
       const state = await focusState(page);
       expect(state.tag, 'фокус на ссылке').toBe('a');
       expect(state.focusVisible).toBe(true);
-      expect(parseFloat(state.outlineWidth), 'AC: outline ≥ 2px против a {outline:none}').toBeGreaterThanOrEqual(2);
+      expect(
+        parseFloat(state.outlineWidth),
+        'AC: outline ≥ 2px против a {outline:none}',
+      ).toBeGreaterThanOrEqual(2);
       expect(state.outlineStyle).toBe('solid');
 
       // Атака №2 — ДО ui-core (первый узел head): 0-1-1 политики бьёт 0-0-1
