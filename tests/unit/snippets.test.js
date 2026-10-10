@@ -184,19 +184,41 @@ describe('ревью T11.1 (high): json-data.php — имя данных в по
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#039;');
 
-  it('враждебное имя не порождает второго атрибута src= (воспроизводит замечание)', () => {
-    // Эмуляция сборки сниппетом ДО фикса: sprintf('data-ui-%s-data',
-    // htmlspecialchars($name)) — враждебное имя проходит насквозь.
-    const emitted =
-      '<script type="application/json" data-ui-' +
-      escapeHtmlAttr('x src=https://evil.tld/a.js') +
-      '-data>';
+  /** Гейт и fallback извлекаются из PHP-исходника — зеркало не дрейфует. */
+  const gateMatch = jsonData.match(
+    /preg_match\(\s*'(\/\^\[a-z\]\[a-z0-9-\]\*\$\/i)'\s*,\s*\(string\)\s*\$name\s*\)\s*\)\s*\{\s*\$name\s*=\s*'([^']+)'/,
+  );
+  const [, phpPattern, fallback] = gateMatch ?? [];
+  const nameGate = phpPattern
+    ? new RegExp(
+        phpPattern.slice(1, phpPattern.lastIndexOf('/')),
+        phpPattern.slice(phpPattern.lastIndexOf('/') + 1),
+      )
+    : null;
+
+  /** Эмуляция сборки атрибута сниппетом (гейт → sprintf data-ui-%s-data). */
+  const emitAsSnippetDoes = (name) => {
+    let safe = String(name);
+    if (!nameGate || !nameGate.test(safe)) {
+      safe = fallback ?? 'invalid';
+    }
+    return `<script type="application/json" data-ui-${escapeHtmlAttr(safe)}-data>`;
+  };
+
+  it('враждебное имя не порождает второго атрибута src= (фикс ревью)', () => {
+    const emitted = emitAsSnippetDoes('x src=https://evil.tld/a.js');
     expect(emitted, 'второй атрибут src= не появился').not.toContain('src=');
+    expect(emitted, 'враждебное имя подменено на invalid').toBe(
+      '<script type="application/json" data-ui-invalid-data>',
+    );
   });
 
   it('пустое имя не собирает пустой data-ui--data', () => {
-    const emitted = '<script type="application/json" data-ui-' + escapeHtmlAttr('') + '-data>';
-    expect(emitted).not.toContain('data-ui--data');
+    expect(emitAsSnippetDoes('')).toBe('<script type="application/json" data-ui-invalid-data>');
+  });
+
+  it('легитимное имя проходит гейт как прежде', () => {
+    expect(emitAsSnippetDoes('tabs')).toBe('<script type="application/json" data-ui-tabs-data>');
   });
 
   it('сниппет валидирует имя гейтом /^[a-z][a-z0-9-]*$/i с подменой на invalid (маркер фикса)', () => {
@@ -204,6 +226,9 @@ describe('ревью T11.1 (high): json-data.php — имя данных в по
       /preg_match\(\s*'\/\^\[a-z\]\[a-z0-9-\]\*\$\/i'\s*,\s*\(string\)\s*\$name/,
     );
     expect(jsonData).toContain("$name = 'invalid'");
+    // Зеркало собрано из реальных значений исходника (гейт + fallback).
+    expect(nameGate, 'гейт извлечён из исходника').toBeInstanceOf(RegExp);
+    expect(fallback, 'fallback извлечён из исходника').toBe('invalid');
   });
 });
 

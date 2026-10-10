@@ -22,7 +22,9 @@
   (ADR-0008 п.2, §6.3): `irao_ui_json_script($data, 'tabs')` →
   `<script type="application/json" data-ui-tabs-data>`; json_encode с
   `JSON_HEX_TAG` (защита от вылезания из `<script>` — XSS) и
-  `JSON_UNESCAPED_UNICODE`; парсит и рендерит сайт, модули системы
+  `JSON_UNESCAPED_UNICODE`; имя данных — гейт `/^[a-z][a-z0-9-]*$/i`
+  (позиция ИМЕНИ атрибута — защита валидацией, не экранированием;
+  враждебное/пустое имя → `invalid`); парсит и рендерит сайт, модули системы
   инициализируют готовую разметку (прецедент — ui-tabs).
 
 - [`breadcrumbs.php`](breadcrumbs.php) — генерация хлебных крошек ui-breadcrumbs

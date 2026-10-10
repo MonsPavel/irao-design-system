@@ -12,7 +12,9 @@
  *
  * Именование: data-ui-<имя>-data — единый паттерн с data-ui-tabs-data
  * (ui-tabs README, 02-architecture §6.3). Значение — имя компонента
- * (или роль данных), латиницей; парсер сайта ищет
+ * (или роль данных), гейт /^[a-z][a-z0-9-]*$/i (латиница/цифры/дефис,
+ * враждебное или пустое → 'invalid': имя попадает в позицию ИМЕНИ атрибута —
+ * см. докблок irao_ui_json_script); парсер сайта ищет
  * script[data-ui-<имя>-data].
  *
  * БЕЗОПАСНОСТЬ (XSS — часть контракта): данные инфоблока могут содержать
@@ -33,12 +35,25 @@ if (!function_exists('irao_ui_json_script')) {
      * @param mixed  $data любые данные (массив/скаляр) — после json_encode
      *                      попадают в <script type="application/json">;
      * @param string $name имя данных: атрибут станет data-ui-{$name}-data
-     *                      (например 'tabs' → data-ui-tabs-data);
+     *                      (например 'tabs' → data-ui-tabs-data). Имя
+     *                      валидируется гейтом /^[a-z][a-z0-9-]*$/i —
+     *                      латиница/цифры/дефис; враждебное (и пустое) имя
+     *                      подменяется на 'invalid'. ВАЖНО: $name попадает
+     *                      в позицию ИМЕНИ атрибута (без кавычек) —
+     *                      htmlspecialchars здесь не защита (пробел и '='
+     *                      он не экранирует: 'x src=//evil.tld/a.js' собрал бы
+     *                      второй атрибут src=), защиту даёт только гейт;
      * @param string $id   необязательный id тега (если парсер ищет по id)
      * @return string HTML <script type="application/json">…</script>
      */
     function irao_ui_json_script($data, $name, $id = '')
     {
+        // Гейт имени (см. @param $name): контекст — имя атрибута, экранирование
+        // не работает, работает валидация. htmlspecialchars ниже — страховка
+        // в глубину (для гейтованного имени — тождественна).
+        if (!preg_match('/^[a-z][a-z0-9-]*$/i', (string) $name)) {
+            $name = 'invalid';
+        }
         $attr = sprintf('data-ui-%s-data', htmlspecialchars((string) $name, ENT_QUOTES, 'UTF-8'));
         $idAttr = $id !== ''
             ? sprintf(' id="%s"', htmlspecialchars((string) $id, ENT_QUOTES, 'UTF-8'))
