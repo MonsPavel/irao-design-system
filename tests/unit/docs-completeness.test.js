@@ -88,18 +88,32 @@ const PATTERN_README = [
   '- **Do**: собирать из компонентов.',
 ].join('\n');
 
-/** Собрать минимальный «полный» корень; правки после — источники проблем. */
+/** Собрать минимальный «полный» корень; правки после — источники проблем.
+ *  Каждый негативный кейс добавляет СВОЙ компонент с уникальным именем:
+ *  метаданные — require(esm)-модули, их кэш не инвалидируется перезаписью
+ *  файла, поэтому мутации одного ui-x ломали бы порядок проверок. */
 function writeFullFixture(dir) {
   mkdirSync(join(dir, 'components', 'ui-x'), { recursive: true });
   writeFileSync(join(dir, 'components', 'ui-x', 'README.md'), VALID_README);
-  mkdirSync(join(dir, 'showcase', 'docs'), { recursive: true });
-  writeFileSync(
-    join(dir, 'showcase', 'docs', 'ui-x.mjs'),
-    `export default ${JSON.stringify(VALID_METADATA, null, 2)};\n`,
-  );
+  writeMetadata(dir, 'ui-x', VALID_METADATA);
   mkdirSync(join(dir, 'patterns', 'p1'), { recursive: true });
   writeFileSync(join(dir, 'patterns', 'p1', 'p1.html'), '<div class="ui-card">p1</div>');
   writeFileSync(join(dir, 'patterns', 'p1', 'README.md'), PATTERN_README);
+}
+
+function writeMetadata(dir, name, metadata) {
+  mkdirSync(join(dir, 'showcase', 'docs'), { recursive: true });
+  writeFileSync(
+    join(dir, 'showcase', 'docs', `${name}.mjs`),
+    `export default ${JSON.stringify(metadata, null, 2)};\n`,
+  );
+}
+
+/** Добавить компонент фикстуры с кастомными README/метаданными. */
+function addFixtureComponent(dir, name, readme, metadata) {
+  mkdirSync(join(dir, 'components', name), { recursive: true });
+  writeFileSync(join(dir, 'components', name, 'README.md'), readme);
+  writeMetadata(dir, name, metadata);
 }
 
 const fixtureRoot = mkdtempSync(join(tmpdir(), 'irao-docs-completeness-'));
@@ -115,93 +129,62 @@ describe('docCompletenessProblems: полный фикстурный корен�
   });
 
   it('компонент без метаданных showcase/docs/<имя>.mjs — док-страница не соберётся', async () => {
-    rmSync(join(fixtureRoot, 'showcase', 'docs', 'ui-x.mjs'));
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('ui-x') && p.includes('метаданны'))).toBe(true);
-    } finally {
-      writeFileSync(
-        join(fixtureRoot, 'showcase', 'docs', 'ui-x.mjs'),
-        `export default ${JSON.stringify(VALID_METADATA, null, 2)};\n`,
-      );
-    }
+    mkdirSync(join(fixtureRoot, 'components', 'ui-x-nometa'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'components', 'ui-x-nometa', 'README.md'), VALID_README);
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('ui-x-nometa') && p.includes('метаданны'))).toBe(true);
   });
 
   it('метаданные без каталога компонента — «и наоборот»', async () => {
-    writeFileSync(
-      join(fixtureRoot, 'showcase', 'docs', 'ui-orphan.mjs'),
-      `export default ${JSON.stringify(VALID_METADATA, null, 2)};\n`,
-    );
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('ui-orphan'))).toBe(true);
-    } finally {
-      rmSync(join(fixtureRoot, 'showcase', 'docs', 'ui-orphan.mjs'));
-    }
+    writeMetadata(fixtureRoot, 'ui-orphan', VALID_METADATA);
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('ui-orphan'))).toBe(true);
   });
 
   it('компонент без README.md — источник секций страницы', async () => {
-    const readme = join(fixtureRoot, 'components', 'ui-x', 'README.md');
-    rmSync(readme);
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('ui-x') && p.includes('README'))).toBe(true);
-    } finally {
-      writeFileSync(readme, VALID_README);
-    }
+    mkdirSync(join(fixtureRoot, 'components', 'ui-x-noreadme'), { recursive: true });
+    writeMetadata(fixtureRoot, 'ui-x-noreadme', VALID_METADATA);
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('ui-x-noreadme') && p.includes('README'))).toBe(true);
   });
 
   it('маппинг метаданных указывает на несуществующий «## заголовок» README', async () => {
-    const readme = join(fixtureRoot, 'components', 'ui-x', 'README.md');
-    const withoutStates = VALID_README.replace('## Состояния', '## Виды');
-    rmSync(readme);
-    writeFileSync(readme, withoutStates);
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('ui-x') && p.includes('Состояния'))).toBe(true);
-    } finally {
-      rmSync(readme);
-      writeFileSync(readme, VALID_README);
-    }
+    addFixtureComponent(
+      fixtureRoot,
+      'ui-x-badmapping',
+      VALID_README.replace('## Состояния', '## Виды'),
+      VALID_METADATA,
+    );
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('ui-x-badmapping') && p.includes('Состояния'))).toBe(
+      true,
+    );
   });
 
   it('пустой обязательный слот метаданных (states/a11y/api/doDont) — секция шаблона пуста', async () => {
-    const meta = join(fixtureRoot, 'showcase', 'docs', 'ui-x.mjs');
     const empty = JSON.parse(JSON.stringify(VALID_METADATA));
     empty.readme.doDont = [];
-    rmSync(meta);
-    writeFileSync(meta, `export default ${JSON.stringify(empty, null, 2)};\n`);
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('ui-x') && p.includes('doDont'))).toBe(true);
-    } finally {
-      rmSync(meta);
-      writeFileSync(meta, `export default ${JSON.stringify(VALID_METADATA, null, 2)};\n`);
-    }
+    addFixtureComponent(fixtureRoot, 'ui-x-emptydodont', VALID_README, empty);
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('ui-x-emptydodont') && p.includes('doDont'))).toBe(true);
   });
 
   it('паттерн без канонического html — стенд не соберётся', async () => {
-    const html = join(fixtureRoot, 'patterns', 'p1', 'p1.html');
-    rmSync(html);
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('patterns/p1'))).toBe(true);
-    } finally {
-      writeFileSync(html, '<div class="ui-card">p1</div>');
-    }
+    mkdirSync(join(fixtureRoot, 'patterns', 'p2'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'patterns', 'p2', 'README.md'), PATTERN_README);
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('patterns/p2'))).toBe(true);
   });
 
   it("README паттерна без «Do / Don't» — чек-лист прогона не зелёный", async () => {
-    const readme = join(fixtureRoot, 'patterns', 'p1', 'README.md');
-    rmSync(readme);
-    writeFileSync(readme, PATTERN_README.replace("## Do / Don't\n", ''));
-    try {
-      const problems = await docCompletenessProblems(fixtureRoot);
-      expect(problems.some((p) => p.includes('patterns/p1') && p.includes("Don't"))).toBe(true);
-    } finally {
-      rmSync(readme);
-      writeFileSync(readme, PATTERN_README);
-    }
+    mkdirSync(join(fixtureRoot, 'patterns', 'p3'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'patterns', 'p3', 'p3.html'), '<div class="ui-card">p3</div>');
+    writeFileSync(
+      join(fixtureRoot, 'patterns', 'p3', 'README.md'),
+      PATTERN_README.replace("## Do / Don't\n", ''),
+    );
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('patterns/p3') && p.includes("Don't"))).toBe(true);
   });
 });
 
@@ -244,11 +227,14 @@ describe('renderMarkdown: схемы doc:/stand: — перекрёстные с
 /* ── битые ссылки (AC T10.2: «перекрёстные ссылки работают») ── */
 
 describe('brokenDocLinks: относительные href/src обязаны резолвиться', () => {
-  const base = join(fixtureRoot, 'showcase-dist-docs-stub');
-  mkdirSync(join(base, 'stands', 'patterns'), { recursive: true });
-  writeFileSync(join(base, 'index.html'), '<h1>каталог</h1>');
-  writeFileSync(join(base, 'stands', 'ui-x.html'), '<h1>ui-x</h1>');
-  writeFileSync(join(base, 'stands', 'patterns', 'p1.html'), '<h1>p1</h1>');
+  // base — модель каталога docs/ полигона: соседние каталоги (stands/, index)
+  // резолвятся через «../».
+  const base = join(fixtureRoot, 'docs');
+  mkdirSync(join(fixtureRoot, 'stands', 'patterns'), { recursive: true });
+  mkdirSync(base, { recursive: true });
+  writeFileSync(join(fixtureRoot, 'index.html'), '<h1>каталог</h1>');
+  writeFileSync(join(fixtureRoot, 'stands', 'ui-x.html'), '<h1>ui-x</h1>');
+  writeFileSync(join(fixtureRoot, 'stands', 'patterns', 'p1.html'), '<h1>p1</h1>');
 
   it('существующие относительные ссылки и якоря — проблем нет', () => {
     const html = [

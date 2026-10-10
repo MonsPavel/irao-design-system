@@ -44,6 +44,8 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transform } from 'esbuild';
 import {
+  brokenDocLinks,
+  docCompletenessProblems,
   loadMetadata,
   readComponentMarkup,
   REFERENCE_COMPONENTS,
@@ -895,13 +897,13 @@ async function generateShowcase({ themes }) {
   });
   writeFileSync(join(SHOWCASE_DIST, 'standalone.html'), standalone);
 
-  return { stands, docs };
+  return { stands, docs, discovered };
 }
 
 /* ── self-проверки сборки (AC T1.3; unit для build.mjs не требуется —
    проверяется сборкой, сценарии e2e — с T1.4) ── */
 
-function selfChecks({ banner, stands, docs }) {
+async function selfChecks({ banner, stands, docs, discovered }) {
   for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js', 'fonts', 'themes']) {
     assert(existsSync(join(DIST, name)), `dist/${name} отсутствует (структура §6.1)`);
   }
@@ -961,11 +963,30 @@ function selfChecks({ banner, stands, docs }) {
   // билде» (Testing requirements T10.1). verifyDocPageHtml пинит чек-лист
   // «страница = шаблон»: 9 секций по порядку, сниппет = каноническому файлу
   // компонента, живые примеры = сниппету, responsive — iframe 375/768/1440.
+  // T10.2 добавляет к прогону полноту и связность: инвентаризация
+  // «компоненты dist + паттерны ↔ страницы» и проверку, что относительные
+  // ссылки страниц (перекрёстные doc:/stand:, стенды responsive-секции)
+  // резолвятся в полигоне — «нет битых» (AC T10.2).
+  const completeness = await docCompletenessProblems(ROOT);
+  assert(
+    completeness.length === 0,
+    `полнота док (T10.2): ${completeness.join('; ')}`,
+  );
   for (const { name, markup } of docs) {
     const html = readFileSync(join(SHOWCASE_DIST, 'docs', `${name}.html`), 'utf8');
     const problems = verifyDocPageHtml(html, markup);
     assert(problems.length === 0, `дока ${name} ≠ шаблону T10.1: ${problems.join('; ')}`);
+    const broken = brokenDocLinks(html, join(SHOWCASE_DIST, 'docs'));
+    assert(broken.length === 0, `дока ${name}: битые ссылки — ${broken.join('; ')}`);
   }
+  // AC T10.2: 100% компонентов dist имеют док-страницу — discovered ↔ docs
+  // «и наоборот» на уровне собранного полигона (инвентаризация выше — по
+  // исходникам, этот гейт — по факту генерации).
+  const missingDocs = discovered.filter((name) => !docs.some((doc) => doc.name === name));
+  assert(
+    missingDocs.length === 0,
+    `компоненты dist без док-страницы (T10.2): ${missingDocs.join(', ')}`,
+  );
   // AC T10.1: все три эталона собрались и прошли чек-лист (отсутствие
   // метаданных эталона — warning выше, здесь — жёсткий гейт).
   for (const reference of REFERENCE_COMPONENTS) {
@@ -1015,8 +1036,8 @@ async function main() {
   emitRuntime(DIST);
   emitRuntime(SHOWCASE_DIST);
 
-  const { stands, docs } = await generateShowcase({ themes: themeNames() });
-  selfChecks({ banner, stands, docs });
+  const { stands, docs, discovered } = await generateShowcase({ themes: themeNames() });
+  await selfChecks({ banner, stands, docs, discovered });
 
   for (const name of COMPONENTS) {
     if (!existsSync(join(ROOT, `components/${name}`))) {

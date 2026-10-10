@@ -24,7 +24,8 @@
  * чтения файлов компонента. Потребители — showcase/build.mjs, unit-пины
  * (tests/unit/docs-template.test.js), e2e-спека (tests/e2e/docs-template.spec.js).
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -147,6 +148,17 @@ function renderInline(text) {
   out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
   out = out.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_all, text2, target) => {
     if (/^https?:\/\//.test(target)) return `<a href="${target}">${text2}</a>`;
+    // Перекрёстные ссылки полигона (T10.2 «связность»): README живёт в
+    // репозитории, а ссылка рендерится на док-странице showcase/dist/docs/,
+    // поэтому репо-относительный путь в ней был бы битым. Явные схемы:
+    //   doc:<имя>              → ../docs/<имя>.html   (дока соседа)
+    //   stand:<имя>            → ../stands/<имя>.html (стенд компонента)
+    //   stand:patterns/<имя>   → ../stands/patterns/<имя>.html (стенд паттерна)
+    // Существование цели пинит сборка (brokenDocLinks в selfChecks).
+    const doc = /^doc:([\w-]+)$/.exec(target);
+    if (doc) return `<a href="../docs/${doc[1]}.html">${text2}</a>`;
+    const stand = /^stand:([\w/-]+)$/.exec(target);
+    if (stand) return `<a href="../stands/${stand[1]}.html">${text2}</a>`;
     const clean = target.replace(/^(?:\.\.\/)+/, '').replace(/^\.\//, '');
     return text2 === clean ? `<code>${clean}</code>` : `${text2} (<code>${clean}</code>)`;
   });
@@ -659,6 +671,184 @@ export function verifyDocPageHtml(html, markup) {
     problems.push(
       `responsive-секция: ожидались iframe 375/768/1440, получено ${frames.join('/') || '—'}`,
     );
+  }
+  return problems;
+}
+
+/* ── полнота док (T10.2, Technical considerations): инвентаризация
+   «компоненты dist + паттерны ↔ страницы showcase». Сборка гоняет её в
+   selfChecks — «у каждого каталога components/* есть страница и наоборот». ── */
+
+/** Метаданные док из УКАЗАННОГО корня. require(esm), а не import(): функция
+ *  исполняется и сборкой (plain Node), и юнит-пинами полноты (T10.2) под
+ *  Vitest — трансформер Vite не резолвит динамический import() файлов вне
+ *  корня проекта (временные фикстуры тестов), а createRequire не
+ *  перехватывается. Node 24: require(esm) синхронен для модулей без
+ *  top-level await — default-экспорт объекта метаданных этому удовлетворяет. */
+const requireDocMetadata = createRequire(import.meta.url);
+
+function importDocMetadata(root, name) {
+  const metadata = requireDocMetadata(join(root, 'showcase', 'docs', `${name}.mjs`));
+  return Promise.resolve(metadata?.default ?? metadata);
+}
+
+/** Обязательные слоты маппинга «секция шаблона → ## заголовок README». */
+const DOC_README_SLOTS = Object.freeze(['states', 'a11y', 'api', 'doDont']);
+
+/** Обязательные секции README паттерна (чек-лист прогона T10.2): состав/
+ *  разметка («Формула секции» — лендинг-паттерн T8.3), a11y (заголовок может
+ *  нести уточнение, как «A11y — диалог-чек» search-overlay), do/don't. */
+const PATTERN_SECTION_CHECKS = Object.freeze([
+  ['состава/разметки', /^(?:Состав|Разметка|Формула секции)$/],
+  ['A11y', /^A11y/],
+  ["Do / Don't", /^Do \/ Don't/],
+]);
+
+/**
+ * Пробелы полноты док. Пустой список = у каждого каталога components/ui-*
+ * есть README и метаданные док-страницы (маппинг указывает на существующие
+ * «## заголовки», машинные части — клавиатура/ARIA/скринридер/версия —
+ * непусты), у каждого showcase/docs/*.mjs есть компонент («и наоборот»),
+ * у каждого patterns/<имя>/ — канонический html (источник стенда) и README
+ * с обязательными секциями. Синхронизировано с чек-листом CONTRIBUTING
+ * («страница = шаблон») и юнит-пинами tests/unit/docs-completeness.test.js.
+ */
+export async function docCompletenessProblems(root) {
+  const problems = [];
+
+  const componentsDir = join(root, 'components');
+  const componentNames = existsSync(componentsDir)
+    ? readdirSync(componentsDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && entry.name.startsWith('ui-'))
+        .map((entry) => entry.name)
+        .sort()
+    : [];
+
+  const docsDir = join(root, 'showcase', 'docs');
+  const docNames = existsSync(docsDir)
+    ? readdirSync(docsDir)
+        .filter((entry) => entry.endsWith('.mjs'))
+        .map((entry) => entry.slice(0, -'.mjs'.length))
+        .sort()
+    : [];
+
+  for (const name of componentNames) {
+    const readmePath = join(componentsDir, name, 'README.md');
+    if (!existsSync(readmePath)) {
+      problems.push(`${name}: нет components/${name}/README.md — источник секций док-страницы`);
+      continue; // слоты маппинга без README не проверить
+    }
+    if (!existsSync(join(docsDir, `${name}.mjs`))) {
+      problems.push(
+        `${name}: нет метаданных showcase/docs/${name}.mjs — док-страница не соберётся ` +
+          '(чек-лист «страница = шаблон», CONTRIBUTING)',
+      );
+      continue;
+    }
+    let metadata;
+    try {
+      metadata = await importDocMetadata(root, name);
+    } catch (error) {
+      problems.push(`${name}: метаданные showcase/docs/${name}.mjs не импортируются (${error.message})`);
+      continue;
+    }
+    if (!metadata || typeof metadata !== 'object') {
+      problems.push(`${name}: метаданные showcase/docs/${name}.mjs без default-экспорта объекта`);
+      continue;
+    }
+    const parsed = parseReadme(readFileSync(readmePath, 'utf8'));
+    const slots = metadata.readme ?? {};
+    for (const slot of DOC_README_SLOTS) {
+      const headings = slots[slot];
+      if (!Array.isArray(headings) || headings.length === 0) {
+        problems.push(`${name}: слот readme.${slot} пуст — секция шаблона останется пустой`);
+        continue;
+      }
+      for (const heading of headings) {
+        if (!parsed.sections.has(heading)) {
+          problems.push(`${name}: в README.md нет секции «${heading}» (слот readme.${slot})`);
+        }
+      }
+    }
+    for (const [index, heading] of (slots.extra ?? []).entries()) {
+      if (!parsed.sections.has(heading)) {
+        problems.push(`${name}: в README.md нет секции «${heading}» (слот readme.extra[${index}])`);
+      }
+    }
+    // A11y-требование T10.2 «секция шаблона — непустая»: машинные части
+    // a11y-секции (клавиатура, ARIA, скринридер) обязаны быть заполнены.
+    if (!Array.isArray(metadata.keyboard) || metadata.keyboard.length === 0) {
+      problems.push(`${name}: клавиатурная таблица (metadata.keyboard) пуста`);
+    }
+    if (!Array.isArray(metadata.aria) || metadata.aria.length === 0) {
+      problems.push(`${name}: ARIA-список (metadata.aria) пуст`);
+    }
+    if (!Array.isArray(metadata.screenReader?.rows) || metadata.screenReader.rows.length === 0) {
+      problems.push(`${name}: чек-лист скринридера (metadata.screenReader.rows) пуст (протокол T9.2)`);
+    }
+    if (!metadata.version?.introduced || !metadata.version?.task) {
+      problems.push(`${name}: version.introduced / version.task не заполнены`);
+    }
+  }
+
+  // «И наоборот»: страница без компонента.
+  for (const name of docNames) {
+    if (!componentNames.includes(name)) {
+      problems.push(
+        `showcase/docs/${name}.mjs: нет components/${name}/ — метаданные без компонента`,
+      );
+    }
+  }
+
+  // Паттерны: страница паттерна в showcase — стенд (standSource — канонический
+  // html), дока — README; полнота — обязательные секции чек-листа.
+  const patternsDir = join(root, 'patterns');
+  if (existsSync(patternsDir)) {
+    const patternNames = readdirSync(patternsDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .sort();
+    for (const name of patternNames) {
+      if (!existsSync(join(patternsDir, name, `${name}.html`))) {
+        problems.push(`patterns/${name}: нет ${name}.html — стенд showcase не соберётся`);
+      }
+      const readmePath = join(patternsDir, name, 'README.md');
+      if (!existsSync(readmePath)) {
+        problems.push(`patterns/${name}: нет README.md — дока паттерна`);
+        continue;
+      }
+      const headings = Array.from(
+        readFileSync(readmePath, 'utf8').matchAll(/^##\s+(.+?)\s*$/gm),
+        (match) => match[1],
+      );
+      for (const [label, re] of PATTERN_SECTION_CHECKS) {
+        if (!headings.some((heading) => re.test(heading))) {
+          problems.push(`patterns/${name}: в README.md нет секции «${label}» (чек-лист паттерна)`);
+        }
+      }
+    }
+  }
+
+  return problems;
+}
+
+/**
+ * Битые ссылки записанной страницы (AC T10.2 «перекрёстные ссылки работают —
+ * нет битых»): относительные href/src разрешаются относительно baseDir
+ * (каталог страницы в полигоне) и обязаны существовать. Схемы-цели
+ * (якоря, http(s), mailto, data) — не файлы полигона, пропускаются.
+ * Возвращает список проблем (пустой = все ссылки резолвятся).
+ */
+export function brokenDocLinks(html, baseDir) {
+  const problems = [];
+  for (const match of html.matchAll(/(?:href|src)="([^"]*)"/g)) {
+    const target = match[1];
+    if (target === '' || /^(?:https?:|mailto:|data:|#)/.test(target)) continue;
+    const clean = target.split('#')[0].split('?')[0];
+    if (clean === '') continue;
+    if (!existsSync(join(baseDir, clean))) {
+      problems.push(`${target} — цели нет в полигоне`);
+    }
   }
   return problems;
 }
