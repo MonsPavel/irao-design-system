@@ -36,9 +36,7 @@ import { renderMarkdown } from '../../showcase/docs-template.mjs';
 const root = join(import.meta.dirname, '..', '..');
 const read = (...parts) => readFileSync(join(root, ...parts), 'utf8');
 
-const guideSources = Object.fromEntries(
-  GUIDES.map((guide) => [guide.name, read(guide.file.split('/').join('/'))]),
-);
+const guideSources = Object.fromEntries(GUIDES.map((guide) => [guide.name, read(guide.file)]));
 const quickstart = guideSources['quickstart'];
 const integrationGuide = guideSources['integration-guide'];
 const tutorial = guideSources['bitrix-30-minutes'];
@@ -255,10 +253,8 @@ describe('bitrix/bitrix-30-minutes.md — сквозной туториал (Sco
 });
 
 describe('версионирование сниппетов (Implementation requirements T10.3 п.2)', () => {
-  const snippetFiles = readdirSync(join(root, 'bitrix', 'snippets')).filter(
-    (name) =>
-      (name.endsWith('.php') && name !== 'header-php.snippet.php') ||
-      name === 'header-php.snippet.php',
+  const snippetFiles = readdirSync(join(root, 'bitrix', 'snippets')).filter((name) =>
+    name.endsWith('.php'),
   );
 
   it('каждый сниппет в snippets/README несёт пометку «с версии …»', () => {
