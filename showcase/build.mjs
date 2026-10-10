@@ -46,12 +46,19 @@ import { transform } from 'esbuild';
 import {
   brokenDocLinks,
   docCompletenessProblems,
+  escapeHtml,
   loadMetadata,
   readComponentMarkup,
   REFERENCE_COMPONENTS,
   renderDocPage,
   verifyDocPageHtml,
 } from './docs-template.mjs';
+import {
+  guideSnippetCoverageProblems,
+  guideSyncProblems,
+  GUIDES,
+  renderGuidePage,
+} from './guides.mjs';
 import { parseTokensFile, renderTokensStand, TOKENS_SOURCES } from './tokens-stand.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -846,6 +853,30 @@ async function generateShowcase({ themes }) {
     warn(`эталоны T10.1 без док-страниц (шаблон не собран): ${missingReference.join(', ')}`);
   }
 
+  // Гайды внедрения T10.3 (quickstart, integration guide, «Bitrix-разработчику
+  // за 30 минут»): living-источники bitrix/*.md публикуются страницами
+  // showcase/dist/docs/<имя>.html (глубина docs/ — как у док-страниц).
+  // Синхронность embed-блоков («сниппет в гайде = файл bitrix/») — selfChecks
+  // ниже, «диф на билде»; поверхность живого DOM — tests/e2e/guides.spec.js.
+  const guides = [];
+  for (const guide of GUIDES) {
+    const sourcePath = join(ROOT, guide.file);
+    if (!existsSync(sourcePath)) {
+      warn(`гайд ${guide.name}: источника ${guide.file} нет — страница не сгенерирована`);
+      continue;
+    }
+    const page = frame({
+      rel: '..', // docs/<имя>.html → SHOWCASE_DIST (глубина как у док-страниц T10.1)
+      home: '../index.html',
+      // <title> короткий (гейт long-title, ≤70): доступное имя страницы — h1 из GUIDES.
+      title: `${guide.name} — гайд внедрения — irao-ui showcase`,
+      main: renderGuidePage({ guide, markdown: readFileSync(sourcePath, 'utf8') }),
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'docs', `${guide.name}.html`), page);
+    guides.push(guide);
+  }
+
   const standItems = stands.map(
     ({ name, source }) =>
       `      <li><a href="stands/${name}.html">${name}</a> — <code>${source}</code></li>`,
@@ -853,6 +884,10 @@ async function generateShowcase({ themes }) {
   const docItems = docs.map(
     ({ name }) =>
       `      <li><a href="docs/${name}.html">${name}</a> — дока по шаблону T10.1: примеры, сниппет, состояния, responsive, a11y, API, do/don't, версия</li>`,
+  );
+  const guideItems = guides.map(
+    ({ name, title, file }) =>
+      `      <li><a href="docs/${name}.html">${escapeHtml(title)}</a> — живой документ <code>${file}</code></li>`,
   );
   const standSection = standItems.length
     ? ['      <ul>', ...standItems, '      </ul>'].join('\n')
@@ -877,6 +912,12 @@ async function generateShowcase({ themes }) {
       docItems.length
         ? ['      <ul>', ...docItems, '      </ul>'].join('\n')
         : '      <p>Доки по шаблону появятся с T10.1 (эталонные три) и T10.2 (все компоненты).</p>',
+      '    </section>',
+      '    <section aria-labelledby="guides-heading">',
+      '      <h2 id="guides-heading">Гайды внедрения (Bitrix)</h2>',
+      guideItems.length
+        ? ['      <ul>', ...guideItems, '      </ul>'].join('\n')
+        : '      <p>Гайды внедрения появятся с T10.3: quickstart, integration guide, «Bitrix-разработчику за 30 минут».</p>',
       '    </section>',
       '    <section aria-labelledby="standalone-heading">',
       '      <h2 id="standalone-heading">Проверка дистрибутива</h2>',
@@ -906,13 +947,13 @@ async function generateShowcase({ themes }) {
   });
   writeFileSync(join(SHOWCASE_DIST, 'standalone.html'), standalone);
 
-  return { stands, docs, discovered };
+  return { stands, docs, guides, discovered };
 }
 
 /* ── self-проверки сборки (AC T1.3; unit для build.mjs не требуется —
    проверяется сборкой, сценарии e2e — с T1.4) ── */
 
-async function selfChecks({ banner, stands, docs, discovered }) {
+async function selfChecks({ banner, stands, docs, guides, discovered }) {
   for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js', 'fonts', 'themes']) {
     assert(existsSync(join(DIST, name)), `dist/${name} отсутствует (структура §6.1)`);
   }
@@ -928,6 +969,7 @@ async function selfChecks({ banner, stands, docs, discovered }) {
     'standalone.html',
     ...stands.map((s) => `stands/${s.name}.html`),
     ...docs.map((d) => `docs/${d.name}.html`),
+    ...guides.map((g) => `docs/${g.name}.html`),
   ];
   const sourceRef =
     /(?:href|src)="([^"]*(?:\/components\/|\/tokens\/|\/base\/|\/a11y\/|\/themes\/)[^"]*)"/;
@@ -1001,6 +1043,29 @@ async function selfChecks({ banner, stands, docs, discovered }) {
       `эталон T10.1 ${reference} не имеет док-страницы (нужны showcase/docs/${reference}.mjs)`,
     );
   }
+  // Гайды T10.3 (AC): «сниппеты в гайдах = файлы в bitrix/» — синхронизация
+  // embed-блоков на билде; полнота покрытия сниппетов гайдами; битые ссылки
+  // записанных страниц полигона. Имя гайда не должно подменять док-страницу
+  // компонента (общий каталог docs/).
+  const guideCoverage = guideSnippetCoverageProblems(ROOT);
+  assert(guideCoverage.length === 0, `полнота гайдов T10.3: ${guideCoverage.join('; ')}`);
+  for (const guide of guides) {
+    assert(
+      !discovered.includes(guide.name),
+      `имя гайда ${guide.name} пересекается с компонентом — подмена док-страницы docs/${guide.name}.html`,
+    );
+    const syncProblems = guideSyncProblems(ROOT, guide);
+    assert(
+      syncProblems.length === 0,
+      `синхронизация гайда ${guide.name}: ${syncProblems.join('; ')}`,
+    );
+    const guideHtml = readFileSync(join(SHOWCASE_DIST, 'docs', `${guide.name}.html`), 'utf8');
+    const guideBroken = brokenDocLinks(guideHtml, join(SHOWCASE_DIST, 'docs'));
+    assert(
+      guideBroken.length === 0,
+      `гайд ${guide.name}: битые ссылки — ${guideBroken.join('; ')}`,
+    );
+  }
 }
 
 /* ── main ── */
@@ -1042,8 +1107,8 @@ async function main() {
   emitRuntime(DIST);
   emitRuntime(SHOWCASE_DIST);
 
-  const { stands, docs, discovered } = await generateShowcase({ themes: themeNames() });
-  await selfChecks({ banner, stands, docs, discovered });
+  const { stands, docs, guides, discovered } = await generateShowcase({ themes: themeNames() });
+  await selfChecks({ banner, stands, docs, guides, discovered });
 
   for (const name of COMPONENTS) {
     if (!existsSync(join(ROOT, `components/${name}`))) {
@@ -1061,6 +1126,10 @@ async function main() {
   console.log(
     `  showcase/dist/docs/   ${docs.length} док-страниц(ы) по шаблону T10.1 ` +
       `(${docs.map((doc) => doc.name).join(', ') || '—'})`,
+  );
+  console.log(
+    `  showcase/dist/docs/   ${guides.length} гайд(а) внедрения T10.3 ` +
+      `(${guides.map((guide) => guide.name).join(', ') || '—'})`,
   );
   console.log('OK: сборка завершена (структура 02-architecture §6.1)');
 }

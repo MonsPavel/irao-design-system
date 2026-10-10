@@ -1,4 +1,4 @@
-# Integration guide — подключение irao-ui к сайту на Bitrix
+# Integration guide: подключение и миграция (living doc)
 
 > Living-doc раздела 6 архитектуры (02-architecture §6); актуальная версия —
 > T11.1, финальная выверка гайдов — T10.3 (quickstart, «за 30 минут»).
@@ -7,6 +7,9 @@
 > Исполнимая форма подключения — чек-лист
 > [`first-connect-checklist.md`](first-connect-checklist.md) (9 констрейнтов
 > раздела 6 плана 06); копипаст-готовый код — [`snippets/`](snippets/README.md).
+> Быстрый старт — [Quickstart](doc:quickstart); сквозной туториал «от
+> подключения до страницы со списком и формой» —
+> [«Bitrix-разработчику за 30 минут»](doc:bitrix-30-minutes).
 
 ## Подключение (header.php)
 
@@ -17,7 +20,39 @@
 в конец (readyState-guard модулей T1.1 закрывает позднюю загрузку), preload
 шрифтов 400/500 cyr до `ShowHead()`, skip-link первым элементом `<body>`
 (T3.5). Объединение/минификация Bitrix совместимы: файлы уже минифицированы
-(02-architecture §6.4).
+(02-architecture §6.4). PHP-блок сниппета как есть:
+
+```php snippet=bitrix/snippets/header-php.snippet.php
+// Версия UI-системы, закреплённая за сайтом. Обновление = правка этой строки.
+const UI_VERSION = '0.1.0';
+
+$asset = \Bitrix\Main\Page\Asset::getInstance();
+$asset->addCss('/local/ui/' . UI_VERSION . '/ui-core.min.css');
+// Тема бренда — опциональна (в MVP все сайты в дефолтном бренде). Если тема
+// есть, она идёт СТРОГО после core (порядок каскада core → theme → сайт):
+// $asset->addCss('/local/ui/' . UI_VERSION . '/themes/theme-corp.css');
+$asset->addCss('/local/ui/' . UI_VERSION . '/ui-vi.min.css');
+$asset->addJs('/local/ui/' . UI_VERSION . '/ui.min.js', true); // true => в конец, defer-семантика Bitrix
+```
+
+## Что вы подключаете: CSS, JS, шрифты
+
+Файлы поставки (структура dist, 02-architecture §6.1) и роль каждого:
+
+| Файл | Что это | Как подключается |
+|---|---|---|
+| `ui-core.min.css` | токены → base → все компоненты, баннер версии+sha | первым (порядок каскада ниже) |
+| `ui-vi.min.css` | модуль версии для слабовидящих (ГОСТ Р 52872), отдельным файлом | после core, всегда — кнопка входа в VI на любой странице |
+| `ui.min.js` | все JS-модули (классические IIFE), публичное API `window.IraoUI` | `addJs(…, true)` — в конец страницы |
+| `fonts/` | Golos Text woff2 (400/500/600, cyr/lat) + OFL-лицензия | не подключаются вручную: `@font-face` внутри core, `url()` относительно |
+| `themes/` | темы бренда — только переопределение семантических токенов | опционально (секция ниже); в MVP не используются |
+
+Шрифты лежат рядом с CSS в той же папке версии — относительные `url()` из
+`@font-face` работают без правок. Preload — только приоритетные грани
+400/500 cyr (90% русской страницы, паттерн career-portal, T3.1), до
+`ShowHead()`, с обязательным `crossorigin` (шрифты грузятся в CORS-режиме —
+без атрибута preload не матчится с загрузкой, шрифт запросится дважды).
+Подключение вручную других граней не требуется.
 
 ## Порядок каскада (не нарушать)
 
@@ -87,7 +122,11 @@ core, атрибут `data-ui-theme` на `<html>` (значение = имя ф
 data-ui-tabs-data>` с флагами `JSON_HEX_TAG` (нельзя убрать — защита от
 вылезания из `<script>`, XSS) и `JSON_UNESCAPED_UNICODE`. Разметку из данных
 рендерит сайт; модули системы инициализируют готовую каноническую разметку
-(прецедент — ui-tabs).
+(прецедент — ui-tabs). Вызов в шаблоне компонента:
+
+```php snippet=bitrix/snippets/json-data.php
+<?= irao_ui_json_script($tabsFromIblock, 'tabs') ?>
+```
 
 ## Компоненты в PHP
 
@@ -102,6 +141,44 @@ data-ui-tabs-data>` с флагами `JSON_HEX_TAG` (нельзя убрать 
 | Хлебные крошки (T4.7) | [`snippets/breadcrumbs.php`](snippets/breadcrumbs.php) |
 | Пагинация (T6.3) | [`snippets/pagination.php`](snippets/pagination.php) |
 | Серверный рендер ошибок формы + фокус (T5.6) | [`snippets/form-error-render.php`](snippets/form-error-render.php) |
+
+## Крошки и пагинация (серверные сниппеты)
+
+Разметку компонентов рендерит сервер — клиентские модули системы
+инициализируют готовую каноническую разметку (модель ADR-0008). Для двух
+серверных генераторов разметка выведена в копипаст-сниппеты; живые
+интеграционные стенды — patterns/list-page и patterns/form-page полигона.
+
+Хлебные крошки (T4.7) —
+[`snippets/breadcrumbs.php`](snippets/breadcrumbs.php): `nav[aria-label]` →
+`ol[role="list"]` с микроразметкой BreadcrumbList, `aria-current="page"` на
+текущей, весь вывод экранирован. Источник цепочки — `$arResult` компонента
+`bitrix:breadcrumb` или собственный массив; правила построения —
+components/ui-breadcrumbs/README.md. Вызов в шаблоне страницы:
+
+```php snippet=bitrix/snippets/breadcrumbs.php
+renderUiBreadcrumbs([
+    ['NAME' => 'Главная', 'LINK' => SITE_DIR],
+    ['NAME' => 'Вакансии', 'LINK' => SITE_DIR . 'vacancies/'],
+    ['NAME' => 'Стажировка в ИРАО', 'LINK' => null], // текущая — span aria-current="page"
+]);
+```
+
+Пагинация (T6.3) —
+[`snippets/pagination.php`](snippets/pagination.php): окно показа с «…»
+(края всегда, окно ±`$side` у текущей), `aria-current="page"` на текущей,
+недоступные стрелки — `button[disabled]`; для `bitrix:news.list` числа — в
+`$arResult`. Правила и решения — components/ui-pagination/README.md:
+
+```php snippet=bitrix/snippets/pagination.php
+if ((int)$arResult['NAV_PAGE_COUNT'] > 1) {
+    renderUiPagination(
+        (int)$arResult['NAV_PAGE_COUNT'],
+        (int)$arResult['NAV_PAGE_NOMER'],
+        $arResult['sUrlPath'] . '?PAGEN_1=#PAGE#'
+    );
+}
+```
 
 ## Серверные ошибки форм (контракт T5.6)
 
@@ -190,3 +267,9 @@ legacy-стилей, когда ссылок на классы нет. Пило�
 Semver и правила поддержки — ADR-0007; репетиция обновления — T11.4
 (upgrade-чек-лист). Major-обновление правит переопределённые токены в
 `template_styles.css` (см. кейс выше, п. 4).
+
+Версионирование сниппетов (T10.3): если сниппет изменился между
+minor-релизами, в [snippets/README.md](snippets/README.md) и в гайдах стоит
+пометка «с версии X» — при обновлении сверяйте свои копии сниппетов с
+файлами по этим пометкам. Гайды хранят embed-блоки сниппетов, сверяемые с
+файлами на билде: копипаст из гайдов всегда актуален текущей версии.

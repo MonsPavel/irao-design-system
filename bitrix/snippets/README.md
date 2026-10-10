@@ -4,7 +4,13 @@
 копипаст-готовый файл, подключение — по чек-листу
 [`../first-connect-checklist.md`](../first-connect-checklist.md)).
 
-- [`header-php.snippet.php`](header-php.snippet.php) — подключение к
+Версионирование сниппетов (T10.3): сниппет, изменившийся между minor-релизами,
+получает пометку «с версии X» в своей записи (и в гайдах —
+quickstart, integration-guide, «за 30 минут»); база первой поставки —
+с версии 0.1.0. Гайды хранят embed-блоки сниппетов, сверяемые с файлами
+на билде — копипаст из гайдов всегда актуален.
+
+- [`header-php.snippet.php`](header-php.snippet.php) (с версии 0.1.0) — подключение к
   `header.php`: константа `UI_VERSION` (пин версии — констрейнт 8), порядок
   CSS `ui-core → (тема, опционально) → ui-vi`, `template_styles.css` сайта —
   последним (констрейнт 1); preload приоритетных граней Golos (400/500 cyr,
@@ -12,13 +18,13 @@
   T1.1 закрывает позднюю загрузку); `ui-skip-link` первым элементом `<body>`
   (T3.5). Атрибут `data-ui-theme` — опционально (см. theme-connect.php).
 
-- [`theme-connect.php`](theme-connect.php) — подключение опциональной темы
+- [`theme-connect.php`](theme-connect.php) (с версии 0.1.0) — подключение опциональной темы
   бренда (механика T2.4/ADR-0009): файл `themes/theme-<имя>.css` строго после
   core, атрибут `data-ui-theme` на `<html>` (значение = имя файла без
   `theme-`/`.css`), декларативно / по разделам / без перезагрузки. В MVP
   (дефолтный бренд) не используется — по факту появления брендовой темы.
 
-- [`json-data.php`](json-data.php) — данные для JS-компонентов в разметке
+- [`json-data.php`](json-data.php) (с версии 0.1.0) — данные для JS-компонентов в разметке
   (ADR-0008 п.2, §6.3): `irao_ui_json_script($data, 'tabs')` →
   `<script type="application/json" data-ui-tabs-data>`; json_encode с
   `JSON_HEX_TAG` (защита от вылезания из `<script>` — XSS) и
@@ -27,12 +33,12 @@
   враждебное/пустое имя → `invalid`); парсит и рендерит сайт, модули системы
   инициализируют готовую разметку (прецедент — ui-tabs).
 
-- [`breadcrumbs.php`](breadcrumbs.php) — генерация хлебных крошек ui-breadcrumbs
+- [`breadcrumbs.php`](breadcrumbs.php) (с версии 0.1.0) — генерация хлебных крошек ui-breadcrumbs
   (T4.7) из массива `$arResult` (`bitrix:breadcrumb` / собственная цепочка):
   микроразметка BreadcrumbList, `aria-current="page"` на текущей, экранирование
   вывода. Правила построения цепочки — `components/ui-breadcrumbs/README.md`.
 
-- [`form-error-render.php`](form-error-render.php) — серверный рендер ошибок
+- [`form-error-render.php`](form-error-render.php) (с версии 0.1.0) — серверный рендер ошибок
   формы по контракту irao-ui (T5.6) для `bitrix:form.result.new` / произвольной
   формы: сводная `ui-form__summary[role=alert]` из `$arResult["FORM_ERRORS"]`,
   `ui-field--error` + `aria-invalid` + `aria-describedby` +
@@ -48,7 +54,7 @@
   `ui-form__summary[tabindex="-1"]`, на success-странице — на заголовок
   успеха (тот же сниппет с id цели).
 
-- [`pagination.php`](pagination.php) — генерация пагинации ui-pagination
+- [`pagination.php`](pagination.php) (с версии 0.1.0) — генерация пагинации ui-pagination
   (T6.3) из общего числа страниц и текущей: окно показа с «…» (края всегда,
   окно ±side у текущей, разрыв в одну страницу — номером, длиннее — «…»),
   `aria-current="page"` на текущей, имена «Страница N», недоступные стрелки —

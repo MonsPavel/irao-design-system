@@ -137,8 +137,11 @@ export function readmeSection(parsed, name, heading, slot) {
 
 /** Инлайн-разметка: `код`, **жирный**, [текст](цель). Репо-относительные цели
  *  (не http) — не ссылки (док-страница — часть статического полигона, исходники
- *  репозитория в нём не раздаются): текст + <code>-путь. */
-function renderInline(text) {
+ *  репозитория в нём не раздаются): текст + <code>-путь. Экспортируется: рендер
+ *  заголовков страниц гайдов T10.3 (showcase/guides.mjs) использует ту же
+ *  семантику, что «extra»-заголовки renderDocPage (README-заголовки несут
+ *  инлайн-конструкции; сырой markdown в доступном имени h2 — скобочный мусор). */
+export function renderInline(text) {
   let out = escapeHtml(text);
   const codes = [];
   out = out.replace(/`([^`]+)`/g, (_all, code) => {
@@ -167,7 +170,7 @@ function renderInline(text) {
   return out.replace(/\uFFF0(\d+)\uFFF0/g, (_all, index) => codes[Number(index)]);
 }
 
-const BLOCK_START = /^(?:#{3,6}\s|```|\||[-*]\s|\d+[.)]\s)/;
+const BLOCK_START = /^(?:#{3,6}\s|```|\||[-*]\s|\d+[.)]\s|>)/;
 
 /**
  * Блочный рендер: абзацы, «###»-заголовки, маркированные/нумерованные списки
@@ -215,6 +218,21 @@ export function renderMarkdown(markdown, { doDont = false } = {}) {
       const level = heading[1].length;
       out.push(`<h${level}>${renderInline(heading[2])}</h${level}>`);
       i += 1;
+      continue;
+    }
+
+    // Blockquote «> …» — цитаты-правила (README ui-form/ui-loader,
+    // landing-section; гайды T10.3). Раньше строки падали в параграф с
+    // литеральными «&gt; » — деградация видимого рендера док-страниц.
+    if (line.startsWith('>')) {
+      flushParagraph();
+      const quote = [];
+      while (i < lines.length && lines[i].startsWith('>')) {
+        quote.push(lines[i].replace(/^>\s?/, ''));
+        i += 1;
+      }
+      // Тело цитаты — тем же рендером (fence/таблицы/списки внутри цитаты).
+      out.push(`<blockquote>\n${renderMarkdown(quote.join('\n'))}\n</blockquote>`);
       continue;
     }
 

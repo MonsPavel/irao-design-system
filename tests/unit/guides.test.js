@@ -113,7 +113,8 @@ describe('синхронизация «сниппет в гайде = файл»
       '```php snippet=bitrix/snippets/header-php.snippet.php',
       "const UI_VERSION = '0.1.0';   \t",
       '```',
-    ].join('\n')
+    ]
+      .join('\n')
       .replace(/\n/g, '\r\n');
     expect(guideSyncProblems(root, GUIDES[0], withNoise)).toEqual([]);
   });
@@ -134,7 +135,10 @@ describe('renderGuidePage — страница гайда в каркасе show
   });
 
   it('«##»-разделы источника становятся h2 страницы по порядку', () => {
-    const html = renderGuidePage({ guide, markdown: '# t\n\nИнтро.\n\n## Первый\n\nТело 1.\n\n## Второй\n\nТело 2.\n' });
+    const html = renderGuidePage({
+      guide,
+      markdown: '# t\n\nИнтро.\n\n## Первый\n\nТело 1.\n\n## Второй\n\nТело 2.\n',
+    });
     const h2s = html.match(/<h2>[^<]*<\/h2>/g) ?? [];
     expect(h2s).toEqual(['<h2>Первый</h2>', '<h2>Второй</h2>']);
   });
@@ -223,13 +227,7 @@ describe('bitrix/integration-guide.md — living doc полного объёма
 describe('bitrix/bitrix-30-minutes.md — сквозной туториал (Scope: до страницы со списком и формой)', () => {
   it('пять шагов с бюджетом времени, уложенных в 30 минут', () => {
     expect(tutorial).toContain('# Bitrix-разработчику за 30 минут');
-    for (const step of [
-      '## Шаг 1',
-      '## Шаг 2',
-      '## Шаг 3',
-      '## Шаг 4',
-      '## Шаг 5',
-    ]) {
+    for (const step of ['## Шаг 1', '## Шаг 2', '## Шаг 3', '## Шаг 4', '## Шаг 5']) {
       expect(tutorial, `раздел ${step}`).toContain(step);
     }
     expect(tutorial).toContain('≈30 минут');
@@ -258,14 +256,17 @@ describe('bitrix/bitrix-30-minutes.md — сквозной туториал (Sco
 
 describe('версионирование сниппетов (Implementation requirements T10.3 п.2)', () => {
   const snippetFiles = readdirSync(join(root, 'bitrix', 'snippets')).filter(
-    (name) => name.endsWith('.php') && name !== 'header-php.snippet.php' || name === 'header-php.snippet.php',
+    (name) =>
+      (name.endsWith('.php') && name !== 'header-php.snippet.php') ||
+      name === 'header-php.snippet.php',
   );
 
   it('каждый сниппет в snippets/README несёт пометку «с версии …»', () => {
     const markers = snippetsReadme.match(/с версии \d+\.\d+\.\d+/g) ?? [];
-    expect(markers.length, `пометок «с версии X.Y.Z»: ${markers.join(', ')}`).toBeGreaterThanOrEqual(
-      snippetFiles.length,
-    );
+    expect(
+      markers.length,
+      `пометок «с версии X.Y.Z»: ${markers.join(', ')}`,
+    ).toBeGreaterThanOrEqual(snippetFiles.length);
     expect(snippetsReadme, 'правило пометки между minor').toContain('между minor');
   });
 });
