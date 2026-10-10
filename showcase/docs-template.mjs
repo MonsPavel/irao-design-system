@@ -307,6 +307,9 @@ const DOCS_STYLE = `<style>
     margin: 0;
     max-width: 100%;
     overflow-x: auto;
+    /* Прокручиваемая область обязана быть доступна с клавиатуры (WCAG 2.1.1;
+       гейт axe scrollable-region-focusable): узкий экран страницы docs —
+       фрейм 768/1440 скроллится по x. */
   }
   .ui-docs-frame iframe {
     display: block;
@@ -376,7 +379,7 @@ function renderResponsive(name) {
   const frames = widths
     .map(
       ({ width, label }) =>
-        `  <figure class="ui-docs-frame">\n` +
+        `  <figure class="ui-docs-frame" tabindex="0">\n` +
         `    <iframe src="../stands/${name}.html" title="Стенд ${name}, ширина ${width} пикселей" width="${width}" height="480"></iframe>\n` +
         `    <figcaption>${label}</figcaption>\n` +
         `  </figure>`,
@@ -427,7 +430,7 @@ export function renderDocPage({ name, markup, readme, metadata }) {
       [
         `<p class="${STAND_NOTE}">Канонический паттерн ` +
           `<code>components/${name}/${name}.html</code> вживую. Полный набор вариантов ` +
-          `и состояний — на стенде выше по ссылке.</p>`,
+          `и состояний — на стенде <a href="../stands/${name}.html">${name}</a>.</p>`,
         '<div class="ui-docs-examples" data-ui-docs-examples>',
         '<!-- ui-docs-examples:start -->',
         markup,
