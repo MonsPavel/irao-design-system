@@ -7,7 +7,7 @@
 валидация, ТЗ №14). Задачи T5.4/T5.5 переносят `.form-page`/`.form-grid`/
 `.form-aside`/`.form-success` career-portal (css/pages.css:174–228) и
 `js/forms.js` в mobile-first и неймспейс `IraoUI`; серверный контракт ошибок —
-T5.6. Поля — `ui-field` (T5.1) и его семейство.
+T5.6. Поля — [ui-field](doc:ui-field) (T5.1) и его семейство.
 
 ## API
 

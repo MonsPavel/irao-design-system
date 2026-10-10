@@ -1,6 +1,7 @@
 # Паттерн «Search overlay» (T7.6)
 
-Полноэкранный поиск сайта на базе **ui-modal** (T7.2) — эталонная сборка
+Полноэкранный поиск сайта на базе **ui-modal** (T7.2, дока:
+[ui-modal](../../components/ui-modal/README.md)) — эталонная сборка
 [`search-overlay.html`](search-overlay.html), она же стенд
 `/showcase/dist/stands/patterns/search-overlay.html` (генерируется
 `showcase/build.mjs`). Переносится композиция `src/blocks/search-screen`
