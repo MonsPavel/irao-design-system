@@ -25,9 +25,7 @@ describe('release.yml: гейты → матрица → VI-smoke → build → 
   });
 
   it('джоба vi-smoke: VI-включение (ui-vi.spec.js) и axe-обход стендов (stands-sweep) — блокирующие', () => {
-    expect(release, 'VI-включение — релизный smoke (T9.1)').toContain(
-      'tests/e2e/ui-vi.spec.js',
-    );
+    expect(release, 'VI-включение — релизный smoke (T9.1)').toContain('tests/e2e/ui-vi.spec.js');
     expect(release, 'axe-прогон ключевых стендов').toContain('tests/a11y/stands-sweep.spec.js');
   });
 
@@ -54,7 +52,7 @@ describe('release.yml: гейты → матрица → VI-smoke → build → 
     );
     expect(release, 'release notes — запись changelog (--extract)').toContain('--extract');
     expect(release, 'Release только для тегов (workflow_dispatch не публикует)').toContain(
-      "refs/tags/",
+      'refs/tags/',
     );
     expect(release, 'права на публикацию — contents: write у джобы релиза').toContain(
       'contents: write',
@@ -93,10 +91,12 @@ describe('nightly.yml: матрица + advisory-visual (до v1.0, ADR-0004)', 
 
   it('валидатор закрепляет новые контракты T12.1 (исполняемая спецификация)', () => {
     for (const contract of [
-      'release: нет джобы гейтов (changelog/версия/протокол)',
-      'release: нет джобы VI-smoke (T9.1)',
-      'release: нет проверки структуры zip (§6.1)',
-      'release: нет джобы публикации GitHub Release',
+      'gates: нет шага tools/release-gate.mjs (changelog-запись тега, версия = тегу)',
+      'gates: нет шага tests/a11y/protocol-gate.mjs (релиз обязан получать exit 0 — T9.2)',
+      'vi-smoke: needs не содержит matrix (матрица и smoke — блокирующие джобы релиза)',
+      'build-dist: нет проверки структуры zip (§6.1): ',
+      'release: нет джобы публикации GitHub Release (gh release create)',
+      'release: нет guard refs/tags/ (workflow_dispatch не публикует Release)',
       'nightly: нет advisory-visual джобы (T12.1, ADR-0004)',
     ]) {
       expect(validator, `контракт валидатора: ${contract}`).toContain(contract);

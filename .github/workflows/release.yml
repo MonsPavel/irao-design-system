@@ -1,15 +1,36 @@
-# Релизный конвейер irao-ui — КАРКАС (задача T1.5; боевой режим — T12.1).
+# Релизный конвейер irao-ui — БОЕВОЙ РЕЖИМ (T12.1; каркас — T1.5).
 #
-# На тег v*: полный матричный прогон chromium/firefox/webkit в пиннутом
-# Playwright-образе (ADR-0004; chromium сравнивает эталоны — релизная точка
-# обязана быть визуально чистой) + dist-zip артефакт (02-architecture §10).
+# Тег v* → гейты → матрица → VI-smoke → build-dist (zip §6.1) → GitHub Release.
 #
-# Гейт масштабирования T3.6 (tests/e2e/scaling.spec.js: zoom 200% — chromium,
-# 32px-база — все браузеры) входит в полный прогон матрицы: красная матрица
-# БЛОКИРУЕТ релиз (шаги без continue-on-error).
+# Джобы (все блокирующие — красная джоба красит релиз; job-level
+# continue-on-error запрещён, структура проверяется
+# tools/validate-workflows.mjs на каждый PR):
+#   gates      — changelog-запись тега + версия package.json = тегу
+#                (tools/release-gate.mjs; ADR-0007: «CI блокирует релиз без
+#                changelog-записи»; баннеры dist = тег — T1.3) и протокол
+#                скринридеров (T9.2: «релиз T12.1 обязан запускать его и
+#                получать exit 0»);
+#   matrix     — полный прогон chromium/firefox/webkit в пиннутом
+#                Playwright-образе (ADR-0004; chromium сравнивает эталоны —
+#                релизная точка обязана быть визуально чистой). Гейт
+#                масштабирования T3.6 (tests/e2e/scaling.spec.js: zoom 200% —
+#                chromium, 32px-база — все браузеры) входит в полный прогон
+#                матрицы: красная матрица БЛОКИРУЕТ релиз;
+#   vi-smoke   — релизный smoke доступности (T9.1/T9.2): VI-включение, темы,
+#                персистентность (tests/e2e/ui-vi.spec.js) и axe-обход ВСЕХ
+#                страниц полигона (tests/a11y/stands-sweep.spec.js);
+#   build-dist — npm run build → zip dist (ui-core/ui-vi/ui.min.js + fonts/
+#                + themes/ — 02-architecture §6.1) → проверка содержимого
+#                артефакта в джобе → upload-artifact;
+#   release    — GitHub Release через gh CLI (allowlist first-party actions —
+#                сторонних нет): артефакт + release notes = запись тега из
+#                CHANGELOG.md. Только на тегах: workflow_dispatch — репетиция
+#                конвейера без публикации (права contents: write — только у
+#                этой джобы).
 #
-# Боевой режим добавит в T12.1: GitHub Release, CHANGELOG-check и VI-smoke
-# (T9.1), публикация пакета (ADR-0006).
+# Логика гейтов — tools/release-gate-lib.mjs (юнит-пин
+# tests/unit/release-gate.test.js); CHANGELOG.md репозитория заводится T12.2 —
+# до её выполнения тег честно красный на гейте («записи нет»).
 name: Release
 
 on:
@@ -22,8 +43,8 @@ permissions:
   contents: read
 
 jobs:
-  build-dist:
-    name: Dist artifact (zip)
+  gates:
+    name: Release gates (changelog / version / protocol)
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -36,28 +57,27 @@ jobs:
           node-version: 24
           cache: npm
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build dist + showcase
-        run: npm run build
-
-      - name: Zip dist
+      # Гейт тега: запись в CHANGELOG.md и версия = тегу. На workflow_dispatch
+      # (репетиция без тега) проверять нечего — шаг пропускается; на теге —
+      # блокирующий (шаг без continue-on-error).
+      - name: Changelog + version gate (ADR-0007, T1.3)
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GITHUB_REF_NAME: ${{ github.ref_name }}
-        run: zip -r "irao-ui-dist-${GITHUB_REF_NAME}.zip" dist
+        run: node tools/release-gate.mjs
 
-      - name: Upload dist-zip artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist-${{ github.ref_name }}
-          path: irao-ui-dist-*.zip
-          if-no-files-found: error
+      # T9.2: релиз обязан получать exit 0 по протоколу скринридеров
+      # (docs/ui-system/a11y/screen-reader-protocol.md — ручной артефакт;
+      # состояние «ожидает ручного прогона» = exit 1 = релиз заблокирован —
+      # честный статус до подписания прогона). Пропуск — только вне тега.
+      - name: Screen-reader protocol gate (T9.2)
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: node tests/a11y/protocol-gate.mjs
 
   matrix:
     name: Matrix (${{ matrix.browser }}, контейнер)
     needs:
-      - build-dist
+      - gates
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -102,3 +122,141 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+
+  vi-smoke:
+    name: Release smoke (VI-включение + axe-обход стендов, T9.1/T9.2)
+    needs:
+      - matrix
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build showcase
+        run: npm run build
+
+      # Релизный smoke доступности (Accessibility requirements T12.1): VI
+      # включается, классы/темы/aria-pressed/localStorage работают
+      # (ui-vi.spec.js), и весь полигон чист по axe (stands-sweep — обход
+      # всех стендов, T9.2). IRAO_SNAPSHOTS не задан: smoke проверяет
+      # поведение, эталоны уже сверены в matrix (chromium).
+      - name: VI-smoke (chromium)
+        run: npx playwright test tests/e2e/ui-vi.spec.js tests/a11y/stands-sweep.spec.js --project=chromium
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-vi-smoke-report
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+
+  build-dist:
+    name: Dist artifact (zip §6.1)
+    needs:
+      - matrix
+      - vi-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dist + showcase
+        run: npm run build
+
+      - name: Zip dist
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: zip -r "irao-ui-dist-${GITHUB_REF_NAME}.zip" dist
+
+      # Проверка содержимого артефакта в джобе (implementation requirements 1):
+      # полный dist по 02-architecture §6.1 — ui-core/ui-vi/ui.min.js + fonts/
+      # + themes/. Баннер версии сверяется с package.json — на теге гейт gates
+      # уже гарантировал совпадение версии с тегом, значит в артефакте = тег.
+      - name: Verify zip structure (02-architecture §6.1) and banner (T1.3)
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: |
+          ZIP="irao-ui-dist-${GITHUB_REF_NAME}.zip"
+          CONTENT="$(unzip -l "$ZIP")"
+          for path in dist/ui-core.min.css dist/ui-vi.min.css dist/ui.min.js dist/fonts/ dist/themes/; do
+            if ! echo "$CONTENT" | grep -qF "$path"; then
+              echo "zip-артефакт не соответствует 02-architecture §6.1: нет $path"
+              exit 1
+            fi
+          done
+          VERSION="$(node -p 'require("./package.json").version')"
+          if ! unzip -p "$ZIP" dist/ui-core.min.css | head -1 | grep -qF "irao-ui v${VERSION}"; then
+            echo "баннер версии dist не содержит irao-ui v${VERSION} (на теге это значит: баннер ≠ тег)"
+            exit 1
+          fi
+          echo "zip ok: структура §6.1 и баннер irao-ui v${VERSION}"
+
+      - name: Upload dist-zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: irao-ui-dist-*.zip
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release (артефакт + changelog-запись)
+    needs:
+      - build-dist
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write # публикация Release — единственная запись в репозиторий конвейера
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # Повторное применение гейта + тело release notes = запись тега из
+      # CHANGELOG.md (--extract): публикация Release без changelog-записи
+      # невозможна по построению (ADR-0007).
+      - name: Extract release notes from CHANGELOG
+        env:
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: node tools/release-gate.mjs --extract > release-notes.md
+
+      - name: Download dist-zip artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: artifact
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REF_NAME: ${{ github.ref_name }}
+        run: gh release create "$GITHUB_REF_NAME" --title "irao-ui ${GITHUB_REF_NAME}" --notes-file release-notes.md "artifact/irao-ui-dist-${GITHUB_REF_NAME}.zip"

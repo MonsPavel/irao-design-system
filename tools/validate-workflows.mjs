@@ -672,8 +672,7 @@ function checkAdvisoryVisualJob(name, job) {
   }
   const diffUpload = (job.steps ?? []).find(
     (s) =>
-      s?.uses === 'actions/upload-artifact@v4' &&
-      String(s.with?.path ?? '').includes('-diff.png'),
+      s?.uses === 'actions/upload-artifact@v4' && String(s.with?.path ?? '').includes('-diff.png'),
   );
   if (!diffUpload) {
     problem(name, 'visual: нет артефакта визуальных дифов (test-results *-diff.png)');
@@ -716,7 +715,10 @@ function checkRelease(name, doc) {
     if (!pipeline.includes(j)) problem(name, `release: неожиданная джоба ${j} (T12.1)`);
   for (const j of pipeline) {
     if (jobs[j] && jobs[j]['continue-on-error'] === true) {
-      problem(name, `release: ${j}: job-level continue-on-error запрещён (блокирующая джоба релиза)`);
+      problem(
+        name,
+        `release: ${j}: job-level continue-on-error запрещён (блокирующая джоба релиза)`,
+      );
     }
   }
 
@@ -724,10 +726,16 @@ function checkRelease(name, doc) {
   // скринридеров (T9.2: «релиз T12.1 обязан запускать его и получать exit 0»).
   if (jobs.gates) {
     if (!anyRunContains(jobs.gates, 'tools/release-gate.mjs')) {
-      problem(name, 'gates: нет шага tools/release-gate.mjs (changelog-запись тега, версия = тегу)');
+      problem(
+        name,
+        'gates: нет шага tools/release-gate.mjs (changelog-запись тега, версия = тегу)',
+      );
     }
     if (!anyRunContains(jobs.gates, 'tests/a11y/protocol-gate.mjs')) {
-      problem(name, 'gates: нет шага tests/a11y/protocol-gate.mjs (релиз обязан получать exit 0 — T9.2)');
+      problem(
+        name,
+        'gates: нет шага tests/a11y/protocol-gate.mjs (релиз обязан получать exit 0 — T9.2)',
+      );
     }
   }
 
@@ -760,9 +768,11 @@ function checkRelease(name, doc) {
   if (viSmoke) {
     const needs = viSmoke.needs ?? [];
     if (!needs.includes('matrix'))
-      problem(name, 'vi-smoke: needs не содержит matrix (матрица и smoke — блокирующие джобы релиза)');
-    if (!viSmoke.container)
-      problem(name, 'vi-smoke: нет container (браузерная джоба — ADR-0004)');
+      problem(
+        name,
+        'vi-smoke: needs не содержит matrix (матрица и smoke — блокирующие джобы релиза)',
+      );
+    if (!viSmoke.container) problem(name, 'vi-smoke: нет container (браузерная джоба — ADR-0004)');
     for (const spec of ['tests/e2e/ui-vi.spec.js', 'tests/a11y/stands-sweep.spec.js']) {
       if (!anyRunContains(viSmoke, spec)) problem(name, `vi-smoke: нет прогона ${spec}`);
     }

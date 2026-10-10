@@ -52,7 +52,11 @@ describe('релизный гейт: changelog-запись тега и верс
   });
 
   it('версия package.json не совпадает с тегом — красный (баннеры dist = тег, T1.3)', () => {
-    const result = evaluateRelease('v1.2.3', CHANGELOG_WITH_V010.replace('v0.1.0', 'v1.2.3'), '0.1.0');
+    const result = evaluateRelease(
+      'v1.2.3',
+      CHANGELOG_WITH_V010.replace('v0.1.0', 'v1.2.3'),
+      '0.1.0',
+    );
     expect(result.ok).toBe(false);
     expect(result.errors.some((e) => e.includes('0.1.0') && e.includes('1.2.3'))).toBe(true);
   });
@@ -61,7 +65,10 @@ describe('релизный гейт: changelog-запись тега и верс
     for (const tag of ['v1.0', '1.0.0', 'release-1', 'v1.0.0-rc1']) {
       const result = evaluateRelease(tag, CHANGELOG_WITH_V010, '0.1.0');
       expect(result.ok, tag).toBe(false);
-      expect(result.errors.some((e) => e.includes('vX.Y.Z')), tag).toBe(true);
+      expect(
+        result.errors.some((e) => e.includes('vX.Y.Z')),
+        tag,
+      ).toBe(true);
     }
   });
 
