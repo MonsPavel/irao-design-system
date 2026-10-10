@@ -27,6 +27,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import {
   brokenDocLinks,
   docCompletenessProblems,
+  renderDocPage,
   renderMarkdown,
 } from '../../showcase/docs-template.mjs';
 
@@ -186,6 +187,21 @@ describe('docCompletenessProblems: полный фикстурный корен�
     const problems = await docCompletenessProblems(fixtureRoot);
     expect(problems.some((p) => p.includes('patterns/p3') && p.includes("Don't"))).toBe(true);
   });
+
+  it('README паттерна со схемой doc:/stand: — ссылка не работает нигде (ревью T10.2)', async () => {
+    // README паттернов в полигон не рендерятся (рендерит только компонентные
+    // доки), а doc:/stand: вне renderInline — несуществующая схема URL: на
+    // GitHub ссылка битая. Гейт brokenDocLinks сюда не смотрит (он сканирует
+    // showcase/dist/docs/*.html) — схему в README паттернов ловит инвентаризация.
+    mkdirSync(join(fixtureRoot, 'patterns', 'p4'), { recursive: true });
+    writeFileSync(join(fixtureRoot, 'patterns', 'p4', 'p4.html'), '<div class="ui-card">p4</div>');
+    writeFileSync(
+      join(fixtureRoot, 'patterns', 'p4', 'README.md'),
+      PATTERN_README + '\nСборка на базе [ui-x](doc:ui-x) и [стенда](stand:ui-x).\n',
+    );
+    const problems = await docCompletenessProblems(fixtureRoot);
+    expect(problems.some((p) => p.includes('patterns/p4') && p.includes('doc:'))).toBe(true);
+  });
 });
 
 describe('docCompletenessProblems: реальный репозиторий (прогон T10.2 до 100%)', () => {
@@ -221,6 +237,51 @@ describe('renderMarkdown: схемы doc:/stand: — перекрёстные с
   it('внешние ссылки остаются настоящими ссылками', () => {
     const html = renderMarkdown('[docs](https://example.com/docs)');
     expect(html).toContain('<a href="https://example.com/docs">docs</a>');
+  });
+});
+
+/* ── extra-заголовки рендерятся инлайном, а не escapeHtml (ревью T10.2) ── */
+
+describe('renderDocPage: заголовок extra-секции с markdown-ссылкой', () => {
+  const readme = [
+    '# ui-x',
+    '',
+    '## API',
+    'Классы.',
+    '',
+    '## Состояния',
+    'Состояния.',
+    '',
+    '## Клавиатура и a11y',
+    'Tab.',
+    '',
+    "## Do / Don't",
+    '- **Do**: нативно.',
+    '',
+    '## Мобильная стратегия — [ADR-0012](../../docs/adr/0012-x.md) и [внешняя](https://example.com/adr)',
+    'Тело секции.',
+  ].join('\n');
+  const metadata = JSON.parse(JSON.stringify(VALID_METADATA));
+  metadata.readme.extra = [
+    'Мобильная стратегия — [ADR-0012](../../docs/adr/0012-x.md) и [внешняя](https://example.com/adr)',
+  ];
+  const html = renderDocPage({
+    name: 'ui-x',
+    markup: '<p class="ui-x">demo</p>',
+    readme,
+    metadata,
+  });
+
+  it('репо-относительная ссылка — инлайн-форма тел секций (текст + code-путь), не сырой markdown', () => {
+    expect(html).toContain(
+      'Мобильная стратегия — ADR-0012 (<code>docs/adr/0012-x.md</code>) и внешняя',
+    );
+    // Сырой markdown в доступном имени h2 — скобочный мусор для скринридера.
+    expect(html).not.toContain('[ADR-0012](../../docs/adr/0012-x.md)');
+  });
+
+  it('внешняя ссылка в заголовке — настоящий <a>', () => {
+    expect(html).toContain('<a href="https://example.com/adr">внешняя</a>');
   });
 });
 
