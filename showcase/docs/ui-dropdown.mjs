@@ -16,8 +16,14 @@ export default {
   },
 
   keyboard: [
-    { keys: 'Enter / Space (триггер)', action: 'Открыть меню, фокус на первый пункт (APG menu-button)' },
-    { keys: 'ArrowDown / ArrowUp (триггер)', action: 'Открыть меню, фокус на первый / последний пункт' },
+    {
+      keys: 'Enter / Space (триггер)',
+      action: 'Открыть меню, фокус на первый пункт (APG menu-button)',
+    },
+    {
+      keys: 'ArrowDown / ArrowUp (триггер)',
+      action: 'Открыть меню, фокус на первый / последний пункт',
+    },
     { keys: 'ArrowDown / ArrowUp (в меню)', action: 'Перемещение по пунктам с зацикливанием' },
     { keys: 'Home / End (в меню)', action: 'Первый / последний пункт' },
     {
@@ -27,7 +33,8 @@ export default {
     },
     {
       keys: 'Tab / Shift+Tab',
-      action: 'Закрыть меню, фокус уходит по естественному порядку (пункты скрыты hidden и пропускаются)',
+      action:
+        'Закрыть меню, фокус уходит по естественному порядку (пункты скрыты hidden и пропускаются)',
     },
   ],
 
@@ -66,7 +73,8 @@ export default {
       },
       {
         scenario: 'Командное меню',
-        expect: '«Действия с записью, меню» — role="menu" с пунктов menuitem; активация возвращает фокус на триггер',
+        expect:
+          '«Действия с записью, меню» — role="menu" с пунктов menuitem; активация возвращает фокус на триггер',
         pin: 'tests/e2e/ui-dropdown.spec.js',
       },
       {

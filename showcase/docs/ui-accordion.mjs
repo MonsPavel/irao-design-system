@@ -56,7 +56,8 @@ export default {
     rows: [
       {
         scenario: 'Tab к вопросу',
-        expect: '«Работает ли аккордеон без JavaScript, кнопка раскрытия/раскрыто» — нативное объявление details',
+        expect:
+          '«Работает ли аккордеон без JavaScript, кнопка раскрытия/раскрыто» — нативное объявление details',
         pin: 'tests/e2e/ui-accordion.spec.js',
       },
       {

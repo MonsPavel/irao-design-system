@@ -68,7 +68,8 @@ export default {
     rows: [
       {
         scenario: 'Tab к полю',
-        expect: '«Резюме, обязательное поле — кнопка выбора файла» — имя из aria-labelledby, hint из aria-describedby',
+        expect:
+          '«Резюме, обязательное поле — кнопка выбора файла» — имя из aria-labelledby, hint из aria-describedby',
         pin: 'tests/e2e/ui-file.spec.js',
       },
       {

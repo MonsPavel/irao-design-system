@@ -8,7 +8,10 @@
  */
 export default {
   readme: {
-    states: ['Правило при 0 (AC)', 'Правило дублирования значения (Implementation requirements п.2)'],
+    states: [
+      'Правило при 0 (AC)',
+      'Правило дублирования значения (Implementation requirements п.2)',
+    ],
     a11y: ['Клавиатура и a11y'],
     api: ['API'],
     doDont: ["Do / Don't"],
@@ -44,7 +47,8 @@ export default {
     rows: [
       {
         scenario: 'Ссылка с бейджем',
-        expect: '«Уведомления, 3, ссылка» — число в доступном имени контрола, бейдж не озвучивается отдельно',
+        expect:
+          '«Уведомления, 3, ссылка» — число в доступном имени контрола, бейдж не озвучивается отдельно',
         pin: 'tests/unit/badge.test.js',
       },
       {

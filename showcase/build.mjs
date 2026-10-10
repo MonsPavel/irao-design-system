@@ -813,7 +813,16 @@ async function generateShowcase({ themes }) {
     const markup = readComponentMarkup(ROOT, name);
     let main;
     try {
-      main = renderDocPage({ name, markup, readme: readFileSync(readmePath, 'utf8'), metadata });
+      main = renderDocPage({
+        name,
+        markup,
+        readme: readFileSync(readmePath, 'utf8'),
+        metadata,
+        // Канон с h1 (ui-error: полностраничный 404/500 — правило T4.8) — без
+        // служебного h1 каркаса: он был бы вторым h1 (гейт irao/one-h1);
+        // прецедент — стенды error-404/паттернов «h1 несёт сам паттерн».
+        pageHeading: !/<h1[\s>]/.test(markup),
+      });
     } catch (error) {
       throw new Error(`дока ${name}: ${error.message}`, { cause: error });
     }
@@ -968,10 +977,7 @@ async function selfChecks({ banner, stands, docs, discovered }) {
   // ссылки страниц (перекрёстные doc:/stand:, стенды responsive-секции)
   // резолвятся в полигоне — «нет битых» (AC T10.2).
   const completeness = await docCompletenessProblems(ROOT);
-  assert(
-    completeness.length === 0,
-    `полнота док (T10.2): ${completeness.join('; ')}`,
-  );
+  assert(completeness.length === 0, `полнота док (T10.2): ${completeness.join('; ')}`);
   for (const { name, markup } of docs) {
     const html = readFileSync(join(SHOWCASE_DIST, 'docs', `${name}.html`), 'utf8');
     const problems = verifyDocPageHtml(html, markup);

@@ -51,12 +51,14 @@ export default {
     rows: [
       {
         scenario: 'Вход в группу',
-        expect: '«Формат работы, группировка» + выбранный вариант — имя из legend, роль group нативная',
+        expect:
+          '«Формат работы, группировка» + выбранный вариант — имя из legend, роль group нативная',
         pin: 'tests/e2e/ui-forms.spec.js',
       },
       {
         scenario: 'Группа с hint и ошибкой',
-        expect: 'После имени группы объявляются подсказка и ошибка (aria-describedby списком, hint первым)',
+        expect:
+          'После имени группы объявляются подсказка и ошибка (aria-describedby списком, hint первым)',
         pin: 'tests/e2e/ui-forms.spec.js',
       },
       {

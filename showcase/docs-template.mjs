@@ -419,13 +419,17 @@ function renderResponsive(name) {
 /**
  * Главная док-страница компонента (тело <main>; каркас добавляет build.mjs).
  * Все секции шаблона — по порядку DOC_SECTIONS; порядок проверяет сборка
- * (verifyDocPageHtml) и e2e.
+ * (verifyDocPageHtml) и e2e. pageHeading: false — канонический паттерн сам
+ * несёт h1 (ui-error: полностраничный вариант 404/500 по правилу T4.8);
+ * служебный h1 каркаса дал бы второй h1 на странице (гейт irao/one-h1) —
+ * тот же прецедент, что у стендов error-404 и паттернов: «заголовок страницы
+ * несёт сам паттерн».
  */
-export function renderDocPage({ name, markup, readme, metadata }) {
+export function renderDocPage({ name, markup, readme, metadata, pageHeading = true }) {
   const parsed = parseReadme(readme);
   const doc = [];
 
-  doc.push(`<h1>${name}</h1>`);
+  if (pageHeading) doc.push(`<h1>${name}</h1>`);
   if (parsed.intro) doc.push(renderMarkdown(parsed.intro));
   doc.push(
     `<p class="${STAND_NOTE}">Дока по единому шаблону (T10.1, 02-architecture §8). ` +
@@ -751,7 +755,9 @@ export async function docCompletenessProblems(root) {
     try {
       metadata = await importDocMetadata(root, name);
     } catch (error) {
-      problems.push(`${name}: метаданные showcase/docs/${name}.mjs не импортируются (${error.message})`);
+      problems.push(
+        `${name}: метаданные showcase/docs/${name}.mjs не импортируются (${error.message})`,
+      );
       continue;
     }
     if (!metadata || typeof metadata !== 'object') {
@@ -786,7 +792,9 @@ export async function docCompletenessProblems(root) {
       problems.push(`${name}: ARIA-список (metadata.aria) пуст`);
     }
     if (!Array.isArray(metadata.screenReader?.rows) || metadata.screenReader.rows.length === 0) {
-      problems.push(`${name}: чек-лист скринридера (metadata.screenReader.rows) пуст (протокол T9.2)`);
+      problems.push(
+        `${name}: чек-лист скринридера (metadata.screenReader.rows) пуст (протокол T9.2)`,
+      );
     }
     if (!metadata.version?.introduced || !metadata.version?.task) {
       problems.push(`${name}: version.introduced / version.task не заполнены`);

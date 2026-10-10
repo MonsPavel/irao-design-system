@@ -40,7 +40,7 @@ const VALID_README = [
   '## API',
   'Классы компонента.',
   '',
-  "## Состояния",
+  '## Состояния',
   'Default, disabled.',
   '',
   '## Клавиатура и a11y',
@@ -255,7 +255,7 @@ describe('brokenDocLinks: относительные href/src обязаны р�
     expect(problems[0]).toContain('../stands/ui-nope.html');
   });
 
-  it('учебные href в код-примерах (сниппет, do/don\'t) — не ссылки страницы', () => {
+  it("учебные href в код-примерах (сниппет, do/don't) — не ссылки страницы", () => {
     const html = [
       '<pre><code>&lt;a class="ui-link" href="/notifications"&gt;…&lt;/a&gt;</code></pre>',
       '<ul><li>Don\'t: <code>&lt;a href="…"&gt;Отправить&lt;/a&gt;</code></li></ul>',
