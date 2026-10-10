@@ -97,7 +97,10 @@ export async function loadMetadata(name) {
 
 /**
  * Разбор README компонента на «## заголовок → тело». Текст до первого «## » —
- * интро (лид страницы). «###» остаются внутри тела секции.
+ * интро (лид страницы); строка «# заголовок» README в интро не попадает —
+ * имя компонента на странице даёт каркас (h1/<title>), сырой маркдаун-заголовок
+ * в лидe — мусор (находка CI 10.10: все 27 док-страниц печатали «# ui-*»
+ * параграфом). «###» остаются внутри тела секции.
  */
 export function parseReadme(markdown) {
   const lines = markdown.replace(/\r\n/g, '\n').split('\n');
@@ -106,6 +109,7 @@ export function parseReadme(markdown) {
   let current = null;
   let body = null;
   for (const line of lines) {
+    if (current === null && /^#\s/.test(line)) continue;
     const heading = /^##\s+(.+?)\s*$/.exec(line);
     if (heading) {
       if (current) sections.set(current, (body ?? []).join('\n').trim());
@@ -390,7 +394,13 @@ const DOCS_STYLE = `<style>
   }
 </style>`;
 
+/** Секция шаблона. title: null — секция без h2 и без aria-labelledby
+ *  (канон сам открывает страницу своим h1 — pageHeading: false, страница
+ *  обязана начинаться с h1: пин e2e иерархии, CI 10.10 — ui-error). */
 function section(id, title, body) {
+  if (title === null) {
+    return ['<section data-ui-docs-section="' + id + '">', body, '</section>'].join('\n');
+  }
   return [
     `<section data-ui-docs-section="${id}" aria-labelledby="ui-docs-${id}-heading">`,
     `<h2 id="ui-docs-${id}-heading">${title}</h2>`,
@@ -459,11 +469,14 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   );
   doc.push(DOCS_STYLE);
 
-  /* 1. Живые примеры: каноническая разметка как есть (не картинка, не копия). */
+  /* 1. Живые примеры: каноническая разметка как есть (не картинка, не копия).
+   *  Заголовок секции — только когда h1 страницы несёт каркас; для канона
+   *  с собственным h1 (ui-error, правило T4.8 «h1 несёт сам паттерн») секция
+   *  без h2 — иначе outline страницы начинается с h2 (пин e2e иерархии). */
   doc.push(
     section(
       'examples',
-      'Живые примеры',
+      pageHeading ? 'Живые примеры' : null,
       [
         `<p class="${STAND_NOTE}">Канонический паттерн ` +
           `<code>components/${name}/${name}.html</code> вживую. Полный набор вариантов ` +

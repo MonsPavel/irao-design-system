@@ -225,7 +225,18 @@ test.describe('типографика (T3.3)', () => {
 
     for (const url of ['/', ...links]) {
       await page.goto(url);
-      await page.waitForLoadState('networkidle');
+      // Детерминированное ожидание вместо networkidle (CI 10.10): на
+      // док-страницах с тремя iframe networkidle зависал навсегда при НУЛЕ
+      // активных запросов — плавающий race ожидания, не сетевая активность
+      // (debug-прогон: 0 незавершённых, таймаут; страница меняется от рана к
+      // рану). Пину заголовков достаточно load + fonts.ready + двойной rAF:
+      // правила проверяются по отрендеренному документу.
+      await page.evaluate(() =>
+        document.fonts.ready.then(
+          () =>
+            new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+        ),
+      );
 
       // Иерархия — правило об ОТРЕНДЕРЕННОМ документе (его же проверяет axe
       // heading-order): скрытые заголовки не входят в outline страницы.
