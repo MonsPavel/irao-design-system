@@ -816,8 +816,11 @@ async function generateShowcase({ themes }) {
       throw new Error(`дока ${name}: ${error.message}`, { cause: error });
     }
     const page = frame({
-      rel: '../..', // docs/<имя>.html → SHOWCASE_DIST (на два уровня выше)
-      home: '../../index.html', // → index.html каталога стендов
+      // docs/<имя>.html — на ОДИН уровень ниже SHOWCASE_DIST (как стенды):
+      // рантайм и home — «../» (глубину пинит selfChecks ниже; ревью T10.1:
+      // «../../» давало 5×404 и рендер живых примеров без CSS/JS).
+      rel: '..', // docs/<имя>.html → SHOWCASE_DIST
+      home: '../index.html', // → index.html каталога стендов
       title: `${name} — дока — irao-ui showcase`,
       main,
       themes,
@@ -906,8 +909,15 @@ function selfChecks({ banner, stands, docs }) {
     const content = readFileSync(join(DIST, name), 'utf8');
     assert(content.startsWith('/*! irao-ui v'), `баннер версии не в начале dist/${name}`);
   }
-  // Страницы используют собранный dist, не исходники (AC T1.3).
-  const pages = ['index.html', 'standalone.html', ...stands.map((s) => `stands/${s.name}.html`)];
+  // Страницы используют собранный dist, не исходники (AC T1.3). Доки по
+  // шаблону T10.1 — в том же обходе (ревью T10.1: сломанный rel каркаса
+  // иначе не ловит ни один гейт — рендер без CSS/JS выглядит «зелёным»).
+  const pages = [
+    'index.html',
+    'standalone.html',
+    ...stands.map((s) => `stands/${s.name}.html`),
+    ...docs.map((d) => `docs/${d.name}.html`),
+  ];
   const sourceRef =
     /(?:href|src)="([^"]*(?:\/components\/|\/tokens\/|\/base\/|\/a11y\/|\/themes\/)[^"]*)"/;
   for (const rel of pages) {
@@ -915,6 +925,14 @@ function selfChecks({ banner, stands, docs }) {
     const match = html.match(sourceRef);
     assert(!match, `${rel} ссылается на исходники, а не на dist: ${match ? match[1] : ''}`);
     assert(html.includes('ui-core.min.css'), `${rel} не подключает собранный ui-core.min.css`);
+    // Пин глубины страниц docs/ (на уровень ниже SHOWCASE_DIST): рантайм
+    // подключается «../» — иначе 404 каркаса, которые не видны в статике.
+    if (rel.startsWith('docs/')) {
+      assert(
+        html.includes('href="../ui-core.min.css"'),
+        `${rel}: рантайм подключён не от «../» (глубина docs/ = SHOWCASE_DIST − 1)`,
+      );
+    }
     // Skip-link и его цель в каркасе каждой страницы (T3.5: правило для
     // сайтов «цель существует» исполняет сборка; WCAG 2.4.1).
     assert(

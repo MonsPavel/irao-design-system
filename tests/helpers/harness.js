@@ -61,6 +61,16 @@ export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
   },
   {
     id: 'color-contrast',
+    match: /(^|\s)\.ui-button--accent(?=$|\s|:)/,
+    reason:
+      'та же белая подпись на accent в канонической разметке БЕЗ id — живые примеры ' +
+      'док-страниц по шаблону T10.1 (showcase/dist/docs/): разметка побайтово та же, ' +
+      'что на стенде (исключение #ui-button-accent выше) — то же одобренное значение ' +
+      '3.12:1, изменение — design-decision владельца; токен-уровень — ' +
+      'tests/contrast/pairs.config.mjs (T2.6/ADR-0010)',
+  },
+  {
+    id: 'color-contrast',
     match: /#ui-button-[a-z-]*-disabled/,
     reason:
       'контраст disabled — декоративный (AC T4.2): WCAG 1.4.3 исключает ' +

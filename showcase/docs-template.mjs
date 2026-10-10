@@ -417,7 +417,7 @@ export function renderDocPage({ name, markup, readme, metadata }) {
     `<p class="${STAND_NOTE}">Дока по единому шаблону (T10.1, 02-architecture §8). ` +
       `Полная матрица вариантов и состояний — стенд ` +
       `<a href="../stands/${name}.html">${name}</a>; каталог — ` +
-      `<a href="../../index.html">irao-ui showcase</a>. Источник страницы — файлы ` +
+      `<a href="../index.html">irao-ui showcase</a>. Источник страницы — файлы ` +
       `компонента: <code>components/${name}/</code> (разметка, README, метаданные ` +
       `<code>showcase/docs/${name}.mjs</code>).</p>`,
   );
