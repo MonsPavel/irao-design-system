@@ -29,6 +29,7 @@ showcase/dist/             # сгенерированный полигон (giti
 ├── stands/typography.html # стенд типографики (T3.3) — из showcase/pages/typography/index.html
 ├── stands/layout.html     # стенд layout-примитивов (T3.4) — из showcase/pages/layout/index.html
 ├── stands/ui-skip-link.html # стенд ui-skip-link (T3.5) — из канонического паттерна components/ui-skip-link/
+├── docs/<name>.html       # дока компонента по шаблону T10.1 (см. «Доки по шаблону»)
 └── stands/<name>.html     # стенд компонента из components/<name>/<name>.html
 ```
 
@@ -107,6 +108,27 @@ showcase/dist/             # сгенерированный полигон (giti
   компонентов — задачи EPIC-4+.
 - Папка компонента без строки в `COMPONENTS` — предупреждение сборки
   (CSS не попадёт в `ui-core.min.css`).
+
+### Доки по шаблону (T10.1)
+
+Для компонента с метаданными `docs/<name>.mjs` сборка генерирует
+`dist/docs/<name>.html` — страницу по единому шаблону (02-architecture §8):
+живые примеры → HTML-сниппет → состояния → responsive-стенд (iframe
+375/768/1440) → a11y → API → do/don't → schema → версия/changelog.
+
+- Один источник — файлы компонента: примеры и сниппет рендерятся из
+  канонического `components/<name>/<name>.html`, текстовые секции — из
+  «## заголовков» README, машинные части (клавиатура/ARIA/скринридер/
+  schema/версия) — из метаданных `showcase/docs/<name>.mjs`. Контракт и
+  рендер — [`docs-template.mjs`](docs-template.mjs); чек-лист «страница =
+  шаблон» — CONTRIBUTING.md.
+- «Сниппет = разметка стенда» проверяется машиной на трёх уровнях: selfChecks
+  сборки по записанному файлу («диф на билде»), юнит-пины
+  `tests/unit/docs-template.test.js`, e2e `tests/e2e/docs-template.spec.js`
+  (живой DOM + axe). Расхождение уронит сборку — дока не отстаёт от кода.
+- Эталоны T10.1 — `ui-button` (CSS-only), `ui-field` (CSS+разметка-паттерн),
+  `ui-modal` (JS-компонент); полный прогон по всем компонентам — T10.2
+  (добавление страницы = один файл метаданных).
 
 ### Идемпотентность
 

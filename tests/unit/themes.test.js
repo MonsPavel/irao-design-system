@@ -26,12 +26,11 @@
  * Поведенческая часть гейта (фикстуры «пойман/не пойман») —
  * tests/lint-cases/css/themes/* + npm run test:lint.
  */
-import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { execPath } from 'node:process';
 import { beforeAll, describe, expect, it } from 'vitest';
 import stylelintConfig from '../../stylelint.config.mjs';
+import { buildForUnitTests } from '../helpers/unit-build.mjs';
 import { resolveTokenColor } from '../contrast/lib.mjs';
 
 const root = join(import.meta.dirname, '../..');
@@ -72,7 +71,10 @@ const core = new Map([...primitives, ...semantic]);
 
 beforeAll(async () => {
   // Реальная сборка: dist/themes + страницы showcase генерируются из исходников.
-  execFileSync(execPath, ['showcase/build.mjs'], { cwd: root, stdio: 'pipe' });
+  // Через общий мьютекс (tests/helpers/unit-build.mjs): параллельный воркер
+  // tokens-stand.test.js собирает то же самое — без замка rmSync одного
+  // билдера попадает в окно чтения другого (флак ENOENT).
+  await buildForUnitTests(root);
 }, 60000);
 
 describe('themes/theme-test.css — форма темы (AC T2.4, ADR-0009)', () => {

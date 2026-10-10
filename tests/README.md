@@ -148,6 +148,7 @@ test.describe('ui-button', () => {
 | Правило | Узлы (регэксп) | Обоснование |
 |---|---|---|
 | color-contrast | `#ui-button-accent*` | белая подпись на accent — одобренный дизайн 3.12:1 (2.91:1 на hover): изменение — design-decision владельца; токен-уровень — `tests/contrast/pairs.config.mjs` (T2.6/ADR-0010), производные — `tests/contrast/derived.config.mjs` (T9.2) |
+| color-contrast | `.ui-button--accent` (без id) | та же разметка канонического паттерна ui-button на док-страницах по шаблону T10.1 (`showcase/dist/docs/`, живые примеры без id): то же одобренное значение 3.12:1 — design-decision владельца; токен-уровень — `tests/contrast/pairs.config.mjs` (T2.6/ADR-0010). Ревью T10.1: цель появляется только с восстановленным CSS док-страниц |
 | color-contrast | `#ui-button-*-disabled` | контраст disabled — декоративный (AC T4.2): WCAG 1.4.3 исключает неактивные компоненты; визуал — `--ui-opacity-disabled` |
 | color-contrast | `#ui-button-*-loading` | лейбл в is-loading визуально скрыт (clip-path, accessible name сохраняется — T4.2 п.3): axe видит бокс текста без краски; спиннер aria-hidden |
 
