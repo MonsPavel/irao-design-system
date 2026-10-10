@@ -195,3 +195,21 @@
   background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
   color: var(--ui-color-text);
 }
+
+/* ── forced-colors (Windows High Contrast, T9.2): аффорданс поля. Коробка
+      держится на solid-фоне surface-muted (режим подменяет его Canvas'ом —
+      граница теряется), кнопка-лейбл — <label> без рамки: UA в отличие от
+      нативных button/input границу ей не дорисовывает (e2e — tests/e2e/
+      forced-colors.spec.js, тест «ui-file»). Явная граница var(--ui-border-
+      width) solid currentColor: текст в forced-colors подменяется системным
+      цветом (CanvasText), граница следует за ним в любой теме ОС; ширина —
+      токен рамки; box-sizing: border-box баз — габариты не меняются. */
+@media (forced-colors: active) {
+  .ui-file {
+    border: var(--ui-border-width) solid currentColor;
+  }
+
+  .ui-file__button {
+    border: var(--ui-border-width) solid currentColor;
+  }
+}

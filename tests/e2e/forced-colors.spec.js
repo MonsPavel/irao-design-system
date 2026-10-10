@@ -2,11 +2,11 @@
  * e2e forced-colors (Windows High Contrast, задача T9.2).
  *
  * Тесты first (Testing requirements T9.2: «forced-colors e2e пишется до
- * правок»). Поверхность — стенды ui-button / ui-field / ui-select / ui-card
- * (Scope T9.2: «кнопки/поля/карточки не теряют границы — system colors /
- * явные border»). Эмуляция — page.emulateMedia({ forcedColors: 'active' })
- * (Technical considerations T9.2); ручная сверка на Windows — протокол
- * a11y-спринта (дока отчёта T9.2).
+ * правок»). Поверхность — стенды ui-button / ui-field / ui-file / ui-select /
+ * ui-card (Scope T9.2: «кнопки/поля/карточки не теряют границы — system
+ * colors / явные border»). Эмуляция — page.emulateMedia({ forcedColors:
+ * 'active' }) (Technical considerations T9.2); ручная сверка на Windows —
+ * протокол a11y-спринта (дока отчёта T9.2).
  *
  * Почему важно: css-color-adjust в forced-colors подменяет авторские цвета
  * системными, НО полностью прозрачные значения сохраняет как есть
@@ -16,9 +16,11 @@
  * контрол (гарантия v1.0, AC T9.2 «границы контролов видимы»).
  *
  * Критерий видимой границы: border-style ≠ none, border-width ≥ 1px и цвет
- * непрозрачный. В forced-colors computed-цвет может прийти и системным
- * ключевым словом (CanvasText/ButtonBorder — не парсится как rgba), и
- * разрешённым rgb() — непрозрачность проверяется по обеим формам.
+ * непрозрачный. Парсер непрозрачности — чистая функция isOpaqueColor
+ * (tests/helpers/forced-colors.js, юнит-пин tests/unit/forced-colors.test.js):
+ * Chromium сериализует computed-цвет комма-формой rgba (rgba(0, 0, 0, 0) —
+ * прозрачна), rgb без альфы и слэш-формой rgb(0 0 0 / a) — все три обязаны
+ * различаться (ревью ветки T9.2: прежний парсер пропускал комма-форму целиком).
  *
  * Вне проверки (осознанно): disabled-состояния — неактивные компоненты
  * исключены из контраст-требований (WCAG 1.4.3); триггер ui-dropdown —
@@ -29,6 +31,7 @@
 import { expect } from '@playwright/test';
 
 import { test as standTest } from '../helpers/harness.js';
+import { isOpaqueColor } from '../helpers/forced-colors.js';
 
 /** Верхняя граница элемента: ширина (px), стиль и цвет computed. */
 const borderOf = (locator) =>
@@ -41,16 +44,6 @@ const borderOf = (locator) =>
     };
   });
 
-/** Цвет непрозрачен: не transparent и (если rgba —) альфа > 0. */
-function isOpaque(color) {
-  if (color.toLowerCase() === 'transparent') return false;
-  const rgba = color.match(/^rgba?\(([^)]+)\)$/);
-  if (!rgba) return true; // системное ключевое слово (CanvasText…) — непрозрачно
-  const parts = rgba[1].split('/').pop().trim();
-  if (!/^[0-9.]+$/.test(parts)) return true; // 'rgb(0, 0, 0)' — альфа опущена
-  return Number(parts) > 0;
-}
-
 /** Граница контрала видима (AC T9.2): solid/двойная, ≥ 1px, непрозрачная. */
 async function expectVisibleBorder(locator, label) {
   const border = await borderOf(locator);
@@ -59,7 +52,9 @@ async function expectVisibleBorder(locator, label) {
     border.width,
     `${label}: border-width ≥ 1px (факт ${border.width}px)`,
   ).toBeGreaterThanOrEqual(1);
-  expect(isOpaque(border.color), `${label}: border-color непрозрачен (${border.color})`).toBe(true);
+  expect(isOpaqueColor(border.color), `${label}: border-color непрозрачен (${border.color})`).toBe(
+    true,
+  );
 }
 
 standTest.describe('forced-colors: active — границы контролов (T9.2)', () => {
@@ -83,6 +78,20 @@ standTest.describe('forced-colors: active — границы контролов 
     await expectVisibleBorder(page.locator('#uif-about'), 'ui-field__textarea');
     await expectVisibleBorder(page.locator('#uif-city-select'), 'ui-field__select');
     await expectVisibleBorder(page.locator('#uif-login-err'), 'ui-field__input в --error');
+  });
+
+  standTest('ui-file: граница коробки поля и кнопки-лейбла видима', async ({ stand }) => {
+    const page = await stand('ui-file');
+    await page.emulateMedia({ forcedColors: 'active' });
+
+    // Коробка поля держится на solid-фоне surface-muted (режим подменяет
+    // Canvas'ом — граница теряется), кнопка-лейбл — <label> без рамки:
+    // UA (в отличие от нативных button/input) границу не дорисовывает.
+    await expectVisibleBorder(page.locator('#uifl-file-box'), 'ui-file (коробка поля)');
+    await expectVisibleBorder(
+      page.locator('#uifl-file-box .ui-file__button'),
+      'ui-file__button (кнопка-лейбл)',
+    );
   });
 
   standTest('ui-select: граница триггера и раскрытого списка видима', async ({ stand }) => {
