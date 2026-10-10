@@ -16,11 +16,10 @@
  * вручную по собранной странице (npm run serve) и зафиксирован в доке
  * «Как пользоваться токенами». Здесь — статическая часть полноты.
  */
-import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { execPath } from 'node:process';
 import { beforeAll, describe, expect, it } from 'vitest';
+import { buildForUnitTests } from '../helpers/unit-build.mjs';
 import { TOKENS_SOURCES, collectTokens, parseTokensFile } from '../../showcase/tokens-stand.mjs';
 
 const root = join(import.meta.dirname, '../..');
@@ -31,7 +30,10 @@ let primitiveTokens;
 
 beforeAll(async () => {
   // Реальная сборка: dist + showcase (страница стенда генерируется из файлов токенов).
-  execFileSync(execPath, ['showcase/build.mjs'], { cwd: root, stdio: 'pipe' });
+  // Через общий мьютекс (tests/helpers/unit-build.mjs): параллельный воркер
+  // themes.test.js собирает то же самое — без замка rmSync одного билдера
+  // попадает в окно чтения другого (флак ENOENT).
+  await buildForUnitTests(root);
   const parsed = TOKENS_SOURCES.map(({ file, layer }) =>
     parseTokensFile(readFileSync(join(root, file), 'utf8'), layer),
   );
