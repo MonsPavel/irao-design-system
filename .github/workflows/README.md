@@ -12,9 +12,9 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
 |---|---|---|
 | `ci.yml` (CI) | PR в main, push в main, вручную | обязательные гейты + advisory-visual |
 | `pages.yml` (Pages) | CI завершился на main, вручную | деплой `showcase/dist` на GitHub Pages |
-| `release.yml` (Release) | тег `v*`, вручную | каркас: dist-zip + матрица браузеров (боевой режим — T12.1) |
+| `release.yml` (Release) | тег `v*`, вручную | боевой режим T12.1: гейты (changelog/версия/протокол) → матрица → VI-smoke → dist-zip (§6.1) → GitHub Release |
 | `update-snapshots.yml` (Update snapshots) | вручную | fallback-обновление скриншот-эталонов ботом (ADR-0004) |
-| `nightly.yml` (Nightly cycle) | cron 03:00, вручную | валидация backlog/контраст/unit + матрица chromium/firefox/webkit |
+| `nightly.yml` (Nightly cycle) | cron 03:00, вручную | валидация backlog/контраст/unit + матрица chromium/firefox/webkit + advisory-visual (T12.1, ADR-0004) |
 
 ## Обязательные гейты PR (mandatory)
 
@@ -66,9 +66,25 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
 
 - **Pages**: деплой только после зелёного CI на main (`workflow_run` с guard-условием
   `workflow_run.conclusion == 'success'`); сборка полигона + `.nojekyll`.
-- **Release** (каркас): на тег `v*` — dist-zip артефакт `dist-<тег>` + полный матричный
-  прогон chromium/firefox/webkit (chromium сверяет эталоны). GitHub Release / changelog /
-  шрифто-зом и VI-smoke — T12.1.
+- **Release** (боевой режим, T12.1): на тег `v*` — цепочка из пяти блокирующих джоб
+  `gates → matrix → vi-smoke → build-dist → release`:
+  1. `gates` — changelog-запись тега + версия `package.json` = тегу
+     (`node tools/release-gate.mjs`; ADR-0007, баннеры dist = тег — T1.3) и протокол
+     скринридеров (`node tests/a11y/protocol-gate.mjs` — T9.2: релиз обязан получать
+     exit 0); шаги только на `refs/tags/v*` — ручной запуск (workflow_dispatch) служит
+     репетицией конвейера без публикации;
+  2. `matrix` — полный прогон chromium/firefox/webkit (chromium сверяет эталоны,
+     в прогоне — шрифто-зум-гейт T3.6);
+  3. `vi-smoke` — релизный smoke доступности: VI-включение (ui-vi.spec.js) и axe-обход
+     всех стендов (stands-sweep) — T9.1/T9.2;
+  4. `build-dist` — zip dist + проверка содержимого в джобе (структура
+     02-architecture §6.1: `ui-core.min.css`, `ui-vi.min.css`, `ui.min.js`,
+     `fonts/`, `themes/`; баннер `irao-ui v<версия>`);
+  5. `release` — GitHub Release через `gh release create` (права `contents: write`
+     только у этой джобы): артефакт + release notes = запись тега из CHANGELOG
+     (`--extract`). Публикация — только на тегах.
+  Релизный чек-лист (предусловия, 7 зелёных ночей, включение mandatory visual) —
+  [docs/ui-system/release/release-checklist.md](../../docs/ui-system/release/release-checklist.md).
 
 ## Branch protection (после первого зелёного прогона)
 
