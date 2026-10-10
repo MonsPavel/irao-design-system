@@ -273,9 +273,7 @@ describe('renderDocPage: заголовок extra-секции с markdown-сс�
   });
 
   it('репо-относительная ссылка — инлайн-форма тел секций (текст + code-путь), не сырой markdown', () => {
-    expect(html).toContain(
-      'Мобильная стратегия — ADR-0012 (<code>docs/adr/0012-x.md</code>) и внешняя',
-    );
+    expect(html).toContain('Мобильная стратегия — ADR-0012 (<code>docs/adr/0012-x.md</code>) и');
     // Сырой markdown в доступном имени h2 — скобочный мусор для скринридера.
     expect(html).not.toContain('[ADR-0012](../../docs/adr/0012-x.md)');
   });

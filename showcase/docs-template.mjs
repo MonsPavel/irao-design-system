@@ -570,12 +570,18 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   );
 
   /* Дополнительные README-блоки вне шаблона (Bitrix-заметки, границы) — после
-     do/don't, до schema/версии; шаблонные секции проверяются независимо. */
+     do/don't, до schema/версии; шаблонные секции проверяются независимо.
+     Заголовок — через renderInline, а не escapeHtml: заголовки README несут
+     инлайн-конструкции (ссылка на ADR в «Мобильная стратегия» ui-select),
+     и сырой markdown в доступном имени h2 — скобочный мусор для скринридера;
+     контракт модуля «markdown → HTML — ровно те конструкции, что живут в
+     README» на заголовки действует так же. renderInline экранирует сырой
+     HTML сам, инъекции нет. */
   for (const [index, heading] of (metadata.readme.extra ?? []).entries()) {
     doc.push(
       [
         `<section data-ui-docs-section="extra" aria-labelledby="ui-docs-extra-${index}-heading">`,
-        `<h2 id="ui-docs-extra-${index}-heading">${escapeHtml(heading)}</h2>`,
+        `<h2 id="ui-docs-extra-${index}-heading">${renderInline(heading)}</h2>`,
         renderMarkdown(readmeSection(parsed, name, heading, `readme.extra[${index}]`)),
         '</section>',
       ].join('\n'),
@@ -827,14 +833,25 @@ export async function docCompletenessProblems(root) {
         problems.push(`patterns/${name}: нет README.md — дока паттерна`);
         continue;
       }
-      const headings = Array.from(
-        readFileSync(readmePath, 'utf8').matchAll(/^##\s+(.+?)\s*$/gm),
-        (match) => match[1],
-      );
+      const readmeText = readFileSync(readmePath, 'utf8');
+      const headings = Array.from(readmeText.matchAll(/^##\s+(.+?)\s*$/gm), (match) => match[1]);
       for (const [label, re] of PATTERN_SECTION_CHECKS) {
         if (!headings.some((heading) => re.test(heading))) {
           problems.push(`patterns/${name}: в README.md нет секции «${label}» (чек-лист паттерна)`);
         }
+      }
+      // Схемы doc:/stand: реализованы только в renderInline, который рендерит
+      // ДОКИ КОМПОНЕНТОВ (showcase/dist/docs/): README паттернов в полигон не
+      // попадает, а вне рендерера doc:/stand: — несуществующая схема URL
+      // (битая ссылка на GitHub). Гейт brokenDocLinks эти файлы не сканирует
+      // (он смотрит только записанные док-страницы) — схему в README
+      // паттернов ловит инвентаризация. Ссылки — репо-относительные.
+      for (const match of readmeText.matchAll(/\]\((doc|stand):[^)]*\)/g)) {
+        problems.push(
+          `patterns/${name}: README.md несёт схему ${match[1]}: — она не рендерится ` +
+            'нигде (README паттернов не попадает в полигон, на GitHub схема не существует); ' +
+            'используйте репо-относительную ссылку',
+        );
       }
     }
   }
