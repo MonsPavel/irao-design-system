@@ -43,6 +43,13 @@ import {
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { transform } from 'esbuild';
+import {
+  loadMetadata,
+  readComponentMarkup,
+  REFERENCE_COMPONENTS,
+  renderDocPage,
+  verifyDocPageHtml,
+} from './docs-template.mjs';
 import { parseTokensFile, renderTokensStand, TOKENS_SOURCES } from './tokens-stand.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -367,7 +374,7 @@ const THEME_SCRIPT = `  <script>
     })();
   </script>`;
 
-function generateShowcase({ themes }) {
+async function generateShowcase({ themes }) {
   mkdirSync(join(SHOWCASE_DIST, 'stands'), { recursive: true });
 
   const stands = [];
@@ -784,9 +791,54 @@ function generateShowcase({ themes }) {
     stands.push({ name, source: body.source });
   }
 
+  // Доки компонентов по шаблону T10.1 (02-architecture §8): страница собирается
+  // ИЗ ФАЙЛОВ КОМПОНЕНТА — живые примеры и сниппет из канонического
+  // components/<имя>/<имя>.html, текстовые секции из README-блоков, машинные
+  // (клавиатура/ARIA/скринридер/schema/версия) из метаданных
+  // showcase/docs/<имя>.mjs. Метаданные есть не у всех компонентов — полный
+  // прогон добавляет T10.2; AC T10.1 — три эталона соответствуют шаблону
+  // на 100% (проверка — selfChecks ниже + юнит-пины + e2e).
+  const docs = [];
+  mkdirSync(join(SHOWCASE_DIST, 'docs'), { recursive: true });
+  for (const name of discovered) {
+    if (!existsSync(join(ROOT, 'showcase', 'docs', `${name}.mjs`))) continue;
+    const metadata = await loadMetadata(name);
+    const readmePath = join(ROOT, 'components', name, 'README.md');
+    if (!existsSync(readmePath)) {
+      warn(`components/${name}/README.md не найден — дока ${name} не сгенерирована`);
+      continue;
+    }
+    const markup = readComponentMarkup(ROOT, name);
+    let main;
+    try {
+      main = renderDocPage({ name, markup, readme: readFileSync(readmePath, 'utf8'), metadata });
+    } catch (error) {
+      throw new Error(`дока ${name}: ${error.message}`);
+    }
+    const page = frame({
+      rel: '../..', // docs/<имя>.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: `${name} — дока — irao-ui showcase`,
+      main,
+      themes,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'docs', `${name}.html`), page);
+    docs.push({ name, markup });
+  }
+  const missingReference = REFERENCE_COMPONENTS.filter(
+    (reference) => !docs.some((doc) => doc.name === reference),
+  );
+  if (missingReference.length) {
+    warn(`эталоны T10.1 без док-страниц (шаблон не собран): ${missingReference.join(', ')}`);
+  }
+
   const standItems = stands.map(
     ({ name, source }) =>
       `      <li><a href="stands/${name}.html">${name}</a> — <code>${source}</code></li>`,
+  );
+  const docItems = docs.map(
+    ({ name }) =>
+      `      <li><a href="docs/${name}.html">${name}</a> — дока по шаблону T10.1: примеры, сниппет, состояния, responsive, a11y, API, do/don't, версия</li>`,
   );
   const standSection = standItems.length
     ? ['      <ul>', ...standItems, '      </ul>'].join('\n')
@@ -805,6 +857,12 @@ function generateShowcase({ themes }) {
       '    <section aria-labelledby="stands-heading">',
       '      <h2 id="stands-heading">Стенды компонентов</h2>',
       standSection,
+      '    </section>',
+      '    <section aria-labelledby="docs-heading">',
+      '      <h2 id="docs-heading">Доки компонентов (шаблон T10.1)</h2>',
+      docItems.length
+        ? ['      <ul>', ...docItems, '      </ul>'].join('\n')
+        : '      <p>Доки по шаблону появятся с T10.1 (эталонные три) и T10.2 (все компоненты).</p>',
       '    </section>',
       '    <section aria-labelledby="standalone-heading">',
       '      <h2 id="standalone-heading">Проверка дистрибутива</h2>',
@@ -834,13 +892,13 @@ function generateShowcase({ themes }) {
   });
   writeFileSync(join(SHOWCASE_DIST, 'standalone.html'), standalone);
 
-  return stands;
+  return { stands, docs };
 }
 
 /* ── self-проверки сборки (AC T1.3; unit для build.mjs не требуется —
    проверяется сборкой, сценарии e2e — с T1.4) ── */
 
-function selfChecks({ banner, stands }) {
+function selfChecks({ banner, stands, docs }) {
   for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js', 'fonts', 'themes']) {
     assert(existsSync(join(DIST, name)), `dist/${name} отсутствует (структура §6.1)`);
   }
@@ -881,6 +939,23 @@ function selfChecks({ banner, stands }) {
     !/\b\d{4}-\d{2}-\d{2}\b|\b\d{2}:\d{2}:\d{2}\b/.test(banner),
     'баннер содержит метку времени — ломает идемпотентность',
   );
+  // Доки по шаблону T10.1: проверка ведётся по ЗАПИСАННОМУ файлу — «диф на
+  // билде» (Testing requirements T10.1). verifyDocPageHtml пинит чек-лист
+  // «страница = шаблон»: 9 секций по порядку, сниппет = каноническому файлу
+  // компонента, живые примеры = сниппету, responsive — iframe 375/768/1440.
+  for (const { name, markup } of docs) {
+    const html = readFileSync(join(SHOWCASE_DIST, 'docs', `${name}.html`), 'utf8');
+    const problems = verifyDocPageHtml(html, markup);
+    assert(problems.length === 0, `дока ${name} ≠ шаблону T10.1: ${problems.join('; ')}`);
+  }
+  // AC T10.1: все три эталона собрались и прошли чек-лист (отсутствие
+  // метаданных эталона — warning выше, здесь — жёсткий гейт).
+  for (const reference of REFERENCE_COMPONENTS) {
+    assert(
+      docs.some((doc) => doc.name === reference),
+      `эталон T10.1 ${reference} не имеет док-страницы (нужны showcase/docs/${reference}.mjs)`,
+    );
+  }
 }
 
 /* ── main ── */
@@ -922,8 +997,8 @@ async function main() {
   emitRuntime(DIST);
   emitRuntime(SHOWCASE_DIST);
 
-  const stands = generateShowcase({ themes: themeNames() });
-  selfChecks({ banner, stands });
+  const { stands, docs } = await generateShowcase({ themes: themeNames() });
+  selfChecks({ banner, stands, docs });
 
   for (const name of COMPONENTS) {
     if (!existsSync(join(ROOT, `components/${name}`))) {
@@ -938,6 +1013,10 @@ async function main() {
     `  dist/ui.min.js        ${uiJs.length} байт js + баннер (${jsFiles.length} модулей)`,
   );
   console.log(`  showcase/dist/        index.html + standalone.html + ${stands.length} стенд(ов)`);
+  console.log(
+    `  showcase/dist/docs/   ${docs.length} док-страниц(ы) по шаблону T10.1 ` +
+      `(${docs.map((doc) => doc.name).join(', ') || '—'})`,
+  );
   console.log('OK: сборка завершена (структура 02-architecture §6.1)');
 }
 
