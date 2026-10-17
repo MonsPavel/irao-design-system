@@ -235,13 +235,16 @@ describe('подключение T5.4 в систему', () => {
       'utf8',
     ).replace(/\r\n/g, '\n');
     const listTags = standSource.match(/<ul class="ui-form__summary-list"[^>]*>/g) ?? [];
-    expect(listTags.length, 'на стенде три списка summary (демо, серверный, валидация)').toBe(3);
+    expect(
+      listTags.length,
+      'на стенде четыре списка summary (демо, серверный, валидация, radio-группа)',
+    ).toBe(4);
     for (const tag of listTags) {
       expect(tag, `${tag}: role="list" (Safari/VoiceOver)`).toContain('role="list"');
     }
     const directives =
       standSource.match(/<!-- html-validate-disable-next no-redundant-role -->/g) ?? [];
-    expect(directives, 'директива html-validate перед каждым списком').toHaveLength(3);
+    expect(directives, 'директива html-validate перед каждым списком').toHaveLength(4);
   });
 
   it('README: role="list" в HTML-примере и Bitrix-шаблоне (копипаст-источники; обоснование — в доке)', () => {

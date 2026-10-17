@@ -366,6 +366,86 @@
     </div>
   </form>
 
+  <!-- Required-radio-группа (ревью T13.4): состояние ГРУППЫ — сабмит с
+       ошибкой ставит aria-invalid на КАЖДЫЙ radio (нативно браузер
+       показывает один bubble на группу), в summary ровно одна запись;
+       выбор варианта снимает ошибку со всей группы уже на input, change
+       довалидирует. Отдельная форма секции: демонстрация группы не меняет
+       счётчик ошибок полной формы выше. required на каждом radio — как в
+       юнит-фикстурах (нативно достаточно одного, aria-контракт — на всех);
+       группа — fieldset/legend (гейт irao/radio-group-fieldset). -->
+  <form class="ui-form" id="uifv-radio" data-ui-form action="#uifv-heading">
+    <div class="ui-form__summary" id="uifv-radio-summary" role="alert" tabindex="-1" hidden>
+      <h3 class="ui-form__summary-title">В форме есть ошибки</h3>
+      <!-- html-validate-disable-next no-redundant-role -->
+      <ul class="ui-form__summary-list" role="list">
+        <li><a class="ui-link" href="#uifv-radio-online">Выберите вариант</a></li>
+      </ul>
+    </div>
+    <div class="ui-field ui-field--required ui-field--wide">
+      <fieldset class="ui-radio-group" aria-describedby="uifv-radio-format-hint">
+        <legend class="ui-radio-group__legend">
+          Формат участия
+          <span class="ui-field__req"
+            ><span aria-hidden="true">*</span
+            ><span class="ui-field__req-text">обязательное поле</span></span
+          >
+        </legend>
+        <div class="ui-radio-group__row">
+          <label class="ui-radio">
+            <input
+              class="ui-radio__input"
+              type="radio"
+              id="uifv-radio-online"
+              name="uifv-radio-format"
+              value="online"
+              required
+            >
+            Онлайн
+          </label>
+          <label class="ui-radio">
+            <input
+              class="ui-radio__input"
+              type="radio"
+              id="uifv-radio-onsite"
+              name="uifv-radio-format"
+              value="onsite"
+              required
+            >
+            Очно
+          </label>
+          <label class="ui-radio">
+            <input
+              class="ui-radio__input"
+              type="radio"
+              id="uifv-radio-record"
+              name="uifv-radio-format"
+              value="record"
+              required
+            >
+            В записи
+          </label>
+        </div>
+      </fieldset>
+      <p class="ui-field__hint" id="uifv-radio-format-hint">
+        Состояние ГРУППЫ: ошибка — aria на каждом radio и одна запись в сводной ошибке; выбор
+        варианта снимает ошибку со всей группы.
+      </p>
+    </div>
+    <div class="ui-form__actions">
+      <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__spinner" aria-hidden="true"></span>
+        <span class="ui-button__label">Отправить</span>
+      </button>
+    </div>
+  </form>
+  <p class="ui-small ui-text--muted">
+    Третья форма — required-radio-группа (ревью T13.4): сабмит с ошибкой помечает
+    <code>aria-invalid="true"</code> каждый radio группы и добавляет в сводную ошибку
+    <strong>одну</strong> запись («Выберите вариант» — нативно браузер показывает один bubble на
+    группу); выбор варианта снимает ошибку со всей группы уже на <code>input</code>.
+  </p>
+
   <!-- События и расширение: без summary (фокус при ошибке — на поле) и с
        кастомным валидатором сайта. Валидный сабмит здесь навигацию по хэшу
        без query не даёт (пустая форма валидна) — состояние is-loading и
@@ -390,6 +470,7 @@
     </div>
     <div class="ui-form__actions">
       <button class="ui-button ui-button--primary" type="submit">
+        <span class="ui-button__spinner" aria-hidden="true"></span>
         <span class="ui-button__label">Отправить</span>
       </button>
     </div>
