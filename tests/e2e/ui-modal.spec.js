@@ -246,10 +246,14 @@ test.describe('ui-modal: Escape и восстановление фокуса (AC
       () => !document.getElementById('uimd-md-dialog').hasAttribute('open'),
     );
     const latency = Date.now() - t0;
+    // Граница 150: путь мгновенный (root.close() синхронно), но замер идёт
+    // сквозь доставку клавиатурного события → dispatch-джиттер движка
+    // (webkit локально: 51мс при старой границе 50 — флейк). Контракт:
+    // НЕ страховочный таймер 500ms — от него граница отстоит на порядок.
     expect(
       latency,
       `cancel→close = ${latency}ms при reduced-motion — без мёртвого окна`,
-    ).toBeLessThan(50);
+    ).toBeLessThan(150);
     await expect(page.locator(SEL.mdTrigger)).toBeFocused();
   });
 

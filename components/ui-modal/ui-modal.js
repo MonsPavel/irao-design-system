@@ -275,7 +275,42 @@
       }
       closing = true;
       root.classList.add('is-closing');
+      startCloseWatch();
       closeTimer = window.setTimeout(finishClose, CLOSE_FALLBACK_MS);
+    }
+
+    /* TASK (webkit, ночной прогон irao#38869366974): headless-WebKit Linux не
+       доставляет transitionend на top-layer <dialog> — закрытие висло до
+       страховки 500ms (замер 511–529ms) при живой анимации, мёртвое окно
+       ~140ms. Дубль-сигнал ДВИЖКО-НЕЗАВИСИМЫЙ: rAF-поллинг computed transform
+       — «3 стабильных кадра после изменения» = переход отыграл. Пуск с-guard
+       120ms (переход заведомо в полёте; мгновенно-стабильный кадр = переход
+       не завёлся — это ловит таймер, не поллинг, чтобы не резать анимацию).
+       transitionend остаётся основным сигналом (хром/файрфокс/сafari-десктоп
+       — как было, ~360ms), таймер 500ms — последняя линия. Цикл гаснет по
+       !closing (finish/cleanup/re-open). */
+    function startCloseWatch() {
+      var last = null;
+      var stable = 0;
+      var startedAt = performance.now();
+      function frame(now) {
+        if (!closing) {
+          return;
+        }
+        if (now - startedAt >= 120) {
+          var current = window.getComputedStyle(root).transform;
+          if (last !== null) {
+            stable = current === last ? stable + 1 : 0;
+            if (stable >= 3) {
+              finishClose();
+              return;
+            }
+          }
+          last = current;
+        }
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
     }
 
     /* Очистка после закрытия. Контракт ADR-0011 «остаточный класс снимается
