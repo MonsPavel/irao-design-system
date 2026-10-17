@@ -146,6 +146,25 @@ describe('каркас showcase (Scope: включён по умолчанию; 
   });
 });
 
+describe('стенд ui-skip-link (T13.5): без литерального дубля каркасного якоря', () => {
+  const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
+
+  it('standBody(): канонический паттерн ui-skip-link не встраивается в стенд', () => {
+    // Якорь паттерна байт-в-байт повторяет каркасный skip-link (первый элемент
+    // body каждой страницы полигона) — встраивание в main давало литеральный
+    // дубль (rev T3.5: dist:13 + dist:30). Поведенческий пин — e2e
+    // skip-link.spec.js («ровно один skip-якорь» на собранном стенде).
+    const standBodyBlock = build.slice(
+      build.indexOf('function standBody'),
+      build.indexOf('async function build'),
+    );
+    expect(standBodyBlock, 'исключение паттерна-дубля в standBody').toContain(
+      'STAND_PATTERN_IS_FRAME',
+    );
+    expect(build).toMatch(/const STAND_PATTERN_IS_FRAME = new Set\(\['ui-skip-link'\]\)/);
+  });
+});
+
 describe('bitrix-сниппет header.php (Scope: включён по умолчанию)', () => {
   const snippet = readFileSync(join(root, 'bitrix', 'snippets', 'header-php.snippet.php'), 'utf8');
 
