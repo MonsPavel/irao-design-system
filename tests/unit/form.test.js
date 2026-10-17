@@ -162,6 +162,20 @@ describe('components/ui-form/ui-form.html — канонический патт�
     expect(html).toContain('ui-form__success-title" tabindex="-1"');
   });
 
+  it('summary-list объявлен списком: role="list" с локальной директивой html-validate (ревью T5.4 medium: flex+list-style:none снимают роль списка в Safari/VoiceOver — образец ui-breadcrumbs)', () => {
+    // display:flex на __summary-list и глобальный list-style:none удаляют
+    // роль списка в Safari/VoiceOver (документировано .htmlvalidate.js) —
+    // скринридер перестаёт объявлять «список, N элементов». role="list"
+    // возвращает её; html-validate считает role на нативном списке избыточным
+    // (no-redundant-role — слеп к Safari-багу; prefer-native-element на
+    // «голом» ul не срабатывает, в директиве только первое правило), поэтому
+    // перед элементом стоит локальная директива; не снимать вместе с
+    // role="list".
+    expect(html).toMatch(
+      /<!-- html-validate-disable-next no-redundant-role -->\s*<ul\s+class="ui-form__summary-list"\s+role="list">/,
+    );
+  });
+
   it('легенда обязательных: маркер aria-hidden, смысл в тексте footnote (не только цветом, WCAG 1.4.1)', () => {
     expect(html).toMatch(/class="ui-form__req" aria-hidden="true"/);
     expect(html).toContain('— обязательные поля');
@@ -213,5 +227,38 @@ describe('подключение T5.4 в систему', () => {
         `атрибут novalidate в ${tag} недопустим — его ставит только модуль T5.5`,
       ).toBe(false);
     }
+  });
+
+  it('стенд: каждый .ui-form__summary-list объявлен списком (role="list" + директива) — стенд источник копипасты (ревью T5.4 medium)', () => {
+    const standSource = readFileSync(
+      join(root, 'showcase', 'pages', 'ui-form', 'index.html'),
+      'utf8',
+    ).replace(/\r\n/g, '\n');
+    const listTags = standSource.match(/<ul class="ui-form__summary-list"[^>]*>/g) ?? [];
+    expect(
+      listTags.length,
+      'на стенде четыре списка summary (демо, серверный, валидация, radio-группа)',
+    ).toBe(4);
+    for (const tag of listTags) {
+      expect(tag, `${tag}: role="list" (Safari/VoiceOver)`).toContain('role="list"');
+    }
+    const directives =
+      standSource.match(/<!-- html-validate-disable-next no-redundant-role -->/g) ?? [];
+    expect(directives, 'директива html-validate перед каждым списком').toHaveLength(4);
+  });
+
+  it('README: role="list" в HTML-примере и Bitrix-шаблоне (копипаст-источники; обоснование — в доке)', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-form', 'README.md'), 'utf8').replace(
+      /\r\n/g,
+      '\n',
+    );
+    const listTags = readme.match(/<ul class="ui-form__summary-list"[^>]*>/g) ?? [];
+    expect(listTags.length, 'HTML-пример и Bitrix-шаблон несут список summary').toBe(2);
+    for (const tag of listTags) {
+      expect(tag, `${tag}: role="list"`).toContain('role="list"');
+    }
+    expect(readme, 'обоснование роли в доке (Safari/VoiceOver, образец ui-breadcrumbs)').toContain(
+      'Safari',
+    );
   });
 });

@@ -3,11 +3,14 @@
      исправлен: инпут скрыт клипом — tab-порядок, скринридер и отправка формы
      живы. Кнопка-лейбл — ЕДИНСТВЕННЫЙ label инпута (клик открывает выбор
      нативно, без JS); имя полю несёт aria-labelledby на текст обвязки
-     (второй label — нарушение axe form-field-multiple-labels). Значение
+     И на подпись кнопки (второй label — нарушение axe
+     form-field-multiple-labels; подпись в имени — Label in Name, WCAG 2.5.3:
+     голосовой ввод произносит видимую подпись «прикрепить файл»). Значение
      выбора — ui-file__value с role="status" (озвучивание); текст и кнопку
      сброса ведёт модуль ui-file.js (хук data-ui-file): имя + размер после
      выбора, «Убрать файл» — нативная очистка с возвратом фокуса на инпут.
-     Подсказка accept/ограничений — ui-file__hint в aria-describedby. Правило
+     Подсказка accept/ограничений — ui-file__hint в aria-describedby (текст
+     согласован с required — не отрицает обязательность). Правило
      «без display:none/visibility:hidden на нативных контролах» и do/don't —
      README.md. -->
 <div class="ui-field ui-field--required ui-field--error">
@@ -28,15 +31,15 @@
         accept=".doc,.docx,.pdf"
         required
         aria-invalid="true"
-        aria-labelledby="ui-resume-label"
+        aria-labelledby="ui-resume-label ui-resume-button-text"
         aria-describedby="ui-resume-hint ui-resume-error"
       >
-      <span class="ui-file__button-text">прикрепить файл</span>
+      <span class="ui-file__button-text" id="ui-resume-button-text">прикрепить файл</span>
     </label>
     <p class="ui-file__value" role="status">Файл не выбран</p>
     <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
     <span class="ui-file__hint" id="ui-resume-hint">
-      doc, docx, pdf — до 5 Мб; файл не обязателен
+      doc, docx, pdf — до 5 Мб; нужен для отбора на собеседование
     </span>
   </div>
   <p class="ui-field__error" id="ui-resume-error" role="alert">

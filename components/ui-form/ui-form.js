@@ -107,7 +107,12 @@
    * Соответствие нативному атрибуту pattern: значение сверяется ЦЕЛИКОМ
    * (неявные якоря ^(?:…)$, семантика HTML), пустое значение проходит
    * (обязательность — отдельное правило), невалидный регэксп игнорируется
-   * (нативное поведение браузеров).
+   * (нативное поведение браузеров). Компиляция — с 'v' (нативные браузеры
+   * проверяют pattern в v-режиме: v-only синтаксис — \q{}, вложенные классы —
+   * исполняется, а не игнорируется молча); без поддержки 'v' или для
+   * u-совместимого синтаксиса, невалидного в 'v' (например [/] — в v-классах
+   * / экранируется), — fallback на 'u' (старые браузеры); не компилируется
+   * нигде — правило игнорируется (нативное поведение битого pattern).
    * @param {string} value значение поля
    * @param {string} pattern содержимое атрибута pattern
    * @returns {boolean}
@@ -117,10 +122,14 @@
       return true;
     }
     try {
-      return new RegExp('^(?:' + pattern + ')$', 'u').test(value);
+      return new RegExp('^(?:' + pattern + ')$', 'v').test(value);
     } catch {
-      // Невалидный pattern — нативные браузеры правило игнорируют.
-      return true;
+      try {
+        return new RegExp('^(?:' + pattern + ')$', 'u').test(value);
+      } catch {
+        // Невалидный pattern — нативные браузеры правило игнорируют.
+        return true;
+      }
     }
   }
 
@@ -246,9 +255,12 @@
     }
 
     var value = field.value;
+    // Переопределение сообщения — непустой data-ui-error (ревью T13.4: пустой
+    // атрибут не является валидным override — он дал бы пустое сообщение и
+    // пустую ссылку в summary; truthy-проверка возвращает правило к умолчанию).
     var override = field.getAttribute('data-ui-error');
     function message(key, params) {
-      return override !== null ? override : defaultMessage(key, params);
+      return override ? override : defaultMessage(key, params);
     }
 
     if (field.hasAttribute('required')) {
@@ -344,16 +356,41 @@
     return field.id;
   }
 
+  /** Существующий элемент ошибки: в обвязке — её .ui-field__error; у поля БЕЗ
+   *  обвязки — сосед-элемент сразу после поля. Только поиск — clearError не
+   *  создаёт узлов. */
+  function findErrorElement(field, wrap) {
+    if (wrap) {
+      return wrap.querySelector('.ui-field__error');
+    }
+    var next = field.nextElementSibling;
+    return next && next.classList && next.classList.contains('ui-field__error') ? next : null;
+  }
+
+  /** Элемент ошибки для показа: существующий или созданный — в обвязке, а у
+   *  поля БЕЗ обвязки сразу после поля (ревью T13.4: раньше errorEl оставался
+   *  null и aria-describedby получал id, которого нет в DOM, — висячая
+   *  ссылка; создание по месту делает ссылку реальной и идемпотентно). */
+  function ensureErrorElement(field, wrap) {
+    var existing = findErrorElement(field, wrap);
+    if (existing) {
+      return existing;
+    }
+    var errorEl = document.createElement('p');
+    errorEl.className = 'ui-field__error';
+    errorEl.setAttribute('role', 'alert');
+    if (wrap) {
+      wrap.appendChild(errorEl);
+    } else if (field.parentNode) {
+      field.parentNode.insertBefore(errorEl, field.nextSibling);
+    }
+    return errorEl;
+  }
+
   /** Показ ошибки по контракту: класс обвязки + aria + текст role="alert". */
   function renderError(field, text) {
     var wrap = field.closest('.ui-field');
-    var errorEl = wrap ? wrap.querySelector('.ui-field__error') : null;
-    if (wrap && !errorEl) {
-      errorEl = document.createElement('p');
-      errorEl.className = 'ui-field__error';
-      errorEl.setAttribute('role', 'alert');
-      wrap.appendChild(errorEl);
-    }
+    var errorEl = ensureErrorElement(field, wrap);
 
     field.setAttribute('aria-invalid', 'true');
     var id = errorIdOf(field, errorEl);
@@ -373,7 +410,7 @@
   /** Снятие ошибки: зеркально контракту (класс, aria, ссылка, текст). */
   function clearError(field) {
     var wrap = field.closest('.ui-field');
-    var errorEl = wrap ? wrap.querySelector('.ui-field__error') : null;
+    var errorEl = findErrorElement(field, wrap);
     field.removeAttribute('aria-invalid');
     if (errorEl && errorEl.id) {
       var described = (field.getAttribute('aria-describedby') || '')
@@ -486,12 +523,24 @@
 
     function validateNow(event) {
       var field = event.currentTarget;
+      var isRadio = field.type === 'radio';
+      var group = isRadio ? radioGroupFields(field) : null;
       var text = validateField(field);
-      if (field.type === 'radio') {
+      if (isRadio && text === null && !hasRule(field)) {
+        // Сосед группы БЕЗ собственных правил (ревью T13.4): его валидации
+        // нет, но состояние общее — группа оценивается по «правилоносному»
+        // члену (программное снятие выбора возвращает ошибку, как и сабмит).
+        for (var r = 0; r < group.length; r += 1) {
+          if (fields.indexOf(group[r]) !== -1) {
+            text = validateField(group[r]);
+            break;
+          }
+        }
+      }
+      if (isRadio) {
         // change/blur на radio — состояние общее для группы: результат
         // применяется ко ВСЕМ radio (соседи не остаются с висящей ошибкой,
         // ревью T5.5).
-        var group = radioGroupFields(field);
         for (var i = 0; i < group.length; i += 1) {
           applyError(group[i], text);
         }
@@ -500,19 +549,23 @@
       }
     }
 
-    // Ошибка на change/blur, снятие на input (career-portal).
+    // Ошибка на change/blur, снятие на input (career-portal). Radio-группа:
+    // input на ЛЮБОМ radio группы — выбор варианта (нативно radio нельзя
+    // снять кликом), ошибка снимается со всей группы, откуда бы input ни
+    // пришёл — в т.ч. от соседа без правил (ревью T13.4: слушатели группы не
+    // ограничены «правилоносными» полями).
     function onFieldInput() {
-      if (this.getAttribute('aria-invalid') === 'true') {
-        if (this.type === 'radio') {
-          var group = radioGroupFields(this);
-          for (var i = 0; i < group.length; i += 1) {
-            if (group[i].getAttribute('aria-invalid') === 'true') {
-              clearError(group[i]);
-            }
+      if (this.type === 'radio') {
+        var radioGroup = radioGroupFields(this);
+        for (var i = 0; i < radioGroup.length; i += 1) {
+          if (radioGroup[i].getAttribute('aria-invalid') === 'true') {
+            clearError(radioGroup[i]);
           }
-        } else {
-          clearError(this);
         }
+        return;
+      }
+      if (this.getAttribute('aria-invalid') === 'true') {
+        clearError(this);
       }
     }
 
@@ -588,10 +641,39 @@
       root.dispatchEvent(new window.CustomEvent('irao-ui:form-valid', { bubbles: true }));
     }
 
+    // Слушатели: input/change/blur — на полях с правилами. Radio-СОСЕДИ без
+    // правил тоже управляют состоянием группы (ревью T13.4 medium: нативно
+    // required достаточно на одном radio группы — без слушателя на соседе
+    // его выбор не снимал aria-invalid="true" с уже заполненной группы до
+    // ресабмита). Дубли исключены: соседи из fields[] получают своих
+    // слушателей там, повторные подписки не нужны.
+    var groupRadios = [];
+
+    function attachFieldListeners(field) {
+      field.addEventListener('input', onFieldInput);
+      field.addEventListener('change', validateNow);
+      field.addEventListener('blur', validateNow);
+      if (field.type !== 'radio') {
+        return;
+      }
+      var group = radioGroupFields(field);
+      for (var n = 0; n < group.length; n += 1) {
+        var neighbor = group[n];
+        if (
+          neighbor === field ||
+          fields.indexOf(neighbor) !== -1 ||
+          groupRadios.indexOf(neighbor) !== -1
+        ) {
+          continue;
+        }
+        neighbor.addEventListener('input', onFieldInput);
+        neighbor.addEventListener('change', validateNow);
+        groupRadios.push(neighbor);
+      }
+    }
+
     for (var k = 0; k < fields.length; k += 1) {
-      fields[k].addEventListener('input', onFieldInput);
-      fields[k].addEventListener('change', validateNow);
-      fields[k].addEventListener('blur', validateNow);
+      attachFieldListeners(fields[k]);
     }
     root.addEventListener('submit', onSubmit);
     root.addEventListener('click', onSummaryClick);
@@ -606,6 +688,11 @@
           fields[i].removeEventListener('input', onFieldInput);
           fields[i].removeEventListener('change', validateNow);
           fields[i].removeEventListener('blur', validateNow);
+        }
+        // Слушатели radio-соседей без правил (см. attachFieldListeners).
+        for (var g = 0; g < groupRadios.length; g += 1) {
+          groupRadios[g].removeEventListener('input', onFieldInput);
+          groupRadios[g].removeEventListener('change', validateNow);
         }
         root.removeEventListener('submit', onSubmit);
         root.removeEventListener('click', onSummaryClick);

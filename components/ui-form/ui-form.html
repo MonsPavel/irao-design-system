@@ -4,16 +4,23 @@
      tabindex="-1" (фокус переводится на него при показе — правило фокуса
      T5.4); ссылки summary ведут на id полей (href="#apply-name") — переход
      фокуса реален, доопределение — модуль T5.5 (Implementation requirements
-     п.2). Success-заголовок несёт tabindex="-1" — паттерн работает и без JS
-     (серверный рендер success-страницы, вариант Bitrix). Заголовки на стенде
-     получают уровень по иерархии страницы (здесь h2 с ролью ui-h4 — визуал
-     одобренного fs-h4). Скрытие до момента — атрибут hidden (показ = снятие
-     атрибута; JS-логика свапа — сайт/T5.5, паттерн выше). Поля — ui-field
-     (T5.1); ui-field--wide растягивает поле на все колонки grid'а. -->
+     п.2). summary-list — ul[role="list"]: display:flex + list-style:none
+     снимают роль списка в Safari/VoiceOver (документировано .htmlvalidate.js),
+     role="list" возвращает её; html-validate считает такое сочетание
+     избыточным, слеп к Safari-багу, — перед списком локальная директива
+     отключения (обоснование и там же; не снимать вместе с role="list";
+     образец — ui-breadcrumbs). Success-заголовок несёт tabindex="-1" —
+     паттерн работает и без JS (серверный рендер success-страницы, вариант
+     Bitrix). Заголовки на стенде получают уровень по иерархии страницы (здесь
+     h2 с ролью ui-h4 — визуал одобренного fs-h4). Скрытие до момента —
+     атрибут hidden (показ = снятие атрибута; JS-логика свапа — сайт/T5.5,
+     паттерн выше). Поля — ui-field (T5.1); ui-field--wide растягивает поле
+     на все колонки grid'а. -->
 <form class="ui-form" action="/apply/" method="post">
   <div class="ui-form__summary" role="alert" tabindex="-1">
     <h2 class="ui-h4 ui-form__summary-title">В форме 2 ошибки</h2>
-    <ul class="ui-form__summary-list">
+    <!-- html-validate-disable-next no-redundant-role -->
+    <ul class="ui-form__summary-list" role="list">
       <li><a class="ui-link" href="#apply-name">Укажите имя и фамилию</a></li>
       <li><a class="ui-link" href="#apply-email">Исправьте адрес e-mail</a></li>
     </ul>

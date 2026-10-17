@@ -165,6 +165,22 @@ describe('components/ui-form/ui-form.js — чистые функции вали
     ])('checkPattern(%j, %j) → %j', (value, pattern, expected) => {
       expect(api().checkPattern(value, pattern)).toBe(expected);
     });
+
+    it('pattern компилируется с "v" при поддержке (ревью T13.4): v-only синтаксис исполняется, а не игнорируется молча', () => {
+      // Строковый литерал \q{…} существует только в v-режиме (внутри класса):
+      // с 'u' компиляция бросала — правило молча игнорировалось (нативные
+      // браузеры проверяют pattern с 'v').
+      expect(api().checkPattern('abc', '[\\q{abc}]'), 'совпадение по v-only pattern').toBe(true);
+      expect(
+        api().checkPattern('xyz', '[\\q{abc}]'),
+        'несовпадение ловится (до фикса «битый регэксп» → true)',
+      ).toBe(false);
+    });
+
+    it('u-совместимый, но v-невалидный синтаксис ([/] — в v-классах / экранируется) — fallback на "u" (старые браузеры и такой синтаксис)', () => {
+      expect(api().checkPattern('/', '[/]+')).toBe(true);
+      expect(api().checkPattern('ab', '[/]+')).toBe(false);
+    });
   });
 
   describe('checkMinLength — нативная семантика: пустое значение проходит', () => {
@@ -378,6 +394,13 @@ describe('components/ui-form/ui-form.js — validateField: правила одн
     expect(validate('type="email" data-ui-error="Проверьте e-mail"', 'x').message).toBe(
       'Проверьте e-mail',
     );
+  });
+
+  it('data-ui-error="" (пустой) — НЕ валидный override (ревью T13.4: truthy-проверка) — сообщение по умолчанию, а не пустая строка', () => {
+    // Пустой override давал бы пустое сообщение и пустую ссылку в summary —
+    // переопределение обязано быть непустым текстом.
+    expect(validate('required data-ui-error=""', '').message).toBe('Заполните это поле');
+    expect(validate('type="email" data-ui-error=""', 'x').message).toBe('Исправьте адрес e-mail');
   });
 
   it('скрытая ветка ([hidden]-предок) пропускается — перенос career-portal; disabled тоже', () => {
@@ -714,6 +737,39 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
     expect(document.activeElement).toBe(document.getElementById('tf-name'));
   });
 
+  it('поле БЕЗ обвязки ui-field получает реальный элемент ошибки рядом с собой (ревью T13.4: aria-describedby не держит висячую ссылку)', () => {
+    const { window, document } = makeSandbox({
+      bodyHtml: `
+        <form id="bf" action="#target" data-ui-form>
+          <input class="ui-field__input" type="text" id="bf-name" name="name" required>
+          <button type="submit">Отправить</button>
+        </form>`,
+    });
+    submitForm(window, document.getElementById('bf'));
+
+    const field = document.getElementById('bf-name');
+    expect(field.getAttribute('aria-invalid'), 'aria-контракт тот же').toBe('true');
+
+    const errorId = (field.getAttribute('aria-describedby') ?? '').split(/\s+/).find(Boolean);
+    expect(errorId, 'id ошибки дописан в aria-describedby').toBeTruthy();
+    const errorEl = document.getElementById(errorId);
+    expect(errorEl, 'элемент ошибки СУЩЕСТВУЕТ в DOM — ссылка не висячая').not.toBeNull();
+    expect(errorEl.tagName.toLowerCase()).toBe('p');
+    expect(errorEl.className).toBe('ui-field__error');
+    expect(errorEl.getAttribute('role'), 'семантика объявления — role="alert"').toBe('alert');
+    expect(errorEl.textContent, 'текст ошибки — сообщение правила').toBe('Заполните это поле');
+    expect(errorEl.previousElementSibling, 'ошибка стоит сразу ПОСЛЕ поля').toBe(field);
+
+    // Снятие на input зеркально чистит созданный элемент и ссылку.
+    field.value = 'Иван';
+    field.dispatchEvent(new window.Event('input'));
+    expect(field.hasAttribute('aria-invalid')).toBe(false);
+    expect(field.hasAttribute('aria-describedby'), 'ссылка снята — список описаний пуст').toBe(
+      false,
+    );
+    expect(errorEl.textContent, 'текст очищен').toBe('');
+  });
+
   /** Форма с required-radio-группой (ревью T5.5 high): оба radio с required. */
   const radioFormHtml = `
     <form class="ui-form" id="rf" action="#target" data-ui-form>
@@ -783,5 +839,69 @@ describe('components/ui-form/ui-form.js — поведение сабмита и
       'true',
     );
     expect(no.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('radio-группа: СОСЕД без правил управляет состоянием группы (ревью T13.4 medium: input/change слушаются на всех radio группы, не только на «правилоносных»)', () => {
+    // Нативная семантика: required достаточно на ОДНОМ radio группы. Сосед
+    // без required не попадает в fields[] и раньше оставался без слушателей —
+    // выбор соседа не снимал aria-invalid="true" с заполненной группы.
+    const { window, document } = makeSandbox({
+      bodyHtml: `
+        <form id="rf" action="#target" data-ui-form>
+          <fieldset class="ui-field ui-field--required">
+            <legend>Формат</legend>
+            <label class="ui-radio"><input class="ui-radio__input" type="radio" id="rf-yes" name="plan" value="yes" required> Да</label>
+            <label class="ui-radio"><input class="ui-radio__input" type="radio" id="rf-no" name="plan" value="no"> Нет</label>
+          </fieldset>
+          <button type="submit">Отправить</button>
+        </form>`,
+    });
+    const form = document.getElementById('rf');
+    const yes = document.getElementById('rf-yes');
+    const no = document.getElementById('rf-no');
+
+    submitForm(window, form);
+    expect(yes.getAttribute('aria-invalid'), 'невалидная группа помечена').toBe('true');
+
+    // Выбор СОСЕДА (без required и своих правил) снимает ошибку группы на input.
+    no.checked = true;
+    no.dispatchEvent(new window.Event('input', { bubbles: true }));
+    expect(yes.getAttribute('aria-invalid'), 'input соседа снял aria с группы').toBeNull();
+
+    // change соседа довалидирует группу — валидное состояние не возвращает ошибку.
+    no.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(yes.hasAttribute('aria-invalid')).toBe(false);
+    expect(no.hasAttribute('aria-invalid')).toBe(false);
+
+    // Возврат группы в невалидное состояние: change соседа валидирует группу.
+    no.checked = false;
+    no.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(yes.getAttribute('aria-invalid'), 'ошибка вернулась — группа пуста').toBe('true');
+  });
+
+  it('destroy снимает слушатели и с radio-соседей группы: после destroy сабмит не перехватывается, изменение соседа не валидирует (T13.1-контракт без утечек)', () => {
+    const { window, document } = makeSandbox({
+      bodyHtml: `
+        <form id="rf" action="#target" data-ui-form>
+          <fieldset class="ui-field ui-field--required">
+            <legend>Формат</legend>
+            <label class="ui-radio"><input class="ui-radio__input" type="radio" id="rf-yes" name="plan" value="yes" required> Да</label>
+            <label class="ui-radio"><input class="ui-radio__input" type="radio" id="rf-no" name="plan" value="no"> Нет</label>
+          </fieldset>
+          <button type="submit">Отправить</button>
+        </form>`,
+    });
+    const api = window.IraoUI.form;
+    const form = document.getElementById('rf');
+    const yes = document.getElementById('rf-yes');
+    const no = document.getElementById('rf-no');
+
+    expect(api.destroy(form), 'инстанс уничтожен').not.toBeNull();
+
+    // Сосед без правил: после destroy его change больше не валидирует группу.
+    no.checked = true;
+    no.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(yes.hasAttribute('aria-invalid'), 'слушатели соседа сняты destroy-ом').toBe(false);
+    expect(submitForm(window, form), 'модуль не перехватывает сабмит').toBe(true);
   });
 });

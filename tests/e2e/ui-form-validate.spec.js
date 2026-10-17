@@ -22,8 +22,10 @@
  *     у сайта/сервера, Technical considerations);
  *  8. события irao-ui:form-invalid/form-valid (bubbles, detail.errors),
  *     валидатор сайта data-ui-validate, фокус первого поля без summary,
- *     is-loading + aria-busy, блокировка повтора, unlock;
- *  9. axe: стенд чист и после динамических ошибок модуля (AC).
+ *     is-loading + aria-busy + спиннер, блокировка повтора, unlock;
+ *  9. required-radio-группа (T13.4): сабмит с ошибкой — aria на каждом
+ *     radio, одна запись summary, чистка группы выбором варианта;
+ * 10. axe: стенд чист и после динамических ошибок модуля (AC).
  */
 import { expect } from '@playwright/test';
 
@@ -42,6 +44,9 @@ const SEL = {
   consent: '#uifv-consent',
   file: '#uifv-file',
   hiddenBranch: '#uifv-conditional', // required внутри [hidden] — модуль пропускает
+  radioForm: '#uifv-radio', // required-radio-группа (T13.4)
+  radioSummary: '#uifv-radio-summary',
+  radio: '#uifv-radio input[type="radio"]',
   eventsForm: '#uifv-events', // события + кастомный валидатор, без summary
   phone: '#uifv-phone',
   untouchedForm: '#uifo-form', // форма T5.4 — без data-ui-form
@@ -264,6 +269,64 @@ standTest.describe('ui-form-validate: интерактивные ошибки (T
   );
 });
 
+standTest.describe('ui-form-validate: required-radio-группа (T13.4)', () => {
+  standTest(
+    'сабмит с ошибкой: блокировка, aria-invalid на КАЖДОМ radio группы, одна запись в summary; выбор варианта чистит группу',
+    async ({ stand }) => {
+      const page = await stand('ui-form');
+      const radios = page.locator(SEL.radio);
+      const radioCount = await radios.count();
+      expect(radioCount, 'в демо-группе три radio').toBe(3);
+
+      await page.locator(submitOf(SEL.radioForm)).click();
+      await page.waitForTimeout(700);
+
+      expect(page.url(), 'preventDefault: навигации нет').not.toMatch(/\?/);
+
+      const summary = page.locator(SEL.radioSummary);
+      await expect(summary, 'summary показан').toBeVisible();
+      await expect(summary, 'фокус немедленно на summary (паттерн T5.4)').toBeFocused();
+      await expect(summary.locator('.ui-form__summary-title')).toHaveText('В форме 1 ошибка');
+
+      const links = summary.locator('.ui-form__summary-list a');
+      await expect(
+        links,
+        'одна запись на ГРУППУ, не по числу radio (нативный один bubble)',
+      ).toHaveCount(1);
+      await expect(links, 'текст — групповое сообщение').toHaveText('Выберите вариант');
+      await expect(links, 'ссылка ведёт на radio группы').toHaveAttribute(
+        'href',
+        '#uifv-radio-online',
+      );
+
+      const errorText = page.locator(`${SEL.radioForm} .ui-field__error`);
+      for (let i = 0; i < radioCount; i += 1) {
+        await expect(radios.nth(i), `aria-invalid на каждом radio (${i})`).toHaveAttribute(
+          'aria-invalid',
+          'true',
+        );
+        const described = (await radios.nth(i).getAttribute('aria-describedby')) ?? '';
+        expect(
+          described.split(/\s+/),
+          `ошибка группы в описании radio ${i} (hint сохранён)`,
+        ).toContain('uifv-radio-online-error');
+      }
+      await expect(errorText, 'общий текст группы role="alert"').toHaveText('Выберите вариант');
+      await expect(page.locator(`${SEL.radioForm} .ui-field`)).toHaveClass(/ui-field--error/);
+
+      // Чистка: выбор варианта — input снимает ошибку со ВСЕЙ группы.
+      await radios.nth(1).check();
+      for (let i = 0; i < radioCount; i += 1) {
+        await expect(radios.nth(i), `radio ${i} чист после выбора`).not.toHaveAttribute(
+          'aria-invalid',
+        );
+      }
+      await expect(errorText, 'текст группы очищен').toHaveText('');
+      await expect(page.locator(`${SEL.radioForm} .ui-field`)).not.toHaveClass(/ui-field--error/);
+    },
+  );
+});
+
 standTest.describe('ui-form-validate: валидный сабмит (T5.5)', () => {
   standTest(
     'модуль ПРОПУСКАЕТ валидный сабмит — navigation с query (success-цикл у сайта/сервера)',
@@ -323,13 +386,17 @@ standTest.describe('ui-form-validate: события и расширение (T5
       );
       expect(page.url(), 'сабмит заблокирован (preventDefault)').not.toMatch(/\?/);
 
-      // Валидный сабмит: form-valid, кнопка is-loading + aria-busy (T4.2).
+      // Валидный сабмит: form-valid, кнопка is-loading + aria-busy (T4.2);
+      // спиннер в разметке кнопки (ревью T13.4: без __spinner is-loading
+      // прячет label и схлопывает кнопку в пустую пилюлю).
       await page.fill(SEL.phone, '+7 999 123-45-67');
       await submit.click();
       state = await page.evaluate(() => window.__uifv);
       expect(state.valid, 'irao-ui:form-valid диспатчен').toBe(1);
       await expect(submit).toHaveClass(/is-loading/);
       await expect(submit).toHaveAttribute('aria-busy', 'true');
+      await expect(submit.locator('.ui-button__spinner')).toHaveCount(1);
+      await expect(submit.locator('.ui-button__label')).toHaveCount(1);
 
       // Повторная отправка заблокирована модулем (кнопка при is-loading не
       // кликабельна и для мыши — шлём сабмит программно, как «двойной клик»).
@@ -352,9 +419,10 @@ standTest.describe('ui-form-validate: axe (T5.5 AC)', () => {
     'axe: стенд чист и после динамических ошибок модуля — известных исключений нет',
     async ({ stand }) => {
       const page = await stand('ui-form');
-      // Динамические узлы модуля в DOM: ошибки полей и summary.
+      // Динамические узлы модуля в DOM: ошибки полей, summary и radio-группы.
       await page.locator(submitOf(SEL.form)).click();
       await page.fill(SEL.phone, '123');
+      await page.locator(submitOf(SEL.radioForm)).click();
       await page.locator(submitOf(SEL.eventsForm)).click();
 
       const results = await a11y(page).analyze();

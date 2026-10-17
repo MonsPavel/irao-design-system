@@ -18,7 +18,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 | Модификатор `.ui-field--error` | состояние ошибки: рамка/фон контролов (`--ui-color-error`/`--ui-color-error-bg`) + показ `__error` |
 | Модификатор `.ui-field--required` | хук разметки «поле обязательное»: на корне; видимый маркер — элемент `__req` (собственных стилей у модификатора нет) |
 | Модификатор `.ui-field--wide` | поле на все колонки grid-родителя (`grid-column: 1 / -1`); потребитель — раскладка [ui-form](doc:ui-form) (T5.4), вне grid инертен |
-| Элемент `.ui-field__label` | `label` 14/500 (`--ui-fs-small`/`--ui-fw-small`); **обязателен `for` с id контрола** |
+| Элемент `.ui-field__label` | `label` 14/500 (`--ui-fs-small`/`--ui-fw-small`); **обязателен `for` с id контрола** (исключение — file-паттерн: `span` + `aria-labelledby`, см. [ui-file](doc:ui-file)) |
 | Элемент `.ui-field__req` | маркер обязательности: видимая звёздочка `*` акцентом (одобренный `.req`, components.css:142) |
 | Элемент `.ui-field__req-text` | текст «обязательное поле» для скринридера внутри `__req`; визуально скрыт клипом (display:none запрещён) |
 | Элемент `.ui-field__input` | контрол: `input` типов text/email/tel/password/date/number |
@@ -52,6 +52,11 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 - **label обязателен**: `<label class="ui-field__label" for="…">` указывает на
   id контрола — клик по label ставит фокус в поле, скринридер именует поле.
   Скрывать label (например, оставляя только placeholder) запрещено.
+  Исключение — [ui-file](doc:ui-file) (T5.3): кнопка-лейбл уже является
+  единственным `label` инпута, второй `label` с `for` там ЗАПРЕЩЁН (axe
+  `form-field-multiple-labels`) — имя полю задаёт `<span class="ui-field__label">`
+  с `id` + `aria-labelledby` (Label in Name, WCAG 2.5.3 — подпись кнопки
+  входит в имя); класс тот же, но элемент — `span`, не `label`.
 - **hint**: `aria-describedby` контрола содержит id хинта — подсказка
   озвучивается после имени поля.
 - **error**: в состоянии `--error` контрол несёт `aria-invalid="true"`, а
