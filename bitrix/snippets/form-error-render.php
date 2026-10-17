@@ -19,7 +19,10 @@
  *  - irao_ui_form_field_wrap_class()  — класс обвязки поля
  *                                       (ui-field [+ ui-field--error]);
  *  - irao_ui_form_field_error_attrs() — aria невалидного контрола:
- *                                       aria-invalid="true" + aria-describedby;
+ *                                       aria-invalid="true" + aria-describedby
+ *                                       (id подсказок из $describedBy —
+ *                                       первыми, {id}-error — последним:
+ *                                       порядок канона модуля T5.5);
  *  - irao_ui_form_field_error_html()  — текст ошибки
  *                                       <p class="ui-field__error" id="…-error"
  *                                       role="alert">…</p>;
@@ -153,23 +156,34 @@ if (!function_exists('irao_ui_form_field_error_attrs')) {
      * Атрибуты невалидного контрола: aria-invalid="true" aria-describedby="{id}-error".
      * Для поля без ошибки возвращает пустую строку — вызов безусловен:
      * <?= irao_ui_form_field_error_attrs('apply-NAME', $nameError) ?>
-     * Если контрол уже несёт aria-describedby (например подсказку), перечислите
-     * id подсказки здесь же: подсказка идёт первой, ошибка — второй
-     * (порядок единый с модулем T5.5).
+     * Если контрол несёт подсказку, передайте её id третьим параметром
+     * $describedBy (можно несколько — через пробел): id подсказок встанут
+     * ПЕРВЫМИ, id ошибки допишется последним — подсказка идёт первой,
+     * ошибка — последней (порядок единый с модулем T5.5, который дописывает
+     * {id}-error в конец существующего aria-describedby):
+     * <?= irao_ui_form_field_error_attrs('apply-NAME', $nameError, 'apply-NAME-hint') ?>
+     * → aria-describedby="apply-NAME-hint apply-NAME-error".
      *
-     * @param string      $fieldId id контрола на странице
-     * @param string|null $message сообщение ошибки поля (пусто — ошибки нет)
+     * @param string      $fieldId     id контрола на странице
+     * @param string|null $message     сообщение ошибки поля (пусто — ошибки нет)
+     * @param string      $describedBy id подсказок поля, уже описанных в
+     *                                 aria-describedby (через пробел);
+     *                                 пусто — описывается только ошибка
      * @return string
      */
-    function irao_ui_form_field_error_attrs($fieldId, $message = null)
+    function irao_ui_form_field_error_attrs($fieldId, $message = null, $describedBy = '')
     {
         if ($message === null || (string) $message === '') {
             return '';
         }
 
+        // Порядок канона T5.5: id подсказок первыми, {id}-error последним.
+        $described = trim((string) $describedBy);
+        $target = $described === '' ? (string) $fieldId : $described . ' ' . $fieldId;
+
         return sprintf(
             'aria-invalid="true" aria-describedby="%s-error"',
-            htmlspecialchars((string) $fieldId, ENT_QUOTES, irao_ui_form_errors_charset())
+            htmlspecialchars($target, ENT_QUOTES, irao_ui_form_errors_charset())
         );
     }
 }
@@ -250,7 +264,8 @@ JS;
  *         <label class="ui-field__label" for="apply-NAME">Имя и фамилия</label>
  *         <input class="ui-field__input" type="text" id="apply-NAME" name="NAME"
  *                value="<?= htmlspecialchars((string) $_POST['NAME'], ENT_QUOTES, irao_ui_form_errors_charset()) ?>"
- *                <?= irao_ui_form_field_error_attrs('apply-NAME', $nameError) ?>>
+ *                <?= irao_ui_form_field_error_attrs('apply-NAME', $nameError, 'apply-NAME-hint') ?>>
+ *         <p class="ui-field__hint" id="apply-NAME-hint">Как в паспорте — для договора</p>
  *         <?= irao_ui_form_field_error_html('apply-NAME', $nameError) ?>
  *       </div>
  *     </div>
