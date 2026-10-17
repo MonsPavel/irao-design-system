@@ -42,7 +42,7 @@
 | Блок `.ui-file` | коробка `.field__file`: flex (перенос длинного имени), gap `--ui-space-3` (12px), `min-height: var(--ui-field-height)` (52px одобренного; не `height` — 32px-база T3.6), padding `--ui-space-1 --ui-space-4` (4px 16px), фон `--ui-color-surface-muted`, радиус `--ui-radius-sm` |
 | Элемент `.ui-file__button` | кнопка-лейбл — **единственный `label` инпута**: клик открывает выбор нативно, без JS; визуал `.btn--light` (подпись primary, pill, hover `--ui-color-surface-hover`); высота — `calc(var(--ui-field-height) - var(--ui-space-2))` (52px минус вертикальный паддинг коробки) |
 | Элемент `.ui-file__input` | нативный `input[type="file"]`, sr-only клипом (см. правило выше); `accept`, `required`, `disabled` — нативные атрибуты |
-| Элемент `.ui-file__button-text` | подпись кнопки («прикрепить файл» — паттерн career-portal) |
+| Элемент `.ui-file__button-text` | подпись кнопки («прикрепить файл» — паттерн career-portal); несёт `id` и входит **второй** в `aria-labelledby` инпута — Label in Name, WCAG 2.5.3 (см. секцию ниже) |
 | Элемент `.ui-file__value` | значение выбора: «Файл не выбран» / «Выбран файл: имя, размер»; **`role="status"` в разметке** — обновление озвучивается скринридером |
 | Элемент `.ui-file__reset` | кнопка «Убрать файл»: нативный `button type="button"`, скрыта (`hidden`) до выбора; очищает инпут и возвращает на него фокус |
 | Элемент `.ui-file__hint` | accept-подсказка и ограничения (типы/размер) внутри коробки; визуал `.field__file-hint`; связь — `aria-describedby` инпута |
@@ -61,12 +61,12 @@
     <label class="ui-file__button">
       <input class="ui-file__input" type="file" id="resume" name="resume"
              accept=".doc,.docx,.pdf" required aria-invalid="true"
-             aria-labelledby="resume-label" aria-describedby="resume-hint resume-error">
-      <span class="ui-file__button-text">прикрепить файл</span>
+             aria-labelledby="resume-label resume-button-text" aria-describedby="resume-hint resume-error">
+      <span class="ui-file__button-text" id="resume-button-text">прикрепить файл</span>
     </label>
     <p class="ui-file__value" role="status">Файл не выбран</p>
     <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
-    <span class="ui-file__hint" id="resume-hint">doc, docx, pdf — до 5 Мб; файл не обязателен</span>
+    <span class="ui-file__hint" id="resume-hint">doc, docx, pdf — до 5 Мб; нужен для отбора на собеседование</span>
   </div>
   <p class="ui-field__error" id="resume-error" role="alert">Прикрепите резюме в формате doc, docx или pdf</p>
 </div>
@@ -82,10 +82,19 @@ accessible name в AT). Поэтому:
 - имя поля задаёт **текст обвязки** — `<span class="ui-field__label" id="…">`
   (класс тот же, визуал идентичен label-полям T5.1);
 - инпут ссылается на него `aria-labelledby="…"`;
-- `aria-describedby` ведёт на `ui-file__hint` и `ui-field__error` (списком).
+- `aria-describedby` ведут на `ui-file__hint` и `ui-field__error` (списком).
 
-Скринридер объявляет: «Резюме, обязательное поле — кнопка выбора файла».
-Клик по тексту обвязки диалог не открывает — аффорданс один: кнопка.
+**Label in Name (WCAG 2.5.3):** `aria-labelledby` перекрывает контент
+`label`-обёртки, а голосовой ввод произносит то, что видно на кнопке, —
+«прикрепить файл». Поэтому у подписи кнопки `.ui-file__button-text` есть свой
+`id`, и она идёт **второй** в `aria-labelledby`: доступное имя
+«Резюме (обязательное поле), прикрепить файл» содержит видимую подпись.
+Второй `id` в списке не меняет единственность label — это атрибут имени, а не
+ещё одна метка.
+
+Скринридер объявляет: «Резюме, обязательное поле, прикрепить файл — кнопка
+выбора файла». Клик по тексту обвязки диалог не открывает — аффорданс один:
+кнопка.
 
 ## Состояния
 
@@ -155,13 +164,13 @@ accessible name в AT). Поэтому:
     <label class="ui-file__button">
       <input class="ui-file__input" type="file" id="apply-resume" name="resume"
              accept=".doc,.docx,.pdf" required
-             aria-labelledby="apply-resume-label"
+             aria-labelledby="apply-resume-label apply-resume-button-text"
              <?= $errors['resume'] ? 'aria-invalid="true" aria-describedby="apply-resume-error"' : '' ?>>
-      <span class="ui-file__button-text">прикрепить файл</span>
+      <span class="ui-file__button-text" id="apply-resume-button-text">прикрепить файл</span>
     </label>
     <p class="ui-file__value" role="status">Файл не выбран</p>
     <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
-    <span class="ui-file__hint">doc, docx, pdf — до 5 Мб; файл не обязателен</span>
+    <span class="ui-file__hint">doc, docx, pdf — до 5 Мб; нужен для отбора на собеседование</span>
   </div>
   <?php if ($errors['resume']): ?>
     <p class="ui-field__error" id="apply-resume-error" role="alert"><?= $errors['resume'] ?></p>
