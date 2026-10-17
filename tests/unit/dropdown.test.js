@@ -321,6 +321,56 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
     expect(typeof api.init).toBe('function');
     expect(typeof api.closeAll).toBe('function');
   });
+
+  it('destroy-контракт (T13.1): destroy(root) снимает JS-состояние; реестр пуст — closeAll не «воскрешает» уничтоженную разметку', () => {
+    const { window, document, warnings } = makeSandbox({
+      readyState: 'complete',
+      bodyHtml: instanceHtml + instanceHtml.replace('dd-menu-1', 'dd-menu-2'),
+    });
+    const api = apiOf({ window });
+    const first = document.querySelectorAll('.ui-dropdown')[0];
+    const second = document.querySelectorAll('.ui-dropdown')[1];
+    const menu1 = first.querySelector('.ui-dropdown__menu');
+    const trigger1 = first.querySelector('.ui-dropdown__trigger');
+    const menu2 = second.querySelector('.ui-dropdown__menu');
+
+    const destroyed = api.destroy(first);
+    expect(destroyed, 'destroy возвращает хэндл уничтоженного инстанса').not.toBeNull();
+    expect(first.getAttribute(INIT_ATTR), 'INIT_ATTR снят').toBeNull();
+    expect(menu1.hidden, 'destroy вернул меню к no-JS виду (раскрыто)').toBe(false);
+    expect(trigger1.hasAttribute('aria-expanded'), 'aria снят').toBe(false);
+
+    // Открытие живого меню закрывает «другие» — но в реестре только живой
+    // инстанс: уничтоженная разметка не получает hidden/aria обратно
+    // (кластер A T6.1: closeAll() воскрешал уничтоженную разметку).
+    second.querySelector('.ui-dropdown__trigger').click();
+    expect(menu2.hidden, 'живое меню открыто').toBe(false);
+    expect(
+      menu1.hidden,
+      'closeAll не трогает уничтоженный инстанс — no-JS вид сохранён',
+    ).toBe(false);
+    expect(trigger1.hasAttribute('aria-expanded'), 'aria уничтоженной разметки не возвращён').toBe(
+      false,
+    );
+
+    // Реестр пуст: повторный destroy не находит инстанс (console.warn, null).
+    expect(api.destroy(first), 'второй destroy — null (инстанс удалён из реестра)').toBeNull();
+    expect(warnings.some((args) => String(args[0]).includes('не найден')), 'warn о ненайденном').toBe(
+      true,
+    );
+
+    // Повторная инициализация работает (guard дублей снят destroy'ом).
+    api.init();
+    expect(first.getAttribute(INIT_ATTR), 'переинициализация состоялась').toBe('true');
+    expect(menu1.hidden, 'переинициализированный модуль снова закрыл меню').toBe(true);
+  });
+
+  it('destroy-контракт (T13.1): closeAll() на пустом реестре безопасен (Technical considerations)', () => {
+    const { window } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const api = apiOf({ window });
+    api.destroy(document.querySelector('.ui-dropdown'));
+    expect(() => api.closeAll()).not.toThrow();
+  });
 });
 
 describe('подключение и гейты (DoD T6.1)', () => {

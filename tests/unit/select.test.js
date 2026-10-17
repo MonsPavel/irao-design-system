@@ -619,6 +619,68 @@ describe('контракт модуля ui-select.js (jsdom; образец test
     expect(select.closest('.ui-select')).toBeTruthy();
   });
 
+  it('destroy-контракт (T13.1): после destroy() инстанс удалён из реестра — повторный destroy не находит инстанс', () => {
+    const manual = makeSandbox({ readyState: 'loading', bodyHtml: instanceHtml });
+    fireDOMContentLoaded(manual.window);
+    const { document, warnings } = manual;
+    const select = document.querySelector('select');
+
+    expect(apiOf(manual).destroy(select), 'первый destroy уничтожил инстанс').not.toBeNull();
+    expect(
+      apiOf(manual).destroy(select),
+      'реестр пуст: второй destroy возвращает null',
+    ).toBeNull();
+    expect(
+      warnings.some((args) => args.some((part) => String(part).includes('не найден'))),
+      'об отсутствии инстанса сообщает console.warn',
+    ).toBe(true);
+  });
+
+  it('destroy-контракт (T13.1): wrap-режим — destroy() восстанавливает прежний inline position обёртки сайта (пара lock.rootOverflow ui-modal)', () => {
+    const { document } = makeSandbox({
+      readyState: 'complete',
+      bodyHtml: `
+        <div class="site-pill" id="pill">
+          <select id="ui-city" name="city" data-ui-select="wrap">
+            <option value="">Любой город</option>
+            <option value="msk">Москва</option>
+          </select>
+        </div>`,
+    });
+    const pill = document.getElementById('pill');
+    const select = document.querySelector('select');
+    const api = apiOf({ window: document.defaultView });
+
+    // init: обёртка static — модуль гарантирует position (существующее
+    // поведение, пин «wrap: обёртка сайта» выше).
+    expect(pill.style.position, 'init ставит relative статичной обёртке').toBe('relative');
+
+    api.destroy(select);
+    expect(
+      pill.style.position,
+      'destroy вернул inline position к no-JS состоянию (кластер A T7.3)',
+    ).toBe('');
+
+    // Повторная инициализация работает и снова гарантирует position.
+    api.init();
+    expect(pill.style.position).toBe('relative');
+  });
+
+  it('destroy-контракт (T13.1): wrap-режим — inline position, заданный сайтом, destroy() не трогает (восстанавливается только своё)', () => {
+    const { document } = makeSandbox({
+      readyState: 'complete',
+      bodyHtml: `
+        <div class="site-pill" id="pill" style="position: absolute">
+          <select name="city" data-ui-select="wrap">
+            <option value="">Любой город</option>
+          </select>
+        </div>`,
+    });
+    const pill = document.getElementById('pill');
+    apiOf({ window: document.defaultView }).destroy(document.querySelector('select'));
+    expect(pill.style.position, 'чужой inline position не сброшен').toBe('absolute');
+  });
+
   it('неполная разметка (хук не на select) — console.warn, соседние инстансы живы (контракт шаблона п.4)', () => {
     const { document, warnings } = makeSandbox({
       readyState: 'loading',
