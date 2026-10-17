@@ -35,7 +35,12 @@
  *    data-ui-select="wrap" — обёртка сайта, select не перемещается;
  *  - pointer:coarse — модуль НЕ активируется (Implementation requirements
  *    п.3, решение зафиксировано в доке и ADR-0012);
- *  - публичный API: init/selector/viewOf/typeaheadIndex/closeAll/destroy.
+ *  - публичный API: init/selector/viewOf/typeaheadIndex/closeAll/destroy;
+ *  - optgroup-семантика и reset-sync (T13.2, кластер B): хвостовая/межгрупповая
+ *    корневая опция рендерится в КОРНЕ списка (сет индексов опций групп),
+ *    disabled optgroup пробрасывается в disabled его опций (навигация/typeahead
+ *    пропускают через существующие проверки), reset формы обновляет подписи
+ *    построенных триггеров (событие reset приходит только при активном JS).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -698,6 +703,159 @@ describe('контракт модуля ui-select.js (jsdom; образец test
     expect(typeof api.viewOf).toBe('function');
     expect(typeof api.typeaheadIndex).toBe('function');
     expect(typeof api.destroy).toBe('function');
+  });
+});
+
+describe('optgroup-семантика и reset-sync (T13.2, кластер B; Testing requirements — tests first)', () => {
+  const source = readFileSync(join(root, 'components', 'ui-select', 'ui-select.js'), 'utf8');
+
+  /**
+   * Песочница: модуль исполнен в jsdom; readyState 'complete' (дефолт jsdom
+   * на момент eval — 'loading': init отложился бы на DOMContentLoaded,
+   * который в песочнице никто не диспатчит) — init синхронный; matchMedia —
+   * тонкий указатель (клавиатурный сценарий).
+   */
+  function makeDom(bodyHtml) {
+    const dom = new JSDOM('<!doctype html><html><body>' + bodyHtml + '</body></html>', {
+      url: 'https://showcase.test/',
+      runScripts: 'outside-only',
+    });
+    const { document } = dom.window;
+    Object.defineProperty(document, 'readyState', {
+      configurable: true,
+      get: () => 'complete',
+    });
+    dom.window.matchMedia = () => ({ matches: false });
+    dom.window.console.warn = () => {};
+    dom.window.eval(source);
+    return dom;
+  }
+
+  /** Смешанная разметка: корневая опция ПОСЛЕ последнего optgroup. */
+  const MIXED_HTML = `
+    <select name="spec" data-ui-select>
+      <option value="">Все специализации</option>
+      <optgroup label="Разработка">
+        <option value="fe">Frontend</option>
+        <option value="be">Backend</option>
+      </optgroup>
+      <option value="qa">QA</option>
+    </select>`;
+
+  /** Optgroup с disabled + хвостовая корневая опция. */
+  const DISABLED_GROUP_HTML = `
+    <select name="spec" data-ui-select>
+      <option value="">Все специализации</option>
+      <optgroup label="Разработка" disabled>
+        <option value="fe">Frontend</option>
+        <option value="be">Backend</option>
+      </optgroup>
+      <option value="qa">QA</option>
+    </select>`;
+
+  /** Форма: reset-сценарий (событие reset диспатчит сама форма). */
+  const RESET_HTML = `
+    <form id="ui-form">
+      <label for="ui-city">Город</label>
+      <select id="ui-city" name="city" data-ui-select>
+        <option value="">Любой город</option>
+        <option value="msk">Москва</option>
+      </select>
+    </form>`;
+
+  function keydown(window, element, key) {
+    element.dispatchEvent(new window.KeyboardEvent('keydown', { key, bubbles: true }));
+  }
+
+  it('смешанная разметка (модель): viewOf — хвостовая опция после группы, индекс вне group.options', () => {
+    const dom = makeDom(MIXED_HTML);
+    const view = dom.window.IraoUI.select.viewOf(dom.window.document.querySelector('select'));
+    // Сброс, группа, её две опции и хвостовая корневая опция.
+    expect(view).toHaveLength(5);
+    expect(view[1]).toEqual({ kind: 'group', label: 'Разработка', options: [1, 2] });
+    expect(view[4]).toMatchObject({ kind: 'option', value: 'qa', text: 'QA', disabled: false });
+  });
+
+  it('смешанная разметка (DOM): хвостовая опция — в корне списка, НЕ внутри контейнера группы', () => {
+    const dom = makeDom(MIXED_HTML);
+    const document = dom.window.document;
+    const list = document.querySelector('.ui-select__list');
+    const group = document.querySelector('.ui-select__group');
+    const tail = document.querySelectorAll('.ui-select__option')[3];
+
+    expect(tail.textContent).toBe('QA');
+    expect(tail.parentElement, 'хвостовая опция — прямой ребёнок списка').toBe(list);
+    expect(group.contains(tail), 'опция не «прилипает» к последнему контейнеру группы').toBe(false);
+    // Порядок документа: кнопка сброса, контейнер группы, хвостовая кнопка.
+    expect(list.children[0].textContent).toBe('Все специализации');
+    expect(list.children[1]).toBe(group);
+    expect(list.children[2]).toBe(tail);
+  });
+
+  it('disabled optgroup (модель): viewOf пробрасывает disabled группы в disabled его опций', () => {
+    const dom = makeDom(DISABLED_GROUP_HTML);
+    const view = dom.window.IraoUI.select.viewOf(dom.window.document.querySelector('select'));
+    expect(view).toHaveLength(5);
+    expect(view[2]).toMatchObject({ kind: 'option', value: 'fe', disabled: true });
+    expect(view[3]).toMatchObject({ kind: 'option', value: 'be', disabled: true });
+    expect(view[4]).toMatchObject({ kind: 'option', value: 'qa', disabled: false });
+  });
+
+  it('disabled optgroup (DOM): кнопки disabled; клик не выбирает; стрелки и typeahead пропускают', () => {
+    const dom = makeDom(DISABLED_GROUP_HTML);
+    const { window } = dom;
+    const document = window.document;
+    const select = document.querySelector('select');
+    const trigger = document.querySelector('.ui-select__trigger');
+    const options = document.querySelectorAll('.ui-select__option');
+
+    expect(options[1].disabled, 'Frontend — disabled кнопка').toBe(true);
+    expect(options[2].disabled, 'Backend — disabled кнопка').toBe(true);
+    expect(options[3].disabled, 'QA (вне группы) — доступна').toBe(false);
+
+    // Клик по disabled-опции не выбирает (disabled-кнопка не активируется).
+    options[1].click();
+    expect(select.value, 'клик по опции disabled-группы не выбирает').toBe('');
+
+    // Открытие клавиатурой (click c detail=0): фокус на выбранной (index 0).
+    trigger.click();
+    expect(document.activeElement).toBe(options[0]);
+
+    // ArrowDown: disabled [1],[2] пропущены — фокус на хвостовой QA (index 3).
+    keydown(window, options[0], 'ArrowDown');
+    expect(document.activeElement, 'стрелка перепрыгнула disabled-группу').toBe(options[3]);
+
+    // Typeahead: 'b' матчит только disabled Backend — пропущен, фокус на месте.
+    keydown(window, options[3], 'b');
+    expect(document.activeElement, 'typeahead не матчит disabled-опцию').toBe(options[3]);
+  });
+
+  it('reset формы обновляет подпись триггера (юнит-пин; reset приходит только при активном JS — no-JS не тронут)', async () => {
+    const dom = makeDom(RESET_HTML);
+    const { window } = dom;
+    const document = window.document;
+    const select = document.querySelector('select');
+    const trigger = document.querySelector('.ui-select__trigger');
+
+    select.value = 'msk';
+    select.dispatchEvent(new window.Event('change', { bubbles: true }));
+    expect(trigger.querySelector('.ui-select__label').textContent).toBe('Москва');
+
+    document.getElementById('ui-form').reset();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(select.value, 'нативный select сброшен формой').toBe('');
+    expect(
+      trigger.querySelector('.ui-select__label').textContent,
+      'подпись триггера синхронизована по reset',
+    ).toBe('Любой город');
+    expect(trigger.classList.contains('is-placeholder')).toBe(true);
+    expect(
+      [...document.querySelectorAll('.ui-select__option')].some((option) =>
+        option.classList.contains('is-selected'),
+      ),
+      'отметки выбора сняты',
+    ).toBe(false);
   });
 });
 

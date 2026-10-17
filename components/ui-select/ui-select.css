@@ -9,7 +9,11 @@
  * muted, пара одобренного .dd__trigger bg surface-blue-50), радиус полей sm,
  * список-карточка на поверхности (--ui-color-surface) c радиусом 12px
  * (0.75rem — вне 8/16/24px шкалы радиусов, перенос «как есть», прецедент
- * 0.875rem меню ui-dropdown), тенью dropdown (--ui-shadow-lg — тот же токен
+ * 0.875rem меню ui-dropdown) и зазором от корня 0.375rem (6px dd__list
+ * career-portal components.css:384 — вне 4px-шкалы §3.2, перенос «как
+ * есть», как радиус 12px; замена на --ui-space-1 (4px) изменила бы
+ * одобренный визуал — эталоны ADR-0004 переснимались бы в контейнере),
+ * тенью dropdown (--ui-shadow-lg — тот же токен
  * T2.2 с этой тени) и z-index --ui-z-dropdown (Technical considerations:
  * components.css:376 = 70). Пункты: паддинг 10px/14px career-portal
  * (0.625rem/0.875rem — вне 4px-шкалы §3.2, перенос «как есть», прецедент
