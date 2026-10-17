@@ -25,10 +25,12 @@
  * --ui-color-accent-hover = accent-light components.css:83; outline
  * components.css:90 — заливка primary + белая подпись; light components.css:93
  * — blue-100 как --ui-color-surface-hover); active одобренным дизайном не
- * задан — color-mix(in srgb, var(--ui-…) 88%, black). Подписи переобъявлены
- * в каждом hover/active-правиле варианта: без них просачивается цвет generic-
- * правила .ui-button:hover/:active при равной специфичности (урок ui-link —
- * тёмный текст на blue-700 = 1.78:1). Все :hover — ТОЛЬКО под
+ * задан — color-mix(in srgb, var(--ui-…) 88%, black). Подписи в каждом
+ * hover/active-правиле варианта переобъявлены ЗАЩИТНО: у варианта всегда
+ * есть собственная подпись, и цвет generic-правила .ui-button:hover/:active
+ * не просачивается ни при каком порядке/пересмотре правил (без переобъявления
+ * generic — единственный источник цвета; урок ui-link — тёмный текст на
+ * blue-700 = 1.78:1). Все :hover — ТОЛЬКО под
  * @media (hover: hover) (EPIC-4: sticky-hover не «залипает» на таче).
  *
  * disabled (Implementation requirements п.2): только атрибут disabled —
@@ -233,4 +235,7 @@
 
 .ui-button:disabled {
   opacity: var(--ui-opacity-disabled);
+  /* Аффорданс неактивного контрола (T13.5): курсор не «палец» — pointer из
+     базы отвечает только кликабельным. */
+  cursor: default;
 }

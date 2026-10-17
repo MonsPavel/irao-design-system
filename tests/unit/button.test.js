@@ -232,6 +232,9 @@ describe('components/ui-button/ui-button.css — производные сост
     const block = blockOf(css, '.ui-button:disabled');
     expect(block, 'правило .ui-button:disabled найдено').toBeTruthy();
     expect(block).toContain('opacity: var(--ui-opacity-disabled);');
+    // Аффорданс неактивного контрола (T13.5): над disabled курсор не «палец» —
+    // pointer из базы отвечает только кликабельным.
+    expect(block).toContain('cursor: default;');
     const mediaIndex = css.indexOf('@media (hover: hover)');
     const disabledIndex = css.indexOf('.ui-button:disabled');
     expect(disabledIndex, 'disabled после hover-блока (порядок каскада)').toBeGreaterThan(
