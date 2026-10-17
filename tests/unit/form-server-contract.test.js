@@ -89,6 +89,71 @@ describe('bitrix/snippets/form-error-render.php — контракт T5.6 (Scope
   });
 });
 
+describe('irao_ui_form_field_error_attrs — третий параметр $describedBy (T13.3)', () => {
+  // T13.3: контрол с подсказкой уже несёт aria-describedby (id hint) — сервер
+  // обязан ДОПИСАТЬ id ошибки в конец списка (hint первым, error последним —
+  // порядок канона модуля T5.5, таблица «состояние → классы → aria → фокус»).
+  // PHP не исполняется — исполняемую форму даёт независимая эмуляция;
+  // неотрывность от исходника держат маркер-пины ниже.
+
+  /** Эмуляция PHP-функции: id подсказок первыми, {id}-error последним. */
+  const attrsOf = (fieldId, message, describedBy = '') => {
+    if (message === null || message === '') return '';
+    const described = String(describedBy).trim();
+    const target = described === '' ? String(fieldId) : described + ' ' + fieldId;
+    return 'aria-invalid="true" aria-describedby="' + target + '-error"';
+  };
+
+  it('сигнатура: третий параметр $describedBy с дефолтом "" (обратная совместимость вызовов)', () => {
+    expect(snippet).toMatch(
+      /function irao_ui_form_field_error_attrs\(\$fieldId, \$message = null, \$describedBy = ''\)/,
+    );
+  });
+
+  it('порядок канона T5.5: id подсказок первыми, {id}-error последним; без подсказок — как раньше', () => {
+    expect(
+      attrsOf('apply-EMAIL', 'Укажите e-mail', 'apply-EMAIL-hint'),
+      'hint → error (тот же порядок, что дописывает модуль)',
+    ).toBe('aria-invalid="true" aria-describedby="apply-EMAIL-hint apply-EMAIL-error"');
+    expect(attrsOf('apply-NAME', 'Укажите имя'), 'вызов без $describedBy не менял контракта').toBe(
+      'aria-invalid="true" aria-describedby="apply-NAME-error"',
+    );
+    expect(attrsOf('apply-NAME', null), 'без ошибки — пусто (как раньше)').toBe('');
+  });
+
+  it('маркер-пины зеркала: target собирается из trim($describedBy) + {id}; {id}-error остаётся последним', () => {
+    expect(snippet).toMatch(/\$described = trim\(\(string\) \$describedBy\)/);
+    expect(snippet, 'пустой $describedBy → только {id}; непустой → hint + " " + {id}').toMatch(
+      /\$described === '' \? \(string\) \$fieldId : \$described \. ' ' \. \$fieldId/,
+    );
+    expect(snippet, 'формат строки: aria-describedby="%s-error" — {id}-error в конце').toMatch(
+      /'aria-invalid="true" aria-describedby="%s-error"'/,
+    );
+  });
+
+  it('докблок: $describedBy задокументирован; порядок hint→error объявлен единым с модулем', () => {
+    const fnStart = snippet.indexOf('function irao_ui_form_field_error_attrs');
+    const docblock = snippet.slice(snippet.lastIndexOf('/**', fnStart), fnStart);
+    expect(docblock, 'третий параметр в докблоке').toContain('$describedBy');
+    expect(docblock, 'подсказка идёт первой').toContain('первой');
+    expect(docblock, 'порядок единый с модулем T5.5').toContain('T5.5');
+  });
+
+  it('пример использования: поле с hint — hint id в $describedBy; DOM-порядок label → input → hint → error', () => {
+    expect(snippet, 'hint передаётся третьим параметром').toMatch(
+      /irao_ui_form_field_error_attrs\('apply-NAME', \$nameError, 'apply-NAME-hint'\)/,
+    );
+    const inputAt = snippet.indexOf('id="apply-NAME"');
+    const hintAt = snippet.indexOf('ui-field__hint');
+    const errorAt = snippet.indexOf("irao_ui_form_field_error_html('apply-NAME'");
+    expect(hintAt, 'подсказка в примере есть').toBeGreaterThan(-1);
+    expect(hintAt, 'hint после инпута (канон ui-field)').toBeGreaterThan(inputAt);
+    expect(errorAt, 'error-текст после hint (DOM-порядок = порядок описания)').toBeGreaterThan(
+      hintAt,
+    );
+  });
+});
+
 describe('стенд integration/form-full-cycle — эмуляция PHP-вывода (Technical considerations)', () => {
   it('четыре ветки — отдельные якоря: ffc-nojs, ffc-client, ffc-server, ffc-success', () => {
     for (const anchor of ['ffc-nojs', 'ffc-client', 'ffc-server', 'ffc-success']) {

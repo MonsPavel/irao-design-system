@@ -313,6 +313,117 @@ describe('PHP-сниппет (bitrix/snippets/pagination.php) согласова
   });
 });
 
+describe('юнит-порт расчёта окна (T13.3) — PHP не исполняется, эталон — независимая реализация', () => {
+  // Т13.3 Testing requirements: порт алгоритма — независимая реализация в
+  // тесте, НЕ import из билда (PHP не исполняется). Неотрывность порта от
+  // PHP-исходника держат маркер-пины ниже (той же природы, что эмуляция
+  // json_encode в snippets.test.js): изменение формы алгоритма в сниппете
+  // валит пины и заставляет пересмотреть порт.
+  const snippet = readFileSync(join(root, 'bitrix', 'snippets', 'pagination.php'), 'utf8');
+
+  /**
+   * Эталонная модель окна сниппета: края всегда, окно ±side вокруг текущей,
+   * разрыв ровно в одну страницу — сам номер, длиннее — «…».
+   * Возвращает элементы { page: N } | { ellipsis: true }.
+   */
+  const paginationWindow = (total, current, side = 1) => {
+    // Гвард сниппета: листать нечего — nav не выводится вовсе (README
+    // ui-pagination: «пагинация не выводится вовсе»).
+    if (total < 2) {
+      return [];
+    }
+    // Клампинг: current вне диапазона — на край; side гасится в >= 0.
+    const clamped = Math.max(1, Math.min(current, total));
+    const half = Math.max(0, side);
+
+    const visible = [];
+    for (let n = 1; n <= total; n += 1) {
+      if (n === 1 || n === total || Math.abs(n - clamped) <= half) {
+        visible.push(n);
+      }
+    }
+    const items = [];
+    let prev = 0;
+    for (const n of visible) {
+      const gap = n - prev - 1; // скрытых страниц между показанными
+      if (gap === 1) {
+        items.push({ page: prev + 1 }); // gap=1 → номер: «…» ради одной страницы нет
+      } else if (gap > 1) {
+        items.push({ ellipsis: true }); // gap>1 → «…»
+      }
+      items.push({ page: n });
+      prev = n;
+    }
+    return items;
+  };
+
+  /** Плоский рендер модели — для читаемых ожиданий «1 … 6 7 8 … 20». */
+  const renderOf = (items) =>
+    items.map((item) => ('ellipsis' in item ? '…' : String(item.page))).join(' ');
+
+  it('края total=1/2: одна страница — навигации нет вовсе; две — обе страницы, без «…»', () => {
+    expect(paginationWindow(1, 1), 'total<2 → пусто (гвард сниппета)').toEqual([]);
+    expect(paginationWindow(0, 1), 'вырожденный total=0 — тоже пусто').toEqual([]);
+    expect(paginationWindow(2, 1)).toEqual([{ page: 1 }, { page: 2 }]);
+    expect(paginationWindow(2, 2)).toEqual([{ page: 1 }, { page: 2 }]);
+  });
+
+  it('разрыв ровно в одну страницу — сам номер, а не «…» (gap=1 → номер)', () => {
+    // 7 страниц, текущая 4, окно ±1: скрыты только 2 и 6 — в обоих разрывах
+    // ровно одна страница, «…» не появляется вовсе.
+    expect(renderOf(paginationWindow(7, 4))).toBe('1 2 3 4 5 6 7');
+    // Единственный gap=1: 6 страниц, текущая 4 → между 1 и 4 скрыта одна (2),
+    // хвост 5–6 в окне: все шесть — номера.
+    expect(paginationWindow(6, 4)).toEqual([
+      { page: 1 },
+      { page: 2 },
+      { page: 3 },
+      { page: 4 },
+      { page: 5 },
+      { page: 6 },
+    ]);
+  });
+
+  it('разрыв длиннее одной страницы — «…» (gap>1); канон README «1 … 6 7 8 … 20»', () => {
+    expect(renderOf(paginationWindow(20, 7)), 'пример 2 в шапке сниппета').toBe('1 … 6 7 8 … 20');
+    expect(renderOf(paginationWindow(10, 1)), 'первая страница: хвост свёрнут в «…»').toBe(
+      '1 2 … 10',
+    );
+    expect(renderOf(paginationWindow(10, 5, 0)), 'side=0 — только края и текущая').toBe(
+      '1 … 5 … 10',
+    );
+  });
+
+  it('клампинг: current вне диапазона — на край; side<0 гасится в 0', () => {
+    expect(renderOf(paginationWindow(10, 0)), 'current=0 → 1').toBe('1 2 … 10');
+    expect(renderOf(paginationWindow(10, 99)), 'current=99 → 10 (total)').toBe('1 … 9 10');
+    expect(renderOf(paginationWindow(10, 5, -3)), 'отрицательный side — как 0').toBe('1 … 5 … 10');
+  });
+
+  it('маркер-пины: алгоритм PHP-исходника той же формы, что порт; правки T13.3 на месте', () => {
+    expect(snippet, 'гвард total<2 (README: пагинация не выводится вовсе)').toContain(
+      'if ($total < 2)',
+    );
+    expect(
+      snippet,
+      'старый гвард total<1 (дегенеративный nav при одной странице) удалён',
+    ).not.toContain('$total < 1');
+    expect(
+      snippet,
+      'ENT_SUBSTITUTE в замыкании $e (невалидная UTF-8 не съедается молча)',
+    ).toContain('ENT_QUOTES | ENT_SUBSTITUTE');
+    expect(snippet, 'окно ±side вокруг текущей').toContain('abs($n - $current) <= $side');
+    expect(snippet, 'gap=1 → номер').toContain('$n - $prev === 2');
+    expect(snippet, 'gap>1 → «…»').toContain('$n - $prev > 2');
+  });
+
+  it('докблок сниппета правлен под гвард T13.3: total >= 2 и ENT_SUBSTITUTE объяснены', () => {
+    const docblock = snippet.slice(0, snippet.indexOf('function renderUiPagination'));
+    expect(docblock, '@param $total: контракт >= 2').toContain('>= 2');
+    expect(docblock, 'причина ENT_SUBSTITUTE задокументирована').toContain('ENT_SUBSTITUTE');
+  });
+});
+
 describe('дока (DoD T6.3)', () => {
   it('README ui-pagination: решение по недоступным стрелкам, aria-current, имена стрелок, touch-цель, Bitrix-сниппет', () => {
     const readme = readFileSync(join(root, 'components', 'ui-pagination', 'README.md'), 'utf8');
