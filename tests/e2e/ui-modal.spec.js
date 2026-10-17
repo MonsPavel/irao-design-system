@@ -403,6 +403,13 @@ test.describe('ui-modal: размеры --sm/--md/--full (Scope)', () => {
     const page = await stand('ui-modal');
     await page.setViewportSize({ width: 1280, height: 800 });
 
+    // Видимая область — ДО открытия: стенд длинный, gutter полосы зарезервирован
+    // (scrollbar-gutter: stable из base): offsetWidth корня = вьюпорт минус
+    // полоса (1265 на 1280). clientWidth корня в Chromium — это вьюпорт (1280,
+    // полосу не вычитает), под открытым диалогом он и подавно врёт (лок снимает
+    // полосу) — сравнивать надо с offsetWidth до лока.
+    const visibleWidth = await page.evaluate(() => document.documentElement.offsetWidth);
+
     const widthOf = async (dialog) =>
       page.locator(dialog).evaluate((el) => el.getBoundingClientRect().width);
     const heightOf = async (dialog) =>
@@ -424,7 +431,9 @@ test.describe('ui-modal: размеры --sm/--md/--full (Scope)', () => {
 
     expect(sm, '--sm уже --md').toBeLessThan(md);
     expect(md, '--md уже вьюпорта (кламп)').toBeLessThan(1280);
-    expect(full.w, '--full: вся ширина').toBe(1280);
+    expect(full.w, '--full: вся ВИДИМАЯ ширина (100% ICB, не 100vw с полосой — T13.6)').toBe(
+      visibleWidth,
+    );
     expect(full.h, '--full: вся высота (dvh)').toBe(800);
   });
 });
