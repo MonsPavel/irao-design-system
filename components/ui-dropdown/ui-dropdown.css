@@ -6,9 +6,11 @@
  * Источник визуала — .header__dropdown* career-portal (src/blocks/header/
  * header.css, класс B аудита): меню-карточка на поверхности (--ui-color-
  * surface) с мягкой рамкой (--ui-color-border-muted — пара .header__
- * dropdown border), радиусом и тенью dropdown (--ui-shadow-lg — токен заведён
- * в T2.2 ровно с этой тени, components.css:375), вход-анимация 180ms
- * cubic-bezier(0.2, 0.8, 0.2, 1) с translateY(-6px) — перенос «как есть» в rem.
+ * dropdown border), радиусом и тенью dropdown (--ui-shadow-lg — однослойная
+ * аппроксимация тени dropdown, заведённая в T2.2: лестница несёт верхний
+ * слой тени career-portal, вторая тонкая пара подложки в токен не входит),
+ * вход-анимация 180ms cubic-bezier(0.2, 0.8, 0.2, 1) с translateY(-6px) —
+ * перенос «как есть» в rem.
  * Пункты: min-height 44px (2.75rem), подпись primary, фон hover/focus/
  * aria-current — surface-blue-50 (--ui-color-surface-muted, пары AA-гейта
  * T2.3), скругление пунктов — --ui-radius-sm (8px .header__dropdown-link).

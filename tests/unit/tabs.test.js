@@ -370,7 +370,10 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
     ).toHaveLength(0);
     // Ролей APG никому не досталось: бросок ДО расстановки атрибутов.
     for (const tab of document.querySelectorAll('.ui-tabs__tab')) {
-      expect(tab.getAttribute('role'), 'роли не расставлены — init сорван в цикле сбора').toBeNull();
+      expect(
+        tab.getAttribute('role'),
+        'роли не расставлены — init сорван в цикле сбора',
+      ).toBeNull();
     }
   });
 
