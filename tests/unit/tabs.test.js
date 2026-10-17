@@ -343,6 +343,44 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
     expect(sandbox.warnings).toHaveLength(0);
   });
 
+  it('таб вне .ui-tabs__list — Error в цикле сбора → console.warn через init() (ревью T13.6: тихо мёртвых табов нет)', () => {
+    // Прежний код брал в tabs[] ЛЮБОЙ .ui-tabs__tab корня: таб-«сирота» с
+    // валидной id-связкой получал роли APG, но клавиатура списка (слушатель
+    // на .ui-tabs__list) его не достигала — таб молча не работал. Пин
+    // симметричен брою id-связок: Error в том же цикле сбора → warn через
+    // init() (контракт шаблона п.4), соседние инстансы живы.
+    const { document, warnings } = makeSandbox({
+      readyState: 'loading',
+      bodyHtml:
+        '<div data-ui-tabs>' +
+        '<a class="ui-tabs__tab" href="#uitab-orphan">Сирота вне списка</a>' +
+        '<div class="ui-tabs__list">' +
+        '<a class="ui-tabs__tab" href="#uitab-orphan">В списке</a>' +
+        '</div>' +
+        '<section class="ui-tabs__panel" id="uitab-orphan">Панель</section>' +
+        '</div>',
+    });
+
+    apiOf({ window: document.defaultView }).init();
+
+    expect(warnings, 'таб вне списка — warn, а не тихая инициализация').toHaveLength(1);
+    expect(
+      document.querySelectorAll(`[${INIT_ATTR}]`),
+      'инстанс с сиротой не инициализирован',
+    ).toHaveLength(0);
+    // Ролей APG никому не досталось: бросок ДО расстановки атрибутов.
+    for (const tab of document.querySelectorAll('.ui-tabs__tab')) {
+      expect(tab.getAttribute('role'), 'роли не расставлены — init сорван в цикле сбора').toBeNull();
+    }
+  });
+
+  it('select(index) игнорирует индексы вне диапазона (ревью T13.6: select(5) на двух табах — no-op)', () => {
+    // Хэндл select() не покидает замыкание инстанса (публичный API модуля —
+    // только init), поэтому пин декларативный — как destroy-пин ниже:
+    // гард диапазона на входе select() до цикла расстановки атрибутов.
+    expect(source).toMatch(/if \(index < 0 \|\| index >= tabs\.length\)\s*\{\s*return;/);
+  });
+
   it('клавиатура: ←/→ с зацикливанием, Home/End; automatic-активация (фокус+выбор вместе)', () => {
     const sandbox = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
     const list = sandbox.document.querySelector('.ui-tabs__list');

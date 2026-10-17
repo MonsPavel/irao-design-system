@@ -8,9 +8,14 @@
  * только для командных меню) и действия (role="menu" + role="menuitem").
  *
  * Деградация без JS (принцип ТЗ №14): в разметке меню раскрыто, hidden и
- * aria-expanded/aria-controls отсутствуют; их ставит МОДУЛЬ при инициализации
- * (тот же приём, что novalidate в ui-form T5.5) — разметка остаётся правдивой
- * без JS, а закрытие появляется только вместе с умением открывать.
+ * aria-expanded/aria-controls/aria-haspopup отсутствуют; их ставит МОДУЛЬ при
+ * инициализации (тот же приём, что novalidate в ui-form T5.5) — разметка
+ * остаётся правдивой без JS, а закрытие появляется только вместе с умением
+ * открывать.
+ *
+ * Пункты меню читаются В МОМЕНТ обработки жеста (itemsOf; ревью T13.6) —
+ * перерисовка пунктов сайтом (Bitrix AJAX) не ломает стрелки/фокус, как
+ * делал снапшот при init.
  *
  * Поведение (APG menu-button + перенос career-portal):
  *  - открытие: клик по триггеру (фокус остаётся — pointer-сценарий),
@@ -82,8 +87,6 @@
       );
     }
 
-    var items = itemsOf(menu);
-
     // id меню для aria-controls: из разметки, иначе генерация.
     if (!menu.id) {
       menu.id = 'ui-' + MODULE_NAME + '-menu-' + (uid += 1);
@@ -91,13 +94,21 @@
 
     /* ── состояние ── */
 
+    /* Пункты читаются В МОМЕНТ обработки жеста (ревью T13.6), не снапшотом
+       при init: замена пунктов сайтом (Bitrix AJAX) оставляла снапшот с
+       отсоединёнными узлами — фокус уходил «в никуда», стрелки молчали. */
+    function items() {
+      return itemsOf(menu);
+    }
+
     function isOpen() {
       return !menu.hidden;
     }
 
     function focusItem(index) {
-      if (items.length) {
-        items[index].focus();
+      var current = items();
+      if (current.length) {
+        current[index].focus();
       }
     }
 
@@ -127,7 +138,7 @@
       if (focus === 'first') {
         focusItem(0);
       } else if (focus === 'last') {
-        focusItem(items.length - 1);
+        focusItem(items().length - 1);
       }
     }
 
@@ -186,7 +197,7 @@
         } else if (event.key === 'ArrowUp') {
           event.preventDefault();
           if (isOpen()) {
-            focusItem(items.length - 1);
+            focusItem(items().length - 1);
           } else {
             open('last');
           }
@@ -199,22 +210,23 @@
       }
 
       // Стрелки/Home/End внутри меню — с зацикливанием (APG menu).
-      var index = Array.prototype.indexOf.call(items, event.target);
+      var current = items();
+      var index = Array.prototype.indexOf.call(current, event.target);
       if (index === -1) {
         return;
       }
       if (event.key === 'ArrowDown') {
         event.preventDefault();
-        focusItem((index + 1) % items.length);
+        focusItem((index + 1) % current.length);
       } else if (event.key === 'ArrowUp') {
         event.preventDefault();
-        focusItem((index - 1 + items.length) % items.length);
+        focusItem((index - 1 + current.length) % current.length);
       } else if (event.key === 'Home') {
         event.preventDefault();
         focusItem(0);
       } else if (event.key === 'End') {
         event.preventDefault();
-        focusItem(items.length - 1);
+        focusItem(current.length - 1);
       }
     }
 
@@ -235,12 +247,15 @@
     }
 
     /* ── init-мутации: закрытое состояние + aria (в разметке их нет —
-       деградация без JS, Implementation requirements п. 3) ── */
+       деградация без JS, Implementation requirements п. 3). aria-haspopup —
+       ревью T13.6: паттерн menu-button заявляется скринридеру; дух no-JS-
+       правдивости — атрибут появляется вместе с поведением, destroy снимает. */
 
     menu.hidden = true;
     root.classList.remove('is-open');
     trigger.setAttribute('aria-controls', menu.id);
     trigger.setAttribute('aria-expanded', 'false');
+    trigger.setAttribute('aria-haspopup', 'true');
 
     trigger.addEventListener('click', onTriggerClick);
     root.addEventListener('click', onRootClick);
@@ -267,6 +282,7 @@
         root.classList.remove('is-open');
         trigger.removeAttribute('aria-controls');
         trigger.removeAttribute('aria-expanded');
+        trigger.removeAttribute('aria-haspopup');
         root.removeAttribute(INIT_ATTR);
         // T13.1 (кластер A): инстанс покидает реестр — пара instances.push
         // при init. Без чистки публичный closeAll() вызывал close()

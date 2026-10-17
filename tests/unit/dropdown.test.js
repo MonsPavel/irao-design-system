@@ -280,7 +280,7 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
     expect(once.document.querySelectorAll(`[${INIT_ATTR}]`)).toHaveLength(1);
   });
 
-  it('init-мутации: hidden на меню, aria-expanded="false", aria-controls на id меню (id генерируется при отсутствии)', () => {
+  it('init-мутации: hidden на меню, aria-expanded="false", aria-controls на id меню, aria-haspopup="true" (id генерируется при отсутствии)', () => {
     // Без id у меню.
     const generated = makeSandbox({
       readyState: 'complete',
@@ -293,12 +293,49 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
     const controls = trigger.getAttribute('aria-controls');
     expect(controls, 'aria-controls указан').toBeTruthy();
     expect(menu.id).toBe(controls);
+    // Ревью T13.6: aria-haspopup="true" — паттерн menu-button заявлен скринридеру
+    // (дух no-JS-правдивости: атрибут появляется вместе с поведением).
+    expect(trigger.getAttribute('aria-haspopup'), 'haspopup ставится при init').toBe('true');
 
     // С существующим id (канонический паттерн) — id не меняется.
     const preset = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
     expect(
       preset.document.querySelector('.ui-dropdown__trigger').getAttribute('aria-controls'),
     ).toBe('dd-menu-1');
+  });
+
+  it('клавиатура читает пункты в момент обработки (ревью T13.6: перерисовка пунктов не ломает стрелки)', () => {
+    // Прежний код снимал itemsOf(menu) ОДИН раз при init: замена пунктов
+    // сайтом (Bitrix AJAX) оставляла снапшот с отсоединёнными узлами —
+    // focus() уходил «в никуда», стрелки молчали. Пин: после перерисовки
+    // ArrowDown фокусирует ПЕРВЫЙ НОВЫЙ пункт.
+    const sandbox = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const { window, document } = sandbox;
+    const trigger = document.querySelector('.ui-dropdown__trigger');
+    const menu = document.querySelector('.ui-dropdown__menu');
+
+    menu.innerHTML =
+      '<ul class="ui-dropdown__list">' +
+      '<li><a class="ui-dropdown__item" href="/x/">Новый Х</a></li>' +
+      '<li><a class="ui-dropdown__item" href="/y/">Новый Y</a></li>' +
+      '</ul>';
+    const fresh = menu.querySelectorAll('.ui-dropdown__item');
+
+    trigger.dispatchEvent(
+      new window.KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }),
+    );
+
+    expect(
+      document.activeElement,
+      'фокус на первом пункте ПОСЛЕ перерисовки (не на отсоединённом узле снапшота)',
+    ).toBe(fresh[0]);
+
+    // Стрелки внутри меню тоже по свежему списку: End — последний новый.
+    fresh[0].focus();
+    document.activeElement.dispatchEvent(
+      new window.KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }),
+    );
+    expect(document.activeElement, 'End ведёт к последнему перерисованному пункту').toBe(fresh[1]);
   });
 
   it('неполная разметка (нет триггера/меню) — console.warn, соседние инстансы живы (контракт шаблона п.4)', () => {
@@ -339,6 +376,10 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
     expect(first.getAttribute(INIT_ATTR), 'INIT_ATTR снят').toBeNull();
     expect(menu1.hidden, 'destroy вернул меню к no-JS виду (раскрыто)').toBe(false);
     expect(trigger1.hasAttribute('aria-expanded'), 'aria снят').toBe(false);
+    expect(
+      trigger1.hasAttribute('aria-haspopup'),
+      'aria-haspopup снят — возврат к no-JS-виду (ревью T13.6)',
+    ).toBe(false);
 
     // Открытие живого меню закрывает «другие» — но в реестре только живой
     // инстанс: уничтоженная разметка не получает hidden/aria обратно
