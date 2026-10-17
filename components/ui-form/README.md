@@ -20,6 +20,7 @@ T5.6. Поля — [ui-field](doc:ui-field) (T5.1) и его семейство.
 | Элемент `.ui-form__main` | основная колонка: держит `__grid` и `__actions` одним блоком лейаута; data-хук сайта для свапа состояния — `data-ui-form-body` (демо стенда; контракт свапа — сайт/T5.5) |
 | Элемент `.ui-form__aside` | боковая колонка (в разметке — `<aside>` с `aria-labelledby`): фон `--ui-color-surface-muted`, радиус md, от lg — `position: sticky; top: var(--ui-space-5)` (одобренный `.form-aside`; в стеке — статична); внутри — `__aside-title` (цвет primary), `__aside-text`, список пар `__aside-list` (класс на `<dl>`) → `__aside-row > __aside-label + __aside-value` |
 | Элемент `.ui-form__summary` | сводная ошибка: **`role="alert"`** (немедленное объявление при появлении после сабмита) + **`tabindex="-1"`** (цель фокуса); фон `--ui-color-error-bg`; внутри — `__summary-title` (цвет `--ui-color-error`) и `__summary-list` — список ссылок на id полей; до момента скрыт атрибутом `hidden` |
+| Элемент `.ui-form__summary-list` | на `<ul role="list">`: `display: flex` и глобальный `list-style: none` снимают роль списка в Safari/VoiceOver (документировано `.htmlvalidate.js`, образец — ui-breadcrumbs), `role="list"` возвращает её — скринридер объявляет «список, N пунктов»; html-validate считает `role="list"` на нативном списке избыточным (слеп к Safari-багу) — в lint-уемых файлах рядом ставится локальная директива `html-validate-disable-next no-redundant-role`; не снимать вместе с `role="list"` |
 | Ссылки summary | реальные `href="#id"` полей: переход фокуса по хэшу нативен во всех браузерах матрицы (проверено e2e chromium/firefox/webkit); доопределение краевых случаев (например, цель появляется скриптом) — фокус-скрипт T5.5 (Implementation requirements T5.4 п.2) |
 | Элемент `.ui-form__success` | блок успеха: фон `--ui-color-success-bg`, gap `--ui-space-3` (12px одобренного), паддинг `--ui-space-5` (дифф 28 → 24, как в ui-card); до момента — `hidden`; работает и без JS (серверный рендер success-страницы — вариант Bitrix) |
 | Элемент `.ui-form__success-title` | заголовок успеха (цвет `--ui-color-success`), **`tabindex="-1"` в разметке** — цель фокуса после показа |
@@ -33,7 +34,7 @@ T5.6. Поля — [ui-field](doc:ui-field) (T5.1) и его семейство.
 <form class="ui-form" action="/apply/" method="post">
   <div class="ui-form__summary" role="alert" tabindex="-1" hidden>
     <h2 class="ui-h4 ui-form__summary-title">В форме 2 ошибки</h2>
-    <ul class="ui-form__summary-list">
+    <ul class="ui-form__summary-list" role="list">
       <li><a class="ui-link" href="#apply-name">Укажите имя и фамилию</a></li>
       <li><a class="ui-link" href="#apply-email">Исправьте адрес e-mail</a></li>
     </ul>
@@ -267,7 +268,7 @@ $charset = defined('SITE_CHARSET') ? SITE_CHARSET : 'UTF-8';
       <h2 class="ui-h4 ui-form__summary-title">
         В форме <?= count($arResult['FORM_ERRORS']) ?> ошибк(и)
       </h2>
-      <ul class="ui-form__summary-list">
+      <ul class="ui-form__summary-list" role="list">
         <?php foreach ($arResult['FORM_ERRORS'] as $field => $message): ?>
           <?php $anchor = rawurlencode((string) $field); ?>
           <li><a class="ui-link"

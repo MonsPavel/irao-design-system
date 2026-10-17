@@ -194,8 +194,12 @@
   color: var(--ui-color-error);
 }
 
-/* Список ссылок на поля: ссылки размечаются ui-link (стили не
-   дублируются); список — колонкой с шагом --ui-space-2. */
+/* Список ссылок на поля: ссылки размечаются ui-link (стили не дублируются);
+   список — колонкой с шагом --ui-space-2. display:flex здесь и глобальный
+   list-style:none снимают роль списка в Safari/VoiceOver — в разметке канона,
+   стендов и примеров README список несёт role="list" (обоснование — README,
+   образец — ui-breadcrumbs; html-validate глух к Safari-багу, рядом с role в
+   lint-уемой разметке стоит локальная директива отключения). */
 .ui-form__summary-list {
   box-sizing: border-box;
   display: flex;
