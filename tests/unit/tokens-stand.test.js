@@ -30,9 +30,9 @@ let primitiveTokens;
 
 beforeAll(async () => {
   // Реальная сборка: dist + showcase (страница стенда генерируется из файлов токенов).
-  // Через общий мьютекс (tests/helpers/unit-build.mjs): параллельный воркер
-  // themes.test.js собирает то же самое — без замка rmSync одного билдера
-  // попадает в окно чтения другого (флак ENOENT).
+  // Через общий хелпер (tests/helpers/unit-build.mjs): лок сериализует первых
+  // воркеров, штамп-мемоизация делает сборку ОДНОЙ на прогон (T13.7) —
+  // rmSync параллельного билдера больше не попадает в окно чтения (флак ENOENT).
   await buildForUnitTests(root);
   const parsed = TOKENS_SOURCES.map(({ file, layer }) =>
     parseTokensFile(readFileSync(join(root, file), 'utf8'), layer),

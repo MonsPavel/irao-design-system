@@ -71,9 +71,9 @@ const core = new Map([...primitives, ...semantic]);
 
 beforeAll(async () => {
   // Реальная сборка: dist/themes + страницы showcase генерируются из исходников.
-  // Через общий мьютекс (tests/helpers/unit-build.mjs): параллельный воркер
-  // tokens-stand.test.js собирает то же самое — без замка rmSync одного
-  // билдера попадает в окно чтения другого (флак ENOENT).
+  // Через общий хелпер (tests/helpers/unit-build.mjs): лок сериализует первых
+  // воркеров, штамп-мемоизация делает сборку ОДНОЙ на прогон (T13.7) —
+  // rmSync параллельного билдера больше не попадает в окно чтения (флак ENOENT).
   await buildForUnitTests(root);
 }, 60000);
 
