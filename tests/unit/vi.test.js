@@ -31,6 +31,11 @@ import { contrastRatio, declarationsFromTokenFile, resolveTokenColor } from '../
 
 const viSource = readFileSync(join(import.meta.dirname, '../../a11y/vi.js'), 'utf8');
 const viCss = readFileSync(join(import.meta.dirname, '../../a11y/vi.css'), 'utf8');
+const viPanelCanon = readFileSync(join(import.meta.dirname, '../../components/ui-vi/ui-vi.html'), 'utf8');
+const viPanelStand = readFileSync(
+  join(import.meta.dirname, '../../showcase/pages/ui-vi/index.html'),
+  'utf8',
+);
 
 const STORAGE_KEY = 'irao-ui-vi';
 
@@ -659,5 +664,37 @@ describe('a11y/vi.css — гарантированные пары тем ГОС�
     const code = viCss.replace(/\/\*[\s\S]*?\*\//g, '');
     const rootBlock = code.match(/:root\s*\{[^}]*\}/)[0];
     expect(code.replace(rootBlock, '')).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  });
+});
+
+describe('панель ui-vi: канон ↔ стенд — паритет копии (пин T13.7)', () => {
+  /**
+   * Стенд ui-vi дублирует панель канона ВРУЧНУЮ (showcase/pages/ui-vi/
+   * index.html, копия рядом с демо-секциями) — потеря data-ui-vi-set или
+   * aria-label при правке одной из сторон была бы молчаливой (дрейф паттерна,
+   * замечание T9.1). Пин сравнивает блок панели канона
+   * (components/ui-vi/ui-vi.html) и стенда нормализованно: без комментариев
+   * (приём vi.test.js «пины смотрят на код») и с схлопнутыми пробелами —
+   * форматирование вправе различаться, разметка и хуки — нет.
+   */
+  const stripMarkupComments = (source) => source.replace(/<!--[\s\S]*?-->/g, '');
+  const collapse = (source) => source.replace(/\s+/g, ' ').trim();
+
+  /** Блок панели: от корневого div до следующей секции (канон — до конца файла). */
+  const panelOf = (source, endMarker) => {
+    const start = source.indexOf('<div class="ui-vi-bar"');
+    const end = endMarker ? source.indexOf(endMarker, start) : source.length;
+    return source.slice(start, end);
+  };
+
+  it('копия панели на стенде — точная (нормализованно): классы, хуки, aria, тексты', () => {
+    const canon = collapse(stripMarkupComments(panelOf(viPanelCanon)));
+    const stand = collapse(
+      stripMarkupComments(panelOf(viPanelStand, '<section class="ui-section"')),
+    );
+    expect(canon.length, 'панель канона найдена в components/ui-vi/ui-vi.html').toBeGreaterThan(
+      100,
+    );
+    expect(stand, 'панель стенда совпадает с каноном нормализованно').toBe(canon);
   });
 });

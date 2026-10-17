@@ -13,7 +13,7 @@
  *    components/<name>/ или patterns/<name>/ (dist не читаем — он
  *    генерируется сборкой).
  */
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { listStands } from '../../tests/helpers/stands.js';
@@ -64,6 +64,50 @@ describe('список стендов полигона (helpers/stands)', () => 
             ? `showcase/pages/${name}`
             : `components/${name}`;
       expect(existsSync(join(root, source)), `${name}: нет источника ${source}`).toBe(true);
+    }
+  });
+});
+
+describe('COMPONENTS (showcase/build.mjs) ↔ стенды полигона (пин соответствия, T13.7)', () => {
+  /**
+   * История пина (замечание T9.1): матрица «тема × стенды» в ui-vi.spec.js
+   * держала захардкоженный EPIC_4_5_STANDS — дубликат COMPONENTS; при
+   * добавлении компонента матрица молча теряла покрытие. С T9.2 список
+   * выводится из дискавери (helpers/stands.js) — дубликата больше нет; этот
+   * пин держит соответствие двух оставшихся списков: каталог компонента
+   * components/ui-… без строки в COMPONENTS — CSS не попадает в ui-core
+   * (сборка лишь предупреждает — в зелёном прогоне предупреждение незаметно),
+   * строка без каталога — мёртвая запись. Несоответствие роняет тест.
+   */
+  const COMPONENTS_EXCEPTION = 'ui-vi'; // паттерн панели: CSS вне ui-core (осознанно, README ui-vi)
+
+  it('каталоги components/ui-* = COMPONENTS (с задокументированным исключением ui-vi)', () => {
+    const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
+    const declaredBlock = build.match(/const COMPONENTS = \[([\s\S]*?)\n\];/)?.[1] ?? '';
+    const declared = [...declaredBlock.matchAll(/'([a-z0-9-]+)'/g)].map((match) => match[1]);
+
+    expect(declared.length, 'список COMPONENTS распознан из build.mjs').toBeGreaterThan(0);
+    expect(new Set(declared).size, 'в COMPONENTS нет дублей').toBe(declared.length);
+
+    // Сторона каталогов — readdirSync(components/) (та же дискавери, что в
+    // listStands): в listStands входят и спец-стенды showcase/pages/ui-*
+    // (ui-table-scroll/ui-table-cards — страницы, не компоненты).
+    const dirs = readdirSync(join(root, 'components'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith('ui-'))
+      .map((entry) => entry.name)
+      .sort();
+    const expected = dirs.filter((name) => name !== COMPONENTS_EXCEPTION);
+
+    expect(
+      [...declared].sort(),
+      'COMPONENTS ≠ каталоги компонентов: молчаливый дрейф полигона/сборки',
+    ).toEqual(expected);
+
+    // Связь со стендами полигона: каждый компонент COMPONENTS имеет стенд
+    // (и тем самым входит в матрицу «тема × стенды» автоматически).
+    const stands = listStands();
+    for (const name of declared) {
+      expect(stands, `компонент ${name} без стенда полигона`).toContain(name);
     }
   });
 });
