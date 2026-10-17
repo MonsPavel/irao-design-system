@@ -30,6 +30,8 @@
 | Скриншот-эталоны | `tests/visual/` | создаются только в контейнере (ADR-0004) |
 | Архитектурные доки и ADR | `docs/`, `docs/adr/` | ADR — по процессу из § «ADR-процесс» ниже |
 | Шаблон JS-модуля | `docs/templates/` | не production-код |
+| Шаблон migration-guide (для будущих major) | `docs/templates/migration-guide-template.md` | заполняется при major с удалениями/переименованиями (ADR-0007); заполненные гайды — `docs/ui-system/release/` |
+| Dev-модуль deprecation-предупреждений | `base/deprecations.js` | попадает только в dev-сборку `dist/ui.dev.js` (T12.2); прод `ui.min.js` молчит; записи реестра — вместе с алиас-классом в том же minor-PR |
 | Негативная lint-фикстура | `tests/lint-cases/` | намеренно «кривой» файл; строка-ожидание в `tools/run-lint-cases.mjs`; из `npm run lint` исключён |
 
 Правила каскада, действующие везде: hex только в `tokens/primitives.css`;
@@ -210,6 +212,27 @@ major либо добавлением нового модификатора** (0
 deprecation: пометка в minor → алиас с warning в dev-сборке → удаление в major
 с migration guide. Каждое изменение — запись в CHANGELOG (Keep a Changelog,
 T12.2) и в changelog-секцию доки компонента (шаблон T10.1, пункт 8).
+
+### Механизм deprecation (T12.2)
+
+Механизм работает до первого deprecated — заводится первым deprecated без
+новых механизмов. Шаги цикла:
+
+1. **Пометка в minor** (один PR): алиас-класс в CSS компонента — дублирование
+   правил канонического блока с комментарием `/* deprecated since x.y */`
+   (нативный CSS — «@extend-эквивалент», допустимо для переходного периода);
+   запись `{ name, since, useInstead }` в реестр
+   [`base/deprecations.js`](base/deprecations.js); список — в доке компонента
+   (раздел «Deprecated») и в CHANGELOG (категория Deprecated).
+2. **Warning у интегратора**: dev-сборка `dist/ui.dev.js` — не минифицированный
+   вариант `ui.min.js` (showcase/build.mjs, `JS_DEV_ONLY`) — регистрирует
+   `window.IraoUI.dev`: скан DOM при старте и MutationObserver печатают
+   `[IraoUI:dev]`-`console.warn` для каждого используемого deprecated-имени
+   с заменой. На dev-копии сайта `ui.min.js` меняется на `ui.dev.js`, прод —
+   молчит (предупреждения не шумят пользователям).
+3. **Удаление в major**: имя уходит из CSS и реестра; миграция — по шаблону
+   [`docs/templates/migration-guide-template.md`](docs/templates/migration-guide-template.md)
+   (таблица переименований, чек-лист проверки, откат на N−1).
 
 ## ADR-процесс
 

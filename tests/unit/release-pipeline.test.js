@@ -34,6 +34,9 @@ describe('release.yml: гейты → матрица → VI-smoke → build → 
       'dist/ui-core.min.css',
       'dist/ui-vi.min.css',
       'dist/ui.min.js',
+      // Ревью T12.2: dev-вариант части поставки (ui.dev.js, T12.2) — zip обязан
+      // содержать его СТРУКТУРНО, а не «случайно уехал целиком» (zip -r dist).
+      'dist/ui.dev.js',
       'dist/fonts/',
       'dist/themes/',
     ]) {

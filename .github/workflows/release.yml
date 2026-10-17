@@ -19,9 +19,9 @@
 #   vi-smoke   — релизный smoke доступности (T9.1/T9.2): VI-включение, темы,
 #                персистентность (tests/e2e/ui-vi.spec.js) и axe-обход ВСЕХ
 #                страниц полигона (tests/a11y/stands-sweep.spec.js);
-#   build-dist — npm run build → zip dist (ui-core/ui-vi/ui.min.js + fonts/
-#                + themes/ — 02-architecture §6.1) → проверка содержимого
-#                артефакта в джобе → upload-artifact;
+#   build-dist — npm run build → zip dist (ui-core/ui-vi/ui.min.js + ui.dev.js
+#                (T12.2) + fonts/ + themes/ — 02-architecture §6.1) → проверка
+#                содержимого в джобе → upload-artifact;
 #   release    — GitHub Release через gh CLI (allowlist first-party actions —
 #                сторонних нет): артефакт + release notes = запись тега из
 #                CHANGELOG.md. Только на тегах: workflow_dispatch — репетиция
@@ -202,14 +202,15 @@ jobs:
         run: zip -r irao-ui-dist.zip dist
 
       # Проверка содержимого артефакта в джобе (implementation requirements 1):
-      # полный dist по 02-architecture §6.1 — ui-core/ui-vi/ui.min.js + fonts/
-      # + themes/. Баннер версии сверяется с package.json — на теге гейт gates
-      # уже гарантировал совпадение версии с тегом, значит в артефакте = тег.
+      # полный dist по 02-architecture §6.1 — ui-core/ui-vi/ui.min.js +
+      # ui.dev.js (T12.2) + fonts/ + themes/. Баннер версии сверяется с
+      # package.json — на теге гейт gates уже гарантировал совпадение версии
+      # с тегом, значит в артефакте = тег.
       - name: Verify zip structure (02-architecture §6.1) and banner (T1.3)
         run: |
           ZIP="irao-ui-dist.zip"
           CONTENT="$(unzip -l "$ZIP")"
-          for path in dist/ui-core.min.css dist/ui-vi.min.css dist/ui.min.js dist/fonts/ dist/themes/; do
+          for path in dist/ui-core.min.css dist/ui-vi.min.css dist/ui.min.js dist/ui.dev.js dist/fonts/ dist/themes/; do
             if ! echo "$CONTENT" | grep -qF "$path"; then
               echo "zip-артефакт не соответствует 02-architecture §6.1: нет $path"
               exit 1

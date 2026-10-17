@@ -6,6 +6,24 @@
 версионирование — [SemVer](https://semver.org/lang/ru/) (политика — ADR-0007,
 рабочая практика — T12.2).
 
+## [Unreleased]
+
+### Added
+
+- Dev-сборка `dist/ui.dev.js` — не минифицированный вариант `ui.min.js` с
+  механизмом deprecation-предупреждений: `window.IraoUI.dev` печатает
+  `console.warn` при использовании deprecated-класса в DOM (скан при старте +
+  MutationObserver для динамики). Прод-бандл `ui.min.js` молчит — механизм
+  существует до первого deprecated (T12.2, ADR-0007);
+- Шаблон migration-guide для будущих major —
+  [docs/templates/migration-guide-template.md](docs/templates/migration-guide-template.md).
+
+### Fixed
+
+- ui-modal: сигнал завершения закрытия не зависит от движка анимаций (webkit);
+  guard'ы requestAnimationFrame и поллинга в startCloseWatch — устойчивость
+  на стендах без rAF.
+
 ## [v0.1.0] — 2026-10-10
 
 Первый предрелиз дизайн-системы irao-ui (линия 0.x): полный кодовый стек

@@ -83,7 +83,7 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
      всех стендов (stands-sweep) — T9.1/T9.2;
   4. `build-dist` — zip dist + проверка содержимого в джобе (структура
      02-architecture §6.1: `ui-core.min.css`, `ui-vi.min.css`, `ui.min.js`,
-     `fonts/`, `themes/`; баннер `irao-ui v<версия>`);
+     `ui.dev.js` (T12.2), `fonts/`, `themes/`; баннер `irao-ui v<версия>`);
   5. `release` — GitHub Release через `gh release create` (права `contents: write`
      только у этой джобы): артефакт + release notes = запись тега из CHANGELOG
      (`--extract`). Публикация — только на тегах.

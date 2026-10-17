@@ -131,6 +131,14 @@ const CSS_VI = ['a11y/vi.css'];
 /** JS vi-модуля — последним в ui.min.js (как JS_ORDER career-portal). */
 const JS_VI = ['a11y/vi.js'];
 
+/**
+ * Dev-модуль deprecation-предупреждений (T12.2, ADR-0007) — ТОЛЬКО в
+ * dev-сборке dist/ui.dev.js (не минифицированный вариант ui.min.js).
+ * Прод-бандл ui.min.js модуль не получает: warning о deprecated-именах —
+ * инструмент разработки и миграции, консоль пользователей в проде молчит.
+ */
+const JS_DEV_ONLY = ['base/deprecations.js'];
+
 /* ── утилиты ── */
 
 function gitShortSha() {
@@ -150,8 +158,9 @@ function assert(ok, message) {
   if (!ok) throw new Error(`self-check: ${message}`);
 }
 
-/** Конкатенация+минификация списка файлов (esbuild transform). */
-async function bundle(files, loader) {
+/** Конкатенация+минификация списка файлов (esbuild transform); minify: false —
+ * dev-варианты (ui.dev.js, T12.2: «не минифицированный или с флагом»). */
+async function bundle(files, loader, minify = true) {
   const parts = [];
   for (const rel of files) {
     const full = join(ROOT, rel);
@@ -164,7 +173,7 @@ async function bundle(files, loader) {
   const joined = parts.join('\n');
   const result = await transform(joined, {
     loader,
-    minify: true,
+    minify,
     legalComments: 'none',
     charset: 'utf8',
   });
@@ -954,10 +963,17 @@ async function generateShowcase({ themes }) {
    проверяется сборкой, сценарии e2e — с T1.4) ── */
 
 async function selfChecks({ banner, stands, docs, guides, discovered }) {
-  for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js', 'fonts', 'themes']) {
+  for (const name of [
+    'ui-core.min.css',
+    'ui-vi.min.css',
+    'ui.min.js',
+    'ui.dev.js',
+    'fonts',
+    'themes',
+  ]) {
     assert(existsSync(join(DIST, name)), `dist/${name} отсутствует (структура §6.1)`);
   }
-  for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js']) {
+  for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js', 'ui.dev.js']) {
     const content = readFileSync(join(DIST, name), 'utf8');
     assert(content.startsWith('/*! irao-ui v'), `баннер версии не в начале dist/${name}`);
   }
@@ -1090,6 +1106,10 @@ async function main() {
   );
   const uiJs = await bundle(jsFiles, 'js');
 
+  // Dev-вариант ui.min.js (T12.2): те же модули + механизм deprecation, БЕЗ
+  // минификации (исходники читаемы в devtools). Прод-бандл выше не меняется.
+  const uiDevJs = await bundle([...jsFiles, ...JS_DEV_ONLY], 'js', false);
+
   // Рантайм (css/js/fonts/themes) emits в ОБЕ точки раздачи:
   //  - DIST — дистрибутив для Bitrix-упаковки (release zip);
   //  - SHOWCASE_DIST — полигон: стенды ссылаются на рантайм ОТНОСИТЕЛЬНО
@@ -1101,6 +1121,7 @@ async function main() {
     writeFileSync(join(target, 'ui-core.min.css'), banner + coreCss);
     writeFileSync(join(target, 'ui-vi.min.css'), banner + viCss);
     writeFileSync(join(target, 'ui.min.js'), banner + uiJs);
+    writeFileSync(join(target, 'ui.dev.js'), banner + uiDevJs);
     copyFonts(target);
     copyThemes(target);
   };
@@ -1121,6 +1142,9 @@ async function main() {
   console.log(`  dist/ui-vi.min.css    ${viCss.length} байт css + баннер`);
   console.log(
     `  dist/ui.min.js        ${uiJs.length} байт js + баннер (${jsFiles.length} модулей)`,
+  );
+  console.log(
+    `  dist/ui.dev.js        ${uiDevJs.length} байт js + баннер (${jsFiles.length + JS_DEV_ONLY.length} модулей, не минифицирован, T12.2)`,
   );
   console.log(`  showcase/dist/        index.html + standalone.html + ${stands.length} стенд(ов)`);
   console.log(
