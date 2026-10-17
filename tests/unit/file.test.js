@@ -345,6 +345,46 @@ describe('components/ui-file/ui-file.js — контракт module-template и 
     expect(formatSize(1073741824)).toBe('1 ГБ');
     expect(formatSize(1610612736)).toBe('1,5 ГБ');
   });
+
+  it('onFormReset: dispatch Event("reset") на форме возвращает значение в «Файл не выбран» (ревью T5.3 medium: событие reset не даёт change на file-инпуте)', async () => {
+    const { window, document } = makeSandbox({
+      bodyHtml: `
+        <form id="ff" action="#x">
+          <div class="ui-file" data-ui-file>
+            <label class="ui-file__button">
+              <input class="ui-file__input" type="file" id="resume" name="resume">
+              <span class="ui-file__button-text">прикрепить файл</span>
+            </label>
+            <p class="ui-file__value" role="status">Файл не выбран</p>
+            <button class="ui-file__reset" type="button" hidden>Убрать файл</button>
+          </div>
+        </form>`,
+    });
+
+    // jsdom не умеет «выбирать файл»: files подменяем настраиваемым геттером —
+    // очисткой в null имитируем нативную очистку полей БРАУЗЕРОМ, которая
+    // происходит ПОСЛЕ события reset (поэтому render модуля отложен).
+    let picked = [{ name: 'resume-Ivanov.pdf', size: 250880 }];
+    const input = document.getElementById('resume');
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      get: () => picked ?? [],
+    });
+    input.dispatchEvent(new window.Event('change'));
+    const value = document.querySelector('.ui-file__value');
+    expect(value.textContent, 'выбор отражён до сброса').toBe(
+      'Выбран файл: resume-Ivanov.pdf, 245 КБ',
+    );
+
+    // reset приходит ДО очистки полей — модуль перерисовывает после очистки
+    // (window.setTimeout(render, 0)); в песочнице ждём реальный тик таймера.
+    document.getElementById('ff').dispatchEvent(new window.Event('reset'));
+    picked = null; // нативная очистка file-инпута браузером
+    await new Promise((resolve) => window.setTimeout(resolve, 0));
+
+    expect(value.textContent, 'после form reset — пустое состояние').toBe('Файл не выбран');
+    expect(document.querySelector('.ui-file__reset').hidden, 'кнопка сброса скрыта').toBe(true);
+  });
 });
 
 describe('канонический паттерн ui-file (components/ui-file/ui-file.html)', () => {
@@ -375,11 +415,22 @@ describe('канонический паттерн ui-file (components/ui-file/ui
     expect(html, 'без tabindex — естественный tab-порядок').not.toMatch(/tabindex=/);
   });
 
-  it('имя поля через aria-labelledby на label-текст обвязки; подсказка и ошибка — aria-describedby', () => {
+  it('имя поля через aria-labelledby на label-текст обвязки И подпись кнопки (Label in Name, WCAG 2.5.3); подсказка и ошибка — aria-describedby', () => {
     const inputTag = html.match(/<input\b[^>]*>/s)?.[0] ?? '';
     const labelId = html.match(/class="ui-field__label"[^>]*id="([^"]+)"/)?.[1];
     expect(labelId, 'у label-текста есть id').toBeTruthy();
-    expect(inputTag, 'aria-labelledby ведёт на имя поля').toContain(`aria-labelledby="${labelId}"`);
+
+    // Label in Name (ревью T5.3 medium, T13.4): aria-labelledby ПЕРЕКРЫВАЕТ
+    // контент label-обёртки, а видимая подпись кнопки «прикрепить файл» — то,
+    // что произносит голосовой ввод; доступное имя обязано её содержать.
+    const buttonTextId = html.match(/class="ui-file__button-text"[^>]*id="([^"]+)"/)?.[1];
+    expect(buttonTextId, 'у видимой подписи кнопки есть id').toBeTruthy();
+    const labelledby = (inputTag.match(/aria-labelledby="([^"]+)"/)?.[1] ?? '').split(/\s+/);
+    expect(labelledby, 'имя начинается с текста обвязки').toContain(labelId);
+    expect(
+      labelledby,
+      'видимая подпись кнопки — часть имени (голосовой ввод «прикрепить файл» совпадает)',
+    ).toContain(buttonTextId);
 
     const describedby = inputTag.match(/aria-describedby="([^"]+)"/)?.[1] ?? '';
     const hintId = html.match(/class="ui-file__hint"[^>]*id="([^"]+)"/)?.[1];
@@ -418,6 +469,18 @@ describe('канонический паттерн ui-file (components/ui-file/ui
       /class="ui-field__error"[^>]*role="alert"|role="alert"[^>]*class="ui-field__error"/,
     );
   });
+
+  it('hint канона согласован с required: не отрицает обязательность (ревью T5.3 low — текст стенда в каноне и README)', () => {
+    const inputTag = html.match(/<input\b[^>]*>/s)?.[0] ?? '';
+    expect(inputTag, 'канонический паттерн — required-поле').toContain('required');
+
+    const hint = html.match(/class="ui-file__hint"[^>]*>([^<]+)</)?.[1] ?? '';
+    expect(
+      hint,
+      '«файл не обязателен» противоречит required и ошибке «Прикрепите резюме…»',
+    ).not.toContain('не обязателен');
+    expect(hint, 'ограничения (типы, размер) на месте').toContain('до 5 Мб');
+  });
 });
 
 describe('стенд и подключение (Scope T5.3)', () => {
@@ -426,9 +489,6 @@ describe('стенд и подключение (Scope T5.3)', () => {
 
     expect(stand, 'живой инстанс с JS-хуком').toContain('data-ui-file');
     expect(stand, 'состояние «выбран» продемонстрировано').toContain('Выбран файл:');
-    expect(stand, 'демо «выбран» — без JS-хука (в живом поле состояние рисует модуль)').toMatch(
-      /Выбран файл:[\s\S]{0,400}/,
-    );
     expect(stand, 'состояние error').toContain('ui-field--error');
     expect(stand, 'состояние disabled').toMatch(
       /ui-file__input[^>]*disabled|disabled[^>]*ui-file__input/,
@@ -437,6 +497,22 @@ describe('стенд и подключение (Scope T5.3)', () => {
     expect(stand, 'гейт T3.6 не расширяется без CHECK_STANDS').not.toContain(
       'data-ui-check-layout',
     );
+
+    // Ревью T5.3/T13.4: прежний пин toMatch(/Выбран файл:[\s\S]{0,400}/) был
+    // таутологией (допускал пустое продолжение — совпадал всегда вместе с
+    // toContain). Инвариант «демо — без JS-хука» проверяется прямо: у
+    // демо-коробки состояния «выбран» нет data-ui-file — статичную разметку
+    // модуль не трогает (состояние рисует только модуль, в живом поле).
+    const demoBox = stand
+      .split(/(?=<div class="ui-file")/)
+      .slice(1)
+      .map((fragment) => fragment.slice(0, fragment.indexOf('</div>')))
+      .find((box) => box.includes('Выбран файл:'));
+    expect(demoBox, 'демо-коробка состояния «выбран» найдена').toBeTruthy();
+    expect(
+      demoBox,
+      'демо «выбран» — без JS-хука data-ui-file (нативный file-инпут не может «содержать файл» статично)',
+    ).not.toContain('data-ui-file');
   });
 
   it("'ui-file' в COMPONENTS showcase/build.mjs — CSS/JS попадают в dist", () => {
