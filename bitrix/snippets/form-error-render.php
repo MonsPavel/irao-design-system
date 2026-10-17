@@ -18,11 +18,14 @@
  *                                       (например $arResult["FORM_ERRORS"]);
  *  - irao_ui_form_field_wrap_class()  — класс обвязки поля
  *                                       (ui-field [+ ui-field--error]);
- *  - irao_ui_form_field_error_attrs() — aria невалидного контрола:
+ *  - irao_ui_form_field_error_attrs() — aria контрола по серверному
+ *                                       состоянию: с ошибкой —
  *                                       aria-invalid="true" + aria-describedby
  *                                       (id подсказок из $describedBy —
  *                                       первыми, {id}-error — последним:
- *                                       порядок канона модуля T5.5);
+ *                                       порядок канона модуля T5.5); валидно —
+ *                                       связь переданных подсказок сохраняется
+ *                                       (aria-describedby без aria-invalid).
  *  - irao_ui_form_field_error_html()  — текст ошибки
  *                                       <p class="ui-field__error" id="…-error"
  *                                       role="alert">…</p>;
@@ -153,32 +156,52 @@ if (!function_exists('irao_ui_form_field_wrap_class')) {
 
 if (!function_exists('irao_ui_form_field_error_attrs')) {
     /**
-     * Атрибуты невалидного контрола: aria-invalid="true" aria-describedby="{id}-error".
-     * Для поля без ошибки возвращает пустую строку — вызов безусловен:
-     * <?= irao_ui_form_field_error_attrs('apply-NAME', $nameError) ?>
+     * Атрибуты aria контрола по серверному состоянию (вызов безусловен).
+     * Ошибка:  aria-invalid="true" aria-describedby="… {id}-error".
+     * Валидно: aria-describedby="…" — подсказки остаются связанными, либо
+     *          пусто, если подсказок не передано.
      * Если контрол несёт подсказку, передайте её id третьим параметром
-     * $describedBy (можно несколько — через пробел): id подсказок встанут
-     * ПЕРВЫМИ, id ошибки допишется последним — подсказка идёт первой,
-     * ошибка — последней (порядок единый с модулем T5.5, который дописывает
-     * {id}-error в конец существующего aria-describedby):
+     * $describedBy (можно несколько — через пробел): при ошибке id подсказок
+     * встанут ПЕРВЫМИ, id ошибки допишется последним — подсказка идёт
+     * первой, ошибка — последней (порядок единый с модулем T5.5, который
+     * дописывает {id}-error в конец существующего aria-describedby).
+     * В валидном состоянии связь подсказки с контролем не рвётся —
+     * aria-describedby без aria-invalid (канон ui-form: «Поле валидно →
+     * aria-describedby — только hint»; ui-field: hint «всегда видима,
+     * связывается aria-describedby»):
      * <?= irao_ui_form_field_error_attrs('apply-NAME', $nameError, 'apply-NAME-hint') ?>
-     * → aria-describedby="apply-NAME-hint apply-NAME-error".
+     * ошибка  → aria-invalid="true" aria-describedby="apply-NAME-hint apply-NAME-error"
+     * валидно → aria-describedby="apply-NAME-hint"
+     * Не дублируйте статичный aria-describedby в разметке рядом с этим
+     * вызовом: по спецификации HTML действует ПЕРВЫЙ атрибут — ссылка на
+     * ошибку потеряется; связь подсказок держит только этот вызов.
      *
      * @param string      $fieldId     id контрола на странице
      * @param string|null $message     сообщение ошибки поля (пусто — ошибки нет)
-     * @param string      $describedBy id подсказок поля, уже описанных в
-     *                                 aria-describedby (через пробел);
-     *                                 пусто — описывается только ошибка
+     * @param string      $describedBy id подсказок поля (через пробел);
+     *                                 пусто и без ошибки → '' (старый
+     *                                 контракт двух-аргного вызова сохранён)
      * @return string
      */
     function irao_ui_form_field_error_attrs($fieldId, $message = null, $describedBy = '')
     {
+        $described = trim((string) $describedBy);
+
         if ($message === null || (string) $message === '') {
-            return '';
+            // Валидное состояние: aria-invalid не ставится, но переданные
+            // подсказки остаются связанными с контролем (канон: «aria-
+            // describedby — только hint»); без подсказок — ''.
+            if ($described === '') {
+                return '';
+            }
+
+            return sprintf(
+                'aria-describedby="%s"',
+                htmlspecialchars($described, ENT_QUOTES, irao_ui_form_errors_charset())
+            );
         }
 
-        // Порядок канона T5.5: id подсказок первыми, {id}-error последним.
-        $described = trim((string) $describedBy);
+        // Ошибка: порядок канона T5.5 — id подсказок первыми, {id}-error последним.
         $target = $described === '' ? (string) $fieldId : $described . ' ' . $fieldId;
 
         return sprintf(
