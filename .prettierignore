@@ -54,3 +54,7 @@ showcase/pages/ui-vi/index.html
 # бы только самозакрытые void-элементы.
 patterns/search-overlay/search-overlay.html
 patterns/header/header.html
+
+# Coverage-отчёты (T13.4): машинный артефакт vitest --coverage
+coverage/
+coverage-json/

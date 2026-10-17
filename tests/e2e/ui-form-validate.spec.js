@@ -289,9 +289,10 @@ standTest.describe('ui-form-validate: required-radio-группа (T13.4)', () =
       await expect(summary.locator('.ui-form__summary-title')).toHaveText('В форме 1 ошибка');
 
       const links = summary.locator('.ui-form__summary-list a');
-      await expect(links, 'одна запись на ГРУППУ, не по числу radio (нативный один bubble)').toHaveCount(
-        1,
-      );
+      await expect(
+        links,
+        'одна запись на ГРУППУ, не по числу radio (нативный один bubble)',
+      ).toHaveCount(1);
       await expect(links, 'текст — групповое сообщение').toHaveText('Выберите вариант');
       await expect(links, 'ссылка ведёт на radio группы').toHaveAttribute(
         'href',
@@ -321,9 +322,7 @@ standTest.describe('ui-form-validate: required-radio-группа (T13.4)', () =
         );
       }
       await expect(errorText, 'текст группы очищен').toHaveText('');
-      await expect(page.locator(`${SEL.radioForm} .ui-field`)).not.toHaveClass(
-        /ui-field--error/,
-      );
+      await expect(page.locator(`${SEL.radioForm} .ui-field`)).not.toHaveClass(/ui-field--error/);
     },
   );
 });

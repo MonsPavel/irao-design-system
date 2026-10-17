@@ -8,6 +8,11 @@
 node_modules/
 dist/
 
+# Coverage (T13.4): отчёт vitest --coverage — машинный артефакт измерения;
+# число фиксируется в отчёте задачи, файлы отчёта не коммитятся
+coverage/
+coverage-json/
+
 # Playwright (T1.4): артефакты прогонов и отчёты. Скриншот-эталоны
 # tests/visual/__screenshots__/ — НЕ артефакт, они коммитятся (ADR-0004).
 test-results/
