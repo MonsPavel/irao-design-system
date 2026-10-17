@@ -15,8 +15,7 @@ import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helper
 
 const SEL = {
   footer: 'body > footer.fdp-footer',
-  h1: 'main h1',
-  address: `${'body > footer.fdp-footer'} address`,
+  address: 'body > footer.fdp-footer address',
   tel: 'a[href^="tel:"]',
   mail: 'a[href^="mailto:"]',
   socials: 'a.fdp-footer__social',

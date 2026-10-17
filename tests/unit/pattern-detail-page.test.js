@@ -269,6 +269,15 @@ describe('patterns/detail-page/README.md — дока паттерна (AC: Bitr
     expect(readme, 'мобильное поведение — aside после контента').toContain('после контента');
     expect(readme, 'граница sticky — md (768)').toContain('768');
   });
+
+  it('расхождение границ с ui-form зафиксировано (T13.7): там aside от lg (T5.4), здесь md (T8.2)', () => {
+    const collapsed = readme.replace(/\s+/g, ' ');
+    expect(collapsed, 'перенос границы упомянут со ссылкой на спеку ui-form (T5.4)').toContain(
+      'T5.4',
+    );
+    expect(collapsed, 'в ui-form aside — от lg по её спеке').toMatch(/от lg/);
+    expect(collapsed, 'здесь md — по спеке T8.2').toMatch(/по спеке T8\.2/);
+  });
 });
 
 describe('Bitrix-сниппет README — безопасный вывод (T13.3): htmlspecialcharsbx, guard ACTIVE_FROM', () => {

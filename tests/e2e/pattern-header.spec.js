@@ -22,8 +22,6 @@ const SEL = {
   search: 'a[data-ui-modal-target="sop-dialog"]',
   dialog: '#sop-dialog',
   query: '#sop-query',
-  h1: 'main h1',
-  home: 'main a[href="../../index.html"]',
 };
 
 standTest.describe('patterns/header: ленмарки (AC — правила ленмарк)', () => {
