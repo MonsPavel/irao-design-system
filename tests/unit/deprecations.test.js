@@ -22,10 +22,7 @@ import { JSDOM } from 'jsdom';
 import { describe, expect, it, vi } from 'vitest';
 
 // import.meta.dirname под module-runner Vitest — cwd-независим (как в эталоне T1.6).
-const moduleSource = readFileSync(
-  join(import.meta.dirname, '../../base/deprecations.js'),
-  'utf8',
-);
+const moduleSource = readFileSync(join(import.meta.dirname, '../../base/deprecations.js'), 'utf8');
 const buildSource = readFileSync(join(import.meta.dirname, '../../showcase/build.mjs'), 'utf8');
 
 /** Демо-запись реестра: формат { name, since, useInstead, note? }. */
@@ -90,7 +87,7 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
   });
 
   it("readyState 'loading': подписка на DOMContentLoaded ровно одна; init сканирует уже заполненный реестр", () => {
-    const { window, document, domContentLoadedSubscriptions, warnings } = makeSandbox({
+    const { window, domContentLoadedSubscriptions, warnings } = makeSandbox({
       readyState: 'loading',
       bodyHtml: '<div class="ui-demo-old"></div>',
       registryAfterEval: [DEMO],
@@ -108,13 +105,30 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
   });
 
   it("readyState 'complete': скан при старте находит deprecated-класс без ручного вызова", () => {
-    const { warnings } = makeSandbox({
-      readyState: 'complete',
-      bodyHtml: '<div class="ui-demo-old"></div>',
-      registryAfterEval: [DEMO],
+    // Записи реестра живут в исходнике модуля (бой: правка base/deprecations.js
+    // в minor-PR), поэтому «заполнен до init» моделируется подстановкой литерала.
+    const sourceWithDemo = moduleSource.replace(
+      'var DEPRECATIONS = [];',
+      "var DEPRECATIONS = [{ name: 'ui-demo-old', since: '0.2.0', useInstead: 'ui-demo-new' }];",
+    );
+    const dom = new JSDOM(
+      '<!doctype html><html><body><div class="ui-demo-old"></div></body></html>',
+      {
+        url: 'https://showcase.test/',
+        runScripts: 'outside-only',
+      },
+    );
+    Object.defineProperty(dom.window.document, 'readyState', {
+      configurable: true,
+      get: () => 'complete',
     });
+    const warnings = [];
+    dom.window.console.warn = (...args) => warnings.push(args);
+
+    dom.window.eval(sourceWithDemo);
 
     expect(warnings).toHaveLength(1);
+    expect(dom.window.IraoUI.dev.deprecations).toHaveLength(1);
   });
 
   it('пустой реестр — скан молчит (механизм существует до первого deprecated)', () => {
@@ -179,7 +193,7 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
   });
 
   it('MutationObserver: элемент, добавленный после init, предупреждает без ручного скана', async () => {
-    const { window, document, warnings } = makeSandbox({ registryAfterEval: [DEMO] });
+    const { document, warnings } = makeSandbox({ registryAfterEval: [DEMO] });
 
     const el = document.createElement('div');
     el.className = 'ui-demo-old';
@@ -190,7 +204,7 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
   });
 
   it('MutationObserver: добавление deprecated-класса существующему элементу (classList.add) ловится', async () => {
-    const { window, document, warnings } = makeSandbox({
+    const { document, warnings } = makeSandbox({
       registryAfterEval: [DEMO],
       bodyHtml: '<div id="target"></div>',
     });
@@ -202,10 +216,13 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
   });
 
   it('guard console: без window.console.warn скан не роняет страницу', () => {
-    const dom = new JSDOM('<!doctype html><html><body><div class="ui-demo-old"></div></body></html>', {
-      url: 'https://showcase.test/',
-      runScripts: 'outside-only',
-    });
+    const dom = new JSDOM(
+      '<!doctype html><html><body><div class="ui-demo-old"></div></body></html>',
+      {
+        url: 'https://showcase.test/',
+        runScripts: 'outside-only',
+      },
+    );
     const { window } = dom;
     Object.defineProperty(window.document, 'readyState', {
       configurable: true,
@@ -218,15 +235,17 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
     expect(window.IraoUI.dev.scan(window.document)).toEqual(['ui-demo-old']);
   });
 
-  it('битая запись реестра (имя не валидно как селектор) не роняет скан остальных', () => {
+  it('битая запись реестра (имя даёт невалидный селектор) не роняет скан остальных', () => {
     const { window, document, warnings } = makeSandbox({
-      registryAfterEval: [{ name: 'плохое имя с пробелами', since: '0.2.0' }, DEMO],
+      // '[' в имени делает селектор '.ui-demo[' невалидным — querySelectorAll
+      // бросает SyntaxError; модуль обязан пропустить запись с объяснением.
+      registryAfterEval: [{ name: 'ui-demo[', since: '0.2.0' }, DEMO],
       bodyHtml: '<div class="ui-demo-old"></div>',
     });
 
     expect(window.IraoUI.dev.scan(document)).toEqual(['ui-demo-old']);
-    // Причина пропуска объясима в консоли, но страница работает.
-    expect(warningText(warnings, 'плохое имя')).not.toBe('');
+    // Причина пропуска объяснима в консоли, но страница работает.
+    expect(warningText(warnings, 'ui-demo[')).not.toBe('');
     expect(warningText(warnings, 'ui-demo-old')).not.toBe('');
   });
 });
@@ -234,7 +253,9 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
 describe('сборка: dev-вариант ui.min.js (T12.2, showcase/build.mjs)', () => {
   it('ui.dev.js выпускается в обе точки раздачи и получает баннер версии + попадает в selfChecks', () => {
     expect(buildSource).toContain("join(target, 'ui.dev.js')");
-    expect(buildSource).toMatch(/'ui-core\.min\.css', 'ui-vi\.min\.css', 'ui\.min\.js', 'ui\.dev\.js'/);
+    expect(buildSource).toMatch(
+      /'ui-core\.min\.css', 'ui-vi\.min\.css', 'ui\.min\.js', 'ui\.dev\.js'/,
+    );
   });
 
   it('base/deprecations.js — только в dev-бандле, без минификации (minify: false)', () => {

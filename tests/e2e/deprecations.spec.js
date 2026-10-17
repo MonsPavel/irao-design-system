@@ -21,7 +21,11 @@ import { expect } from '@playwright/test';
 import { test } from '../helpers/harness.js';
 
 /** Демо-запись реестра (формат — base/deprecations.js). */
-const DEMO = { name: 'ui-deprecation-demo--old', since: '0.2.0', useInstead: 'ui-deprecation-demo--new' };
+const DEMO = {
+  name: 'ui-deprecation-demo--old',
+  since: '0.2.0',
+  useInstead: 'ui-deprecation-demo--new',
+};
 
 /** Имя для сценария динамического появления (не пересекается с DEMO). */
 const DEMO_LATE = {
@@ -90,6 +94,8 @@ test.describe('механизм deprecation (T12.2)', () => {
     const page = await stand('ui-button');
     const warnings = captureWarnings(page);
     await page.addScriptTag({ url: '../ui.dev.js' });
+    // Демо-алиас: дублирование правил канонического блока (нативный CSS).
+    await page.addStyleTag({ content: DEMO_ALIAS_CSS });
 
     // Вставка разметки, запись реестра и скан — ОДНА синхронная задача:
     // MutationObserver доставит колбэк только после неё, поэтому здесь
@@ -122,8 +128,10 @@ test.describe('механизм deprecation (T12.2)', () => {
     expect(text).toContain(DEMO.since);
     expect(text).toContain(DEMO.useInstead);
 
-    // Алиас работает: стили алиаса = каноническому блоку (дублирование правил).
+    // Алиас работает: стили алиаса = каноническому блоку (дублирование правил),
+    // и это НЕ пустое совпадение дефолтов — заливка токеном реально применилась.
     expect(result.alias).toEqual(result.canonical);
+    expect(result.alias.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
   });
 
   test('MutationObserver: динамическое появление deprecated-класса предупреждает без ручного скана', async ({
