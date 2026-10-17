@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Фикстура: target="_BLANK" без rel (регистр значения)</title>
+  </head>
+  <body>
+    <h1>Фикстура</h1>
+    <!-- Негативная фикстура irao/link-external-noopener (T13.5, rev T4.1):
+         контекст браузера не зависит от регистра значения target — "_BLANK"
+         без rel обязан ловиться так же, как "_blank" (сравнение в правиле —
+         без учёта регистра). -->
+    <a href="https://example.com" target="_BLANK">Внешняя ссылка с target="_BLANK" без rel</a>
+  </body>
+</html>

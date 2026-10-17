@@ -16,5 +16,10 @@
       <img src="logo.svg" alt="Логотип партнёра" width="32" height="32">
     </a>
     <a href="#top"><span aria-hidden="true">→</span> Наверх</a>
+    <!-- ПОЗИТИВНЫЙ контроль пропуска (T13.5, rev T4.1): якорь-цель без href —
+         не ссылка (не в tab-порядке, имя скринридеру не требуется);
+         irao/link-accessible-name молчит (встроенный h30 и так ограничен
+         ссылками). -->
+    <a id="section-start" tabindex="-1"></a>
   </body>
 </html>

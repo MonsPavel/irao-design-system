@@ -190,6 +190,15 @@ const EXPECTATIONS = [
   },
   { file: 'html/two-h1.html', tool: 'html', expect: 'fail', rules: ['irao/one-h1'] },
   {
+    // T13.5 (rev T3.3): страница вовсе без h1 — гейт репортит отсутствие
+    // заголовка страницы (цель — первый заголовок >1), а не только дубли h1
+    // (two-h1.html).
+    file: 'html/no-h1.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/one-h1'],
+  },
+  {
     // T3.3: пропуск уровня иерархии h1→h3 (SEO h1→h2→h3 без пропусков;
     // перенос идеи test_internship_headings.py career-portal).
     file: 'html/heading-skip.html',
@@ -217,6 +226,15 @@ const EXPECTATIONS = [
     rules: ['irao/link-external-noopener'],
   },
   {
+    // T13.5 (rev T4.1): контекст браузера не зависит от регистра значения
+    // target — "_BLANK" без rel обязан ловиться так же, как "_blank"
+    // (сравнение в правиле — без учёта регистра).
+    file: 'html/link-external-noopener-uppercase.html',
+    tool: 'html',
+    expect: 'fail',
+    rules: ['irao/link-external-noopener'],
+  },
+  {
     // T4.1 (Implementation requirements п.3): ссылка без доступного имени
     // (icon-only без aria-label) — предупреждение (severity warning).
     file: 'html/link-icon-only-without-name.html',
@@ -226,7 +244,9 @@ const EXPECTATIONS = [
   },
   {
     // T4.1: позитивный контроль гейта доступного имени — текст ссылки,
-    // aria-label и img с alt дают имя, гейт молчит.
+    // aria-label и img с alt дают имя, гейт молчит. С T13.5 здесь же
+    // позитивный контроль пропуска: якорь-цель без href — не ссылка,
+    // гейт молчит (предупреждения на якоря-цели — шум, rev T4.1).
     file: 'html/link-named.html',
     tool: 'html',
     expect: 'pass',
