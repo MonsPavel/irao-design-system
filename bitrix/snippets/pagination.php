@@ -21,7 +21,13 @@
  *      кликается, объявляется неактивной (disabled на <a>, как в
  *      career-portal, невалиден; решение зафиксировано в README);
  *   4. весь пользовательский вывод (label, URL) экранируется
- *      (htmlspecialchars); номера страниц — целые из (int).
+ *      (htmlspecialchars с ENT_QUOTES | ENT_SUBSTITUTE: QUOTES — атрибуты,
+ *      SUBSTITUTE — невалидная UTF-8 заменяется U+FFFD, а не молча
+ *      обрезается до пустой строки); номера страниц — целые из (int).
+ *
+ * Гвард: при $total < 2 навигация не выводится вовсе (пустая строка/null) —
+ * практика README ui-pagination: список, помещающийся на одну страницу,
+ * не получает nav с двумя disabled-стрелками вокруг одного номера.
  *
  * AJAX-пагинация — зона сайта (Out of scope задачи): сниппет рендерит
  * серверную навигацию ссылками; перехват кликов и подмена контента —
@@ -35,7 +41,8 @@ if (!defined('B_PROLOG_INCLUDED') || B_PROLOG_INCLUDED !== true) {
 /**
  * Печатает пагинацию в разметке ui-pagination.
  *
- * @param int    $total       Всего страниц (>= 1; иначе компонент не выводится).
+ * @param int    $total       Всего страниц (>= 2; при меньшем числе навигация
+ *                            не выводится вовсе — листать нечего).
  * @param int    $current     Текущая страница (1..total; вне диапазона — клампится).
  * @param string $urlTemplate Шаблон URL страницы: плейсхолдер #PAGE# заменяется
  *                            номером (например '?page=#PAGE#' или
@@ -56,8 +63,10 @@ function renderUiPagination(
     int $side = 1,
     bool $needReturn = false
 ): ?string {
-    // Нет страниц — компонент не выводится вовсе (шаблон без «пустого» nav).
-    if ($total < 1) {
+    // Листать нечего — nav не выводится вовсе, без «пустого» дегенеративного
+    // каркаса (две disabled-стрелки вокруг одного номера); практика README
+    // ui-pagination: «пагинация не выводится вовсе».
+    if ($total < 2) {
         return $needReturn ? '' : null;
     }
 
@@ -66,7 +75,14 @@ function renderUiPagination(
 
     $e = static function ($value) {
         // URL-шаблон приходит из кода шаблона, но уходит в атрибут — экранируем.
-        return htmlspecialchars((string)$value, ENT_QUOTES, defined('SITE_CHARSET') ? SITE_CHARSET : 'UTF-8');
+        // ENT_SUBSTITUTE: невалидная UTF-8 заменяется U+FFFD, а не молча
+        // превращается в пустую строку (PHP 5.4+; флаг по умолчанию в 8.1+,
+        // объявлен явно — сниппет копируется в шаблоны разных версий PHP).
+        return htmlspecialchars(
+            (string)$value,
+            ENT_QUOTES | ENT_SUBSTITUTE,
+            defined('SITE_CHARSET') ? SITE_CHARSET : 'UTF-8'
+        );
     };
     $url = static function (int $page) use ($urlTemplate, $e) {
         return $e(str_replace('#PAGE#', (string)$page, $urlTemplate));

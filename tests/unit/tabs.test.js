@@ -441,6 +441,43 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
   });
 });
 
+describe('JSON-паттерн — безопасный вывод (T13.3): escapeHtml перед innerHTML-конкатенацией', () => {
+  // Пин присутствия escapeHtml в примере ui-tabs (Testing requirements T13.3):
+  // README и стенд — источники копипасты; JSON-паттерн интерполирует данные
+  // инфоблока в innerHTML — каждая строка данных проходит escapeHtml до
+  // конкатенации (innerHTML собирает разметку: сырая строка соберёт и тег).
+  const readme = readFileSync(join(root, 'components', 'ui-tabs', 'README.md'), 'utf8');
+  const stand = readFileSync(join(root, 'showcase', 'pages', 'ui-tabs', 'index.html'), 'utf8');
+  // Демо-скрипт стенда — единственный голый <script> (второй — application/json).
+  const demoScript = stand.match(/<script>\s*([\s\S]*?)\s*<\/script>/)?.[1] ?? '';
+
+  it('README-пример определяет escapeHtml-хелпер и применяет его к данным (label, text)', () => {
+    expect(readme, 'хелпер определён в примере (копипаст-готово)').toMatch(/function escapeHtml\(/);
+    expect(readme, 'label таба экранируется').toMatch(/\+\s*escapeHtml\(t\.label\)/);
+    expect(readme, 'текст панели экранируется').toMatch(/\+\s*escapeHtml\(t\.text\)/);
+    expect(readme, 'сырая интерполяция label ушла').not.toMatch(/\+\s*t\.label\b/);
+    expect(readme, 'сырая интерполяция text ушла').not.toMatch(/\+\s*t\.text\b/);
+  });
+
+  it('README: комментарий о границе допустимости (что допустимо без экранирования)', () => {
+    expect(readme).toContain('Граница допустимости');
+  });
+
+  it('стенд — тот же паттерн: escapeHtml в демо-скрипте перед innerHTML (id, label, intro, шаги)', () => {
+    expect(demoScript, 'хелпер в демо-скрипте стенда').toMatch(/function escapeHtml\(/);
+    expect(demoScript, 'id из данных уходит в атрибут — экранируется').toMatch(
+      /escapeHtml\(tab\.id\)/,
+    );
+    expect(demoScript, 'label экранируется').toMatch(/escapeHtml\(tab\.label\)/);
+    expect(demoScript, 'intro экранируется').toMatch(/escapeHtml\(tab\.intro\)/);
+    expect(demoScript, 'шаги списка экранируются по одному').toMatch(/\.map\(escapeHtml\)/);
+    expect(demoScript, 'сырая интерполяция данных ушла').not.toMatch(
+      /\+\s*tab\.(?:id|label|intro)\b/,
+    );
+    expect(demoScript, 'комментарий о границе допустимости').toContain('Граница допустимости');
+  });
+});
+
 describe('подключение и гейты (DoD T6.2)', () => {
   it("'ui-tabs' в COMPONENTS showcase/build.mjs — CSS/JS попадают в dist", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');

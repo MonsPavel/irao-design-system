@@ -271,6 +271,48 @@ describe('patterns/detail-page/README.md — дока паттерна (AC: Bitr
   });
 });
 
+describe('Bitrix-сниппет README — безопасный вывод (T13.3): htmlspecialcharsbx, guard ACTIVE_FROM', () => {
+  // T13.3: Bitrix-сниппет в доке — источник копипасты; NAME и дата — данные
+  // инфоблока (недоверенный вывод), экранируются htmlspecialcharsbx (прецедент
+  // того же сниппета — вывод DISPLAY_PROPERTIES); пустая ACTIVE_FROM не должна
+  // собирать <time datetime="1970-01-01"> — guard на timestamp.
+  const readme = readFileSync(readmePath, 'utf8');
+
+  it('NAME экранируется htmlspecialcharsbx (сырой вывод ушёл)', () => {
+    expect(readme, 'экранированный вывод заголовка').toMatch(
+      /htmlspecialcharsbx\(\$arResult\['NAME'\]\)/,
+    );
+    expect(readme, 'сырой вывод NAME ушёл').not.toContain("<?= $arResult['NAME'] ?>");
+  });
+
+  it('дата: человекочитаемый текст через FormatDate с экранированием; старая форма date(strtotime) ушла', () => {
+    // Токены Bitrix FormatDate (ревью T13.3, dev.1c-bitrix.ru …/formatdate.php):
+    // 'f' — ТОЛЬКО название месяца в именительном («Сентябрь»), полная дата —
+    // 'j F Y': день без нуля + месяц в родительном + год → «12 сентября 2026».
+    expect(readme, 'полная дата — j F Y (токен ловит пин)').toMatch(
+      /htmlspecialcharsbx\(FormatDate\('j F Y', \$sDateTs\)\)/,
+    );
+    expect(readme, "токен 'f' (только месяц в именительном) не используется").not.toMatch(
+      /FormatDate\('f'/,
+    );
+    expect(readme, 'дегенеративная форма без guard удалена').not.toContain(
+      "date('Y-m-d', strtotime($sDate))",
+    );
+  });
+
+  it('guard на пустое ACTIVE_FROM: без даты <time> не выводится вовсе (нет datetime="1970-01-01")', () => {
+    expect(readme, 'timestamp считается с guard-ом на пустую строку').toMatch(
+      /\$sDateTs = \$sDate === '' \? false : strtotime\(\$sDate\)/,
+    );
+    expect(readme, 'мета с <time> — за guard-ом if ($sDateTs !== false)').toMatch(
+      /if \(\$sDateTs !== false\):/,
+    );
+    expect(readme, 'мусорный datetime-атрибут эпохи в примере не собирается').not.toContain(
+      'datetime="1970-01-01"',
+    );
+  });
+});
+
 describe('сборка: стенд паттерна генерируется в stands/patterns/detail-page.html', () => {
   it('build.mjs читает patterns/detail-page/detail-page.html и кладёт стенд на два уровня ниже', () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
