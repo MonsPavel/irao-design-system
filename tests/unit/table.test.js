@@ -239,18 +239,14 @@ describe('components/ui-table/ui-table.css — карточная трансфо
 
     // ≥md — поведение без изменений: zebra/hover в карточном режиме работают.
     const md = css.slice(css.indexOf('@media (min-width: 768px)'));
-    expect(
-      md,
-      'zebra восстановлен в md-блоке (--cards + --zebra)',
-    ).toMatch(
+    expect(md, 'zebra восстановлен в md-блоке (--cards + --zebra)').toMatch(
       /\.ui-table--cards\.ui-table--zebra[\s\S]{0,400}?background-color: var\(--ui-color-surface-muted\);/,
     );
     const hoverRestore = md.indexOf('@media (hover: hover)');
     expect(hoverRestore, 'hover восстановлен в md-блоке --cards').toBeGreaterThan(-1);
-    expect(
-      md.slice(hoverRestore),
-      'hover — пара одобренного дизайна',
-    ).toMatch(/background-color: var\(--ui-color-surface-hover\);/);
+    expect(md.slice(hoverRestore), 'hover — пара одобренного дизайна').toMatch(
+      /background-color: var\(--ui-color-surface-hover\);/,
+    );
   });
 });
 

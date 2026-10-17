@@ -31,7 +31,10 @@ import { contrastRatio, declarationsFromTokenFile, resolveTokenColor } from '../
 
 const viSource = readFileSync(join(import.meta.dirname, '../../a11y/vi.js'), 'utf8');
 const viCss = readFileSync(join(import.meta.dirname, '../../a11y/vi.css'), 'utf8');
-const viPanelCanon = readFileSync(join(import.meta.dirname, '../../components/ui-vi/ui-vi.html'), 'utf8');
+const viPanelCanon = readFileSync(
+  join(import.meta.dirname, '../../components/ui-vi/ui-vi.html'),
+  'utf8',
+);
 const viPanelStand = readFileSync(
   join(import.meta.dirname, '../../showcase/pages/ui-vi/index.html'),
   'utf8',
@@ -288,7 +291,7 @@ describe('a11y/vi.js — enum-клампинг значений хранилищ
   };
 
   it('валидный JSON с невалидными значениями не бросает: каждое поле клампится к дефолту', () => {
-    const { window, document } = makeSandbox({
+    const { window } = makeSandbox({
       readyState: 'loading',
       bodyHtml: panelHtml,
       storage: { [STORAGE_KEY]: JSON.stringify(INVALID) },

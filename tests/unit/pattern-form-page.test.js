@@ -179,9 +179,7 @@ describe('patterns/form-page/form-page.html — контракт эталонн�
     // пере-сабмите — pre-rendered ошибка оставалась висеть (замечание T8.3).
     const consent = pattern.match(/<input[^>]*id="fpp-srv-consent"[^>]*>/) ?? [''];
     expect(consent[0], 'чекбокс согласия серверной ветки на месте').not.toBe('');
-    expect(consent[0], 'required — согласие валидируется как остальные поля').toContain(
-      'required',
-    );
+    expect(consent[0], 'required — согласие валидируется как остальные поля').toContain('required');
   });
 
   it('ветка success: видимая ui-form__success, заголовок — цель фокуса, CTA-лента', () => {

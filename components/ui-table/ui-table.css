@@ -272,7 +272,10 @@
      специфичности, но раньше), hover-селектор той же формы — позже, и
      порядок каскада на его стороне. */
   .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__col,
-  .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__rowhead,
+  .ui-table--cards.ui-table--zebra
+    .ui-table__body
+    .ui-table__row:nth-child(even)
+    .ui-table__rowhead,
   .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__cell {
     background-color: var(--ui-color-surface-muted);
   }
