@@ -663,6 +663,61 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     expect(rootEl.style.overflow, 'лок снят с закрытием живого цикла').toBe('');
   });
 
+  it('destroy-контракт (T13.1): после destroy() open(el) инициализирует заново и слушатели работают (реестр без мёртвых инстансов)', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const api = apiOf({ window });
+
+    const handle = api.open(dialog);
+    handle.destroy();
+
+    // Реестр пуст: instanceOf не возвращает мёртвый инстанс — open()
+    // инициализирует элемент заново (кластер A T7.2: без чистки open(el)
+    // «воскрешал» инстанс без слушателей, скролл-лок не снимался никогда).
+    const reopened = api.open(dialog);
+    expect(reopened, 'open() после destroy() вернул живой инстанс').not.toBeNull();
+    expect(
+      dialog.getAttribute(INIT_ATTR),
+      'повторная инициализация состоялась (флаг снова стоит)',
+    ).toBe('true');
+
+    // Слушатели нового инстанса работают: Escape (cancel) закрывает анимированно.
+    dialog.dispatchEvent(new window.Event('cancel'));
+    expect(dialog.classList.contains('is-closing'), 'cancel-слушатель жив').toBe(true);
+    vi.advanceTimersByTime(500);
+    expect(dialog.hasAttribute('open')).toBe(false);
+    expect(document.documentElement.style.overflow, 'скролл-лок снят после reopen-цикла').toBe('');
+  });
+
+  it('destroy-контракт (T13.1): повторные циклы open+destroy не накапливают инстансы; close() на пустом стеке безопасен', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const api = apiOf({ window });
+
+    for (let cycle = 0; cycle < 2; cycle += 1) {
+      api.open(dialog).destroy();
+    }
+    expect(dialog.getAttribute(INIT_ATTR), 'после destroy() флага нет').toBeNull();
+
+    // Technical considerations T13.1: closeTopmost не спотыкается о пустой
+    // реестр/стек.
+    expect(api.close(), 'close() без открытых — null, без исключений').toBeNull();
+
+    // И после чистых циклов открытие работает, причём инициализацией заново
+    // (реестр не копил мёртвые инстансы — иначе reopen взял бы первый из них).
+    api.open(dialog);
+    expect(dialog.hasAttribute('open')).toBe(true);
+    expect(dialog.getAttribute(INIT_ATTR), 'reopen после циклов — свежая инициализация').toBe(
+      'true',
+    );
+    api.close();
+    vi.advanceTimersByTime(500);
+    expect(dialog.hasAttribute('open')).toBe(false);
+    expect(document.documentElement.style.overflow).toBe('');
+  });
+
   it('data-ui-modal-target: клик по триггеру открывает целевой диалог; восстановление фокуса — на триггер', () => {
     vi.useFakeTimers();
     const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });

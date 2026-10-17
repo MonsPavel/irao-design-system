@@ -201,6 +201,10 @@
     }
 
     var wrap = root.getAttribute('data-ui-select') === WRAP_VALUE;
+    // Прежний inline position обёртки сайта (wrap-режим): запоминается перед
+    // заменой и восстанавливается в destroy() — пара lock.rootOverflow
+    // ui-modal (T13.1, контракт «destroy возвращает разметку к no-JS-виду»).
+    var wrapperPosition = null;
 
     /* ── имя поля (ДО перестройки DOM): label[for=id] или label-обёртка.
        Без переноса имени триггер терял бы его — нативный select скрыт, а
@@ -528,6 +532,7 @@
       root.parentElement.appendChild(elementRoot);
       var wrapper = root.parentElement;
       if (window.getComputedStyle(wrapper).position === 'static') {
+        wrapperPosition = wrapper.style.position; // T13.1: прежнее — для restore
         wrapper.style.position = 'relative';
       }
     } else {
@@ -569,8 +574,12 @@
         document.removeEventListener('keydown', onDocumentKeydown);
         root.removeEventListener('change', onNativeChange);
         // Возврат разметки к no-JS состоянию: select на прежнем месте,
-        // раскрыт и табулируем.
+        // раскрыт и табулируем; inline position обёртки восстановлен, если
+        // модуль его ставил (T13.1, пара lock.rootOverflow ui-modal).
         elementRoot.parentElement.insertBefore(root, elementRoot);
+        if (wrapperPosition !== null) {
+          elementRoot.parentElement.style.position = wrapperPosition;
+        }
         elementRoot.parentElement.removeChild(elementRoot);
         root.classList.remove('ui-select__native');
         root.removeAttribute('tabindex');
@@ -578,6 +587,13 @@
           labelElement.removeAttribute('id');
         }
         root.removeAttribute(INIT_ATTR);
+        // T13.1 (кластер A): destroy() инстанса сам вычищает свою запись
+        // реестра — пара instances.push при init; публичный destroy остаётся
+        // тонкой обёрткой.
+        var index = instances.indexOf(instance);
+        if (index !== -1) {
+          instances.splice(index, 1);
+        }
       },
     };
     instances.push(instance);
@@ -633,7 +649,9 @@
 
   /**
    * Уничтожить инстанс (публичный API): select или корень .ui-select, либо id.
-   * Разметка возвращается к no-JS состоянию; повторная инициализация возможна.
+   * Разметка возвращается к no-JS состоянию (включая inline position обёртки
+   * в wrap-режиме — T13.1); повторная инициализация возможна. Запись реестра
+   * вычищает сам destroy() инстанса.
    * @param {Element|string} element select, корень .ui-select или id
    * @returns {Object|null} уничтоженный инстанс или null (не найден)
    */
@@ -645,10 +663,6 @@
       return null;
     }
     instance.destroy();
-    var index = instances.indexOf(instance);
-    if (index !== -1) {
-      instances.splice(index, 1);
-    }
     return instance;
   }
 

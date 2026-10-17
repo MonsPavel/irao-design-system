@@ -183,13 +183,18 @@ inline-`<script>`-сниппет, работающий без модулей.
   (`event.preventDefault()`), слушает `irao-ui:form-valid`, отправляет данные
   сам и снимает состояние кнопки вызовом **`IraoUI.form.unlock(form)`**
   (без AJAX `unlock` не нужен — страницу перезагружает сервер).
+- **Пересоздание формы** (Bitrix AJAX, форма заменяется новой разметкой) —
+  **`IraoUI.form.destroy(form)`**: снимает слушатели и блокировку сабмита,
+  форма возвращается сайту (нативный цикл); повторный `init()` инициализирует
+  её заново. Инстанс покидает реестр модуля — `unlock(form)` всегда находит
+  живой инстанс, отцепленные DOM-корни не копятся (T13.1).
 
 ### Публичное API
 
 `IraoUI.form = { init, selector, checkRequired, checkEmail, checkPattern,
 checkMinLength, checkFileSize, formatBytes, validateField, validators,
-unlock }` — функции правил чистые и переиспользуемы сайтами; `validateField`
-принимает контрол и возвращает сообщение или `null`.
+unlock, destroy }` — функции правил чистые и переиспользуемые сайтами;
+`validateField` принимает контрол и возвращает сообщение или `null`.
 
 ## Состояния
 

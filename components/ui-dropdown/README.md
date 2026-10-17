@@ -19,7 +19,7 @@
 | Элемент `.ui-dropdown__item` | пункт: `<a>` (навигация) или `<button type="button" role="menuitem">` (действия) |
 | Элемент `.ui-dropdown__icon` | декоративный шеврон: `aria-hidden="true"`, `currentColor`, `1em`; разворот в состоянии `is-open` |
 | Состояние `.is-open` | на блоке, только в цепочке (`.ui-dropdown.is-open`) — ставит модуль |
-| JS | `IraoUI.dropdown`: `init()`, `selector`, `closeAll()`; хук разметки — `data-ui-dropdown` |
+| JS | `IraoUI.dropdown`: `init()`, `selector`, `closeAll()`, `destroy(rootOrId)`; хук разметки — `data-ui-dropdown` |
 | События | `irao-ui:dropdown-open` / `irao-ui:dropdown-close` на корне (`bubbles: true`) |
 | Токены | `--ui-z-dropdown` (лестница T2.2), `--ui-color-{surface, surface-muted, border-muted, primary, text}`, `--ui-shadow-lg`, `--ui-radius-sm`, `--ui-border-width`, `--ui-space-2/3/8`, focus-тройка ADR-0001, `--ui-transition{-fast}` |
 
@@ -162,7 +162,10 @@ header.css:137; 32px = `--ui-space-6` шкалы §3.2). **Коллизия с �
 уникальны на странице; для нескольких инстансов достаточно разметки — модуль
 инициализирует все и держит «одно открытое». Серверная простановка
 `aria-current="page"` — в шаблоне меню (сравнение с `$APPLICATION->GetCurPage()`),
-JS-хелпер выше — для клиентских сценариев.
+JS-хелпер выше — для клиентских сценариев. Замена меню AJAX-ом —
+`IraoUI.dropdown.destroy(rootOrId)` (корень `.ui-dropdown`, его id или `null`
+с предупреждением, если инстанса нет): модуль снимает слушатели и возвращает
+разметку к no-JS-виду, повторный `init()` инициализирует заново (T13.1).
 
 ## Известные границы
 

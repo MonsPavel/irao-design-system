@@ -404,6 +404,14 @@
         // Чистка ПРЯМО: отложенный close-таск придёт после снятия слушателей.
         cleanupAfterClose();
         root.removeAttribute(INIT_ATTR);
+        // T13.1 (кластер A): инстанс покидает реестр — пара instances.push
+        // при init. Без чистки instanceOf() возвращал мёртвый инстанс и
+        // open(el) «воскрешал» его без слушателей (cancel/close/click) —
+        // диалог открывался, а скролл-лок не снимался никогда.
+        var index = instances.indexOf(instance);
+        if (index !== -1) {
+          instances.splice(index, 1);
+        }
       },
     };
     instances.push(instance);

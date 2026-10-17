@@ -476,6 +476,70 @@ describe('components/ui-form/ui-form.js — контракт module-template и 
   });
 });
 
+describe('components/ui-form/ui-form.js — destroy-контракт (T13.1: реестр instances)', () => {
+  it('публичный destroy(form): снимает слушатели, возвращает форму сайту; незнакомая форма — null без исключений', () => {
+    const { window, document } = makeSandbox({ bodyHtml: liveFormHtml });
+    const api = window.IraoUI.form;
+    expect(typeof api.destroy, 'публичный destroy задекларирован в API модуля').toBe('function');
+
+    const form = document.getElementById('tf');
+    const destroyed = api.destroy(form);
+    expect(destroyed, 'destroy возвращает хэндл уничтоженного инстанса').not.toBeNull();
+    expect(form.getAttribute('data-ui-form-init'), 'INIT_ATTR снят').toBeNull();
+    // Слушатели сняты: сабмит с пустыми required больше не блокируется
+    // модулем (форма возвращена сайту — нативный цикл/навигация).
+    expect(submitForm(window, form), 'уничтоженный модуль не перехватывает сабмит').toBe(true);
+
+    // Technical considerations T13.1: destroy/unlock не спотыкаются о форму
+    // вне реестра (пустой реестр — легитимное состояние).
+    expect(api.destroy(document.createElement('form')), 'destroy чужой формы — null').toBeNull();
+    expect(() => api.unlock(document.createElement('form'))).not.toThrow();
+  });
+
+  it('AJAX-сценарий (пересоздание форм): после destroy+init unlock(form) доходит до ЖИВОГО инстанса — реестр без мёртвых записей', () => {
+    const { window, document } = makeSandbox({ bodyHtml: liveFormHtml });
+    const api = window.IraoUI.form;
+    const form = document.getElementById('tf');
+
+    api.destroy(form);
+    api.init(); // сайт пересоздал форму → повторная инициализация
+    expect(form.getAttribute('data-ui-form-init'), 'повторная инициализация работает').toBe('true');
+
+    // Валидный сабмит: модуль блокирует повтор (is-loading) — AJAX-сайт
+    // завершит цикл вызовом unlock(form).
+    document.getElementById('tf-name').value = 'Иван';
+    document.getElementById('tf-email').value = 'ivan@example.ru';
+    expect(submitForm(window, form), 'валидный сабмит модуль пропускает').toBe(true);
+    const button = form.querySelector('[type="submit"]');
+    expect(button.classList.contains('is-loading'), 'кнопка в is-loading').toBe(true);
+
+    api.unlock(form);
+    expect(
+      button.classList.contains('is-loading'),
+      'unlock дошёл до живого инстанса (не до мёртвой записи реестра)',
+    ).toBe(false);
+    expect(button.getAttribute('aria-busy'), 'aria-busy снят').toBeNull();
+    expect(submitForm(window, form), 'после unlock повторный сабмит снова не заблокирован').toBe(
+      true,
+    );
+  });
+
+  it('после destroy повторная инициализация работает: валидация снова на месте', () => {
+    const { window, document } = makeSandbox({ bodyHtml: liveFormHtml });
+    const api = window.IraoUI.form;
+    const form = document.getElementById('tf');
+
+    api.destroy(form);
+    api.init();
+
+    // Невалидный сабмит снова перехватывается: preventDefault + ошибка по
+    // контракту T5.6 (регресс aria-контракта исключён существующими пинами).
+    expect(submitForm(window, form), 'валидация работает после пересоздания').toBe(false);
+    expect(form.querySelector('.ui-field__error')).toBeTruthy();
+    expect(document.getElementById('tf-name').getAttribute('aria-invalid')).toBe('true');
+  });
+});
+
 describe('components/ui-form/ui-form.js — поведение сабмита и ошибок (jsdom)', () => {
   const sandboxWithForm = () => makeSandbox({ bodyHtml: liveFormHtml });
 
