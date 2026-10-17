@@ -217,6 +217,24 @@
   font-weight: var(--ui-fw-caption);
 }
 
+/* Фон ячеек в карточном режиме нейтрализован (T13.7): zebra и hover красят
+   ЯЧЕЙКИ — на карточке-строке это заливка/полоса внутри коробки карточки
+   (инсет-артефакт; комбинация на стендах не показана). Селекторы повторяют
+   форму zebra (nth-child) и hover (равная специфичность) и идут ПОЗЖЕ них —
+   ниже md побеждает порядок каскада. md-блок возвращает zebra/hover —
+   поведение ≥md не меняется (см. восстановление в @media ниже). */
+.ui-table--cards .ui-table__body .ui-table__row:nth-child(even) .ui-table__col,
+.ui-table--cards .ui-table__body .ui-table__row:nth-child(even) .ui-table__rowhead,
+.ui-table--cards .ui-table__body .ui-table__row:nth-child(even) .ui-table__cell,
+.ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__col,
+.ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__rowhead,
+.ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__cell,
+.ui-table--cards .ui-table__col,
+.ui-table--cards .ui-table__rowhead,
+.ui-table--cards .ui-table__cell {
+  background-color: transparent;
+}
+
 /* ── md (768px, шкала T2.5): возврат к table-раскладке ──
    Явные table-значения (не display: revert): детерминированно во всех
    движках, без опоры на UA-таблицу. Правила идут ПОСЛЕ базовых карточных —
@@ -246,6 +264,25 @@
     display: table-cell;
     padding: var(--ui-space-3) var(--ui-space-4);
     border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
+  }
+
+  /* Возврат table-раскладки возвращает и фон ячеек (нейтрализация базы —
+     только ниже md). Значения сознательно повторяют zebra и hover выше —
+     правьте ПАРОЙ: zebra-селектор усилен --zebra (нейтрализатор той же
+     специфичности, но раньше), hover-селектор той же формы — позже, и
+     порядок каскада на его стороне. */
+  .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__col,
+  .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__rowhead,
+  .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__cell {
+    background-color: var(--ui-color-surface-muted);
+  }
+
+  @media (hover: hover) {
+    .ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__col,
+    .ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__rowhead,
+    .ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__cell {
+      background-color: var(--ui-color-surface-hover);
+    }
   }
 
   .ui-table--cards .ui-table__rowhead::before,

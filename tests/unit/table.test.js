@@ -216,6 +216,42 @@ describe('components/ui-table/ui-table.css — карточная трансфо
       'подписи data-label сняты',
     ).toBe(true);
   });
+
+  it('фон ячеек в карточном режиме нейтрализован ниже md (T13.7): zebra/hover не дают инсет-полос на карточке', () => {
+    // zebra и hover красят ЯЧЕЙКИ — на карточке-строке это заливка внутри
+    // коробки карточки (артефакт). Нейтрализатор повторяет форму zebra
+    // (nth-child) и hover (та же специфичность) и стоит позже в base --cards;
+    // md-блок возвращает zebra/hover — поведение ≥md не меняется.
+    const zebraIdx = css.indexOf('.ui-table--zebra');
+    const hoverIdx = css.indexOf('@media (hover: hover)');
+    const neutralizerIdx = css.search(
+      /\.ui-table--cards \.ui-table__body \.ui-table__row:nth-child\(even\) \.ui-table__col[\s\S]{0,1200}?background-color: transparent;/,
+    );
+    expect(neutralizerIdx, 'нейтрализатор zebra-формы в базе --cards').toBeGreaterThan(-1);
+    expect(
+      css.slice(neutralizerIdx),
+      'нейтрализатор покрывает и hover-форму, и все три класса ячеек',
+    ).toMatch(
+      /\.ui-table--cards \.ui-table__body \.ui-table__row:hover \.ui-table__(?:col|rowhead|cell)[\s\S]{0,1200}?background-color: transparent;/,
+    );
+    expect(neutralizerIdx, 'нейтрализатор после zebra (порядок каскада)').toBeGreaterThan(zebraIdx);
+    expect(neutralizerIdx, 'нейтрализатор после hover-блока').toBeGreaterThan(hoverIdx);
+
+    // ≥md — поведение без изменений: zebra/hover в карточном режиме работают.
+    const md = css.slice(css.indexOf('@media (min-width: 768px)'));
+    expect(
+      md,
+      'zebra восстановлен в md-блоке (--cards + --zebra)',
+    ).toMatch(
+      /\.ui-table--cards\.ui-table--zebra[\s\S]{0,400}?background-color: var\(--ui-color-surface-muted\);/,
+    );
+    const hoverRestore = md.indexOf('@media (hover: hover)');
+    expect(hoverRestore, 'hover восстановлен в md-блоке --cards').toBeGreaterThan(-1);
+    expect(
+      md.slice(hoverRestore),
+      'hover — пара одобренного дизайна',
+    ).toMatch(/background-color: var\(--ui-color-surface-hover\);/);
+  });
 });
 
 describe('канонический паттерн (components/ui-table/ui-table.html) — семантика', () => {
