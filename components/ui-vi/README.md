@@ -68,7 +68,7 @@ $asset->addCss('/local/ui/' . UI_VERSION . '/ui-vi.min.css');
 | `init()` | слушатели кнопок + первичное применение; идемпотентен (readyState-guard — Bitrix `addJs(..., true)`) |
 | `apply()` | применить текущее состояние (классы, aria, padding-top, сохранение) |
 | `set(key, value)` | задать настройку (`on/size/theme/img/kern`) и применить |
-| `toggle()` | вход/выход из режима (сброс к дефолтам при входе, `scrollTo({top: 0})`) |
+| `toggle()` | вход/выход из режима (сброс к дефолтам при входе, `scrollTo({top: 0})`; скролл кверху при ОБОИХ направлениях — сознательно, «как есть» career-portal: резкий скачок страницы при смене режима) |
 | `state` | живое состояние `{ on, size, theme, img, kern }` |
 | `DEFAULTS` | `{ on: false, size: 'md', theme: 'baw', img: 'on', kern: 'normal' }` |
 | `STORAGE_KEY` | `'irao-ui-vi'` |
