@@ -801,6 +801,9 @@ function checkRelease(name, doc) {
       'dist/ui-core.min.css',
       'dist/ui-vi.min.css',
       'dist/ui.min.js',
+      // Dev-вариант ui.min.js (T12.2) — структурная проверка как у остальных
+      // файлов поставки (§6.1), не «уехал целиком».
+      'dist/ui.dev.js',
       'dist/fonts/',
       'dist/themes/',
     ];
