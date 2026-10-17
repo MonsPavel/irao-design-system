@@ -497,10 +497,21 @@ test.describe('ui-modal: эталоны (AC; ADR-0004 — только конт�
     await page.locator(SEL.smTrigger).click();
     await shot(page, { name: 'ui-modal-open-sm', viewport: 'desktop' });
     await page.keyboard.press('Escape');
+    /* TASK: оседание после закрытия (0.36s анимации + скролл-лок) — следующий
+       open/snapshot снимает стабильное состояние, не транзит снятия лока
+       (раньше гонка давала сдвиг обёртки на ширину полосы — flake эталонов). */
+    await page.waitForFunction(
+      () => !document.getElementById('uimd-sm-dialog').hasAttribute('open'),
+    );
+    await page.waitForTimeout(450);
 
     await page.locator(SEL.mdTrigger).click();
     await shot(page, { name: 'ui-modal-open-md', viewport: 'desktop' });
     await page.keyboard.press('Escape');
+    await page.waitForFunction(
+      () => !document.getElementById('uimd-md-dialog').hasAttribute('open'),
+    );
+    await page.waitForTimeout(450);
 
     await page.locator(SEL.fullTrigger).click();
     await shot(page, { name: 'ui-modal-open-full', viewport: 'desktop' });
