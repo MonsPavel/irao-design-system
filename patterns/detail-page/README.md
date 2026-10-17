@@ -233,7 +233,7 @@ $sDateTs = $sDate === '' ? false : strtotime($sDate);
      // те же itemprop, что в эталоне; datePosted — ACTIVE_FROM.
      // NAME и дата — данные ИБ (недоверенный вывод): экранируются
      // htmlspecialcharsbx (API Битрикса, как и вывод свойств выше). ?>
-    <time itemprop="datePosted" datetime="<?= date('Y-m-d', $sDateTs) ?>"><?= htmlspecialcharsbx(FormatDate('f', $sDateTs)) ?></time>
+    <time itemprop="datePosted" datetime="<?= date('Y-m-d', $sDateTs) ?>"><?= htmlspecialcharsbx(FormatDate('j F Y', $sDateTs)) ?></time>
   </p>
   <?php endif; ?>
 
@@ -261,9 +261,11 @@ $sDateTs = $sDate === '' ? false : strtotime($sDate);
 - Guard на пустой `ACTIVE_FROM`: без даты мета с `<time>` не выводится
   вовсе — `strtotime('')` даёт `false`, и без guard-а `date('Y-m-d', …)`
   собрал бы в `datetime` заглушку эпохи 1970-01-01 (мусор для schema-парсера).
-  Человекочитаемый текст — `FormatDate('f', …)` (локаль сайта: «12 сентября
-  2026»), а не сырая строка свойства; оба вывода — данные ИБ, экранируются
-  `htmlspecialcharsbx` (как и NAME).
+  Человекочитаемый текст — `FormatDate('j F Y', …)`: полный формат «12 сентября
+  2026» (день без нуля, месяц в родительном, год); токен `f` не годится — он
+  даёт только название месяца в именительном падеже («Сентябрь»).
+  Оба вывода — данные ИБ (недоверенные), экранируются `htmlspecialcharsbx`
+  (как и NAME).
 - Связующие стили (`dpp-*`) перенесите в `template_styles.css` сайта —
   источник: `<style>` в [`detail-page.html`](detail-page.html), значения —
   только токены `--ui-*`.
