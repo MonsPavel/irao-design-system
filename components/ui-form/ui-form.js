@@ -123,10 +123,10 @@
     }
     try {
       return new RegExp('^(?:' + pattern + ')$', 'v').test(value);
-    } catch (vError) {
+    } catch {
       try {
         return new RegExp('^(?:' + pattern + ')$', 'u').test(value);
-      } catch (uError) {
+      } catch {
         // Невалидный pattern — нативные браузеры правило игнорируют.
         return true;
       }
