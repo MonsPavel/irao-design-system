@@ -22,8 +22,9 @@
  *     интерактивные варианты ≥ 4.5:1, КРОМЕ accent — белая подпись на
  *     orange-500 = 3.12:1 (hover accent-light = 2.91:1): значение одобренного
  *     дизайна, замена — design-decision владельца (исключение зафиксировано
- *     в tests/contrast/pairs.config.mjs с T2.6); факты запинены порогом ≥ 3:1
- *     (некстовый уровень, чек-лист T9.2) и значением-пином;
+ *     в tests/contrast/pairs.config.mjs с T2.6); факты (default и hover)
+ *     запинены значением-пином и полом (default ≥ 3:1 — некстовый уровень,
+ *     чек-лист T9.2; hover ≥ 2.85 — ниже известного разрыва, T13.5);
  *  8. axe: нарушения вне известных исключений (accent; disabled — декоративный
  *     по AC; скрытый лейбл loading) = [];
  *  9. сценарий T2.6 «кнопочная часть» (tests/e2e/README.md): смена темы
@@ -69,16 +70,17 @@ const BTN = {
  * tests/helpers/harness.js и tests/README.md; расширять только туда.
  */
 
-/** Вычисленное состояние кнопки + контекст (data-ui-button-bg или body). */
+/** Вычисленное состояние кнопки (фон-подложка — body; T13.5: мёртвая ветка
+ *  data-ui-button-bg удалена — атрибут не используется нигде в репозитории,
+ *  при появлении on-dark-контекста кнопок ветка вернётся с разметкой). */
 const stateOf = (page, id) =>
   page.locator(`#${id}`).evaluate((el) => {
     const style = getComputedStyle(el);
-    const scope = el.closest('[data-ui-button-bg]');
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
       borderColor: style.borderColor,
-      backdrop: getComputedStyle(scope ?? document.body).backgroundColor,
+      backdrop: getComputedStyle(document.body).backgroundColor,
       minHeight: style.minHeight,
       borderRadius: style.borderRadius,
       fontSize: style.fontSize,
@@ -433,6 +435,12 @@ standTest.describe('ui-button (T4.2)', () => {
 
       const disabled = page.locator(`#${BTN.primaryDisabled}`);
       await expect(disabled).toBeDisabled();
+      // Аффорданс неактивного контрола (T13.5): курсор над disabled — не
+      // «палец», кнопка не отвечает курсором как кликабельная.
+      expect(
+        await disabled.evaluate((el) => getComputedStyle(el).cursor),
+        'disabled не отвечает курсором как кликабельная',
+      ).toBe('default');
 
       // Клавиатура: последовательный Tab ни разу не оставляет фокус на disabled.
       for (let step = 0; step < 40; step += 1) {
@@ -522,6 +530,26 @@ standTest.describe('ui-button (T4.2)', () => {
       await page.locator(`#${BTN.ghost}`).hover();
       await settleTransitions(page);
       await assertAA(BTN.ghost, 'hover ghost');
+
+      // hover accent — известный разрыв одобренного дизайна (accent-light),
+      // пин факта симметрично default: до T13.5 hover accent не проверялся
+      // вовсе — задокументированное значение могло дрейфовать молча. Значение
+      // не меняется без design-decision владельца (пары кнопок не гейтятся в
+      // tests/contrast/pairs.config.mjs с T2.6); пол ниже некстового уровня
+      // 3:1 default — сигнал только о регрессии в меньшую сторону.
+      await page.locator(`#${BTN.accent}`).hover();
+      await settleTransitions(page);
+      const accentHoverRatio = ratioOf(await stateOf(page, BTN.accent));
+      expect(
+        accentHoverRatio,
+        `пин одобренного значения 2.91:1 (белая подпись на accent-light, факт ${accentHoverRatio.toFixed(2)}:1)`,
+      ).toBeCloseTo(2.91, 1);
+      expect(accentHoverRatio, 'пол известного разрыва hover accent').toBeGreaterThanOrEqual(2.85);
+
+      // Снять hover: default-пин ниже измеряет базовый accent (orange-500),
+      // а не остаточное hover-состояние (--ui-transition 0.25s + запас).
+      await page.mouse.move(0, 0);
+      await settleTransitions(page);
 
       // accent — известный разрыв одобренного дизайна (пары кнопок не гейтятся
       // в tests/contrast/pairs.config.mjs с T2.6; значение не меняется без

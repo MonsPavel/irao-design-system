@@ -168,6 +168,14 @@ standTest.describe('ui-skip-link (T3.5, WCAG 2.4.1)', () => {
     expect(results.violations).toEqual([]);
   });
 
+  standTest('стенд ui-skip-link: ровно один skip-якорь (AC T13.5)', async ({ stand }) => {
+    const page = await stand('ui-skip-link');
+    const count = await page.evaluate(
+      () => document.querySelectorAll('a.ui-skip-link[href="#main"]').length,
+    );
+    expect(count, 'литеральный дубль каркасного skip-якоря исключён (rev T3.5)').toBe(1);
+  });
+
   standTest(
     'эталоны плашки в фокусе 375/768/1280/1440 — только из контейнера (ADR-0004)',
     async ({ stand }) => {

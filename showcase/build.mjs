@@ -223,6 +223,17 @@ function discoverComponents() {
     .sort();
 }
 
+/**
+ * T13.5 (rev T3.5): компоненты, чей канонический паттерн НЕ встраивается в
+ * автогенерированный стенд. У ui-skip-link якорь паттерна байт-в-байт
+ * повторяет каркасный skip-link (первый элемент body каждой страницы
+ * полигона) — встраивание в main давало литеральный дубль (две одинаковые
+ * остановки Tab-обхода, антипример; AC «ровно один skip-якорь»). Демо на
+ * стенде несёт сам каркас; поведение (первый Tab, Enter → фокус в #main)
+ * пинят tests/e2e/skip-link.spec.js.
+ */
+const STAND_PATTERN_IS_FRAME = new Set(['ui-skip-link']);
+
 /** Тело стенда: расширенный стенд из showcase/pages/<имя>/, иначе канонический
  * паттерн (CONTRIBUTING: «Стенд компонента — showcase/pages/<имя>/»). */
 function standBody(name) {
@@ -237,6 +248,16 @@ function standBody(name) {
   }
   const patternFull = join(ROOT, patternRel);
   if (!existsSync(patternFull)) return null;
+  if (STAND_PATTERN_IS_FRAME.has(name)) {
+    return {
+      html:
+        `<p class="ui-showcase-stand__note">Канонический паттерн: <code>${patternRel}</code>. ` +
+        `Живой якорь на этой странице — skip-link каркаса (первый элемент <code>body</code>, ` +
+        `до шапки): разметка паттерна повторяет его байт-в-байт, поэтому на стенд не ` +
+        `встраивается — литеральный дубль skip-якоря исключён (T13.5; rev T3.5).</p>`,
+      source: patternRel,
+    };
+  }
   const pattern = readFileSync(patternFull, 'utf8').trim();
   return {
     html: [

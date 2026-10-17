@@ -33,6 +33,19 @@
  * <button> без type по умолчанию submit — в чужой форме клик отправит её;
  * негативная фикстура — tests/lint-cases/html/button-without-type.html.
  *
+ * С T13.5 (бэклог-ревью):
+ *  - `irao/link-accessible-name` пропускает ссылки без href: якорь-цель —
+ *    не ссылка (не в tab-порядке, встроенный wcag/h30 на неё и так молчит),
+ *    предупреждение на неё — шум. Пропуск не ослабляет гейт для настоящих
+ *    ссылок: позитивный контроль — link-named.html (там же якорь без href);
+ *  - `irao/link-external-noopener` сравнивает target без учёта регистра:
+ *    `target="_BLANK"` — тот же контекст браузера, bypass «_BLANK без rel»
+ *    закрыт (фикстура link-external-noopener-uppercase.html);
+ *  - `irao/one-h1` репортит и ОТСУТСТВИЕ h1 (раньше — только дубли): цель —
+ *    первый заголовок >1 либо body. Гвард «есть body» отделяет полную
+ *    страницу от фрагмента (канонические *.html компонентов тем же конфигом
+ *    гоняет lint-html — h1 фрагментам не положен). Фикстура no-h1.html.
+ *
  * С T4.6: `irao/img-dimensions` — img без зафиксированного места — ошибка:
  * обязательны атрибуты width/height ИЛИ модификатор `ui-image--ratio-*`
  * (место резервирует aspect-ratio из CSS; спека T4.6: «width/height или
@@ -148,6 +161,21 @@ class OneH1 extends Rule {
           'На странице должен быть один <h1>: SEO-иерархия h1→h2→h3 (02-architecture §0).',
         );
       }
+      // T13.5 (rev T3.3): отсутствие h1 тоже нарушение — страница без
+      // заголовка первого уровня проходила гейт молча (дубли ловились, ноль —
+      // нет). Цель репорта — первый заголовок >1; если заголовков нет вовсе —
+      // body. Гвард «в документе есть body» отличает ПОЛНУЮ страницу от
+      // фрагмента: канонические *.html компонентов (tools/lint-html.mjs гоняет
+      // их тем же конфигом) — куски разметки без каркаса, h1 им не положен;
+      // страницы полигона все начинаются с h1 (проверено прогоном).
+      if (headings.length > 0) return;
+      const body = event.document.querySelectorAll('body')[0];
+      if (!body) return;
+      const firstHeading = event.document.querySelectorAll('h2, h3, h4, h5, h6')[0];
+      this.report(
+        firstHeading ?? body,
+        'На странице нет <h1>: страница обязана начинаться с заголовка первого уровня — SEO-иерархия h1→h2→h3 (02-architecture §0).',
+      );
     });
   }
 }
@@ -194,7 +222,9 @@ class LinkExternalNoopener extends Rule {
     this.on('dom:ready', (event) => {
       for (const link of event.document.querySelectorAll('a')) {
         const target = link.getAttribute('target');
-        if (!target || target.value !== '_blank') continue;
+        // Регистр значения не влияет на контекст браузера: "_BLANK" — тот же
+        // "blank" (T13.5, rev T4.1 — сравнение без учёта регистра).
+        if (!target || target.value.toLowerCase() !== '_blank') continue;
         const rel = link.getAttribute('rel');
         const tokens = rel ? rel.value.trim().split(/\s+/) : [];
         if (tokens.includes('noopener')) continue;
@@ -212,6 +242,12 @@ class LinkAccessibleName extends Rule {
   setup() {
     this.on('dom:ready', (event) => {
       for (const link of event.document.querySelectorAll('a')) {
+        // Якорь-цель без href — не ссылка: не в tab-порядке, роли link у неё
+        // нет, имя скринридер не объявляет (T13.5, rev T4.1 — предупреждение
+        // на такие якоря — шум; встроенный wcag/h30 ограничен ссылками и так
+        // молчит). Пропуск не ослабляет гейт для настоящих ссылок —
+        // позитивный контроль link-named.html остаётся в lint-cases.
+        if (!link.getAttribute('href')) continue;
         if (hasAccessibleName(link)) continue;
         this.report(
           link,

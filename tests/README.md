@@ -137,8 +137,11 @@ test.describe('ui-button', () => {
 ## Осознанные исключения axe (реестр узлов — T9.2)
 
 Выключать правило целиком слишком грубо, поэтому точечные исключения живут
-в `KNOWN_AXE_EXCEPTIONS` (`tests/helpers/harness.js`): id правила + регэксп
-цели узла + обоснование. Нарушение остаётся в результатах axe; хелпер
+в `KNOWN_AXE_EXCEPTIONS` (`tests/helpers/harness.js`): id правила + подстрока
+цели узла (запись — регэксп по цели) + обоснование. Конвенция per-node
+исключений (rev T4.2 → T13.5): правило целиком не отключается — узел попадает
+в реестр только парой «цель + обоснование», обоснование живёт рядом с записью.
+Нарушение остаётся в результатах axe; хелпер
 `unexpectedViolations(results)` допускает только узлы из реестра. Потребители:
 компонентные спеки (ui-button) и сквозной axe-обход всех страниц
 `tests/a11y/stands-sweep.spec.js` (AC T9.2 «axe=0» = ноль нарушений ВНЕ
@@ -151,6 +154,13 @@ test.describe('ui-button', () => {
 | color-contrast | `.ui-button--accent` (без id) | та же разметка канонического паттерна ui-button на док-страницах по шаблону T10.1 (`showcase/dist/docs/`, живые примеры без id): то же одобренное значение 3.12:1 — design-decision владельца; токен-уровень — `tests/contrast/pairs.config.mjs` (T2.6/ADR-0010). Ревью T10.1: цель появляется только с восстановленным CSS док-страниц |
 | color-contrast | `#ui-button-*-disabled` | контраст disabled — декоративный (AC T4.2): WCAG 1.4.3 исключает неактивные компоненты; визуал — `--ui-opacity-disabled` |
 | color-contrast | `#ui-button-*-loading` | лейбл в is-loading визуально скрыт (clip-path, accessible name сохраняется — T4.2 п.3): axe видит бокс текста без краски; спиннер aria-hidden |
+
+Три исключения стенда ui-button (rev T4.2 → T13.5, одна строка для
+сверки с e2e): `#ui-button-accent` — одобренный 3.12:1 (2.91:1 на hover,
+пины в `tests/e2e/ui-button.spec.js`); `#ui-button-*-disabled` — WCAG 1.4.3
+(неактивные компоненты); `#ui-button-*-loading` — скрытый clip-path-лейбл.
+Четвёртая запись реестра (`.ui-button--accent` без id) — та же разметка на
+док-страницах по шаблону T10.1, не стенд.
 
 ## Нельзя
 
