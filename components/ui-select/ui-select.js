@@ -18,6 +18,10 @@
  *    как с нативным контролом (перенос career-portal);
  *  - нативный change (значение изменил сторонний код) обновляет UI —
  *    синхронизация двусторонняя;
+ *  - reset формы обновляет подписи построенных триггеров (T13.2, кластер B):
+ *    слушатель reset ставится при инициализации на форму select (root.form),
+ *    sync — по macrotask после события (спека HTML: reset стреляет ДО
+ *    применения сброса к полям);
  *  - destroy() возвращает разметку к no-JS состоянию (PE-цикл Bitrix AJAX).
  *
  * Поведение (APG «Listbox and associated button» + перенос career-portal):
@@ -41,6 +45,11 @@
  *    весь инвентарь опций, а живая обёртка после init содержит построенный
  *    UI — ревью T7.3 high); без имени на select триггер терял бы «Город»;
  *    опции — aria-selected, optgroup → role="group" + aria-label группы.
+ *    Optgroup-семантика (T13.2): корневые опции между/после групп рендерятся
+ *    в корне списка (принадлежность опции группе — по сету индексов записи
+ *    группы), disabled optgroup пробрасывается в disabled его опций —
+ *    существующие проверки disabled в навигации/typeahead подхватывают флаг
+ *    без дублирования логики.
  *
  * Мобильная стратегия (Implementation requirements п.3, решение ADR-0012):
  * на устройствах с coarse-указателем (matchMedia('(pointer: coarse)')) модуль
@@ -110,7 +119,10 @@
    * Чистая функция синхронизации: состояние select → модель опций и групп.
    * Порядок — документный: группа идёт ПЕРЕД своими опциями (как элемент
    * optgroup в разметке; её options — индексы опций в select.options, они же
-   * индексы плоского списка кнопок UI).
+   * индексы плоского списка кнопок UI). disabled группы (T13.2) пробрасывается
+   * в disabled его опций — jsdom не отражает нативную семантику «опция в
+   * disabled optgroup недоступна», а навигация/typeahead строят флаги из
+   * этих записей; существующие проверки disabled не дублируются.
    * @param {HTMLSelectElement} root нативный select
    * @returns {Array<Object>} записи kind="option"/kind="group"
    */
@@ -122,10 +134,15 @@
       if (child.tagName === 'OPTGROUP') {
         var groupAt = view.length; // позиция записи группы — перед её опциями
         var optionIndexes = [];
+        var groupDisabled = child.hasAttribute('disabled');
         for (var j = 0; j < child.children.length; j += 1) {
           if (child.children[j].tagName === 'OPTION') {
             optionIndexes.push(index);
-            view.push(optionView(child.children[j]));
+            var option = optionView(child.children[j]);
+            if (groupDisabled) {
+              option.disabled = true;
+            }
+            view.push(option);
             index += 1;
           }
         }
@@ -331,9 +348,16 @@
 
     var view = viewOf(root);
     var currentContainer = list;
+    // T13.2: контейнер группы действует только на СВОИ опции — принадлежность
+    // узнаётся по сету индексов записи группы (entry.options). Корневая опция
+    // между/после optgroup рендерится в корне списка (ревью T7.3: хвостовая
+    // опция «прилипала» к контейнеру последней группы).
+    var currentGroup = null;
+    var optionIndex = 0;
     for (var entryIndex = 0; entryIndex < view.length; entryIndex += 1) {
       var entry = view[entryIndex];
       if (entry.kind === 'group') {
+        currentGroup = entry;
         currentContainer = document.createElement('div');
         currentContainer.className = 'ui-select__group';
         currentContainer.setAttribute('role', 'group');
@@ -343,8 +367,14 @@
         groupLabel.textContent = entry.label;
         currentContainer.appendChild(groupLabel);
         list.appendChild(currentContainer);
-      } else {
+      } else if (currentGroup !== null && currentGroup.options.indexOf(optionIndex) !== -1) {
         currentContainer.appendChild(buildOption(entry));
+        optionIndex += 1;
+      } else {
+        currentGroup = null;
+        currentContainer = list;
+        list.appendChild(buildOption(entry));
+        optionIndex += 1;
       }
     }
 
@@ -524,6 +554,26 @@
       sync();
     }
 
+    /* ── reset формы (T13.2, кластер B, замечание T8.1): подписи построенных
+       триггеров синхронизируются с восстановленными значениями. Слушатель
+       ставится только при инициализации (root.form — и DOM-предок, и
+       form="id") — без JS его нет, no-JS деградация не тронута. По спеке
+       HTML событие reset стреляет ДО применения сброса к полям, поэтому
+       sync — по macrotask после него; повторный reset в тот же тик
+       схлопывается в один sync. ── */
+    var form = root.form;
+    var resetTimer = null;
+
+    function onFormReset() {
+      if (resetTimer !== null) {
+        window.clearTimeout(resetTimer);
+      }
+      resetTimer = window.setTimeout(function () {
+        resetTimer = null;
+        sync();
+      }, 0);
+    }
+
     /* ── перестройка DOM: PE — select скрыт ТОЛЬКО теперь ── */
 
     if (wrap) {
@@ -554,6 +604,9 @@
     document.addEventListener('click', onDocumentClick);
     document.addEventListener('keydown', onDocumentKeydown);
     root.addEventListener('change', onNativeChange);
+    if (form) {
+      form.addEventListener('reset', onFormReset);
+    }
 
     // Флаг только после успешной привязки (контракт шаблона).
     root.setAttribute(INIT_ATTR, 'true');
@@ -573,6 +626,15 @@
         document.removeEventListener('click', onDocumentClick);
         document.removeEventListener('keydown', onDocumentKeydown);
         root.removeEventListener('change', onNativeChange);
+        // T13.2: подписка reset формы и незакрытый macrotask sync снимаются
+        // вместе с инстансом (пара addEventListener выше).
+        if (resetTimer !== null) {
+          window.clearTimeout(resetTimer);
+          resetTimer = null;
+        }
+        if (form) {
+          form.removeEventListener('reset', onFormReset);
+        }
         // Возврат разметки к no-JS состоянию: select на прежнем месте,
         // раскрыт и табулируем; inline position обёртки восстановлен, если
         // модуль его ставил (T13.1, пара lock.rootOverflow ui-modal).
