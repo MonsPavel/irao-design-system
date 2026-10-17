@@ -345,19 +345,19 @@ describe('контракт модуля ui-dropdown.js (jsdom; образец �
     // (кластер A T6.1: closeAll() воскрешал уничтоженную разметку).
     second.querySelector('.ui-dropdown__trigger').click();
     expect(menu2.hidden, 'живое меню открыто').toBe(false);
-    expect(
-      menu1.hidden,
-      'closeAll не трогает уничтоженный инстанс — no-JS вид сохранён',
-    ).toBe(false);
+    expect(menu1.hidden, 'closeAll не трогает уничтоженный инстанс — no-JS вид сохранён').toBe(
+      false,
+    );
     expect(trigger1.hasAttribute('aria-expanded'), 'aria уничтоженной разметки не возвращён').toBe(
       false,
     );
 
     // Реестр пуст: повторный destroy не находит инстанс (console.warn, null).
     expect(api.destroy(first), 'второй destroy — null (инстанс удалён из реестра)').toBeNull();
-    expect(warnings.some((args) => String(args[0]).includes('не найден')), 'warn о ненайденном').toBe(
-      true,
-    );
+    expect(
+      warnings.some((args) => String(args[0]).includes('не найден')),
+      'warn о ненайденном',
+    ).toBe(true);
 
     // Повторная инициализация работает (guard дублей снят destroy'ом).
     api.init();

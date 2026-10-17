@@ -626,10 +626,7 @@ describe('контракт модуля ui-select.js (jsdom; образец test
     const select = document.querySelector('select');
 
     expect(apiOf(manual).destroy(select), 'первый destroy уничтожил инстанс').not.toBeNull();
-    expect(
-      apiOf(manual).destroy(select),
-      'реестр пуст: второй destroy возвращает null',
-    ).toBeNull();
+    expect(apiOf(manual).destroy(select), 'реестр пуст: второй destroy возвращает null').toBeNull();
     expect(
       warnings.some((args) => args.some((part) => String(part).includes('не найден'))),
       'об отсутствии инстанса сообщает console.warn',
