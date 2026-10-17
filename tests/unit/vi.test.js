@@ -264,6 +264,94 @@ describe('a11y/vi.js — загрузка сохранённого состоя�
   });
 });
 
+describe('a11y/vi.js — enum-клампинг значений хранилища (T13.7)', () => {
+  /**
+   * Валидный JSON с невалидными ЗНАЧЕНИЯМИ (мусор хранилища, чужая версия
+   * пакета): до T13.7 mergeState пропускал их в apply() — classList.add
+   * бросал InvalidCharacterError посреди apply() (половинное состояние:
+   * body.vi поставлен, панель/aria/padding нет). Клампинг — в mergeState/apply
+   * до classList.add: неизвестное значение → дефолт, без бросков; состояние
+   * применяется ПОЛНОСТЬЮ (Accessibility requirements: половинное состояние
+   * «body.vi без панели» недостижимо).
+   */
+  const INVALID = {
+    on: true,
+    size: 'a b', // пробел — без клампинга InvalidCharacterError в classList.add
+    theme: 'purple',
+    img: 'sometimes',
+    kern: 'hug',
+  };
+
+  it('валидный JSON с невалидными значениями не бросает: каждое поле клампится к дефолту', () => {
+    const { window, document } = makeSandbox({
+      readyState: 'loading',
+      bodyHtml: panelHtml,
+      storage: { [STORAGE_KEY]: JSON.stringify(INVALID) },
+    });
+
+    expect(() => fireDOMContentLoaded(window)).not.toThrow();
+
+    const api = window.IraoUI.vi;
+    expect(api.state).toEqual({
+      on: true,
+      size: 'md',
+      theme: 'baw',
+      img: 'on',
+      kern: 'normal',
+    });
+  });
+
+  it('клампнутое состояние применяется полностью: классы дефолтов, панель, aria, padding', () => {
+    const { window, document } = makeSandbox({
+      readyState: 'loading',
+      bodyHtml: panelHtml,
+      storage: { [STORAGE_KEY]: JSON.stringify(INVALID) },
+    });
+
+    fireDOMContentLoaded(window);
+
+    expect(viClasses(document.body).sort()).toEqual(['vi', 'vi-size--md', 'vi-theme--baw']);
+    expect(document.body.classList.contains('vi-img--gray')).toBe(false);
+    expect(document.body.classList.contains('vi-kern--wide')).toBe(false);
+    expect(document.querySelector('[data-ui-vi-panel]').hidden).toBe(false);
+    expect(document.querySelector('[data-ui-vi-toggle]').getAttribute('aria-pressed')).toBe('true');
+    // padding-top выставлен тем же apply() — состояние не оборвалось на классах.
+    expect(document.body.style.paddingTop).not.toBe('');
+  });
+
+  it('mergeState клампит: неизвестные size/theme/img/kern заменяются дефолтами', () => {
+    const { window } = makeSandbox({ readyState: 'complete' });
+    const api = window.IraoUI.vi;
+
+    expect(
+      api.mergeState(api.DEFAULTS, {
+        on: true,
+        size: 'xxl',
+        theme: 'purple',
+        img: 'sometimes',
+        kern: 'hug',
+      }),
+    ).toEqual({ on: true, size: 'md', theme: 'baw', img: 'on', kern: 'normal' });
+  });
+
+  it('публичный set() с невалидным значением не бросает и клампится к дефолту (apply до classList.add)', () => {
+    const { window, document } = makeSandbox({ readyState: 'loading', bodyHtml: panelHtml });
+
+    fireDOMContentLoaded(window);
+    document.querySelector('[data-ui-vi-toggle]').click(); // вход в режим
+
+    expect(() => window.IraoUI.vi.set('size', 'a b')).not.toThrow();
+    expect(() => window.IraoUI.vi.set('theme', 'purple')).not.toThrow();
+    expect(() => window.IraoUI.vi.set('img', 'sometimes')).not.toThrow();
+    expect(() => window.IraoUI.vi.set('kern', 'hug')).not.toThrow();
+
+    expect(document.body.classList.contains('vi-size--md')).toBe(true);
+    expect(document.body.classList.contains('vi-theme--baw')).toBe(true);
+    expect(window.IraoUI.vi.state.size).toBe('md');
+    expect(window.IraoUI.vi.state.theme).toBe('baw');
+  });
+});
+
 describe('a11y/vi.js — apply: классы, aria-pressed, панель, padding-top', () => {
   it('включение: классы дефолтов на body, aria-pressed кнопок синхронизирован, панель видима', () => {
     const { window, document } = makeSandbox({
