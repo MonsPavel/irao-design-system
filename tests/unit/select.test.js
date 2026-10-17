@@ -725,7 +725,7 @@ describe('optgroup-семантика и reset-sync (T13.2, кластер B; Te
       configurable: true,
       get: () => 'complete',
     });
-    dom.window.matchMedia = (query) => ({ matches: false });
+    dom.window.matchMedia = () => ({ matches: false });
     dom.window.console.warn = () => {};
     dom.window.eval(source);
     return dom;
@@ -785,9 +785,7 @@ describe('optgroup-семантика и reset-sync (T13.2, кластер B; Te
 
     expect(tail.textContent).toBe('QA');
     expect(tail.parentElement, 'хвостовая опция — прямой ребёнок списка').toBe(list);
-    expect(group.contains(tail), 'опция не «прилипает» к последнему контейнеру группы').toBe(
-      false,
-    );
+    expect(group.contains(tail), 'опция не «прилипает» к последнему контейнеру группы').toBe(false);
     // Порядок документа: кнопка сброса, контейнер группы, хвостовая кнопка.
     expect(list.children[0].textContent).toBe('Все специализации');
     expect(list.children[1]).toBe(group);
