@@ -79,7 +79,10 @@ standTest.describe('ui-loader: анимация, размеры, цвет (Imple
     });
     expect(animation.name, 'rotate-анимация применена').toBe('ui-loader-spin');
     expect(animation.iteration, 'вращение бесконечное').toBe('infinite');
-    expect(Number.parseFloat(animation.duration), 'период — из токена перехода').toBeGreaterThan(0);
+    expect(
+      Number.parseFloat(animation.duration),
+      'период — 0.4s сырым временем (значение --ui-transition-slow)',
+    ).toBeGreaterThan(0);
   });
 
   standTest('размеры sm/md — ступени шкалы (md 24px, sm 16px)', async ({ stand }) => {
