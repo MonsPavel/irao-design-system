@@ -173,9 +173,10 @@
   function apply() {
     // Клампинг перед любым classList.add (T13.7): публичный set() мутирует
     // state в обход mergeState — здесь последняя линия, InvalidCharacterError
-    // на невалидном значении недостижим. Замена на месте — ссылка
-    // window.IraoUI.vi.state остаётся живой.
-    state = clampState(state);
+    // на невалидном значении недостижим. Кламп НА МЕСТЕ (Object.assign, не
+    // перепривязка): ссылка window.IraoUI.vi.state остаётся живой — контракт
+    // «живое состояние» доки (README ui-vi, таблица API, строка state).
+    Object.assign(state, clampState(state));
     var body = document.body;
     body.classList.toggle('vi', state.on);
     // Классы режимов — только в режиме (AC T9.1 «выключение полностью снимает

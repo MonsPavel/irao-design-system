@@ -358,6 +358,33 @@ describe('a11y/vi.js — enum-клампинг значений хранилищ
     expect(window.IraoUI.vi.state.size).toBe('md');
     expect(window.IraoUI.vi.state.theme).toBe('baw');
   });
+
+  it('ссылка window.IraoUI.vi.state живая (T13.7-ревью): set/toggle видны через api.state, объект не перепривязывается', () => {
+    // Контракт «живое состояние» — README ui-vi (таблица API, строка state):
+    // внешний код интегратора читает api.state для синхронизации своей кнопки.
+    // Регрессия: apply() перепривязывал локальную state на новый объект
+    // (clampState возвращает литерал) — api.state навсегда держал объект,
+    // захваченный при регистрации (на main все мутации были in place).
+    const { window, document } = makeSandbox({ readyState: 'loading', bodyHtml: panelHtml });
+
+    fireDOMContentLoaded(window);
+    const api = window.IraoUI.vi;
+    const stateRef = api.state;
+
+    document.querySelector('[data-ui-vi-toggle]').click(); // вход в режим
+
+    expect(api.state.on, 'toggle() виден через api.state (ссылка живая)').toBe(true);
+    expect(api.state, 'объект состояния не перепривязывается (мутация in place)').toBe(stateRef);
+
+    api.set('size', 'lg');
+    expect(api.state.size, 'set() виден через api.state').toBe('lg');
+    expect(document.body.classList.contains('vi-size--lg'), 'класс применён из того же state').toBe(
+      true,
+    );
+
+    document.querySelector('[data-ui-vi-toggle]').click(); // выход
+    expect(api.state.on, 'выход виден через api.state').toBe(false);
+  });
 });
 
 describe('a11y/vi.js — apply: классы, aria-pressed, панель, padding-top', () => {
