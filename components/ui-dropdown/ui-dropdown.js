@@ -268,6 +268,15 @@
         trigger.removeAttribute('aria-controls');
         trigger.removeAttribute('aria-expanded');
         root.removeAttribute(INIT_ATTR);
+        // T13.1 (кластер A): инстанс покидает реестр — пара instances.push
+        // при init. Без чистки публичный closeAll() вызывал close()
+        // уничтоженного инстанса и возвращал hidden/aria-expanded на
+        // разметку, которую destroy вернул к no-JS-виду (guard
+        // «if (menu.hidden) return» не спасает — no-JS меню раскрыто).
+        var index = instances.indexOf(instance);
+        if (index !== -1) {
+          instances.splice(index, 1);
+        }
       },
     };
     instances.push(instance);
@@ -286,6 +295,29 @@
         instances[i].close();
       }
     }
+  }
+
+  /**
+   * Уничтожить инстанс (публичный API, T13.1): снимает слушатели и возвращает
+   * разметку к no-JS состоянию (destroy() инстанса); повторная инициализация
+   * возможна (PE-цикл Bitrix AJAX). Запись реестра вычищает сам destroy()
+   * инстанса — closeAll() больше не «воскрешает» уничтоженную разметку.
+   * @param {Element|string} root корень инстанса (.ui-dropdown) или его id
+   * @returns {Object|null} уничтоженный инстанс или null (не найден)
+   */
+  function destroy(root) {
+    var el = typeof root === 'string' ? document.getElementById(root) : root;
+    for (var i = 0; i < instances.length; i += 1) {
+      if (instances[i].root === el) {
+        var instance = instances[i];
+        instance.destroy();
+        return instance;
+      }
+    }
+    if (window.console && window.console.warn) {
+      window.console.warn('[IraoUI:' + MODULE_NAME + '] destroy(): инстанс не найден');
+    }
+    return null;
   }
 
   /**
@@ -322,6 +354,7 @@
     init: init,
     selector: SELECTOR,
     closeAll: closeAll,
+    destroy: destroy,
   };
 
   // readyState-guard (Bitrix addJs(..., true) кладёт скрипт в конец страницы).
