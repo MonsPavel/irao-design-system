@@ -167,11 +167,12 @@ describe('components/ui-form/ui-form.html — канонический патт�
     // роль списка в Safari/VoiceOver (документировано .htmlvalidate.js) —
     // скринридер перестаёт объявлять «список, N элементов». role="list"
     // возвращает её; html-validate считает role на нативном списке избыточным
-    // (no-redundant-role, prefer-native-element — слепы к Safari-багу), поэтому
-    // перед элементом стоит локальная директива с обоснованием; не снимать
-    // вместе с role="list".
+    // (no-redundant-role — слеп к Safari-багу; prefer-native-element на
+    // «голом» ul не срабатывает, в директиве только первое правило), поэтому
+    // перед элементом стоит локальная директива; не снимать вместе с
+    // role="list".
     expect(html).toMatch(
-      /<!-- html-validate-disable-next no-redundant-role, prefer-native-element -->\s*<ul\s+class="ui-form__summary-list"\s+role="list">/,
+      /<!-- html-validate-disable-next no-redundant-role -->\s*<ul\s+class="ui-form__summary-list"\s+role="list">/,
     );
   });
 
@@ -239,9 +240,7 @@ describe('подключение T5.4 в систему', () => {
       expect(tag, `${tag}: role="list" (Safari/VoiceOver)`).toContain('role="list"');
     }
     const directives =
-      standSource.match(
-        /<!-- html-validate-disable-next no-redundant-role, prefer-native-element -->/g,
-      ) ?? [];
+      standSource.match(/<!-- html-validate-disable-next no-redundant-role -->/g) ?? [];
     expect(directives, 'директива html-validate перед каждым списком').toHaveLength(3);
   });
 
