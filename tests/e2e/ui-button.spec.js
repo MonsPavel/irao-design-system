@@ -544,9 +544,7 @@ standTest.describe('ui-button (T4.2)', () => {
         accentHoverRatio,
         `пин одобренного значения 2.91:1 (белая подпись на accent-light, факт ${accentHoverRatio.toFixed(2)}:1)`,
       ).toBeCloseTo(2.91, 1);
-      expect(accentHoverRatio, 'пол известного разрыва hover accent').toBeGreaterThanOrEqual(
-        2.85,
-      );
+      expect(accentHoverRatio, 'пол известного разрыва hover accent').toBeGreaterThanOrEqual(2.85);
 
       // Снять hover: default-пин ниже измеряет базовый accent (orange-500),
       // а не остаточное hover-состояние (--ui-transition 0.25s + запас).
