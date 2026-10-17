@@ -37,7 +37,7 @@ N−1, CHANGELOG Keep a Changelog). Ведение CHANGELOG и deprecation-ме
       axe-обход всех страниц полигона (stands-sweep, T9.1/T9.2).
 - [ ] **build-dist** — zip-артефакт прошёл проверку структуры
       [02-architecture §6.1](../../02-architecture.md): `ui-core.min.css`,
-      `ui-vi.min.css`, `ui.min.js`, `fonts/`, `themes/` + баннер
+      `ui-vi.min.css`, `ui.min.js`, `ui.dev.js`, `fonts/`, `themes/` + баннер
       `irao-ui v<версия>` = тег (T1.3).
 - [ ] **release** — GitHub Release создан: артефакт
       `irao-ui-dist-vX.Y.Z.zip` + release notes = запись CHANGELOG тега.

@@ -18,6 +18,7 @@ dist/                      # то, что уезжает на сайты (ADR-00
 ├── ui-core.min.css        # tokens → base → компоненты, баннер версии+sha
 ├── ui-vi.min.css          # VI-модуль (ГОСТ Р 52872) — отдельным файлом
 ├── ui.min.js              # все JS-модули (IIFE), баннер версии+sha
+├── ui.dev.js              # dev-вариант: не минифицирован + warning'и deprecated (T12.2)
 ├── fonts/                 # копия assets/fonts (появятся в T3.1)
 └── themes/                # копия themes/*.css
 
