@@ -164,6 +164,16 @@ describe('patterns/header/README.md — дока паттерна (AC: прав�
   it('связка с search-overlay (T7.6): диалог в конце body', () => {
     expect(readme, 'диалог поиска — пара к триггеру шапки').toContain('search-overlay');
   });
+
+  it("Don't единственности диалога (T13.7): ровно один sop-dialog/sop-query, копия из шапки удаляется при подключённом search-overlay", () => {
+    // Ловушка дублей id (T13.7): header встраивает копию диалога для
+    // самодостаточности; при совместной интеграции с паттерном search-overlay
+    // дубли id молча ломали открытие (data-ui-modal-target ведёт на первый).
+    expect(readme, 'правило единственности: ровно один диалог').toMatch(/ровно один/i);
+    expect(readme, 'id пары названы').toMatch(/sop-dialog/);
+    expect(readme, 'id поля названо').toMatch(/sop-query/);
+    expect(readme, 'что делать: удалить копию из шапки').toMatch(/удалите копию/i);
+  });
 });
 
 describe('сборка: стенд паттерна генерируется в stands/patterns/header.html', () => {
