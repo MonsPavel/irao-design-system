@@ -23,7 +23,10 @@ beforeAll(() => {
   readme = readFileSync(join(root, 'tests/e2e/README.md'), 'utf8');
   const start = readme.indexOf('## Сценарий T2.6');
   const next = readme.indexOf('\n## ', start + 1);
-  section = readme.slice(start, next === -1 ? undefined : next);
+  // Нормализация пробелов секции (T13.5, rev T4.2): перенос строки внутри
+  // записи ослаблял пин до двух независимых toContain-фрагментов — нормализация
+  // возвращает одно точное сравнение color-mix-строки.
+  section = readme.slice(start, next === -1 ? undefined : next).replace(/\s+/g, ' ');
 });
 
 describe('T2.6, кнопочная часть AC2 — сценарий исполняется кодом с T4.2', () => {
@@ -42,10 +45,10 @@ describe('T2.6, кнопочная часть AC2 — сценарий испо�
     expect(section).toContain('rgb(243, 113, 49)');
   });
 
-  it('active записан по конвенции ADR-0010: color-mix 88% базовый + black', () => {
-    expect(section).toContain('color-mix(in srgb, var(--ui-color-primary)');
-    expect(section).toContain('88%, black)');
-    expect(section).toContain('88%');
+  it('active записан по конвенции ADR-0010: точная color-mix-строка (88% базовый + black)', () => {
+    // Точная запись конвенции одним сравнением (секция нормализована в
+    // beforeAll): фрагменты «до/после переноса строки» пин не тянут.
+    expect(section).toContain('color-mix(in srgb, var(--ui-color-primary) 88%, black)');
   });
 
   it('visual-эталоны привязаны к окружению создания по ADR-0003/0004 (test:docker/CI), не хост', () => {
