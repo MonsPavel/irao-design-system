@@ -210,25 +210,32 @@ T8.2 п.1) закрыт e2e на эталоне: `tests/e2e/pattern-detail-page.
 <?php
 // Свойства ИБ — в теги и мету: $arResult['DISPLAY_PROPERTIES']
 // (DIRECTION, EXPERIENCE, SALARY…), дата — ACTIVE_FROM.
-$sDate = $arResult['ACTIVE_FROM'] ?? '';
+$sDate = (string) ($arResult['ACTIVE_FROM'] ?? '');
+// Guard: пустая дата → <time> не выводится вовсе; strtotime('') = false,
+// и без guard-а date('Y-m-d', false) собрал бы datetime-заглушку 1970-01-01.
+$sDateTs = $sDate === '' ? false : strtotime($sDate);
 ?>
 <nav class="ui-breadcrumbs" aria-label="Хлебные крошки">
   <?php // цепочка — bitrix:breadcrumb или BUILD_LINK_CHAIN news.detail
      // (сниппет bitrix/snippets/breadcrumbs.php) ?>
 </nav>
 <article itemscope itemtype="https://schema.org/JobPosting">
-  <h1 class="ui-h1" itemprop="title"><?= $arResult['NAME'] ?></h1>
+  <h1 class="ui-h1" itemprop="title"><?= htmlspecialcharsbx($arResult['NAME']) ?></h1>
   <p class="dpp-tags">
     <?php foreach ($arResult['DISPLAY_PROPERTIES'] as $code => $prop):
       if (empty($prop['DISPLAY_VALUE'])) continue; ?>
       <span class="ui-tag ui-tag--blue"><?= htmlspecialcharsbx(is_array($prop['DISPLAY_VALUE']) ? implode(', ', $prop['DISPLAY_VALUE']) : $prop['DISPLAY_VALUE']) ?></span>
     <?php endforeach; ?>
   </p>
+  <?php if ($sDateTs !== false): ?>
   <p class="dpp-meta ui-small ui-text--muted">
     <?php // hiringOrganization/jobLocation — из свойств ИБ (COMPANY, CITY):
-     // те же itemprop, что в эталоне; datePosted — ACTIVE_FROM. ?>
-    <time itemprop="datePosted" datetime="<?= date('Y-m-d', strtotime($sDate)) ?>"><?= $sDate ?></time>
+     // те же itemprop, что в эталоне; datePosted — ACTIVE_FROM.
+     // NAME и дата — данные ИБ (недоверенный вывод): экранируются
+     // htmlspecialcharsbx (API Битрикса, как и вывод свойств выше). ?>
+    <time itemprop="datePosted" datetime="<?= date('Y-m-d', $sDateTs) ?>"><?= htmlspecialcharsbx(FormatDate('f', $sDateTs)) ?></time>
   </p>
+  <?php endif; ?>
 
   <div class="dpp-layout">
     <div class="dpp-main">
@@ -251,6 +258,12 @@ $sDate = $arResult['ACTIVE_FROM'] ?? '';
   02-architecture §6.3).
 - `datePosted` в разметке обязателен даже если дату не показываете визуально:
   спрячьте элемент классом сайта, но не удаляйте `<time>`.
+- Guard на пустой `ACTIVE_FROM`: без даты мета с `<time>` не выводится
+  вовсе — `strtotime('')` даёт `false`, и без guard-а `date('Y-m-d', …)`
+  собрал бы в `datetime` заглушку эпохи 1970-01-01 (мусор для schema-парсера).
+  Человекочитаемый текст — `FormatDate('f', …)` (локаль сайта: «12 сентября
+  2026»), а не сырая строка свойства; оба вывода — данные ИБ, экранируются
+  `htmlspecialcharsbx` (как и NAME).
 - Связующие стили (`dpp-*`) перенесите в `template_styles.css` сайта —
   источник: `<style>` в [`detail-page.html`](detail-page.html), значения —
   только токены `--ui-*`.
