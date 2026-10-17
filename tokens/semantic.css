@@ -339,7 +339,7 @@
   --ui-shadow-sm: 0 0.125rem 0.5rem var(--ui-blue-800-10);
   /* career-portal: components.css:124 — тень карточки 0 12px 32px rgba(0, 40, 86, 0.10) → rem */
   --ui-shadow-md: 0 0.75rem 2rem var(--ui-blue-800-10);
-  /* career-portal: components.css:375 — тень dropdown 0 16px 40px rgba(0, 40, 86, 0.16) → rem */
+  /* career-portal: components.css:375 — тень dropdown 0 16px 40px rgba(0, 40, 86, 0.16) → rem; однослойная аппроксимация тени dropdown, заведённая в T2.2: тень в career-portal многослойная (верхняя пара + тонкая подложка 0 3px 10px rgba(0, 40, 86, 0.06), header.css:73) — лестница несёт только верхний слой */
   --ui-shadow-lg: 0 1rem 2.5rem var(--ui-blue-800-16);
   /* career-portal: семантическое имя тени карточки (= одобренное значение через лестницу) */
   --ui-shadow-card: var(--ui-shadow-md);

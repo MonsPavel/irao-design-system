@@ -718,6 +718,70 @@ describe('контракт модуля ui-modal.js (jsdom; образец — t
     expect(document.documentElement.style.overflow).toBe('');
   });
 
+  it('onDocumentClick: не-левая кнопка и модификаторы (Ctrl/Cmd/Shift/Alt) модалку не открывают (ревью T13.6)', () => {
+    // Ctrl/Cmd+клик по ссылке-триггеру — «открыть в новой вкладке» пользователя:
+    // открытие модалки поверх ломает жест; не-левые кнопки — не активация.
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const trigger = document.querySelector('[data-ui-modal-target]');
+
+    const gestures = [
+      { init: { button: 1 }, name: 'средняя кнопка' },
+      { init: { button: 2 }, name: 'правая кнопка' },
+      { init: { ctrlKey: true }, name: 'Ctrl+клик' },
+      { init: { metaKey: true }, name: 'Cmd+клик' },
+      { init: { shiftKey: true }, name: 'Shift+клик' },
+      { init: { altKey: true }, name: 'Alt+клик' },
+    ];
+    for (const gesture of gestures) {
+      trigger.dispatchEvent(
+        new window.MouseEvent('click', { bubbles: true, cancelable: true, ...gesture.init }),
+      );
+      expect(dialog.hasAttribute('open'), `${gesture.name} не открывает модалку`).toBe(false);
+    }
+
+    // Контроль: левый клик без модификаторов по-прежнему открывает.
+    trigger.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+    expect(dialog.hasAttribute('open'), 'левый клик без модификаторов открывает').toBe(true);
+  });
+
+  it('reopen раньше чистки прошлого цикла не теряет счётчик лока (ревью T13.6: чужое снятие open + отложенный close)', () => {
+    vi.useFakeTimers();
+    const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+    const dialog = document.getElementById('m-1');
+    const rootEl = document.documentElement;
+    const api = apiOf({ window });
+
+    let closeEvents = 0;
+    document.addEventListener('irao-ui:modal-close', () => {
+      closeEvents += 1;
+    });
+
+    // Цикл 1 открыт; ЧУЖОЙ путь закрытия (form method="dialog", К11) снял
+    // open синхронно — close-событие браузер доставит отложенным таском,
+    // наша чистка на этот момент ещё не шла (cleanedUp === false).
+    api.open(dialog);
+    dialog.close();
+    expect(dialog.hasAttribute('open'), 'чужой путь снял open').toBe(false);
+
+    // Reopen ДО доставки отложенного close-события: модуль обязан СНАЧАЛА
+    // отпустить резерв лока прошлого цикла, потом взять новый. Прежний код
+    // брал второй лок (count 2) — гард onClose видел открытый новый цикл,
+    // чистка прошлого резерва не наступала никогда: после закрытия нового
+    // цикла count = 1, фон оставался залоченным навсегда.
+    api.open(dialog);
+    expect(dialog.hasAttribute('open'), 'новый цикл открыт').toBe(true);
+    expect(rootEl.style.overflow, 'лок стоит (резерв прошлого отпущен, новый взят)').toBe('hidden');
+    expect(closeEvents, 'irao-ui:modal-close прошлого цикла доставлен честной чисткой').toBe(1);
+
+    // Живой цикл закрывается — лок снимается ДО КОНЦА (count не утёк).
+    api.close();
+    vi.advanceTimersByTime(500);
+    expect(dialog.hasAttribute('open')).toBe(false);
+    expect(rootEl.style.overflow, 'счётчик лока не потерян: overflow восстановлен').toBe('');
+    expect(closeEvents, 'второе легитимное irao-ui:modal-close (новый цикл)').toBe(2);
+  });
+
   it('data-ui-modal-target: клик по триггеру открывает целевой диалог; восстановление фокуса — на триггер', () => {
     vi.useFakeTimers();
     const { window, document } = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });

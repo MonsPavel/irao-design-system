@@ -88,20 +88,30 @@ test.describe('ui-tabs: деградация без JS (AC)', () => {
   }) => {
     const page = await stand('ui-tabs');
 
-    // Источник разметки (генерат полигона): атрибуты JS-состояния отсутствуют.
-    const source = await page.request
-      .get('/showcase/dist/stands/ui-tabs.html')
-      .then((r) => r.text());
+    // Источник разметки (генерат полигона); сперва вырезаются КОММЕНТАРИИ,
+    // затем инлайн-скрипты: проза шапки стенда содержит литеральный
+    // «<script type="application/json"…» (без парного закрывающего) — без
+    // вырезания комментариев ленивый регэксп скриптов открыл бы по нему
+    // ложную script-область и съел статичную разметку. Строки канонической
+    // разметки внутри <script> (демо-рендер JSON) тоже не должны матчиться —
+    // пины деградации смотрят только на настоящую разметку (ревью T13.6).
+    const source = (
+      await page.request.get('/showcase/dist/stands/ui-tabs.html').then((r) => r.text())
+    )
+      .replace(/<!--[\s\S]*?-->/g, '')
+      .replace(/<script\b[\s\S]*?<\/script>/g, '');
     const stateAttrs = /\b(role|tabindex|aria-selected|hidden)=/;
 
     const panelTags = source.match(/<section[^>]*ui-tabs__panel[^>]*>/g) ?? [];
-    expect(panelTags.length, 'в разметке стенда есть панели').toBeGreaterThan(0);
+    expect(panelTags.length, 'в разметке стенда есть панели (скрипты вырезаны)').toBeGreaterThan(0);
     for (const tag of panelTags) {
       expect(tag, `панель без hidden и без ролей в разметке (AC): ${tag}`).not.toMatch(stateAttrs);
       expect(tag, `панель названа табом в разметке: ${tag}`).toMatch(/aria-labelledby=/);
     }
     const tabTags = source.match(/<a[^>]*ui-tabs__tab[^>]*>/g) ?? [];
-    expect(tabTags.length, 'в разметке стенда есть табы-ссылки').toBeGreaterThan(0);
+    expect(tabTags.length, 'в разметке стенда есть табы-ссылки (скрипты вырезаны)').toBeGreaterThan(
+      0,
+    );
     for (const tag of tabTags) {
       expect(tag, `таб-ссылка без JS-атрибутов: ${tag}`).not.toMatch(stateAttrs);
       expect(tag, `таб-ссылка ведёт на панель якорем: ${tag}`).toMatch(/href="#/);

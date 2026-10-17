@@ -193,6 +193,19 @@
         return;
       }
       options = options || {};
+      /* Гонка reopen/чистка (ревью T7.2 → T13.6): чужой путь закрытия (form
+         method="dialog", К11) снимает open синхронно, а close-событие
+         доставляет отложенным таском. Если прошлый цикл ещё не вычищен
+         (cleanedUp === false), сначала отпускаем его резерв — лок и запись
+         стека, — иначе новый цикл берёт ВТОРОЙ резерв, а гард onClose
+         отложенного события прошлого цикла видит уже открытый новый и
+         выходит по «open стоит»: чистка прошлого резерва не наступает
+         никогда, счётчик лока утекает и фон остаётся залоченным после
+         закрытия нового цикла. Событие close прошлого цикла при этом
+         уходит сайту честно (через чистку), до open нового. */
+      if (!cleanedUp) {
+        cleanupAfterClose();
+      }
       opener = options.opener || document.activeElement || null;
       if (opener && typeof opener.focus !== 'function') {
         opener = null;
@@ -496,6 +509,13 @@
      частью инстанса. Ссылка-триггер без JS ведёт на страницу контента
      (правило доки о деградации) — при открытии переход снимается. */
   function onDocumentClick(event) {
+    /* Не-левые кнопки и модификаторы (Ctrl/Cmd/Shift/Alt) — не активация
+       (ревью T13.6): Ctrl/Cmd+клик по ссылке — «открыть в новой вкладке»
+       пользователя, открытие модалки поверх ломает жест. Клавиатурная
+       активация (Enter) диспетчит click с button === 0 — паритет сохранён. */
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+      return;
+    }
     var target = event.target;
     var trigger = target && target.closest ? target.closest('[' + TRIGGER_ATTR + ']') : null;
     if (!trigger) {

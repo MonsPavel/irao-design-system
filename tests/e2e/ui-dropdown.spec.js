@@ -166,6 +166,28 @@ test.describe('ui-dropdown: открытие (AC: клик/Enter/Space/↓)', ()
     }
   });
 
+  test('ширина меню на вьюпорте 375 — кламп вьюпорта (ревью T13.6: 100vw с классической полосой)', async ({
+    stand,
+  }) => {
+    // Кламп career-portal: min(312px, 100vw − 32px). На 375 пин фиксирует
+    // ветку 312px И вписанность в видимую область (вьюпорт минус отступы
+    // клампа) — регресс к неклампленной ширине меню ловится здесь.
+    const page = await stand('ui-dropdown');
+    await page.setViewportSize({ width: 375, height: 667 });
+    const trigger = page.locator(SEL.navTrigger);
+    const menu = page.locator(SEL.navMenu);
+
+    await trigger.click();
+    await expectOpen(page, trigger, menu);
+
+    const width = await menu.evaluate((el) => getComputedStyle(el).width);
+    expect(width, 'computed width = 312px (19.5rem — ветка одобренного дизайна)').toBe('312px');
+    expect(
+      Number.parseFloat(width),
+      'меню вписано в вьюпорт с отступами клампа (375 − 32)',
+    ).toBeLessThanOrEqual(375 - 32);
+  });
+
   test('ArrowDown открывает с фокусом на первый пункт, ArrowUp — на последний (APG)', async ({
     stand,
   }) => {

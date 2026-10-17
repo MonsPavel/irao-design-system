@@ -34,7 +34,9 @@
  * ищется по href="#id" (канонический паттерн — ссылки) или aria-controls
  * (кнопки в JS-гарантированных контекстах); без связки инстанс не
  * инициализируется (console.warn, соседи живы). Гейт разметки —
- * html-validate irao/tabs-id-links.
+ * html-validate irao/tabs-id-links. Таб вне .ui-tabs__list — тот же отказ:
+ * без списка клавиатура и roving tabindex его не достигают (ревью T13.6).
+ * select(index) с индексом вне диапазона — no-op (ревью T13.6).
  *
  * DOM-поведение — tests/e2e/ui-tabs.spec.js; контракт шаблона, init-мутации
  * и клавиатура — tests/unit/tabs.test.js.
@@ -87,8 +89,21 @@
     }
 
     // id-связки tab↔panel обязательны: без панели таб не участвует в паттерне.
+    // Таб вне .ui-tabs__list — тоже брак разметки (ревью T13.6): прежний код
+    // брал его в tabs[] и расставлял роли, но клавиатура списка (слушатель на
+    // .ui-tabs__list) его не достигала — таб молча не работал. Бросок в том же
+    // цикле сбора, симметрично брою id-связок → console.warn через init().
     var tabs = [];
     for (var t = 0; t < tabEls.length; t += 1) {
+      if (!list.contains(tabEls[t])) {
+        throw new Error(
+          '[IraoUI:' +
+            MODULE_NAME +
+            '] таб «' +
+            tabEls[t].textContent.trim() +
+            '» вне .ui-tabs__list: перенесите его в список (иначе клавиатура и roving tabindex его не достигают)',
+        );
+      }
       var panel = panelOf(tabEls[t]);
       if (!panel) {
         throw new Error(
@@ -116,11 +131,16 @@
     /**
      * Выбор таба. silent — стартовый выбор при инициализации: состояние
      * меняется, но событие сайту не отправляется (это не смена выбора).
+     * Индексы вне диапазона игнорируются (ревью T13.6: select(5) на двух
+     * табах — no-op, а не сломанное состояние «ничего не выбрано»).
      * @param {number} index индекс таба
      * @param {boolean} focusTab перевести фокус на таб (automatic-активация)
      * @param {boolean} [silent] не диспатчить irao-ui:tabs-select
      */
     function select(index, focusTab, silent) {
+      if (index < 0 || index >= tabs.length) {
+        return;
+      }
       if (index === current) {
         if (focusTab) {
           tabs[index].el.focus();
