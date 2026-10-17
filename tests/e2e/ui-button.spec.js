@@ -70,16 +70,17 @@ const BTN = {
  * tests/helpers/harness.js и tests/README.md; расширять только туда.
  */
 
-/** Вычисленное состояние кнопки + контекст (data-ui-button-bg или body). */
+/** Вычисленное состояние кнопки (фон-подложка — body; T13.5: мёртвая ветка
+ *  data-ui-button-bg удалена — атрибут не используется нигде в репозитории,
+ *  при появлении on-dark-контекста кнопок ветка вернётся с разметкой). */
 const stateOf = (page, id) =>
   page.locator(`#${id}`).evaluate((el) => {
     const style = getComputedStyle(el);
-    const scope = el.closest('[data-ui-button-bg]');
     return {
       color: style.color,
       backgroundColor: style.backgroundColor,
       borderColor: style.borderColor,
-      backdrop: getComputedStyle(scope ?? document.body).backgroundColor,
+      backdrop: getComputedStyle(document.body).backgroundColor,
       minHeight: style.minHeight,
       borderRadius: style.borderRadius,
       fontSize: style.fontSize,
@@ -546,6 +547,11 @@ standTest.describe('ui-button (T4.2)', () => {
       expect(accentHoverRatio, 'пол известного разрыва hover accent').toBeGreaterThanOrEqual(
         2.85,
       );
+
+      // Снять hover: default-пин ниже измеряет базовый accent (orange-500),
+      // а не остаточное hover-состояние (--ui-transition 0.25s + запас).
+      await page.mouse.move(0, 0);
+      await settleTransitions(page);
 
       // accent — известный разрыв одобренного дизайна (пары кнопок не гейтятся
       // в tests/contrast/pairs.config.mjs с T2.6; значение не меняется без
