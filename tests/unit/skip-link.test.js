@@ -156,7 +156,7 @@ describe('стенд ui-skip-link (T13.5): без литерального ду�
     // skip-link.spec.js («ровно один skip-якорь» на собранном стенде).
     const standBodyBlock = build.slice(
       build.indexOf('function standBody'),
-      build.indexOf('async function build'),
+      build.indexOf('function frame('),
     );
     expect(standBodyBlock, 'исключение паттерна-дубля в standBody').toContain(
       'STAND_PATTERN_IS_FRAME',
