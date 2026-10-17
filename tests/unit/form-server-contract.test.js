@@ -96,10 +96,17 @@ describe('irao_ui_form_field_error_attrs — третий параметр $desc
   // PHP не исполняется — исполняемую форму даёт независимая эмуляция;
   // неотрывность от исходника держат маркер-пины ниже.
 
-  /** Эмуляция PHP-функции: id подсказок первыми, {id}-error последним. */
+  /**
+   * Эмуляция PHP-функции: с ошибкой — aria-invalid + «hints {id}-error»
+   * (подсказки первыми, {id}-error последним); валидное состояние — связь
+   * подсказок сохраняется (aria-describedby без aria-invalid) или пусто
+   * (двух-аргный вызов — старый контракт).
+   */
   const attrsOf = (fieldId, message, describedBy = '') => {
-    if (message === null || message === '') return '';
     const described = String(describedBy).trim();
+    if (message === null || message === '') {
+      return described === '' ? '' : 'aria-describedby="' + described + '"';
+    }
     const target = described === '' ? String(fieldId) : described + ' ' + fieldId;
     return 'aria-invalid="true" aria-describedby="' + target + '-error"';
   };
@@ -118,7 +125,22 @@ describe('irao_ui_form_field_error_attrs — третий параметр $desc
     expect(attrsOf('apply-NAME', 'Укажите имя'), 'вызов без $describedBy не менял контракта').toBe(
       'aria-invalid="true" aria-describedby="apply-NAME-error"',
     );
-    expect(attrsOf('apply-NAME', null), 'без ошибки — пусто (как раньше)').toBe('');
+    expect(attrsOf('apply-NAME', null), 'двух-аргный вызов без подсказок — пусто').toBe('');
+  });
+
+  it('валидное состояние: hint остаётся связан — aria-describedby без aria-invalid (канон ui-form: «aria-describedby — только hint»)', () => {
+    // Ревью T13.3 (high): error_attrs в примере — единственный источник
+    // aria-describedby; '' при переданных подсказках терял связь hint с
+    // контролем в валидном состоянии (ui-field README: hint «всегда видима,
+    // связывается aria-describedby»; ui-form README: «aria-describedby —
+    // только hint»).
+    expect(attrsOf('apply-NAME', null, 'apply-NAME-hint')).toBe(
+      'aria-describedby="apply-NAME-hint"',
+    );
+    expect(
+      attrsOf('apply-NAME', null, 'apply-NAME-hint'),
+      'aria-invalid в валидном состоянии нет',
+    ).not.toContain('aria-invalid');
   });
 
   it('маркер-пины зеркала: target собирается из trim($describedBy) + {id}; {id}-error остаётся последним', () => {
@@ -131,12 +153,32 @@ describe('irao_ui_form_field_error_attrs — третий параметр $desc
     );
   });
 
-  it('докблок: $describedBy задокументирован; порядок hint→error объявлен единым с модулем', () => {
+  it('маркер-пин валидного состояния: отдельный формат aria-describedby="%s" — без aria-invalid и без суффикса -error', () => {
+    expect(snippet, 'ветка валидного состояния в коде функции').toMatch(/'aria-describedby="%s"'/);
+  });
+
+  it('докблок: $describedBy задокументирован; порядок hint→error единый с модулем; валидное состояние описано', () => {
     const fnStart = snippet.indexOf('function irao_ui_form_field_error_attrs');
     const docblock = snippet.slice(snippet.lastIndexOf('/**', fnStart), fnStart);
     expect(docblock, 'третий параметр в докблоке').toContain('$describedBy');
     expect(docblock, 'подсказка идёт первой').toContain('первой');
     expect(docblock, 'порядок единый с модулем T5.5').toContain('T5.5');
+    expect(docblock, 'валидное состояние — связь подсказок (канон ui-form)').toContain(
+      'только hint',
+    );
+  });
+
+  it('пример: инпут не несёт статичного aria-describedby рядом с error_attrs (действует первый атрибут HTML)', () => {
+    // Якорь — форма примера использования (method="post"), а не упоминание
+    // <form class="ui-form"> в докблоке irao_ui_form_summary_html.
+    const form = snippet.slice(
+      snippet.indexOf('<form class="ui-form" method="post"'),
+      snippet.indexOf('</form>'),
+    );
+    expect(
+      form,
+      'связь hint/error — только через вызов irao_ui_form_field_error_attrs',
+    ).not.toContain('aria-describedby="');
   });
 
   it('пример использования: поле с hint — hint id в $describedBy; DOM-порядок label → input → hint → error', () => {

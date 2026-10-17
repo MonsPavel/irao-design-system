@@ -286,8 +286,14 @@ describe('Bitrix-сниппет README — безопасный вывод (T13.
   });
 
   it('дата: человекочитаемый текст через FormatDate с экранированием; старая форма date(strtotime) ушла', () => {
-    expect(readme, 'дата выводится FormatDate и экранируется').toMatch(
-      /htmlspecialcharsbx\(FormatDate\(/,
+    // Токены Bitrix FormatDate (ревью T13.3, dev.1c-bitrix.ru …/formatdate.php):
+    // 'f' — ТОЛЬКО название месяца в именительном («Сентябрь»), полная дата —
+    // 'j F Y': день без нуля + месяц в родительном + год → «12 сентября 2026».
+    expect(readme, 'полная дата — j F Y (токен ловит пин)').toMatch(
+      /htmlspecialcharsbx\(FormatDate\('j F Y', \$sDateTs\)\)/,
+    );
+    expect(readme, "токен 'f' (только месяц в именительном) не используется").not.toMatch(
+      /FormatDate\('f'/,
     );
     expect(readme, 'дегенеративная форма без guard удалена').not.toContain(
       "date('Y-m-d', strtotime($sDate))",
