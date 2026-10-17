@@ -611,6 +611,14 @@
         root.removeEventListener('click', onSummaryClick);
         unlock();
         root.removeAttribute(INIT_ATTR);
+        // T13.1 (кластер A): запись покидает реестр — пара instances.push
+        // при init. Без чистки unlock(form) после пересоздания формы находил
+        // мёртвую запись раньше живого инстанса (unlock мёртвой записи —
+        // no-op: её состояние снял destroy), а отцепленные DOM-корни копились.
+        var index = instances.indexOf(instance);
+        if (index !== -1) {
+          instances.splice(index, 1);
+        }
       },
     };
     instances.push(instance);
@@ -640,6 +648,29 @@
         return;
       }
     }
+  }
+
+  /**
+   * Уничтожить инстанс формы (публичный API, T13.1): снимает слушатели
+   * валидации, блокировку сабмита и INIT_ATTR — форма возвращается сайту
+   * (нативный цикл), повторная инициализация возможна (PE-цикл Bitrix AJAX).
+   * Запись реестра вычищает сам destroy() инстанса — мёртвые записи не
+   * скапливаются и unlock(form) всегда находит живой инстанс.
+   * @param {Element} form форма с data-ui-form
+   * @returns {Object|null} уничтоженный инстанс или null (не найден)
+   */
+  function destroy(form) {
+    for (var i = 0; i < instances.length; i += 1) {
+      if (instances[i].root === form) {
+        var instance = instances[i];
+        instance.destroy();
+        return instance;
+      }
+    }
+    if (window.console && window.console.warn) {
+      window.console.warn('[IraoUI:' + MODULE_NAME + '] destroy(): инстанс не найден');
+    }
+    return null;
   }
 
   /**
@@ -684,6 +715,7 @@
     validateField: validateField,
     validators: validators,
     unlock: unlock,
+    destroy: destroy,
   };
 
   // readyState-guard (Bitrix addJs(..., true) кладёт скрипт в конец страницы).
