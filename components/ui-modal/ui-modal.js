@@ -290,6 +290,11 @@
        — как было, ~360ms), таймер 500ms — последняя линия. Цикл гаснет по
        !closing (finish/cleanup/re-open). */
     function startCloseWatch() {
+      /* Нет rAF (jsdom-стенды юнит-тестов, экзотические окружения) — дубль-
+         сигнала нет, остаётся пара transitionend + страховка 500ms. */
+      if (typeof window.requestAnimationFrame !== 'function') {
+        return;
+      }
       var last = null;
       var stable = 0;
       var startedAt = performance.now();
