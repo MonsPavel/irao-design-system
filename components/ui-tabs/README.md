@@ -102,20 +102,37 @@ html-validate `irao/tabs-id-links`): таб-ссылка ведёт `href="#id"`
 </script>
 <div class="ui-tabs" data-ui-tabs id="track-tabs"></div>
 <script>
-  // Рендер канонического паттерна из JSON (упрощённо; экранирование — на сайте).
+  // Рендер канонического паттерна из JSON. Данные инфоблока — недоверенный
+  // вывод: innerHTML собирает РАЗМЕТКУ, сырая строка данных соберёт и тег —
+  // каждая строка проходит escapeHtml перед конкатенацией.
+  function escapeHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (ch) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch];
+    });
+  }
+
   var data = JSON.parse(document.querySelector('script[data-ui-tabs-data]').textContent);
   document.getElementById('track-tabs').innerHTML =
     '<div class="ui-tabs__list">' +
     data.tabs.map(function (t, i) {
       return '<a class="ui-tabs__tab" href="#track-panel-' + i + '" id="track-tab-' + i + '">' +
-        t.label + '</a>';
+        escapeHtml(t.label) + '</a>';
     }).join('') + '</div>' +
     data.tabs.map(function (t, i) {
       return '<section class="ui-tabs__panel" id="track-panel-' + i +
-        '" aria-labelledby="track-tab-' + i + '"><p>' + t.text + '</p></section>';
+        '" aria-labelledby="track-tab-' + i + '"><p>' + escapeHtml(t.text) + '</p></section>';
     }).join('');
 </script>
 ```
+
+**Граница допустимости**: без `escapeHtml` можно интерполировать в
+`innerHTML` только строки, которые вы полностью контролируете в коде
+шаблона (константные префиксы разметки, номера из `(int)`); всё, что
+приезжает из данных (инфоблок, пользователь, XML/JSON внешних систем) —
+всегда через `escapeHtml` (или `createElement` + `textContent`). Суффикс
+`-N` в `href`/`id` — числа-индексы `map`, экранировать их не нужно. Альтернатива
+без конкатенации вообще — сниппет `bitrix/snippets/json-data.php`: данные в
+`<script type="application/json">`, а разметку рендерит PHP-шаблон сервером.
 
 ## Do / Don't
 
