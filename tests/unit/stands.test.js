@@ -68,6 +68,28 @@ describe('список стендов полигона (helpers/stands)', () => 
   });
 });
 
+describe('компонентные имена → поверхность стенда (пин T13.9)', () => {
+  // build.mjs standBody: расширенный стенд showcase/pages/<имя>/index.html,
+  // иначе канонический паттерн components/<имя>/<имя>.html (из него
+  // генерируется стенд <имя>.html). Нет ни того ни другого — сборка лишь
+  // предупреждает в лог, стенд компонента пуст (в зелёном прогоне
+  // предупреждение незаметно): пин роняет юнит-прогон раньше.
+  it('у каждого каталога components/ui-* есть pages/<имя>/index.html или канонический <имя>.html', () => {
+    const dirs = readdirSync(join(root, 'components'), { withFileTypes: true })
+      .filter((entry) => entry.isDirectory() && entry.name.startsWith('ui-'))
+      .map((entry) => entry.name);
+    expect(dirs.length, 'компонентные каталоги на месте').toBeGreaterThan(0);
+    for (const name of dirs) {
+      const hasPage = existsSync(join(root, 'showcase', 'pages', name, 'index.html'));
+      const hasPattern = existsSync(join(root, 'components', name, `${name}.html`));
+      expect(
+        hasPage || hasPattern,
+        `${name}: нет ни showcase/pages/${name}/index.html, ни components/${name}/${name}.html — стенд полигона пуст`,
+      ).toBe(true);
+    }
+  });
+});
+
 describe('COMPONENTS (showcase/build.mjs) ↔ стенды полигона (пин соответствия, T13.7)', () => {
   /**
    * История пина (замечание T9.1): матрица «тема × стенды» в ui-vi.spec.js
