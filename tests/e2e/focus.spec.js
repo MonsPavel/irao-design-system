@@ -136,14 +136,20 @@ standTest.describe('политика фокуса (T3.2, ADR-0001)', () => {
       // юнит-пин ловил лишь замену на :focus в CSS): политика ADR-0001
       // рисует outline ТОЛЬКО для клавиатурного фокуса. Кнопка, не поле
       // ввода: у текстовых полей браузеры применяют :focus-visible и на клик.
+      // Активный элемент после клика зависит от движка: Chromium/Firefox
+      // фокусируют кнопку; Safari/WebKit кнопку кликом не фокусирует — фокус
+      // уходит к ближайшему фокусируемому предку (main[tabindex="-1"],
+      // воспроизведено на Windows-webkit: focusin на MAIN#main). Пинуется
+      // инвариант ADR-0001: какой бы элемент ни получил мышиный фокус,
+      // :focus-visible на нём не применён и outline не рисован (попадание
+      // клика в кнопку гарантирует actionability page.click).
       const page = await stand('base');
 
       await page.click('button');
       const state = await focusState(page);
-      expect(state.tag, 'после клика фокус на кнопке').toBe('button');
       expect(
         state.focusVisible,
-        'мышиный фокус — НЕ :focus-visible (наведение и так видно, обводка на каждый клик — шум)',
+        `мышиный фокус (на <${state.tag}>) — НЕ :focus-visible: наведение и так видно, обводка на каждый клик — шум`,
       ).toBe(false);
       expect(
         state.outlineStyle,
