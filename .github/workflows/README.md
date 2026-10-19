@@ -47,7 +47,9 @@ GitHub Actions (решение Phase 0). Схема гейтов — [02-archite
   собираются следующими шагами; на джобе флага НЕТ: GitHub даёт упавшей джобе
   check-run `conclusion=success`, и именованный чек выглядел бы зелёным при
   любом расхождении (ревью T1.5 high, community #77915/#15452, SO 62045967);
-- шаг прогона с `IRAO_SNAPSHOTS=1` сравнивает эталоны (chromium, порог нулевой);
+- шаг прогона с `IRAO_SNAPSHOTS=1` сравнивает эталоны (chromium: цветовой
+  порог нулевой, допуск `maxDiffPixels: 8` — только AA-шум скруглений,
+  playwright.config.mjs);
 - дифы (`*-diff.png/*-actual.png/*-expected.png`) + HTML-отчёт — артефакт `visual-diffs`,
   прикладываются всегда (`if: always()`);
 - при расхождении финальный шаг красит джобу по `steps.visual.outcome`: чек И

@@ -110,7 +110,8 @@ jobs:
       - name: Build showcase
         run: npm run build
 
-      # IRAO_SNAPSHOTS=1: chromium сверяет эталоны (порог нулевой — ADR-0004);
+      # IRAO_SNAPSHOTS=1: chromium сверяет эталоны (цветовой порог нулевой —
+      # ADR-0004, допуск maxDiffPixels 8 на AA-шум скруглений);
       # firefox/webkit проверяют поведение, скриншоты у них no-op (харнесс).
       # В полный прогон входит релизный гейт масштабирования T3.6
       # (tests/e2e/scaling.spec.js): падение валит матрицу — релиз блокирован.
