@@ -58,6 +58,28 @@ describe('patterns/footer/footer.html — контракт эталонной с
     expect(mail[0], 'e-mail — ссылка mailto:').not.toBe('');
   });
 
+  it('логотип — ссылка на главную с доступным именем (T4.6): классы только своего паттерна fdp-logo (T13.7)', () => {
+    // По образцу header-пина (pattern-header.test.js): копируемый фрагмент
+    // несёт классы ТОЛЬКО своей связки — чужие классы (hdp-* из header) в
+    // footer-сниппете были бы мёртвыми хуками (ни правил, ни поведения).
+    const logo = pattern.match(/<a\b[^>]*class="[^"]*fdp-logo[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
+    expect(logo[0], 'логотип-ссылка на месте').not.toBe('');
+    expect(logo[0], 'href — главная страница').toMatch(/href="(?:\/|index\.html)"/);
+    const name =
+      (logo[0].match(/aria-label="([^"]+)"/) ?? [])[1] ??
+      logo[0]
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    expect(name.length, 'у ссылки-логотипа есть доступное имя').toBeGreaterThan(0);
+    // Элементы логотипа — fdp-logo__mark/__text (паттерн footer), не hdp-*
+    // (копипаст из header — T13.7: дубли паттерна тиражируются на сайты).
+    expect(logo[0], 'знак логотипа — fdp-logo__mark').toContain('class="fdp-logo__mark"');
+    expect(logo[0], 'текст логотипа — fdp-logo__text').toContain('class="fdp-logo__text"');
+    // Чужих классов header-паттерна в сниппете footer нет вообще.
+    expect(markup, 'в footer нет классов чужого паттерна hdp-*').not.toMatch(/\bhdp-[a-z]/);
+  });
+
   it('icon-only ссылки соцсетей — с aria-label (T4.1, гейт irao/link-accessible-name)', () => {
     const socials = pattern.match(/<a\b[^>]*class="[^"]*fdp-footer__social[^"]*"[^>]*>/g) ?? [];
     expect(socials.length, 'соцсети на месте').toBeGreaterThanOrEqual(2);

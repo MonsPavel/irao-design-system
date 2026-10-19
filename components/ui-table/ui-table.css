@@ -217,6 +217,25 @@
   font-weight: var(--ui-fw-caption);
 }
 
+/* Фон ячеек в карточном режиме нейтрализован (T13.7): zebra, hover и sticky
+   красят ЯЧЕЙКИ — на карточке-строке это заливка/полоса внутри коробки
+   карточки, а прозрачная sticky-шапка просвечивает строками. Селекторы
+   повторяют форму zebra (nth-child) и hover (та же специфичность) и идут
+   ПОЗЖЕ них — ниже md побеждает порядок каскада. md-блок возвращает
+   zebra/hover/sticky усиленными парами — поведение ≥md не меняется (см.
+   восстановление в @media ниже). */
+.ui-table--cards .ui-table__body .ui-table__row:nth-child(even) .ui-table__col,
+.ui-table--cards .ui-table__body .ui-table__row:nth-child(even) .ui-table__rowhead,
+.ui-table--cards .ui-table__body .ui-table__row:nth-child(even) .ui-table__cell,
+.ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__col,
+.ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__rowhead,
+.ui-table--cards .ui-table__body .ui-table__row:hover .ui-table__cell,
+.ui-table--cards .ui-table__col,
+.ui-table--cards .ui-table__rowhead,
+.ui-table--cards .ui-table__cell {
+  background-color: transparent;
+}
+
 /* ── md (768px, шкала T2.5): возврат к table-раскладке ──
    Явные table-значения (не display: revert): детерминированно во всех
    движках, без опоры на UA-таблицу. Правила идут ПОСЛЕ базовых карточных —
@@ -246,6 +265,37 @@
     display: table-cell;
     padding: var(--ui-space-3) var(--ui-space-4);
     border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
+  }
+
+  /* Возврат table-раскладки возвращает и фон ячеек (нейтрализация базы —
+     только ниже md). Значения сознательно повторяют zebra/hover/sticky выше —
+     правьте ТРОЙКОЙ (каждому фону базы — усиленное восстановление здесь):
+      — zebra: (0,6,0) против (0,5,0) у нейтрализатора;
+      — sticky: (0,3,0) против (0,2,0) — шапка остаётся непрозрачной
+        (--ui-color-surface, гарантия README «Геометрия»);
+      — hover: .ui-table поднят в селектор до той же (0,6,0), что у zebra, и
+        блок стоит ПОСЛЕ zebra — порядок каскада даёт hover и на полосатых
+        чётных строках (дизайн hover-блока выше; ревью T13.7: (0,5,0)
+        проигрывал zebra-восстановлению — hover был мёртв на чётных). */
+  .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__col,
+  .ui-table--cards.ui-table--zebra
+    .ui-table__body
+    .ui-table__row:nth-child(even)
+    .ui-table__rowhead,
+  .ui-table--cards.ui-table--zebra .ui-table__body .ui-table__row:nth-child(even) .ui-table__cell {
+    background-color: var(--ui-color-surface-muted);
+  }
+
+  .ui-table--cards.ui-table--sticky-head .ui-table__col {
+    background-color: var(--ui-color-surface);
+  }
+
+  @media (hover: hover) {
+    .ui-table--cards.ui-table .ui-table__body .ui-table__row:hover .ui-table__col,
+    .ui-table--cards.ui-table .ui-table__body .ui-table__row:hover .ui-table__rowhead,
+    .ui-table--cards.ui-table .ui-table__body .ui-table__row:hover .ui-table__cell {
+      background-color: var(--ui-color-surface-hover);
+    }
   }
 
   .ui-table--cards .ui-table__rowhead::before,

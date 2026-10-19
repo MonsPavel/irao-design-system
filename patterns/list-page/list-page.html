@@ -243,8 +243,10 @@
   </div>
 
   <!-- Пагинация (T6.3): первая страница — краевой сценарий канонического
-       паттерна; href — demo-адреса «?page=N», в бою шаблон сохраняет
-       применённые GET-параметры фильтров (README паттерна, Bitrix-заметки). -->
+       паттерна. Demo-упрощение: href «?page=N» подменяют query целиком —
+       так ссылки остаются чистыми на статике; в бою шаблон сохраняет
+       применённые GET-параметры фильтров («?city=msk&page=2», README
+       паттерна и Bitrix-заметки). -->
   <nav class="ui-pagination" id="lpp-pagination" aria-label="Пагинация: вакансии">
     <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">
       <!-- prettier-ignore -->

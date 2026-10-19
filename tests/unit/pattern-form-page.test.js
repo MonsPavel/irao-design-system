@@ -173,6 +173,15 @@ describe('patterns/form-page/form-page.html — контракт эталонн�
     expect(pattern, 'сниппет гвардит по hidden').toContain('!el.hidden');
   });
 
+  it('серверная ветка: чекбокс согласия fpp-srv-consent несёт required (T13.7)', () => {
+    // Реальный серверный ре-рендер несёт атрибуты ОПРЕДЕЛЕНИЯ формы: без
+    // required модуль не валидирует и не чистит consent при частичном
+    // пере-сабмите — pre-rendered ошибка оставалась висеть (замечание T8.3).
+    const consent = pattern.match(/<input[^>]*id="fpp-srv-consent"[^>]*>/) ?? [''];
+    expect(consent[0], 'чекбокс согласия серверной ветки на месте').not.toBe('');
+    expect(consent[0], 'required — согласие валидируется как остальные поля').toContain('required');
+  });
+
   it('ветка success: видимая ui-form__success, заголовок — цель фокуса, CTA-лента', () => {
     expect(pattern, 'секция ветки success — якорь-состояние').toContain('id="fpp-success"');
     const successTitle = pattern.match(/<(h[23456])[^>]*ui-form__success-title[^>]*>/) ?? [''];

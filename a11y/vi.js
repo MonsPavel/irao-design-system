@@ -34,9 +34,16 @@
  * кнопок ошибкой не является — сохранённое состояние применяется всегда
  * (режим действует на всём сайте, панель рендерит сайт).
  *
- * Чистая логика состояния (parse/merge) вынесена в функции parseSaved и
- * mergeState — поверхность tests/unit/vi.test.js (T1.6/T9.1); DOM-поведение —
- * tests/e2e/ui-vi.spec.js.
+ * Чистая логика состояния (parse/merge/clamp) вынесена в функции parseSaved,
+ * mergeState и clampState — поверхность tests/unit/vi.test.js (T1.6/T9.1;
+ * T13.7 добавил enum-клампинг); DOM-поведение — tests/e2e/ui-vi.spec.js.
+ *
+ * Клампинг значений (T13.7): size/theme/img/kern из хранилища и публичного
+ * set() валидируются против enum'ов (выведены из констант классов) —
+ * неизвестное значение заменяется дефолтом БЕЗ броска. Клампинг в
+ * mergeState/apply до classList.add: валидный JSON с невалидным значением
+ * не оставляет половинного состояния (body.vi без панели/aria/padding) —
+ * InvalidCharacterError недостижим.
  */
 (function (window, document) {
   'use strict';
@@ -61,6 +68,51 @@
     'vi-theme--beige',
     'vi-theme--green',
   ];
+
+  /**
+   * Допустимые значения настроек — выводятся из констант классов выше
+   * (один источник: класс на body ⇔ значение настройки).
+   */
+  var SIZE_VALUES = SIZE_CLASSES.map(function (className) {
+    return className.replace('vi-size--', '');
+  });
+  var THEME_VALUES = THEME_CLASSES.map(function (className) {
+    return className.replace('vi-theme--', '');
+  });
+  var IMG_VALUES = ['on', 'gray', 'off'];
+  var KERN_VALUES = ['normal', 'wide'];
+
+  /**
+   * Клампинг значения к enum'у настройки (T13.7): неизвестное/не-строковое
+   * → дефолт. Валидный JSON с невалидным значением (мусор хранилища, чужая
+   * версия пакета) до клампинга доходил до classList.add и бросал
+   * InvalidCharacterError посреди apply() — половинное состояние страницы.
+   * @param {string} value значение настройки из хранилища/set()
+   * @param {string[]} allowed допустимые значения (enum)
+   * @param {string} fallback дефолт настройки
+   * @returns {string} значение или дефолт
+   */
+  function clampValue(value, allowed, fallback) {
+    return typeof value === 'string' && allowed.indexOf(value) !== -1 ? value : fallback;
+  }
+
+  /**
+   * Клампинг полного состояния к enum'ам size/theme/img/kern (on — булев
+   * семантикой truthiness). Вызывается из mergeState (загрузка хранилища)
+   * и apply (публичный set() мутирует state напрямую) — до classList.add,
+   * поэтому InvalidCharacterError недостижим.
+   * @param {object} raw состояние до клампинга (не мутируется)
+   * @returns {object} новое состояние с допустимыми значениями
+   */
+  function clampState(raw) {
+    return {
+      on: Boolean(raw.on),
+      size: clampValue(raw.size, SIZE_VALUES, DEFAULTS.size),
+      theme: clampValue(raw.theme, THEME_VALUES, DEFAULTS.theme),
+      img: clampValue(raw.img, IMG_VALUES, DEFAULTS.img),
+      kern: clampValue(raw.kern, KERN_VALUES, DEFAULTS.kern),
+    };
+  }
 
   var state = mergeState(DEFAULTS, parseSaved(readSaved()));
   var initialized = false;
@@ -94,13 +146,14 @@
 
   /**
    * Чистая: дефолты + сохранённое (частичное) — сохранённое побеждает.
+   * Значения клампятся к enum'ам настроек (T13.7): неизвестное → дефолт.
    * Оба аргумента не мутируются.
    * @param {object} defaults полные дефолтные настройки
    * @param {object|null} saved сохранённые (возможно частичные) настройки
    * @returns {object} новое полное состояние
    */
   function mergeState(defaults, saved) {
-    return Object.assign({}, defaults, saved || {});
+    return clampState(Object.assign({}, defaults, saved || {}));
   }
 
   /** Сохранить состояние; сбой записи (квота, приватный режим) игнорируется. */
@@ -118,6 +171,12 @@
    * padding-top по фактической высоте панели. Завершается сохранением.
    */
   function apply() {
+    // Клампинг перед любым classList.add (T13.7): публичный set() мутирует
+    // state в обход mergeState — здесь последняя линия, InvalidCharacterError
+    // на невалидном значении недостижим. Кламп НА МЕСТЕ (Object.assign, не
+    // перепривязка): ссылка window.IraoUI.vi.state остаётся живой — контракт
+    // «живое состояние» доки (README ui-vi, таблица API, строка state).
+    Object.assign(state, clampState(state));
     var body = document.body;
     body.classList.toggle('vi', state.on);
     // Классы режимов — только в режиме (AC T9.1 «выключение полностью снимает
@@ -228,6 +287,7 @@
     STORAGE_KEY: STORAGE_KEY,
     parseSaved: parseSaved,
     mergeState: mergeState,
+    clampState: clampState,
   };
 
   // readyState-guard (Bitrix addJs(..., true) кладёт скрипт в конец страницы):

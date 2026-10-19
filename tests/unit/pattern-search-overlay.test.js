@@ -150,6 +150,16 @@ describe('patterns/search-overlay/README.md — дока паттерна (AC: B
     expect(readme, 'без JS форма отправляется переходом').toContain('без JS');
     expect(readme, 'триггер — ссылка на страницу поиска').toContain('href');
   });
+
+  it("Don't единственности диалога (T13.7): один sop-dialog/sop-query на страницу, копию шапки удалить", () => {
+    // Ловушка дублей id (T13.7): header включает копию диалога для
+    // самодостаточности — оба README обязаны предупреждать о единственности,
+    // иначе совместная интеграция даёт дубли id (откроется только первый).
+    expect(readme, 'правило единственности').toMatch(/один диалог|ровно один/i);
+    expect(readme, 'id пары названы').toMatch(/sop-dialog/);
+    expect(readme, 'id поля названо').toMatch(/sop-query/);
+    expect(readme, 'связка с паттерном header (копия в его сниппете)').toMatch(/header/);
+  });
 });
 
 describe('сборка: стенд паттерна генерируется в stands/patterns/search-overlay.html', () => {

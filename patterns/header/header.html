@@ -226,6 +226,11 @@
   Диалог поиска — копия паттерна search-overlay (T7.6): в бою держите перед
   </body>; здесь — рядом с шапкой для самодостаточности сниппета. Подробная
   дока и связующие стили (sop-*) — patterns/search-overlay/.
+
+  Don't (ловушка дублей id): на странице ровно ОДИН диалог sop-dialog/sop-query.
+  Если паттерн search-overlay уже подключён (тот же id в include-файле/footer),
+  удалите копию из шапки — при дублях data-ui-modal-target откроет только
+  первый диалог, а html-validate no-duplicate-id поймает копию уже в бою.
 -->
 <dialog
   class="ui-modal ui-modal--full"

@@ -216,6 +216,70 @@ describe('components/ui-table/ui-table.css — карточная трансфо
       'подписи data-label сняты',
     ).toBe(true);
   });
+
+  it('фон ячеек в карточном режиме нейтрализован ниже md (T13.7): zebra/hover не дают инсет-полос на карточке', () => {
+    // zebra и hover красят ЯЧЕЙКИ — на карточке-строке это заливка внутри
+    // коробки карточки (артефакт). Нейтрализатор повторяет форму zebra
+    // (nth-child) и hover (та же специфичность) и стоит позже в base --cards;
+    // md-блок возвращает zebra/hover/sticky — поведение ≥md не меняется.
+    const zebraIdx = css.indexOf('.ui-table--zebra');
+    const hoverIdx = css.indexOf('@media (hover: hover)');
+    const neutralizerIdx = css.search(
+      /\.ui-table--cards \.ui-table__body \.ui-table__row:nth-child\(even\) \.ui-table__col[\s\S]{0,1200}?background-color: transparent;/,
+    );
+    expect(neutralizerIdx, 'нейтрализатор zebra-формы в базе --cards').toBeGreaterThan(-1);
+    expect(
+      css.slice(neutralizerIdx),
+      'нейтрализатор покрывает и hover-форму, и все три класса ячеек',
+    ).toMatch(
+      /\.ui-table--cards \.ui-table__body \.ui-table__row:hover \.ui-table__(?:col|rowhead|cell)[\s\S]{0,1200}?background-color: transparent;/,
+    );
+    expect(neutralizerIdx, 'нейтрализатор после zebra (порядок каскада)').toBeGreaterThan(zebraIdx);
+    expect(neutralizerIdx, 'нейтрализатор после hover-блока').toBeGreaterThan(hoverIdx);
+
+    // ≥md — поведение без изменений: zebra/hover/sticky в карточном режиме
+    // работают. Восстановления усилены модификатором (--cards.ui-table--X):
+    // нейтрализатор-перечисление действует на ВСЕХ ширинах, парой к нему
+    // идёт правило большей специфичности в md-блоке (ревью T13.7).
+    const md = css.slice(css.indexOf('@media (min-width: 768px)'));
+    expect(md, 'zebra восстановлен в md-блоке (--cards + --zebra)').toMatch(
+      /\.ui-table--cards\.ui-table--zebra[\s\S]{0,400}?background-color: var\(--ui-color-surface-muted\);/,
+    );
+    expect(
+      md,
+      'sticky-фон восстановлен в md-блоке (--cards + --sticky-head: непрозрачный surface, гарантия README)',
+    ).toMatch(
+      /\.ui-table--cards\.ui-table--sticky-head \.ui-table__col\s*\{[^}]*background-color: var\(--ui-color-surface\);/,
+    );
+    const hoverRestore = md.indexOf('@media (hover: hover)');
+    expect(hoverRestore, 'hover восстановлен в md-блоке --cards').toBeGreaterThan(-1);
+    expect(md.slice(hoverRestore), 'hover — пара одобренного дизайна').toMatch(
+      /background-color: var\(--ui-color-surface-hover\);/,
+    );
+
+    // Каскад hover × zebra на чётных строках ≥md (ревью T13.7): hover обязан
+    // побеждать и там — дизайн «hover виден и на полосатых строках»
+    // (ui-table.css, hover-блок). Специфичность считаем машиной: селектор —
+    // классы + псевдоклассы (тегов в селекторах компонента нет).
+    const specOf = (selector) =>
+      (selector.match(/\.[a-z0-9-]+/gi) ?? []).length + (selector.match(/:[a-z-]+/gi) ?? []).length;
+    const zebraRestoreMatch = md.match(/\.ui-table--cards\.ui-table--zebra[^{]*\{/);
+    expect(zebraRestoreMatch, 'zebra-восстановление найдено').toBeTruthy();
+    const hoverRestoreSel = md.slice(hoverRestore).match(/\.ui-table--cards[^{]*:hover[^{]*\{/);
+    expect(hoverRestoreSel, 'hover-восстановление найдено').toBeTruthy();
+    const zebraSpec = specOf(zebraRestoreMatch[0].replace('{', '').trim());
+    const hoverSpec = specOf(hoverRestoreSel[0].replace('{', '').trim());
+    expect(
+      hoverSpec,
+      `специфичность hover-восстановления (${hoverSpec}) не ниже zebra (${zebraSpec})`,
+    ).toBeGreaterThanOrEqual(zebraSpec);
+    if (hoverSpec === zebraSpec) {
+      expect(
+        hoverRestore,
+        'при равной специфичности hover-блок позже zebra — порядок каскада на его стороне',
+      ).toBeGreaterThan(md.indexOf('.ui-table--cards.ui-table--zebra'));
+    }
+  });
 });
 
 describe('канонический паттерн (components/ui-table/ui-table.html) — семантика', () => {

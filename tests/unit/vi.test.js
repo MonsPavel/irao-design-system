@@ -31,6 +31,14 @@ import { contrastRatio, declarationsFromTokenFile, resolveTokenColor } from '../
 
 const viSource = readFileSync(join(import.meta.dirname, '../../a11y/vi.js'), 'utf8');
 const viCss = readFileSync(join(import.meta.dirname, '../../a11y/vi.css'), 'utf8');
+const viPanelCanon = readFileSync(
+  join(import.meta.dirname, '../../components/ui-vi/ui-vi.html'),
+  'utf8',
+);
+const viPanelStand = readFileSync(
+  join(import.meta.dirname, '../../showcase/pages/ui-vi/index.html'),
+  'utf8',
+);
 
 const STORAGE_KEY = 'irao-ui-vi';
 
@@ -261,6 +269,121 @@ describe('a11y/vi.js — загрузка сохранённого состоя�
     fireDOMContentLoaded(window);
 
     expect(document.body.classList.contains('vi')).toBe(false);
+  });
+});
+
+describe('a11y/vi.js — enum-клампинг значений хранилища (T13.7)', () => {
+  /**
+   * Валидный JSON с невалидными ЗНАЧЕНИЯМИ (мусор хранилища, чужая версия
+   * пакета): до T13.7 mergeState пропускал их в apply() — classList.add
+   * бросал InvalidCharacterError посреди apply() (половинное состояние:
+   * body.vi поставлен, панель/aria/padding нет). Клампинг — в mergeState/apply
+   * до classList.add: неизвестное значение → дефолт, без бросков; состояние
+   * применяется ПОЛНОСТЬЮ (Accessibility requirements: половинное состояние
+   * «body.vi без панели» недостижимо).
+   */
+  const INVALID = {
+    on: true,
+    size: 'a b', // пробел — без клампинга InvalidCharacterError в classList.add
+    theme: 'purple',
+    img: 'sometimes',
+    kern: 'hug',
+  };
+
+  it('валидный JSON с невалидными значениями не бросает: каждое поле клампится к дефолту', () => {
+    const { window } = makeSandbox({
+      readyState: 'loading',
+      bodyHtml: panelHtml,
+      storage: { [STORAGE_KEY]: JSON.stringify(INVALID) },
+    });
+
+    expect(() => fireDOMContentLoaded(window)).not.toThrow();
+
+    const api = window.IraoUI.vi;
+    expect(api.state).toEqual({
+      on: true,
+      size: 'md',
+      theme: 'baw',
+      img: 'on',
+      kern: 'normal',
+    });
+  });
+
+  it('клампнутое состояние применяется полностью: классы дефолтов, панель, aria, padding', () => {
+    const { window, document } = makeSandbox({
+      readyState: 'loading',
+      bodyHtml: panelHtml,
+      storage: { [STORAGE_KEY]: JSON.stringify(INVALID) },
+    });
+
+    fireDOMContentLoaded(window);
+
+    expect(viClasses(document.body).sort()).toEqual(['vi', 'vi-size--md', 'vi-theme--baw']);
+    expect(document.body.classList.contains('vi-img--gray')).toBe(false);
+    expect(document.body.classList.contains('vi-kern--wide')).toBe(false);
+    expect(document.querySelector('[data-ui-vi-panel]').hidden).toBe(false);
+    expect(document.querySelector('[data-ui-vi-toggle]').getAttribute('aria-pressed')).toBe('true');
+    // padding-top выставлен тем же apply() — состояние не оборвалось на классах.
+    expect(document.body.style.paddingTop).not.toBe('');
+  });
+
+  it('mergeState клампит: неизвестные size/theme/img/kern заменяются дефолтами', () => {
+    const { window } = makeSandbox({ readyState: 'complete' });
+    const api = window.IraoUI.vi;
+
+    expect(
+      api.mergeState(api.DEFAULTS, {
+        on: true,
+        size: 'xxl',
+        theme: 'purple',
+        img: 'sometimes',
+        kern: 'hug',
+      }),
+    ).toEqual({ on: true, size: 'md', theme: 'baw', img: 'on', kern: 'normal' });
+  });
+
+  it('публичный set() с невалидным значением не бросает и клампится к дефолту (apply до classList.add)', () => {
+    const { window, document } = makeSandbox({ readyState: 'loading', bodyHtml: panelHtml });
+
+    fireDOMContentLoaded(window);
+    document.querySelector('[data-ui-vi-toggle]').click(); // вход в режим
+
+    expect(() => window.IraoUI.vi.set('size', 'a b')).not.toThrow();
+    expect(() => window.IraoUI.vi.set('theme', 'purple')).not.toThrow();
+    expect(() => window.IraoUI.vi.set('img', 'sometimes')).not.toThrow();
+    expect(() => window.IraoUI.vi.set('kern', 'hug')).not.toThrow();
+
+    expect(document.body.classList.contains('vi-size--md')).toBe(true);
+    expect(document.body.classList.contains('vi-theme--baw')).toBe(true);
+    expect(window.IraoUI.vi.state.size).toBe('md');
+    expect(window.IraoUI.vi.state.theme).toBe('baw');
+  });
+
+  it('ссылка window.IraoUI.vi.state живая (T13.7-ревью): set/toggle видны через api.state, объект не перепривязывается', () => {
+    // Контракт «живое состояние» — README ui-vi (таблица API, строка state):
+    // внешний код интегратора читает api.state для синхронизации своей кнопки.
+    // Регрессия: apply() перепривязывал локальную state на новый объект
+    // (clampState возвращает литерал) — api.state навсегда держал объект,
+    // захваченный при регистрации (на main все мутации были in place).
+    const { window, document } = makeSandbox({ readyState: 'loading', bodyHtml: panelHtml });
+
+    fireDOMContentLoaded(window);
+    const api = window.IraoUI.vi;
+    const stateRef = api.state;
+
+    document.querySelector('[data-ui-vi-toggle]').click(); // вход в режим
+
+    expect(api.state.on, 'toggle() виден через api.state (ссылка живая)').toBe(true);
+    expect(api.state, 'объект состояния не перепривязывается (мутация in place)').toBe(stateRef);
+
+    api.set('size', 'lg');
+    expect(api.state.size, 'set() виден через api.state').toBe('lg');
+    expect(document.body.classList.contains('vi-size--lg'), 'класс применён из того же state').toBe(
+      true,
+    );
+
+    document.querySelector('[data-ui-vi-toggle]').click(); // выход
+    expect(api.state.on, 'выход виден через api.state').toBe(false);
   });
 });
 
@@ -571,5 +694,37 @@ describe('a11y/vi.css — гарантированные пары тем ГОС�
     const code = viCss.replace(/\/\*[\s\S]*?\*\//g, '');
     const rootBlock = code.match(/:root\s*\{[^}]*\}/)[0];
     expect(code.replace(rootBlock, '')).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  });
+});
+
+describe('панель ui-vi: канон ↔ стенд — паритет копии (пин T13.7)', () => {
+  /**
+   * Стенд ui-vi дублирует панель канона ВРУЧНУЮ (showcase/pages/ui-vi/
+   * index.html, копия рядом с демо-секциями) — потеря data-ui-vi-set или
+   * aria-label при правке одной из сторон была бы молчаливой (дрейф паттерна,
+   * замечание T9.1). Пин сравнивает блок панели канона
+   * (components/ui-vi/ui-vi.html) и стенда нормализованно: без комментариев
+   * (приём vi.test.js «пины смотрят на код») и с схлопнутыми пробелами —
+   * форматирование вправе различаться, разметка и хуки — нет.
+   */
+  const stripMarkupComments = (source) => source.replace(/<!--[\s\S]*?-->/g, '');
+  const collapse = (source) => source.replace(/\s+/g, ' ').trim();
+
+  /** Блок панели: от корневого div до следующей секции (канон — до конца файла). */
+  const panelOf = (source, endMarker) => {
+    const start = source.indexOf('<div class="ui-vi-bar"');
+    const end = endMarker ? source.indexOf(endMarker, start) : source.length;
+    return source.slice(start, end);
+  };
+
+  it('копия панели на стенде — точная (нормализованно): классы, хуки, aria, тексты', () => {
+    const canon = collapse(stripMarkupComments(panelOf(viPanelCanon)));
+    const stand = collapse(
+      stripMarkupComments(panelOf(viPanelStand, '<section class="ui-section"')),
+    );
+    expect(canon.length, 'панель канона найдена в components/ui-vi/ui-vi.html').toBeGreaterThan(
+      100,
+    );
+    expect(stand, 'панель стенда совпадает с каноном нормализованно').toBe(canon);
   });
 });
