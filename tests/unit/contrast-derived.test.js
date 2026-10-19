@@ -128,7 +128,8 @@ describe('ревизия производных: спецификации цве
     });
     expect(
       result.configErrors.some(
-        (message) => message.includes('no-spec') && message.includes('fg') && message.includes('token/mix'),
+        (message) =>
+          message.includes('no-spec') && message.includes('fg') && message.includes('token/mix'),
       ),
       `configErrors содержит внятную причину: ${JSON.stringify(result.configErrors)}`,
     ).toBe(true);

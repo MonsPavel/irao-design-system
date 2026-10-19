@@ -23,8 +23,7 @@ const root = join(import.meta.dirname, '..', '..');
 
 /** CSS без комментариев, переводы строк нормализованы к LF: пины смотрят на
  * исполняемый код, а не на прозу шапки; смещения якорей не зависят от CRLF. */
-const stripCssComments = (css) =>
-  css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\r\n/g, '\n');
+const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\r\n/g, '\n');
 
 /** Тело правила по селектору (начало строки — селектор, до закрывающей скобки). */
 const blockOf = (css, selector) => {
