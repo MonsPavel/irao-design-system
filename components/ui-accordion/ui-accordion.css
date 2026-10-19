@@ -85,11 +85,14 @@
 /* Вопрос — career-portal .faq__q (components.css:280): текст слева, шеврон
    справа; маркер disclosure снят (list-style: none — evergreen; видимый
    индикатор состояния — шеврон разметки с поворотом). Паддинг — touch-запас
-   (24px × 2 + строка fs-body ≥ 44px). */
+   (24px × 2 + строка fs-body ≥ 44px). gap career-portal 24px — ступень
+   --ui-space-5 «как есть» (T13.8: ранее ошибочно брался --ui-space-6 = 32px
+   — отклонение от одобренного дизайна без design-decision, возвращено к
+   проверяемому факту career-portal). */
 .ui-accordion__q {
   box-sizing: border-box;
   display: flex;
-  gap: var(--ui-space-6);
+  gap: var(--ui-space-5);
   align-items: center;
   justify-content: space-between;
   padding: var(--ui-space-5);

@@ -29,6 +29,7 @@
 | Unit-тесты JS (Vitest, T1.6) | `tests/unit/<имя>.test.js` | юнит-пины решения; эталон контракта шаблона — `tests/unit/module-template.test.js` |
 | Скриншот-эталоны | `tests/visual/` | создаются только в контейнере (ADR-0004) |
 | Архитектурные доки и ADR | `docs/`, `docs/adr/` | ADR — по процессу из § «ADR-процесс» ниже |
+| SPIKE (исследование) | файла в репозитории нет: прототипы выбрасываются | SPIKE закрывается ADR (номер продолжает журнал `docs/adr/`), доказательства — в ADR (прецедент T7.1/ADR-0011) |
 | Шаблон JS-модуля | `docs/templates/` | не production-код |
 | Шаблон migration-guide (для будущих major) | `docs/templates/migration-guide-template.md` | заполняется при major с удалениями/переименованиями (ADR-0007); заполненные гайды — `docs/ui-system/release/` |
 | Dev-модуль deprecation-предупреждений | `base/deprecations.js` | попадает только в dev-сборку `dist/ui.dev.js` (T12.2); прод `ui.min.js` молчит; записи реестра — вместе с алиас-классом в том же minor-PR |

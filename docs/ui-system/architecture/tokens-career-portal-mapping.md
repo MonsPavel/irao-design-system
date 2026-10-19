@@ -139,7 +139,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | тень dropdown `0 16px 40px rgba(0,40,86,.16)` (components.css:375) | `--ui-shadow-lg` | |
 | `--transition` 0.25s ease | `--ui-transition` | fast/slow 0.15/0.4 — §3.2 (новые) |
 | height `.btn` 52px (components.css:70) | `--ui-button-height: 3.25rem` | T4.2: используется как min-height (32px-база T3.6) |
-| height `.tag` 28px (components.css:99) | `--ui-tag-height: 1.75rem` | T4.3: используется как min-height (тот же прецедент) |
+| height `.tag` 28px (components.css:101) | `--ui-tag-height: 1.75rem` | T4.3: используется как min-height (тот же прецедент) |
 | gap `.tag` 6px (components.css:100) | `--ui-tag-gap: 0.375rem` | T4.3: ступени шкалы отступов кратны 4 — значение перенесено «как есть», пересмотр — design-decision владельца |
 | gap `.vac-card` 14px (pages.css:42) | `--ui-card-gap: 0.875rem` | T4.4: тот же случай — вне шкалы §3.2, перенос «как есть» |
 | height `.field__input/.field__select/.field__textarea` 52px (components.css:148) | `--ui-field-height: 3.25rem` | T5.1: используется как min-height (прецедент `--ui-button-height` — 32px-база T3.6) |
@@ -147,7 +147,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | вертикальный паддинг `.field__textarea` 14px (components.css:162) | `--ui-field-textarea-padding-y: 0.875rem` | T5.1: вне шкалы §3.2, перенос «как есть» (прецедент `--ui-card-gap`) |
 | размер инпута `.checkbox input`/`.radio input` 20px (components.css:203/223) | `--ui-control-size: 1.25rem` | T5.2: единый токен обоих блоков (в career-portal значение продублировано) |
 | gap `.radio` 10px (components.css:215) | `--ui-radio-gap: 0.625rem` | T5.2: вне шкалы §3.2, перенос «как есть» (прецедент `--ui-tag-gap`), пересмотр — design-decision владельца |
-| letter-spacing `.tag` 0.02em (components.css:105) | `--ui-tag-letter-spacing: 0.02em` | T4.3: em — от размера роли |
+| letter-spacing `.tag` 0.02em (components.css:106) | `--ui-tag-letter-spacing: 0.02em` | T4.3: em — от размера роли |
 | рамка `.btn--outline` 2px (components.css:87) | `--ui-button-border-width: 0.125rem` | T4.2: «все значения из токенов» |
 | `.pagination__arrow[disabled]` opacity 0.3 (components.css:269) | `--ui-opacity-disabled: 0.3` | T4.2: единственный disabled-паттерн одобренного дизайна |
 | min-width/height `.pagination__page` и 44×44 `.pagination__arrow` (components.css:240/261) | `--ui-pagination-size: 2.75rem` | T6.3: touch-цель 44×44, 44px вне шкалы отступов §3.2 — перенос «как есть» (прецедент `--ui-card-gap`); min-геометрия (прецедент `--ui-button-height`) |

@@ -52,7 +52,7 @@ describe('tokens/semantic.css — тег-токены (Implementation requiremen
     expect(source).toMatch(/--ui-color-tag-blue-bg:\s*var\(--ui-blue-100\);/);
   });
 
-  it('высота тега — токен 1.75rem (28px career-portal components.css:99)', () => {
+  it('высота тега — токен 1.75rem (28px career-portal components.css:101)', () => {
     expect(source).toMatch(/--ui-tag-height:\s*1\.75rem;/);
   });
 
@@ -60,7 +60,7 @@ describe('tokens/semantic.css — тег-токены (Implementation requiremen
     expect(source).toMatch(/--ui-tag-gap:\s*0\.375rem;/);
   });
 
-  it('letter-spacing тега — токен 0.02em (career-portal components.css:105; em — от размера роли)', () => {
+  it('letter-spacing тега — токен 0.02em (career-portal components.css:106; em — от размера роли)', () => {
     expect(source).toMatch(/--ui-tag-letter-spacing:\s*0\.02em;/);
   });
 });

@@ -24,26 +24,52 @@
 | `.ui-table--cards` | карточная трансформация: на <md (768px) таблица → карточки-строки с парами «заголовок–значение» из `data-label`; на ≥md — обычная таблица |
 | `data-label` на ячейках | **обязателен** в `--cards` для каждой `td` и `th` тела — текст заголовка колонки (копипаст); исполняет гейт html-validate `irao/table-card-data-label` (error) |
 | JS | не требуется (CSS-компонент) |
-| Токены | `--ui-space-1..4`, `--ui-color-divider`, `--ui-color-surface(-muted/-hover)`, `--ui-border-width`, `--ui-border-color`, `--ui-radius-md`, `--ui-z-sticky`, `--ui-fw-body-bold`, `--ui-fs-caption`, `--ui-fw-caption`, `--ui-color-text-muted` |
+| Токены | `--ui-space-1..5`, `--ui-color-divider`, `--ui-color-surface(-muted/-hover)`, `--ui-border-width`, `--ui-border-color`, `--ui-radius-md`, `--ui-z-sticky`, `--ui-fw-body-bold`, `--ui-fs-caption`, `--ui-fw-caption`, `--ui-color-text-muted` |
+
+Скролл-зона вокруг обычной таблицы (обёртка — только когда таблица шире
+контейнера; здесь сравнение по колонкам важно, колонок много):
 
 ```html
 <div class="ui-table__scroll" tabindex="0" role="region" aria-label="Направления подготовки">
-  <table class="ui-table ui-table--cards">
+  <table class="ui-table">
     <caption class="ui-table__caption">Направления подготовки</caption>
     <thead class="ui-table__head">
       <tr class="ui-table__row">
         <th class="ui-table__col" scope="col">Направление</th>
         <th class="ui-table__col" scope="col">Срок обучения</th>
+        <th class="ui-table__col" scope="col">Форма</th>
       </tr>
     </thead>
     <tbody class="ui-table__body">
       <tr class="ui-table__row">
-        <th class="ui-table__rowhead" scope="row" data-label="Направление">Электромонтёр подстанции</th>
-        <td class="ui-table__cell" data-label="Срок обучения">2 года</td>
+        <th class="ui-table__rowhead" scope="row">Электромонтёр подстанции</th>
+        <td class="ui-table__cell">2 года</td>
+        <td class="ui-table__cell">Очная</td>
       </tr>
     </tbody>
   </table>
 </div>
+```
+
+Карточная трансформация — отдельный паттерн (строка — самодостаточная запись;
+обёртка скролла с `--cards` не совмещается — на <md таблица и так не скроллится):
+
+```html
+<table class="ui-table ui-table--cards">
+  <caption class="ui-table__caption">Направления подготовки</caption>
+  <thead class="ui-table__head">
+    <tr class="ui-table__row">
+      <th class="ui-table__col" scope="col">Направление</th>
+      <th class="ui-table__col" scope="col">Срок обучения</th>
+    </tr>
+  </thead>
+  <tbody class="ui-table__body">
+    <tr class="ui-table__row">
+      <th class="ui-table__rowhead" scope="row" data-label="Направление">Электромонтёр подстанции</th>
+      <td class="ui-table__cell" data-label="Срок обучения">2 года</td>
+    </tr>
+  </tbody>
+</table>
 ```
 
 ## Матрица выбора паттерна

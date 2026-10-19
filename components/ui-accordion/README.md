@@ -18,7 +18,7 @@ career-portal (класс A): визуал и grid-rows-техника аним�
 | Элемент `.ui-accordion__a-inner` | внутренний блок ответа: паддинги, роль small |
 | JS (опция) | `IraoUI.accordion`: `init()`, `selector`; хук разметки — `data-ui-accordion` на корне; режим single — `data-ui-accordion="single"` |
 | События | `irao-ui:accordion-open` / `irao-ui:accordion-close` на корне (`bubbles: true`) — на каждом toggle инициализированного инстанса (точка расширения сайта) |
-| Токены | `--ui-color-surface-muted`, `--ui-radius-md`, `--ui-color-primary`, `--ui-color-text`, `--ui-fs-body`, `--ui-fw-body-bold`, `--ui-fs-small`, `--ui-lh-small`, `--ui-space-4/5/6`, `--ui-transition`; focus-тройка ADR-0001 |
+| Токены | `--ui-color-surface-muted`, `--ui-radius-md`, `--ui-color-primary`, `--ui-color-text`, `--ui-fs-body`, `--ui-fw-body-bold`, `--ui-fs-small`, `--ui-lh-small`, `--ui-space-4/5`, `--ui-transition`; focus-тройка ADR-0001 |
 
 ```html
 <div class="ui-accordion ui-accordion--faq">
@@ -92,7 +92,7 @@ career-portal (0fr→1fr на обёртке ответа) в Chromium не ст
 ```
 
 Почему это работает: `::details-content` (Chrome 131+, Safari 18.4+, Firefox
-150+) — **постоянный** бокс слота содержимого, он существует и в закрытом
+143+) — **постоянный** бокс слота содержимого, он существует и в закрытом
 состоянии — переходу есть между чем идти. `interpolate-size` не нужен
 (0fr↔1fr интерполируется сам). `content-visibility` c `allow-discrete` в
 переходе (согласование с UA-правилом
