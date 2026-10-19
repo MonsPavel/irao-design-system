@@ -12,7 +12,7 @@
  *  - components/ui-tag/ui-tag.css: box-sizing на корне (ADR-0002); цвета —
  *    только токены слоя 2; min-height вместо height (прецедент T4.2: 32px-база
  *    T3.6 растит тег вместе с текстом); тройка micro + fw-caption (career-
- *    portal components.css:104–105: font-size 12px, font-weight --fw-caption);
+ *    portal components.css:103–104: font-size 12px, font-weight --fw-caption);
  *    точка-маркер __icon — наследие media__tag-dot (8px, круг) на currentColor;
  *  - инварианты системы: без !important, без hex, без фиксированных (px/rem)
  *    высот — min-height только из токенов;
@@ -52,11 +52,11 @@ describe('tokens/semantic.css — тег-токены (Implementation requiremen
     expect(source).toMatch(/--ui-color-tag-blue-bg:\s*var\(--ui-blue-100\);/);
   });
 
-  it('высота тега — токен 1.75rem (28px career-portal components.css:99)', () => {
+  it('высота тега — токен 1.75rem (28px career-portal components.css:100)', () => {
     expect(source).toMatch(/--ui-tag-height:\s*1\.75rem;/);
   });
 
-  it('gap тега — токен 0.375rem (6px career-portal components.css:100, не на шкале §3.2 — перенос «как есть»)', () => {
+  it('gap тега — токен 0.375rem (6px career-portal components.css:99, не на шкале §3.2 — перенос «как есть»)', () => {
     expect(source).toMatch(/--ui-tag-gap:\s*0\.375rem;/);
   });
 
@@ -95,7 +95,7 @@ describe('components/ui-tag/ui-tag.css — база (Implementation requirements
     expect(block).toContain('color: var(--ui-color-text);');
   });
 
-  it('шрифтовая тройка одобренного .tag — fs-micro × fw-caption (career-portal components.css:104–105)', () => {
+  it('шрифтовая тройка одобренного .tag — fs-micro × fw-caption (career-portal components.css:103–104)', () => {
     const block = blockOf(css, '.ui-tag');
     expect(block).toContain('font-size: var(--ui-fs-micro);');
     expect(block).toContain('font-weight: var(--ui-fw-caption);');

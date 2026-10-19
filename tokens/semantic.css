@@ -158,9 +158,9 @@
 
   /* ── Теги и счётчики (ui-tag / ui-badge, T4.3): геометрия ── */
 
-  /* career-portal: components.css:99 — height .tag 28px → rem; используется как min-height (прецедент T4.2: 32px-база T3.6 растит компонент вместе с текстом) */
+  /* career-portal: components.css:100 — height .tag 28px → rem; используется как min-height (прецедент T4.2: 32px-база T3.6 растит компонент вместе с текстом) */
   --ui-tag-height: 1.75rem;
-  /* career-portal: components.css:100 — gap .tag 6px; ступени шкалы отступов §3.2 кратны 4, значение 6 — перенос «как есть», пересмотр — design-decision владельца */
+  /* career-portal: components.css:99 — gap .tag 6px; ступени шкалы отступов §3.2 кратны 4, значение 6 — перенос «как есть», пересмотр — design-decision владельца */
   --ui-tag-gap: 0.375rem;
   /* career-portal: components.css:105 — letter-spacing .tag 0.02em; em — от размера роли (как --ui-link-underline-thickness) */
   --ui-tag-letter-spacing: 0.02em;
