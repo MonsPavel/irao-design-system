@@ -105,6 +105,37 @@ describe('ревизия производных: спецификации цве
     expect(result.configErrors).toHaveLength(2);
   });
 
+  it('спека без token и mix — внятная ошибка, а не TypeError деконструкции (T13.9)', () => {
+    // Ошибка конфига обязана называть причину и попадать в configErrors
+    // (evaluate ловит), а не крашить гейт TypeError-ом вида
+    // «Cannot destructure property 'base' of 'undefined'».
+    expect(() => resolveColorSpec({}, primitives, semantic)).toThrow(/token\/mix/);
+    expect(() => resolveColorSpec({ mix: null }, primitives, semantic)).toThrow(/token\/mix/);
+
+    const result = evaluateDerivedContrast({
+      primitives,
+      semantic,
+      pairs: [
+        {
+          id: 'no-spec',
+          level: 'large',
+          fg: {},
+          bg: { token: '--ui-color-surface' },
+          usage: 'тест',
+        },
+      ],
+      exceptions: [],
+    });
+    expect(
+      result.configErrors.some(
+        (message) => message.includes('no-spec') && message.includes('fg') && message.includes('token/mix'),
+      ),
+      `configErrors содержит внятную причину: ${JSON.stringify(result.configErrors)}`,
+    ).toBe(true);
+    // Пара без разрешённых цветов не попадает в строки гейта.
+    expect(result.rows.map((row) => row.id)).toEqual([]);
+  });
+
   it('дубль id и исключение для неизвестной пары — ошибки конфига', () => {
     const pair = {
       id: 'x',

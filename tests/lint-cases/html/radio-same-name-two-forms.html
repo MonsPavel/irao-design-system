@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <title>Позитивный контроль: одноимённые радио в РАЗНЫХ формах — не одна группа</title>
+  </head>
+  <body>
+    <!-- ПОЗИТИВНЫЙ КОНТРОЛЬ (T13.9, rev T5.2): счёт радио-групп скоупится
+         ближайшим form-предком. Одноимённое (общий name «format») одиночное
+         радио в каждой из двух форм — ДВЕ независимые единицы, а не одна
+         группа: нативно браузер не связывает радио из разных форм, каждая
+         единица .ui-radio легальна сама по себе. Глобальный счёт склеивал их
+         в псевдогруппу и требовал fieldset/legend обеим — ложное
+         срабатывание. Ожидаемый зелёный: ни одного замечания
+         irao/radio-group-fieldset. -->
+    <h1>Две независимые формы с одиночным радио</h1>
+
+    <form action="/" method="post">
+      <label><input type="radio" name="format" value="full"> Полная занятость</label>
+      <button type="submit">Отправить анкету 1</button>
+    </form>
+
+    <form action="/" method="post">
+      <label><input type="radio" name="format" value="part"> Частичная занятость</label>
+      <button type="submit">Отправить анкету 2</button>
+    </form>
+  </body>
+</html>

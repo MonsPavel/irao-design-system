@@ -274,6 +274,22 @@ const EXPECTATIONS = [
     expect: 'pass',
   },
   {
+    // T13.9 (rev T5.2): счёт групп скоупится ближайшим form-предком —
+    // одноимённые одиночные радио двух РАЗНЫХ форм не склеиваются в группу,
+    // гейт молчит (глобальный счёт давал ложное срабатывание на обе).
+    file: 'html/radio-same-name-two-forms.html',
+    tool: 'html',
+    expect: 'pass',
+  },
+  {
+    // T13.9 (rev T5.2): радио без name пропускаются — браузер не связывает
+    // их в группу, проверять fieldset/legend нечего (пустой ключ счёта
+    // собирал безымянные радио в псевдогруппу — ложное срабатывание).
+    file: 'html/radio-nameless-pair.html',
+    tool: 'html',
+    expect: 'pass',
+  },
+  {
     // T6.2 (Implementation requirements п.1): id-связки tab↔panel обязательны —
     // таб без панели (href в никуда) и панель без имени табом — ошибки.
     file: 'html/tabs-id-links-broken.html',
