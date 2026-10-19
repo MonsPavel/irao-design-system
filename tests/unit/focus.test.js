@@ -96,10 +96,14 @@ describe('дока «Focus visible: почему так» (Scope T3.2)', () => {
     'utf8',
   );
 
-  it('существует, ссылается на ADR-0001, перечисляет цели политики', () => {
+  it('существует, ссылается на ADR-0001, правило показано полными формами селекторов', () => {
     expect(doc).toContain('0001-focus-visible-specificity.md');
+    // Полные формы «${target}:focus-visible» (T13.9): прежний пин голых имён
+    // ('a', 'button', …) был тавтологичным — «a» содержится почти в любом
+    // русском тексте. Дока обязана показывать точные селекторы политики
+    // (блок «Правило (base/focus.css)»).
     for (const target of ADR_TARGETS) {
-      expect(doc).toContain(target);
+      expect(doc, `${target}:focus-visible в доке`).toContain(`${target}:focus-visible`);
     }
   });
 

@@ -448,9 +448,12 @@ describe('канонический паттерн ui-radio-group (components/ui-
   });
 
   it('legend обязателен и идёт первым ребёнком fieldset (правило доки + html-validate)', () => {
-    const legendTag = html.match(/<\/fieldset\s*>\s*<legend[\s\S]*?<\/legend>/)?.[0];
+    // Мёртвый регэксп «</fieldset>…<legend>» удалён (T13.9): legend — первый
+    // ребёнок ВНУТРИ fieldset, после закрывающего </fieldset> в паттерне не
+    // встречается — первое совпадение всегда было undefined и срабатывал
+    // fallback ниже (поведение ассертов не меняется).
     expect(html).toMatch(/<fieldset[^>]*>\s*<legend/);
-    expect(legendTag ?? html.match(/<legend[\s\S]*?<\/legend>/)?.[0]).toContain(
+    expect(html.match(/<legend[\s\S]*?<\/legend>/)?.[0]).toContain(
       'class="ui-radio-group__legend"',
     );
   });
@@ -511,6 +514,17 @@ describe('html-validate: правило irao/radio-group-fieldset (T5.2, AC)', (
     expect(registry).toMatch(
       /file:\s*'html\/radio-group-with-legend\.html'[\s\S]*?expect:\s*'pass'/,
     );
+  });
+
+  it('псевдогруппы не дают ложных срабатываний (T13.9): одноимённые одиночки разных форм и безымянные радио — pass', () => {
+    // Скоуп счёта — ближайший form-предок; радио без name пропускаются.
+    for (const fixture of ['radio-same-name-two-forms.html', 'radio-nameless-pair.html']) {
+      expect(existsSync(join(root, 'tests', 'lint-cases', 'html', fixture)), fixture).toBe(true);
+    }
+    expect(registry).toMatch(
+      /file:\s*'html\/radio-same-name-two-forms\.html'[\s\S]*?expect:\s*'pass'/,
+    );
+    expect(registry).toMatch(/file:\s*'html\/radio-nameless-pair\.html'[\s\S]*?expect:\s*'pass'/);
   });
 });
 

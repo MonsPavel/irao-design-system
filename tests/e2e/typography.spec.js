@@ -18,12 +18,17 @@
  *  5. иерархия заголовков зелёная на ВСЕХ страницах showcase
  *     (Implementation requirements T3.3 п.2): один h1 на странице, уровни
  *     без пропусков (перенос идеи test_internship_headings.py career-portal);
+ *     набор обхода сверяется с собранным dist — страница вне индекса или
+ *     битая ссылка индекса красит тест (T13.9);
  *  6. 32px-сценарий (совместно с T3.6): типографика масштабируется
  *     пропорционально rem-токенам, длинные RU-слова не рвут макет —
  *     горизонтального скролла нет;
  *  7. axe чист на стенде; эталоны 375/768/1280/1440 — только из контейнера
  *     (ADR-0004).
  */
+import { readdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { expect } from '@playwright/test';
 
 import { a11y, openIndex, shot, test, VIEWPORTS } from '../helpers/harness.js';
@@ -209,7 +214,7 @@ test.describe('типографика (T3.3)', () => {
     expect(list.addressStyle, 'address без браузерного курсива').toBe('normal');
   });
 
-  test('иерархия заголовков зелёная на всех страницах showcase', async ({ page }) => {
+  test('иерархия заголовков зелёная на всех страницах showcase', async ({ page, baseURL }) => {
     // Обход всего полигона (~75 страниц: стенды, доки, гайды, standalone) —
     // бюджет по умолчанию 30s рассчитан на быстрый прогон одной страницы;
     // полный обход на медленных машинах в него не укладывается (дефект был
@@ -228,10 +233,40 @@ test.describe('типографика (T3.3)', () => {
         .map((href) => new URL(href, `${window.location.origin}/showcase/dist/index.html`).href)
         .filter((href) => href.startsWith(`${window.location.origin}/showcase/dist/`)),
     );
+
+    // Сверка набора обхода с СОБРАННЫМ полигоном (T13.9, rev T3.3: прежний
+    // ассерт «≥ 4 ссылки» пропускал страницу, выпавшую из индекса, — она
+    // молча теряла проверку иерархии). Ожидаемое множество генерируется из
+    // showcase/dist (знания сборки не дублируются вручную): страница вне
+    // индекса и битая ссылка индекса — красные. process.cwd() — корень
+    // репозитория (конвенция tests/helpers/stands.js); index.html дилится
+    // на канонический адрес «/» (rewrite сервера), как и ссылка каркаса
+    // «index.html» в обходе.
+    const distPages = readdirSync(join(process.cwd(), 'showcase', 'dist'), {
+      recursive: true,
+    })
+      .map((file) => String(file).replaceAll('\\', '/'))
+      .filter((file) => file.endsWith('.html'));
+    const expected = new Set([
+      `${baseURL}/`,
+      ...distPages
+        .filter((file) => file !== 'index.html')
+        .map((file) => `${baseURL}/showcase/dist/${file}`),
+    ]);
+    const walked = new Set(
+      [`${baseURL}/`, ...links].map((url) => url.replace(/\/showcase\/dist\/index\.html$/, '/')),
+    );
+
+    const notLinked = [...expected].filter((url) => !walked.has(url));
+    const broken = [...walked].filter((url) => !expected.has(url));
     expect(
-      links.length,
-      'полигон не пуст: стенды + standalone собираются в индекс',
-    ).toBeGreaterThanOrEqual(4);
+      notLinked.map((url) => url.slice(baseURL.length)),
+      'страницы dist вне индекса — обход иерархии их молча терял',
+    ).toEqual([]);
+    expect(
+      broken.map((url) => url.slice(baseURL.length)),
+      'ссылки индекса на несобранные страницы',
+    ).toEqual([]);
 
     for (const url of ['/', ...links]) {
       await page.goto(url);

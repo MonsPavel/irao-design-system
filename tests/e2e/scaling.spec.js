@@ -8,8 +8,11 @@
  *     (CSS-вьюпорт вдвое уже, DPR вдвое больше — точная модель системного
  *     зума; механика и fallback зафиксированы в tests/e2e/README.md);
  *  B. `html { font-size: 32px }` — инжект через page.addStyleTag;
- *  чувствительность — гейт обязан ловить специально сломанный узел
- *  (фикс. высота + overflow: hidden → обрезка; наложение соседей → перекрытие).
+ *  чувствительность — гейт обязан ловить специально сломанные узлы
+ *  (фикс. высота + overflow: hidden → обрезка; наложение соседей →
+ *  перекрытие; body min-width: 400vw → горизонтальный скролл; снятие
+ *  маркеров → contract-нарушение — обе последние ветки исполняются
+ *  с T13.9) и НЕ флагать легитимный скролл (overflow: auto).
  *
  * «Что считать поломкой» (пороги, Implementation requirements T3.6 п.2):
  *  - горизонтальный скролл страницы: scrollWidth > clientWidth у html/body;
@@ -202,16 +205,17 @@ const nextFrame = (page) =>
  * (rem-типографика в CSS-px не меняется, медиазапросы пересчитываются).
  * Реализация зафиксирована в tests/e2e/README.md; раскладка-эквивалент для
  * не-chromium браузеров — page.setViewportSize({ width: база/2 }).
+ * Сессия создаётся ОДНА на тест (T13.9: прежний код открывал newCDPSession
+ * на каждую базу и не детачил — сессии висели до закрытия контекста);
+ * переопределение применяется на неё, снятие и detach — в finally теста.
  */
-const applyZoom = async (page, { width, height, factor }) => {
-  const session = await page.context().newCDPSession(page);
+const applyZoom = async (session, { width, height, factor }) => {
   await session.send('Emulation.setDeviceMetricsOverride', {
     width: Math.round(width / factor),
     height: Math.round(height / factor),
     deviceScaleFactor: factor,
     mobile: false,
   });
-  return session;
 };
 
 test.describe('масштабирование: zoom 200% и 32px-база (T3.6, релизный гейт)', () => {
@@ -224,20 +228,30 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
         'CDP-эмуляция зума — только chromium (механика — tests/e2e/README.md)',
       );
       const page = await stand(name);
+      // Одна CDP-сессия на тест с session.detach() (T13.9): переопределение
+      // зума пере применяется на неё для каждой базы, снятие и detach —
+      // в finally (детач не теряется при падении ассерта посреди цикла).
+      const session = await page.context().newCDPSession(page);
+      try {
+        for (const base of ZOOM_BASE_WIDTHS) {
+          await page.setViewportSize({ width: base, height: 900 });
+          await applyZoom(session, { width: base, height: 900, factor: 2 });
 
-      for (const base of ZOOM_BASE_WIDTHS) {
-        await page.setViewportSize({ width: base, height: 900 });
-        const session = await applyZoom(page, { width: base, height: 900, factor: 2 });
+          // Ожидание применения эмуляции (а не одиночное чтение): при высокой
+          // параллельной нагрузке CDP-override доезжает не мгновенно, и ранний
+          // замер поймал бы гонку, а не раскладку.
+          const cssWidth = Math.round(base / 2);
+          await page.waitForFunction((expected) => window.innerWidth === expected, cssWidth);
+          await nextFrame(page);
 
-        // Ожидание применения эмуляции (а не одиночное чтение): при высокой
-        // параллельной нагрузке CDP-override доезжает не мгновенно, и ранний
-        // замер поймал бы гонку, а не раскладку.
-        const cssWidth = Math.round(base / 2);
-        await page.waitForFunction((expected) => window.innerWidth === expected, cssWidth);
-        await nextFrame(page);
-
-        expectNoViolations(await collectViolations(page), `zoom 200% (база ${base}) на «${name}»`);
+          expectNoViolations(
+            await collectViolations(page),
+            `zoom 200% (база ${base}) на «${name}»`,
+          );
+        }
+      } finally {
         await session.send('Emulation.clearDeviceMetricsOverride');
+        await session.detach();
       }
     });
 
@@ -322,5 +336,41 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
       await collectViolations(page),
       'overflow: auto с прокручиваемым (достижимым) контентом',
     );
+  });
+
+  test('чувствительность гейта: горизонтальный скролл (body min-width: 400vw) ловится', async ({
+    stand,
+  }) => {
+    // Ветка hscroll чекера (T13.9: вид поломки был назван юнит-пином и
+    // README, но исполняющего теста не было — ветка без единого прогона).
+    // Инжект спеки: body { min-width: 400vw } — scrollWidth > clientWidth
+    // у body (и у html), чекер обязан флагать.
+    const page = await stand('layout');
+    await page.addStyleTag({ content: 'body { min-width: 400vw !important; }' });
+    await nextFrame(page);
+
+    const kinds = new Set((await collectViolations(page)).map((v) => v.kind));
+    expect(
+      kinds.has('hscroll'),
+      `горизонтальный скролл ловится как hscroll (поймано: ${[...kinds].join(', ')})`,
+    ).toBe(true);
+  });
+
+  test('чувствительность гейта: стенд без маркеров — contract-нарушение, а не зелёный прогон', async ({
+    stand,
+  }) => {
+    // Ветка contract чекера (T13.9: «пустой гейт = отсутствие поверхности, а
+    // не зелёный результат» — ветка не исполнялась ни одним тестом). Снятие
+    // всех data-ui-check-layout обязано дать ровно contract-нарушение: чекер
+    // молчать не имеет права.
+    const page = await stand('layout');
+    await page.evaluate(() => {
+      for (const node of document.querySelectorAll('[data-ui-check-layout]')) {
+        node.removeAttribute('data-ui-check-layout');
+      }
+    });
+
+    const kinds = (await collectViolations(page)).map((v) => v.kind);
+    expect(kinds, 'снятие всех маркеров — ровно contract-нарушение').toEqual(['contract']);
   });
 });

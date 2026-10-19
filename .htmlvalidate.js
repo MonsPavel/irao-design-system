@@ -65,6 +65,14 @@
  * фикстура — tests/lint-cases/html/radio-without-fieldset.html, позитивная —
  * radio-group-with-legend.html.
  *
+ * С T13.9 (rev T5.2): счёт групп скоупится БЛИЖАЙШИМ form-предком —
+ * одноимённые радио из разных форм нативно не связаны (браузер связывает
+ * радио только внутри одной формы), глобальный счёт склеивал одиночные
+ * радио двух форм в псевдогруппу (фикстура radio-same-name-two-forms.html).
+ * Радио без name пропускаются: без name браузер не связывает радио вовсе —
+ * пустой ключ счёта собирал безымянные радио в псевдогруппу (фикстура
+ * radio-nameless-pair.html).
+ *
  * С T6.2: `irao/tabs-id-links` — id-связки tab↔panel в разметке ui-tabs
  * обязательны (спека T6.2, Implementation requirements п.1). Таб-ссылка
  * обязана вести href="#id" на существующую панель (без JS якорь —
@@ -279,22 +287,41 @@ class ImgDimensions extends Rule {
   }
 }
 
-/** Радио-группа (≥2 радио с общим name) обязана лежать в fieldset с legend (T5.2). */
+/** Радио-группа (≥2 радио с общим name в одном form-скоупе) обязана лежать
+ *  в fieldset с legend (T5.2). С T13.9: скоуп — ближайший form-предок
+ *  (одноимённые радио разных форм не связаны), радио без name — пропуск. */
 class RadioGroupFieldset extends Rule {
   setup() {
     this.on('dom:ready', (event) => {
+      // Ближайший form-предок радио (элемент form или null вне форм) — скоуп
+      // счёта: браузер связывает радио в группу только внутри одной формы.
+      const formScopeOf = (radio) => {
+        let ancestor = radio.parent;
+        while (ancestor) {
+          if (ancestor.is('form')) return ancestor;
+          ancestor = ancestor.parent;
+        }
+        return null;
+      };
       const radios = [...event.document.querySelectorAll('input[type="radio"]')];
-      // Группа = имя, встречающееся ≥2 раз; одиночное имя — не группа.
-      const countByName = new Map();
+      // Радио без name пропускаются (T13.9): браузер не связывает их в
+      // группу (клик не снимает соседа), общего имени и роли group нет —
+      // пустой ключ счёта собирал безымянные радио в псевдогруппу.
+      const named = [];
+      const countByScope = new Map(); // скоуп (form | null) → Map<name, count>
       for (const radio of radios) {
         const name = radio.getAttribute('name');
-        const key = name ? name.value : '';
-        countByName.set(key, (countByName.get(key) ?? 0) + 1);
+        if (!name || name.value.trim() === '') continue;
+        const scope = formScopeOf(radio);
+        const byName = countByScope.get(scope) ?? new Map();
+        byName.set(name.value, (byName.get(name.value) ?? 0) + 1);
+        countByScope.set(scope, byName);
+        named.push({ radio, scope, name: name.value });
       }
-      for (const radio of radios) {
-        const name = radio.getAttribute('name');
-        const key = name ? name.value : '';
-        if ((countByName.get(key) ?? 0) < 2) continue;
+      // Группа = имя, встречающееся в ОДНОМ скоупе ≥2 раз; одиночное имя —
+      // не группа (одноимённые одиночки разных форм — разные скоупы, T13.9).
+      for (const { radio, scope, name } of named) {
+        if ((countByScope.get(scope)?.get(name) ?? 0) < 2) continue;
         // Ближайший fieldset-предок обязан нести legend прямым ребёнком.
         let ancestor = radio.parent;
         let closestFieldset = null;
