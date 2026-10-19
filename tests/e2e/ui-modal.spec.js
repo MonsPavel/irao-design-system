@@ -375,7 +375,11 @@ test.describe('ui-modal: скролл-лок (Implementation requirements п.1)'
       rootOverflow: document.documentElement.style.overflow,
     }));
     expect(during.rootOverflow, 'overflow hidden на корне').toBe('hidden');
-    expect(during.scrollY, 'позиция прокрутки погашена локом (overflow hidden)').toBe(0);
+    // Контракт К10 — «скролл заблокирован, макет не сдвинулся»; АБСОЛЮТНАЯ
+    // позиция прокрутки под локом не контрактуема: overflow: hidden сохраняет
+    // её в Chromium, но клик триггера Playwright может автоскроллить к нему
+    // (ранее ассерт toBe(0) проходил именно этой случайностью). Доказательство
+    // лока — колесо ниже не меняет позицию; ширина шапки — пара К10.
     expect(
       during.headerWidth,
       `ширина шапки не изменилась (${before.headerWidth} → ${during.headerWidth})`,

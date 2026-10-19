@@ -244,7 +244,7 @@ describe('сборка: стенд паттерна генерируется в 
     const block = build.slice(build.indexOf('patterns/landing-section'));
     // Лендинг-секция — не страница: h1 несёт каркас демо-страницы (как
     // base/typography/layout/integration), заголовки секций — h2.
-    expect(block).toContain('<h1>patterns/landing-section</h1>');
+    expect(block).toContain('<h1 class="ui-showcase-title">patterns/landing-section</h1>');
     // h1 добавляется в main каркаса; источник паттерна остаётся фрагментом.
     const pattern = readFileSync(
       join(root, 'patterns', 'landing-section', 'landing-section.html'),

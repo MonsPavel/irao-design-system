@@ -115,11 +115,11 @@ async function expectChannels(state, [r, g, b], label) {
 
 /** Клавиатурный обход до ссылки (фокус с клавиатуры — :focus-visible, ADR-0001). */
 async function tabTo(page, locator) {
-  for (let step = 0; step < 25; step += 1) {
+  for (let step = 0; step < 120; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
     await page.keyboard.press('Tab');
   }
-  throw new Error('фокус не дошёл до ссылки за 25 Tab');
+  throw new Error('фокус не дошёл до ссылки за 120 Tab');
 }
 
 /** DOM-страховка гейтов html-validate на стенде: blank→noopener, icon-only→имя. */

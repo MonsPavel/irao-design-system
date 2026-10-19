@@ -95,13 +95,18 @@ test.describe('ui-table-scroll: скролл-зона (AC — фокус и кл
     await expect(zone).toHaveAttribute('tabindex', '0');
     await expect(zone).toHaveAttribute('aria-label', /направления/i);
 
-    // Tab-порядок: после последнего интерактива шапки каркаса (select темы)
-    // следующая остановка — скролл-регион (первый интерактив main). Tab —
-    // клавиатурная модальность, поэтому зона в :focus-visible и контур рисует
-    // глобальная политика ADR-0001 ([tabindex]:focus-visible, base/focus.css).
+    // Tab-порядок (редизайн каркаса 19.10): между шапкой и контентом стоит
+    // сайдбар-навигация, поэтому за последним интерактивом шапки (select
+    // темы) обход идёт по сайдбару, и в main он приходит с последней ссылки
+    // сайдбара. Tab — клавиатурная модальность, поэтому зона в
+    // :focus-visible и контур рисует глобальная политика ADR-0001
+    // ([tabindex]:focus-visible, base/focus.css).
     await page.locator('.ui-showcase-header__theme').focus();
     await page.keyboard.press('Tab');
-    await expect(zone, 'Tab из шапки приходит в скролл-регион').toBeFocused();
+    await expect(page.locator('.ui-showcase-nav'), 'Tab из шапки — регион сайдбара').toBeFocused();
+    await page.locator('.ui-showcase-nav__link >> nth=-1').focus();
+    await page.keyboard.press('Tab');
+    await expect(zone, 'Tab из сайдбара приходит в скролл-регион').toBeFocused();
     const outline = await zone.evaluate((el) => {
       const style = getComputedStyle(el);
       return { width: style.outlineWidth, style: style.outlineStyle };
