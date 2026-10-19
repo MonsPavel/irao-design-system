@@ -19,11 +19,11 @@ import { a11y, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js'
 
 /** Клавиатурный обход до элемента (фокус с клавиатуры — :focus-visible, ADR-0001). */
 async function tabTo(page, locator) {
-  for (let step = 0; step < 30; step += 1) {
+  for (let step = 0; step < 120; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
     await page.keyboard.press('Tab');
   }
-  throw new Error('фокус не дошёл до элемента за 30 Tab');
+  throw new Error('фокус не дошёл до элемента за 120 Tab');
 }
 
 standTest.describe('ui-empty: структура и доступность (T4.8)', () => {

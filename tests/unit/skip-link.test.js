@@ -121,7 +121,7 @@ describe('каркас showcase (Scope: включён по умолчанию; 
     const bodyBlock = build.slice(build.indexOf('const body = [];'), build.indexOf('if (withJs)'));
     const skip = bodyBlock.indexOf('<a class="ui-skip-link" href="#main">');
     const header = bodyBlock.indexOf('...header');
-    const main = bodyBlock.indexOf('<main id="main" tabindex="-1">');
+    const main = bodyBlock.indexOf('<main id="main" tabindex="-1" class="ui-showcase-main">');
     expect(skip, 'skip-link в теле каркаса').toBeGreaterThan(-1);
     expect(header, 'header после skip-link').toBeGreaterThan(skip);
     expect(main, 'цель #main после header').toBeGreaterThan(header);
@@ -135,7 +135,7 @@ describe('каркас showcase (Scope: включён по умолчанию; 
   });
 
   it('frame(): цель #main несёт tabindex="-1" — фокус переносится реально (Safari-кейс)', () => {
-    expect(build).toContain('<main id="main" tabindex="-1">');
+    expect(build).toContain('<main id="main" tabindex="-1" class="ui-showcase-main">');
   });
 
   it('selfChecks: валидация каркаса — skip-link и цель #main на каждой странице (правило «цель существует»)', () => {

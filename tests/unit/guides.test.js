@@ -127,9 +127,9 @@ describe('renderGuidePage — страница гайда в каркасе show
 
   it('h1 из метаданных гайда; «#»-строка источника не дублируется в теле', () => {
     const html = renderGuidePage({ guide, markdown: '# Quickstart: тест\n\nВводный абзац.\n' });
-    expect(html).toContain('<h1>Quickstart: тест</h1>');
+    expect(html).toContain('<h1 class="ui-showcase-title">Quickstart: тест</h1>');
     expect(html).toContain('<p>Вводный абзац.</p>');
-    expect(html.match(/<h1>/g)).toHaveLength(1);
+    expect(html.match(/<h1/g)).toHaveLength(1);
   });
 
   it('«##»-разделы источника становятся h2 страницы по порядку', () => {
@@ -137,8 +137,12 @@ describe('renderGuidePage — страница гайда в каркасе show
       guide,
       markdown: '# t\n\nИнтро.\n\n## Первый\n\nТело 1.\n\n## Второй\n\nТело 2.\n',
     });
-    const h2s = html.match(/<h2>[^<]*<\/h2>/g) ?? [];
-    expect(h2s).toEqual(['<h2>Первый</h2>', '<h2>Второй</h2>']);
+    // Редизайн 19.10: h2 секций несут якорные id оглавления гайда.
+    const h2s = html.match(/<h2[^>]*>[^<]*<\/h2>/g) ?? [];
+    expect(h2s).toEqual([
+      '<h2 id="ui-guide-sec-0">Первый</h2>',
+      '<h2 id="ui-guide-sec-1">Второй</h2>',
+    ]);
   });
 
   it('info-строка fence (snippet=…) не протекает в вывод; код экранирован', () => {
@@ -146,7 +150,7 @@ describe('renderGuidePage — страница гайда в каркасе show
       guide,
       markdown: '```php snippet=bitrix/snippets/json-data.php\n$ x < y;\n```\n',
     });
-    expect(html).toContain('<pre><code>$ x &lt; y;</code></pre>');
+    expect(html).toContain('<pre tabindex="0"><code>$ x &lt; y;</code></pre>');
     expect(html).not.toContain('snippet=bitrix/snippets');
   });
 

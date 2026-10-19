@@ -125,10 +125,12 @@ standTest.describe('patterns/form-page: эталонная сборка (Scope) 
       const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
       expect(
         stylesheets.length,
-        'внешних стилей ровно два — ui-core и ui-vi из dist (нового CSS нет)',
-      ).toBe(2);
+        'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
+      ).toBe(3);
       for (const link of stylesheets) {
-        expect(link, 'стилевой файл — собранный dist').toMatch(/ui-(core|vi)\.min\.css/);
+        expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
+          /ui-(core|vi)\.min\.css|showcase\.css/,
+        );
       }
       expect(
         source,
@@ -577,12 +579,25 @@ standTest.describe('patterns/form-page: a11y страницы (AC)', () => {
         await nextStopFrom('.ui-skip-link'),
         'skip-link → домашняя ссылка каркаса (порядок DOM)',
       ).toBe('ui-showcase-header__home');
-      expect(await nextStopFrom('.ui-showcase-header__home'), 'каркас → тема').toBe(
+      // Редизайн каркаса 19.10: в шапке появилась ссылка на GitHub, между
+      // шапкой и контентом — сайдбар-навигация (порядок DOM: home → github →
+      // тема → регион сайдбара → ссылки сайдбара → крошки паттерна).
+      expect(await nextStopFrom('.ui-showcase-header__home'), 'шапка → GitHub').toBe(
+        'ui-showcase-header__github',
+      );
+      expect(await nextStopFrom('.ui-showcase-header__github'), 'GitHub → тема').toBe(
         'ui-showcase-theme',
       );
-      expect(await nextStopFrom('#ui-showcase-theme'), 'каркас → первая ссылка крошек').toBe(
-        'ui-breadcrumbs__link',
+      expect(await nextStopFrom('#ui-showcase-theme'), 'тема → сайдбар (регион с клавиатуры)').toBe(
+        'ui-showcase-nav',
       );
+      expect(await nextStopFrom('.ui-showcase-nav'), 'регион → первая ссылка сайдбара').toBe(
+        'ui-showcase-nav__link',
+      );
+      expect(
+        await nextStopFrom('.ui-showcase-nav__link >> nth=-1'),
+        'последняя ссылка сайдбара → первая ссылка крошек',
+      ).toBe('ui-breadcrumbs__link');
 
       // Крошки: три ссылки по порядку; после последней — aside-ссылка.
       const secondCrumb = await page.locator(`${SEL.breadcrumbs} a`).nth(1);

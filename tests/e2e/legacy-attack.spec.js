@@ -334,10 +334,17 @@ standTest.describe('legacy-атака: констрейнты раздела 6 �
         roleBefore['font-size'],
       );
 
-      // …а сырой тег БЕЗ класса (служебный h1 каркаса) legacy перебивает —
-      // граница защиты системы, правило для сайта: носить роли классами.
-      const raw = await probeStyles(page, 'main h1:not([class])', ['font-size']);
-      expect(raw['font-size'], 'сырой <h1> под атакой — 18px legacy-правила').toBe('18px');
+      // …а сырой тег БЕЗ класса legacy перебивает — граница защиты системы,
+      // правило для сайта: носить роли классами. Зонд — свой голый h1 в main
+      // (служебный h1 каркаса с редизайна 19.10 несёт класс каркаса, зондить
+      // его нельзя: классы система защищает — см. кейс выше).
+      const raw = await page.evaluate(() => {
+        const el = document.createElement('h1');
+        el.textContent = 'сырой h1 без класса';
+        document.querySelector('main')?.append(el);
+        return getComputedStyle(el).fontSize;
+      });
+      expect(raw, 'сырой <h1> под атакой — 18px legacy-правила').toBe('18px');
     },
   );
 });

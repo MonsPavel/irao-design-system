@@ -1,0 +1,527 @@
+/*!
+ * irao-ui showcase — стили КАРКАСА полигона (редизайн showcase, задача из
+ * реестра 19.10). Зона showcase: файл живёт рядом с генератором
+ * (showcase/build.mjs копирует его в showcase/dist/showcase.css), в dist/
+ * НЕ попадает — ui-core.min.css уезжает на сайты Bitrix без примесей
+ * полигона (ADR-0006).
+ *
+ * Границы зоны (инвариант редизайна):
+ *  — стилизуются ТОЛЬКО каркасные элементы: шапка, сайдбар-навигация,
+ *    подвал, контейнер <main>, служебные классы .ui-showcase-*;
+ *  — НИ ОДНОГО селектора на ui-* классы компонентов и на содержимое
+ *    демо-областей: рендер компонентов на страницах полигона обязан
+ *    оставаться ровно таким, как в ui-core.min.css, — дока показывает
+ *    интегратору то, что получит он;
+ *  — все значения — семантические токены слоя 2 (--ui-*, ADR-0009):
+ *    полигон — витрина системы, сырые цвета/размеры ему запрещены
+ *    (stylelint-гейты те же, что у компонентов).
+ *
+ * Полигон повторяет mobile-first-шкалу брейкпоинтов системы (T2.5):
+ * базовая раскладка — мобильная (сайдбар складывается в компактную
+ * навигацию), колонка сайдбара включается с md (768).
+ */
+
+/* ── Каркас страницы: шапка → (сайдбар | main) → подвал. Все элементы —
+   прямые дети body (инвариант ленмарк-тестов body > header/main/footer).
+   Два режима навигации (класс на body, ставит frame()):
+   - ui-showcase-body--sidebar (index/доки/гайды): с md body — grid
+     «17rem | контент», шапка и подвал охватывают обе колонки;
+   - без модификатора (стенды): обычный поток — демо-страницы получают
+     полную ширину вьюпорта (32px-сценарий T3.6, sticky-aside паттернов),
+     навигация — лента чипов над контентом ── */
+
+body {
+  display: block;
+  min-height: 100vh;
+}
+
+/* ── Шапка: название-ссылка в каталог, GitHub, переключатель темы ── */
+
+.ui-showcase-header {
+  border-bottom: var(--ui-border-width) solid var(--ui-color-border-muted);
+  background-color: var(--ui-color-surface);
+}
+
+.ui-showcase-header__in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3) var(--ui-space-5);
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--ui-container-max);
+  margin-inline: auto;
+  padding-block: var(--ui-space-3);
+  padding-inline: var(--ui-container-pad);
+}
+
+.ui-showcase-header__home {
+  color: var(--ui-color-primary);
+  font-size: var(--ui-fs-h6);
+  font-weight: var(--ui-fw-h6);
+  line-height: var(--ui-lh-h6);
+  text-decoration: none;
+}
+
+.ui-showcase-header__home-note {
+  color: var(--ui-color-text-muted);
+  font-weight: var(--ui-fw-body);
+}
+
+.ui-showcase-header__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3) var(--ui-space-4);
+  align-items: center;
+}
+
+.ui-showcase-header__github {
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  padding: var(--ui-space-1) var(--ui-space-3);
+  border: var(--ui-border-width) solid var(--ui-color-border-muted);
+  border-radius: var(--ui-radius-pill);
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  text-decoration: none;
+  transition:
+    border-color var(--ui-transition-fast),
+    background-color var(--ui-transition-fast),
+    color var(--ui-transition-fast);
+}
+
+.ui-showcase-header__github:hover {
+  border-color: var(--ui-color-border-hover);
+  background-color: var(--ui-color-surface-hover);
+  color: var(--ui-color-primary);
+}
+
+.ui-showcase-header__github svg {
+  width: 1rem;
+  height: 1rem;
+  fill: var(--ui-color-text-muted);
+  transition: fill var(--ui-transition-fast);
+}
+
+.ui-showcase-header__github:hover svg {
+  fill: var(--ui-color-primary);
+}
+
+.ui-showcase-header__theme-label {
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+}
+
+.ui-showcase-header__theme {
+  min-height: var(--ui-button-height-sm);
+  border: var(--ui-border-width) solid var(--ui-color-border-muted);
+  border-radius: var(--ui-radius-sm);
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  padding-inline: var(--ui-space-2);
+}
+
+/* ── Сетка «сайдбар | контент»; сайдбар — с md, до md — компактная
+   навигация-лента над контентом (без JS-переключателей: все ссылки
+   всегда в DOM и в Tab-порядке, обход — через skip-link каркаса) ── */
+
+/* ── Сайдбар-навигация: плоский список, заголовки групп — НЕ заголовки
+   (h1 страницы обязан оставаться первым заголовком DOM — гейт иерархии
+   tests/e2e/typography.spec.js) ── */
+
+.ui-showcase-nav {
+  border-bottom: var(--ui-border-width) solid var(--ui-color-border-muted);
+  background-color: var(--ui-color-surface);
+}
+
+.ui-showcase-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+  align-items: center;
+  max-width: var(--ui-container-max);
+  padding: var(--ui-space-3) var(--ui-container-pad);
+  margin-inline: auto;
+}
+
+.ui-showcase-nav__group-title {
+  display: none;
+}
+
+.ui-showcase-nav__link {
+  display: inline-block;
+  max-width: 100%;
+  padding: var(--ui-space-1) var(--ui-space-3);
+  border: var(--ui-border-width) solid transparent;
+  border-radius: var(--ui-radius-pill);
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition:
+    background-color var(--ui-transition-fast),
+    border-color var(--ui-transition-fast),
+    color var(--ui-transition-fast);
+}
+
+.ui-showcase-nav__link:hover {
+  border-color: var(--ui-color-border-hover);
+  background-color: var(--ui-color-surface-hover);
+  color: var(--ui-color-primary);
+}
+
+.ui-showcase-nav__link--current {
+  border-color: transparent;
+  background-color: var(--ui-color-tag-blue-bg);
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-fw-small);
+}
+
+/* ── Контентная колонка ── */
+
+/* Стенды: без каркасных отступов — демо-контент получает полную ширину,
+   как до редизайна (инвариант gates 32px/sticky/layout). */
+.ui-showcase-main {
+  width: 100%;
+}
+
+/* Страницы документации (сайдбар-режим): читабельная колонка с потолком. */
+body.ui-showcase-body--sidebar .ui-showcase-main {
+  max-width: 75rem;
+  padding: var(--ui-space-5) var(--ui-container-pad) var(--ui-space-7);
+  margin-inline: auto;
+}
+
+/* Заголовок-страницы, который несёт КАРКАС (каталог, стенды, дока, гайд) —
+   тройка ui-h1 из ui-core, но селектор — класс каркаса: h1 паттернов и
+   компонентов внутри main каркас не стилизует (граница зоны). */
+.ui-showcase-title {
+  font-size: var(--ui-fs-h1);
+  font-weight: var(--ui-fw-h1);
+  line-height: var(--ui-lh-h1);
+  margin-block: 0 var(--ui-space-4);
+}
+
+/* Секции каталога (index): заголовок h2 в размере роли ui-h4 — h2-масштаб
+   системы осознанно зарезервирован контенту сайтов. */
+.ui-showcase-section > h2 {
+  font-size: var(--ui-fs-h4);
+  font-weight: var(--ui-fw-h4);
+  line-height: var(--ui-lh-h4);
+  margin-block: 0 var(--ui-space-3);
+}
+
+/* ── Служебная приписка каркаса (путь к источнику на стендах/доках) ── */
+
+.ui-showcase-stand__note {
+  padding: var(--ui-space-3) var(--ui-space-4);
+  border-radius: 0 var(--ui-radius-sm) var(--ui-radius-sm) 0;
+  background-color: var(--ui-color-surface-muted);
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  border-inline-start: 0.1875rem solid var(--ui-color-divider);
+  margin-block: var(--ui-space-4);
+}
+
+.ui-showcase-stand__note code,
+.ui-showcase-footer code {
+  font-family: var(--ui-font-family-mono);
+  font-size: 1em;
+}
+
+.ui-showcase-stand__note a {
+  color: var(--ui-color-primary);
+}
+
+/* ── Подвал каркаса ── */
+
+.ui-showcase-footer {
+  border-top: var(--ui-border-width) solid var(--ui-color-border-muted);
+  background-color: var(--ui-color-surface-muted);
+}
+
+.ui-showcase-footer__in {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3) var(--ui-space-5);
+  align-items: center;
+  justify-content: space-between;
+  max-width: var(--ui-container-max);
+  margin-inline: auto;
+  padding-block: var(--ui-space-4);
+  padding-inline: var(--ui-container-pad);
+}
+
+.ui-showcase-footer__note {
+  margin: 0;
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  overflow-wrap: anywhere;
+}
+
+.ui-showcase-footer__link {
+  color: var(--ui-color-primary);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+}
+
+/* ── Каталог (index): герой с поиском и карточная сетка ── */
+
+.ui-showcase-lead {
+  max-width: 46rem;
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-lead);
+  line-height: var(--ui-lh-lead);
+  margin-block: var(--ui-space-3) var(--ui-space-5);
+}
+
+.ui-showcase-search {
+  margin-block: var(--ui-space-5) var(--ui-space-6);
+}
+
+.ui-showcase-search__label {
+  display: block;
+  color: var(--ui-color-text);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  margin-block-end: var(--ui-space-2);
+}
+
+.ui-showcase-search__field {
+  position: relative;
+  max-width: 34rem;
+}
+
+.ui-showcase-search__field svg {
+  position: absolute;
+  top: 50%;
+  left: var(--ui-space-4);
+  width: 1.25rem;
+  height: 1.25rem;
+  fill: var(--ui-color-text-muted);
+  transform: translateY(-50%);
+}
+
+.ui-showcase-search__input {
+  width: 100%;
+  min-height: 3.25rem;
+  border: var(--ui-border-width) solid var(--ui-color-divider);
+  border-radius: var(--ui-radius-sm);
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-body);
+  line-height: var(--ui-lh-body);
+  padding-inline: var(--ui-space-8) var(--ui-space-4);
+}
+
+.ui-showcase-search__input::placeholder {
+  color: var(--ui-color-text-muted);
+}
+
+.ui-showcase-search__status {
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  margin-block-start: var(--ui-space-2);
+}
+
+.ui-showcase-section {
+  margin-block: var(--ui-space-6);
+}
+
+.ui-showcase-section__note {
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  margin-block: var(--ui-space-2) var(--ui-space-4);
+}
+
+/* Карточная сетка: авто-колонки от ширины, карточка — ссылка целиком. */
+
+.ui-showcase-cards {
+  display: grid;
+  gap: var(--ui-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(16.5rem, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ui-showcase-card__link {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  height: 100%;
+  padding: var(--ui-space-4);
+  border: var(--ui-border-width) solid var(--ui-color-divider);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
+  text-decoration: none;
+  transition:
+    border-color var(--ui-transition-fast),
+    box-shadow var(--ui-transition-fast),
+    transform var(--ui-transition-fast);
+}
+
+.ui-showcase-card__link:hover {
+  border-color: var(--ui-color-border-hover);
+  box-shadow: var(--ui-shadow-sm);
+  transform: translateY(-0.125rem);
+}
+
+.ui-showcase-card__aside-link {
+  display: inline-block;
+  color: var(--ui-color-primary);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  margin-block-start: calc(-1 * var(--ui-space-2));
+  margin-inline-start: var(--ui-space-4);
+}
+
+.ui-showcase-card__chip {
+  align-self: flex-start;
+  padding: var(--ui-space-1) var(--ui-space-2);
+  border-radius: var(--ui-radius-pill);
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-caption);
+  line-height: var(--ui-lh-micro);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ui-showcase-card__chip--stand {
+  background-color: var(--ui-color-tag-green-bg);
+  color: var(--ui-color-tag-green-text);
+}
+
+.ui-showcase-card__chip--doc {
+  background-color: var(--ui-color-tag-blue-bg);
+  color: var(--ui-color-primary);
+}
+
+.ui-showcase-card__chip--guide {
+  background-color: var(--ui-color-tag-orange-bg);
+  color: var(--ui-color-tag-orange-text);
+}
+
+.ui-showcase-card__chip--pattern {
+  background-color: var(--ui-color-tag-gray-bg);
+  color: var(--ui-color-text-muted);
+}
+
+.ui-showcase-card__name {
+  color: var(--ui-color-primary);
+  font-family: var(--ui-font-family-mono);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-body-bold);
+  line-height: var(--ui-lh-body);
+  overflow-wrap: anywhere;
+}
+
+.ui-showcase-card__desc {
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+}
+
+/* ── Список файлов dist на каталоге ── */
+
+.ui-showcase-dist-list {
+  margin: var(--ui-space-3) 0;
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  padding-inline-start: var(--ui-space-5);
+}
+
+.ui-showcase-dist-list code {
+  font-family: var(--ui-font-family-mono);
+}
+
+/* ── Шкала T2.5: с md — сайдбар-колонка на страницах документации ── */
+
+@media (min-width: 768px) {
+  .ui-showcase-header__in,
+  .ui-showcase-nav__list,
+  .ui-showcase-footer__in {
+    padding-inline: var(--ui-container-pad-md);
+  }
+
+  body.ui-showcase-body--sidebar {
+    display: grid;
+    align-content: start;
+    grid-template-columns: 17rem minmax(0, 1fr);
+  }
+
+  body.ui-showcase-body--sidebar > header,
+  body.ui-showcase-body--sidebar > footer {
+    grid-column: 1 / -1;
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-nav {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    overflow-y: auto;
+    max-height: 100vh;
+    border-right: var(--ui-border-width) solid var(--ui-color-border-muted);
+    border-bottom: none;
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-nav__list {
+    flex-direction: column;
+    gap: var(--ui-space-1);
+    align-items: stretch;
+    justify-content: flex-start;
+    padding-block: var(--ui-space-5);
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-nav__group-title {
+    display: block;
+    color: var(--ui-color-text-muted);
+    font-size: var(--ui-fs-micro);
+    font-weight: var(--ui-fw-caption);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-block: var(--ui-space-4) var(--ui-space-2);
+  }
+
+  body.ui-showcase-body--sidebar
+    .ui-showcase-nav__list
+    > .ui-showcase-nav__group-title:first-child {
+    margin-block-start: 0;
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-nav__link {
+    border-radius: var(--ui-radius-sm);
+    padding-inline: var(--ui-space-3);
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-main {
+    padding-block: var(--ui-space-6) var(--ui-space-8);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ui-showcase-header__in,
+  .ui-showcase-nav__list,
+  .ui-showcase-footer__in {
+    padding-inline: var(--ui-container-pad-lg);
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-main {
+    padding-inline: var(--ui-space-7);
+  }
+}

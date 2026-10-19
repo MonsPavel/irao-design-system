@@ -50,10 +50,12 @@ standTest.describe(
         const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
         expect(
           stylesheets.length,
-          'внешних стилей ровно два — ui-core и ui-vi из dist (нового CSS нет)',
-        ).toBe(2);
+          'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
+        ).toBe(3);
         for (const link of stylesheets) {
-          expect(link, 'стилевой файл — собранный dist').toMatch(/ui-(core|vi)\.min\.css/);
+          expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
+            /ui-(core|vi)\.min\.css|showcase\.css/,
+          );
         }
         expect(
           source,

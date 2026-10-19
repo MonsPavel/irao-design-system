@@ -97,11 +97,11 @@ const collectLayoutViolations = (page) =>
 
 /** Клавиатурный обход до элемента (фокус с клавиатуры — :focus-visible, ADR-0001). */
 async function tabTo(page, locator) {
-  for (let step = 0; step < 40; step += 1) {
+  for (let step = 0; step < 120; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
     await page.keyboard.press('Tab');
   }
-  throw new Error('фокус не дошёл до элемента за 40 Tab');
+  throw new Error('фокус не дошёл до элемента за 120 Tab');
 }
 
 standTest.describe(
@@ -118,10 +118,12 @@ standTest.describe(
         const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
         expect(
           stylesheets.length,
-          'внешних стилей ровно два — ui-core и ui-vi из dist (нового CSS нет)',
-        ).toBe(2);
+          'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
+        ).toBe(3);
         for (const link of stylesheets) {
-          expect(link, 'стилевой файл — собранный dist').toMatch(/ui-(core|vi)\.min\.css/);
+          expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
+            /ui-(core|vi)\.min\.css|showcase\.css/,
+          );
         }
         expect(
           source,

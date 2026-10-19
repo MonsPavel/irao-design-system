@@ -206,7 +206,7 @@ async function tabTo(page, locator) {
         ? `${el.tagName}|${el.id}|${typeof el.className === 'string' ? el.className : ''}`
         : 'none';
     });
-  for (let step = 0; step < 60; step += 1) {
+  for (let step = 0; step < 120; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
     const before = await signature();
     await page.keyboard.press('Tab');
@@ -214,7 +214,7 @@ async function tabTo(page, locator) {
       await page.evaluate(() => document.activeElement?.blur());
     }
   }
-  throw new Error('фокус не дошёл до кнопки за 60 Tab');
+  throw new Error('фокус не дошёл до кнопки за 120 Tab');
 }
 
 /** Физический клик мышью по центру кнопки (без actionability-проверок

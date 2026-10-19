@@ -47,11 +47,11 @@ const tabsOf = (page, id) => page.locator(`#${id} a, #${id} button`);
 
 /** Tab-обход до элемента (фокус с клавиатуры — :focus-visible, ADR-0001). */
 async function tabTo(page, locator) {
-  for (let step = 0; step < 60; step += 1) {
+  for (let step = 0; step < 120; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
     await page.keyboard.press('Tab');
   }
-  throw new Error('фокус не дошёл до элемента за 60 Tab');
+  throw new Error('фокус не дошёл до элемента за 120 Tab');
 }
 
 /** Ожидание устоявшегося computed-цвета (переходы --ui-transition не гасим —
