@@ -212,7 +212,11 @@ export function renderMarkdown(markdown, { doDont = false } = {}) {
         i += 1;
       }
       i += 1; // закрывающий ```
-      out.push(`<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`);
+      // tabindex="0" (редизайн 19.10): длинные строки кода скроллятся
+      // (overflow-x в DOCS_STYLE/GUIDE_STYLE) — прокручиваемый регион
+      // доступен с клавиатуры (WCAG 2.1.1, гейт axe
+      // scrollable-region-focusable; прецедент — .ui-docs-frame).
+      out.push(`<pre tabindex="0"><code>${escapeHtml(code.join('\n'))}</code></pre>`);
       continue;
     }
 
@@ -331,8 +335,141 @@ function renderTable(rows) {
 
 /* ── каркас страницы ── */
 
-/** CSS док-страницы — зона showcase (в dist не попадает), токены слоя 2. */
+/** CSS док-страницы — зона showcase (в dist не попадает), токены слоя 2.
+ *  Полировка редизайна 19.10: оглавление, copy-кнопка сниппета, аккуратные
+ *  таблицы/код-блоки markdown-секций. Селекторы контента — ТОЛЬКО прямые
+ *  дети [data-ui-docs-section]: разметка живых примеров (глубже, внутри
+ *  .ui-docs-examples и iframe-фигур) стилизуется исключительно ui-core —
+ *  инвариант «дока показывает интегратору ровно то, что получит он». */
 const DOCS_STYLE = `<style>
+  [data-ui-docs-section] {
+    margin-block: var(--ui-space-6);
+  }
+  [data-ui-docs-section] > h2 {
+    margin-block: 0 var(--ui-space-4);
+    font-size: var(--ui-fs-h4);
+    font-weight: var(--ui-fw-h4);
+    line-height: var(--ui-lh-h4);
+  }
+  [data-ui-docs-section] > h3 {
+    margin-block: var(--ui-space-5) var(--ui-space-3);
+    font-size: var(--ui-fs-h6);
+    font-weight: var(--ui-fw-h6);
+    line-height: var(--ui-lh-h6);
+  }
+  .ui-docs-toc {
+    margin-block: var(--ui-space-4);
+    padding: var(--ui-space-4) var(--ui-space-5);
+    border: var(--ui-border-width) solid var(--ui-color-divider);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface);
+  }
+  .ui-docs-toc__title {
+    margin-block-end: var(--ui-space-2);
+    color: var(--ui-color-text-muted);
+    font-size: var(--ui-fs-micro);
+    font-weight: var(--ui-fw-caption);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ui-docs-toc__list {
+    columns: 2;
+    margin: 0;
+    padding-inline-start: var(--ui-space-5);
+  }
+  .ui-docs-toc__list li {
+    margin-block: var(--ui-space-1);
+    break-inside: avoid;
+  }
+  .ui-docs-toc__list a {
+    color: var(--ui-color-primary);
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+  }
+  .ui-docs-copybar {
+    position: relative;
+    margin: 0 0 var(--ui-space-4);
+  }
+  .ui-docs-copy {
+    position: absolute;
+    top: var(--ui-space-2);
+    right: var(--ui-space-2);
+    min-height: var(--ui-button-height-sm);
+    padding-inline: var(--ui-space-3);
+    border: var(--ui-border-width) solid var(--ui-color-divider);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface);
+    color: var(--ui-color-text);
+    font-family: var(--ui-font-family);
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+    transition:
+      border-color var(--ui-transition-fast),
+      background-color var(--ui-transition-fast),
+      color var(--ui-transition-fast);
+  }
+  .ui-docs-copy:hover {
+    border-color: var(--ui-color-border-hover);
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-primary);
+  }
+  .ui-docs-copybar pre {
+    padding-block-start: var(--ui-space-6);
+  }
+  [data-ui-docs-section] > table {
+    width: 100%;
+    margin-block: var(--ui-space-3) var(--ui-space-5);
+    border-collapse: collapse;
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+  }
+  [data-ui-docs-section] > table th,
+  [data-ui-docs-section] > table td {
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: none;
+    border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
+    text-align: left;
+    vertical-align: top;
+  }
+  [data-ui-docs-section] > table thead th {
+    color: var(--ui-color-text-muted);
+    font-weight: var(--ui-fw-caption);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: var(--ui-fs-micro);
+  }
+  [data-ui-docs-section] > table tbody tr:nth-child(2n) {
+    background-color: var(--ui-color-surface-muted);
+  }
+  [data-ui-docs-section] > table kbd {
+    display: inline-block;
+    padding: 0 var(--ui-space-2);
+    border: var(--ui-border-width) solid var(--ui-color-divider);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface-muted);
+    font-family: var(--ui-font-family-mono);
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+    white-space: nowrap;
+  }
+  [data-ui-docs-section] > pre {
+    margin-block: var(--ui-space-3) var(--ui-space-5);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface-muted);
+    overflow-x: auto;
+  }
+  [data-ui-docs-section] > pre code {
+    font-family: var(--ui-font-family-mono);
+    font-size: var(--ui-fs-small);
+  }
+  [data-ui-docs-section] > blockquote {
+    margin-block: var(--ui-space-4);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-inline-start: 0.1875rem solid var(--ui-color-accent);
+    background-color: var(--ui-color-surface-muted);
+    border-radius: 0 var(--ui-radius-sm) var(--ui-radius-sm) 0;
+  }
   .ui-docs-frames {
     display: flex;
     flex-wrap: wrap;
@@ -364,7 +501,7 @@ const DOCS_STYLE = `<style>
     border-radius: var(--ui-radius-sm);
     padding: var(--ui-space-3) var(--ui-space-4);
     overflow-x: auto;
-    margin: 0 0 var(--ui-space-4);
+    margin: 0;
   }
   .ui-docs-snippet code {
     font-family: var(--ui-font-family-mono);
@@ -394,13 +531,140 @@ const DOCS_STYLE = `<style>
   }
 </style>`;
 
+/** CSS страницы гайда (T10.3 + полировка редизайна 19.10): тот же визуальный
+ *  язык, что у док-страниц, но скоуп — обёртка .ui-docs-body (тело гайда —
+ *  цельный markdown без секционного шаблона). Зона showcase, токены слоя 2. */
+export const GUIDE_STYLE = `<style>
+  .ui-docs-body > h2 {
+    margin-block: var(--ui-space-6) var(--ui-space-3);
+    font-size: var(--ui-fs-h4);
+    font-weight: var(--ui-fw-h4);
+    line-height: var(--ui-lh-h4);
+  }
+  .ui-docs-body > h3 {
+    margin-block: var(--ui-space-5) var(--ui-space-2);
+    font-size: var(--ui-fs-h6);
+    font-weight: var(--ui-fw-h6);
+    line-height: var(--ui-lh-h6);
+  }
+  .ui-docs-body > table {
+    width: 100%;
+    margin-block: var(--ui-space-3) var(--ui-space-5);
+    border-collapse: collapse;
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+  }
+  .ui-docs-body > table th,
+  .ui-docs-body > table td {
+    padding: var(--ui-space-2) var(--ui-space-3);
+    border: none;
+    border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
+    text-align: left;
+    vertical-align: top;
+  }
+  .ui-docs-body > table thead th {
+    color: var(--ui-color-text-muted);
+    font-weight: var(--ui-fw-caption);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    font-size: var(--ui-fs-micro);
+  }
+  .ui-docs-body > table tbody tr:nth-child(2n) {
+    background-color: var(--ui-color-surface-muted);
+  }
+  .ui-docs-body kbd {
+    display: inline-block;
+    padding: 0 var(--ui-space-2);
+    border: var(--ui-border-width) solid var(--ui-color-divider);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface-muted);
+    font-family: var(--ui-font-family-mono);
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+    white-space: nowrap;
+  }
+  .ui-docs-body > pre {
+    margin-block: var(--ui-space-3) var(--ui-space-5);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface-muted);
+    overflow-x: auto;
+  }
+  .ui-docs-body > pre code {
+    font-family: var(--ui-font-family-mono);
+    font-size: var(--ui-fs-small);
+  }
+  .ui-docs-body > blockquote {
+    margin-block: var(--ui-space-4);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    border-inline-start: 0.1875rem solid var(--ui-color-accent);
+    background-color: var(--ui-color-surface-muted);
+    border-radius: 0 var(--ui-radius-sm) var(--ui-radius-sm) 0;
+  }
+  .ui-docs-toc {
+    margin-block: var(--ui-space-4);
+    padding: var(--ui-space-4) var(--ui-space-5);
+    border: var(--ui-border-width) solid var(--ui-color-divider);
+    border-radius: var(--ui-radius-sm);
+    background-color: var(--ui-color-surface);
+  }
+  .ui-docs-toc__title {
+    margin-block-end: var(--ui-space-2);
+    color: var(--ui-color-text-muted);
+    font-size: var(--ui-fs-micro);
+    font-weight: var(--ui-fw-caption);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .ui-docs-toc__list {
+    columns: 2;
+    margin: 0;
+    padding-inline-start: var(--ui-space-5);
+  }
+  .ui-docs-toc__list li {
+    margin-block: var(--ui-space-1);
+    break-inside: avoid;
+  }
+  .ui-docs-toc__list a {
+    color: var(--ui-color-primary);
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+  }
+</style>`;
+
 function section(id, title, body, { withHeading = true } = {}) {
   const label = withHeading ? `aria-labelledby="ui-docs-${id}-heading"` : `aria-label="${title}"`;
   return [
-    `<section data-ui-docs-section="${id}" ${label}>`,
+    // id секции — цель оглавления (редизайн 19.10): у секции без собственного
+    // заголовка (examples при pageHeading: false) якорить больше нечего.
+    `<section id="ui-docs-sec-${id}" data-ui-docs-section="${id}" ${label}>`,
     ...(withHeading ? [`<h2 id="ui-docs-${id}-heading">${title}</h2>`] : []),
     body,
     '</section>',
+  ].join('\n');
+}
+
+/** Оглавление док-страницы (полировка редизайна 19.10, БЕЗ перестройки
+ *  шаблона): якоря на 9 секций T10.1 + «extra»-секции README. Секции и их
+ *  порядок не меняются — verifyDocPageHtml считает data-ui-docs-section. */
+function renderToc({ pageHeading, extraHeadings }) {
+  const entries = DOC_SECTIONS.map((docSection) => ({
+    href:
+      docSection.id === 'examples' && !pageHeading
+        ? '#ui-docs-sec-examples'
+        : `#ui-docs-${docSection.id}-heading`,
+    title: docSection.title,
+  }));
+  for (const [index, heading] of extraHeadings.entries()) {
+    entries.push({ href: `#ui-docs-extra-${index}-heading`, title: heading });
+  }
+  return [
+    '<nav class="ui-docs-toc" aria-label="Содержание страницы">',
+    '<p class="ui-docs-toc__title">Содержание</p>',
+    '<ul class="ui-docs-toc__list">',
+    ...entries.map(({ href, title }) => `  <li><a href="${href}">${renderInline(title)}</a></li>`),
+    '</ul>',
+    '</nav>',
   ].join('\n');
 }
 
@@ -452,7 +716,7 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   const parsed = parseReadme(readme);
   const doc = [];
 
-  if (pageHeading) doc.push(`<h1>${name}</h1>`);
+  if (pageHeading) doc.push(`<h1 class="ui-showcase-title">${name}</h1>`);
   if (parsed.intro) doc.push(renderMarkdown(parsed.intro));
   doc.push(
     `<p class="${STAND_NOTE}">Дока по единому шаблону (T10.1, 02-architecture §8). ` +
@@ -462,6 +726,7 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
       `компонента: <code>components/${name}/</code> (разметка, README, метаданные ` +
       `<code>showcase/docs/${name}.mjs</code>).</p>`,
   );
+  doc.push(renderToc({ pageHeading, extraHeadings: metadata.readme.extra ?? [] }));
   doc.push(DOCS_STYLE);
 
   /* 1. Живые примеры: каноническая разметка как есть (не картинка, не копия).
@@ -488,7 +753,11 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
     ),
   );
 
-  /* 2. Копируемый сниппет: та же строка, что примеры выше (экранирована). */
+  /* 2. Копируемый сниппет: та же строка, что примеры выше (экранирована).
+     Обёртка ui-docs-copybar + кнопка (редизайн 19.10): обработчик — скрипт
+     каркаса (data-ui-showcase-copy), без JS кнопка просто не копирует.
+     САМ <pre> не меняется: extractDocPageChecks пинит точную пару
+     data-ui-docs-snippet><code>…</code></pre> («диф на билде»). */
   doc.push(
     section(
       'snippet',
@@ -498,7 +767,10 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
           `выше: <code>components/${name}/${name}.html</code>. Синхронность ` +
           `«сниппет = разметка стенда» проверяет сборка (selfChecks, диф на билде) и ` +
           `<code>tests/e2e/docs-template.spec.js</code>.</p>`,
-        `<pre class="ui-docs-snippet" data-ui-docs-snippet><code>${escapeHtml(markup)}</code></pre>`,
+        '<div class="ui-docs-copybar">',
+        `  <pre class="ui-docs-snippet" data-ui-docs-snippet><code>${escapeHtml(markup)}</code></pre>`,
+        '  <button class="ui-docs-copy" type="button" data-ui-showcase-copy>Скопировать HTML</button>',
+        '</div>',
       ].join('\n'),
     ),
   );

@@ -212,7 +212,7 @@ describe('renderMarkdown (блоки README → HTML)', () => {
 
   it('fenced-код экранируется целиком', () => {
     const html = renderMarkdown(['```html', '<b>жирный</b>', '```'].join('\n'));
-    expect(html).toContain('<pre><code>');
+    expect(html).toContain('<pre tabindex="0"><code>');
     expect(html).toContain('&lt;b&gt;');
     expect(html).not.toContain('<b>жирный</b>');
   });

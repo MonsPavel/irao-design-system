@@ -32,6 +32,7 @@ import { join } from 'node:path';
 
 import {
   escapeHtml,
+  GUIDE_STYLE,
   normalizeMarkup,
   parseReadme,
   renderInline,
@@ -171,13 +172,30 @@ export function guideSnippetCoverageProblems(root) {
  * лид. Заголовки разделов рендерятся renderInline — та же семантика, что
  * у «extra»-заголовков renderDocPage (инлайн-конструкции заголовков не
  * показываются сырым markdown).
+ *
+ * Полировка редизайна 19.10: якорное оглавление разделов (id секций —
+ * порядковые: заголовки живого markdown-источника могут меняться,
+ * стабильный слаг потребовал бы транслитерации) и обёртка ui-docs-body —
+ * общий визуальный язык таблиц/кода/цитат с док-страницами (GUIDE_STYLE).
  */
 export function renderGuidePage({ guide, markdown }) {
   const withoutTitle = markdown.replace(/^#\s+.+?\r?\n/, '');
   const parsed = parseReadme(withoutTitle);
+  const headings = [...parsed.sections.keys()];
+  const toc = [
+    '<nav class="ui-docs-toc" aria-label="Содержание гайда">',
+    '<p class="ui-docs-toc__title">Содержание</p>',
+    '<ul class="ui-docs-toc__list">',
+    ...headings.map(
+      (heading, index) =>
+        `  <li><a href="#ui-guide-sec-${index}">${renderInline(heading)}</a></li>`,
+    ),
+    '</ul>',
+    '</nav>',
+  ].join('\n');
   const doc = [];
 
-  doc.push(`<h1>${escapeHtml(guide.title)}</h1>`);
+  doc.push(`<h1 class="ui-showcase-title">${escapeHtml(guide.title)}</h1>`);
   doc.push(
     `<p class="ui-showcase-stand__note">Живой документ: источник — ` +
       `<code>${guide.file}</code> репозитория. Блоки кода с маркером snippet=… ` +
@@ -185,10 +203,16 @@ export function renderGuidePage({ guide, markdown }) {
       '<code>tests/unit/guides.test.js</code>) — сниппет в гайде не может ' +
       'отстать от файла.</p>',
   );
+  doc.push(toc);
+  doc.push(GUIDE_STYLE);
+  doc.push('<div class="ui-docs-body">');
   if (parsed.intro) doc.push(renderMarkdown(parsed.intro));
+  let sectionIndex = 0;
   for (const [heading, body] of parsed.sections) {
-    doc.push(`<h2>${renderInline(heading)}</h2>`);
+    doc.push(`<h2 id="ui-guide-sec-${sectionIndex}">${renderInline(heading)}</h2>`);
     doc.push(renderMarkdown(body));
+    sectionIndex += 1;
   }
+  doc.push('</div>');
   return doc.join('\n');
 }
