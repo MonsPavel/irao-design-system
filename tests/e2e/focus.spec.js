@@ -9,17 +9,20 @@
  *  1. Tab-обход стенда: каждый сфокусированный элемент — в состоянии
  *     :focus-visible, computed outline-width ≥ 2px (AC), стиль solid;
  *     обход встречает все 7 целей политики (a, button, input, select,
- *     textarea, summary, [tabindex]);
- *  2. «legacy-атака» (AC): инжект `a { outline: none }` ПОСЛЕ ui-core —
+ *     textarea, summary, [tabindex]); уникальность последовательности —
+ *     Set из tag/hasTabindex против DOM-списка (T13.9);
+ *  2. мышиный фокус не подсвечивается: клик по кнопке — :focus-visible
+ *     false, outline-style none (дока «почему так» п.2, T13.9);
+ *  3. «legacy-атака» (AC): инжект `a { outline: none }` ПОСЛЕ ui-core —
  *     фокус на ссылке всё ещё виден; вторая атака — ДО ui-core: ADR-0001
  *     побеждает tag-правило 0-0-1 независимо от порядка каскада
  *     (специфичность «элемент+:focus-visible» = 0-1-1). Попутно пин
  *     var-цепочки цвета: computed = rgb(0, 40, 86) — --ui-focus-color →
  *     --ui-color-primary → --ui-blue-800;
- *  3. смена темы (механизм T2.4, select каркаса без перезагрузки) меняет
+ *  4. смена темы (механизм T2.4, select каркаса без перезагрузки) меняет
  *     цвет фокуса без правки base: --ui-focus-color → --ui-orange-400
  *     (сквозной сценарий с T2.4, Implementation requirements T3.2 п.2);
- *  4. axe чист на стенде; скриншот focus-состояния — эталон только из
+ *  5. axe чист на стенде; скриншот focus-состояния — эталон только из
  *     контейнера/CI (ADR-0004).
  */
 import { expect } from '@playwright/test';
@@ -48,13 +51,14 @@ const focusState = (page) =>
     };
   });
 
-/** Инжект legacy-правила: style-узел первым/последним в <head>. */
+/** Инжект legacy-правила: style-узел первым/последним в <head>. Позиция
+ * инжекта пинится ассертами lastElementChild/firstElementChild в сценарии
+ * атаки — значение инжекта не возвращается (мёртвый return удалён, T13.9). */
 const injectAttack = (page, position) =>
   page.evaluate(({ selector, css }) => {
     const style = document.createElement('style');
     style.textContent = css;
     document.head[selector](style);
-    return document.head.querySelector('style') !== null;
   }, position);
 
 standTest.describe('политика фокуса (T3.2, ADR-0001)', () => {
@@ -76,7 +80,31 @@ standTest.describe('политика фокуса (T3.2, ADR-0001)', () => {
         expect(state.tag, `шаг ${step + 1}: фокус на элементе, не ушёл в body`).not.toBe('body');
         visited.push(state);
       }
-      expect(visited).toHaveLength(focusable);
+      // Уникальность последовательности обхода (BACKLOG T3.2, T13.9): прежний
+      // ассерт toHaveLength(focusable) не мог упасть — visited наполняется
+      // ровно focusable итерациями. Вместо него: Set из tag/hasTabindex
+      // посещённых остановок обязан совпасть размером с тем же Set по
+      // DOM-списку фокусируемых. Застрявший/зацикленный обход повторяет ключ —
+      // Set меньше и тест красный. Ключ груб (одноимённые элементы на стенде
+      // неразличимы: три <a> и два <select>) — «каждый элемент ровно один раз»
+      // он не доказывает, класс дефектов «обход не движется» ловит; порядок
+      // Tab == DOM-порядок гарантирован отсутствием положительных tabindex
+      // (пин tests/unit/focus.test.js, WCAG 2.4.3).
+      const walkKeys = new Set(visited.map((state) => `${state.tag}:${state.hasTabindex}`));
+      const domKeys = await page.evaluate(
+        (selector) =>
+          new Set(
+            Array.from(document.querySelectorAll(selector), (el) => {
+              return `${el.tagName.toLowerCase()}:${el.hasAttribute('tabindex')}`;
+            }).values(),
+          ).size,
+        FOCUSABLE_SELECTOR,
+      );
+      expect(
+        walkKeys.size,
+        `обход повторил остановку (застревание/зацикливание): различных ключей tag/hasTabindex ` +
+          `${walkKeys.size} вместо ${domKeys} в DOM-списке фокусируемых`,
+      ).toBe(domKeys);
 
       for (const [index, state] of visited.entries()) {
         const where = `шаг ${index + 1} (<${state.tag}>)`;
@@ -97,6 +125,30 @@ standTest.describe('политика фокуса (T3.2, ADR-0001)', () => {
         visited.some((state) => state.hasTabindex),
         'цель [tabindex] получила фокус в обходе',
       ).toBe(true);
+    },
+  );
+
+  standTest(
+    'мышиный фокус не подсвечивается: клик по кнопке — без :focus-visible и без outline',
+    async ({ stand }) => {
+      // «Мышиный фокус сознательно не подсвечивается» (дока focus-policy,
+      // «Почему так» п.2; BACKLOG T3.2 — сценарий не был закреплён e2e,
+      // юнит-пин ловил лишь замену на :focus в CSS): политика ADR-0001
+      // рисует outline ТОЛЬКО для клавиатурного фокуса. Кнопка, не поле
+      // ввода: у текстовых полей браузеры применяют :focus-visible и на клик.
+      const page = await stand('base');
+
+      await page.click('button');
+      const state = await focusState(page);
+      expect(state.tag, 'после клика фокус на кнопке').toBe('button');
+      expect(
+        state.focusVisible,
+        'мышиный фокус — НЕ :focus-visible (наведение и так видно, обводка на каждый клик — шум)',
+      ).toBe(false);
+      expect(
+        state.outlineStyle,
+        'outline нет: политика base/focus.css рисует обводку только для :focus-visible',
+      ).toBe('none');
     },
   );
 
