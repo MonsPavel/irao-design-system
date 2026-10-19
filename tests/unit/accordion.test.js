@@ -121,7 +121,7 @@ describe('components/ui-accordion/ui-accordion.css — база (ADR-0002, те�
     expect(block).toContain('display: flex;');
     expect(block).toContain('align-items: center;');
     expect(block).toContain('justify-content: space-between;');
-    expect(block).toContain('gap: var(--ui-space-6);'); // 24px .faq__q
+    expect(block).toContain('gap: var(--ui-space-5);'); // 24px .faq__q (career-portal gap 24px = --ui-space-5 «как есть»; T13.8: --ui-space-6 = 32px был ошибкой ступени)
     expect(block).toContain('padding: var(--ui-space-5);'); // 24px (20→24, ступень шкалы — README)
     expect(block).toContain('font-size: var(--ui-fs-body);');
     expect(block).toContain('font-weight: var(--ui-fw-body-bold);');
