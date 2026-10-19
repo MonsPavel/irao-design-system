@@ -21,8 +21,10 @@ import { describe, expect, it } from 'vitest';
 
 const root = join(import.meta.dirname, '..', '..');
 
-/** CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки. */
-const stripCssComments = (css) => css.replace(/\/\*[\s\S]*?\*\//g, '');
+/** CSS без комментариев, переводы строк нормализованы к LF: пины смотрят на
+ * исполняемый код, а не на прозу шапки; смещения якорей не зависят от CRLF. */
+const stripCssComments = (css) =>
+  css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\r\n/g, '\n');
 
 /** Тело правила по селектору (начало строки — селектор, до закрывающей скобки). */
 const blockOf = (css, selector) => {
@@ -136,18 +138,30 @@ describe('base/layout.css — сетка (Scope T3.4)', () => {
     expect(xxl).toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
   });
 
-  it('gap: рост до --ui-space-6 на lg; --4 плотнее (--ui-space-5) — правило ПОСЛЕ media (порядок источника)', () => {
+  it('gap: рост до --ui-space-6 на lg; --4 плотнее (--ui-space-5) — top-level правило ПОСЛЕ lg-media сетки', () => {
     const lg = mediaBlocks(css, 1024);
     expect(lg).toContain('gap: var(--ui-space-6);');
 
-    const gap4 = css.indexOf('.ui-grid--4');
-    const gapMedia = css.indexOf('@media (min-width: 1024px)');
-    expect(gap4, 'правило .ui-grid--4 объявлено в файле').toBeGreaterThan(-1);
+    // Пин РЕАЛЬНОЙ пары «top-level gap-правило после lg-media сетки»
+    // (T13.9, rev T3.4: indexOf по голым вхождениям брал '.ui-grid--4' из
+    // селектор-списка md-медиа и lg-media паддинга контейнера — пара была
+    // не та). Якоря — с телом правила, УНИКАЛЬНЫЕ в очищенном CSS: голый
+    // '.ui-grid--4' встречается и в xl/2xl-медиа ПОСЛЕ lg-media, и после
+    // перестановки правил lastIndexOf уезжал бы на 2xl-блок (ловится
+    // мутацией). Проверка уникальности делает lastIndexOf однозначным;
+    // смещения якорей при текущем файле — ровно 1313 и 873 (подтверждено
+    // ревью), сами числа не пинятся — дрейф форматирования.
+    const GAP_RULE = '.ui-grid--4 {\n  gap: var(--ui-space-5);\n}';
+    const GRID_MEDIA = '@media (min-width: 1024px) {\n  .ui-grid {';
+    expect(css.split(GAP_RULE).length - 1, 'top-level gap-правило --4 в файле ровно одно').toBe(1);
+    expect(css.split(GRID_MEDIA).length - 1, 'lg-media сетки ровно одна').toBe(1);
+
+    const gap4 = css.lastIndexOf(GAP_RULE);
+    const gapMedia = css.lastIndexOf(GRID_MEDIA);
     expect(
       gap4,
-      '.ui-grid--4 (gap 24) после lg-media: равная специфичность, побеждает порядок источника',
+      'top-level .ui-grid--4 (gap 24) после lg-media: равная специфичность, побеждает порядок источника',
     ).toBeGreaterThan(gapMedia);
-    expect(blockOf(css, '.ui-grid--4')).toContain('gap: var(--ui-space-5);');
   });
 });
 
