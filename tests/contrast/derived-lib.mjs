@@ -26,10 +26,18 @@ import { contrastRatio, normalizeColor, parseColor, resolveTokenColor } from './
 
 /** Разрешить спецификацию цвета пары: {token} — var()-цепочка; {mix} —
  * производная {base, percent, with} от токена (with — константа подмешивания,
- * CSS-ключевое слово black = #000000). Возвращает нормализованный hex. */
+ * CSS-ключевое слово black = #000000). Возвращает нормализованный hex.
+ * Спека без token и mix — внятная ошибка конфига (T13.9): раньше падала
+ * TypeError-ом деконструкции «Cannot destructure property 'base'…» без
+ * указания причины; evaluateDerivedContrast кладёт сообщение в configErrors. */
 export function resolveColorSpec(spec, primitives, semantic) {
   if (spec.token !== undefined) {
     return resolveTokenColor(spec.token, new Map([...primitives, ...semantic]));
+  }
+  if (spec.mix === undefined || spec.mix === null) {
+    throw new Error(
+      `спека цвета без token/mix — укажите {token} или {mix: {base, percent, with}}: ${JSON.stringify(spec)}`,
+    );
   }
   const { base, percent, with: withColor } = spec.mix;
   const baseColor = resolveTokenColor(base, new Map([...primitives, ...semantic]));
