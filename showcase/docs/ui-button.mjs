@@ -11,7 +11,7 @@ export default {
     a11y: ['Клавиатура и a11y'],
     api: ['API'],
     doDont: ["Do / Don't: действие против перехода"],
-    extra: ['Bitrix (шаблоны)', 'Известные границы'],
+    extra: ['Bitrix (шаблоны)', 'Пилюля со стрелкой (`.ui-button--pill`)', 'Известные границы'],
   },
 
   keyboard: [

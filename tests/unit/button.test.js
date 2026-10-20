@@ -340,9 +340,9 @@ describe('components/ui-button/ui-button.css — модификатор pill (T1
 
   it('демо (components/ui-button/ui-button.html): pill в каноне слотов — лейбл + svg-стрелка aria-hidden, type явный', () => {
     const html = readFileSync(join(root, 'components', 'ui-button', 'ui-button.html'), 'utf8');
-    const pillButtons = [
-      ...html.matchAll(/<button[^>]*ui-button--pill[\s\S]*?<\/button>/g),
-    ].map(([tag]) => tag);
+    const pillButtons = [...html.matchAll(/<button[^>]*ui-button--pill[\s\S]*?<\/button>/g)].map(
+      ([tag]) => tag,
+    );
     expect(pillButtons.length, 'pill-кнопка в паттерне есть').toBeGreaterThan(0);
     for (const tag of pillButtons) {
       expect(tag, 'type обязателен (гейт no-implicit-button-type)').toMatch(/\btype="/);

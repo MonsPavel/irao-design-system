@@ -56,6 +56,8 @@ const BTN = {
   accent: 'ui-button-accent',
   outline: 'ui-button-outline',
   light: 'ui-button-light',
+  pill: 'ui-button-pill',
+  pillSm: 'ui-button-pill-sm',
   primarySm: 'ui-button-primary-sm',
   primaryDisabled: 'ui-button-primary-disabled',
   accentDisabled: 'ui-button-accent-disabled',
@@ -285,6 +287,56 @@ standTest.describe('ui-button (T4.2)', () => {
       const sm = await stateOf(page, BTN.primarySm);
       expect(sm.minHeight, 'sm — --ui-button-height-sm (32px)').toBe('32px');
 
+      // Пилюля со стрелкой (T14.4): min-height 44px (--ui-button-height-pill),
+      // фон surface, подпись primary; кружок иконки 2rem на accent, стрелка
+      // text-on-dark; радиус — общий --ui-radius-pill.
+      const pill = await stateOf(page, BTN.pill);
+      expect(pill.minHeight, 'pill — --ui-button-height-pill (44px, min-height)').toBe('44px');
+      expect(pill.backgroundColor, 'pill — фон surface').toBe('rgb(255, 255, 255)');
+      expect(pill.color, 'pill — подпись primary (пара outline)').toBe('rgb(0, 40, 86)');
+      expect(pill.borderRadius, 'pill — радиус --ui-radius-pill').toBe('100px');
+      const pillIcon = await page.locator(`#${BTN.pill} .ui-button__icon`).evaluate((el) => {
+        const style = getComputedStyle(el);
+        return {
+          width: style.width,
+          height: style.height,
+          backgroundColor: style.backgroundColor,
+          color: style.color,
+          borderRadius: style.borderRadius,
+        };
+      });
+      expect(pillIcon.width, 'кружок — --ui-button-pill-icon-size (32px)').toBe('32px');
+      expect(pillIcon.height, 'кружок — квадрат').toBe('32px');
+      expect(pillIcon.backgroundColor, 'кружок — фон --ui-color-accent').toBe('rgb(242, 103, 34)');
+      expect(pillIcon.color, 'стрелка — text-on-dark (currentColor svg)').toBe(
+        'rgb(255, 255, 255)',
+      );
+      expect(pillIcon.borderRadius, 'кружок — --ui-radius-pill').toBe('100px');
+
+      // Фактическая высота: min-height активен, только если контент (кружок
+      // 2rem + паддинг 4×2 + рамка 2×1 = 42px) меньше токена — иначе no-op
+      // (урок ревью T4.2; T14.4).
+      const pillBox = await page.locator(`#${BTN.pill}`).boundingBox();
+      expect(
+        Math.abs(pillBox.height - 44),
+        `pill: фактическая высота = --ui-button-height-pill (факт ${pillBox.height})`,
+      ).toBeLessThanOrEqual(0.5);
+
+      // Комбинированный pill+sm (AC T14.4): высота sm-токена, кружок уплотнён.
+      const pillSm = await stateOf(page, BTN.pillSm);
+      expect(pillSm.minHeight, 'pill+sm — min-height --ui-button-height-sm (32px)').toBe('32px');
+      const pillSmBox = await page.locator(`#${BTN.pillSm}`).boundingBox();
+      expect(
+        Math.abs(pillSmBox.height - 32),
+        `pill+sm: фактическая высота = --ui-button-height-sm (факт ${pillSmBox.height})`,
+      ).toBeLessThanOrEqual(0.5);
+      const pillSmIcon = await page.locator(`#${BTN.pillSm} .ui-button__icon`).evaluate((el) => {
+        const style = getComputedStyle(el);
+        return { width: style.width, height: style.height };
+      });
+      expect(pillSmIcon.width, 'кружок sm — --ui-button-pill-icon-size-sm (24px)').toBe('24px');
+      expect(pillSmIcon.height, 'кружок sm — квадрат').toBe('24px');
+
       // Фактическая (отрисовая) высота, а не только computed min-height:
       // минимальная высота активируется, только если контент (line-box +
       // вертикальный паддинг + рамка) меньше токена — иначе размер no-op
@@ -361,6 +413,17 @@ standTest.describe('ui-button (T4.2)', () => {
         'hover ghost — одобренная hover-поверхность blue-100',
       );
       expect(ghost.color, 'подпись ghost — цвет текста').toBe('rgb(31, 31, 31)');
+
+      // pill (T14.4): hover-фон оригинала blue-50 (pages.css:248) — та же
+      // одобренная поверхность; подпись остаётся primary.
+      await page.locator(`#${BTN.pill}`).hover();
+      const pill = await settledState(
+        page,
+        BTN.pill,
+        (s) => s.backgroundColor === 'rgb(232, 238, 254)',
+        'hover pill — --ui-color-surface-hover (blue-100)',
+      );
+      expect(pill.color, 'подпись pill на hover — primary').toBe('rgb(0, 40, 86)');
     },
   );
 
@@ -522,7 +585,7 @@ standTest.describe('ui-button (T4.2)', () => {
         const ratio = ratioOf(await stateOf(page, id));
         expect(ratio, `${label}: ${ratio.toFixed(2)}:1 ≥ 4.5`).toBeGreaterThanOrEqual(4.5);
       };
-      for (const id of [BTN.ghost, BTN.primary, BTN.outline, BTN.light]) {
+      for (const id of [BTN.ghost, BTN.primary, BTN.outline, BTN.light, BTN.pill]) {
         await assertAA(id, `default ${id}`);
       }
 
@@ -539,6 +602,9 @@ standTest.describe('ui-button (T4.2)', () => {
       await page.locator(`#${BTN.ghost}`).hover();
       await settleTransitions(page);
       await assertAA(BTN.ghost, 'hover ghost');
+      await page.locator(`#${BTN.pill}`).hover();
+      await settleTransitions(page);
+      await assertAA(BTN.pill, 'hover pill');
 
       // hover accent — известный разрыв одобренного дизайна (accent-light),
       // пин факта симметрично default: до T13.5 hover accent не проверялся
