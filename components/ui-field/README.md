@@ -18,6 +18,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 | Модификатор `.ui-field--error` | состояние ошибки: рамка/фон контролов (`--ui-color-error`/`--ui-color-error-bg`) + показ `__error` |
 | Модификатор `.ui-field--required` | хук разметки «поле обязательное»: на корне; видимый маркер — элемент `__req` (собственных стилей у модификатора нет) |
 | Модификатор `.ui-field--wide` | поле на все колонки grid-родителя (`grid-column: 1 / -1`); потребитель — раскладка [ui-form](doc:ui-form) (T5.4), вне grid инертен |
+| Модификатор `.ui-field--compact` | плотная высота анкет-модалок: `min-height` `--ui-field-height-compact` (48px, `.apply-form .field__input` pages.css:1208 оригинала) на `__input`/`__select`; **textarea высоту не меняет** (многострочность важнее плотности), паддинг не трогает. Когда: формы в модалках / плотные анкеты; потребитель — apply-формы career-portal |
 | Элемент `.ui-field__label` | `label` 14/500 (`--ui-fs-small`/`--ui-fw-small`); **обязателен `for` с id контрола** (исключение — file-паттерн: `span` + `aria-labelledby`, см. [ui-file](doc:ui-file)) |
 | Элемент `.ui-field__req` | маркер обязательности: видимая звёздочка `*` акцентом (одобренный `.req`, components.css:142) |
 | Элемент `.ui-field__req-text` | текст «обязательное поле» для скринридера внутри `__req`; визуально скрыт клипом (display:none запрещён) |
@@ -28,7 +29,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 | Элемент `.ui-field__hint` | постоянная подсказка (fs-micro, muted); всегда видима, связывается `aria-describedby` |
 | Элемент `.ui-field__error` | текст ошибки (fs-micro, `--ui-color-error`); вне `--error` скрыт; `role="alert"` в разметке |
 | JS | модуля нет (состояния — в разметке; переключает их валидационный модуль T5.5) |
-| Токены | геометрия: `--ui-field-height` (52px → min-height), `--ui-field-textarea-min-height`, `--ui-field-textarea-padding-y` (14px, вне шкалы §3.2 — перенос «как есть»); радиус `--ui-radius-sm`, рамка `--ui-border-width`, цвета — слой 2 |
+| Токены | геометрия: `--ui-field-height` (52px → min-height), `--ui-field-pad-inline` (20px, components.css:150 — вне шкалы §3.2, перенос «как есть»), `--ui-field-height-compact` (48px, pages.css:1208 — compact), `--ui-field-textarea-min-height`, `--ui-field-textarea-padding-y` (14px, вне шкалы §3.2 — перенос «как есть»); радиус `--ui-radius-sm`, рамка `--ui-border-width`, цвета — слой 2 |
 
 ```html
 <!-- ошибка: визуал и aria в одном паттерне — копипаст даёт доступный результат -->
@@ -135,6 +136,17 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
   запрещён. Textarea: фикс. высоты нет, `min-height`
   `--ui-field-textarea-min-height`, `resize: vertical`; авто-рост — опция
   модуля T5.5.
+- Горизонтальный паддинг контролов — `--ui-field-pad-inline` (20px
+  одобренного `.field__input`, components.css:150; вертикаль — `--ui-space-1`,
+  у textarea свой `--ui-field-textarea-padding-y`).
+- **compact** — модификатор `--compact`: плотная высота анкет-модалок
+  оригинала (48px, `.apply-form .field__input` pages.css:1208) на
+  `__input`/`__select`; паддинг не меняется (одобренные 20px и так в общем
+  правиле), textarea высоту не меняет — многострочность важнее плотности.
+  48 ≥ 44px — touch-минимум (WCAG 2.5.8) не нарушен. Когда: формы в
+  модалках / плотные анкеты; потребитель — apply-формы career-portal.
+  Ставится на корень `.ui-field` (действует на вложенный select в том
+  числе).
 - Иконки валидации не введены (анти-overengineering): смысл ошибки несёт её
   текст; если сайт добавляет иконку — только декоративную (`aria-hidden`),
   смысл дублируется текстом.

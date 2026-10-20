@@ -113,7 +113,9 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
     const block = blockOfStandalone(css, '.ui-field__textarea');
     expect(block, 'правило .ui-field__textarea найдено').toBeTruthy();
     expect(block).toContain('min-height: var(--ui-field-textarea-min-height);');
-    expect(block).toContain('padding: var(--ui-field-textarea-padding-y) var(--ui-field-pad-inline);');
+    expect(block).toContain(
+      'padding: var(--ui-field-textarea-padding-y) var(--ui-field-pad-inline);',
+    );
     expect(block).toContain('resize: vertical;');
     expect(block, 'textarea без фикс. высоты (Implementation requirements п.1)').not.toMatch(
       /(?:^|;)\s*(?:height|max-height):\s/,
