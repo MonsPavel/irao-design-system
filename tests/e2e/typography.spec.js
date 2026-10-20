@@ -13,9 +13,10 @@
  *     заголовков −0.02em (перенос макета career-portal), текстовых ролей —
  *     normal;
  *  3. body-дефолты страницы (font/color/bg) и ui-text--muted — из токенов;
- *  3а. цвет заголовков (T14.1): computed color ролей ui-h1…ui-h6 =
- *      --ui-color-heading (#002856 = primary career-portal) на всех вьюпортах;
- *      текстовые роли наследуют body (--ui-color-text);
+ *  3а. цвет заголовков (T14.1): computed color ролей ui-h1…ui-h6 и
+ *      ui-page-title (T14.2) = --ui-color-heading (#002856 = primary
+ *      career-portal) на всех вьюпортах; текстовые роли наследуют body
+ *      (--ui-color-text);
  *  4. ui-list: маркеры disc/decimal, отступы из шкалы spacing; ui-address
  *     без браузерного курсива;
  *  5. иерархия заголовков зелёная на ВСЕХ страницах showcase
@@ -40,6 +41,8 @@ import { a11y, openIndex, shot, test, VIEWPORTS } from '../helpers/harness.js';
  * Роль → суффикс тройки токенов (tokens/semantic.css, T2.2) и letter-spacing
  * в em (0 — normal). Источник истины — base/typography.css; здесь проверяется
  * ФАКТ в браузере, пины формы решения — tests/unit/typography.test.js.
+ * ui-page-title (T14.2) — роль-псевдоним: h1 внутренних страниц несёт тройку
+ * h2 (в career-portal .page-title = fs-h2 при теге h1).
  */
 const ROLES = [
   ['ui-h1', 'h1', -0.02],
@@ -48,6 +51,7 @@ const ROLES = [
   ['ui-h4', 'h4', -0.02],
   ['ui-h5', 'h5', -0.02],
   ['ui-h6', 'h6', -0.02],
+  ['ui-page-title', 'h2', -0.02],
   ['ui-lead', 'lead', 0],
   ['ui-body', 'body', 0],
   ['ui-small', 'small', 0],
