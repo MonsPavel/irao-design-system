@@ -77,14 +77,16 @@
 
 /* ── ui-link--button: визуально кнопка, семантика ссылки
       («переход-выглядит-как-действие»; полная кнопка — T4.2). Геометрия —
-      padдинги одобренного .btn career-portal (12/28) без фиксированной
-      высоты: 32px-база не разваливает подпись. ── */
+      паддинги одобренного .btn career-portal (12/28) без фиксированной
+      высоты: 32px-база не разваливает подпись. Горизонталь — общий с кнопкой
+      токен --ui-button-pad-inline (T14.3): «выглядит-как-кнопка» не плотнее
+      самой кнопки. ── */
 
 .ui-link--button {
   display: inline-flex;
   gap: var(--ui-space-2);
   align-items: center;
-  padding: var(--ui-space-3) var(--ui-space-5);
+  padding: var(--ui-space-3) var(--ui-button-pad-inline);
   border-radius: var(--ui-radius-pill);
   background-color: var(--ui-color-primary);
   color: var(--ui-color-text-on-dark);

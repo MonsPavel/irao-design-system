@@ -18,13 +18,15 @@
 | Модификатор `.ui-button--light` | действие на приглушённом фоне (pair `--ui-color-surface-muted` / `--ui-color-primary`) |
 | Размер md | база: `min-height: var(--ui-button-height)` (52px) — модификатор не нужен |
 | Размер `.ui-button--sm` | `min-height: var(--ui-button-height-sm)` (32px, ступень шкалы §3.2) |
+| Паддинг | `12px 28px` — как `.btn` career-portal (components.css:71): вертикаль `--ui-space-3`, горизонталь `--ui-button-pad-inline` (28px вне шкалы отступов — перенос «как есть», прецедент `--ui-card-gap`; T14.3) |
+| Паддинг sm | вертикаль уплотнена до `--ui-space-1` (иначе контент выше 32px и `min-height` не работает — ревью T4.2); **горизонталь sm не уплотняется**: наследует `--ui-button-pad-inline` (28px) — в одобренном макете кнопка одна, компактного inline-паддинга у неё нет (решение T14.3) |
 | Элемент `.ui-button__label` | подпись; в `is-loading` остаётся в DOM (accessible name) |
 | Элемент `.ui-button__icon` | инлайн-SVG: `aria-hidden="true"`, `focusable="false"`, цвета — `currentColor` в `fill`/`stroke`; размер 1em |
 | Элемент `.ui-button__spinner` | декоративный (`aria-hidden="true"`); рисуется CSS на `currentColor` |
 | Состояние disabled | **атрибут** `disabled` — не фокусируется и не кликается нативно |
 | Состояние loading | класс `is-loading` + `aria-busy="true"` (ставит управляющий код формы/приложения) |
 | JS | не требуется (CSS-компонент; переключение loading — за формой, T5.5) |
-| Токены | `--ui-button-height(-sm)`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
+| Токены | `--ui-button-height(-sm)`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
 
 ```html
 <button class="ui-button ui-button--primary" type="submit">Отправить отклик</button>

@@ -203,7 +203,10 @@ describe('components/ui-link/ui-link.css — варианты (Scope T4.1)', () 
   it('ui-link--button: визуально кнопка из одобренного дизайна, семантика ссылки', () => {
     const block = blockOf(css, '.ui-link--button');
     expect(block).toContain('display: inline-flex;');
-    expect(block).toContain('padding: var(--ui-space-3) var(--ui-space-5);');
+    // Геометрия кнопочного вида — общая с ui-button (шапка файла: «паддинги
+    // одобренного .btn career-portal (12/28)»): горизонталь — токен кнопки
+    // (T14.3), иначе «выглядит-как-кнопка» плотнее самой кнопки.
+    expect(block).toContain('padding: var(--ui-space-3) var(--ui-button-pad-inline);');
     expect(block).toContain('border-radius: var(--ui-radius-pill);');
     expect(block).toContain('background-color: var(--ui-color-primary);');
     expect(block).toContain('color: var(--ui-color-text-on-dark);');
