@@ -154,6 +154,23 @@ standTest.describe(
     );
 
     standTest(
+      'крошки T14.5 несут вертикальный ритм страницы: computed padding 20/24px',
+      async ({ stand }) => {
+        const page = await stand('patterns/detail-page');
+
+        // Ритм крошек — у паттерна страницы (T14.5), не у компонента
+        // (инвариант T4.7): полоса 62px оригинала — padding .breadcrumbs
+        // 20px 0 24px (career-portal components.css:14).
+        const padding = await page.locator(SEL.breadcrumbs).evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return { top: cs.paddingTop, bottom: cs.paddingBottom };
+        });
+        expect(padding.top, 'сверху 20px — верх полосы 62px (components.css:14)').toBe('20px');
+        expect(padding.bottom, 'снизу 24px — низ полосы 62px (components.css:14)').toBe('24px');
+      },
+    );
+
+    standTest(
       'schema-парсер JobPosting (AC): title, hiringOrganization, jobLocation, datePosted валидны',
       async ({ stand }) => {
         const page = await stand('patterns/detail-page');

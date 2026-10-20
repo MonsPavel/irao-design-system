@@ -18,7 +18,7 @@
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
-| Крошки | `ui-breadcrumbs` | T4.7; текущая страница («Отклик») — `span` + `aria-current="page"` |
+| Крошки | `ui-breadcrumbs` | T4.7; текущая страница («Отклик») — `span` + `aria-current="page"`; вертикальный ритм — обвязка `fpp-breadcrumbs` (T14.5, ниже) |
 | page-head | h1 «Отклик» (`ui-page-title`) + lead (`ui-lead`) | подроли типографики T3.3 |
 | Форма | `ui-form` (T5.4) + поля `ui-field`/`ui-checkbox` | `data-ui-form` — хук модуля `IraoUI.form` (T5.5); в разметке нет `novalidate` |
 | Aside-сводка | `ui-form__aside`: title/text/rows | перенос `form-aside` career-portal; возврат к вакансии — `ui-button`-ссылка |
@@ -67,10 +67,24 @@
 
 ### page-head: крошки → h1 «Отклик» → lead
 
+Компонент `ui-breadcrumbs` внешних отступов не имеет (инвариант T4.7): правило
+**«крошки без обвязки — над контентом; вертикальный ритм страницы несёт
+шаблон»** (T14.5, общее для page-паттернов T8.1–T8.3). Обвязка — связка сайта
+(`fpp-*`) с `padding-block` 20/24px — полоса 62px одобренного дизайна
+(career-portal `components.css:14`, `padding: 20px 0 24px`; верх 20px вне шкалы
+отступов §3.2 — перенос «как есть»):
+
 ```html
-<nav class="ui-breadcrumbs" aria-label="Хлебные крошки">…</nav>
+<nav class="ui-breadcrumbs fpp-breadcrumbs" aria-label="Хлебные крошки">…</nav>
 <h1 class="ui-page-title">Отклик на вакансию</h1>
 <p class="ui-lead">Заполните анкету — компания рассмотрит отклик…</p>
+```
+
+```css
+.fpp-breadcrumbs {
+  box-sizing: border-box;
+  padding-block: 1.25rem var(--ui-space-5); /* 20/24px — полоса 62px career-portal */
+}
 ```
 
 Крошки — до page-head (конвенция паттернов T8.2); текущая страница — `span`

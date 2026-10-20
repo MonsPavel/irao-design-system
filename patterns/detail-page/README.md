@@ -19,7 +19,7 @@
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
-| Крошки | `ui-breadcrumbs` | T4.7; микроразметка BreadcrumbList, текущая — `span` + `aria-current="page"` |
+| Крошки | `ui-breadcrumbs` | T4.7; микроразметка BreadcrumbList, текущая — `span` + `aria-current="page"`; вертикальный ритм — обвязка `dpp-breadcrumbs` (T14.5, ниже) |
 | page-head | h1 (`ui-page-title`) + зарплата (`ui-h3`) + теги (`ui-tag`) + мета | мета — `ui-small ui-text--muted`; дата — `<time datetime>` |
 | Контент | роли T3.3 (`ui-body`, `ui-list`), секции h2 | уровень тега — семантика страницы, роль — вид |
 | Aside | справочная панель `dl` + CTA `ui-button` + дисклеймер `ui-link` | перенос `form-aside` career-portal; **sticky только ≥ md (768)** |
@@ -35,6 +35,29 @@
 DOM-порядок = смысловой (Accessibility requirements): крошки → page-head →
 `dpp-main` → `dpp-aside` → related. На мобиле aside визуально тоже
 после контента (одна колонка — порядок DOM сохраняется), от md — правая колонка.
+
+### Крошки: вертикальный ритм несёт шаблон (T14.5)
+
+Компонент `ui-breadcrumbs` внешних отступов не имеет (инвариант T4.7) — без
+обвязки крошки стоят плоско и контент «прилипает» к шапке. Правило: **крошки
+без обвязки — над контентом; вертикальный ритм страницы несёт шаблон**.
+Обвязка — связка сайта (`dpp-*`) с `padding-block` 20/24px — полоса 62px
+одобренного дизайна (career-portal `components.css:14`, `padding: 20px 0 24px`;
+верх 20px вне шкалы отступов §3.2 — перенос «как есть»):
+
+```css
+.dpp-breadcrumbs {
+  box-sizing: border-box;
+  padding-block: 1.25rem var(--ui-space-5); /* 20/24px — полоса 62px career-portal */
+}
+```
+
+```html
+<nav class="ui-breadcrumbs dpp-breadcrumbs" aria-label="Хлебные крошки">…</nav>
+```
+
+Крошки — в DOM раньше page-head (см. «Порядок чтения» ниже); то же правило
+ритма в сборках списка (T8.1) и формы (T8.3) — копируется вместе с ними.
 
 ### Лейаут «контент + aside»: sticky только ≥ md
 
@@ -217,9 +240,10 @@ $sDate = (string) ($arResult['ACTIVE_FROM'] ?? '');
 // и без guard-а date('Y-m-d', false) собрал бы datetime-заглушку 1970-01-01.
 $sDateTs = $sDate === '' ? false : strtotime($sDate);
 ?>
-<nav class="ui-breadcrumbs" aria-label="Хлебные крошки">
+<nav class="ui-breadcrumbs dpp-breadcrumbs" aria-label="Хлебные крошки">
   <?php // цепочка — bitrix:breadcrumb или BUILD_LINK_CHAIN news.detail
-     // (сниппет bitrix/snippets/breadcrumbs.php) ?>
+     // (сниппет bitrix/snippets/breadcrumbs.php); связка dpp-breadcrumbs
+     // несёт вертикальный ритм страницы (T14.5). ?>
 </nav>
 <article itemscope itemtype="https://schema.org/JobPosting">
   <h1 class="ui-page-title" itemprop="title"><?= htmlspecialcharsbx($arResult['NAME']) ?></h1>
