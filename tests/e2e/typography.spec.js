@@ -80,13 +80,10 @@ const tokenRem = (page, name) =>
 
 /** computed color образца роли. */
 const roleColor = (page, cls) =>
-  page.evaluate(
-    (selector) => {
-      const el = document.querySelector(`.${selector}`);
-      return el ? getComputedStyle(el).color : null;
-    },
-    cls,
-  );
+  page.evaluate((selector) => {
+    const el = document.querySelector(`.${selector}`);
+    return el ? getComputedStyle(el).color : null;
+  }, cls);
 
 /** База rem на html (16 по умолчанию, 32 — в сценарии масштабирования). */
 const rootFontSize = (page) =>
