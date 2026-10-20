@@ -36,11 +36,20 @@ const THEMES = ['baw', 'wb', 'bb', 'beige', 'green'];
  * Ключевая пара цветов каждой темы — ожидаемые computed-значения.
  * baw — базовая: перекраски нет (дизайн уже «тёмное на светлом»), пара —
  * дефолтные токены системы (surface/text = #FFFFFF/#1F1F1F); h1 остаётся
- * прозрачным (пин отсутствия repaint). wb — инверсия корня (фильтр на html),
- * фон body — чёрный. bb/beige/green — явная перекраска всех элементов.
+ * прозрачным (пин отсутствия repaint). h1Color темы baw — «дефолт системы»:
+ * с T14.1 он зависит от того, чем является h1 — роль ui-h1…ui-h6 несёт
+ * --ui-color-heading (#002856 = primary), каркасный h1 (ui-showcase-title)
+ * наследует body (флаг h1Default). wb — инверсия корня (фильтр на html),
+ * фон body — чёрный. bb/beige/green — явная перекраска всех элементов:
+ * vi.css форсирует цвета !important'ом, ожидание одно для всех стендов.
  */
 const THEME_EXPECTATIONS = {
-  baw: { bodyBg: 'rgb(255, 255, 255)', h1Bg: 'rgba(0, 0, 0, 0)', h1Color: 'rgb(31, 31, 31)' },
+  baw: {
+    bodyBg: 'rgb(255, 255, 255)',
+    h1Bg: 'rgba(0, 0, 0, 0)',
+    h1Color: 'rgb(31, 31, 31)',
+    h1Default: true,
+  },
   wb: { bodyBg: 'rgb(0, 0, 0)', htmlFilter: 'invert(1) grayscale(1)' },
   bb: {
     bodyBg: 'rgb(157, 209, 255)',
@@ -290,17 +299,18 @@ test.describe('ui-vi — финальная матрица «тема × все 
           expect(await computedOf(h1, 'background-color')).toBe(expected.h1Bg);
         }
         if (expected.h1Color) {
-          // baw перекраски не делает — цвет h1 = дефолт системы. С T14.1 дефолт
-          // зависит от того, чем является h1: роль ui-h1…ui-h6 несёт
-          // --ui-color-heading (#002856 = primary), каркасный h1
-          // (ui-showcase-title) наследует body. Темы bb/beige/green красят
-          // !important'ом vi.css — там ожидание одно для всех стендов.
-          const h1HasRole = await h1.evaluate((el) =>
-            [...el.classList].some((c) => /^ui-h[1-6]$/.test(c)),
-          );
-          expect(await computedOf(h1, 'color')).toBe(
-            h1HasRole ? 'rgb(0, 40, 86)' : expected.h1Color,
-          );
+          if (expected.h1Default) {
+            // Тема без перекраски — цвет h1 = дефолт системы, который с T14.1
+            // зависит от того, несёт ли h1 роль ui-h1…ui-h6 (см. таблицу выше).
+            const h1HasRole = await h1.evaluate((el) =>
+              [...el.classList].some((c) => /^ui-h[1-6]$/.test(c)),
+            );
+            expect(await computedOf(h1, 'color')).toBe(
+              h1HasRole ? 'rgb(0, 40, 86)' : expected.h1Color,
+            );
+          } else {
+            expect(await computedOf(h1, 'color')).toBe(expected.h1Color);
+          }
         }
         if (expected.htmlFilter) {
           expect(await computedOf(page.locator('html'), 'filter')).toBe(expected.htmlFilter);
