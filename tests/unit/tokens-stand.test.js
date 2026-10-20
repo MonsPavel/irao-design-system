@@ -73,3 +73,38 @@ describe('полнота стенда токенов (AC T2.2)', () => {
     expect(firstSemantic).toBeGreaterThan(lastPrimitive);
   });
 });
+
+describe('тинты primary на стенде (T14.7)', () => {
+  /** Ступени Scope T14.7 — суффикс прозрачности в процентах. */
+  const TINT_NAMES = [
+    '--ui-color-primary-a10',
+    '--ui-color-primary-a20',
+    '--ui-color-primary-a26',
+    '--ui-color-primary-a55',
+    '--ui-color-primary-a94',
+  ];
+
+  /** Карта семантических токенов по имени (лениво — после beforeAll-сборки). */
+  const semanticByName = () =>
+    new Map(
+      tokens.filter((token) => token.layer === 'semantic').map((token) => [token.name, token]),
+    );
+
+  it('парсер стенда находит новые имена (Implementation requirements T14.7 п.1)', () => {
+    const byName = semanticByName();
+    for (const name of TINT_NAMES) {
+      expect(byName.has(name), `${name} парсером не найден`).toBe(true);
+      expect(byName.get(name).section, `${name} вне секции тинтов`).toContain('тинты');
+    }
+  });
+
+  it('секция тинтов рендерится, каждый тинт — узел data-token со своим значением', () => {
+    const byName = semanticByName();
+    expect(standHtml, 'секции тинтов нет на стенде').toContain('Цвета-смыслы: тинты primary');
+    const nodes = [...standHtml.matchAll(/data-token="([^"]+)"/g)].map((m) => m[1]);
+    for (const name of TINT_NAMES) {
+      expect(nodes, `${name} нет узла на стенде`).toContain(name);
+      expect(standHtml, `значение ${name} не отображается`).toContain(byName.get(name).value);
+    }
+  });
+});

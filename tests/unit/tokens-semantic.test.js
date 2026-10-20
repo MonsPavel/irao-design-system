@@ -144,11 +144,55 @@ describe('tokens/semantic.css — структура слоя 2 (ADR-0009)', () 
     }
   });
 
-  it('цветовые семантические токены — ровно один var() (AC «только примитивы/семантика»)', () => {
+  it('цветовые семантические токены — ровно один var() или тинт primary (T14.7: color-mix от primary)', () => {
     for (const [name, value] of declarations) {
       if (!/color/.test(name)) continue;
+      // Тинты primary (T14.7) — единственная производная форма цветового
+      // токена слоя 2: color-mix(in srgb, var(--ui-color-primary) N%,
+      // transparent), N = суффикс имени. Остальные цветовые токены — ровно
+      // один var() (AC «только примитивы/семантика»).
+      const tint = name.match(/^--ui-color-primary-a(\d+)$/);
+      if (tint) {
+        expect(value, `${name}: ${value} — не тинт primary по форме T14.7`).toBe(
+          `color-mix(in srgb, var(--ui-color-primary) ${Number(tint[1])}%, transparent)`,
+        );
+        continue;
+      }
       expect(value, `${name}: ${value} — не одиночный var()`).toMatch(/^var\(--ui-[a-z0-9-]+\)$/);
     }
+  });
+});
+
+describe('tokens/semantic.css — тинты primary (T14.7)', () => {
+  /** Ступени тинтов (Scope T14.7): суффикс = процент primary в смеси. */
+  const TINTS = Object.freeze({ a10: 10, a20: 20, a26: 26, a55: 55, a94: 94 });
+
+  const tintName = (step) => `--ui-color-primary-${step}`;
+
+  it('пять ступеней a10/a20/a26/a55/a94 объявлены (Scope T14.7)', () => {
+    for (const step of Object.keys(TINTS)) {
+      expect(declarations.get(tintName(step)), `${tintName(step)} отсутствует`).toBeDefined();
+    }
+  });
+
+  it('значение — color-mix(in srgb, var(--ui-color-primary) N%, transparent); N = суффикс (AC «ссылаются на primary»)', () => {
+    for (const [step, percent] of Object.entries(TINTS)) {
+      expect(declarations.get(tintName(step)), tintName(step)).toBe(
+        `color-mix(in srgb, var(--ui-color-primary) ${percent}%, transparent)`,
+      );
+    }
+  });
+
+  it('имена по паттерну BEM-токенов: суффикс прозрачности в процентах, без посторонних тинтов primary', () => {
+    const tintNames = [...declarations.keys()].filter((name) =>
+      /^--ui-color-primary-a\d+$/.test(name),
+    );
+    expect(new Set(tintNames)).toEqual(new Set(Object.keys(TINTS).map(tintName)));
+  });
+
+  it('лестница процентов растёт монотонно (10 < 20 < 26 < 55 < 94)', () => {
+    const percents = Object.values(TINTS);
+    expect(percents).toEqual([...percents].sort((a, b) => a - b));
   });
 });
 
