@@ -32,7 +32,9 @@ const root = join(import.meta.dirname, '..', '..');
 /**
  * Роль → суффикс тройки токенов (tokens/semantic.css, T2.2) и letter-spacing
  * класса: заголовки — −0.02em (перенос макета career-portal: page-title,
- * section__title), текстовые роли — normal.
+ * section__title), текстовые роли — normal. ui-page-title (T14.2) — роль-
+ * псевдоним: h1 внутренних страниц несёт тройку h2 (в career-portal
+ * .page-title = fs-h2 при теге h1).
  */
 const ROLES = [
   ['ui-h1', 'h1', '-0.02em'],
@@ -41,6 +43,7 @@ const ROLES = [
   ['ui-h4', 'h4', '-0.02em'],
   ['ui-h5', 'h5', '-0.02em'],
   ['ui-h6', 'h6', '-0.02em'],
+  ['ui-page-title', 'h2', '-0.02em'],
   ['ui-lead', 'lead', 'normal'],
   ['ui-body', 'body', 'normal'],
   ['ui-small', 'small', 'normal'],
@@ -99,7 +102,7 @@ describe('base/typography.css — классы ролей (Scope T3.3)', () => {
 
 describe('цвет заголовков: --ui-color-heading (T14.1)', () => {
   /** Заголовочные роли несут токен; текстовые цвет не задают — наследуют body. */
-  const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'page-title'];
   const TEXT_ROLES = ['lead', 'body', 'small', 'caption', 'micro'];
 
   const css = stripCssComments(readFileSync(join(root, 'base', 'typography.css'), 'utf8'));
@@ -135,6 +138,40 @@ describe('цвет заголовков: --ui-color-heading (T14.1)', () => {
       expect(block).not.toContain('color:');
     },
   );
+});
+
+describe('Роль «заголовок страницы»: ui-page-title (T14.2)', () => {
+  const css = stripCssComments(readFileSync(join(root, 'base', 'typography.css'), 'utf8'));
+  const block = blockOf(css, '.ui-page-title');
+
+  it('тройка fs/lh/fw — от h2 (в career-portal .page-title = fs-h2 при теге h1, AC T14.2)', () => {
+    expect(block, 'правило .ui-page-title найдено').toBeTruthy();
+    expect(block).toContain('font-size: var(--ui-fs-h2);');
+    expect(block).toContain('line-height: var(--ui-lh-h2);');
+    expect(block).toContain('font-weight: var(--ui-fw-h2);');
+  });
+
+  it('не «ui-h1 + модификатор»: h1-токены роль не читает (Technical considerations T14.2)', () => {
+    expect(block, 'правило .ui-page-title найдено').toBeTruthy();
+    expect(block).not.toContain('--ui-fs-h1');
+    expect(block).not.toContain('--ui-lh-h1');
+    expect(block).not.toContain('--ui-fw-h1');
+  });
+
+  it('letter-spacing −0.02em и цвет заголовков — как у заголовочных ролей (AC T14.2)', () => {
+    expect(block, 'правило .ui-page-title найдено').toBeTruthy();
+    expect(block).toContain('letter-spacing: -0.02em;');
+    expect(block).toContain('color: var(--ui-color-heading);');
+  });
+
+  it('роль в доках: строка «когда какую» в typography-roles.md (Scope T14.2)', () => {
+    const doc = readFileSync(
+      join(root, 'docs', 'ui-system', 'architecture', 'typography-roles.md'),
+      'utf8',
+    );
+    expect(doc).toContain('ui-page-title');
+    expect(doc).toMatch(/ui-page-title[^\n]*заголовок страницы/i);
+  });
 });
 
 describe('base/typography.css — body-дефолты страницы (Scope T3.3)', () => {
@@ -197,7 +234,7 @@ describe('html-validate: иерархия заголовков (Implementation r
 describe('стенд типографики (Implementation requirements T3.3 п.3)', () => {
   const stand = readFileSync(join(root, 'showcase', 'pages', 'typography', 'index.html'), 'utf8');
 
-  it('все 11 ролей и ui-text--muted представлены образцами', () => {
+  it('все 12 ролей и ui-text--muted представлены образцами', () => {
     for (const [cls] of ROLES) {
       expect(stand).toMatch(new RegExp(`class="[^"]*\\b${cls}\\b[^"]*"`));
     }

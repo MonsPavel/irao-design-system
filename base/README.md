@@ -66,13 +66,15 @@
   (`--ui-font-family`, тройка body, `--ui-color-text`, `--ui-color-surface`;
   порт career-portal `css/base.css:60`) + `overflow-wrap: break-word` —
   длинные RU-слова не создают горизонтальный скролл (32px-сценарий, №19 ТЗ);
-- классы ролей `ui-h1…ui-h6`, `ui-lead`, `ui-body`, `ui-small`, `ui-caption`,
-  `ui-micro` — типографическая шкала как API: каждый класс задаёт
-  fs/lh/fw/letter-spacing целиком из тройки токенов T2.2; mobile-first
-  лестница размеров живёт в токенах (media в файле нет); заголовочные роли
-  несут цвет `--ui-color-heading` (T14.1: career-portal красит все заголовки
-  primary `#002856`; alias на primary — тема едет за ней сама; override —
-  осознанное design-decision), текстовые роли наследуют `body`;
+- классы ролей `ui-h1…ui-h6`, `ui-page-title` (T14.2: заголовок страницы
+  списка/детальной/формы — тег h1 со шкалой h2), `ui-lead`, `ui-body`,
+  `ui-small`, `ui-caption`, `ui-micro` — типографическая шкала как API: каждый
+  класс задаёт fs/lh/fw/letter-spacing целиком из тройки токенов T2.2;
+  mobile-first лестница размеров живёт в токенах (media в файле нет);
+  заголовочные роли несут цвет `--ui-color-heading` (T14.1: career-portal
+  красит все заголовки primary `#002856`; alias на primary — тема едет за ней
+  сама; override — осознанное design-decision), текстовые роли наследуют
+  `body`;
 - «классы, а не теги»: теги h1–h6/p файлом не стилизуются — в шаблонах Bitrix
   заголовки выводятся классами (специфичность класса против legacy
   `h1 { … }`); семантику даёт реальный тег, иерархия h1→h2→h3 без пропусков
@@ -125,5 +127,5 @@
 | `reset.css` | T3.1 | глобальный reset (выше) |
 | `fonts.css` | T3.1 | @font-face Golos Text 400/500/600 × cyr/lat |
 | `focus.css` | T3.2 | глобальная политика `:focus-visible` (ADR-0001) |
-| `typography.css` | T3.3 | классы ролей ui-h1…ui-micro, body-дефолты, ui-list/ui-address |
+| `typography.css` | T3.3 | классы ролей ui-h1…ui-micro, ui-page-title (T14.2), body-дефолты, ui-list/ui-address |
 | `layout.css` | T3.4 | ui-container / ui-section (+ --muted) / ui-grid --2/--3/--4 |

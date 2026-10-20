@@ -8,8 +8,10 @@
  *    overflow-wrap: break-word — длинные RU-слова (и 32px-база требования
  *    №19 ТЗ) не создают горизонтального скролла; -webkit-font-smoothing —
  *    рендер одобренного макета;
- *  - классы ролей ui-h1…ui-h6, ui-lead, ui-body, ui-small, ui-caption,
- *    ui-micro — типографическая шкала как API для контентных областей:
+ *  - классы ролей ui-h1…ui-h6, ui-page-title (T14.2: заголовок страницы
+ *    списка/детальной/формы — h1 со шкалой h2), ui-lead, ui-body, ui-small,
+ *    ui-caption, ui-micro — типографическая шкала как API для контентных
+ *    областей:
  *    в шаблонах Bitrix заголовки выводятся КЛАССАМИ, т.к. теги стилизуются
  *    legacy («классы, а не теги» — специфичность класса против legacy
  *    `h1 { … }`, Technical considerations T3.3). Семантику страницы по-прежнему
@@ -106,6 +108,20 @@ body {
   font-size: var(--ui-fs-h6);
   font-weight: var(--ui-fw-h6);
   line-height: var(--ui-lh-h6);
+  letter-spacing: -0.02em;
+}
+
+/* Роль «заголовок страницы» (T14.2): h1 внутренних страниц со шкалой h2 —
+   перенос .page-title career-portal (fs-h2/60px при семантическом h1; в ДС
+   ui-h1 = 80px, из-за чего заголовки страниц клона были на треть крупнее
+   оригинала — REPORT §3.2). Самостоятельная роль, не «ui-h1 + модификатор»
+   (правило «роль задаёт тройку целиком», T3.3); hero/лендинг-h1 остаётся
+   на ui-h1 (крупный приветственный заголовок — так и в оригинале). */
+.ui-page-title {
+  color: var(--ui-color-heading);
+  font-size: var(--ui-fs-h2);
+  font-weight: var(--ui-fw-h2);
+  line-height: var(--ui-lh-h2);
   letter-spacing: -0.02em;
 }
 
