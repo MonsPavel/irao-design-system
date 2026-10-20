@@ -140,6 +140,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | тень dropdown `0 16px 40px rgba(0,40,86,.16)` (components.css:375) | `--ui-shadow-lg` | |
 | `--transition` 0.25s ease | `--ui-transition` | fast/slow 0.15/0.4 — §3.2 (новые) |
 | height `.btn` 52px (components.css:70) | `--ui-button-height: 3.25rem` | T4.2: используется как min-height (32px-база T3.6) |
+| padding `.btn` 12px 28px (components.css:71) | `--ui-button-pad-inline: 1.75rem` (горизонталь; вертикаль — `--ui-space-3`) | T14.3: 28px вне шкалы отступов §3.2 — перенос «как есть» (прецедент `--ui-card-gap`); до T14.3 горизонталь несла `--ui-space-5` (24px) — REPORT §3.3 «кнопки клона плотнее оригинала» |
 | height `.tag` 28px (components.css:101) | `--ui-tag-height: 1.75rem` | T4.3: используется как min-height (тот же прецедент) |
 | gap `.tag` 6px (components.css:100) | `--ui-tag-gap: 0.375rem` | T4.3: ступени шкалы отступов кратны 4 — значение перенесено «как есть», пересмотр — design-decision владельца |
 | gap `.vac-card` 14px (pages.css:42) | `--ui-card-gap: 0.875rem` | T4.4: тот же случай — вне шкалы §3.2, перенос «как есть» |
