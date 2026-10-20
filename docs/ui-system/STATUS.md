@@ -79,7 +79,7 @@
 | T14.3 | todo | EPIC-14: ui-button паддинг 28px |
 | T14.4 | todo | EPIC-14: ui-button--pill (после T14.3) |
 | T14.5 | todo | EPIC-14: ритм крошек в паттернах (после T14.2) |
-| T14.6 | todo | EPIC-14: ui-field паддинг + mapping-таблица |
+| T14.6 | todo | EPIC-14: ui-field паддинг + compact-модификатор + mapping-таблица |
 | T14.7 | todo | EPIC-14: тинт-токены primary |
 | T14.8 | todo | EPIC-14: компонент ui-chip |
 | T14.9 | todo | EPIC-14: ui-tabs --pill + начальный выбор |
