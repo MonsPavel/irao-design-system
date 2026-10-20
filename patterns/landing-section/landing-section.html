@@ -18,9 +18,13 @@
   Тёмная секция (Technical considerations T8.3): фон — семантика
   --ui-color-primary-deep (surface-inverse-пара), текст — on-dark-пары
   токенов (--ui-color-text-on-dark[-muted]); обе пары проходят контраст-гейт
-  T2.3 (npm run test:contrast). Карточки внутри тёмной секции — обычные
+  T2.3 (npm run test:contrast). Заголовок секции — роль ui-h2: с T14.1 роли
+  несут --ui-color-heading, поэтому связка lsp-dark возвращает его в
+  on-dark-пару явно (стиль ниже). Карточки внутри тёмной секции — обычные
   светлые ui-card: их текст остаётся в паре text-on-surface, перекраска не
-  требуется.
+  требуется; заголовки-ссылки карточек (h3.ui-h3) несут --ui-color-heading —
+  пара primary-on-surface гейта T2.3 на белой карточке (совпадает с
+  vac-card__title a career-portal).
 
   Full-bleed внутри контейнера (Technical considerations T8.3): изображение
   шире колонки контента тянется до краёв секции отрицательными margin от
@@ -57,6 +61,15 @@
 
   .lsp-dark .lsp-lead {
     color: var(--ui-color-text-on-dark-muted);
+  }
+
+  /* Заголовок секции — роль ui-h1…ui-h6, а роли несут --ui-color-heading
+     (T14.1): наследования on-dark больше нет, явная пара возвращает заголовок
+     на тёмном в text-on-dark (Out of scope T14.1 — «on-dark заголовки — зона
+     сайта»; точечно, чтобы не задеть h3 карточек — они остаются в паре
+     карточки на белой поверхности). */
+  .lsp-dark .ui-container > .ui-h2 {
+    color: var(--ui-color-text-on-dark);
   }
 
   /* Карточки внутри тёмной секции остаются светлыми, но их текст ОБЯЗАН

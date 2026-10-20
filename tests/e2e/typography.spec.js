@@ -13,6 +13,9 @@
  *     заголовков −0.02em (перенос макета career-portal), текстовых ролей —
  *     normal;
  *  3. body-дефолты страницы (font/color/bg) и ui-text--muted — из токенов;
+ *  3а. цвет заголовков (T14.1): computed color ролей ui-h1…ui-h6 =
+ *      --ui-color-heading (#002856 = primary career-portal) на всех вьюпортах;
+ *      текстовые роли наследуют body (--ui-color-text);
  *  4. ui-list: маркеры disc/decimal, отступы из шкалы spacing; ui-address
  *     без браузерного курсива;
  *  5. иерархия заголовков зелёная на ВСЕХ страницах showcase
@@ -74,6 +77,14 @@ const tokenRem = (page, name) =>
     (token) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(token)),
     name,
   );
+
+/** computed color образца роли: проба роли с data-ui-check-layout — первичный
+ * образец стенда БЕЗ модификаторов (muted-caption стенда не должен попадать). */
+const roleColor = (page, cls) =>
+  page.evaluate((selector) => {
+    const el = document.querySelector(`.${selector}[data-ui-check-layout]`);
+    return el ? getComputedStyle(el).color : null;
+  }, cls);
 
 /** База rem на html (16 по умолчанию, 32 — в сценарии масштабирования). */
 const rootFontSize = (page) =>
@@ -142,6 +153,32 @@ test.describe('типографика (T3.3)', () => {
     // дробные rem-значения дают нецелые px (13/0.8125rem и т.п.) — проверка
     // пропорциональности делается явно в 32px-сценарии ниже.
     expect(root, 'база html — 16px (дефолт полигона)').toBe(16);
+  });
+
+  test('цвет заголовков — --ui-color-heading #002856, текстовые роли наследуют body (T14.1)', async ({
+    stand,
+  }) => {
+    const page = await stand('typography');
+
+    for (const [name, size] of Object.entries(VIEWPORTS)) {
+      await page.setViewportSize(size);
+      for (const [cls, role] of ROLES) {
+        const color = await roleColor(page, cls);
+        expect(color, `${name}: образец роли ${cls} есть на стенде`).not.toBeNull();
+        if (role.startsWith('h')) {
+          // computed-color = --ui-color-heading → primary #002856 (career-portal):
+          // тема с отличным primary красит заголовки через alias сама (T14.1).
+          expect(color, `${name} ${cls}: color = --ui-color-heading (#002856)`).toBe(
+            'rgb(0, 40, 86)',
+          );
+        } else {
+          // Текстовые роли цвет не задают — наследуют body (--ui-color-text).
+          expect(color, `${name} ${cls}: color = --ui-color-text (наследование body)`).toBe(
+            'rgb(31, 31, 31)',
+          );
+        }
+      }
+    }
   });
 
   test('body-дефолты и ui-text--muted — из токенов слоя 2', async ({ stand }) => {

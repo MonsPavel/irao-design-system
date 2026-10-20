@@ -74,7 +74,7 @@
 | T13.7 | done | смержена |
 | T13.8 | done | смержена |
 | T13.9 | done | смержена |
-| T14.1 | todo | EPIC-14: цвет заголовков (--ui-color-heading + роли) |
+| T14.1 | done | смержена |
 | T14.2 | todo | EPIC-14: роль «заголовок страницы» (после T14.1) |
 | T14.3 | todo | EPIC-14: ui-button паддинг 28px |
 | T14.4 | todo | EPIC-14: ui-button--pill (после T14.3) |

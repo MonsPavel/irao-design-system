@@ -49,6 +49,8 @@
   --ui-color-text-on-dark: var(--ui-white);
   /* career-portal: --color-text-on-dark-muted */
   --ui-color-text-on-dark-muted: var(--ui-slate-400);
+  /* career-portal: page-title/section__title color: var(--color-primary) — все заголовки одобренного макета #002856; решение владельца 20.10 — канон main (T14.1); alias на primary — тема с отличным primary красит заголовки сама */
+  --ui-color-heading: var(--ui-color-primary);
 
   /* ── Цвета-смыслы: поверхности ── */
 
