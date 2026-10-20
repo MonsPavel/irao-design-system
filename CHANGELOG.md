@@ -18,6 +18,11 @@
 
 ### Added
 
+- Роль «заголовок страницы» `.ui-page-title` (T14.2): тег `h1` внутренних
+  страниц (список/детальная/форма) со шкалой `h2` — fs/lh/fw-h2 + ls −0.02em +
+  `--ui-color-heading`, как `.page-title` career-portal (60px при h1 вместо
+  80px у `ui-h1`). Расширение API типографики; page-паттерны list/detail/form
+  переведены на роль, лендинг/hero-h1 остаётся `ui-h1`;
 - Dev-сборка `dist/ui.dev.js` — не минифицированный вариант `ui.min.js` с
   механизмом deprecation-предупреждений: `window.IraoUI.dev` печатает
   `console.warn` при использовании deprecated-класса в DOM (скан при старте +
