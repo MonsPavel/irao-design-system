@@ -195,6 +195,7 @@ describe('components/ui-button/ui-button.css — производные сост
       '.ui-button--accent:hover',
       '.ui-button--outline:hover',
       '.ui-button--light:hover',
+      '.ui-button--pill:hover',
     ]) {
       expect(mediaBlock).toContain(selector);
     }
@@ -256,6 +257,112 @@ describe('components/ui-button/ui-button.css — производные сост
     expect(disabledIndex, 'disabled после hover-блока (порядок каскада)').toBeGreaterThan(
       mediaIndex,
     );
+  });
+});
+
+describe('components/ui-button/ui-button.css — модификатор pill (T14.4)', () => {
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-button', 'ui-button.css'), 'utf8'),
+  );
+
+  it('токены: высота пилюли --ui-button-height-pill = 2.75rem (44px career-portal css/pages.css:220 — вне шкалы, прецедент touch-токена пагинации --ui-pagination-size)', () => {
+    const source = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+    expect(source).toMatch(/--ui-button-height-pill:\s*2\.75rem;/);
+  });
+
+  it('токены: кружок иконки md --ui-button-pill-icon-size = 2rem (32px career-portal css/pages.css:240/241)', () => {
+    const source = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+    expect(source).toMatch(/--ui-button-pill-icon-size:\s*2rem;/);
+  });
+
+  it('токены: кружок иконки sm --ui-button-pill-icon-size-sm = 1.5rem (24px — ступень шкалы §3.2, прецедент --ui-badge-size: диаметр круга)', () => {
+    const source = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+    expect(source).toMatch(/--ui-button-pill-icon-size-sm:\s*1\.5rem;/);
+  });
+
+  it('pill: computed-геометрия AC — min-height 44px из токена, фон surface, рамка 1px (--ui-border-width) border-цветом, компактный паддинг из шкалы, подпись primary (AC: «как outline»)', () => {
+    const block = blockOf(css, '.ui-button--pill');
+    expect(block, 'правило .ui-button--pill найдено').toBeTruthy();
+    expect(block).toContain('min-height: var(--ui-button-height-pill);');
+    expect(block).toContain('background-color: var(--ui-color-surface);');
+    expect(block).toContain('border: var(--ui-border-width) solid var(--ui-border-color);');
+    // Компактный inline-паддинг из шкалы §3.2 (оригинал css/pages.css:221 —
+    // 0 6px 0 20px): слева --ui-space-4 (16px), справа --ui-space-1 (4px —
+    // кружок прижат к круглому торцу пилюли); вертикаль уплотнён до
+    // --ui-space-1, иначе контент (кружок 2rem + 12×2) выше 44px и
+    // min-height не активируется (урок ревью T4.2 про sm).
+    expect(block).toContain('padding-block: var(--ui-space-1);');
+    expect(block).toContain('padding-inline: var(--ui-space-4) var(--ui-space-1);');
+    expect(block).toContain('color: var(--ui-color-primary);');
+  });
+
+  it('pill: иконка-кружок 32px на СУЩЕСТВУЮЩЕМ __icon (без нового элемента), фон accent, стрелка text-on-dark; радиус — унаследованный --ui-radius-pill', () => {
+    const block = blockOf(css, '.ui-button--pill .ui-button__icon');
+    expect(block, 'правило .ui-button--pill .ui-button__icon найдено').toBeTruthy();
+    expect(block).toContain('width: var(--ui-button-pill-icon-size);');
+    expect(block).toContain('height: var(--ui-button-pill-icon-size);');
+    // SVG-видовой экран = content-box: паддинг --ui-space-2 держит стрелку
+    // 16px (канонический svg 16×16) внутри кружка 2rem.
+    expect(block).toContain('padding: var(--ui-space-2);');
+    expect(block).toContain('border-radius: var(--ui-radius-pill);');
+    expect(block).toContain('background-color: var(--ui-color-accent);');
+    expect(block).toContain('color: var(--ui-color-text-on-dark);');
+  });
+
+  it('pill hover — фон surface-hover (одобренная поверхность), подпись переобъявлена primary (против просачивания generic-.ui-button:hover)', () => {
+    const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
+    const pill = blockOf(mediaBlock, '.ui-button--pill:hover');
+    expect(pill, 'правило hover внутри media-обёртки').toBeTruthy();
+    expect(pill).toContain('background-color: var(--ui-color-surface-hover);');
+    expect(pill).toContain('color: var(--ui-color-primary);');
+  });
+
+  it('pill active — color-mix 88% + black над hover-поверхностью (конвенция ADR-0010, как light), подпись primary', () => {
+    const block = blockOf(css, '.ui-button--pill:active');
+    expect(block, 'правило .ui-button--pill:active найдено').toBeTruthy();
+    expect(block).toContain(
+      'background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);',
+    );
+    expect(block).toContain('color: var(--ui-color-primary);');
+  });
+
+  it('pill + sm (комбинированный модификатор, AC): высота sm-токена, вертикаль без паддинга, кружок уплотнён sm-токеном (24px — иначе min-height sm no-op, урок ревью T4.2) и паддингом --ui-space-1 (стрелка 16px сохраняется)', () => {
+    const block = blockOf(css, '.ui-button--pill.ui-button--sm');
+    expect(block, 'правило .ui-button--pill.ui-button--sm найдено').toBeTruthy();
+    expect(block).toContain('min-height: var(--ui-button-height-sm);');
+    expect(block).toContain('padding-block: 0;');
+    const icon = blockOf(css, '.ui-button--pill.ui-button--sm .ui-button__icon');
+    expect(icon, 'правило кружка sm найдено').toBeTruthy();
+    expect(icon).toContain('width: var(--ui-button-pill-icon-size-sm);');
+    expect(icon).toContain('height: var(--ui-button-pill-icon-size-sm);');
+    expect(icon).toContain('padding: var(--ui-space-1);');
+  });
+
+  it('демо (components/ui-button/ui-button.html): pill в каноне слотов — лейбл + svg-стрелка aria-hidden, type явный', () => {
+    const html = readFileSync(join(root, 'components', 'ui-button', 'ui-button.html'), 'utf8');
+    const pillButtons = [
+      ...html.matchAll(/<button[^>]*ui-button--pill[\s\S]*?<\/button>/g),
+    ].map(([tag]) => tag);
+    expect(pillButtons.length, 'pill-кнопка в паттерне есть').toBeGreaterThan(0);
+    for (const tag of pillButtons) {
+      expect(tag, 'type обязателен (гейт no-implicit-button-type)').toMatch(/\btype="/);
+      expect(tag, 'лейбл несёт доступное имя').toContain('ui-button__label');
+      expect(tag, 'стрелка декоративная').toContain('aria-hidden="true"');
+      expect(tag, 'стрелка — существующий слот __icon').toContain('ui-button__icon');
+    }
+  });
+
+  it('README: раздел модификатора — «когда» (CTA строки/карточки-ссылки) и границы (обычные действия — базовые варианты)', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-button', 'README.md'), 'utf8');
+    expect(readme).toMatch(/^## .*[Пп]илюл/m);
+    expect(readme).toMatch(/карточки-ссылки/i);
+    expect(readme).toContain('ui-button--pill');
+  });
+
+  it('стенд (showcase/pages/ui-button): pill md и комбинированный pill+sm в матрице', () => {
+    const html = readFileSync(join(root, 'showcase', 'pages', 'ui-button', 'index.html'), 'utf8');
+    expect(html).toContain('id="ui-button-pill"');
+    expect(html).toContain('id="ui-button-pill-sm"');
   });
 });
 
