@@ -37,9 +37,10 @@ const THEMES = ['baw', 'wb', 'bb', 'beige', 'green'];
  * baw — базовая: перекраски нет (дизайн уже «тёмное на светлом»), пара —
  * дефолтные токены системы (surface/text = #FFFFFF/#1F1F1F); h1 остаётся
  * прозрачным (пин отсутствия repaint). h1Color темы baw — «дефолт системы»:
- * с T14.1 он зависит от того, чем является h1 — роль ui-h1…ui-h6 несёт
- * --ui-color-heading (#002856 = primary), каркасный h1 (ui-showcase-title)
- * наследует body (флаг h1Default). wb — инверсия корня (фильтр на html),
+ * с T14.1 он зависит от того, чем является h1 — роль ui-h1…ui-h6 или
+ * ui-page-title (T14.2) несёт --ui-color-heading (#002856 = primary),
+ * каркасный h1 (ui-showcase-title) наследует body (флаг h1Default).
+ * wb — инверсия корня (фильтр на html),
  * фон body — чёрный. bb/beige/green — явная перекраска всех элементов:
  * vi.css форсирует цвета !important'ом, ожидание одно для всех стендов.
  */
@@ -301,9 +302,10 @@ test.describe('ui-vi — финальная матрица «тема × все 
         if (expected.h1Color) {
           if (expected.h1Default) {
             // Тема без перекраски — цвет h1 = дефолт системы, который с T14.1
-            // зависит от того, несёт ли h1 роль ui-h1…ui-h6 (см. таблицу выше).
+            // зависит от того, несёт ли h1 роль ui-h1…ui-h6 или ui-page-title
+            // (T14.2: h1 внутренних страниц со шкалой h2 — см. таблицу выше).
             const h1HasRole = await h1.evaluate((el) =>
-              [...el.classList].some((c) => /^ui-h[1-6]$/.test(c)),
+              [...el.classList].some((c) => /^ui-(h[1-6]|page-title)$/.test(c)),
             );
             expect(await computedOf(h1, 'color')).toBe(
               h1HasRole ? 'rgb(0, 40, 86)' : expected.h1Color,
