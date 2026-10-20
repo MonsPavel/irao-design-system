@@ -145,6 +145,8 @@
   --ui-button-height-sm: 2rem;
   /* новый: Technical considerations T4.2 «все значения из токенов» — толщина рамки outline-варианта, career-portal components.css:87 (2px) */
   --ui-button-border-width: 0.125rem;
+  /* career-portal: components.css:71 — padding .btn 12px 28px; горизонталь 28px вне шкалы отступов §3.2 — перенос «как есть» (прецедент --ui-card-gap; T14.3, REPORT §3.3: кнопки клона плотнее оригинала); вертикаль — --ui-space-3 */
+  --ui-button-pad-inline: 1.75rem;
   /* career-portal: components.css:269 — .pagination__arrow[disabled] opacity 0.3, единственный disabled-паттерн одобренного дизайна; контраст неактивных контролов WCAG 1.4.3 не требует (исключение зафиксировано в README ui-button) */
   --ui-opacity-disabled: 0.3;
 
