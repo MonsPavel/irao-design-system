@@ -290,7 +290,17 @@ test.describe('ui-vi — финальная матрица «тема × все 
           expect(await computedOf(h1, 'background-color')).toBe(expected.h1Bg);
         }
         if (expected.h1Color) {
-          expect(await computedOf(h1, 'color')).toBe(expected.h1Color);
+          // baw перекраски не делает — цвет h1 = дефолт системы. С T14.1 дефолт
+          // зависит от того, чем является h1: роль ui-h1…ui-h6 несёт
+          // --ui-color-heading (#002856 = primary), каркасный h1
+          // (ui-showcase-title) наследует body. Темы bb/beige/green красят
+          // !important'ом vi.css — там ожидание одно для всех стендов.
+          const h1HasRole = await h1.evaluate((el) =>
+            [...el.classList].some((c) => /^ui-h[1-6]$/.test(c)),
+          );
+          expect(await computedOf(h1, 'color')).toBe(
+            h1HasRole ? 'rgb(0, 40, 86)' : expected.h1Color,
+          );
         }
         if (expected.htmlFilter) {
           expect(await computedOf(page.locator('html'), 'filter')).toBe(expected.htmlFilter);

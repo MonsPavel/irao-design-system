@@ -215,28 +215,39 @@ standTest.describe('patterns/landing-section: тёмная секция (on-dark
         reference,
       );
 
-      // Проба пары текста карточки: ui-card цвет текста не задаёт, а
-      // .ui-card__link несёт color: inherit — без восстановления пары в
+      // Проба пар текста и заголовка карточки: ui-card цвет текста не задаёт,
+      // а .ui-card__link несет color: inherit — без восстановления пары в
       // связке тёмной секции текст карточки наследует белый on-dark и
       // становится невидимым (белое на белом; axe color-contrast это
       // пропускает — проверено прогоном, violations = []). Пин —
-      // детерминированная страховка: цвет текста = --ui-color-text.
-      await page.addStyleTag({ content: '.lsp-probe-text { color: var(--ui-color-text); }' });
-      const textPair = await page.evaluate(() => {
-        const probe = document.createElement('div');
-        probe.className = 'lsp-probe-text';
-        document.body.appendChild(probe);
-        const color = getComputedStyle(probe).color;
-        probe.remove();
-        return color;
+      // детерминированная страховка: цвет текста = --ui-color-text;
+      // заголовок-ссылка — роль ui-h3 и с T14.1 несёт --ui-color-heading
+      // (пара primary-on-surface гейта T2.3 на белой карточке; в career-portal
+      // vac-card__title a тоже primary — совпадение с одобренным дизайном).
+      await page.addStyleTag({
+        content:
+          '.lsp-probe-text { color: var(--ui-color-text); } ' +
+          '.lsp-probe-heading { color: var(--ui-color-heading); }',
       });
+      const pairOf = (cls) =>
+        page.evaluate((name) => {
+          const probe = document.createElement('div');
+          probe.className = name;
+          document.body.appendChild(probe);
+          const color = getComputedStyle(probe).color;
+          probe.remove();
+          return color;
+        }, cls);
+      const textPair = await pairOf('lsp-probe-text');
+      const headingPair = await pairOf('lsp-probe-heading');
       expect(
         style.fg,
         'цвет текста карточки — пара text-on-surface, не унаследованный on-dark',
       ).toBe(textPair);
-      expect(style.linkFg, 'заголовок-ссылка карточки — не белый (иначе невидим на карточке)').toBe(
-        textPair,
-      );
+      expect(
+        style.linkFg,
+        'заголовок-ссылка карточки — роль ui-h3 несёт --ui-color-heading (T14.1): не белый и не on-dark',
+      ).toBe(headingPair);
       expect(style.bodyFg, 'текст тела карточки — не белый').toBe(textPair);
     },
   );

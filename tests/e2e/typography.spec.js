@@ -78,10 +78,11 @@ const tokenRem = (page, name) =>
     name,
   );
 
-/** computed color образца роли. */
+/** computed color образца роли: проба роли с data-ui-check-layout — первичный
+ * образец стенда БЕЗ модификаторов (muted-caption стенда не должен попадать). */
 const roleColor = (page, cls) =>
   page.evaluate((selector) => {
-    const el = document.querySelector(`.${selector}`);
+    const el = document.querySelector(`.${selector}[data-ui-check-layout]`);
     return el ? getComputedStyle(el).color : null;
   }, cls);
 
