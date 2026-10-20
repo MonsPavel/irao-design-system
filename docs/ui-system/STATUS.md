@@ -74,3 +74,15 @@
 | T13.7 | done | смержена |
 | T13.8 | done | смержена |
 | T13.9 | done | смержена |
+| T14.1 | todo | EPIC-14: цвет заголовков (--ui-color-heading + роли) |
+| T14.2 | todo | EPIC-14: роль «заголовок страницы» (после T14.1) |
+| T14.3 | todo | EPIC-14: ui-button паддинг 28px |
+| T14.4 | todo | EPIC-14: ui-button--pill (после T14.3) |
+| T14.5 | todo | EPIC-14: ритм крошек в паттернах (после T14.2) |
+| T14.6 | todo | EPIC-14: ui-field паддинг + mapping-таблица |
+| T14.7 | todo | EPIC-14: тинт-токены primary |
+| T14.8 | todo | EPIC-14: компонент ui-chip |
+| T14.9 | todo | EPIC-14: ui-tabs --pill + начальный выбор |
+| T14.10 | todo | EPIC-14: list-page строки/сайдбар (после T14.4, T14.8) |
+| T14.11 | todo | EPIC-14: паттерн таймлайн |
+| T14.12 | todo | EPIC-14: пересборка пилота и сверка (после всех T14.1–T14.11) |
