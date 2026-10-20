@@ -1,10 +1,10 @@
 <!--
   Паттерн «Страница списка» (T8.1): эталонная сборка страницы
-  вакансии/события/предложения из готовых компонентов системы — page-head
-  (h1 + счётчик результатов + lead), GET-форма фильтров (select-пилюли
-  data-ui-select="wrap" + «Применить»/«Сбросить»), сетка ui-grid--3 с
-  карточками (T4.4 + теги T4.3), пагинация (T6.3); вторая ветка — «ничего не
-  найдено»: счётчик 0 + ui-empty (T4.8) с кнопкой сброса.
+  вакансии/события/предложения из готовых компонентов системы — крошки
+  (T4.7, ритм T14.5), page-head (h1 + счётчик результатов + lead), GET-форма
+  фильтров (select-пилюли data-ui-select="wrap" + «Применить»/«Сбросить»),
+  сетка ui-grid--3 с карточками (T4.4 + теги T4.3), пагинация (T6.3); вторая
+  ветка — «ничего не найдено»: счётчик 0 + ui-empty (T4.8) с кнопкой сброса.
 
   Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
   подключены только компоненты; связующие стили ниже — зона сайта (в бою —
@@ -22,6 +22,17 @@
 <style>
   /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
      дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
+
+  /* Ритм крошек (T14.5): полоса 62px career-portal — components.css:14,
+     padding .breadcrumbs 20px 0 24px. Верх 20px вне шкалы отступов §3.2 —
+     перенос «как есть» (прецедент --ui-button-pad-inline, T14.3); низ 24px —
+     --ui-space-5. Компонент отступов не получает (инвариант T4.7): ритм несёт
+     шаблон — правило копируется вместе со сборкой паттерна. */
+  .lpp-breadcrumbs {
+    box-sizing: border-box;
+    padding-block: 1.25rem var(--ui-space-5);
+  }
+
   .lpp-filters {
     display: flex;
     flex-wrap: wrap;
@@ -70,10 +81,49 @@
 
 <section class="ui-section" id="lpp-results" aria-labelledby="lpp-title">
   <p class="ui-showcase-stand__note">
-    Ветка «с данными»: полный цикл списка — page-head, GET-форма фильтров, сетка карточек,
+    Ветка «с данными»: полный цикл списка — крошки, page-head, GET-форма фильтров, сетка карточек,
     пагинация. Форма работает БЕЗ JS (кнопка «Применить», нативный GET-запрос); с JS модуль
     <code>IraoUI.select</code> (T7.3) строит listbox поверх нативных select — UX тот же.
   </p>
+
+  <!-- Крошки (T4.7 + ритм T14.5): nav[aria-label] > ol[role="list"],
+       микроразметка BreadcrumbList; текущая страница («Вакансии») — span +
+       aria-current="page" (не ссылка), как в оригинале vacancies.html:146.
+       Обвязка lpp-breadcrumbs несёт вертикальный ритм страницы (полоса 62px):
+       компонент отступов не получает (инвариант T4.7). Крошки в DOM раньше
+       page-head (конвенция паттернов T8.2). -->
+  <nav class="ui-breadcrumbs lpp-breadcrumbs" id="lpp-breadcrumbs" aria-label="Хлебные крошки">
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <ol
+      class="ui-breadcrumbs__list"
+      role="list"
+      itemscope
+      itemtype="https://schema.org/BreadcrumbList"
+    >
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <a class="ui-breadcrumbs__link" itemprop="item" href="/"
+          ><span itemprop="name">Главная</span></a
+        >
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="1">
+      </li>
+      <li
+        class="ui-breadcrumbs__item"
+        itemprop="itemListElement"
+        itemscope
+        itemtype="https://schema.org/ListItem"
+      >
+        <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page">Вакансии</span>
+        <!-- prettier-ignore -->
+        <meta itemprop="position" content="2">
+      </li>
+    </ol>
+  </nav>
 
   <!-- page-head: h1 (page-title) ролью ui-page-title (T14.2: шкала h2 при
        теге h1, как .page-title career-portal) — цель фокуса после применения

@@ -30,6 +30,16 @@
   /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
      дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
 
+  /* Ритм крошек (T14.5): полоса 62px career-portal — components.css:14,
+     padding .breadcrumbs 20px 0 24px. Верх 20px вне шкалы отступов §3.2 —
+     перенос «как есть» (прецедент --ui-button-pad-inline, T14.3); низ 24px —
+     --ui-space-5. Компонент отступов не получает (инвариант T4.7): ритм несёт
+     шаблон — правило копируется вместе со сборкой паттерна. */
+  .fpp-breadcrumbs {
+    box-sizing: border-box;
+    padding-block: 1.25rem var(--ui-space-5);
+  }
+
   /* page-head: вертикальный ритм (reset системы обнуляет margin p/h). */
   .fpp-head {
     box-sizing: border-box;
@@ -83,8 +93,14 @@
 
   <!-- Крошки (T4.7): nav[aria-label] > ol[role="list"], микроразметка
        BreadcrumbList; текущая страница («Отклик») — span + aria-current="page"
-       (не ссылка). Крошки в DOM раньше page-head (конвенция паттернов T8.2). -->
-  <nav class="ui-breadcrumbs" id="fpp-breadcrumbs" aria-label="Хлебные крошки">
+       (не ссылка). Крошки в DOM раньше page-head (конвенция паттернов T8.2).
+       Обвязка fpp-breadcrumbs несёт вертикальный ритм страницы (полоса 62px,
+       T14.5) — компонент отступов не получает (инвариант T4.7). -->
+  <nav
+    class="ui-breadcrumbs fpp-breadcrumbs"
+    id="fpp-breadcrumbs"
+    aria-label="Хлебные крошки"
+  >
     <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
     <ol
       class="ui-breadcrumbs__list"
