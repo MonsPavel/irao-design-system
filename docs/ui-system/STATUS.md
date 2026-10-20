@@ -79,7 +79,7 @@
 | T14.3 | done | смержена |
 | T14.4 | done | смержена |
 | T14.5 | done | смержена |
-| T14.6 | todo | EPIC-14: ui-field паддинг + compact-модификатор + mapping-таблица |
+| T14.6 | done | смержена |
 | T14.7 | todo | EPIC-14: тинт-токены primary |
 | T14.8 | todo | EPIC-14: компонент ui-chip |
 | T14.9 | todo | EPIC-14: ui-tabs --pill + начальный выбор |
