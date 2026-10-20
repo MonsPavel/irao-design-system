@@ -90,7 +90,7 @@ standTest.describe(
             document
               .getElementById('lpp-breadcrumbs')
               .compareDocumentPosition(document.getElementById('lpp-title')) &
-              Node.DOCUMENT_POSITION_FOLLOWING,
+            Node.DOCUMENT_POSITION_FOLLOWING,
           ),
         );
         expect(order, 'крошки в DOM раньше h1 (page-head после крошек)').toBe(true);
