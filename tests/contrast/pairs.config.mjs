@@ -64,6 +64,21 @@ export const PAIRS = [
     usage: 'текст на приглушённых секциях и карточках (section--gray, card--filled)',
   },
   {
+    id: 'heading-on-surface',
+    fg: '--ui-color-heading',
+    bg: '--ui-color-surface',
+    level: 'text',
+    usage:
+      'заголовки ролей ui-h1…ui-h6 (T14.1): career-portal красит все заголовки primary #002856',
+  },
+  {
+    id: 'heading-on-surface-muted',
+    fg: '--ui-color-heading',
+    bg: '--ui-color-surface-muted',
+    level: 'text',
+    usage: 'заголовки ролей ui-h1…ui-h6 (T14.1) на приглушённых секциях',
+  },
+  {
     id: 'muted-on-surface',
     fg: '--ui-color-text-muted',
     bg: '--ui-color-surface',

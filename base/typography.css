@@ -28,6 +28,11 @@
  *  - letter-spacing: заголовочные роли −0.02em (перенос макета career-portal:
  *    page-title, section__title), текстовые — normal; значения в em — от
  *    размера самой роли, масштабируются вместе с ней;
+ *  - цвет: заголовочные роли несут --ui-color-heading (T14.1; career-portal:
+ *    все заголовки #002856 = --color-primary) — alias на primary, тема с
+ *    отличным primary красит заголовки сама; текстовые роли цвет не задают —
+ *    наследуют body (--ui-color-text); override цвета заголовка — осознанное
+ *    решение (design-decision);
  *  - text-wrap: pretty/balance не используется (нет в матрице браузеров —
  *    Technical considerations T3.3; кандидат на minor-улучшение позже);
  *  - никаких !important (инвариант системы) и никакого hex — только токены.
@@ -50,8 +55,12 @@ body {
 }
 
 /* ── Заголовочные роли: career-portal page-title/section__title (−0.02em) ── */
+/* Цвет — --ui-color-heading (= primary #002856, T14.1): в одобренном макете
+   все заголовки тёмно-синие; тема с отличным primary красит их сама. Override
+   цвета заголовка — осознанное решение (design-decision), не «просто цвет». */
 
 .ui-h1 {
+  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h1);
   font-weight: var(--ui-fw-h1);
   line-height: var(--ui-lh-h1);
@@ -59,6 +68,7 @@ body {
 }
 
 .ui-h2 {
+  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h2);
   font-weight: var(--ui-fw-h2);
   line-height: var(--ui-lh-h2);
@@ -66,6 +76,7 @@ body {
 }
 
 .ui-h3 {
+  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h3);
   font-weight: var(--ui-fw-h3);
   line-height: var(--ui-lh-h3);
@@ -73,6 +84,7 @@ body {
 }
 
 .ui-h4 {
+  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h4);
   font-weight: var(--ui-fw-h4);
   line-height: var(--ui-lh-h4);
@@ -82,6 +94,7 @@ body {
 /* Роли h5/h6 §3.2: в career-portal их нет (см. --ui-fs-h5/h6); трекинг —
    как у остальных заголовочных ролей. */
 .ui-h5 {
+  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h5);
   font-weight: var(--ui-fw-h5);
   line-height: var(--ui-lh-h5);
@@ -89,6 +102,7 @@ body {
 }
 
 .ui-h6 {
+  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h6);
   font-weight: var(--ui-fw-h6);
   line-height: var(--ui-lh-h6);
