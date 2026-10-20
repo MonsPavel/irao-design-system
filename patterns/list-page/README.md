@@ -18,7 +18,7 @@
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
-| page-head | h1 (`ui-h1`) + счётчик + lead (`ui-lead`) | счётчик — `aria-live="polite"`; h1 — цель фокуса (`tabindex="-1"`) |
+| page-head | h1 (`ui-page-title`) + счётчик + lead (`ui-lead`) | счётчик — `aria-live="polite"`; h1 — цель фокуса (`tabindex="-1"`) |
 | Панель фильтров | `select` в пилюлях + `ui-button` | GET-форма: без JS — кнопкой «Применить»; с JS — `IraoUI.select` (wrap-режим), UX тот же |
 | Выдача | `ui-grid--3` + `ui-card--hover ui-card--link` + `ui-tag` | карточка-ссылка T4.4, теги T4.3 |
 | Пагинация | `ui-pagination` | T6.3; сохраняет GET-параметры фильтров |
@@ -32,14 +32,15 @@
 ### page-head: счётчик — живая область
 
 ```html
-<h1 class="ui-h1" id="page-title" tabindex="-1">Вакансии</h1>
+<h1 class="ui-page-title" id="page-title" tabindex="-1">Вакансии</h1>
 <p class="ui-small ui-text--muted" aria-live="polite">Найдено: 6 вакансий</p>
 <p class="ui-lead">Открытые вакансии компаний Группы «Интер РАО»…</p>
 ```
 
 `aria-live="polite"` — обновлённое число объявляется скринридеру
 (Technical considerations T8.1). `tabindex="-1"` на h1 — цель фокуса после
-применения фильтра.
+применения фильтра. Роль h1 — `ui-page-title` (T14.2): шкала h2 при теге h1,
+как `.page-title` career-portal.
 
 ### Панель фильтров: GET-форма, select-пилюли
 
@@ -149,7 +150,7 @@ $sDirection = isset($_GET['direction']) ? htmlspecialcharsbx((string)$_GET['dire
 $sExperience = isset($_GET['experience']) ? htmlspecialcharsbx((string)$_GET['experience']) : '';
 $iCount = count($arResult['ITEMS']);
 ?>
-<h1 class="ui-h1" id="page-title" tabindex="-1">Вакансии</h1>
+<h1 class="ui-page-title" id="page-title" tabindex="-1">Вакансии</h1>
 <p class="ui-small ui-text--muted" aria-live="polite">Найдено: <?= $iCount ?> вакансий</p>
 
 <form class="lpp-filters" method="get" action="<?= $APPLICATION->GetCurPage() ?>" aria-label="Фильтры вакансий">

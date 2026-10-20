@@ -19,7 +19,7 @@
 | Блок | Компоненты | Примечания |
 |---|---|---|
 | Крошки | `ui-breadcrumbs` | T4.7; текущая страница («Отклик») — `span` + `aria-current="page"` |
-| page-head | h1 «Отклик» (`ui-h1`) + lead (`ui-lead`) | подроли типографики T3.3 |
+| page-head | h1 «Отклик» (`ui-page-title`) + lead (`ui-lead`) | подроли типографики T3.3 |
 | Форма | `ui-form` (T5.4) + поля `ui-field`/`ui-checkbox` | `data-ui-form` — хук модуля `IraoUI.form` (T5.5); в разметке нет `novalidate` |
 | Aside-сводка | `ui-form__aside`: title/text/rows | перенос `form-aside` career-portal; возврат к вакансии — `ui-button`-ссылка |
 | Полный форма-цикл | ветки T5.6, встроенные в страницу | живая форма → «серверный ответ» (pre-rendered + inline-фокус) → success |
@@ -69,13 +69,14 @@
 
 ```html
 <nav class="ui-breadcrumbs" aria-label="Хлебные крошки">…</nav>
-<h1 class="ui-h1">Отклик на вакансию</h1>
+<h1 class="ui-page-title">Отклик на вакансию</h1>
 <p class="ui-lead">Заполните анкету — компания рассмотрит отклик…</p>
 ```
 
 Крошки — до page-head (конвенция паттернов T8.2); текущая страница — `span`
 с `aria-current="page"`, не ссылка. Заголовок страницы — единственный h1
-(гейт `irao/one-h1`); lead — подроль `ui-lead`.
+(гейт `irao/one-h1`), роль — `ui-page-title` (T14.2: шкала h2 при теге h1);
+lead — подроль `ui-lead`.
 
 ### Форма + aside-сводка (перенос form-aside)
 

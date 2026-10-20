@@ -20,7 +20,7 @@
 | Блок | Компоненты | Примечания |
 |---|---|---|
 | Крошки | `ui-breadcrumbs` | T4.7; микроразметка BreadcrumbList, текущая — `span` + `aria-current="page"` |
-| page-head | h1 (`ui-h1`) + зарплата (`ui-h3`) + теги (`ui-tag`) + мета | мета — `ui-small ui-text--muted`; дата — `<time datetime>` |
+| page-head | h1 (`ui-page-title`) + зарплата (`ui-h3`) + теги (`ui-tag`) + мета | мета — `ui-small ui-text--muted`; дата — `<time datetime>` |
 | Контент | роли T3.3 (`ui-body`, `ui-list`), секции h2 | уровень тега — семантика страницы, роль — вид |
 | Aside | справочная панель `dl` + CTA `ui-button` + дисклеймер `ui-link` | перенос `form-aside` career-portal; **sticky только ≥ md (768)** |
 | Related | h2 + `ui-grid--3` + `ui-card--hover ui-card--link` | после main; заголовки карточек — h3 |
@@ -169,7 +169,7 @@ T8.2 п.1) закрыт e2e на эталоне: `tests/e2e/pattern-detail-page.
 
 ```html
 <article class="dpp-article" itemscope itemtype="https://schema.org/JobPosting">
-  <h1 class="ui-h1" itemprop="title">…</h1>
+  <h1 class="ui-page-title" itemprop="title">…</h1>
   <span itemprop="hiringOrganization" itemscope itemtype="https://schema.org/Organization">
     <span itemprop="name">АО «Интер РАО – Электрогенерация»</span>
   </span>
@@ -222,7 +222,7 @@ $sDateTs = $sDate === '' ? false : strtotime($sDate);
      // (сниппет bitrix/snippets/breadcrumbs.php) ?>
 </nav>
 <article itemscope itemtype="https://schema.org/JobPosting">
-  <h1 class="ui-h1" itemprop="title"><?= htmlspecialcharsbx($arResult['NAME']) ?></h1>
+  <h1 class="ui-page-title" itemprop="title"><?= htmlspecialcharsbx($arResult['NAME']) ?></h1>
   <p class="dpp-tags">
     <?php foreach ($arResult['DISPLAY_PROPERTIES'] as $code => $prop):
       if (empty($prop['DISPLAY_VALUE'])) continue; ?>
