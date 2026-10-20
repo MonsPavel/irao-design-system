@@ -149,6 +149,12 @@
   --ui-button-pad-inline: 1.75rem;
   /* career-portal: components.css:269 — .pagination__arrow[disabled] opacity 0.3, единственный disabled-паттерн одобренного дизайна; контраст неактивных контролов WCAG 1.4.3 не требует (исключение зафиксировано в README ui-button) */
   --ui-opacity-disabled: 0.3;
+  /* career-portal: pages.css:220 — height .pill-btn 44px (пилюля со стрелкой, REPORT §3.3 — самый частый CTA оригинала) → rem; 44px вне шкалы отступов §3.2 — перенос «как есть» (прецедент touch-токена пагинации --ui-pagination-size), используется как min-height (прецедент --ui-button-height: 32px-база T3.6 растит компонент вместе с текстом; T14.4) */
+  --ui-button-height-pill: 2.75rem;
+  /* career-portal: pages.css:240/241 — .pill-btn__icon 32×32 (кружок икон-слота) → rem; 32px — ступень шкалы §3.2 (прецедент --ui-badge-size: диаметр круга; T14.4) */
+  --ui-button-pill-icon-size: 2rem;
+  /* новый (T14.4): кружок в комбинированном ui-button--pill.ui-button--sm — оригинал .pill-btn--sm тоже уплотняет иконку (pages.css:254, 32→30px); здесь ступень шкалы §3.2 24px (прецедент --ui-badge-size): кружок обязан помещаться в высоту sm (2rem − рамка 2×1px), иначе min-height sm — no-op (урок ревью T4.2) */
+  --ui-button-pill-icon-size-sm: 1.5rem;
 
   /* ── Пагинация (ui-pagination, T6.3): геометрия ── */
 
