@@ -53,6 +53,14 @@
  * --wide — модификатор «на все колонки grid-родителя»: потребитель —
  * раскладка форм ui-form-grid (T5.4); вне grid-родителя правило инертно.
  *
+ * --compact (T14.6) — плотный вариант «поле в анкете-модалке» оригинала
+ * (.apply-form .field__input height 48px, pages.css:1208): min-height
+ * --ui-field-height-compact (3rem) на input/select; textarea высоту не
+ * меняет (многострочность важнее плотности), паддинг compact не трогает —
+ * горизонталь и так несёт одобренные 20px (--ui-field-pad-inline).
+ * Потребитель — apply-формы career-portal (модалки-анкеты); правило —
+ * README.md. 48px ≥ 44px — touch-минимум не нарушается.
+ *
  * Иконки валидации не вводятся (анти-overengineering): смысл ошибки дублирует
  * её текст (Implementation requirements п.4 — иконки допустимы только
  * декоративные, aria-hidden). Без media-запросов и :hover — одобренным
@@ -100,7 +108,7 @@
   box-sizing: border-box;
   width: 100%;
   min-height: var(--ui-field-height);
-  padding: var(--ui-space-1) var(--ui-space-5);
+  padding: var(--ui-space-1) var(--ui-field-pad-inline);
   border: var(--ui-border-width) solid transparent;
   border-radius: var(--ui-radius-sm);
   background-color: var(--ui-color-surface-muted);
@@ -114,11 +122,20 @@
 }
 
 /* Textarea выше однострочного поля и растягивается пользователем по
-   вертикали; фикс. высоты нет — растёт по контенту с 32px-базой T3.6. */
+   вертикали; фикс. высоты нет — растёт по контенту с 32px-базой T3.6.
+   Горизонталь — тот же одобренный 20px (components.css:162 «14px 20px»). */
 .ui-field__textarea {
   min-height: var(--ui-field-textarea-min-height);
-  padding: var(--ui-field-textarea-padding-y) var(--ui-space-5);
+  padding: var(--ui-field-textarea-padding-y) var(--ui-field-pad-inline);
   resize: vertical;
+}
+
+/* Compact (T14.6): плотная высота анкет-модалок оригинала (pages.css:1208)
+   на input/select; textarea не участвует — многострочность важнее плотности.
+   Паддинг не переопределяется: одобренные 20px уже в общем правиле. */
+.ui-field--compact .ui-field__input,
+.ui-field--compact .ui-field__select {
+  min-height: var(--ui-field-height-compact);
 }
 
 /* Select (T5.2): appearance: none убирает только UA-стрелку ЗАКРЫТОГО

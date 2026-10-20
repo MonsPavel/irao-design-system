@@ -10,6 +10,12 @@
 
 ### Changed
 
+- Горизонтальный паддинг полей: `4px 24px` → `4px 20px` (textarea `14px 20px`), как
+  `.field__input` career-portal (components.css:150) — новый токен
+  `--ui-field-pad-inline` (20px вне шкалы отступов — перенос «как есть», T14.6).
+  Селект наследует автоматически; кастомный listbox ui-select не зависит от
+  паддинга поля (триггер повторяет одобренный `.dd__trigger` 4/16). Визуальное
+  изменение поставки;
 - Горизонтальный паддинг кнопки: `12px 24px` → `12px 28px`, как `.btn`
   career-portal (components.css:71) — новый токен `--ui-button-pad-inline`
   (28px вне шкалы отступов — перенос «как есть», T14.3). sm-вариант наследует
@@ -23,6 +29,12 @@
 
 ### Added
 
+- Модификатор поля «плотная анкета-модалка» `.ui-field--compact` (T14.6):
+  `min-height` 48px (`--ui-field-height-compact`; height `.apply-form
+  .field__input` pages.css:1208 оригинала) на `__input`/`__select`; textarea
+  высоту не меняет (многострочность важнее плотности), паддинг не трогает.
+  Расширение API поля; потребитель — apply-формы career-portal. 48 ≥ 44px —
+  touch-минимум не нарушен;
 - Модификатор кнопки «пилюля со стрелкой» `.ui-button--pill` (T14.4): самый
   частый CTA оригинала (`.pill-btn` career-portal — «откликнуться →»):
   h44 (`--ui-button-height-pill`), фон surface, рамка 1px, круглая иконка-

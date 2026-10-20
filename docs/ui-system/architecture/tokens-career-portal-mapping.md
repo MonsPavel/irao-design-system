@@ -7,7 +7,9 @@
 Инструмент контроля отклонений от одобренного дизайна (Implementation
 requirements T2.1 п.4): каждое значение career-portal перенесено **как есть**;
 отклонений от эталона нет — колонка «Решение» во всей таблице `перенос`,
-`design-decision` не требуется. Исполняемая форма таблицы (гейт в PR):
+`design-decision` не требуется. AA-правки значений — отдельный раздел
+«AA-замены» (T2.3), микрорасхождения, решённые в пользу значений ДС, —
+раздел «Принято значение ДС» (T14.6, REPORT §3.3). Исполняемая форма таблицы (гейт в PR):
 `tests/unit/tokens-primitives.test.js` → `npm run test:unit`.
 
 Источники: `css/variables.css`, захардкоженные значения `css/components.css` /
@@ -147,6 +149,8 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | gap `.tag` 6px (components.css:100) | `--ui-tag-gap: 0.375rem` | T4.3: ступени шкалы отступов кратны 4 — значение перенесено «как есть», пересмотр — design-decision владельца |
 | gap `.vac-card` 14px (pages.css:42) | `--ui-card-gap: 0.875rem` | T4.4: тот же случай — вне шкалы §3.2, перенос «как есть» |
 | height `.field__input/.field__select/.field__textarea` 52px (components.css:148) | `--ui-field-height: 3.25rem` | T5.1: используется как min-height (прецедент `--ui-button-height` — 32px-база T3.6) |
+| padding `.field__input/.field__select` 4px 20px и `.field__textarea` 14px 20px — горизонталь 20px (components.css:150) | `--ui-field-pad-inline: 1.25rem` (горизонталь всех контролов поля; вертикали — `--ui-space-1` и `--ui-field-textarea-padding-y`) | T14.6: 20px вне шкалы отступов §3.2 — перенос «как есть» (прецедент `--ui-button-pad-inline`); до T14.6 горизонталь несла `--ui-space-5` (24px) — REPORT §3.3 «паддинг 20 vs 24» |
+| height `.apply-form .field__input` 48px (pages.css:1208 — анкеты-модалки оригинала) | `--ui-field-height-compact: 3rem` — модификатор `ui-field--compact` на input/select | T14.6: компактный вариант «поле в анкете-модалке», не отставание Pages (REPORT §2 (г)); 48px вне шкалы отступов §3.2 — перенос «как есть» (прецедент `--ui-card-gap`), используется как min-height (прецедент `--ui-field-height`); textarea высоту не меняет (многострочность важнее плотности); 48 ≥ 44 — touch-минимум |
 | min-height `.field__textarea` 120px (components.css:161) | `--ui-field-textarea-min-height: 7.5rem` | T5.1: у textarea фикс. высоты нет (Scope) |
 | вертикальный паддинг `.field__textarea` 14px (components.css:162) | `--ui-field-textarea-padding-y: 0.875rem` | T5.1: вне шкалы §3.2, перенос «как есть» (прецедент `--ui-card-gap`) |
 | размер инпута `.checkbox input`/`.radio input` 20px (components.css:203/223) | `--ui-control-size: 1.25rem` | T5.2: единый токен обоих блоков (в career-portal значение продублировано) |
@@ -158,6 +162,18 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--container-max` 1440px | `--ui-container-max: 90rem` | |
 | фокус pages.css:52 (outline 3px primary, offset 2px) | `--ui-focus-color/width/offset` | ADR-0001 |
 | z-index: 70 dropdown (components.css:376) | `--ui-z-dropdown: 70` | |
+
+### Принято значение ДС (микрорасхождения сверки пилота — REPORT §3.3, T14.6)
+
+Расхождения clone-сверки 20.10, решённые в пользу значений ДС: осознанные
+решения, не дефекты — зафиксированы, чтобы не всплывали повторно (T14.6).
+Смена значения поставки — design-decision владельца дизайна.
+
+| Компонент | Оригинал (career-portal) | ДС (принято) | Примечание |
+| --- | --- | --- | --- |
+| `ui-card` padding | 20px | `--ui-space-5` (24px) | база ДС «воздушнее» оригинала на 4px; проба сверки попала в строку вакансии пилота (16px) — артефакт, значение ДС оставлено (REPORT §3.3) |
+| `ui-modal` dialog padding | 40px | 2.25rem = 36px (`ui-modal.css`) | микро; принято значение ДС (REPORT §3.3) |
+| `ui-tag` orange — текст пары | `#B34A10` (`--ui-orange-700`, 4.40:1 на orange-50) | `#A94710` (`--ui-orange-800`, 4.78:1) | осознанная AA-замена T2.3 — см. «AA-замены значений» ниже; не дефект (REPORT §3.3) |
 
 ### Новые (в career-portal нет источника)
 
