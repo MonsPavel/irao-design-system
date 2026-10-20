@@ -551,3 +551,32 @@ describe('подключение и гейты (DoD T6.2)', () => {
     expect(expectations).toContain('tabs-id-links');
   });
 });
+
+describe('расхождение паддинга таба с ui-button (ревью ветки T14.3)', () => {
+  // Шапка и README читаются С комментариями: предмет пина — проза контракта,
+  // рассинхрон доки и кода (рубрика ревью T14.3).
+  const raw = readFileSync(join(root, 'components', 'ui-tabs', 'ui-tabs.css'), 'utf8');
+  const css = stripCssComments(raw);
+
+  it('исполняемый контракт: паддинг таба — ступени шкалы 12×24 (--ui-space-3/5), не токен кнопки', () => {
+    const block = blockOf(css, '.ui-tabs__tab');
+    expect(block).toContain('padding: var(--ui-space-3) var(--ui-space-5);');
+    expect(block, 'синхронизация с кнопкой — только отдельной задачей EPIC-14').not.toContain(
+      '--ui-button-pad-inline',
+    );
+  });
+
+  it('шапка не декларирует парность паддинга с кнопкой: после T14.3 у .ui-button --ui-button-pad-inline (28px) — заявка «как в ui-button» ложна', () => {
+    const normalized = raw.replace(/\s+/g, ' ');
+    expect(normalized, 'ложная заявка парности снята').not.toContain(
+      'паддинг --ui-space-3/5 как в ui-button',
+    );
+    expect(normalized, 'расхождение задокументировано в шапке').toContain('--ui-button-pad-inline');
+  });
+
+  it('README фиксирует решение: таб сознательно 12×24; синхронизация — отдельная задача EPIC-14', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-tabs', 'README.md'), 'utf8');
+    expect(readme).toContain('--ui-button-pad-inline');
+    expect(readme).toMatch(/EPIC-14/);
+  });
+});
