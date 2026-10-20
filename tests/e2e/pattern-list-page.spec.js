@@ -20,6 +20,7 @@ import { expect } from '@playwright/test';
 import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helpers/harness.js';
 
 const SEL = {
+  breadcrumbs: '#lpp-breadcrumbs', // крошки T4.7 в начале ветки «с данными» (T14.5)
   title: '#lpp-title', // h1 страницы-списка — цель фокуса после фильтра
   count: '#lpp-count',
   lead: '#lpp-lead',
@@ -61,6 +62,38 @@ standTest.describe(
           source,
           'связующие стили паттерна — inline <style> стенда (showcase, не dist)',
         ).toContain('<style>');
+      },
+    );
+
+    standTest(
+      'крошки T14.5: в начале сборки, несут вертикальный ритм страницы (computed 20/24px)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const crumbs = page.locator(SEL.breadcrumbs);
+        await expect(crumbs, 'крошки T4.7 в начале ветки «с данными»').toBeVisible();
+        await expect(crumbs).toHaveAttribute('aria-label', /Хлебные крошки/);
+
+        // Ритм крошек — у паттерна страницы (T14.5), не у компонента
+        // (инвариант T4.7): полоса 62px оригинала — padding .breadcrumbs
+        // 20px 0 24px (career-portal components.css:14).
+        const padding = await crumbs.evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return { top: cs.paddingTop, bottom: cs.paddingBottom };
+        });
+        expect(padding.top, 'сверху 20px — верх полосы 62px (components.css:14)').toBe('20px');
+        expect(padding.bottom, 'снизу 24px — низ полосы 62px (components.css:14)').toBe('24px');
+
+        // DOM-порядок: крошки раньше заголовка страницы (конвенция T8.2).
+        const order = await page.evaluate(() =>
+          Boolean(
+            document
+              .getElementById('lpp-breadcrumbs')
+              .compareDocumentPosition(document.getElementById('lpp-title')) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          ),
+        );
+        expect(order, 'крошки в DOM раньше h1 (page-head после крошек)').toBe(true);
       },
     );
 
