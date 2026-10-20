@@ -94,7 +94,7 @@ describe('components/ui-field/ui-field.css — ui-field__select (T5.2)', () => {
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('width: 100%;');
     expect(block).toContain('min-height: var(--ui-field-height);');
-    expect(block).toContain('padding: var(--ui-space-1) var(--ui-space-5);');
+    expect(block).toContain('padding: var(--ui-space-1) var(--ui-field-pad-inline);');
     expect(block).toContain('border: var(--ui-border-width) solid transparent;');
     expect(block).toContain('background-color: var(--ui-color-surface-muted);');
     expect(block).toContain('color: var(--ui-color-text);');

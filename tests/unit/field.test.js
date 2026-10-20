@@ -98,7 +98,7 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
       block,
       'фиксированной height нет — только min-height (Implementation requirements п.1)',
     ).not.toMatch(/(?:^|;)\s*height:\s/);
-    expect(block).toContain('padding: var(--ui-space-1) var(--ui-space-5);');
+    expect(block).toContain('padding: var(--ui-space-1) var(--ui-field-pad-inline);');
     expect(block).toContain('border: var(--ui-border-width) solid transparent;');
     expect(block).toContain('border-radius: var(--ui-radius-sm);');
     expect(block).toContain('background-color: var(--ui-color-surface-muted);');
@@ -113,10 +113,32 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
     const block = blockOfStandalone(css, '.ui-field__textarea');
     expect(block, 'правило .ui-field__textarea найдено').toBeTruthy();
     expect(block).toContain('min-height: var(--ui-field-textarea-min-height);');
-    expect(block).toContain('padding: var(--ui-field-textarea-padding-y) var(--ui-space-5);');
+    expect(block).toContain('padding: var(--ui-field-textarea-padding-y) var(--ui-field-pad-inline);');
     expect(block).toContain('resize: vertical;');
     expect(block, 'textarea без фикс. высоты (Implementation requirements п.1)').not.toMatch(
       /(?:^|;)\s*(?:height|max-height):\s/,
+    );
+  });
+
+  it('.ui-field--compact (T14.6): min-height --ui-field-height-compact (48px анкет-модалок career-portal) на input/select; textarea высоту compact не меняет', () => {
+    const compact = blockOf(
+      css,
+      '.ui-field--compact .ui-field__input,\n.ui-field--compact .ui-field__select',
+    );
+    expect(compact, 'правило compact для input/select найдено').toBeTruthy();
+    expect(compact).toContain('min-height: var(--ui-field-height-compact);');
+    expect(
+      compact,
+      'compact — только высота: паддинг едет из общего правила (одобренный паддинг не зависит от плотности)',
+    ).not.toMatch(/padding/);
+    expect(
+      css,
+      'textarea в правиле compact нет — многострочность важнее плотности (Technical considerations T14.6)',
+    ).not.toMatch(/\.ui-field--compact[^{]*textarea/);
+    // База не тронута: общее правило контролов продолжает нести 52px.
+    const base = blockOf(css, '.ui-field__input,\n.ui-field__select,\n.ui-field__textarea');
+    expect(base, 'базовая высота контролов не изменилась').toContain(
+      'min-height: var(--ui-field-height);',
     );
   });
 
@@ -223,8 +245,10 @@ describe('tokens/semantic.css — геометрия полей (слой 2, T5.
 
   it.each([
     ['--ui-field-height', '3.25rem', 'components.css:148'],
+    ['--ui-field-pad-inline', '1.25rem', 'components.css:150'],
     ['--ui-field-textarea-min-height', '7.5rem', 'components.css:161'],
     ['--ui-field-textarea-padding-y', '0.875rem', 'components.css:162'],
+    ['--ui-field-height-compact', '3rem', 'pages.css:1208'],
   ])(
     '%s = %s перенесён «как есть» (px → rem, происхождение зафиксировано)',
     (token, value, origin) => {
@@ -243,8 +267,10 @@ describe('tokens/semantic.css — геометрия полей (слой 2, T5.
     );
     for (const token of [
       '--ui-field-height',
+      '--ui-field-pad-inline',
       '--ui-field-textarea-min-height',
       '--ui-field-textarea-padding-y',
+      '--ui-field-height-compact',
     ]) {
       expect(css, `${token} используется компонентом`).toContain(`var(${token})`);
     }
@@ -257,11 +283,31 @@ describe('tokens/semantic.css — геометрия полей (слой 2, T5.
     );
     for (const token of [
       '--ui-field-height',
+      '--ui-field-pad-inline',
       '--ui-field-textarea-min-height',
       '--ui-field-textarea-padding-y',
+      '--ui-field-height-compact',
     ]) {
       expect(mapping, `${token} — строка в таблице диффов`).toContain(token);
     }
+  });
+
+  it('mapping-таблица фиксирует микрорасхождения «принято ДС» (T14.6, REPORT §3.3): карточка, модалка, tag-orange', () => {
+    const mapping = readFileSync(
+      join(root, 'docs', 'ui-system', 'architecture', 'tokens-career-portal-mapping.md'),
+      'utf8',
+    );
+    expect(mapping, 'секция «принято ДС» заведена').toContain('### Принято значение ДС');
+    expect(mapping, 'карточка: 20 оригинала против 24 ДС (REPORT §3.3)').toMatch(
+      /ui-card[^\n]*\| 20px \|/,
+    );
+    expect(mapping, 'модалка: 40 оригинала против 36 ДС (REPORT §3.3)').toMatch(
+      /ui-modal[^\n]*\| 40px \|/,
+    );
+    expect(
+      mapping,
+      'tag-orange: текст #A94710 ДС против #B34A10 оригинала (AA T2.3) — строка «принято ДС»',
+    ).toMatch(/ui-tag[^\n]*#B34A10[^\n]*#A94710/);
   });
 });
 
@@ -352,6 +398,7 @@ describe('стенд и подключение (Scope T5.1)', () => {
       /ui-field__input[^>]*readonly|readonly[^>]*ui-field__input/,
     );
     expect(stand, '--wide в grid продемонстрирован').toContain('ui-field--wide');
+    expect(stand, 'compact-модификатор продемонстрирован (T14.6)').toContain('ui-field--compact');
     expect(stand, 'сетка layout-примитива (T3.4) как grid-родитель').toContain('ui-grid--2');
     expect(stand, 'гейт T3.6 не расширяется без CHECK_STANDS').not.toContain(
       'data-ui-check-layout',
@@ -378,6 +425,7 @@ describe('дока компонента (DoD T5.1)', () => {
       'min-height',
       'resize: vertical',
       'ui-field--wide',
+      'ui-field--compact',
       '32px',
       'ui-field__error',
     ]) {
