@@ -23,6 +23,13 @@
 
 ### Added
 
+- Модификатор кнопки «пилюля со стрелкой» `.ui-button--pill` (T14.4): самый
+  частый CTA оригинала (`.pill-btn` career-portal — «откликнуться →»):
+  h44 (`--ui-button-height-pill`), фон surface, рамка 1px, круглая иконка-
+  стрелка в кружке accent (`--ui-button-pill-icon-size`) на обычном
+  `__icon`; hover — `surface-hover`; совместим с `ui-button--sm`
+  (кружок `--ui-button-pill-icon-size-sm`). Расширение API кнопки;
+  потребитель — ветка «строки» паттерна списка (T14.10) и карточки-ссылки;
 - Роль «заголовок страницы» `.ui-page-title` (T14.2): тег `h1` внутренних
   страниц (список/детальная/форма) со шкалой `h2` — fs/lh/fw-h2 + ls −0.02em +
   `--ui-color-heading`, как `.page-title` career-portal (60px при h1 вместо

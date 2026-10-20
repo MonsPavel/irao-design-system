@@ -101,6 +101,64 @@
   color: var(--ui-color-primary);
 }
 
+/* ── Модификатор pill (T14.4): пилюля со стрелкой — самый частый CTA
+      оригинала («откликнуться →», .pill-btn career-portal pages.css:215) ──
+ *
+ * Геометрия: min-height 44px (--ui-button-height-pill, pages.css:220), фон
+ * surface (pages.css:224), рамка 1px (--ui-border-width/--ui-border-color —
+ * решение спеки T14.4; у оригинала рамка primary). Компактный паддинг из
+ * шкалы §3.2 вместо оригинального 0 6px 0 20px (pages.css:221): вертикаль
+ * уплотнена до --ui-space-1, иначе контент (кружок 2rem + паддинг 12×2)
+ * выше 44px и min-height не активируется (урок ревью T4.2 про sm);
+ * горизонталь 16px/4px — кружок прижат к круглому торцу пилюли. Подпись —
+ * primary на surface (контраст-пара как у outline, AC T14.4).
+ *
+ * Иконка-кружок — на СУЩЕСТВУЮЩЕМ __icon (без нового элемента — доступное
+ * имя кнопки остаётся «лейбл», Technical considerations T14.4): кружок
+ * 2rem (--ui-button-pill-icon-size, pages.css:240/241), фон accent, стрелка
+ * text-on-dark (решение спеки T14.4; у оригинала кружок primary и лишь на
+ * hover accent — pages.css:243/250). SVG-видовой экран = content-box:
+ * паддинг --ui-space-2 держит каноническую стрелку 16px внутри кружка
+ * 2rem. Радиус — унаследованный --ui-radius-pill (не новый токен).
+ * hover — фон surface-hover (одобренная hover-поверхность); кружок остаётся
+ * accent. Каскад: правила hover/active/combined см. в своих секциях ниже.
+ */
+.ui-button--pill {
+  min-height: var(--ui-button-height-pill);
+  border: var(--ui-border-width) solid var(--ui-border-color);
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-primary);
+  padding-block: var(--ui-space-1);
+  padding-inline: var(--ui-space-4) var(--ui-space-1);
+}
+
+.ui-button--pill .ui-button__icon {
+  width: var(--ui-button-pill-icon-size);
+  height: var(--ui-button-pill-icon-size);
+  padding: var(--ui-space-2);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-accent);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Комбинированный pill+sm (AC T14.4: «совместимость с --sm»): высота —
+   sm-токен (2rem; явная декларация вместо надежды на порядок каскада),
+   вертикаль без паддинга, кружок уплотнён --ui-button-pill-icon-size-sm
+   (24px: 24 + рамка 2×1 ≤ 32 — иначе min-height sm no-op, урок ревью
+   T4.2) и паддингом --ui-space-1 (стрелка 16px сохраняется:
+   24 − 2×4 = 16). Оригинал уплотняет иконку так же (.pill-btn--sm
+   pages.css:254, 32→30px). */
+.ui-button--pill.ui-button--sm {
+  min-height: var(--ui-button-height-sm);
+  padding-block: 0;
+}
+
+.ui-button--pill.ui-button--sm .ui-button__icon {
+  width: var(--ui-button-pill-icon-size-sm);
+  height: var(--ui-button-pill-icon-size-sm);
+  padding: var(--ui-space-1);
+}
+
 /* ── Размеры: md — база (--ui-button-height), sm (Scope) ── */
 
 /* sm: вертикальный паддинг уплотнён до --ui-space-1 (4px) — иначе контент
@@ -203,6 +261,15 @@
     background-color: var(--ui-color-surface-hover);
     color: var(--ui-color-primary);
   }
+
+  /* T14.4: фон blue-50 оригинала (.pill-btn:hover pages.css:248) маппится на
+     ту же одобренную hover-поверхность --ui-color-surface-hover (пара light).
+     Подпись переобъявлена ЗАЩИТНО (первый урок шапки): без неё
+     просачивался цвет generic-.ui-button:hover. */
+  .ui-button--pill:hover {
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-primary);
+  }
 }
 
 /* ── :active — color-mix 88% + black (одобренным дизайном active не задан) ── */
@@ -229,6 +296,14 @@
 }
 
 .ui-button--light:active {
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
+  color: var(--ui-color-primary);
+}
+
+/* T14.4: активный pill — по конвенции над hover-поверхностью (одобренным
+   дизайном active не задан), подпись переобъявлена (против просачивания
+   generic-.ui-button:active). */
+.ui-button--pill:active {
   background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
   color: var(--ui-color-primary);
 }

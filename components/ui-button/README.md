@@ -16,6 +16,7 @@
 | Модификатор `.ui-button--accent` | акцентное действие (pair `--ui-color-accent` / `--ui-color-text-on-dark`) |
 | Модификатор `.ui-button--outline` | вторичное действие: рамка и текст primary на прозрачном |
 | Модификатор `.ui-button--light` | действие на приглушённом фоне (pair `--ui-color-surface-muted` / `--ui-color-primary`) |
+| Модификатор `.ui-button--pill` | пилюля со стрелкой — CTA строки/карточки-ссылки (ниже — «Пилюля со стрелкой»); совместим с `.ui-button--sm` |
 | Размер md | база: `min-height: var(--ui-button-height)` (52px) — модификатор не нужен |
 | Размер `.ui-button--sm` | `min-height: var(--ui-button-height-sm)` (32px, ступень шкалы §3.2) |
 | Паддинг | `12px 28px` — как `.btn` career-portal (components.css:71): вертикаль `--ui-space-3`, горизонталь `--ui-button-pad-inline` (28px вне шкалы отступов — перенос «как есть», прецедент `--ui-card-gap`; T14.3) |
@@ -26,7 +27,7 @@
 | Состояние disabled | **атрибут** `disabled` — не фокусируется и не кликается нативно |
 | Состояние loading | класс `is-loading` + `aria-busy="true"` (ставит управляющий код формы/приложения) |
 | JS | не требуется (CSS-компонент; переключение loading — за формой, T5.5) |
-| Токены | `--ui-button-height(-sm)`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
+| Токены | `--ui-button-height(-sm)`, `--ui-button-height-pill`, `--ui-button-pill-icon-size(-sm)`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
 
 ```html
 <button class="ui-button ui-button--primary" type="submit">Отправить отклик</button>
@@ -62,6 +63,43 @@
   none`). Границы: клавиатурные (Enter/Space) и программные активации CSS
   не отменяет — повторные отправки перехватывает управляющий модуль формы
   (T5.5) по `aria-busy`; сам компонент JS не содержит.
+
+## Пилюля со стрелкой (`.ui-button--pill`)
+
+Самый частый CTA оригинала career-portal (`.pill-btn`, REPORT §3.3:
+«откликнуться →», «подробнее →»): компактная пилюля 44px, фон surface, рамка
+1px `--ui-border-color`, круглая иконка-стрелка в кружке accent. Пилот заменял
+её `ui-button--outline` (h52, рамка 2px) — CTA выходил тяжелее и неузнаваемее
+макета.
+
+- **Когда**: CTA строки списка (T14.10) и карточки-ссылки — короткое
+  приглашающее действие с иконкой-стрелкой («откликнуться», «подробнее»).
+- **Границы**: обычные действия форм и панелей — базовые варианты
+  (primary/outline/…); pill — не «пятый цвет», а CTA-паттерн строк/карточек.
+  Иконочные кнопки без лейбла — отдельная потребность (Out of scope T4.2).
+- **Геометрия**: `--ui-button-height-pill` (44px — прецедент touch-токена
+  пагинации), паддинг из шкалы: 16px/4px inline (оригинал 20/6 — страницы
+  css/pages.css:221), 4px block; кружок `--ui-button-pill-icon-size` (2rem,
+  фон `--ui-color-accent`, стрелка `--ui-color-text-on-dark`) на обычном
+  `__icon` — без нового элемента, доступное имя кнопки = лейбл; hover —
+  фон `--ui-color-surface-hover` (одобренная поверхность), радиус пилюли —
+  общий `--ui-radius-pill`.
+- **С `--sm`**: комбинированный модификатор даёт компактную версию — высота
+  sm-токена (32px), кружок `--ui-button-pill-icon-size-sm` (1.5rem; оригинал
+  `.pill-btn--sm` уплотняет иконку так же — pages.css:254).
+- **A11y**: стрелка `aria-hidden="true"` (декоративная), имя — лейбл;
+  touch-цель 44px; контраст подписи primary/surface — пара outline
+  (≥ 4.5:1); белая стрелка на accent — известная пара кнопок (3.12:1,
+  исключение T2.3/T2.6, как у `--accent`).
+
+```html
+<button class="ui-button ui-button--pill" type="button">
+  <span class="ui-button__label">Откликнуться</span>
+  <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
+    <path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+  </svg>
+</button>
+```
 
 ## Клавиатура и a11y
 
