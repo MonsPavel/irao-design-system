@@ -78,7 +78,7 @@
 | T14.2 | done | смержена |
 | T14.3 | done | смержена |
 | T14.4 | done | смержена |
-| T14.5 | todo | EPIC-14: ритм крошек в паттернах (после T14.2) |
+| T14.5 | done | смержена |
 | T14.6 | todo | EPIC-14: ui-field паддинг + compact-модификатор + mapping-таблица |
 | T14.7 | todo | EPIC-14: тинт-токены primary |
 | T14.8 | todo | EPIC-14: компонент ui-chip |
