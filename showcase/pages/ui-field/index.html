@@ -214,6 +214,47 @@
   </p>
 </section>
 
+<section aria-labelledby="uif-compact-heading">
+  <h2 id="uif-compact-heading">Модификатор --compact (плотные анкеты-модалки)</h2>
+  <div class="ui-grid ui-grid--2">
+    <div class="ui-field ui-field--compact">
+      <label class="ui-field__label" for="uif-compact-name">Имя и фамилия</label>
+      <input
+        class="ui-field__input"
+        type="text"
+        id="uif-compact-name"
+        name="compact-name"
+        autocomplete="name"
+     >
+    </div>
+    <div class="ui-field ui-field--compact">
+      <label class="ui-field__label" for="uif-compact-city">Город</label>
+      <span class="ui-field__select-wrap">
+        <select class="ui-field__select" id="uif-compact-city" name="compact-city">
+          <option value="" selected>Выберите город</option>
+          <option value="msk">Москва</option>
+          <option value="spb">Санкт-Петербург</option>
+        </select>
+      </span>
+    </div>
+    <div class="ui-field ui-field--wide ui-field--compact">
+      <label class="ui-field__label" for="uif-compact-about">О себе</label>
+      <textarea
+        class="ui-field__textarea"
+        id="uif-compact-about"
+        name="compact-about"
+        rows="3"
+        placeholder="Коротко об опыте"
+      ></textarea>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    <code>ui-field--compact</code> — плотная высота анкет-модалок оригинала (48px,
+    <code>--ui-field-height-compact</code>): действует на input/select; textarea высоту не
+    меняет — многострочность важнее плотности. Потребитель — apply-формы career-portal.
+  </p>
+</section>
+
 <section aria-labelledby="uif-select-heading">
   <h2 id="uif-select-heading">Select (нативный выпадающий список)</h2>
   <div class="ui-grid ui-grid--2">
