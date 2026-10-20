@@ -8,7 +8,8 @@
 `showcase/build.mjs`).
 
 Собирается **без нового CSS системы**: только компоненты
-(`ui-select`, `ui-button`, `ui-card`, `ui-tag`, `ui-empty`, `ui-pagination`)
+(`ui-breadcrumbs`, `ui-select`, `ui-button`, `ui-card`, `ui-tag`, `ui-empty`,
+`ui-pagination`)
 и layout-примитивы (`ui-section`, `ui-grid--3`). Связующие стили — зона сайта
 (в бою — `template_styles.css`; на стенде — `<style>` рядом, не в `dist`).
 Если какой-то связке понадобится место в системе — поднимается вопрос о
@@ -18,6 +19,7 @@
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
+| Крошки | `ui-breadcrumbs` | T4.7; текущая страница («Вакансии») — `span` + `aria-current="page"`; вертикальный ритм — обвязка `lpp-breadcrumbs` (T14.5, ниже) |
 | page-head | h1 (`ui-page-title`) + счётчик + lead (`ui-lead`) | счётчик — `aria-live="polite"`; h1 — цель фокуса (`tabindex="-1"`) |
 | Панель фильтров | `select` в пилюлях + `ui-button` | GET-форма: без JS — кнопкой «Применить»; с JS — `IraoUI.select` (wrap-режим), UX тот же |
 | Выдача | `ui-grid--3` + `ui-card--hover ui-card--link` + `ui-tag` | карточка-ссылка T4.4, теги T4.3 |
@@ -28,6 +30,40 @@
 
 Копируйте блоки из [`list-page.html`](list-page.html) (он же — живой стенд).
 Ключевые решения:
+
+### Крошки: вертикальный ритм несёт шаблон (T14.5)
+
+Компонент `ui-breadcrumbs` внешних отступов не имеет (инвариант T4.7) — без
+обвязки крошки стоят плоско и контент «прилипает» к шапке. Правило: **крошки
+без обвязки — над контентом; вертикальный ритм страницы несёт шаблон**.
+Обвязка — связка сайта (`lpp-*`) с `padding-block` 20/24px — полоса 62px
+одобренного дизайна (career-portal `components.css:14`, `padding: 20px 0 24px`;
+верх 20px вне шкалы отступов §3.2 — перенос «как есть»):
+
+```html
+<nav class="ui-breadcrumbs lpp-breadcrumbs" aria-label="Хлебные крошки">
+  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">
+    <li class="ui-breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <a class="ui-breadcrumbs__link" itemprop="item" href="/"><span itemprop="name">Главная</span></a>
+      <meta itemprop="position" content="1" />
+    </li>
+    <li class="ui-breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+      <span class="ui-breadcrumbs__current" itemprop="name" aria-current="page">Вакансии</span>
+      <meta itemprop="position" content="2" />
+    </li>
+  </ol>
+</nav>
+```
+
+```css
+.lpp-breadcrumbs {
+  box-sizing: border-box;
+  padding-block: 1.25rem var(--ui-space-5); /* 20/24px — полоса 62px career-portal */
+}
+```
+
+Крошки — в DOM раньше page-head (конвенция page-паттернов T8.2); цепочка той
+же страницы на других шаблонах та же (детальная T8.2, форма отклика T8.3).
 
 ### page-head: счётчик — живая область
 
@@ -150,6 +186,10 @@ $sDirection = isset($_GET['direction']) ? htmlspecialcharsbx((string)$_GET['dire
 $sExperience = isset($_GET['experience']) ? htmlspecialcharsbx((string)$_GET['experience']) : '';
 $iCount = count($arResult['ITEMS']);
 ?>
+<nav class="ui-breadcrumbs lpp-breadcrumbs" aria-label="Хлебные крошки">
+  <?php // цепочка — bitrix:breadcrumb (сниппет bitrix/snippets/breadcrumbs.php):
+     // «Главная» — ссылка, текущая страница («Вакансии») — span + aria-current="page". ?>
+</nav>
 <h1 class="ui-page-title" id="page-title" tabindex="-1">Вакансии</h1>
 <p class="ui-small ui-text--muted" aria-live="polite">Найдено: <?= $iCount ?> вакансий</p>
 
