@@ -56,6 +56,10 @@ const globalIgnores = {
     '**/.playwright-mcp/**',
     'dist/**',
     'showcase/dist/**',
+    // Пилот career-portal (pilot/): сборка pilot/career-portal/dist/ копирует
+    // минифицированный ui.min.js и собранные сайт-зонные файлы — машинный
+    // артефакт (та же логика, что dist/**); исходники пилота линтятся.
+    'pilot/career-portal/dist/**',
   ],
 };
 

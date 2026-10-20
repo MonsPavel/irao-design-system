@@ -28,3 +28,8 @@ Thumbs.db
 
 # Windows-артефакт редиректов (зарезервированное имя устройства)
 nul
+
+# Пилот career-portal (EPIC-пилот): сборка и артефакты сравнения — машинные,
+# воспроизводятся `node pilot/career-portal/build.mjs` + compare.mjs (README)
+pilot/career-portal/dist/
+pilot/career-portal/compare-output/

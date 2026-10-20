@@ -59,3 +59,9 @@ patterns/header/header.html
 # Coverage-отчёты (T13.4): машинный артефакт vitest --coverage
 coverage/
 coverage-json/
+
+# Пилот career-portal: vendored-мок-данные (байт-в-байт копия data/ оригинала,
+# переформатирование сломает сравнимость) и машинная сборка/артефакты сравнения
+pilot/career-portal/data/
+pilot/career-portal/dist/
+pilot/career-portal/compare-output/
