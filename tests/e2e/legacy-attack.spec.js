@@ -73,16 +73,21 @@ const probeStyles = (page, selector, props, pseudo = undefined) =>
  * после Tab) и сбрасывается blur() — дальнейший обход остаётся честным
  * клавиатурным, следующий Tab — реальное нажатие. Бюджет — три цикла: любого
  * стартового положения хватает с запасом на один сброс.
+ *
+ * Подпись позиции — ИНДЕКС в списке фокусируемых, не tagName|id|className:
+ * соседние однотипные элементы неразличимы текстовой подписью (редизайн
+ * каркаса 19.10 — 45 одинаковых ссылок сайдбара подряд), ложное
+ * «застревание» с blur() зацикливало WebKit, который после blur продолжает
+ * обход С НАЧАЛА документа; Chromium выживал только за счёт retention точки
+ * продолжения (ночной 39368953274: 4 падения tabTo только в webkit-ноге).
  */
 async function tabTo(page, selector) {
   const limit = await page.evaluate((sel) => document.querySelectorAll(sel).length, FOCUSABLE);
   const signature = () =>
-    page.evaluate(() => {
+    page.evaluate((sel) => {
       const el = document.activeElement;
-      return el
-        ? `${el.tagName}|${el.id}|${typeof el.className === 'string' ? el.className : ''}`
-        : 'none';
-    });
+      return el ? [...document.querySelectorAll(sel)].indexOf(el) : -1;
+    }, FOCUSABLE);
   for (let step = 0; step <= limit * 3 + 4; step += 1) {
     const onTarget = await page.evaluate(
       ({ selector }) => Boolean(document.activeElement?.matches(selector)),

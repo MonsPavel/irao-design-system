@@ -197,15 +197,24 @@ const clicksOf = (page, id) => page.evaluate((btnId) => window.__buttonClicks[bt
  *  ПОСЛЕДНЕГО фокусируемого в Firefox/WebKit уходит в chrome браузера — в
  *  headless фокус застревает на элементе, цикл не замыкается (Chromium
  *  оборачивается в начало). Застревание (activeElement не сменился после Tab)
- *  сбрасывается blur() — дальнейший обход остаётся честным клавиатурным. */
+ *  сбрасывается blur() — дальнейший обход остаётся честным клавиатурным.
+ *
+ *  Подпись позиции — ИНДЕКС в списке фокусируемых: текстовая подпись
+ *  tagName|id|className неразличима для соседних однотипных ссылок (редизайн
+ *  каркаса 19.10 — 45 одинаковых ссылок сайдбара), ложное «застревание» с
+ *  blur() зацикливало WebKit (после blur он продолжает обход с начала
+ *  документа; Chromium выживал за счёт retention точки продолжения) —
+ *  ночной 39368953274, 2 падения только в webkit-ноге. */
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), ' +
+  'textarea:not([disabled]), summary, [tabindex]:not([tabindex="-1"])';
+
 async function tabTo(page, locator) {
   const signature = () =>
-    page.evaluate(() => {
+    page.evaluate((sel) => {
       const el = document.activeElement;
-      return el
-        ? `${el.tagName}|${el.id}|${typeof el.className === 'string' ? el.className : ''}`
-        : 'none';
-    });
+      return el ? [...document.querySelectorAll(sel)].indexOf(el) : -1;
+    }, FOCUSABLE);
   for (let step = 0; step < 120; step += 1) {
     if (await locator.evaluate((el) => el.matches(':focus-visible'))) return;
     const before = await signature();

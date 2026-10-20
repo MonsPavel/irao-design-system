@@ -57,9 +57,11 @@ export default defineConfig({
       // x=1424, y≈1360/1543; ранее — tablet-случай 10.10). Минимальная
       // реальная регрессия на практике — 78 px (search-overlay, PR #5):
       // допуск в ~10 раз ниже сигнала. Реальный дифф значим по-прежнему.
+      // ВАЖНО: maxDiffPixelRatio НЕ задавать — при заданных обоих параметрах
+      // Playwright берёт min(8, W·H·ratio), и ratio 0 обнуляет весь допуск
+      // (ночной 39368953274: «4 pixels» пробило допуск именно так).
       threshold: 0,
       maxDiffPixels: 8,
-      maxDiffPixelRatio: 0,
     },
   },
   // Эталоны — в tests/visual/ (каталог эталонов по 02-architecture §7),

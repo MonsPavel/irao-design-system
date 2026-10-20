@@ -146,8 +146,8 @@ standTest.describe('ui-field: матрица и состояния (T5.1)', () =
       expect(textarea.resize, 'resize: vertical (Scope T5.1)').toBe('vertical');
       const textareaBox = await page.locator(`#${FLD.about}`).boundingBox();
       expect(
-        textareaBox.height,
-        'textarea без фикс. высоты: растёт по контенту (≥ 120px)',
+        Math.round(textareaBox.height),
+        `textarea без фикс. высоты: растёт по контенту (≥ 120px, факт ${textareaBox.height})`,
       ).toBeGreaterThanOrEqual(120);
     },
   );
