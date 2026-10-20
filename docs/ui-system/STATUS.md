@@ -77,7 +77,7 @@
 | T14.1 | done | смержена |
 | T14.2 | done | смержена |
 | T14.3 | done | смержена |
-| T14.4 | todo | EPIC-14: ui-button--pill (после T14.3) |
+| T14.4 | done | смержена |
 | T14.5 | todo | EPIC-14: ритм крошек в паттернах (после T14.2) |
 | T14.6 | todo | EPIC-14: ui-field паддинг + compact-модификатор + mapping-таблица |
 | T14.7 | todo | EPIC-14: тинт-токены primary |
