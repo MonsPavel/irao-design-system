@@ -118,6 +118,7 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--color-blue-700` (hover btn--primary, components.css:80) | `--ui-color-primary-hover` → `--ui-blue-700` | hover-пара одобренного дизайна (T2.6, ADR-0010); color-mix значение не заменяет |
 | `--color-accent-light` (hover btn--accent, components.css:83) | `--ui-color-accent-hover` → `--ui-orange-400` | hover-пара одобренного дизайна (T2.6, ADR-0010) |
 | `--color-text` | `--ui-color-text` → `--ui-black` | |
+| `page-title`/`section__title` `color: var(--color-primary)` (все заголовки макета #002856; переменной в career-portal нет) | `--ui-color-heading` → `--ui-color-primary` | T14.1: семантическое имя смысла «цвет заголовков»; alias на primary — тема с отличным primary красит заголовки сама; пары `heading-on-*` контраст-гейта |
 | `--color-text-muted` | `--ui-color-text-muted` → `--ui-gray-700` | AA-замена значения — T2.3, см. «AA-замены» |
 | `--color-text-on-dark` / `…-muted` | `--ui-color-text-on-dark[-muted]` → `--ui-white` / `--ui-slate-400` | |
 | `--color-surface` | `--ui-color-surface` → `--ui-white` | |
