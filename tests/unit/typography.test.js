@@ -18,7 +18,10 @@
  *  - стенд типографики: все роли × ui-list × ui-address + длинные RU-слова;
  *    build.mjs генерирует stands/typography.html;
  *  - дока «Роли типографики» (Definition of Done: роли и когда какую
- *    использовать).
+ *    использовать);
+ *  - цвет заголовков (T14.1): роли ui-h1…ui-h6 несут --ui-color-heading
+ *    (alias на --ui-color-primary = #002856 career-portal), текстовые роли
+ *    цвет не задают — наследуют body (--ui-color-text).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -92,6 +95,46 @@ describe('base/typography.css — классы ролей (Scope T3.3)', () => {
   it('без @media: mobile-first лестница размеров живёт в токенах (T2.2), не в классах', () => {
     expect(css).not.toContain('@media');
   });
+});
+
+describe('цвет заголовков: --ui-color-heading (T14.1)', () => {
+  /** Заголовочные роли несут токен; текстовые цвет не задают — наследуют body. */
+  const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
+  const TEXT_ROLES = ['lead', 'body', 'small', 'caption', 'micro'];
+
+  const css = stripCssComments(readFileSync(join(root, 'base', 'typography.css'), 'utf8'));
+  const semantic = stripCssComments(readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8'));
+  const primitives = stripCssComments(readFileSync(join(root, 'tokens', 'primitives.css'), 'utf8'));
+
+  /** Значение объявления токена по имени (до «;»; null — объявления нет). */
+  const declarationOf = (cssSource, name) => {
+    const match = cssSource.match(new RegExp(`${name}\\s*:\\s*([^;]+);`));
+    return match ? match[1].trim() : null;
+  };
+
+  it('токен --ui-color-heading — alias на --ui-color-primary (не дубликат hex, Technical considerations T14.1)', () => {
+    expect(declarationOf(semantic, '--ui-color-heading')).toBe('var(--ui-color-primary)');
+  });
+
+  it('computed-color дефолтной темы = #002856: --ui-color-primary → --ui-blue-800 (AC T14.1)', () => {
+    expect(declarationOf(semantic, '--ui-color-primary')).toBe('var(--ui-blue-800)');
+    expect(declarationOf(primitives, '--ui-blue-800')).toBe('#002856');
+  });
+
+  it.each(HEADING_ROLES)('ui-%s несёт color: var(--ui-color-heading) (AC T14.1)', (role) => {
+    const block = blockOf(css, `.ui-${role}`);
+    expect(block, `правило .ui-${role} найдено`).toBeTruthy();
+    expect(block).toContain('color: var(--ui-color-heading);');
+  });
+
+  it.each(TEXT_ROLES)(
+    'ui-%s цвет не задаёт — наследует body (--ui-color-text): цвет текстовых ролей не сменился (AC T14.1)',
+    (role) => {
+      const block = blockOf(css, `.ui-${role}`);
+      expect(block, `правило .ui-${role} найдено`).toBeTruthy();
+      expect(block).not.toContain('color:');
+    },
+  );
 });
 
 describe('base/typography.css — body-дефолты страницы (Scope T3.3)', () => {
