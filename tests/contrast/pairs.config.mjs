@@ -323,6 +323,37 @@ export const EXCEPTIONS = [
       'подложка оверлея баннера (pages.css:478; модалки — T7.2): затемнение сцены, а не текстовая пара',
   },
   {
+    token: '--ui-color-primary-a10',
+    reason:
+      'тинт primary (T14.7, color-mix 10% + transparent): декоративная поверхность — плашки/подложки ' +
+      'сайт-зон (PLAN P3, теги hero/стекло holding/why-us); альфа без подложки не вычислима, текст на ' +
+      'тинте проверяется парой с конкретным фоном (tokens-usage.md, гейт T2.3)',
+  },
+  {
+    token: '--ui-color-primary-a20',
+    reason:
+      'тинт primary (T14.7): декоративная поверхность — альфа тегов hero (hero.css:152–155 rgba(…, 0.2)); ' +
+      'см. обоснование a10',
+  },
+  {
+    token: '--ui-color-primary-a26',
+    reason:
+      'тинт primary (T14.7): декоративная поверхность — ступень тегов hero 26% (hero.css:153, ' +
+      'pilot.css:214); см. обоснование a10',
+  },
+  {
+    token: '--ui-color-primary-a55',
+    reason:
+      'тинт primary (T14.7): декоративная поверхность — оверлеи 55% (components.css:447, pages.css:669; ' +
+      'родственен --ui-color-overlay); см. обоснование a10',
+  },
+  {
+    token: '--ui-color-primary-a94',
+    reason:
+      'тинт primary (T14.7): декоративная поверхность — hero-оверлей 94% (hero.css:24, pilot.css:121) — ' +
+      'фон под текстом text-on-dark; см. обоснование a10',
+  },
+  {
     token: '--ui-color-divider',
     reason:
       'некстовой разделитель (крошки/прогресс): WCAG 1.4.11 не требует контраста для декоративных элементов',

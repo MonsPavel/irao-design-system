@@ -78,6 +78,19 @@
   /* career-portal: pages.css:478 — оверлей поверх фото (будущие модалки) */
   --ui-color-overlay: var(--ui-blue-800-55);
 
+  /* ── Цвета-смыслы: тинты primary (T14.7) ── */
+
+  /* career-portal: альфа-плашки оригинала — теги hero (rgba(…, 0.2/0.26), src/blocks/hero/hero.css:152–155), стекло holding/why-us (белые 0.1–0.2) — и PLAN P3 («#002856 @ 10–26%»): нижняя ступень лестницы тинтов. Форма color-mix(in srgb, var(--ui-color-primary) N%, transparent): производная следует за primary в темах автоматически (примитив-альфа прибит к blue-800), transparent даёт нулевую альфу без сдвига оттенка (в отличие от подмешивания белого). color-mix — Baseline 2023 (Chromium 111+ / Firefox 113+ / Safari 16.2+): матрица браузеров §10 (evergreen, Playwright) поддерживает, фолбэк не пишется — сборка не транспилирует CSS (ADR-0005). Граница: тинты — декоративные поверхности, не текст (tokens-usage.md; гейт пар T2.3 — исключения в pairs.config.mjs) */
+  --ui-color-primary-a10: color-mix(in srgb, var(--ui-color-primary) 10%, transparent);
+  /* career-portal: hero__tag--violet/green/rose — rgba(…, 0.2) (src/blocks/hero/hero.css:152–155) — мода альфы стеклянных плашек; форма/Baseline/границы — примечание a10 */
+  --ui-color-primary-a20: color-mix(in srgb, var(--ui-color-primary) 20%, transparent);
+  /* career-portal: hero__tag--sand — rgba(234, 125, 29, 0.26) (src/blocks/hero/hero.css:153; в оригинале плашка акцентная, ступень 26% у primary — та же лестница PLAN P3); пилот — pilot.css:214 (color-mix 26%) */
+  --ui-color-primary-a26: color-mix(in srgb, var(--ui-color-primary) 26%, transparent);
+  /* career-portal: оверлеи rgba(0, 40, 86, 0.55) (components.css:447 — модалка, pages.css:669 — banner-card); примитив --ui-blue-800-55 существует (--ui-color-overlay), тинт от primary следует за темой */
+  --ui-color-primary-a55: color-mix(in srgb, var(--ui-color-primary) 55%, transparent);
+  /* career-portal: hero-оверлей rgba(0, 40, 86, 0.94) (src/blocks/hero/hero.css:24 — градиент, нарастающий к низу hero); пилот — pilot.css:121 (color-mix 94%) */
+  --ui-color-primary-a94: color-mix(in srgb, var(--ui-color-primary) 94%, transparent);
+
   /* ── Цвета-смыслы: рамки и разделители ── */
 
   /* career-portal: components.css:22, pages.css:526 — разделители крошек/прогресса */
