@@ -7,7 +7,10 @@
  * tests/e2e/ui-button.spec.js; здесь — пины исполняемой формы решения:
  *  - tokens/semantic.css: высоты и рамка — токены (Implementation requirements
  *    п.1: «все значения из токенов»; md — из --ui-button-height, career-portal
- *    components.css:70; sm — новый, ступень шкалы §3.2); disabled — затемнение
+ *    components.css:70; sm — новый, ступень шкалы §3.2); горизонтальный
+ *    паддинг — токен --ui-button-pad-inline (28px career-portal
+ *    components.css:71, вне шкалы отступов — прецедент --ui-card-gap; T14.3);
+ *    disabled — затемнение
  *    из токена (career-portal components.css:269 — единственный disabled-паттерн
  *    одобренного дизайна); hover-поверхность --ui-color-surface-hover —
  *    значение одобренного дизайна (ADR-0010 п.4: color-mix не воспроизводит);
@@ -65,6 +68,10 @@ describe('tokens/semantic.css — кнопочные токены (Implementatio
     expect(source).toMatch(/--ui-button-border-width:\s*0\.125rem;/);
   });
 
+  it('горизонтальный паддинг: --ui-button-pad-inline = 1.75rem (28px career-portal components.css:71 — вне шкалы отступов §3.2, перенос «как есть», прецедент --ui-card-gap; T14.3)', () => {
+    expect(source).toMatch(/--ui-button-pad-inline:\s*1\.75rem;/);
+  });
+
   it('disabled: --ui-opacity-disabled = 0.3 (career-portal components.css:269)', () => {
     expect(source).toMatch(/--ui-opacity-disabled:\s*0\.3;/);
   });
@@ -91,7 +98,9 @@ describe('components/ui-button/ui-button.css — база (Implementation requir
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('display: inline-flex;');
     expect(block).toContain('min-height: var(--ui-button-height);');
-    expect(block).toContain('padding: var(--ui-space-3) var(--ui-space-5);');
+    // Вертикаль — --ui-space-3 (12px); горизонталь — токен 28px одобренного
+    // .btn (T14.3: REPORT §3.3 — кнопки клона плотнее оригинала).
+    expect(block).toContain('padding: var(--ui-space-3) var(--ui-button-pad-inline);');
     expect(block).toContain('border: var(--ui-button-border-width) solid transparent;');
     expect(block).toContain('border-radius: var(--ui-radius-pill);');
     // Технические considerations: min-height вместо height (32px-база T3.6).
@@ -159,6 +168,13 @@ describe('components/ui-button/ui-button.css — варианты (Scope T4.2)',
     const block = blockOf(css, '.ui-button--sm');
     expect(block).toContain('min-height: var(--ui-button-height-sm);');
     expect(block).toContain('padding-block: var(--ui-space-1);');
+  });
+
+  it('sm (T14.3): вертикаль не менялась; inline-паддинг НЕ переопределён — sm наследует --ui-button-pad-inline (28px), компактного inline у одобренного макета нет (решение — README компонента)', () => {
+    const block = blockOf(css, '.ui-button--sm');
+    expect(block, 'своего inline-паддинга у sm нет — только уплотнённый block').not.toContain(
+      'padding-inline',
+    );
   });
 });
 
