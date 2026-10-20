@@ -29,6 +29,16 @@
 
 ### Added
 
+- Тинты primary — штатные полупрозрачные производные `--ui-color-primary-a10/
+  -a20/-a26/-a55/-a94` (T14.7): `color-mix(in srgb, var(--ui-color-primary)
+  N%, transparent)`, суффикс — процент primary в смеси. Следуют за primary в
+  темах автоматически (в отличие от примитивов-альф, прибитых к blue-800);
+  color-mix — Baseline 2023, фолбэк не пишется (ADR-0005). Потребители —
+  сайт-зоны (плашки hero-тегов, стеклянные карточки, оверлеи; REPORT §4,
+  PLAN P3); граница — декоративные поверхности, не текст
+  (docs/ui-system/architecture/tokens-usage.md, раздел «Тинты primary»).
+  Контраст-гейт: токены-тинты — осознанные исключения pairs.config.mjs,
+  текст на тинте проверяется парой с конкретным фоном (T2.3);
 - Модификатор поля «плотная анкета-модалка» `.ui-field--compact` (T14.6):
   `min-height` 48px (`--ui-field-height-compact`; height `.apply-form
   .field__input` pages.css:1208 оригинала) на `__input`/`__select`; textarea
