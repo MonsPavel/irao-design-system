@@ -29,6 +29,23 @@
 
 ### Added
 
+- Паттерн «Страница списка» — ветки раскладок «строки» и «сайдбар фильтров»
+  (T14.10; REPORT §4, PLAN P1-3/P1-4). «Строки»: выдача горизонтальными
+  строками вакансий — порт `.vac-row` (build.py `render_vacancy_card`) —
+  `article.ui-card--hover` + flex-связка `lpp-row` (зона сайта, на стенде —
+  `<style>` паттерна), заголовок выдачи h2 → строки-`article` с h3-ссылкой
+  (роль `ui-h4`), место/описание/дата (`<time datetime>`), CTA
+  `ui-button--pill` (T14.4) вне ссылки заголовка (инвариант вложенных
+  интерактивов ui-card) с `href`-заглушкой и `data-ui-modal-target` на
+  демо-модалку отклика. «Сайдбар»: grid «aside | выдача» — порт
+  `.vac-layout`/`.vac-side`: sticky-панель от md (280px, top 24px,
+  `max-height` + `overflow-y` + `tabindex="0"` — axe
+  scrollable-region-focusable), select-пилюли `label[for]`, radio-группа
+  «Опыт» (fieldset/legend), чекбокс доступности, «Применить»/«Сбросить»,
+  промо `ui-card--filled`; чипы направлений `ui-chip` (T14.8) над выдачей
+  строк. Новый CSS в системе отсутствует (граница patterns/README); README
+  паттерна — правила выбора раскладок и Bitrix-заметки (строки из ИБ,
+  сохранение GET-параметров пагинации);
 - ui-tabs: модификатор `.ui-tabs--pill` и начальный выбор таба из разметки
   (T14.9). Модификатор — вид навигации разделов career-portal (`.tabs-pill`,
   pages.css:969–1001, REPORT §3.3/PLAN P1-2): прозрачные пилюли без рамки на
