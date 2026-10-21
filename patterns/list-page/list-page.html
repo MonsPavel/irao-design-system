@@ -102,12 +102,15 @@
 
   /* Строка вакансии: горизонталь — main-блок слева, CTA-пилюля справа
      (space-between + gap 32px — pages.css:159–165); на узких экранах пилюля
-     переносится под текст. Горизонтальный паддинг 28px — pages.css:165, вне
-     шкалы отступов §3.2 — перенос «как есть» (прецедент
-     --ui-button-pad-inline, T14.3); вертикаль — паддинг ui-card. */
+     переносится под текст. flex-direction: row — сброс колонки ui-card
+     (карточка — flex-колонка, связка обязана вернуть ряд). Горизонтальный
+     паддинг 28px — pages.css:165, вне шкалы отступов §3.2 — перенос «как
+     есть» (прецедент --ui-button-pad-inline, T14.3); вертикаль — паддинг
+     ui-card. */
   .lpp-row {
     box-sizing: border-box;
     display: flex;
+    flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
