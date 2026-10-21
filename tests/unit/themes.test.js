@@ -177,15 +177,24 @@ describe('фикстура совместимости: старая тема + �
       // и т.п.) — значения core с учётом переопределений, как в браузере.
       // Альфа-токены (surface-translucent, стекло) lib контраста до непрозрачного
       // цвета не доводит сознательно (исключения pairs.config.mjs) — для
-      // валидности темы достаточно, что ссылка определена.
+      // валидности темы достаточно, что ссылка определена. Тинты primary
+      // (T14.7, color-mix) статической математикой lib не вычисляются тоже:
+      // их var()-ссылка (--ui-color-primary) проверяется ниже отдельно, а
+      // вычислимость mix доказывает браузер (эталон стенда tokens, ADR-0004).
       let resolved;
       try {
         resolved = resolveTokenColor(name, themed);
       } catch (error) {
+        const isTint = /^--ui-color-primary-a\d+$/.test(name);
         expect(
-          error.message.startsWith('альфа-цвет'),
+          error.message.startsWith('альфа-цвет') ||
+            (isTint && error.message.includes('не разбирается как hex/rgb-цвет')),
           `${name} не вычислим со старой темой: ${error.message}`,
         ).toBe(true);
+        // Тинт вычислим настолько, насколько вычислима его var()-ссылка.
+        if (isTint) {
+          expect(() => resolveTokenColor('--ui-color-primary', themed)).not.toThrow();
+        }
         continue;
       }
       if (fixture.declarations.has(name)) {
