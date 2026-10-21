@@ -6,6 +6,15 @@
   сетка ui-grid--3 с карточками (T4.4 + теги T4.3), пагинация (T6.3); вторая
   ветка — «ничего не найдено»: счётчик 0 + ui-empty (T4.8) с кнопкой сброса.
 
+  Ветки T14.10 (калибровка по пилоту, REPORT §4 / PLAN P1-3/P1-4) — раскладки
+  оригинала, которых в базовых ветках нет: (а) «строки» — выдача
+  горизонтальными строками вакансий (h2 → article.ui-card--hover с h3-ссылкой,
+  местом, описанием, датой; CTA — ui-button--pill T14.4) + демо-модалка
+  отклика; (б) «сайдбар фильтров» — grid «aside | выдача»: sticky-панель
+  (select-пилюли, radio-группа «Опыт», чекбокс доступности,
+  «Применить»/«Сбросить», промо ui-card--filled) + чипы направлений (T14.8)
+  над выдачей строк.
+
   Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
   подключены только компоненты; связующие стили ниже — зона сайта (в бою —
   template_styles.css), на стенде они живут <style>'ом рядом (showcase, не в
@@ -13,8 +22,9 @@
   перезагрузкой GET-формы и без JS (Implementation requirements п.2).
 
   Референс: career-portal src/pages/vacancies.html + блок vacancy-search
-  (фильтры-пилюли) — переносится КОМПОЗИЦИЯ, не стили. Фильтр-пилюля — замена
-  хака .vacancy-search__select-wrap модификатором data-ui-select="wrap" (T7.3):
+  (фильтры-пилюли) + build.py render_vacancy_card (строки .vac-row) —
+  переносится КОМПОЗИЦИЯ, не стили. Фильтр-пилюля — замена хака
+  .vacancy-search__select-wrap модификатором data-ui-select="wrap" (T7.3):
   обёртку и геометрию рисует сайт, триггер растягивается на неё; подпись —
   label[for] РЯДОМ с пилюлей (обёртка содержит только select — триггер накрыл
   бы всё её содержимое; имя поля получают и нативный select, и триггер).
@@ -76,6 +86,154 @@
 
   .lpp-lead {
     margin-top: var(--ui-space-3);
+  }
+
+  /* ── Ветка «строки» (T14.10): порт .vac-row career-portal (pages.css:157–182).
+     Компонент «строка списка» сознательно не заводится (Out of scope T14.10):
+     связка собирает ui-card + роли base до появления второго потребителя. ── */
+
+  /* Лента строк: шаг 16px — .vac-rows (pages.css:157). */
+  .lpp-rows {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+  }
+
+  /* Строка вакансии: горизонталь — main-блок слева, CTA-пилюля справа
+     (space-between + gap 32px — pages.css:159–165); на узких экранах пилюля
+     переносится под текст. Горизонтальный паддинг 28px — pages.css:165, вне
+     шкалы отступов §3.2 — перенос «как есть» (прецедент
+     --ui-button-pad-inline, T14.3); вертикаль — паддинг ui-card. */
+  .lpp-row {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-7);
+    padding: var(--ui-space-5) 1.75rem;
+  }
+
+  /* Main-блок строки: заголовок-ссылка, место, описание, дата (gap 8px —
+     pages.css:168); min-width: 0 — длинные заголовки переносятся, не
+     распирают флекс. */
+  .lpp-row__main {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--ui-space-2);
+    min-width: 0;
+  }
+
+  /* Заголовок-ссылка: цвет наследует заголовку (оригинал .vac-row__title a —
+     color: inherit), подчёркивания нет — как у ссылки карточки (T4.4);
+     hover строки перекрашивает ссылку в primary (pages.css:178), только под
+     hover:hover (дисциплина EPIC-4). Ссылка НЕ растягивается на карточку
+     (ui-card--link не включается): пилюля остаётся независимой целью —
+     инвариант вложенных интерактивов ui-card (Technical considerations
+     T14.10). */
+  .lpp-row__title a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .lpp-row:hover .lpp-row__title a {
+      color: var(--ui-color-primary);
+    }
+  }
+
+  /* Место и дата — мета-строки с декоративной иконкой; шаг 6px — pages.css:190,
+     вне шкалы — перенос «как есть». */
+  .lpp-row__place,
+  .lpp-row__date {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+  }
+
+  /* ── Ветка «сайдбар фильтров» (T14.10): порт .vac-layout/.vac-side
+     career-portal (pages.css:185–197). Мобильная база — одна колонка (сайдбар
+     в потоке перед выдачей — порядок чтения «фильтры → результаты», как в
+     базовой ветке); рост — только min-width из шкалы брейкпоинтов T2.5. ── */
+  .lpp-layout {
+    box-sizing: border-box;
+    display: grid;
+    gap: var(--ui-space-7); /* 48px — .vac-layout (pages.css:186) */
+    align-items: start; /* sticky-потомок: без start сетка растянет панель */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Сайдбар: колонка групп (gap 16px — pages.css:193). */
+  .lpp-side {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+  }
+
+  /* Форма сайдбара: вертикальный шаг групп (16px — pages.css:193). */
+  .lpp-side__form {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+  }
+
+  /* Группа «подпись + контрол»: шаг 8px — ритм подписи обвязки ui-field. */
+  .lpp-side__group {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+  }
+
+  /* Select-пилюля сайдбара — на всю ширину панели (оригинал .vac-side__dd):
+     триггер модуля растягивается на обёртку. */
+  .lpp-side__group .lpp-pill {
+    display: flex;
+  }
+
+  .lpp-side__group .lpp-pill select {
+    width: 100%;
+  }
+
+  /* Пара кнопок «Применить»/«Сбросить». */
+  .lpp-side__actions {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-3);
+  }
+
+  /* Выдача ветки: заголовок h2 → чипы направлений → строки (шаг 24px). */
+  .lpp-main {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-5);
+  }
+
+  /* md (768, шкала T2.5): grid «aside | выдача» — 280px колонка сайдбара
+     оригинала (pages.css:187, вне шкалы — перенос «как есть»); aside sticky
+     top 24px (pages.css:189). Панель выше вьюпорта прокручивается внутри
+     себя — keyboard access региона даёт tabindex="0" в разметке (axe
+     scrollable-region-focusable). Осторожно с предками: sticky не работает
+     внутри overflow: hidden/auto (README паттерна detail-page). */
+  @media (min-width: 768px) {
+    .lpp-layout {
+      grid-template-columns: 17.5rem minmax(0, 1fr);
+    }
+
+    .lpp-side {
+      position: sticky;
+      top: var(--ui-space-5);
+      max-height: calc(100vh - 2 * var(--ui-space-5));
+      overflow-y: auto;
+    }
   }
 </style>
 
@@ -369,15 +527,417 @@
   </div>
 </section>
 
+<section class="ui-section" id="lpp-rows" aria-labelledby="lpp-rows-title">
+  <p class="ui-showcase-stand__note">
+    Ветка «строки» (T14.10): выдача горизонтальными строками вакансий — композиция оригинала
+    (<code>.vac-row</code>, build.py <code>render_vacancy_card</code>), не сетка карточек. Строка —
+    <code>article.ui-card--hover</code> с flex-раскладкой связки <code>lpp-row</code> (зона сайта):
+    заголовок-ссылка h3, место, описание, дата; CTA — пилюля <code>ui-button--pill</code> (T14.4)
+    ВНЕ ссылки заголовка (инвариант вложенных интерактивов ui-card — растянутой ссылки у строки
+    нет). С JS пилюля открывает демо-модалку отклика (<code>data-ui-modal-target</code>), без JS —
+    работает <code>href</code>-заглушка на страницу отклика.
+  </p>
+
+  <!-- Заголовок выдачи — h2 (иерархия h1 → h2 → h3 без пропусков: строки —
+       h3; гейт irao/heading-order). tabindex="-1" — цель фокуса гварда
+       стенда после применения фильтра ветки (сниппет внизу). -->
+  <h2 class="ui-h3" id="lpp-rows-title" tabindex="-1">Открытые вакансии</h2>
+
+  <!-- Строка вакансии: main-блок (заголовок-ссылка, место, описание, дата)
+       + CTA-пилюля — сиблинги внутри article.ui-card--hover. Вид заголовка —
+       роль ui-h4 (20px, как .vac-row__title оригинала); уровень тега (h3)
+       задаёт семантика страницы. Место и дата — мета-строки с декоративными
+       иконками (aria-hidden). Демо-данные — правдоподобные вакансии по
+       мотивам моков пилота (data/vacancies.json), не дословно. -->
+  <div class="lpp-rows" id="lpp-rows-list">
+    <article class="ui-card ui-card--hover lpp-row">
+      <div class="lpp-row__main">
+        <h3 class="ui-h4 lpp-row__title">
+          <a href="vacancy.html">Ведущий инженер по эксплуатации энергоблоков</a>
+        </h3>
+        <span class="lpp-row__place ui-small ui-text--muted">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+          Москва · Московская ТЭЦ
+        </span>
+        <p class="lpp-row__short ui-small ui-text--muted">
+          Контроль режимов работы оборудования энергоблоков ТЭЦ, ведение оперативных переключений и
+          устранение отклонений.
+        </p>
+        <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-09-12">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+          12.09.2026
+        </time>
+      </div>
+      <a
+        class="ui-button ui-button--pill"
+        href="vacancy-apply.html"
+        data-ui-modal-target="lpp-apply-dialog"
+      >
+        <span class="ui-button__label">Откликнуться</span>
+        <!-- prettier-ignore -->
+        <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </article>
+
+    <article class="ui-card ui-card--hover lpp-row">
+      <div class="lpp-row__main">
+        <h3 class="ui-h4 lpp-row__title">
+          <a href="vacancy.html">Инженер-теплоэнергетик</a>
+        </h3>
+        <span class="lpp-row__place ui-small ui-text--muted">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+          Омск · Омская ТЭЦ-5
+        </span>
+        <p class="lpp-row__short ui-small ui-text--muted">
+          Обслуживание и ремонт теплоэнергетического оборудования, наладка котельного хозяйства
+          станции.
+        </p>
+        <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-09-10">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+          10.09.2026
+        </time>
+      </div>
+      <a
+        class="ui-button ui-button--pill"
+        href="vacancy-apply.html"
+        data-ui-modal-target="lpp-apply-dialog"
+      >
+        <span class="ui-button__label">Откликнуться</span>
+        <!-- prettier-ignore -->
+        <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </article>
+
+    <article class="ui-card ui-card--hover lpp-row">
+      <div class="lpp-row__main">
+        <h3 class="ui-h4 lpp-row__title">
+          <a href="vacancy.html">Специалист по цифровым продуктам</a>
+        </h3>
+        <span class="lpp-row__place ui-small ui-text--muted">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+          Москва · Офис «Интер РАО – Лаб»
+        </span>
+        <p class="lpp-row__short ui-small ui-text--muted">
+          Развитие внутренних цифровых сервисов Группы: аналитика требований, прототипирование и
+          запуск релизов.
+        </p>
+        <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-09-08">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+          08.09.2026
+        </time>
+      </div>
+      <a
+        class="ui-button ui-button--pill"
+        href="vacancy-apply.html"
+        data-ui-modal-target="lpp-apply-dialog"
+      >
+        <span class="ui-button__label">Откликнуться</span>
+        <!-- prettier-ignore -->
+        <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </article>
+
+    <article class="ui-card ui-card--hover lpp-row">
+      <div class="lpp-row__main">
+        <h3 class="ui-h4 lpp-row__title">
+          <a href="vacancy.html">Электромонтёр по обслуживанию подстанций</a>
+        </h3>
+        <span class="lpp-row__place ui-small ui-text--muted">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+          Саратов · Саратовская ГЭС
+        </span>
+        <p class="lpp-row__short ui-small ui-text--muted">
+          Техническое обслуживание распределительных сетей и подстанций 110 кВ, оперативные
+          переключения.
+        </p>
+        <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-09-05">
+          <!-- prettier-ignore -->
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+          05.09.2026
+        </time>
+      </div>
+      <a
+        class="ui-button ui-button--pill"
+        href="vacancy-apply.html"
+        data-ui-modal-target="lpp-apply-dialog"
+      >
+        <span class="ui-button__label">Откликнуться</span>
+        <!-- prettier-ignore -->
+        <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </article>
+  </div>
+
+  <!-- Демо-модалка отклика: триггеры — CTA-пилюли строк обеих веток (id один
+       на стенд). Без open в разметке: контент отклика без JS достижим
+       href-заглушкой пилюли (деградация К9 ADR-0011 через ссылку-триггер);
+       с JS модуль снимает переход и показывает диалог. Анкета отклика —
+       паттерн «Страница формы» (T8.3). -->
+  <dialog
+    class="ui-modal ui-modal--md"
+    id="lpp-apply-dialog"
+    data-ui-modal
+    aria-labelledby="lpp-apply-title"
+  >
+    <button class="ui-modal__close" type="button" aria-label="Закрыть">
+      <!-- prettier-ignore -->
+      <svg class="ui-modal__icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+    </button>
+    <h2 class="ui-modal__title ui-h3" id="lpp-apply-title">Отклик на вакансию</h2>
+    <div class="ui-modal__body">
+      <p class="ui-body">
+        Демо-модалка ветки «строки»: пилюля «Откликнуться» открывает анкету отклика — форма
+        собирается по паттерну «Страница формы» (T8.3); без JS пилюля ведёт на неё ссылкой.
+      </p>
+    </div>
+  </dialog>
+</section>
+
+<section class="ui-section" id="lpp-side" aria-labelledby="lpp-side-title">
+  <p class="ui-showcase-stand__note">
+    Ветка «сайдбар фильтров» (T14.10): grid «aside | выдача» — порт <code>.vac-layout</code>/
+    <code>.vac-side</code> оригинала. Сайдбар — sticky-панель от md: select-пилюли по канону
+    <code>ui-select</code> (label[for] рядом), radio-группа «Опыт» (fieldset/legend), чекбокс
+    доступности, «Применить»/«Сбросить», промо-карточка <code>ui-card--filled</code>; панель выше
+    вьюпорта прокручивается внутри себя и фокусируется с клавиатуры (<code>tabindex="0"</code> — axe
+    scrollable-region-focusable). Над выдачей строк — чипы направлений (<code>ui-chip</code>, T14.8,
+    ссылочная форма). Форма работает БЕЗ JS — перезагрузкой GET-запроса.
+  </p>
+
+  <div class="lpp-layout">
+    <!-- Сайдбар: лендмарка aside с именем из видимого заголовка
+         (aria-labelledby). Sticky/scrollable — связка lpp-side от md;
+         tabindex="0" — keyboard access прокручиваемого региона. -->
+    <aside class="lpp-side" id="lpp-side-panel" tabindex="0" aria-labelledby="lpp-side-title">
+      <h2 class="ui-h4" id="lpp-side-title">Фильтры вакансий</h2>
+
+      <!-- GET-форма сайдбара: работает без JS (кнопка «Применить»); action —
+           якорь выдачи ветки (в бою — URL страницы списка). Скрытый маркер
+           side=1 — демо-различение ветки для гварда фокуса стенда; в бою
+           сниппет фокуса ставит сервер по отрендеренной ветке (README). -->
+      <form
+        class="lpp-side__form"
+        id="lpp-side-filter"
+        method="get"
+        action="#lpp-side-results"
+        aria-label="Фильтры вакансий в сайдбаре"
+      >
+        <!-- prettier-ignore -->
+        <input type="hidden" name="side" value="1">
+
+        <div class="lpp-side__group">
+          <label class="lpp-pill__name" for="lpp-side-region">Регион</label>
+          <div class="lpp-pill">
+            <select id="lpp-side-region" name="region" data-ui-select="wrap">
+              <option value="" selected>Любой регион</option>
+              <option value="msk">Москва и МО</option>
+              <option value="spb">Санкт-Петербург</option>
+              <option value="omsk">Омская область</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="lpp-side__group">
+          <label class="lpp-pill__name" for="lpp-side-direction">Направление</label>
+          <div class="lpp-pill">
+            <select id="lpp-side-direction" name="direction" data-ui-select="wrap">
+              <option value="" selected>Все направления</option>
+              <option value="power">Электроэнергетика</option>
+              <option value="heat">Теплоэнергетика</option>
+              <option value="it">Информационные технологии</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Опыт — radio-группа (T5.2): fieldset/legend именует группу
+             нативно, стрелки переключают без JS. -->
+        <fieldset class="ui-radio-group">
+          <legend class="ui-radio-group__legend">Опыт</legend>
+          <div class="ui-radio-group__row">
+            <label class="ui-radio">
+              <!-- prettier-ignore -->
+              <input class="ui-radio__input" type="radio" name="experience" value="junior">
+              Без опыта
+            </label>
+            <label class="ui-radio">
+              <!-- prettier-ignore -->
+              <input class="ui-radio__input" type="radio" name="experience" value="middle">
+              От 1 года
+            </label>
+            <label class="ui-radio">
+              <!-- prettier-ignore -->
+              <input class="ui-radio__input" type="radio" name="experience" value="senior">
+              От 3 лет
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- Доступность — чекбокс (T5.2): нативный input внутри label. -->
+        <label class="ui-checkbox">
+          <!-- prettier-ignore -->
+          <input class="ui-checkbox__input" type="checkbox" name="accessible" value="1">
+          <span>Доступно людям с инвалидностью</span>
+        </label>
+
+        <div class="lpp-side__actions">
+          <button class="ui-button ui-button--primary" type="submit">Применить</button>
+          <button class="ui-button ui-button--outline" type="reset">Сбросить</button>
+        </div>
+      </form>
+
+      <!-- Промо-карточка сайдбара (оригинал .vac-side__promo card card--filled). -->
+      <div class="ui-card ui-card--filled" id="lpp-side-promo">
+        <p class="ui-body">
+          Если ты студент или выпускник — свяжись с нами и получи практику или стажировку в
+          компаниях Группы.
+        </p>
+        <a class="ui-button ui-button--primary" href="practices.html">узнать подробнее</a>
+      </div>
+    </aside>
+
+    <div class="lpp-main">
+      <!-- Заголовок выдачи ветки — h2 (иерархия: h1 → h2 сайдбара → h2
+           выдачи → h3 строк); tabindex="-1" — цель фокуса гварда ветки. -->
+      <h2 class="ui-h3" id="lpp-side-results" tabindex="-1">Открытые вакансии</h2>
+
+      <!-- Чипы направлений (T14.8, ссылочная форма): GET-фильтр — ссылки с
+           полным набором параметров (работают без JS); активная —
+           aria-current="page" и ОСТАЁТСЯ ссылкой (повторный клик
+           перезапрашивает выдачу). href — demo-упрощение: подменяют query
+           целиком; маркер side=1 — как у формы сайдбара (гвард фокуса
+           стенда); в бою шаблон сохраняет остальные параметры фильтров. -->
+      <nav class="ui-chip" id="lpp-side-chips" aria-label="Направления">
+        <a class="ui-chip__pill" href="?side=1&direction=power" aria-current="page"
+          >энергетика и электротехника</a
+        >
+        <a class="ui-chip__pill" href="?side=1&direction=it">информационные технологии</a>
+        <a class="ui-chip__pill" href="?side=1&direction=econ">экономика и финансы</a>
+        <a class="ui-chip__pill" href="?side=1&direction=design">конструирование</a>
+        <a class="ui-chip__pill" href="?side=1&direction=general">общие направления</a>
+      </nav>
+
+      <!-- Выдача строками: та же связка lpp-row, что в ветке «строки»
+           (данные — по мотивам моков пилота, не дословно). -->
+      <div class="lpp-rows" id="lpp-side-results-list">
+        <article class="ui-card ui-card--hover lpp-row">
+          <div class="lpp-row__main">
+            <h3 class="ui-h4 lpp-row__title">
+              <a href="vacancy.html">Менеджер по работе с клиентами</a>
+            </h3>
+            <span class="lpp-row__place ui-small ui-text--muted">
+              <!-- prettier-ignore -->
+              <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+              Москва · Офис «Интер РАО – Энергосбыт»
+            </span>
+            <p class="lpp-row__short ui-small ui-text--muted">
+              Консультирование частных и корпоративных клиентов по вопросам энергосбыта, работа с
+              обращениями.
+            </p>
+            <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-09-01">
+              <!-- prettier-ignore -->
+              <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+              01.09.2026
+            </time>
+          </div>
+          <a
+            class="ui-button ui-button--pill"
+            href="vacancy-apply.html"
+            data-ui-modal-target="lpp-apply-dialog"
+          >
+            <span class="ui-button__label">Откликнуться</span>
+            <!-- prettier-ignore -->
+            <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </a>
+        </article>
+
+        <article class="ui-card ui-card--hover lpp-row">
+          <div class="lpp-row__main">
+            <h3 class="ui-h4 lpp-row__title">
+              <a href="vacancy.html">Аналитик данных</a>
+            </h3>
+            <span class="lpp-row__place ui-small ui-text--muted">
+              <!-- prettier-ignore -->
+              <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+              Москва · Офис «Интер РАО – Диджитал»
+            </span>
+            <p class="lpp-row__short ui-small ui-text--muted">
+              Построение отчётности и дашбордов, анализ операционных показателей компаний Группы.
+            </p>
+            <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-08-22">
+              <!-- prettier-ignore -->
+              <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+              22.08.2026
+            </time>
+          </div>
+          <a
+            class="ui-button ui-button--pill"
+            href="vacancy-apply.html"
+            data-ui-modal-target="lpp-apply-dialog"
+          >
+            <span class="ui-button__label">Откликнуться</span>
+            <!-- prettier-ignore -->
+            <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </a>
+        </article>
+
+        <article class="ui-card ui-card--hover lpp-row">
+          <div class="lpp-row__main">
+            <h3 class="ui-h4 lpp-row__title">
+              <a href="vacancy.html">Оператор котельной</a>
+            </h3>
+            <span class="lpp-row__place ui-small ui-text--muted">
+              <!-- prettier-ignore -->
+              <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+              Томск · Томская ГРЭС-2
+            </span>
+            <p class="lpp-row__short ui-small ui-text--muted">
+              Ведение технологического процесса котельной, контроль параметров теплоносителя.
+            </p>
+            <time class="lpp-row__date ui-small ui-text--muted" datetime="2026-08-18">
+              <!-- prettier-ignore -->
+              <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="3.5" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.5"></rect><path d="M2 7h12M5.5 1.5v3.5M10.5 1.5v3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>
+              18.08.2026
+            </time>
+          </div>
+          <a
+            class="ui-button ui-button--pill"
+            href="vacancy-apply.html"
+            data-ui-modal-target="lpp-apply-dialog"
+          >
+            <span class="ui-button__label">Откликнуться</span>
+            <!-- prettier-ignore -->
+            <svg class="ui-button__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          </a>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
 <script>
   // T8.1, Technical considerations: после применения фильтра (перезагрузка
   // GET-формы) фокус — на заголовок результатов: скринридер объявляет
   // заголовок и следующие за ним счётчик/выдачу, клавиатура продолжает
   // с результатов (фильтры уже позади). На реальном сайте сниппет ставит
-  // сервер — только когда фильтр реально применён (см. README паттерна);
-  // на статике — guard по GET-параметрам: чистая загрузка фокус не крадёт.
+  // сервер — только когда фильтр реально применён и только для ОТРЕНДЕРЕННОЙ
+  // ветки (см. README паттерна); на статике — guard по GET-параметрам:
+  // чистая загрузка фокус не крадёт. Ветки различаются маркером: side=1 —
+  // hidden-поле формы сайдбара (T14.10), город/направление/опыт — фильтры
+  // базовой формы; у них фокус — на h1 page-head базовой ветки.
   (function () {
     var params = new URLSearchParams(window.location.search);
+    var sideTitle = document.getElementById('lpp-side-results');
+    if (params.has('side') && sideTitle && typeof sideTitle.focus === 'function') {
+      sideTitle.focus();
+      return;
+    }
     var applied = ['city', 'direction', 'experience'].some(function (key) {
       return Boolean(params.get(key));
     });
