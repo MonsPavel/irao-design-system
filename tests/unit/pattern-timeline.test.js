@@ -135,10 +135,7 @@ describe('patterns/timeline/timeline.html — mini-эталон (Scope T14.11)',
       style[1],
       'линия — псевдоэлемент связки этапа (::after), не отдельный элемент DOM (Scope)',
     ).toMatch(/\.tl__stage:not\(:last-child\)::after/);
-    expect(
-      style[1],
-      'высотa линии — 2px оригинала (.timeline__track)',
-    ).toMatch(/height:\s*2px/);
+    expect(style[1], 'высотa линии — 2px оригинала (.timeline__track)').toMatch(/height:\s*2px/);
     expect(
       style[1],
       'линия лежит ПОД точкой: точка несёт z-index 1 (линия заходит за круг, как track оригинала)',
@@ -177,8 +174,7 @@ describe('patterns/timeline/timeline.html — mini-эталон (Scope T14.11)',
       .flatMap(([, value]) => value.split(/\s+/))
       .filter(Boolean);
     const foreign = classes.filter(
-      (cls) =>
-        cls !== 'ui-showcase-stand__note' && !cls.startsWith('ui-') && !cls.startsWith('tl'),
+      (cls) => cls !== 'ui-showcase-stand__note' && !cls.startsWith('ui-') && !cls.startsWith('tl'),
     );
     expect(
       foreign,
@@ -199,9 +195,7 @@ describe('patterns/timeline/README.md — композиция, a11y, Bitrix (AC
     for (const marker of ['ol', 'tl__dot', 'tl__stage', 'ui-h3']) {
       expect(readme, `дока называет «${marker}»`).toContain(marker);
     }
-    expect(readme, 'горизонтальный ряд и мобильная колонка задокументированы').toContain(
-      'колонк',
-    );
+    expect(readme, 'горизонтальный ряд и мобильная колонка задокументированы').toContain('колонк');
   });
 
   it('a11y-правила: ol-семантика, видимые номера, декоративная линия, иерархия', () => {
@@ -209,9 +203,7 @@ describe('patterns/timeline/README.md — композиция, a11y, Bitrix (AC
       'role="list"',
     );
     expect(readme, 'видимые номера — правило WCAG 1.3.1').toContain('1.3.1');
-    expect(readme, 'линия задокументирована как декоративная').toMatch(
-      /лини[ия][^.]*декоратив/i,
-    );
+    expect(readme, 'линия задокументирована как декоративная').toMatch(/лини[ия][^.]*декоратив/i);
     expect(readme, 'иерархия h2 секции → h3 этапов (без пропусков)').toContain('h3');
   });
 
@@ -249,13 +241,11 @@ describe('сборка: стенд паттерна генерируется в 
 
   it('nav/каталог: patterns/timeline в сайдбаре и в описаниях стенда', () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(
-      build,
-      'patternNames содержит timeline (сайдбар «Паттерны» и каталог)',
-    ).toMatch(/'timeline'/);
-    expect(
-      build,
-      'STAND_DESCRIPTIONS описывает patterns/timeline',
-    ).toContain(`'patterns/timeline':`);
+    expect(build, 'patternNames содержит timeline (сайдбар «Паттерны» и каталог)').toMatch(
+      /'timeline'/,
+    );
+    expect(build, 'STAND_DESCRIPTIONS описывает patterns/timeline').toContain(
+      `'patterns/timeline':`,
+    );
   });
 });
