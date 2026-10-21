@@ -349,10 +349,7 @@ standTest.describe(
           await expect(row.locator(ROWS.titleLink), `строка ${i}: заголовок-ссылка`).toBeVisible();
           await expect(row.locator(ROWS.place), `строка ${i}: место`).not.toBeEmpty();
           await expect(row.locator(ROWS.short), `строка ${i}: описание`).toBeVisible();
-          await expect(
-            row.locator(ROWS.date),
-            `строка ${i}: дата — <time datetime>`,
-          ).toBeVisible();
+          await expect(row.locator(ROWS.date), `строка ${i}: дата — <time datetime>`).toBeVisible();
           await expect(row.locator(ROWS.cta), `строка ${i}: CTA — пилюля (T14.4)`).toBeVisible();
         }
       },
@@ -420,7 +417,10 @@ standTest.describe(
           'sticky',
         );
         expect(desktop.overflow, 'сайдбар прокручивается внутри sticky-региона').toBe('auto');
-        expect(desktop.tabindex, 'scrollable-region-focusable: регион фокусируется с клавиатуры').toBe(0);
+        expect(
+          desktop.tabindex,
+          'scrollable-region-focusable: регион фокусируется с клавиатуры',
+        ).toBe(0);
         const tracks = await page
           .locator(SIDE.layout)
           .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
@@ -430,7 +430,11 @@ standTest.describe(
         await page.setViewportSize(VIEWPORTS.mobile);
         const mobile = await aside.evaluate((el) => {
           const cs = getComputedStyle(el);
-          return { position: cs.position, tracks: getComputedStyle(el.closest('.lpp-layout')).gridTemplateColumns.split(' ').length };
+          return {
+            position: cs.position,
+            tracks: getComputedStyle(el.closest('.lpp-layout')).gridTemplateColumns.split(' ')
+              .length,
+          };
         });
         expect(mobile.position, 'на мобиле aside в потоке (min-width-деградация)').not.toBe(
           'sticky',
@@ -476,10 +480,9 @@ standTest.describe(
           'action',
           /#lpp-side-results/,
         );
-        await expect(
-          form.locator('button[type="submit"]'),
-          'Применить — сабмит формы',
-        ).toHaveText('Применить');
+        await expect(form.locator('button[type="submit"]'), 'Применить — сабмит формы').toHaveText(
+          'Применить',
+        );
         await expect(
           form.locator('button[type="reset"]'),
           'Сбросить — нативный reset формы',
@@ -507,7 +510,7 @@ standTest.describe(
           );
         }
         await expect(
-          chips.locator('[aria-current="page"]'),
+          page.locator(`${SIDE.chips} .ui-chip__pill[aria-current="page"]`),
           'активный чип — ровно один, aria-current="page"',
         ).toHaveCount(1);
 
@@ -516,7 +519,7 @@ standTest.describe(
             document
               .getElementById('lpp-side-chips')
               .compareDocumentPosition(document.getElementById('lpp-side-results-list')) &
-              Node.DOCUMENT_POSITION_FOLLOWING,
+            Node.DOCUMENT_POSITION_FOLLOWING,
           ),
         );
         expect(order, 'чипы в DOM раньше выдачи строк').toBe(true);
@@ -542,10 +545,9 @@ standTest.describe(
           await noJsPage.waitForURL(/\?/, { timeout: 5000 });
           const params = new URL(noJsPage.url()).searchParams;
           expect(params.get('region'), 'регион ушёл GET-параметром').toBe('msk');
-          expect(
-            noJsPage.url(),
-            'action ведёт на якорь выдачи ветки сайдбара',
-          ).toContain('#lpp-side-results');
+          expect(noJsPage.url(), 'action ведёт на якорь выдачи ветки сайдбара').toContain(
+            '#lpp-side-results',
+          );
         } finally {
           await context.close();
         }
@@ -556,7 +558,9 @@ standTest.describe(
       'перезагрузка с фильтром сайдбара: фокус на заголовок выдачи ветки (не крадётся к ветке «с данными»)',
       async ({ stand }) => {
         const page = await stand('patterns/list-page');
-        await page.goto(`${page.url().split('?')[0]}?region=msk`, { waitUntil: 'networkidle' });
+        await page.goto(`${page.url().split('?')[0]}?side=1&region=msk`, {
+          waitUntil: 'networkidle',
+        });
         await expect(
           page.locator(SIDE.resultsTitle),
           'гвард стенда переводит фокус на заголовок выдачи ветки сайдбара',
