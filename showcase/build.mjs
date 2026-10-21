@@ -88,6 +88,7 @@ const STAND_DESCRIPTIONS = {
   'patterns/detail-page': 'Паттерн «Детальная страница»: крошки, контент + aside, JobPosting',
   'patterns/form-page': 'Паттерн «Страница формы»: форма отклика с aside-сводкой',
   'patterns/landing-section': 'Паттерн «Landing-секция»: светлая, тёмная, full-bleed',
+  'patterns/timeline': 'Паттерн «Таймлайн этапов»: нумерованные точки этапов процесса',
   'patterns/search-overlay': 'Паттерн «Поисковый оверлей» на ui-modal--full',
   'patterns/header': 'Паттерн «Шапка сайта» с навигацией и оверлеем поиска',
   'patterns/footer': 'Паттерн «Подвал сайта»: contentinfo, контакты, «Наверх»',
@@ -334,6 +335,7 @@ function buildNav() {
     'detail-page',
     'form-page',
     'landing-section',
+    'timeline',
     'search-overlay',
     'header',
     'footer',
@@ -981,6 +983,33 @@ async function generateShowcase({ themes }) {
       'patterns/landing-section/landing-section.html ещё нет — ' +
         'стенд patterns/landing-section не сгенерирован',
     );
+  }
+
+  // Стенд «patterns/timeline» (T14.11) — паттерн «таймлайн этапов»: правила
+  // сборки композиции «этапы процесса» + mini-эталон из четырёх этапов (ol:
+  // нумерованная точка, заголовок h3, текст) БЕЗ нового CSS; связки паттерна
+  // (tl-*) — <style> в нём (зона сайта, в dist не попадает). Каркас СО
+  // СЛУЖЕБНЫМ <h1> (как landing-section): таймлайн — фрагмент секции, h1 у
+  // него нет по определению, а стенд — демо-страница полигона; axe
+  // page-has-heading-one требует h1, заголовок секции эталона — h2 с ролью
+  // ui-h2 (иерархия h1 → h2 → h3 без пропусков).
+  const timelineStandSource = join(ROOT, 'patterns', 'timeline', 'timeline.html');
+  if (existsSync(timelineStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/timeline.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/timeline — irao-ui showcase',
+      // Служебный h1: таймлайн — фрагмент, h1 несёт каркас демо-страницы.
+      main: `    <h1 class="ui-showcase-title">patterns/timeline</h1>\n${readFileSync(timelineStandSource, 'utf8').trim()}`,
+      themes,
+      navCurrent: { kind: 'stand', name: 'patterns/timeline' },
+      navMode: 'strip',
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'timeline.html'), page);
+    stands.push({ name: 'patterns/timeline', source: 'patterns/timeline/timeline.html' });
+  } else {
+    warn('patterns/timeline/timeline.html ещё нет — стенд patterns/timeline не сгенерирован');
   }
 
   // Стенд «patterns/search-overlay» (T7.6) — паттерн «Поисковый оверлей»:

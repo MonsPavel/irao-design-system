@@ -1,0 +1,166 @@
+<!--
+  Паттерн «таймлайн этапов» (T14.11): правила сборки повторяющейся композиции
+  «этапы процесса» + mini-эталон из четырёх этапов — горизонтальный ряд
+  нумерованных точек с заголовками и текстами («Как попасть на практику»
+  career-portal). Источник композиции — steps_html + .timeline пилота
+  (build.py:484, css/pages.css:1096): переносится КОМПОЗИЦИЯ, не стили
+  (прецедент паттерна-композиции — landing-section T8.3).
+
+  Формула (Scope): секция каркаса (ui-section + ui-container + заголовок-роль
+  h2) + ol этапов; этап — li-колонка: точка с ВИДИМЫМ номером, заголовок h3,
+  текст. Секция именована aria-labelledby; у секции есть h2 → заголовки
+  этапов — h3 (h2 → h3 без пропусков, гейт irao/heading-order).
+
+  Границы (правило EPIC-8): контент этапов (номера, заголовки, тексты) —
+  зона САЙТА; каркас композиции (секция, контейнер, роли типографики, сетка
+  ряда, точки, линия) — СИСТЕМА. НОВОГО CSS В СИСТЕМЕ НЕТ (patterns/README):
+  связующие стили ниже (tl-*) — зона сайта (в бою — template_styles.css),
+  на стенде они живут <style>'ом рядом (showcase, не в dist). Компонент
+  dist/ui-timeline не создаётся — второго потребителя нет; при появлении —
+  решение о компоненте отдельно.
+
+  Точка с номером (Technical considerations): номер — видимый текст внутри
+  точки, НЕ content: counter — скринридер читает текст точки как контент
+  (WCAG 1.3.1); собственная нумерация ol дублировала бы его, поэтому
+  маркеры выключены (глобальный reset list-style: none) и семантика списка
+  защищена role="list" — Safari/VoiceOver снимает роль списка при
+  list-style: none (конвенция ui-breadcrumbs; html-validate считает
+  role="list" избыточным — inline-директива с обоснованием рядом).
+
+  Соединительная линия: декоративная, смысла не несёт — на псевдоэлементе
+  ::after связки этапа (не элемент DOM): от центра точки через остаток
+  колонки и зазор сетки до левого края следующей точки; точки несут
+  z-index: 1 — линия заходит за непрозрачный круг, давая непрерывную линию
+  track оригинала при ЛЮБОМ числе этапов (без процентов «10%/90%», привязанных
+  к 5 колонкам .timeline пилота). В мобильной колонке линии нет: правило
+  живёт внутри media ряда, как track оригинала, прятавшийся на узких
+  вьюпортах.
+
+  Мобильная деградация (Scope): база — колонка (порядок DOM = порядок
+  чтения), горизонтальный ряд — от lg (min-width: 1024, шкала T2.5) —
+  в оригинале ряд деградировал на той же границе. Без горизонтального
+  скролла на любом вьюпорте; длинные RU-слова в текстах этапов переносятся
+  переносами базы (overflow-wrap, T3.3).
+-->
+<style>
+  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
+     дисциплина системы (без hex, важных объявлений, inline-стилей). */
+
+  /* Таймлайн: база — колонка (мобильная деградация, порядок чтения = DOM). */
+  .tl {
+    box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-5); /* 24px между этапами (.timeline gap) */
+  }
+
+  /* Этап: якорь линии (::after), колонка «точка → заголовок → текст». */
+  .tl__stage {
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3); /* 12px внутри этапа (.timeline__stage gap) */
+  }
+
+  /* Точка с номером: 56px круг оригинала (вне шкалы отступов — перенос
+     «как есть», прецедент --ui-button-pad-inline T14.3); фон = парa
+     --color-surface-blue-100 оригинала (семантика surface-hover), номер —
+     primary (контраст 12.9:1, гейт AA). z-index держит точку НАД линией. */
+  .tl__dot {
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    background-color: var(--ui-color-surface-hover);
+    color: var(--ui-color-primary);
+    font-weight: var(--ui-fw-body-bold);
+  }
+
+  /* Горизонтальный ряд — от lg (1024): в оригинале ряд деградировал на той
+     же границе (max-width: 1024). Колонка на каждый этап — grid-auto-flow:
+     column: число колонок задаёт разметка ol (без inline-стилей и счётчиков). */
+  @media (min-width: 1024px) {
+    .tl {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: var(--ui-space-5);
+    }
+
+    /* Соединительная линия — декоративная, ::after связки этапа (см. шапку):
+       от центра точки до левого края следующей; под точками (z-index точки)
+       линия визуально непрерывна, как track оригинала. Псевдоэлемент без
+       текста в a11y-дерево не попадает — aria-hidden не требуется. */
+    .tl__stage:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 1.75rem; /* центр точки: 3.5rem / 2 */
+      left: 1.75rem; /* от центра точки — край круга */
+      right: calc(-1 * var(--ui-space-5)); /* через зазор сетки до следующей точки */
+      height: 2px; /* толщина track оригинала */
+      background-color: var(--ui-color-surface-hover);
+    }
+  }
+</style>
+
+<!-- Mini-эталон (Scope): каркас формулы «секция → контейнер → h2 → ol этапов»,
+     4 этапа практики пилота (internships.json practice.steps, 1–4). Этап —
+     li-колонка: точка с видимым номером → h3 (роль ui-h3) → текст
+     (ui-small + ui-text--muted: fs-small/muted оригинала). -->
+<section class="ui-section" id="tl-demo" aria-labelledby="tl-demo-title">
+  <p class="ui-showcase-stand__note">
+    Композиция «этапы процесса»: каркас — секция + контейнер + заголовок-роль + ol этапов; контент —
+    сайт. Горизонтальный ряд от 1024, база — колонка (мобильная деградация). Связки
+    <code>tl-*</code> — зона сайта (<code>&lt;style&gt;</code> рядом, не в dist).
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="tl-demo-title">Как попасть на практику</h2>
+    <!-- html-validate-disable-next no-redundant-role, prefer-native-element -->
+    <!-- role="list" защищает семантику списка: reset снимает list-style, Safari/VoiceOver
+         теряет роль ol (конвенция ui-breadcrumbs, .htmlvalidate.js). Оба правила html-validate
+         слепы к багу — не снимать вместе с role="list". -->
+    <ol class="tl" role="list">
+      <li class="tl__stage">
+        <span class="tl__dot">1</span>
+        <h3 class="ui-h3">Выберите практику</h3>
+        <p class="ui-small ui-text--muted">
+          Найдите подходящую вакансию практики в каталоге по фильтрам региона, города и направления
+          подготовки.
+        </p>
+      </li>
+
+      <li class="tl__stage">
+        <span class="tl__dot">2</span>
+        <h3 class="ui-h3">Подайте заявку</h3>
+        <p class="ui-small ui-text--muted">
+          Заполните анкету: данные о вас, вашем образовании и курсе обучения. Это займёт не больше
+          10 минут.
+        </p>
+      </li>
+
+      <li class="tl__stage">
+        <span class="tl__dot">3</span>
+        <h3 class="ui-h3">Дождитесь ответа</h3>
+        <p class="ui-small ui-text--muted">
+          Компания рассматривает заявку и связывается с вами по телефону или email в течение 10
+          рабочих дней.
+        </p>
+      </li>
+
+      <li class="tl__stage">
+        <span class="tl__dot">4</span>
+        <h3 class="ui-h3">Пройдите отбор</h3>
+        <p class="ui-small ui-text--muted">
+          Короткое интервью с наставником и руководителем практики — очно или по видеосвязи.
+        </p>
+      </li>
+    </ol>
+  </div>
+</section>
