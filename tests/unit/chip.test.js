@@ -232,4 +232,28 @@ describe('подключение и гейты (DoD)', () => {
     expect(readme).toMatch(/44/); // touch-компромисс 36px vs 44px с фиксацией
     expect(readme).toMatch(/без JS|no-JS|Без JS/i);
   });
+
+  it('README: числа контраста chip-пар = факту гейта T2.3 (ревью T14.8: док-числа не расходятся с отчётом)', async () => {
+    // Механика контраст-гейта (tests/contrast/check.mjs): те же функции,
+    // те же источники — README не может «отойти» от отчёта гейта.
+    const { declarationsFromTokenFile, evaluateContrast } = await import('../contrast/lib.mjs');
+    const { PAIRS } = await import('../contrast/pairs.config.mjs');
+    const primitives = declarationsFromTokenFile(
+      readFileSync(join(root, 'tokens', 'primitives.css'), 'utf8'),
+      'primitive',
+    );
+    const semantic = declarationsFromTokenFile(
+      readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8'),
+      'semantic',
+    );
+    const result = evaluateContrast({ primitives, semantic, pairs: PAIRS, exceptions: [] });
+    const readme = readFileSync(join(root, 'components', 'ui-chip', 'README.md'), 'utf8');
+    for (const id of ['chip-default', 'chip-active']) {
+      const row = result.rows.find((pair) => pair.id === id);
+      expect(row, `пара ${id} в прогоне гейта`).toBeTruthy();
+      expect(readme, `${id}: README называет фактические ${row.ratio.toFixed(2)}:1`).toContain(
+        `${row.ratio.toFixed(2)}:1`,
+      );
+    }
+  });
 });
