@@ -1,13 +1,18 @@
-<!-- Стенд ui-tabs (T6.2): две секции. #uitab-static — статические табы
+<!-- Стенд ui-tabs (T6.2; T14.9): три секции. #uitab-static — статические табы
      канонического паттерна (контент карьерных треков career-portal, .track-tabs
      js/tracks.js): табы — ссылки на панели, БЕЗ hidden/ролей/aria-selected в
      разметке — их ставит модуль (без JS все панели видимы, e2e проверяет
      источник и no-JS контекст). #uitab-json — JSON-паттерн Bitrix
      (02-architecture §6.3): данные в <script type="application/json"
-     data-ui-tabs-data>, рендер канонической разметки — демо-скрипт стенда
+     data-ui-tabs-data">, рендер канонической разметки — демо-скрипт стенда
      (данные — зона сайта), модуль IraoUI.tabs инициализирует готовую разметку
      сам (defer ui.min.js выполняется после парсинга); событие
-     irao-ui:tabs-select пишется в статус-регион #uitab-json-status. Ссылки
+     irao-ui:tabs-select пишется в статус-регион #uitab-json-status.
+     #uitab-pill (T14.9) — модификатор ui-tabs--pill (вид nav.tabs-pill
+     career-portal, education.html) + начальный выбор из разметки:
+     aria-current="page" на третьем табе — модуль выбирает его при
+     инициализации (silent); атрибут — семантика автора разметки, CSS на него
+     не реагирует, без JS все панели видимы. Ссылки
      после секций — цели сценариев Tab-выхода. -->
 <section id="uitab-static" aria-labelledby="uitab-static-heading">
   <h2 id="uitab-static-heading">Статические табы (канонический паттерн)</h2>
@@ -46,6 +51,60 @@
   </div>
   <p>
     <a class="ui-link" id="uitab-after-static" href="#uitab-static"
+      >Элемент после табов (цель Tab-выхода)</a
+    >
+  </p>
+</section>
+
+<section id="uitab-pill" aria-labelledby="uitab-pill-heading">
+  <h2 id="uitab-pill-heading">Пилюли — модификатор ui-tabs--pill (T14.9)</h2>
+  <p class="ui-showcase-stand__note">
+    Вид навигации разделов career-portal (<code>.tabs-pill</code>, education.html): прозрачные
+    пилюли без рамки на тинт-треке, активная — заливка primary; hover — подпись primary без заливки.
+    Клавиатура и ARIA — общие с базой. <code>aria-current="page"</code> на третьем табе — начальный
+    выбор из разметки: модуль выбирает его при инициализации (silent), не первый таб; дубли атрибута
+    — первый + <code>console.warn</code>. Без JS все панели видимы — CSS на
+    <code>aria-current</code> не реагирует.
+  </p>
+  <div class="ui-tabs ui-tabs--pill" data-ui-tabs>
+    <div class="ui-tabs__list">
+      <a class="ui-tabs__tab" href="#uitab-pill-practices" id="uitab-pill-practices-tab"
+        >Практики</a
+      >
+      <a class="ui-tabs__tab" href="#uitab-pill-internships" id="uitab-pill-internships-tab"
+        >Стажировки</a
+      >
+      <a
+        class="ui-tabs__tab"
+        href="#uitab-pill-target"
+        id="uitab-pill-target-tab"
+        aria-current="page"
+        >Целевое обучение</a
+      >
+    </div>
+    <section
+      class="ui-tabs__panel"
+      id="uitab-pill-practices"
+      aria-labelledby="uitab-pill-practices-tab"
+    >
+      <p>Практики для школьников и студентов — раздел навигации по разделам.</p>
+    </section>
+    <section
+      class="ui-tabs__panel"
+      id="uitab-pill-internships"
+      aria-labelledby="uitab-pill-internships-tab"
+    >
+      <p>Стажировки — раздел навигации по разделам.</p>
+    </section>
+    <section class="ui-tabs__panel" id="uitab-pill-target" aria-labelledby="uitab-pill-target-tab">
+      <p>
+        Целевое обучение — текущий раздел навигации: <code>aria-current="page"</code> в разметке
+        задал начальный выбор (T14.9).
+      </p>
+    </section>
+  </div>
+  <p>
+    <a class="ui-link" id="uitab-after-pill" href="#uitab-pill"
       >Элемент после табов (цель Tab-выхода)</a
     >
   </p>

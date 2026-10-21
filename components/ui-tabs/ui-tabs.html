@@ -15,6 +15,14 @@
   html-validate irao/tabs-id-links): href="#panel-id" на табе, aria-labelledby
   с id таба на панели. Фокус рисует глобальная политика base/focus.css
   (ADR-0001).
+
+  Второй кейс (T14.9): модификатор ui-tabs--pill — вид nav.tabs-pill
+  career-portal (межстраничная навигация разделов, education.html) + начальный
+  выбор из разметки: aria-current="page" на «Целевом обучении» (как в
+  оригинале) — модуль при инициализации выбирает ЕГО, а не первый таб.
+  Атрибут ставит автор разметки (семантика «текущая страница», как в
+  ui-breadcrumbs); модуль его не снимает, CSS на него не реагирует — без JS
+  все панели по-прежнему видимы.
 -->
 <div class="ui-tabs" data-ui-tabs>
   <div class="ui-tabs__list">
@@ -40,5 +48,38 @@
       <li>Начальник смены цеха — 3–4 года;</li>
       <li>Начальник цеха — 5+ лет.</li>
     </ul>
+  </section>
+</div>
+
+<!-- T14.9: модификатор ui-tabs--pill + начальный выбор из разметки.
+     aria-current="page" на третьем табе — модуль выберет его при
+     инициализации (silent, без irao-ui:tabs-select); дубли атрибута —
+     брак разметки (первый + console.warn). -->
+<div class="ui-tabs ui-tabs--pill" data-ui-tabs>
+  <div class="ui-tabs__list">
+    <a class="ui-tabs__tab" href="#uitab-pill-practices" id="uitab-pill-practices-tab">Практики</a>
+    <a class="ui-tabs__tab" href="#uitab-pill-internships" id="uitab-pill-internships-tab"
+      >Стажировки</a
+    >
+    <a class="ui-tabs__tab" href="#uitab-pill-target" id="uitab-pill-target-tab" aria-current="page"
+      >Целевое обучение</a
+    >
+  </div>
+  <section
+    class="ui-tabs__panel"
+    id="uitab-pill-practices"
+    aria-labelledby="uitab-pill-practices-tab"
+  >
+    <p>Практики для студентов и школьников — раздел навигации разделов.</p>
+  </section>
+  <section
+    class="ui-tabs__panel"
+    id="uitab-pill-internships"
+    aria-labelledby="uitab-pill-internships-tab"
+  >
+    <p>Стажировки — раздел навигации разделов.</p>
+  </section>
+  <section class="ui-tabs__panel" id="uitab-pill-target" aria-labelledby="uitab-pill-target-tab">
+    <p>Целевое обучение — текущий раздел навигации (aria-current="page" в разметке).</p>
   </section>
 </div>

@@ -21,10 +21,17 @@
  *  4. клик выбирает таб, якорный прыжок отменён (хэш страницы не меняется);
  *  5. JSON-кейс: табы отрендерены, клавиатура работает, событие
  *     irao-ui:tabs-select доходит до приёмника сайта (статус-регион);
- *  6. axe: стенд чист в исходном и переключённом состояниях (AC);
- *  7. эталоны: исходное состояние на 4 вьюпортах; выбранный второй таб
- *     статических табов и выбранный таб JSON-кейса — desktop (ADR-0004:
- *     создаются только в контейнере/CI, локально — no-op с аннотацией).
+ *  6. axe: стенд чист в исходном и переключённом состояниях (AC); в исходное
+ *     состояние входит секция ui-tabs--pill (T14.9) со стартом на
+ *     aria-current-табе — она проанализирована сразу;
+ *  7. T14.9: модификатор ui-tabs--pill — инициализация выбирает таб с
+ *     aria-current="page" (третий, как в nav.tabs-pill education.html),
+ *     атрибут остаётся, клавиатура общая с базой; no-JS: панели pill-набора
+ *     видимы (деградация не меняется);
+ *  8. эталоны: исходное состояние на 4 вьюпортах; выбранный второй таб
+ *     статических табов, выбранный таб JSON-кейса и выбранный pill-таб —
+ *     desktop (ADR-0004: создаются только в контейнере/CI, локально — no-op
+ *     с аннотацией).
  */
 import { expect } from '@playwright/test';
 
@@ -41,6 +48,9 @@ const SEL = {
   jsonTabs: '#uitab-json-tabs .ui-tabs__tab',
   jsonPanels: '#uitab-json-tabs .ui-tabs__panel',
   jsonStatus: '#uitab-json-status',
+  pillSection: '#uitab-pill',
+  pillTabs: '#uitab-pill .ui-tabs__tab',
+  pillPanels: '#uitab-pill .ui-tabs__panel',
 };
 
 /** Состояние одного инстанса: ровно один выбранный таб, панель выбранного видима. */
@@ -149,6 +159,17 @@ test.describe('ui-tabs: деградация без JS (AC)', () => {
         expect(href, `href таба ${i} — якорь`).toMatch(/^#/);
         await expect(noJsPage.locator(href), `панель ${href} существует`).toHaveCount(1);
       }
+
+      // T14.9: pill-инстанс в том же no-JS контексте — все панели видимы,
+      // aria-current="page" в разметке ни на что не влияет (деградация не
+      // меняется — правило T14.9).
+      const pillPanelsNoJs = noJsPage.locator(SEL.pillPanels);
+      const pillCount = await pillPanelsNoJs.count();
+      expect(pillCount, 'pill-панели в разметке').toBe(3);
+      for (let i = 0; i < pillCount; i += 1) {
+        await expect(pillPanelsNoJs.nth(i), `pill-панель ${i} видима без JS`).toBeVisible();
+      }
+      await expect(noJsPage.locator(`${SEL.pillTabs}[aria-current="page"]`)).toHaveCount(1);
     } finally {
       await context.close();
     }
@@ -272,6 +293,58 @@ test.describe('ui-tabs: клик и JSON-кейс (Bitrix)', () => {
   });
 });
 
+test.describe('ui-tabs--pill и начальный выбор (aria-current="page"; T14.9)', () => {
+  test('модификатор на стенде: инициализация выбирает таб с aria-current="page" (третий), атрибут остаётся', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-tabs');
+
+    await expect(page.locator(SEL.pillSection), 'секция pill-варианта на стенде').toHaveCount(1);
+    await expect(page.locator('#uitab-pill .ui-tabs--pill')).toHaveCount(1);
+
+    // Стартовый выбор — aria-current-таб (третий, как в nav.tabs-pill
+    // education.html), а не первый; инстанс консистентен (roving tabindex,
+    // ровно один aria-selected, панели скрыты модулем).
+    const selected = await expectInstanceConsistent(page, SEL.pillTabs, SEL.pillPanels);
+    expect(selected, 'выбран третий таб — aria-current="page" из разметки').toBe(2);
+    await expect(page.locator(SEL.pillTabs).nth(2)).toHaveAttribute('aria-current', 'page');
+    await expect(page.locator(SEL.pillTabs).nth(0)).not.toHaveAttribute('aria-current');
+
+    // Контраст выбранной пилюли: подпись text-on-dark на заливке primary (пара
+    // гейта T2.3). Каскадный пин: цвет невыбранных задаёт :not-правило
+    // модификатора, цвет выбранной — активное правило базы (иначе — тёмная
+    // подпись на тёмной заливке, 1.12:1; ловилось axe color-contrast).
+    const colorOf = (index) =>
+      page
+        .locator(SEL.pillTabs)
+        .nth(index)
+        .evaluate((el) => getComputedStyle(el).color);
+    expect(await colorOf(2), 'выбранная пилюля: text-on-dark').toBe('rgb(255, 255, 255)');
+    expect(await colorOf(0), 'невыбранная пилюля: text').toBe('rgb(31, 31, 31)');
+  });
+
+  test('клавиатура общая с базой: ←/→ automatic-активация в pill-инстансе', async ({ stand }) => {
+    const page = await stand('ui-tabs');
+    const tabs = page.locator(SEL.pillTabs);
+    const panels = page.locator(SEL.pillPanels);
+
+    await tabs.nth(2).focus();
+    await expect(tabs.nth(2)).toBeFocused();
+
+    // ← : фокус и выбор уходят на второй таб (automatic — APG, как в базе).
+    await page.keyboard.press('ArrowLeft');
+    await expect(tabs.nth(1), '←: фокус на втором табе').toBeFocused();
+    await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+    await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'false');
+    await expect(panels.nth(1), 'панель второго таба показана').toBeVisible();
+    await expect(panels.nth(2)).toBeHidden();
+
+    // roving tabindex переехал за выбором.
+    await expect(tabs.nth(1)).toHaveAttribute('tabindex', '0');
+    await expect(tabs.nth(2)).toHaveAttribute('tabindex', '-1');
+  });
+});
+
 test.describe('ui-tabs: axe (AC)', () => {
   test('стенд чист в исходном и переключённом состояниях (AC)', async ({ stand }) => {
     const page = await stand('ui-tabs');
@@ -309,5 +382,10 @@ test.describe('ui-tabs: эталоны (AC; ADR-0004 — только конте
     // Выбранный второй таб JSON-кейса.
     await page.locator(SEL.jsonTabs).nth(1).click();
     await shot(page, { name: 'ui-tabs-json-selected', viewport: 'desktop' });
+
+    // T14.9: pill-вариант после переключения (заливка ушла с aria-current-таба
+    // на второй) — вид пилюль в обоих состояниях.
+    await page.locator(SEL.pillTabs).nth(1).click();
+    await shot(page, { name: 'ui-tabs-pill-selected', viewport: 'desktop' });
   });
 });

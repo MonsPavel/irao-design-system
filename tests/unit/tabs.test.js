@@ -32,7 +32,15 @@
  *    tests/README.md);
  *  - событие irao-ui:tabs-select (bubbles) — точка расширения сайта
  *    (прецедент irao-ui:dropdown-open/close T6.1); при инициализации НЕ
- *    диспатчится — это событие смены выбора, а не декларация стартового.
+ *    диспатчится — это событие смены выбора, а не декларация стартового;
+ *  - T14.9: начальный выбор из разметки — таб с aria-current="page"
+ *    выбирается вместо первого (silent); дубли — первый + console.warn;
+ *    без aria-current — поведение как раньше; модуль aria-current не снимает,
+ *    CSS на aria-current не реагирует (не стилевой крючок — деградация без JS
+ *    не меняется); модификатор ui-tabs--pill — прозрачные пилюли .tabs-pill
+ *    (pages.css:969–1001) на токенах: трек surface-muted, паддинг/gap 4px,
+ *    радиус pill; таб без рамки, hover — подпись primary без заливки и только
+ *    у невыбранных; активная — базовая заливка primary/text-on-dark.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -463,6 +471,69 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
     expect(events[0].bubbles, 'событие всплывает — точка расширения сайта').toBe(true);
   });
 
+  describe('начальный выбор из разметки — aria-current="page" (T14.9; пины до правок модуля)', () => {
+    /** Канонический инстанс, где aria-current="page" стоит на табах с этими индексами. */
+    const instanceWithCurrent = (indices) =>
+      instanceHtml.replace(/id="uitab-([ab])-tab">/g, (tag, side) =>
+        indices.includes(side === 'a' ? 0 : 1)
+          ? `id="uitab-${side}-tab" aria-current="page">`
+          : tag,
+      );
+
+    it('aria-current="page" на втором табе: выбран второй (роли/roving/панели), событие НЕ диспатчится, атрибут остаётся', () => {
+      // Deferred-режим: слушатель сайта подключается ДО init — проверка
+      // silent-старта настоящая (select(index, false, true)).
+      const sandbox = makeSandbox({
+        readyState: 'loading',
+        bodyHtml: instanceWithCurrent([1]),
+      });
+      const root = sandbox.document.querySelector('[data-ui-tabs]');
+      const events = [];
+      root.addEventListener('irao-ui:tabs-select', (event) => events.push(event));
+
+      fireDOMContentLoaded(sandbox.window);
+
+      const tabs = tabsOf(sandbox);
+      const panels = panelsOf(sandbox);
+      expect(tabs[1].getAttribute('aria-selected'), 'выбран таб с aria-current').toBe('true');
+      expect(tabs[0].getAttribute('aria-selected')).toBe('false');
+      expect(tabs[1].getAttribute('tabindex'), 'roving tabindex за выбором').toBe('0');
+      expect(tabs[0].getAttribute('tabindex')).toBe('-1');
+      expect(panels[1].hidden, 'панель aria-current-таба видима').toBe(false);
+      expect(panels[0].hidden).toBe(true);
+      expect(events, 'стартовый выбор silent — событие сайту не нужно').toHaveLength(0);
+      expect(
+        tabs[1].getAttribute('aria-current'),
+        'модуль aria-current не снимает (семантика автора разметки)',
+      ).toBe('page');
+      expect(sandbox.warnings, 'единственный aria-current — без warn').toHaveLength(0);
+    });
+
+    it('дубли aria-current="page": выбирается первый, console.warn — ровно один (контракт шаблона п.4)', () => {
+      const sandbox = makeSandbox({
+        readyState: 'complete',
+        bodyHtml: instanceWithCurrent([0, 1]),
+      });
+
+      const tabs = tabsOf(sandbox);
+      expect(tabs[0].getAttribute('aria-selected'), 'из дублей выбран первый').toBe('true');
+      expect(tabs[1].getAttribute('aria-selected')).toBe('false');
+      expect(panelsOf(sandbox)[1].hidden).toBe(true);
+      expect(sandbox.warnings, 'дубли — брак разметки: warn, init продолжается').toHaveLength(1);
+      expect(String(sandbox.warnings[0][0])).toContain('aria-current');
+    });
+
+    it('без aria-current — поведение не изменилось: первый таб, warn-ов нет', () => {
+      const sandbox = makeSandbox({ readyState: 'complete', bodyHtml: instanceHtml });
+
+      const tabs = tabsOf(sandbox);
+      expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+      expect(tabs[1].getAttribute('aria-selected')).toBe('false');
+      expect(panelsOf(sandbox)[0].hidden).toBe(false);
+      expect(sandbox.warnings).toHaveLength(0);
+    });
+  });
+
   it('destroy возвращает разметку к no-JS состоянию (роли/aria/tabindex сняты, панели раскрыты)', () => {
     // destroy живёт на хэндле инстанса initInstance; через публичный init()
     // он не отдаётся (как в ui-dropdown) — проверяем через повторный eval
@@ -578,5 +649,84 @@ describe('расхождение паддинга таба с ui-button (рев�
     const readme = readFileSync(join(root, 'components', 'ui-tabs', 'README.md'), 'utf8');
     expect(readme).toContain('--ui-button-pad-inline');
     expect(readme).toMatch(/EPIC-14/);
+  });
+});
+
+describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal pages.css:969–1001)', () => {
+  const path = join(root, 'components', 'ui-tabs', 'ui-tabs.css');
+  const css = stripCssComments(readFileSync(path, 'utf8'));
+
+  it('лента — трек-пилюля .tabs-pill: тинт surface-muted, паддинг/gap 4px (ступень шкалы --ui-space-1), радиус pill', () => {
+    const block = blockOf(css, '.ui-tabs--pill .ui-tabs__list');
+    expect(block, 'правило модификатора ленты найдено').toBeTruthy();
+    expect(block).toContain('gap: var(--ui-space-1);'); // 4px .tabs-pill
+    expect(block).toContain('padding: var(--ui-space-1);'); // 4px .tabs-pill
+    expect(block).toContain('background-color: var(--ui-color-surface-muted);'); // blue-50 трек
+    expect(block).toContain('border-radius: var(--ui-radius-pill);');
+  });
+
+  it('таб — прозрачная пилюля без рамки: color text только у НЕвыбранных (:not — иначе модификатор перебил бы активное правило базы); типографика/высота базы не переопределяются', () => {
+    const border = blockOf(css, '.ui-tabs--pill .ui-tabs__tab');
+    expect(border, 'правило модификатора таба найдено').toBeTruthy();
+    expect(border).toContain('border: 0;'); // рамка outline-кнопки не входит в вид пилюли
+    // Подпись text (pages.css:989) — правило с :not([aria-selected='true']):
+    // без исключения (0,2,0) модификатора перебили бы (0,1,0) активное правило
+    // базы — тёмная подпись на заливке primary (ловилось axe на стенде).
+    const color = blockOf(css, ".ui-tabs--pill .ui-tabs__tab:not([aria-selected='true'])");
+    expect(color, ':not-правило подписи найдено').toBeTruthy();
+    expect(color).toContain('color: var(--ui-color-text);');
+    // fs-small-масштаб спеки и базовая min-height — общие с базой правилами:
+    // модификатор меняет только вид (Technical considerations T14.9).
+    for (const block of [border, color]) {
+      expect(block).not.toContain('font-size');
+      expect(block).not.toContain('height');
+      expect(block).not.toContain('padding');
+    }
+  });
+
+  it('hover пилюли — только у НЕвыбранных, подпись primary БЕЗ заливки (pages.css:998); внутри (hover: hover)', () => {
+    const mediaIndex = css.indexOf('@media (hover: hover)');
+    expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
+    const media = css.slice(mediaIndex);
+    expect(media).toMatch(
+      /\.ui-tabs--pill \.ui-tabs__tab:not\(\[aria-selected='true'\]\):hover\s*\{[^}]*background-color: transparent;/,
+    );
+    expect(media).toMatch(
+      /\.ui-tabs--pill \.ui-tabs__tab:not\(\[aria-selected='true'\]\):hover\s*\{[^}]*color: var\(--ui-color-primary\);/,
+    );
+  });
+
+  it('активная пилюля — базовое правило :where([aria-selected]) без дубля в модификаторе; aria-current — не стилевой крючок', () => {
+    // Дубль активного правила искал бы заливку text-on-dark в блоках
+    // модификатора (aria-selected в :not()-исключении hover — защита выбранной
+    // пилюли от перекраски, не дубль; прецедент ui-chip T14.8).
+    for (const [, block] of css.matchAll(/(?:^|\n)\s*\.ui-tabs--pill[^{]*\{([^}]*)\}/g)) {
+      expect(block, 'модификатор не повторяет активную заливку (общее правило базы)').not.toContain(
+        'text-on-dark',
+      );
+    }
+    // aria-current="page" — подсказка модулю (начальный выбор), не CSS-крючок:
+    // без JS активного таба нет, и вид разметки от атрибута не меняется
+    // (деградация «все панели видимы» не искажается).
+    expect(css).not.toContain('aria-current');
+  });
+});
+
+describe('доки T14.9 (README): модификатор --pill и правило начального выбора', () => {
+  const readme = readFileSync(join(root, 'components', 'ui-tabs', 'README.md'), 'utf8');
+
+  it('README описывает модификатор ui-tabs--pill: когда (межстраничная навигация разделов) и вид', () => {
+    expect(readme).toContain('ui-tabs--pill');
+    expect(readme).toMatch(/\.tabs-pill/);
+  });
+
+  it('README фиксирует правило начального выбора: aria-current="page" → N-й таб; дубли — первый + console.warn; без — первый', () => {
+    expect(readme).toContain('aria-current="page"');
+    expect(readme).toMatch(/console\.warn/);
+    expect(readme).toMatch(/дубл[а-я]*/i);
+  });
+
+  it('README: no-JS-деградация не меняется — CSS не реагирует на aria-current (все панели видимы)', () => {
+    expect(readme).toMatch(/aria-current[\s\S]{0,300}(не стилевой|CSS не реагирует)/i);
   });
 });

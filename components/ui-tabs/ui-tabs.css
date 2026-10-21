@@ -45,6 +45,28 @@
  * анимаций нет, переходы цветов гасит kill-switch reduced-motion base/reset
  * (DoD EPIC-6). VI-режим: цветов вне токенов нет (§5) — перекраска vi.css
  * накрывает компонент.
+ *
+ * Модификатор --pill (T14.9) — вид «пилюль» nav.tabs-pill career-portal
+ * (pages.css:969–1001, REPORT §3.3/PLAN P1-2): межстраничная навигация
+ * разделов («практики/стажировки/целевое обучение»). Оригинал: трек-пилюля
+ * на --color-surface-blue-50 с padding/gap 4px и радиусом pill; табы —
+ * прозрачные пилюли БЕЗ рамки, height 48px, color text (fs-body 20px/400),
+ * hover — подпись primary без заливки (pages.css:998), активная — заливка
+ * primary + text-on-dark (pages.css:1000). Перенос на токены: тинт трека —
+ * --ui-color-surface-muted (blue-50, паритет #F1F5FE), паддинг/gap 4px —
+ * ступень шкалы §3.2 --ui-space-1, радиус --ui-radius-pill. Осознанные
+ * отступления от оригинала: подпись — роль small (fs-small-масштаб, решение
+ * спеки T14.9 — 20px/400 не переносится), высота — базовая --ui-button-height
+ * (52px против 48px — в пределах ≤4px порога EPIC-14, не переписывается),
+ * сетка repeat(5, 1fr) .tabs-pill — раскладка конкретной страницы (5
+ * разделов), не вида: лента остаётся flex с переносом (база), отступы блока
+ * (nav-маргины pages.css:969) — зона страницы. Модификатор меняет ТОЛЬКО вид
+ * list/tab — roving tabindex/клавиатура/ARIA общие с базой; активная пилюля —
+ * то же базовое правило :where([aria-selected='true']) (border: 0 делает
+ * заливку чистой пилюлей), дубля правила в модификаторе нет. aria-current=
+ * "page" на табе — подсказка модулю (начальный выбор, ui-tabs.js T14.9),
+ * НЕ стилевой крючок: CSS на него не реагирует — без JS вид разметки от
+ * атрибута не меняется (деградация «все панели видимы» не искажается).
  */
 
 .ui-tabs {
@@ -104,6 +126,52 @@
   .ui-tabs__tab:hover {
     background-color: var(--ui-color-primary);
     color: var(--ui-color-text-on-dark);
+  }
+}
+
+/* ── Модификатор --pill (T14.9): вид .tabs-pill career-portal (шапка файла).
+   Меняет только вид — роли/клавиатура/roving tabindex общие с базой. ── */
+
+/* Лента — трек-пилюля (pages.css:974–979): тинт blue-50, паддинг и gap 4px
+   (ступень шкалы --ui-space-1), радиус pill. Базовые flex/wrap/маргины не
+   переопределяются (сетка 5×1fr и nav-маргины оригинала — зона страницы). */
+.ui-tabs--pill .ui-tabs__list {
+  gap: var(--ui-space-1);
+  padding: var(--ui-space-1);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Таб — прозрачная пилюля без рамки (pages.css:983–997): outline-рамка базы
+   не входит в вид пилюли; на заливке primary она и так невидима (тот же
+   цвет), поэтому снимается всем табам. Типографика, min-height и радиус —
+   общие с базой (fs-small-масштаб спеки; 52px против 48px — порог ≤4px
+   EPIC-14). */
+.ui-tabs--pill .ui-tabs__tab {
+  border: 0;
+}
+
+/* Подпись text — только у НЕвыбранных (pages.css:989: color text). Ставить
+   её в правило выше нельзя: (0,2,0) модификатора перебило бы (0,1,0) базовое
+   АКТИВНОЕ правило :where([aria-selected='true']) — и выбранная пилюля
+   осталась бы с тёмной подписью на заливке primary (1.12:1, axe
+   color-contrast). :not-исключение уводит конфликт: цвет выбранной задаёт
+   общее активное правило базы (text-on-dark, пара гейта T2.3) — прецедент
+   :not-исключения ui-chip (T14.8) и __page пагинации. */
+.ui-tabs--pill .ui-tabs__tab:not([aria-selected='true']) {
+  color: var(--ui-color-text);
+}
+
+/* hover пилюли — pages.css:998: подпись primary БЕЗ заливки (у базы hover —
+   заливка). Только у НЕвыбранных: у выбранной подпись text-on-dark на заливке
+   primary — :not-исключение держит hover от перекраски (прецедент ui-chip
+   T14.8, __page пагинации). transparent гасит базовый hover-филл (правило
+   специфичнее базового .ui-tabs__tab:hover); блок внутри media — после
+   базового hover-блока. */
+@media (hover: hover) {
+  .ui-tabs--pill .ui-tabs__tab:not([aria-selected='true']):hover {
+    background-color: transparent;
+    color: var(--ui-color-primary);
   }
 }
 

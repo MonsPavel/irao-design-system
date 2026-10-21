@@ -28,7 +28,15 @@
  *  - N инстансов независимы (в отличие от ui-dropdown closeAll не нужен);
  *  - события irao-ui:tabs-select (bubbles) — на смене выбора ПОСЛЕ
  *    инициализации (silent-старт) — точка расширения сайта (аналитика);
- *    прецедент — irao-ui:dropdown-open/close (T6.1).
+ *    прецедент — irao-ui:dropdown-open/close (T6.1);
+ *  - начальный выбор из разметки (T14.9): таб с aria-current="page"
+ *    выбирается вместо первого — в межстраничных наборах («практика/
+ *    стажировка/целевое обучение» — nav.tabs-pill career-portal) активный
+ *    таб зависит от страницы: потребителю не нужен IraoUI.tabs.select(i)
+ *    с сайта. Семантика «текущая страница» — как в ui-breadcrumbs;
+ *    атрибут остаётся в разметке (модуль его не снимает, CSS на него не
+ *    реагирует — деградация без JS не меняется); дубли aria-current — брак
+ *    разметки: выбирается первый, console.warn (контракт шаблона п.4).
  *
  * id-связки tab↔panel обязательны (Implementation requirements п.1): панель
  * ищется по href="#id" (канонический паттерн — ссылки) или aria-controls
@@ -222,8 +230,32 @@
     list.addEventListener('keydown', onListKeydown);
     list.addEventListener('click', onListClick);
 
-    // Стартовое состояние: первый таб (silent — событие сайту не нужно).
-    select(0, false, true);
+    /* ── Стартовый выбор (T14.9): таб с aria-current="page" вместо первого. ──
+       Разметка может объявить «текущую страницу» набора (межстраничная
+       навигация .tabs-pill career-portal: одинаковый порядок табов на разных
+       страницах, активный — по странице). Первый отмеченный выигрывает;
+       дубли — брак разметки: warn и первый (init не срывается — выбор
+       детерминирован). Без отмеченных — как раньше, первый таб. */
+    var initial = 0;
+    var marked = [];
+    for (var m = 0; m < tabs.length; m += 1) {
+      if (tabs[m].el.getAttribute('aria-current') === 'page') {
+        marked.push(m);
+      }
+    }
+    if (marked.length > 1 && window.console && window.console.warn) {
+      window.console.warn(
+        '[IraoUI:' +
+          MODULE_NAME +
+          '] aria-current="page" стоит на нескольких табах — выбран первый из них',
+      );
+    }
+    if (marked.length > 0) {
+      initial = marked[0];
+    }
+
+    // Silent: стартовый выбор — не смена выбора, событие сайту не нужно.
+    select(initial, false, true);
 
     // Флаг только после успешной привязки (контракт шаблона).
     root.setAttribute(INIT_ATTR, 'true');
