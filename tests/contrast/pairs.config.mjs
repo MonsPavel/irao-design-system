@@ -185,6 +185,25 @@ export const PAIRS = [
       '.tag--blue (components.css:108); до T4.3 bg ссылался на примитив --ui-blue-100 — пара заведена токеном --ui-color-tag-blue-bg',
   },
 
+  /* ── Чипы фильтров (ui-chip, T14.8; текст 14px → порог text) ── */
+
+  {
+    id: 'chip-default',
+    fg: '--ui-color-text',
+    bg: '--ui-color-surface',
+    level: 'text',
+    usage:
+      'ui-chip в покое: текст пилюли на фоновой подложке surface (рамка #D6D6D6 — декоративная --ui-border-color, исключение ниже); hover-пара (подпись primary) — primary-on-surface',
+  },
+  {
+    id: 'chip-active',
+    fg: '--ui-color-text-on-dark',
+    bg: '--ui-color-primary',
+    level: 'text',
+    usage:
+      'активный чип (aria-pressed="true" / aria-current="page"): заливка primary + подпись text-on-dark — как .chip.is-active career-portal (pages.css:151)',
+  },
+
   /* ── Акцентный, статусный текст и ссылки на светлых поверхностях ── */
 
   {

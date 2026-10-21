@@ -205,7 +205,10 @@ describe('стенд (showcase/pages/ui-chip/index.html)', () => {
 describe('подключение и гейты (DoD)', () => {
   it("'ui-chip' в COMPONENTS showcase/build.mjs — CSS в dist/ui-core.min.css", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-chip'[^\]]*\]/);
+    // [^\]] здесь недостаточно: комментарии в массиве несут квадратные скобки
+    // (ui-pagination — «button[disabled]»), поэтому ленивый матч до `];` —
+    // ui-chip добавлен последним элементом массива.
+    expect(build).toMatch(/const COMPONENTS = \[[\s\S]*?'ui-chip'[\s\S]*?\];/);
   });
 
   it('пары chip-default/chip-active в pairs.config.mjs — семантическими токенами (Implementation requirements T14.8 п.1)', () => {

@@ -29,6 +29,14 @@
 
 ### Added
 
+- Компонент `ui-chip` — интерактивный фильтр-чип (T14.8): пилюля 36px
+  (`--ui-chip-height`, `.chip` career-portal pages.css:137–151, 4+ страницы),
+  блок-группа (лента flex-wrap, gap 8px) + `__pill`; обе формы — кнопочная
+  (`type="button"` + `aria-pressed`) и ссылочная (GET, `aria-current="page"`
+  на активной); активное состояние — ARIA-атрибутом, не классом (WCAG 1.4.1),
+  JS-модуля нет. Пары `chip-default`/`chip-active` в контраст-гейте (T2.3).
+  Закрывает самый частый GAP пилота (REPORT §4, PLAN P1-1) и обещание README
+  ui-tag «паттерн T8.1» (ссылка заменена на ui-chip);
 - Тинты primary — штатные полупрозрачные производные `--ui-color-primary-a10/
   -a20/-a26/-a55/-a94` (T14.7): `color-mix(in srgb, var(--ui-color-primary)
   N%, transparent)`, суффикс — процент primary в смеси. Следуют за primary в
