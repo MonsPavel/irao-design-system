@@ -11,8 +11,9 @@
  *
  * Блоки без аналога в ДС (hero, production, directions, holding, employers,
  * why-us, students, video, media, team, cta-mail, шапка/подвал сайта,
- * chips, timeline, page-head, vac-row) — честная сайт-зона: кандидаты в
- * новые паттерны/компоненты ДС, до решения — живут здесь.
+ * timeline, page-head, vac-row) — честная сайт-зона: кандидаты в
+ * новые паттерны/компоненты ДС, до решения — живут здесь. Чипы с T14.8 —
+ * компонент ui-chip: сайт-зоне остаётся только ритм раскладок вокруг них.
  */
 
 /* ── страница ── */
@@ -115,11 +116,7 @@
   inset: 0;
   background:
     linear-gradient(180deg, var(--ui-color-surface) 0%, transparent 35%),
-    linear-gradient(
-      180deg,
-      transparent 60%,
-      color-mix(in srgb, var(--ui-color-primary) 94%, transparent) 100%
-    );
+    linear-gradient(180deg, transparent 60%, var(--ui-color-primary-a94) 100%);
 }
 
 .cp-hero__bg img {
@@ -210,8 +207,10 @@
   background-color: color-mix(in srgb, #3142ff 20%, transparent);
 }
 
+/* hero__tag--sand: ступень 26% лестницы тинтов T14.7 (в оригинале плашка
+   акцентная rgba(234,125,29,0.26) — mapping-решение T14.7: --ui-color-primary-a26) */
 .cp-hero__tag--sand {
-  background-color: color-mix(in srgb, var(--ui-color-accent) 26%, transparent);
+  background-color: var(--ui-color-primary-a26);
 }
 
 .cp-hero__tag--green {
@@ -833,35 +832,17 @@
   color: var(--ui-color-text-muted);
 }
 
-/* Чипы-фильтры: сайта-зона поверх ui-tag (интерактива в ДС нет — GAP) */
-.cp-chip-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-2);
+/* Ритм лент ui-chip (T14.8) в раскладках пилота: компонент отступов не
+   несёт — вертикальный ритм добавляет раскладка сайт-зоны (вид пилюль и
+   состояния — сам компонент). */
+.cp-vac-main .ui-chip,
+#directions .ui-chip {
   margin: var(--ui-space-4) 0;
 }
 
-.cp-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.25rem;
-  padding: var(--ui-space-1) var(--ui-space-3);
-  border: var(--ui-border-width) solid var(--ui-color-border);
-  border-radius: var(--ui-radius-pill);
-  background-color: var(--ui-color-surface);
-  color: var(--ui-color-text);
-  font-size: var(--ui-fs-small);
-  text-decoration: none;
-}
-
-.cp-chip:hover {
-  background-color: var(--ui-color-surface-muted);
-}
-
-.cp-chip.is-active {
-  border-color: var(--ui-color-primary);
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-text-on-dark);
+/* Лента разделов сразу после page-head: сверху ритм ведёт сам page-head */
+.cp-page-head + .ui-chip {
+  margin-bottom: var(--ui-space-4);
 }
 
 /* Строка вакансии: ui-card + сайт-зона раскладки строки (GAP: нет list-row) */
