@@ -59,10 +59,10 @@ const COMPONENT_PROBES = [
   ['faq-item', '.faq__item', '.ui-accordion__item'],
   ['pagination-page', '.pagination__page', '.ui-pagination__page'],
   ['tabs-pill', '.tabs-pill__tab', '.ui-tabs__tab'],
-  ['chip', '.chip', '.cp-chip'],
+  ['chip', '.chip', '.ui-chip__pill'],
   ['modal-dialog', '.modal__dialog', '.ui-modal'],
   ['section-title', '.section__title', '.ui-h2'],
-  ['page-title', '.page-title', '.ui-h1'],
+  ['page-title', '.page-title', '.ui-page-title'],
 ];
 
 /** Пары блоков главной (высота секций). */

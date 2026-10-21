@@ -3,7 +3,8 @@
  * career-portal. Интерактив компонентов (дропдауны, табы, селекты, модалки,
  * аккордеоны, VI) — модули dist/ui.min.js (window.IraoUI); здесь только
  * поведение сайт-зоны: карусель «Производство», попап «Направлений»,
- * мок-поведение форм (успех после сабмита), фильтры-чипы.
+ * мок-поведение форм (успех после сабмита), мок-переключение aria-pressed
+ * кнопочных чипов ui-chip.
  *
  * Деградация без JS: карусель показывает первый слайд (данные в разметке),
  * попап направлений не открывается (кнопки остаются в разметке), формы
@@ -149,16 +150,17 @@
     });
   });
 
-  /* ── чипы-фильтры: мок-переключение активного (GAP: нет чипа в ДС) ── */
+  /* ── кнопочные чипы ui-chip: мок-переключение aria-pressed (канон
+       компонента: состояние — ARIA-атрибут, один слушатель на группе;
+       ссылочные чипы работают нативно и в JS не нуждаются) ── */
 
-  ARROW('[data-cp-chip-group]').forEach(function (group) {
+  ARROW('[data-cp-filter-group]').forEach(function (group) {
     group.addEventListener('click', function (event) {
-      var chip = event.target.closest('[data-cp-chip]');
+      var chip = event.target.closest('.ui-chip__pill');
       if (!chip || !group.contains(chip)) return;
-      event.preventDefault();
-      var active = group.querySelector('.is-active');
-      if (active) active.classList.remove('is-active');
-      chip.classList.add('is-active');
+      var pressed = group.querySelector('[aria-pressed="true"]');
+      if (pressed) pressed.setAttribute('aria-pressed', 'false');
+      chip.setAttribute('aria-pressed', 'true');
     });
   });
 

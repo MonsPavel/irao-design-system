@@ -16,11 +16,13 @@
  *     корня ДС) в dist/assets/ — картинки в git не попадают.
  *
  * Блоки без аналога в ДС (hero, production, directions, holding, employers,
- * why-us, students, video, media, team, cta-mail, шапка/подвал, чипы,
- * таймлайн, page-head, строка вакансии) собраны как СТЫК СТОРОНЫ САЙТА
+ * why-us, students, video, media, team, cta-mail, шапка/подвал, таймлайн,
+ * page-head, строка вакансии) собраны как СТЫК СТОРОНЫ САЙТА
  * (pilot.css, префикс cp-) — ровно так, как это предписывает архитектура
  * (02-architecture §7: связки — зона сайта). Эти блоки — главные кандидаты
- * в доработки ДС по итогам сравнения (REPORT.md).
+ * в доработки ДС по итогам сравнения (REPORT.md). Чипы (T14.8), табы-пилюли
+ * и начальный выбор (T14.9), заголовок страницы (T14.2) и CTA-пилюля
+ * (T14.4) с эпика EPIC-14 живут в ДС — пилот использует их напрямую.
  *
  * Запуск:  node pilot/career-portal/build.mjs [--ref <путь-к-career-portal>]
  * Перед запуском нужен собранный dist/ ДС:  npm run build
@@ -158,26 +160,29 @@ function radioGroup({ label, name, options, required = false }) {
 </div>`;
 }
 
-/** «пилюля со стрелкой» оригинала (.pill-btn) → ui-button--outline + иконка */
+/** «пилюля со стрелкой» оригинала (.pill-btn) → ui-button--pill (T14.4) */
 function pillButton(text, { target } = {}) {
-  return `<button class="ui-button ui-button--outline" type="button"${target ? ` data-ui-modal-target="${target}"` : ''}><span class="ui-button__label">${esc(text)}</span><span class="ui-button__icon" aria-hidden="true">${ARROW}</span></button>`;
+  return `<button class="ui-button ui-button--pill" type="button"${target ? ` data-ui-modal-target="${target}"` : ''}><span class="ui-button__label">${esc(text)}</span><span class="ui-button__icon" aria-hidden="true">${ARROW}</span></button>`;
 }
 
-/** ui-breadcrumbs (T4.7) с микроразметкой BreadcrumbList */
+/** ui-breadcrumbs (T4.7) с микроразметкой BreadcrumbList.
+ *  Элемент [label, href]: href-строка — ссылка; '' — текущая страница
+ *  (span aria-current="page", ровно один на цепочку); null — промежуточный
+ *  пункт без ссылки (plain span, как в оригинале career-portal). */
 function breadcrumbs(items) {
   const list = items
     .map(([label, href], index) => {
       const position = index + 1;
       const current = href
         ? `<a class="ui-breadcrumbs__link" itemprop="item" href="${esc(href)}"><span itemprop="name">${esc(label)}</span></a>`
-        : `<span class="ui-breadcrumbs__current" itemprop="name" aria-current="page">${esc(label)}</span>`;
+        : `<span class="ui-breadcrumbs__current" itemprop="name"${href === '' ? ' aria-current="page"' : ''}>${esc(label)}</span>`;
       return `    <li class="ui-breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
       ${current}
       <meta itemprop="position" content="${position}">
     </li>`;
     })
     .join('\n');
-  return `<nav class="ui-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
+  return `<nav class="ui-breadcrumbs cp-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
 }
 
 /** строка вакансии (оригинал .vac-row): ui-card + связка сайт-зоны */
@@ -1105,11 +1110,15 @@ ${applyDialogHtml()}`;
 
 function vacanciesMain() {
   const rows = VAC.items.map(vacancyRow).join('\n');
-  return `<section class="ui-section">
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Вакансии', ''],
+  ])}
+<section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head cp-page-head--split">
       <div>
-        <h1 class="ui-h1">Вакансии</h1>
+        <h1 class="ui-page-title">Вакансии</h1>
         <p class="cp-page-subtitle ui-lead">Открытые вакансии компаний Группы «Интер РАО» — от производственных до офисных направлений.</p>
       </div>
       <p class="ui-small ui-text--muted">На сайте ${VAC.total} вакансий</p>
@@ -1173,13 +1182,15 @@ function vacanciesMain() {
           <button class="ui-button ui-button--accent" type="submit">Найти</button>
         </form>
 
-        <div class="cp-chip-row" aria-label="Направления" data-cp-chip-group>
-          <a class="cp-chip is-active" href="vacancies.html" data-cp-chip>энергетика и электротехника</a>
-          <a class="cp-chip" href="vacancies.html" data-cp-chip>информационные технологии</a>
-          <a class="cp-chip" href="vacancies.html" data-cp-chip>экономика и финансы</a>
-          <a class="cp-chip" href="vacancies.html" data-cp-chip>конструирование</a>
-          <a class="cp-chip" href="vacancies.html" data-cp-chip>общие направления</a>
-        </div>
+        <!-- ui-chip (T14.8), ссылочная форма: GET-фильтр как в оригинале,
+             активный — aria-current="page" из разметки, JS не нужен -->
+        <nav class="ui-chip" aria-label="Направления">
+          <a class="ui-chip__pill" href="vacancies.html" aria-current="page">энергетика и электротехника</a>
+          <a class="ui-chip__pill" href="vacancies.html">информационные технологии</a>
+          <a class="ui-chip__pill" href="vacancies.html">экономика и финансы</a>
+          <a class="ui-chip__pill" href="vacancies.html">конструирование</a>
+          <a class="ui-chip__pill" href="vacancies.html">общие направления</a>
+        </nav>
 
         <div class="cp-vac-rows">
 ${rows}
@@ -1230,7 +1241,7 @@ function vacancyMain(v = VAC.items[0]) {
   <div class="ui-container">
     <article class="cp-vacancy-page">
       <header class="cp-vacancy-page__head">
-        <h1 class="ui-h1">${esc(v.title)}</h1>
+        <h1 class="ui-page-title">${esc(v.title)}</h1>
         <p class="cp-vacancy-page__salary">${esc(v.salary)} до вычета налога</p>
         <p class="cp-vacancy-page__place">${PLACE_PIN} ${esc(v.place)}</p>
       </header>
@@ -1275,7 +1286,7 @@ function vacancyApplyMain(v = VAC.items[0]) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <h1 class="ui-h1">Отклик на вакансию</h1>
+    <h1 class="ui-page-title">Отклик на вакансию</h1>
     <div class="ui-form__layout" style="margin-top: var(--ui-space-5);">
       <div class="ui-form__main">
         <p class="ui-small ui-text--muted">Вакансия: <strong>${esc(v.title)}</strong>, ${esc(v.company)}</p>
@@ -1327,10 +1338,15 @@ function internshipsMain(set) {
   };
   const [title, titleLower, titleAcc, who] = pageTitles[set];
 
-  return `<section class="ui-section">
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Школьникам и студентам', null],
+    [title, ''],
+  ])}
+<section class="ui-section">
   <div class="ui-container">
     <div class="cp-cover-hero">
-      <h1 class="ui-h1">${title}</h1>
+      <h1 class="ui-page-title">${title}</h1>
       <p class="cp-page-subtitle ui-lead">${esc(data.subtitle)}</p>
       <a class="ui-button ui-button--primary" href="#directions">смотреть ${titleLower}</a>
     </div>
@@ -1339,22 +1355,17 @@ function internshipsMain(set) {
 
 <section class="ui-section">
   <div class="ui-container">
-    <div class="ui-tabs" data-ui-tabs>
+    <div class="ui-tabs ui-tabs--pill" data-ui-tabs>
       <div class="cp-tabs-row">
         <div class="ui-tabs__list">
-${
-  isPractice
-    ? `          <a class="ui-tabs__tab" href="#cptab-practice" id="cptab-practice-tab">практика</a>
-          <a class="ui-tabs__tab" href="#cptab-internship" id="cptab-internship-tab">стажировка</a>`
-    : `          <a class="ui-tabs__tab" href="#cptab-internship" id="cptab-internship-tab">стажировка</a>
-          <a class="ui-tabs__tab" href="#cptab-practice" id="cptab-practice-tab">практика</a>`
-}
+          <a class="ui-tabs__tab" href="#cptab-practice" id="cptab-practice-tab"${isPractice ? ' aria-current="page"' : ''}>практика</a>
+          <a class="ui-tabs__tab" href="#cptab-internship" id="cptab-internship-tab"${isPractice ? '' : ' aria-current="page"'}>стажировка</a>
         </div>
         <!-- Смешанный набор «табы + ссылки разделов» (tabs-pill оригинала):
-             в ДС нет варианта — ссылки вне tablist, GAP в PLAN.md P1-2.
-             Активный таб = раздел страницы: ui-tabs выбирает первый,
-             поэтому порядок табов зависит от страницы (GAP: нет начального
-             выбора из разметки). -->
+             ссылки — вне tablist, отдельным nav (правило ui-tabs); вид табов —
+             ui-tabs--pill (T14.9), начальный выбор — aria-current="page"
+             из разметки (T14.9): активный таб = раздел страницы, порядок
+             табов фиксированный, как в оригинале. -->
         <nav class="cp-tabs-links" aria-label="Другие разделы">
           <a class="ui-link" href="education.html">целевое обучение</a>
           <a class="ui-link" href="career-track.html">карьерный трек</a>
@@ -1375,15 +1386,17 @@ ${
   <div class="ui-container">
     <h2 class="ui-h2">Выбери свой город и направление</h2>
     <p>${selectField({ name: 'city', options: ['все города', 'Москва', 'Санкт-Петербург', 'Екатеринбург'], pill: true, ariaLabel: 'Город' })}</p>
-    <div class="cp-chip-row" aria-label="Направления" data-cp-chip-group>
-      <button class="cp-chip${isPractice ? ' is-active' : ''}" type="button" data-cp-chip>все направления</button>
-      <button class="cp-chip" type="button" data-cp-chip>экономика и финансы</button>
-      <button class="cp-chip" type="button" data-cp-chip>атомная энергетика и энергостроительство</button>
-      <button class="cp-chip" type="button" data-cp-chip>электроэнергетика и электрика</button>
-      <button class="cp-chip" type="button" data-cp-chip>химические технологии</button>
-      <button class="cp-chip" type="button" data-cp-chip>теплоэнергетика и теплотехника</button>
-      <button class="cp-chip" type="button" data-cp-chip>конструирование</button>
-      <button class="cp-chip" type="button" data-cp-chip>общие направления</button>
+    <!-- ui-chip (T14.8), кнопочная форма: мок-фильтр, состояние — aria-pressed
+         (переключение — один слушатель в pilot.js на data-cp-filter-group) -->
+    <div class="ui-chip" role="group" aria-label="Направления" data-cp-filter-group>
+      <button class="ui-chip__pill" type="button" aria-pressed="true">все направления</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">экономика и финансы</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">атомная энергетика и энергостроительство</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">электроэнергетика и электрика</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">химические технологии</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">теплоэнергетика и теплотехника</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">конструирование</button>
+      <button class="ui-chip__pill" type="button" aria-pressed="false">общие направления</button>
     </div>
     <div class="ui-grid ui-grid--3">
 ${cards}
@@ -1496,21 +1509,21 @@ function educationMain() {
   const offers = EDU.offers.slice(0, 3).map(offerCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
-    ['Школьникам и студентам', ''],
+    ['Школьникам и студентам', null],
     ['Целевое обучение', ''],
   ])}
 <section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head">
-      <h1 class="ui-h1">Целевое обучение</h1>
+      <h1 class="ui-page-title">Целевое обучение</h1>
       <p class="cp-page-subtitle ui-lead">Учись по целевому договору — с гарантированным местом работы в Группе после выпуска.</p>
     </div>
-    <nav class="cp-chip-row" aria-label="Разделы школьникам и студентам">
-      <a class="cp-chip" href="practices.html">Практики</a>
-      <a class="cp-chip" href="internships.html">Стажировки</a>
-      <a class="cp-chip is-active" href="education.html" aria-current="page">Целевое обучение</a>
-      <a class="cp-chip" href="career-track.html">Карьерный трек</a>
-      <a class="cp-chip" href="events.html">Мероприятия</a>
+    <nav class="ui-chip" aria-label="Разделы школьникам и студентам">
+      <a class="ui-chip__pill" href="practices.html">Практики</a>
+      <a class="ui-chip__pill" href="internships.html">Стажировки</a>
+      <a class="ui-chip__pill" href="education.html" aria-current="page">Целевое обучение</a>
+      <a class="ui-chip__pill" href="career-track.html">Карьерный трек</a>
+      <a class="ui-chip__pill" href="events.html">Мероприятия</a>
     </nav>
   </div>
 </section>
@@ -1557,21 +1570,21 @@ function eventsMain() {
   const past = EVT.past.map(eventCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
-    ['Школьникам и студентам', ''],
+    ['Школьникам и студентам', null],
     ['Мероприятия', ''],
   ])}
 <section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head">
-      <h1 class="ui-h1">Мероприятия</h1>
+      <h1 class="ui-page-title">Мероприятия</h1>
       <p class="cp-page-subtitle ui-lead">Дни открытых дверей, экскурсии и чемпионаты Группы «Интер РАО».</p>
     </div>
-    <nav class="cp-chip-row" aria-label="Разделы школьникам и студентам">
-      <a class="cp-chip" href="practices.html">Практики</a>
-      <a class="cp-chip" href="internships.html">Стажировки</a>
-      <a class="cp-chip" href="education.html">Целевое обучение</a>
-      <a class="cp-chip" href="career-track.html">Карьерный трек</a>
-      <a class="cp-chip is-active" href="events.html" aria-current="page">Мероприятия</a>
+    <nav class="ui-chip" aria-label="Разделы школьникам и студентам">
+      <a class="ui-chip__pill" href="practices.html">Практики</a>
+      <a class="ui-chip__pill" href="internships.html">Стажировки</a>
+      <a class="ui-chip__pill" href="education.html">Целевое обучение</a>
+      <a class="ui-chip__pill" href="career-track.html">Карьерный трек</a>
+      <a class="ui-chip__pill" href="events.html" aria-current="page">Мероприятия</a>
     </nav>
 
     <h2 class="ui-h2">Предстоящие</h2>
@@ -1592,7 +1605,7 @@ ${past}
 function mediaMain() {
   const cards = ART.items.map(articleCard).join('\n');
   const rubrics = ART.rubrics
-    .map((rubric) => `<a class="cp-chip" href="media.html">${esc(rubric)}</a>`)
+    .map((rubric) => `<a class="ui-chip__pill" href="media.html">${esc(rubric)}</a>`)
     .join('\n      ');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
@@ -1601,18 +1614,22 @@ function mediaMain() {
 <section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head">
-      <h1 class="ui-h1">Медиа</h1>
+      <h1 class="ui-page-title">Медиа</h1>
       <p class="cp-page-subtitle ui-lead">Статьи, видео и подкасты о работе в Группе «Интер РАО»: люди, проекты, технология и профессии энергетики.</p>
     </div>
 
     <div class="cp-media-toolbar">
       <span class="ui-tag ui-tag--gray">Тип контента:</span>
-      <a class="cp-chip is-active" href="media.html">Все</a>
-      <a class="cp-chip" href="media.html">статьи</a>
-      <a class="cp-chip" href="media.html">видео</a>
-      <a class="cp-chip" href="media.html">подкасты</a>
+      <nav class="ui-chip" aria-label="Тип контента">
+        <a class="ui-chip__pill" href="media.html" aria-current="page">Все</a>
+        <a class="ui-chip__pill" href="media.html">статьи</a>
+        <a class="ui-chip__pill" href="media.html">видео</a>
+        <a class="ui-chip__pill" href="media.html">подкасты</a>
+      </nav>
       <span class="ui-tag ui-tag--gray">Рубрики:</span>
+      <nav class="ui-chip" aria-label="Рубрики">
       ${rubrics}
+      </nav>
     </div>
 
     <div class="ui-grid ui-grid--4">
@@ -1651,21 +1668,21 @@ ${tracks}
   const articles = ART.items.slice(0, 4).map(articleCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
-    ['Школьникам и студентам', ''],
+    ['Школьникам и студентам', null],
     ['Карьерные треки', ''],
   ])}
 <section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head">
-      <h1 class="ui-h1">Карьерные треки</h1>
+      <h1 class="ui-page-title">Карьерные треки</h1>
       <p class="cp-page-subtitle ui-lead">Путь от студента до руководителя направления — со всеми ступенями, сроками и требованиями.</p>
     </div>
-    <nav class="cp-chip-row" aria-label="Разделы школьникам и студентам">
-      <a class="cp-chip" href="practices.html">Практики</a>
-      <a class="cp-chip" href="internships.html">Стажировки</a>
-      <a class="cp-chip" href="education.html">Целевое обучение</a>
-      <a class="cp-chip is-active" href="career-track.html" aria-current="page">Карьерный трек</a>
-      <a class="cp-chip" href="events.html">Мероприятия</a>
+    <nav class="ui-chip" aria-label="Разделы школьникам и студентам">
+      <a class="ui-chip__pill" href="practices.html">Практики</a>
+      <a class="ui-chip__pill" href="internships.html">Стажировки</a>
+      <a class="ui-chip__pill" href="education.html">Целевое обучение</a>
+      <a class="ui-chip__pill" href="career-track.html" aria-current="page">Карьерный трек</a>
+      <a class="ui-chip__pill" href="events.html">Мероприятия</a>
     </nav>
 
     <div class="ui-tabs" data-ui-tabs>
@@ -1712,7 +1729,7 @@ ${cards}
 <section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head">
-      <h1 class="ui-h1">Компании группы</h1>
+      <h1 class="ui-page-title">Компании группы</h1>
       <p class="cp-page-subtitle ui-lead">Работодатели Группы «Интер РАО» — от генерации до сбыта и сервисов.</p>
     </div>
 ${sections}
