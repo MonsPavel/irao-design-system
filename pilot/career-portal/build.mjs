@@ -179,7 +179,7 @@ function breadcrumbs(items) {
     </li>`;
     })
     .join('\n');
-  return `<nav class="ui-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
+  return `<nav class="ui-breadcrumbs cp-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
 }
 
 /** строка вакансии (оригинал .vac-row): ui-card + связка сайт-зоны */

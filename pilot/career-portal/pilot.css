@@ -814,6 +814,15 @@
 
 /* ── внутренние страницы ── */
 
+/* Ритм крошек (T14.5): связка из канона list-page (.lpp-breadcrumbs) —
+   полоса 62px оригинала (components.css:14, padding 20px 0 24px); верх
+   20px вне шкалы отступов — перенос «как есть», низ — --ui-space-5.
+   Компонент отступов не получает (инвариант T4.7): ритм несёт шаблон. */
+.cp-breadcrumbs {
+  box-sizing: border-box;
+  padding-block: 1.25rem var(--ui-space-5);
+}
+
 .cp-page-head {
   display: flex;
   flex-direction: column;
