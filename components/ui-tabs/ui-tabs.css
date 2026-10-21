@@ -138,16 +138,27 @@
 .ui-tabs--pill .ui-tabs__list {
   gap: var(--ui-space-1);
   padding: var(--ui-space-1);
-  background-color: var(--ui-color-surface-muted);
   border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-surface-muted);
 }
 
-/* Таб — прозрачная пилюля без рамки (pages.css:983–997): подпись text,
-   outline-рамка базы не входит в вид пилюли; заливка не задаётся — до выбора
-   таб прозрачен на тинте трека. Типографика, min-height и радиус — общие с
-   базой (fs-small-масштаб спеки; 52px против 48px — порог ≤4px EPIC-14). */
+/* Таб — прозрачная пилюля без рамки (pages.css:983–997): outline-рамка базы
+   не входит в вид пилюли; на заливке primary она и так невидима (тот же
+   цвет), поэтому снимается всем табам. Типографика, min-height и радиус —
+   общие с базой (fs-small-масштаб спеки; 52px против 48px — порог ≤4px
+   EPIC-14). */
 .ui-tabs--pill .ui-tabs__tab {
   border: 0;
+}
+
+/* Подпись text — только у НЕвыбранных (pages.css:989: color text). Ставить
+   её в правило выше нельзя: (0,2,0) модификатора перебило бы (0,1,0) базовое
+   АКТИВНОЕ правило :where([aria-selected='true']) — и выбранная пилюля
+   осталась бы с тёмной подписью на заливке primary (1.12:1, axe
+   color-contrast). :not-исключение уводит конфликт: цвет выбранной задаёт
+   общее активное правило базы (text-on-dark, пара гейта T2.3) — прецедент
+   :not-исключения ui-chip (T14.8) и __page пагинации. */
+.ui-tabs--pill .ui-tabs__tab:not([aria-selected='true']) {
   color: var(--ui-color-text);
 }
 

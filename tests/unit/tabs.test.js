@@ -475,7 +475,9 @@ describe('контракт модуля ui-tabs.js (jsdom; образец — te
     /** Канонический инстанс, где aria-current="page" стоит на табах с этими индексами. */
     const instanceWithCurrent = (indices) =>
       instanceHtml.replace(/id="uitab-([ab])-tab">/g, (tag, side) =>
-        indices.includes(side === 'a' ? 0 : 1) ? `id="uitab-${side}-tab" aria-current="page">` : tag,
+        indices.includes(side === 'a' ? 0 : 1)
+          ? `id="uitab-${side}-tab" aria-current="page">`
+          : tag,
       );
 
     it('aria-current="page" на втором табе: выбран второй (роли/roving/панели), событие НЕ диспатчится, атрибут остаётся', () => {
@@ -663,19 +665,26 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     expect(block).toContain('border-radius: var(--ui-radius-pill);');
   });
 
-  it('таб — прозрачная пилюля без рамки: color text; типографика/высота базы не переопределяются', () => {
-    const block = blockOf(css, '.ui-tabs--pill .ui-tabs__tab');
-    expect(block, 'правило модификатора таба найдено').toBeTruthy();
-    expect(block).toContain('border: 0;'); // рамка outline-кнопки не входит в вид пилюли
-    expect(block).toContain('color: var(--ui-color-text);'); // .tabs-pill__tab color text
+  it('таб — прозрачная пилюля без рамки: color text только у НЕвыбранных (:not — иначе модификатор перебил бы активное правило базы); типографика/высота базы не переопределяются', () => {
+    const border = blockOf(css, '.ui-tabs--pill .ui-tabs__tab');
+    expect(border, 'правило модификатора таба найдено').toBeTruthy();
+    expect(border).toContain('border: 0;'); // рамка outline-кнопки не входит в вид пилюли
+    // Подпись text (pages.css:989) — правило с :not([aria-selected='true']):
+    // без исключения (0,2,0) модификатора перебили бы (0,1,0) активное правило
+    // базы — тёмная подпись на заливке primary (ловилось axe на стенде).
+    const color = blockOf(css, ".ui-tabs--pill .ui-tabs__tab:not([aria-selected='true'])");
+    expect(color, ':not-правило подписи найдено').toBeTruthy();
+    expect(color).toContain('color: var(--ui-color-text);');
     // fs-small-масштаб спеки и базовая min-height — общие с базой правилами:
     // модификатор меняет только вид (Technical considerations T14.9).
-    expect(block).not.toContain('font-size');
-    expect(block).not.toContain('height');
-    expect(block).not.toContain('padding');
+    for (const block of [border, color]) {
+      expect(block).not.toContain('font-size');
+      expect(block).not.toContain('height');
+      expect(block).not.toContain('padding');
+    }
   });
 
-  it("hover пилюли — только у НЕвыбранных, подпись primary БЕЗ заливки (pages.css:998); внутри (hover: hover)", () => {
+  it('hover пилюли — только у НЕвыбранных, подпись primary БЕЗ заливки (pages.css:998); внутри (hover: hover)', () => {
     const mediaIndex = css.indexOf('@media (hover: hover)');
     expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
     const media = css.slice(mediaIndex);
