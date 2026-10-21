@@ -7,7 +7,14 @@
  *  - #lpp-results — «с данными»: page-head (h1 + счётчик aria-live + lead),
  *    GET-форма фильтров (select-пилюли data-ui-select="wrap"), сетка
  *    ui-grid--3 с карточками, пагинация;
- *  - #lpp-empty — «пустая выдача»: счётчик 0 + ui-empty с кнопкой сброса.
+ *  - #lpp-empty — «пустая выдача»: счётчик 0 + ui-empty с кнопкой сброса;
+ *  - #lpp-rows — «строки» (T14.10): выдача горизонтальными строками вакансий
+ *    (h2 → article.ui-card--hover: h3-ссылка, место, описание, дата) с
+ *    CTA-пилюлей ui-button--pill (T14.4) на демо-модалку отклика;
+ *  - #lpp-side — «сайдбар фильтров» (T14.10): grid «aside | выдача» —
+ *    sticky-сайдбар (select-пилюли, radio-группа «Опыт», чекбокс
+ *    доступности, Применить/Сбросить, промо ui-card--filled) + чипы
+ *    направлений (T14.8) над выдачей строк.
  *
  * Ключевые сценарии спеки: фильтрация GET-формой без JS (кнопка «Применить»)
  * и с JS (IraoUI.select — UX тот же); empty-ветка со сбросом; axe чист;
@@ -36,6 +43,34 @@ const SEL = {
 };
 
 const submitBtn = `${SEL.filter} button[type="submit"]`;
+
+/** Ветка «строки» (T14.10): выдача горизонтальными строками вакансий. */
+const ROWS = {
+  section: '#lpp-rows',
+  title: '#lpp-rows-title',
+  list: '#lpp-rows-list',
+  row: '.lpp-row',
+  titleLink: '.lpp-row__title a',
+  place: '.lpp-row__place',
+  short: '.lpp-row__short',
+  date: 'time.lpp-row__date',
+  cta: 'a.ui-button--pill',
+  applyDialog: '#lpp-apply-dialog',
+};
+
+/** Ветка «сайдбар фильтров» (T14.10): grid «aside | выдача». */
+const SIDE = {
+  section: '#lpp-side',
+  layout: '#lpp-side .lpp-layout',
+  aside: '#lpp-side-panel',
+  asideTitle: '#lpp-side-title',
+  form: '#lpp-side-filter',
+  region: '#lpp-side-region',
+  direction: '#lpp-side-direction',
+  resultsTitle: '#lpp-side-results',
+  chips: '#lpp-side-chips',
+  promo: '#lpp-side-promo',
+};
 
 standTest.describe(
   'patterns/list-page: ветка «с данными» — эталонная сборка (Implementation requirements п.1)',
@@ -283,6 +318,254 @@ standTest.describe(
   },
 );
 
+standTest.describe(
+  'patterns/list-page: ветка «строки» (T14.10) — выдача строками вместо сетки',
+  () => {
+    standTest(
+      '3+ строки: h2 выдачи → article.ui-card--hover с h3-ссылкой, местом, описанием, датой и pill-CTA',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const rows = page.locator(`${ROWS.section} ${ROWS.row}`);
+        await expect(rows, 'выдача строками — 3+ строки вакансии').toHaveCount(4);
+
+        // Иерархия ветки: заголовок выдачи — h2, строки — article с h3-ссылкой
+        // (иерархия h1→h2→h3 без пропусков; глобальный гейт — в a11y-блоке).
+        await expect(page.locator(ROWS.title), 'заголовок выдачи — h2').toBeVisible();
+        expect(
+          await page.locator(ROWS.title).evaluate((el) => el.tagName),
+          'тег заголовка выдачи — h2 (перед h3 строк)',
+        ).toBe('H2');
+        for (let i = 0; i < (await rows.count()); i += 1) {
+          const row = rows.nth(i);
+          await expect(row, `строка ${i}: карточка с hover, НЕ карточка-ссылка`).toHaveClass(
+            /ui-card ui-card--hover/,
+          );
+          expect(
+            await row.evaluate((el) => el.classList.contains('ui-card--link')),
+            `строка ${i}: CTA-пилюля вне карточки-ссылки — растянутой ссылки нет (инвариант вложенных интерактивов ui-card)`,
+          ).toBe(false);
+          await expect(row.locator('h3')).toHaveCount(1);
+          await expect(row.locator(ROWS.titleLink), `строка ${i}: заголовок-ссылка`).toBeVisible();
+          await expect(row.locator(ROWS.place), `строка ${i}: место`).not.toBeEmpty();
+          await expect(row.locator(ROWS.short), `строка ${i}: описание`).toBeVisible();
+          await expect(
+            row.locator(ROWS.date),
+            `строка ${i}: дата — <time datetime>`,
+          ).toBeVisible();
+          await expect(row.locator(ROWS.cta), `строка ${i}: CTA — пилюля (T14.4)`).toBeVisible();
+        }
+      },
+    );
+
+    standTest(
+      'CTA-пилюля вне ссылки заголовка; с JS открывает демо-модалку отклика, без JS — ссылка (href)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const dialog = page.locator(ROWS.applyDialog);
+        await expect(dialog, 'демо-модалка отклика на стенде').toHaveCount(1);
+        await expect(dialog).toHaveAttribute('data-ui-modal', '');
+        await expect(dialog, 'диалог скрыт на чистой загрузке').not.toBeVisible();
+
+        // Инвариант вложенных интерактивов: CTA — сиблинг main-блока, не внутри ссылки заголовка.
+        const nested = await page.evaluate(() => {
+          const row = document.querySelector('.lpp-row');
+          const titleLink = row.querySelector('.lpp-row__title a');
+          const cta = row.querySelector('a.ui-button--pill');
+          return titleLink.contains(cta);
+        });
+        expect(nested, 'пилюля не вложена в ссылку заголовка').toBe(false);
+
+        const cta = page.locator(`${ROWS.section} ${ROWS.row}`).first().locator(ROWS.cta);
+        const href = await cta.getAttribute('href');
+        expect(href, 'без JS пилюля ведёт ссылкой на страницу отклика').toBeTruthy();
+
+        await cta.click();
+        await expect(dialog, 'с JS пилюля открывает демо-модалку отклика').toBeVisible();
+        await page.locator(`${ROWS.applyDialog} .ui-modal__close`).click();
+        await expect(dialog, 'диалог закрывается крестом').not.toBeVisible();
+      },
+    );
+  },
+);
+
+standTest.describe(
+  'patterns/list-page: ветка «сайдбар фильтров» (T14.10) — grid «aside | выдача»',
+  () => {
+    standTest(
+      'aside со sticky от md и scrollable-region-focusable; на мобиле — одна колонка',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const aside = page.locator(SIDE.aside);
+        await expect(aside, 'aside имеет доступное имя (aria-labelledby)').toHaveAttribute(
+          'aria-labelledby',
+          SIDE.asideTitle.slice(1),
+        );
+        await expect(
+          page.locator(SIDE.asideTitle),
+          'заголовок сайдбара виден и именует лендмарку',
+        ).toBeVisible();
+
+        // md (768, шкала T2.5): grid «aside | выдача» — две колонки, aside sticky
+        // и scrollable (max-height) — keyboard access даёт tabindex="0"
+        // (axe scrollable-region-focusable).
+        await page.setViewportSize(VIEWPORTS.desktop);
+        const desktop = await aside.evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return { position: cs.position, overflow: cs.overflowY, tabindex: el.tabIndex };
+        });
+        expect(desktop.position, 'aside sticky от md (порт .vac-side career-portal)').toBe(
+          'sticky',
+        );
+        expect(desktop.overflow, 'сайдбар прокручивается внутри sticky-региона').toBe('auto');
+        expect(desktop.tabindex, 'scrollable-region-focusable: регион фокусируется с клавиатуры').toBe(0);
+        const tracks = await page
+          .locator(SIDE.layout)
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+        expect(tracks, 'от md — две колонки (aside | выдача)').toBe(2);
+
+        // Мобильная база: одна колонка, позиционирования нет.
+        await page.setViewportSize(VIEWPORTS.mobile);
+        const mobile = await aside.evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return { position: cs.position, tracks: getComputedStyle(el.closest('.lpp-layout')).gridTemplateColumns.split(' ').length };
+        });
+        expect(mobile.position, 'на мобиле aside в потоке (min-width-деградация)').not.toBe(
+          'sticky',
+        );
+        expect(mobile.tracks, 'на мобиле grid сворачивается в колонку').toBe(1);
+      },
+    );
+
+    standTest(
+      'label у каждого контрола, radio-группа — fieldset/legend «Опыт», чекбокс, Применить/Сбросить, промо ui-card--filled',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        // select-пилюли сайдбара — канон ui-select wrap: label[for] рядом.
+        for (const id of [SIDE.region.slice(1), SIDE.direction.slice(1)]) {
+          await expect(
+            page.locator(`label[for="${id}"]`),
+            `пилюля ${id}: подпись label[for]`,
+          ).toBeVisible();
+          await expect(
+            page.locator(`#${id}`),
+            `пилюля ${id}: data-ui-select="wrap"`,
+          ).toHaveAttribute('data-ui-select', 'wrap');
+        }
+
+        // Radio-группа «Опыт» — fieldset/legend (гейт irao/radio-group-fieldset).
+        const fieldset = page.locator(`${SIDE.aside} fieldset.ui-radio-group`);
+        await expect(fieldset, 'радио-группа опыта — fieldset.ui-radio-group').toHaveCount(1);
+        await expect(fieldset.locator('legend')).toHaveText(/Опыт/);
+        await expect(
+          fieldset.locator('input[type="radio"][name="experience"]'),
+          'три варианта опыта',
+        ).toHaveCount(3);
+
+        // Чекбокс доступности — label оборачивает input.
+        const checkbox = page.locator(`${SIDE.aside} label.ui-checkbox input[name="accessible"]`);
+        await expect(checkbox, 'чекбокс доступности в label-обвязке').toHaveCount(1);
+
+        // GET-форма: метод/якорь выдачи и пара кнопок.
+        const form = page.locator(SIDE.form);
+        await expect(form).toHaveAttribute('method', 'get');
+        await expect(form, 'якорь выдачи ветки — no-JS-скролл к результатам').toHaveAttribute(
+          'action',
+          /#lpp-side-results/,
+        );
+        await expect(
+          form.locator('button[type="submit"]'),
+          'Применить — сабмит формы',
+        ).toHaveText('Применить');
+        await expect(
+          form.locator('button[type="reset"]'),
+          'Сбросить — нативный reset формы',
+        ).toHaveText('Сбросить');
+
+        // Промо-карточка в сайдбаре — ui-card--filled со ссылкой-действием.
+        const promo = page.locator(SIDE.promo);
+        await expect(promo, 'промо — заполненная карточка').toHaveClass(/ui-card--filled/);
+        await expect(promo.locator('a'), 'промо несёт действие-ссылку').toBeVisible();
+      },
+    );
+
+    standTest(
+      'чипы направлений (T14.8, ссылочная форма) в DOM раньше выдачи строк; выдача — строки',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const chips = page.locator(`${SIDE.chips} .ui-chip__pill`);
+        const chipCount = await chips.count();
+        expect(chipCount, 'лента чипов направлений — 3+').toBeGreaterThanOrEqual(3);
+        for (let i = 0; i < chipCount; i += 1) {
+          await expect(chips.nth(i), `чип ${i}: GET-ссылка (работает без JS)`).toHaveAttribute(
+            'href',
+            /\?/,
+          );
+        }
+        await expect(
+          chips.locator('[aria-current="page"]'),
+          'активный чип — ровно один, aria-current="page"',
+        ).toHaveCount(1);
+
+        const order = await page.evaluate(() =>
+          Boolean(
+            document
+              .getElementById('lpp-side-chips')
+              .compareDocumentPosition(document.getElementById('lpp-side-results-list')) &
+              Node.DOCUMENT_POSITION_FOLLOWING,
+          ),
+        );
+        expect(order, 'чипы в DOM раньше выдачи строк').toBe(true);
+
+        await expect(
+          page.locator('#lpp-side-results-list .lpp-row'),
+          'выдача ветки сайдбара — строки вакансий',
+        ).toHaveCount(3);
+      },
+    );
+
+    standTest(
+      'без JS: сайдбар-форма уходит GET-параметрами, страница открывается на выдаче ветки',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+        const standUrl = page.url();
+        const context = await page.context().browser().newContext({ javaScriptEnabled: false });
+        const noJsPage = await context.newPage();
+        try {
+          await noJsPage.goto(standUrl, { waitUntil: 'networkidle' });
+          await noJsPage.selectOption(SIDE.region, 'msk');
+          await noJsPage.locator(`${SIDE.form} button[type="submit"]`).click();
+          await noJsPage.waitForURL(/\?/, { timeout: 5000 });
+          const params = new URL(noJsPage.url()).searchParams;
+          expect(params.get('region'), 'регион ушёл GET-параметром').toBe('msk');
+          expect(
+            noJsPage.url(),
+            'action ведёт на якорь выдачи ветки сайдбара',
+          ).toContain('#lpp-side-results');
+        } finally {
+          await context.close();
+        }
+      },
+    );
+
+    standTest(
+      'перезагрузка с фильтром сайдбара: фокус на заголовок выдачи ветки (не крадётся к ветке «с данными»)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+        await page.goto(`${page.url().split('?')[0]}?region=msk`, { waitUntil: 'networkidle' });
+        await expect(
+          page.locator(SIDE.resultsTitle),
+          'гвард стенда переводит фокус на заголовок выдачи ветки сайдбара',
+        ).toBeFocused();
+      },
+    );
+  },
+);
+
 standTest.describe('patterns/list-page: a11y страницы (AC)', () => {
   standTest('axe страницы чист', async ({ stand }) => {
     const page = await stand('patterns/list-page');
@@ -335,6 +618,8 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
       const branches = [
         ['lpp-branch-results', page.locator('#lpp-results')],
         ['lpp-branch-empty', page.locator(SEL.emptySection)],
+        ['lpp-branch-rows', page.locator(ROWS.section)], // T14.10 — выдача строками
+        ['lpp-branch-side', page.locator(SIDE.section)], // T14.10 — сайдбар фильтров
       ];
 
       for (const viewport of Object.keys(VIEWPORTS)) {
