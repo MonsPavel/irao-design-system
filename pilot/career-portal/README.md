@@ -52,9 +52,12 @@ computed-стилы probe-пар «класс оригинала → ui-комп
 `internships`/`practices` (табы + карточки + таймлайн + FAQ), `education`,
 `events`, `media`, `career-track`, `companies`, `404`.
 
-Не пересобирались: генеративные карточки 12 вакансий (типаж одинаков),
-главная варианта 2,(events-search|event|event-apply|internship(-apply)|
-article|company) — типовые повторения вошедших страниц.
+Не пересобраны (раунд 2, 21.10 — план пересборки в
+[EPIC-15](../../docs/ui-system/epics/EPIC-15-pilot-completeness/README.md)):
+генеративные карточки 12 вакансий (типаж одинаков), главная варианта 2;
+(event|event-apply|events-search|internship|internship-apply|article|
+company|education-catalog) — 8 типовых страниц, 4 из них сейчас
+мёртвые ссылки из собранных страниц (детали — REPORT §7).
 
 ## Правила пилота
 

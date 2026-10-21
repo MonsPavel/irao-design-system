@@ -1,6 +1,8 @@
 # Отчёт: career-portal (оригинал) vs пилотный клон на irao-ui
 
-Дата: 2026-10-20 · пересверка после EPIC-14: 2026-10-21 · Pilot: `pilot/career-portal/` · [План доработок](PLAN.md) · [README пилота](README.md)
+Дата: 2026-10-20 · пересверка после EPIC-14: 2026-10-21 · раунд 2
+(полнота/adoption): 2026-10-21 вечер, §7 · Pilot: `pilot/career-portal/`
+· [План доработок](PLAN.md) · [README пилота](README.md)
 
 ## 1. Что сделано
 
@@ -207,3 +209,42 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
   `color-contrast` на кнопке `ui-button--accent` «Найти» (белое на акценте,
   3.12:1) — известная пара одобренного дизайна (исключение T2.3/T2.6 в
   `KNOWN_AXE_EXCEPTIONS` ДС), не регрессия пилота.
+
+## 7. Раунд 2 (21.10, вечер): полнота страниц и adoption-хвосты
+
+Пересборка на main ДС 17beefd + свежий compare-прогон. Эпик закрытия —
+[EPIC-15](../../docs/ui-system/epics/EPIC-15-pilot-completeness/README.md).
+
+**Предпосылки:**
+
+- **Pages-деплой оригинала актуален** (перепроверен): live CSS
+  байт-в-байт идентичен main 8469ea6 (sha256 raw-блоба и live;
+  расхождение при локальном клоне — только CRLF-конвертация Windows);
+  последний запуск deploy-workflow зелёный на финальном коммите; все
+  20+ страниц оригинала, включая неперенесённые, отвечают 200.
+- **Регрессий EPIC-14 нет**: probe-пары соответствуют §3.3 — все
+  «закрыто T14.x» остались MATCH; systematic-диффы — задокументированные
+  «принято ДС» (контейнер 32 vs 40 — решение-отклонение №4 mapping) и
+  артефакты выборки (ширины/text проб, закрытые модалки); doc-высоты
+  совпали с §3.4 до пикселя.
+
+**Находки (в EPIC-15):**
+
+1. **8 страниц оригинала не пересобраны**, 4 из них — мёртвые ссылки из
+   собранных страниц клона (grep dist): `article.html` ← index/media/
+   career-track; `company.html` ← companies; `education-catalog.html` ←
+   education; `event.html` ← events/internships/practices; ещё 4
+   достижимы из них: `internship.html`, `internship-apply.html`,
+   `events-search.html`, `event-apply.html`. На events.html клона нет
+   пагинации (в оригинале есть — probe `pagination-page` not found).
+2. **Adoption-хвосты**: `ui-field--compact` (доставлен T14.6) не
+   применён в анкетах-модалках клона — поля 52px против 48px оригинала;
+   на education кнопка «сайт „Работа России"» собрана `--sm` (32px)
+   против базовой 52px оригинала (probe: height 52→32, прочие стили
+   совпали).
+3. **§3.3/§4 устарели по compact**: строка «компактный вариант…
+   аналога в ДС нет — остаток P1» неверна — модификатор есть с T14.6
+   (ui-field.css, mapping:154); правка формулировок — в T15.6 вместе с
+   adoption. P2-остатки §4 (цвет подписи поля, тег на фото) включены в
+   EPIC-15 (T15.7/T15.8); P3 (заголовок vacancy-apply, спец-тинты
+   hero) — остаются в бэклоге.

@@ -86,3 +86,12 @@
 | T14.10 | done | смержена |
 | T14.11 | done | смержена |
 | T14.12 | done | смержена |
+| T15.1 | todo | EPIC-15 (раунд 2 проверок пилота, 21.10): пилот — детальные event.html/article.html; закрывает мёртвые ссылки с 6 страниц |
+| T15.2 | todo | EPIC-15: пилот — company.html; мёртвая ссылка с companies |
+| T15.3 | todo | EPIC-15: пилот — education-catalog.html; мёртвая ссылка с education, потребитель list-page-сайдбара |
+| T15.4 | todo | EPIC-15: пилот — internship.html + internship-apply/event-apply |
+| T15.5 | todo | EPIC-15: пилот — events-search.html + пагинация events (в оригинале есть, клон пропустил) |
+| T15.6 | todo | EPIC-15: пилот — adoption-хвосты (ui-field--compact в анкетах-модалках, кнопка education без --sm) + актуализация REPORT (compact уже в ДС с T14.6); рекомендуется первой |
+| T15.7 | todo | EPIC-15: ДС — цвет подписи ui-field (P2 из REPORT §4, AA-замена gray-700) |
+| T15.8 | todo | EPIC-15: ДС — ui-tag--on-photo (P2 из REPORT §4, белый на primary 40px) |
+| T15.9 | todo | EPIC-15: закрывающая — compare на 20 страниц, гейт мёртвых ссылок dist, REPORT/PLAN; последняя |
