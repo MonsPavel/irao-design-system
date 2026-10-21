@@ -234,10 +234,13 @@ describe('подключение и гейты (DoD)', () => {
     );
   });
 
-  it("README компонента: тег не интерактивен (do/don't), чипы фильтров — T8.1, VI — T9.1", () => {
+  it("README компонента: тег не интерактивен (do/don't), чипы фильтров — ui-chip (T14.8), VI — T9.1", () => {
     const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
     expect(readme).toMatch(/не интерактивен/i);
-    expect(readme).toContain('T8.1');
+    // С T14.8: обещание «паттерн T8.1» закрыто компонентом ui-chip —
+    // ссылка в README ui-tag ведёт на него (Notes T14.8).
+    expect(readme).toContain('ui-chip');
+    expect(readme).not.toContain('T8.1');
     expect(readme).toContain('T9.1');
     expect(readme).toContain('ui-button');
   });

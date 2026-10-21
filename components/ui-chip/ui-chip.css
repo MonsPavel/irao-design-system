@@ -1,0 +1,107 @@
+/** @define chip */
+
+/*!
+ * irao-ui — ui-chip: интерактивный фильтр-чип (задача T14.8).
+ *
+ * Источник — .chip career-portal (pages.css:137–149, 4+ страницы: вакансии,
+ * стажировки, медиа, поиск мероприятий): пилюля 36px, паддинг 0 16px, рамка
+ * 1px #D6D6D6, радиус pill, fs-small; hover — рамка и подпись primary;
+ * активная (.chip.is-active pages.css:151) — заливка primary + подпись
+ * text-on-dark. Группа — .chip-row (pages.css:135): flex/wrap/gap 8px.
+ * Перенос на токены слоя 2: высота — --ui-chip-height (36px вне шкалы §3.2 —
+ * перенос «как есть», прецедент --ui-card-gap), паддинг 0 16px и gap 8px —
+ * ступени шкалы (--ui-space-4/--ui-space-2), рамка — --ui-border-width ×
+ * --ui-border-color, радиус --ui-radius-pill, типографика — готовая роль
+ * small (Scope T14.8: fs-small × fw-small), переход --ui-transition, цвета —
+ * пары surface/text/primary/text-on-dark (новых цветовых токенов не заведено —
+ * контраст состояний гейтят пары chip-default/chip-active, T14.8 п.1).
+ *
+ * Высота — min-height, не height (прецедент T4.2): 32px-база T3.6 растит чип
+ * вместе с текстом, контент центрируется flex'ом; длинная RU-подпись переносится
+ * внутри пилюли (лента flex-wrap: wrap переносит сами чипы).
+ *
+ * Блок .ui-chip — ГРУППА чипов (прецедент ui-pagination: блок = лента,
+ * элементы = контролы): flex-лента с переносом. Элемент __pill — сама пилюля:
+ * <button type="button"> (клиентский фильтр) или <a href> (GET-фильтр).
+ * font-family объявлен явно — UA-шрифт кнопки не наследуется (прецедент
+ * ui-button); text-decoration: none — сброс ссылки (прецедент __page
+ * пагинации); cursor: pointer — аффорданс обеих форм.
+ *
+ * Активное состояние — ARIA-атрибутом, НЕ классом (Technical considerations
+ * T14.8; как aria-current в ui-breadcrumbs/ui-pagination):
+ * [aria-pressed='true'] у кнопки, [aria-current='page'] у ссылки; класс
+ * is-active оригинала не переносится. :where() держит специфичность
+ * одноклассовой (прецедент aria-selected ui-tabs). Класс-дубль для стиля не
+ * нужен — селектор атрибута и есть стилевой крючок.
+ *
+ * hover — ТОЛЬКО под (hover: hover) (EPIC-4: sticky-hover) и только у
+ * неактивных (:not-исключение — у активной подпись primary на заливке
+ * primary была бы нечитаема; прецедент __page пагинации). Пары одобренного
+ * дизайна (pages.css:149: border-color + color primary) — контраст покрывает
+ * пара primary-on-surface гейта T2.3. Активное правило — ПОСЛЕ hover-блока:
+ * порядок каскада, а не специфичность (прецедент ui-pagination).
+ *
+ * Фокус — глобальная политика ADR-0001 (base/focus.css: a:focus-visible,
+ * button:focus-visible) — здесь outline не запрещается и не заменяется.
+ * VI-режим: цветов вне токенов нет (§5) — перекраска vi.css накрывает
+ * компонент. JS-модуля нет: состояние приходит из разметки/сервера, клики —
+ * нативные (кнопки сабмитят форму при type="submit" — деградация без JS,
+ * README.md).
+ */
+
+/* ── Блок: группа чипов (.chip-row career-portal, gap 8px — ступень шкалы) ── */
+
+.ui-chip {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-2);
+  align-items: center;
+}
+
+/* ── Элемент: пилюля — button (клиентский фильтр) или a (GET-фильтр) ── */
+
+.ui-chip__pill {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ui-chip-height);
+  padding: 0 var(--ui-space-4);
+  border: var(--ui-border-width) solid var(--ui-border-color);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  text-decoration: none;
+  transition:
+    background-color var(--ui-transition),
+    color var(--ui-transition),
+    border-color var(--ui-transition);
+  cursor: pointer;
+}
+
+/* ── hover: пара одобренного дизайна (pages.css:149) только под
+      (hover: hover) и только у НЕактивных (активная не мигает подписью
+      primary на заливке primary; прецедент __page пагинации) ── */
+
+@media (hover: hover) {
+  .ui-chip__pill:not([aria-pressed='true']):not([aria-current='page']):hover {
+    border-color: var(--ui-color-primary);
+    color: var(--ui-color-primary);
+  }
+}
+
+/* ── Активное состояние — ARIA-атрибутом (не класс): заливка primary +
+      подпись text-on-dark (pages.css:151, .chip.is-active оригинала).
+      Правило после hover-блока — порядок каскада (прецедент ui-pagination);
+      :where() — специфичность одноклассовой. ── */
+
+.ui-chip__pill:where([aria-pressed='true'], [aria-current='page']) {
+  border-color: var(--ui-color-primary);
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}

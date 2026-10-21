@@ -1,0 +1,59 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-chip (T14.8): интерактивный фильтр-чип — пилюля 36px career-portal (<code>.chip</code>,
+  pages.css:137–151: вакансии, стажировки, медиа, поиск мероприятий). Обе формы — кнопочная
+  (<code>aria-pressed</code>, клиентский фильтр) и ссылочная (GET,
+  <code>aria-current="page"</code> на активной); активное состояние — ARIA-атрибутом, не классом.
+  Сценарии — <code>tests/e2e/chip.spec.js</code> (axe, клавиатура Tab/Enter/Space, активные
+  состояния, контраст ≥ 4.5:1, эталоны 375/768/1280/1440). JS-модуля нет: состояние приходит из
+  разметки/сервера, клики — нативные.
+</p>
+
+<section aria-labelledby="uichip-buttons-heading">
+  <h2 id="uichip-buttons-heading">Кнопочная форма (aria-pressed)</h2>
+  <div class="ui-chip" id="uichip-buttons" role="group" aria-label="Формат занятости">
+    <button class="ui-chip__pill" type="button" aria-pressed="true">полная занятость</button>
+    <button class="ui-chip__pill" type="button" aria-pressed="false">стажировка</button>
+    <button class="ui-chip__pill" type="button" aria-pressed="false">частичная занятость</button>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Клиентский фильтр: переключение <code>aria-pressed</code> — один слушатель на группе (зона
+    сайта, JS-модуля у компонента нет). Явный <code>type="button"</code> — гейт
+    no-implicit-button-type. Активная заливка primary + подпись text-on-dark — пара
+    <code>chip-active</code> гейта T2.3; дефолт — <code>chip-default</code>.
+  </p>
+</section>
+
+<section aria-labelledby="uichip-links-heading">
+  <h2 id="uichip-links-heading">Ссылочная форма (GET-фильтр)</h2>
+  <nav class="ui-chip" id="uichip-links" aria-label="Направления">
+    <a class="ui-chip__pill" href="?topic=energy" aria-current="page"
+      >энергетика и электротехника</a
+    >
+    <a class="ui-chip__pill" href="?topic=it">информационные технологии</a>
+    <a class="ui-chip__pill" href="?topic=econ">экономика и финансы</a>
+    <a class="ui-chip__pill" href="?topic=design">конструирование</a>
+    <a class="ui-chip__pill" href="?topic=general">общие направления</a>
+  </nav>
+  <p class="ui-small ui-text--muted">
+    Как на страницах career-portal: сервер рендерит выдачу и расставляет
+    <code>aria-current="page"</code>; активная остаётся рабочей ссылкой (повторный клик
+    перезапрашивает выдачу) — работает без JS по построению. Лента — flex-wrap: длинный набор
+    переносится, не рвёт горизонталь на 375.
+  </p>
+</section>
+
+<section aria-labelledby="uichip-long-heading">
+  <h2 id="uichip-long-heading">Длинные RU-подписи (перенос)</h2>
+  <nav class="ui-chip" id="uichip-long" aria-label="Форматы обучения">
+    <a class="ui-chip__pill" href="?mode=full">очное обучение в группе полного дня</a>
+    <a class="ui-chip__pill" href="?mode=hybrid" aria-current="page"
+      >гибридный формат: часть занятий на предприятии</a
+    >
+    <a class="ui-chip__pill" href="?mode=remote">дистанционные модули с наставником</a>
+  </nav>
+  <p class="ui-small ui-text--muted">
+    Высота — <code>min-height</code> 36px (<code>--ui-chip-height</code>): короткая подпись даёт
+    ровно пилюлю, длинная переносится внутри и растёт вместе с контентом (прецедент T4.2 — 32px-база
+    T3.6). Touch-компромисс 36 против 44px пагинации зафиксирован в README компонента.
+  </p>
+</section>

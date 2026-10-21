@@ -1,0 +1,27 @@
+<!-- ui-chip (T14.8): канонический паттерн — группа чипов, обе формы. Блок
+     .ui-chip — группа (лента с переносом, доступное имя обязательно); элемент
+     __pill — пилюля-контрол. Кнопочная форма — клиентский фильтр:
+     button[type="button"] (явный тип — гейт no-implicit-button-type) +
+     aria-pressed="true|false" — активное состояние ARIA-атрибутом, НЕ классом
+     (как aria-current в ui-breadcrumbs); группа — role="group" с именем.
+     Ссылочная форма — GET-фильтр: nav + <a href="?…">; активная —
+     aria-current="page" и ОСТАЁТСЯ ссылкой (повторный клик перезапрашивает
+     выдачу — не span, как в ui-pagination: фильтр не «текущая страница», а
+     выбранный фильтр). Активная — ровно одна на группу (канон одиночного
+     выбора; мульти-выбор — границы в README). href — шаблон «?topic=…» /
+     «?format=…» (вырожденный demo-адрес; реальные URL — зона сайта/шаблона).
+     JS-модуля нет: состояние приходит из разметки/сервера, клики — нативные;
+     деградация без JS — ссылки работают, кнопки сабмитят форму при
+     type="submit" в GET-форме (README.md). -->
+<div class="ui-chip" role="group" aria-label="Формат занятости">
+  <button class="ui-chip__pill" type="button" aria-pressed="true">полная занятость</button>
+  <button class="ui-chip__pill" type="button" aria-pressed="false">стажировка</button>
+  <button class="ui-chip__pill" type="button" aria-pressed="false">частичная занятость</button>
+</div>
+<nav class="ui-chip" aria-label="Направления">
+  <a class="ui-chip__pill" href="?topic=energy" aria-current="page">энергетика и электротехника</a>
+  <a class="ui-chip__pill" href="?topic=it">информационные технологии</a>
+  <a class="ui-chip__pill" href="?topic=econ">экономика и финансы</a>
+  <a class="ui-chip__pill" href="?topic=design">конструирование</a>
+  <a class="ui-chip__pill" href="?topic=general">общие направления</a>
+</nav>
