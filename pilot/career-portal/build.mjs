@@ -165,14 +165,17 @@ function pillButton(text, { target } = {}) {
   return `<button class="ui-button ui-button--pill" type="button"${target ? ` data-ui-modal-target="${target}"` : ''}><span class="ui-button__label">${esc(text)}</span><span class="ui-button__icon" aria-hidden="true">${ARROW}</span></button>`;
 }
 
-/** ui-breadcrumbs (T4.7) с микроразметкой BreadcrumbList */
+/** ui-breadcrumbs (T4.7) с микроразметкой BreadcrumbList.
+ *  Элемент [label, href]: href-строка — ссылка; '' — текущая страница
+ *  (span aria-current="page", ровно один на цепочку); null — промежуточный
+ *  пункт без ссылки (plain span, как в оригинале career-portal). */
 function breadcrumbs(items) {
   const list = items
     .map(([label, href], index) => {
       const position = index + 1;
       const current = href
         ? `<a class="ui-breadcrumbs__link" itemprop="item" href="${esc(href)}"><span itemprop="name">${esc(label)}</span></a>`
-        : `<span class="ui-breadcrumbs__current" itemprop="name" aria-current="page">${esc(label)}</span>`;
+        : `<span class="ui-breadcrumbs__current" itemprop="name"${href === '' ? ' aria-current="page"' : ''}>${esc(label)}</span>`;
       return `    <li class="ui-breadcrumbs__item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
       ${current}
       <meta itemprop="position" content="${position}">
@@ -1107,7 +1110,11 @@ ${applyDialogHtml()}`;
 
 function vacanciesMain() {
   const rows = VAC.items.map(vacancyRow).join('\n');
-  return `<section class="ui-section">
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Вакансии', ''],
+  ])}
+<section class="ui-section">
   <div class="ui-container">
     <div class="cp-page-head cp-page-head--split">
       <div>
@@ -1331,7 +1338,12 @@ function internshipsMain(set) {
   };
   const [title, titleLower, titleAcc, who] = pageTitles[set];
 
-  return `<section class="ui-section">
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Школьникам и студентам', null],
+    [title, ''],
+  ])}
+<section class="ui-section">
   <div class="ui-container">
     <div class="cp-cover-hero">
       <h1 class="ui-page-title">${title}</h1>
@@ -1497,7 +1509,7 @@ function educationMain() {
   const offers = EDU.offers.slice(0, 3).map(offerCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
-    ['Школьникам и студентам', ''],
+    ['Школьникам и студентам', null],
     ['Целевое обучение', ''],
   ])}
 <section class="ui-section">
@@ -1558,7 +1570,7 @@ function eventsMain() {
   const past = EVT.past.map(eventCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
-    ['Школьникам и студентам', ''],
+    ['Школьникам и студентам', null],
     ['Мероприятия', ''],
   ])}
 <section class="ui-section">
@@ -1656,7 +1668,7 @@ ${tracks}
   const articles = ART.items.slice(0, 4).map(articleCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
-    ['Школьникам и студентам', ''],
+    ['Школьникам и студентам', null],
     ['Карьерные треки', ''],
   ])}
 <section class="ui-section">
