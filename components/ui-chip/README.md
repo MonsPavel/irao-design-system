@@ -74,10 +74,12 @@ ui-tabs): класс-дубль для стиля не нужен, а стили
 - Активное состояние озвучивается атрибутом («нажата» / «текущая страница»),
   не цветом (WCAG 1.4.1) — см. раздел выше.
 - Контраст состояний — гейт T2.3 (Implementation requirements T14.8 п.1):
-  пары `chip-default` (текст на surface, 15.75:1) и `chip-active`
-  (text-on-dark на primary, 12.19:1); hover-пара — существующая
-  `primary-on-surface`. Рамка #D6D6D6 — декоративная (исключение
-  `--ui-border-color` гейта).
+  пары `chip-default` (текст на surface, 16.48:1) и `chip-active`
+  (text-on-dark на primary, 14.60:1 — значения отчёта
+  `npm run test:contrast`, dist/contrast-report.md); hover-пара —
+  существующая `primary-on-surface`. Рамка #D6D6D6 — декоративная (исключение
+  `--ui-border-color` гейта). Синхронность чисел с отчётом — юнит-пин
+  `tests/unit/chip.test.js` (evaluateContrast поверх pairs.config.mjs).
 - Группа несёт доступное имя (`aria-label` у `nav` / `role="group"`):
   без него скринридер читает набор пилюль без контекста «это фильтры».
 
