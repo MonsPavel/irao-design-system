@@ -200,6 +200,11 @@ function vacancyRow(v) {
 
 /** карточка события (оригинал .event-card): ui-card--link + теги */
 function eventCard(e) {
+  // Теги на фото — тинты вариантов 28px, как в оригинале (events.html:270/302;
+  // pages.css:573 только позиционирует). Модификатор ui-tag--on-photo (T16.10)
+  // остаётся API ДС без пилотного применения — «белый на primary, 40px»
+  // оригинала относится к фильтр-тегам (реклассификация REPORT §3.3, ревью
+  // T16.10); применение поверх фото — решение владельца.
   const reg = /открыта/.test(e.reg)
     ? '<span class="ui-tag ui-tag--green">Регистрация</span>'
     : /Завершено/.test(e.reg)
@@ -225,6 +230,9 @@ function eventCard(e) {
 
 /** карточка статьи (оригинал .article-card): ui-card--link + точка-тег */
 function articleCard(a) {
+  // Тег на фото — тинт варианта + точка, как .media__tag оригинала
+  // (media.css:72–87); ui-tag--on-photo — API ДС без пилотного применения
+  // (реклассификация REPORT §3.3, ревью T16.10).
   const dot =
     { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[a.type] ||
     'ui-tag--blue';
@@ -834,6 +842,9 @@ const MEDIA_HOME = [
 ];
 
 function mediaHomeCard(card, extraClass = '') {
+  // Тег на фото — тинт варианта + точка, как в articleCard (маркер
+  // реклассификации REPORT §3.3 — ревью T16.10: on-photo в пилоте не
+  // применяется).
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
     card.type
   ];

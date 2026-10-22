@@ -184,6 +184,14 @@ export const PAIRS = [
     usage:
       '.tag--blue (components.css:108); до T4.3 bg ссылался на примитив --ui-blue-100 — пара заведена токеном --ui-color-tag-blue-bg',
   },
+  {
+    id: 'tag-on-photo',
+    fg: '--ui-color-text-on-dark',
+    bg: '--ui-color-primary',
+    level: 'text',
+    usage:
+      'тег на фото ui-tag--on-photo (T16.10): белый текст на непрозрачной primary-плашке поверх фотографии — алиас уже зелёной пары (та же пара цветов — on-dark-on-surface-dark/chip-active); заведён, чтобы роль оверлейного тега была видна в отчёте гейта (REPORT §3.3)',
+  },
 
   /* ── Чипы фильтров (ui-chip, T14.8; текст 14px → порог text) ── */
 

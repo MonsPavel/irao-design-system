@@ -32,6 +32,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
+import { contrastRatio, declarationsFromTokenFile, resolveTokenColor } from '../contrast/lib.mjs';
+
 const root = join(import.meta.dirname, '..', '..');
 
 /** CSS без комментариев: пины смотрят на исполняемый код, а не на прозу шапки. */
@@ -146,6 +148,112 @@ describe('components/ui-tag/ui-tag.css — варианты (Scope T4.3: blue/or
     const block = blockOf(css, '.ui-tag--navy');
     expect(block).toContain('background-color: var(--ui-color-primary);');
     expect(block).toContain('color: var(--ui-color-text-on-dark);');
+  });
+});
+
+describe('T16.10 — модификатор «тег на фото» (ui-tag--on-photo)', () => {
+  const source = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8'),
+  );
+
+  it('токен высоты on-photo: 2.5rem (40px оригинала — pages.css:596/REPORT §3.3; вне шкалы §3.2 — перенос «как есть»)', () => {
+    expect(source).toMatch(/--ui-tag-height-on-photo:\s*2\.5rem;/);
+  });
+
+  it('модификатор: непрозрачная плашка primary/text-on-dark, высота — токен on-photo', () => {
+    const block = blockOf(css, '.ui-tag--on-photo');
+    expect(block, 'правило .ui-tag--on-photo найдено').toBeTruthy();
+    expect(block).toContain('min-height: var(--ui-tag-height-on-photo);');
+    expect(block).toContain('background-color: var(--ui-color-primary);');
+    expect(block).toContain('color: var(--ui-color-text-on-dark);');
+  });
+
+  it('модификатор объявлен ПОСЛЕ цветовых вариантов — перекрывает их при совместном использовании', () => {
+    expect(css.indexOf('.ui-tag--on-photo'), 'модификатор найден').toBeGreaterThan(-1);
+    expect(css.indexOf('.ui-tag--on-photo')).toBeGreaterThan(css.lastIndexOf('.ui-tag--navy'));
+  });
+
+  it('плашка не tint: без color-mix/альфы — контраст не зависит от фото (Technical considerations)', () => {
+    const block = blockOf(css, '.ui-tag--on-photo');
+    expect(block).not.toMatch(/color-mix|rgba?\(|-a\d+\b/);
+  });
+
+  it('алиас tag-on-photo в pairs.config.mjs — роль в покрытии гейта (Implementation requirements п.2)', () => {
+    const config = readFileSync(join(root, 'tests', 'contrast', 'pairs.config.mjs'), 'utf8');
+    const pair = config.match(/\{\s*id:\s*'tag-on-photo'[\s\S]*?\}/);
+    expect(pair, 'пара tag-on-photo найдена').toBeTruthy();
+    expect(pair[0]).toContain("fg: '--ui-color-text-on-dark'");
+    expect(pair[0]).toContain("bg: '--ui-color-primary'");
+  });
+
+  it('README: правило «когда on-photo» — только поверх фото/тёмного, на светлом фоне запрещён', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
+    expect(readme).toContain('on-photo');
+    expect(readme).toMatch(/на светлом фоне/i);
+  });
+
+  it('стенд: вариант on-photo на фото-подложке', () => {
+    const html = readFileSync(join(root, 'showcase', 'pages', 'ui-tag', 'index.html'), 'utf8');
+    expect(html).toContain('id="ui-tag-on-photo"');
+    expect(html).toContain('id="ui-tag-on-photo-backdrop"');
+  });
+});
+
+describe('T16.10 — ревью: контраст и провенанс on-photo (errata спеки)', () => {
+  /** Гейт-значение пары primary/text-on-dark — теми же либами, что T2.3. */
+  const pairRatio = () => {
+    const primitives = declarationsFromTokenFile(
+      readFileSync(join(root, 'tokens', 'primitives.css'), 'utf8'),
+      'primitive',
+    );
+    const semantic = declarationsFromTokenFile(
+      readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8'),
+      'semantic',
+    );
+    const resolve = (name) => resolveTokenColor(name, new Map([...primitives, ...semantic]));
+    return contrastRatio(resolve('--ui-color-text-on-dark'), resolve('--ui-color-primary'));
+  };
+
+  const surfaces = () => ({
+    readme: readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8'),
+    css: readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8'),
+    changelog: readFileSync(join(root, 'CHANGELOG.md'), 'utf8'),
+    stand: readFileSync(join(root, 'showcase', 'pages', 'ui-tag', 'index.html'), 'utf8'),
+  });
+
+  it('документированный контраст on-photo = гейт-значению пары (14.60:1); 12.58 — это пара primary/tag-blue-bg (tag-blue)', () => {
+    const ratio = pairRatio();
+    expect(ratio, 'computed primary/text-on-dark либами гейта').toBeCloseTo(14.6, 1);
+    for (const [name, text] of Object.entries(surfaces())) {
+      expect(
+        text,
+        `${name}: «12.58» — контраст другой пары (primary/tag-blue-bg), не on-photo`,
+      ).not.toContain('12.58');
+      expect(text, `${name}: контраст пары задокументирован гейт-цифрой`).toContain('14.60:1');
+    }
+  });
+
+  it('провенанс: README не приписывает оригиналу «красит тег на фото белым» — реклассификация к T16.14 (ревью)', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
+    expect(readme, 'ложная атрибуция REPORT §3.3 исправлена').not.toMatch(
+      /оригинал красит тег на фото/i,
+    );
+    expect(readme, 'форма 40px отнесена к фильтр-тегам (зона T16.14)').toContain('T16.14');
+    const css = readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8');
+    expect(css, 'в комментарии модификатора — фактический алиас пары').toContain('tag-on-photo');
+  });
+
+  it('пилот без применения on-photo: теги фото событий/медиа в тинтах — паритет с оригиналом (применение — решение владельца)', () => {
+    const build = readFileSync(join(root, 'pilot', 'career-portal', 'build.mjs'), 'utf8');
+    // Смотрим на генерируемую разметку: комментарии-маркеры реклассификации
+    // могут упоминать имя модификатора, применение — нет.
+    expect(build, 'модификатор остаётся API ДС, пилотный хук откачен (ревью T16.10)').not.toMatch(
+      /class="ui-tag ui-tag--on-photo/,
+    );
+    expect(build, 'тинты вариантов на фото на месте (events.html:270/302 оригинала)').toMatch(
+      /class="ui-tag ui-tag--green"/,
+    );
   });
 });
 
