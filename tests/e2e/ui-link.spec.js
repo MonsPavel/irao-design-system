@@ -57,6 +57,7 @@ const stateOf = (page, id) =>
       backdrop: getComputedStyle(scope ?? document.body).backgroundColor,
       fontSize: style.fontSize,
       fontWeight: style.fontWeight,
+      lineHeight: style.lineHeight,
       opacity: style.opacity,
       decorationLine: style.textDecorationLine,
       decorationThickness: style.textDecorationThickness,
@@ -269,6 +270,7 @@ standTest.describe('ui-link (T4.1)', () => {
       const rest = await stateOf(page, LINK.nav);
       expect(rest.fontSize, 'пункт навигации — fs-small (14px)').toBe('14px');
       expect(rest.fontWeight, 'fw-small (500)').toBe('500');
+      expect(rest.lineHeight, 'компактная строка пункта — lh 1.1 (14 × 1.1)').toBe('15.4px');
       expect(rest.decorationLine, 'без подчёркивания (nav-структура, WCAG 1.4.1)').toBe('none');
       expect(rest.color, 'цвет — primary базы, своего нет').toBe('rgb(0, 40, 86)');
       expect(rest.opacity, 'в покое opacity не тронут').toBe('1');

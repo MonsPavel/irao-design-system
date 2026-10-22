@@ -254,6 +254,11 @@ describe('components/ui-link/ui-link.css — nav-вариант (T16.3, Scope п
     ).toBeNull();
   });
 
+  it('.ui-link--nav: компактная строка пункта — lh 1.1 (оригинал .header__link line-height: 1.1, header.css:36; доводка AC4 — полный computed-матч шапки)', () => {
+    const block = blockOf(css, '.ui-link--nav');
+    expect(block).toContain('line-height: 1.1;');
+  });
+
   it('hover — ТОЛЬКО opacity 0.7 под (hover: hover); цветной hover базы переобъявлен (не просачивается)', () => {
     const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
     const block = blockOf(mediaBlock, '.ui-link--nav:hover');
