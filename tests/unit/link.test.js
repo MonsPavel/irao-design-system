@@ -228,6 +228,46 @@ describe('components/ui-link/ui-link.css — варианты (Scope T4.1)', () 
   });
 });
 
+describe('components/ui-link/ui-link.css — nav-вариант (T16.3, Scope п.1)', () => {
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-link', 'ui-link.css'), 'utf8'),
+  );
+
+  it('.ui-link--nav: fs-small/fw-small (14/500), подчёркивание снято (пункты навигации)', () => {
+    const block = blockOf(css, '.ui-link--nav');
+    expect(block, 'правило .ui-link--nav найдено').toBeTruthy();
+    expect(block).toContain('font-size: var(--ui-fs-small);');
+    expect(block).toContain('font-weight: var(--ui-fw-small);');
+    expect(block, 'пункт навигации без подчёркивания').toContain('text-decoration: none;');
+    // Своего цвета модификатор не заводит — primary из базы (цветной hover
+    // nav-варианту не добавляется: Out of scope T16.3).
+    expect(block, 'цвет — унаследованный primary базы').not.toMatch(/(?:^|\n)\s*color:/);
+  });
+
+  it(':visited — общее с default правило осталось (цвет меняется, как у default); своего --nav:visited нет', () => {
+    expect(blockOf(css, '.ui-link:visited'), 'правило :visited не отключено').toContain(
+      'color: var(--ui-color-text-muted);',
+    );
+    expect(
+      blockOf(css, '.ui-link--nav:visited'),
+      'nav-вариант не дублирует и не отменяет :visited',
+    ).toBeNull();
+  });
+
+  it('hover — ТОЛЬКО opacity 0.7 под (hover: hover); цветной hover базы переобъявлен (не просачивается)', () => {
+    const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
+    const block = blockOf(mediaBlock, '.ui-link--nav:hover');
+    expect(block, 'nav-hover внутри media-обёртки (EPIC-4)').toBeTruthy();
+    expect(block).toContain('opacity: 0.7;');
+    // Прецедент .ui-link--button:hover: без переобъявления цвета на nav
+    // просачивался бы color-mix базы — hover nav «цветной», а одобренный
+    // дизайн — только opacity.
+    expect(block, 'против просачивания color-mix .ui-link:hover').toContain(
+      'color: var(--ui-color-primary);',
+    );
+  });
+});
+
 describe('канонический паттерн (components/ui-link/ui-link.html)', () => {
   const html = readFileSync(join(root, 'components', 'ui-link', 'ui-link.html'), 'utf8');
 
@@ -270,7 +310,13 @@ describe('стенд (showcase/pages/ui-link/index.html)', () => {
     expect(html).toContain('class="ui-link"');
     expect(html).toContain('ui-link--on-dark');
     expect(html).toContain('ui-link--button');
+    expect(html).toContain('ui-link--nav');
     expect(html).toContain('ui-link__icon');
+  });
+
+  it('nav-вариант на стенде — в структурной навигации nav[aria-label] (WCAG 1.4.1, обоснование снятия подчёркивания)', () => {
+    const nav = html.match(/<nav\b[^>]*aria-label="([^"]*)"[^>]*>[\s\S]*?<\/nav>/) ?? [''];
+    expect(nav[0], 'nav-демо в лендмарке с именем').toContain('ui-link--nav');
   });
 
   it('без data-ui-check-layout — гейт T3.6 не расширяется без записи в CHECK_STANDS', () => {
@@ -304,6 +350,18 @@ describe('подключение и гейты (DoD)', () => {
     expect(readme).toMatch(/Ссылка vs кнопка/i);
     expect(readme).toContain('noopener');
     expect(readme).toContain('aria-label');
+  });
+
+  it('README компонента: nav-вариант — do (пункты меню/шапки/футера), don\'t (inline-текст контента), обоснование WCAG 1.4.1 (Implementation requirements п.2 T16.3)', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-link', 'README.md'), 'utf8');
+    expect(readme).toContain('ui-link--nav');
+    expect(readme, 'do: пункты навигации').toMatch(/(?:меню|шапк|футер)/i);
+    expect(readme, "don't: inline-текст контента остаётся подчёркнутым").toMatch(
+      /inline|в тексте контента|контента/i,
+    );
+    expect(readme, 'прецедент снятия подчёркивания задокументирован (WCAG 1.4.1)').toContain(
+      '1.4.1',
+    );
   });
 
   it('e2e-сценарий записан и использует контраст-библиотеку T2.3 (сквозной AC)', () => {
