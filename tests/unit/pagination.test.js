@@ -234,15 +234,15 @@ describe('стенд (showcase/pages/ui-pagination/index.html)', () => {
     'utf8',
   );
 
-  it('стенд содержит четыре навигации-сценария: полный, короткий, первая страница, последняя страница (AC)', () => {
-    for (const id of ['uipag-full', 'uipag-short', 'uipag-first', 'uipag-last']) {
+  it('стенд содержит пять навигаций-сценариев: полный, короткий, первая страница, последняя страница, bare (AC)', () => {
+    for (const id of ['uipag-full', 'uipag-short', 'uipag-first', 'uipag-last', 'uipag-bare']) {
       expect(stand, id).toContain(`id="${id}"`);
     }
   });
 
   it('aria-label с конвенционным именем «Пагинация»; лендмарки стенда разведены (axe landmark-unique)', () => {
     const labels = [...stand.matchAll(/aria-label="(Пагинация[^"]*)"/g)].map((m) => m[1]);
-    expect(labels.length, 'четыре навигации с конвенционной основой имени').toBe(4);
+    expect(labels.length, 'пять навигаций с конвенционной основой имени').toBe(5);
     expect(new Set(labels).size, 'имена уникальны — лендмарки различимы').toBe(labels.length);
     for (const label of labels) {
       expect(label.startsWith('Пагинация'), `конвенция имени: ${label}`).toBe(true);
@@ -260,6 +260,81 @@ describe('стенд (showcase/pages/ui-pagination/index.html)', () => {
 
   it('без data-ui-check-layout — гейт T3.6 не расширяется без записи в CHECK_STANDS', () => {
     expect(stand).not.toContain('data-ui-check-layout');
+  });
+});
+
+describe('T16.6 — пагинация без стрелок (модификатор .ui-pagination--bare)', () => {
+  // REPORT §8.2 №7: оригинал career-portal на списковых страницах рендерит
+  // только номера (.pagination без стрелок, стрелок в DOM нет); ДС T6.3
+  // всегда включала два __arrow. Снимать стрелки дефолтом не стали (T6.3
+  // задуман «1 2 … 12» со стрелками как структурным элементом доступной
+  // навигации) — заводим структурный модификатор (прецедент ui-card--filled,
+  // ui-link--on-dark). Пины «стили __page не изменились» — это ВСЕ пины
+  // describe выше: они читают те же блоки css и остались нетронутыми.
+  const path = join(root, 'components', 'ui-pagination', 'ui-pagination.css');
+  const css = stripCssComments(readFileSync(path, 'utf8'));
+
+  it('модификатор НА блоке скрывает стрелки display: none — страховка для готовой разметки (ionic-вариант — разметка без стрелок)', () => {
+    const block = blockOf(css, '.ui-pagination--bare .ui-pagination__arrow');
+    expect(block, 'правило .ui-pagination--bare .ui-pagination__arrow найдено').toBeTruthy();
+    expect(block).toContain('display: none;');
+    expect(block, 'без !important (инвариант vi.css)').not.toContain('!important');
+  });
+
+  it('модификатор не заводит правил на __page: стили страниц неизменны (probe pagination-page MATCH)', () => {
+    expect(blockOf(css, '.ui-pagination--bare .ui-pagination__page')).toBeNull();
+    expect(css.match(/--bare/g)?.length, 'ровно одно bare-правило (скрытие стрелок)').toBe(1);
+  });
+
+  it('каноническая разметка документирует ОБЕ формы: default со стрелками; bare — только страницы', () => {
+    const html = readFileSync(
+      join(root, 'components', 'ui-pagination', 'ui-pagination.html'),
+      'utf8',
+    );
+    // Default-форма на месте (пины describe «канонический паттерн» выше).
+    expect(html).toContain('class="ui-pagination"');
+    // Bare-форма: модификатор на nav, стрелок внутри нет, страницы и
+    // aria-current на месте.
+    const bareNav = html.match(/<nav[^>]*ui-pagination--bare[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? '';
+    expect(bareNav, 'bare-навигация в канонической разметке').toBeTruthy();
+    expect(bareNav).not.toContain('ui-pagination__arrow');
+    expect(bareNav).toMatch(/aria-label="Пагинация[^"]*"/);
+    expect(bareNav).toContain('aria-current="page"');
+    expect(bareNav).toMatch(/aria-label="Страница \d+"/);
+    // Лендмарки обеих форм разведены именами (axe landmark-unique на доке);
+    // проверяем РАЗМЕТКУ — в шапке-комментарии «Пагинация» упоминается словами.
+    const markup = html.replace(/<!--[\s\S]*?-->/g, '');
+    const labels = [...markup.matchAll(/aria-label="(Пагинация[^"]*)"/g)].map((m) => m[1]);
+    expect(labels.length, 'обе формы — навигации с конвенционной основой имени').toBe(2);
+    expect(new Set(labels).size, 'имена лендмарок уникальны').toBe(labels.length);
+  });
+
+  it('стенд: сценарий #uipag-bare — bare-навигация без стрелок (по конвенции стенда «состояния компонента»)', () => {
+    const stand = readFileSync(
+      join(root, 'showcase', 'pages', 'ui-pagination', 'index.html'),
+      'utf8',
+    );
+    const bareNav = stand.match(/<nav[^>]*id="uipag-bare"[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? '';
+    expect(bareNav, 'сценарий bare на стенде').toBeTruthy();
+    expect(bareNav).toContain('ui-pagination--bare');
+    expect(bareNav).not.toContain('ui-pagination__arrow');
+    expect(bareNav).toContain('aria-current="page"');
+  });
+
+  it('README: когда bare уместен (компактные списки, как в career-portal) и граница с правилом «не прятать disabled-стрелку»', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-pagination', 'README.md'), 'utf8');
+    expect(readme).toContain('ui-pagination--bare');
+    expect(readme).toMatch(/компактн/i);
+    expect(readme).toMatch(/career-portal/i);
+  });
+
+  it('adoption пилота (Dependencies): вакансии клона — пагинация bare, стрелок в разметке нет', () => {
+    const build = readFileSync(join(root, 'pilot', 'career-portal', 'build.mjs'), 'utf8');
+    const nav = build.match(/<nav[^>]*ui-pagination--bare[^>]*>[\s\S]*?<\/nav>/)?.[0] ?? '';
+    expect(nav, 'пагинация вакансий — bare').toBeTruthy();
+    expect(nav, 'стрелки из разметки клона убраны').not.toContain('ui-pagination__arrow');
+    expect(nav).toContain('aria-current="page"');
+    expect(nav).toMatch(/aria-label="Страница \d+"/);
   });
 });
 
