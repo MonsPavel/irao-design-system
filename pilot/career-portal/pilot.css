@@ -1335,6 +1335,171 @@
   text-decoration: none;
 }
 
+/* ── компания: детальная страница (T15.2) ──
+   Источник — src/pages/company.html + pages.css:796–825/656–674/884.
+   Статы — вторая вариация блока статистики (Technical considerations
+   T15.2): cp-holding — glass-dark карточки с рамкой и сносками на
+   фото-фоне, здесь — сплошной primary на светлой странице; унификация
+   дороже двух вариаций. Значения оригинала вне шкалы отступов — rem
+   «как есть» с источником в комментарии (прецедент cp-breadcrumbs). */
+
+.cp-company-hero {
+  display: grid;
+  gap: var(--ui-space-7);
+  align-items: center;
+  grid-template-columns: 25rem minmax(0, 1fr);
+  margin-bottom: 2.5rem;
+}
+
+/* 40px «как есть» (pages.css:796); 400px колонки — pages.css:796 */
+.cp-company-hero__photo {
+  width: 100%;
+  height: 20rem;
+  border-radius: var(--ui-radius-md);
+}
+
+/* шаг имя/описание 16px (pages.css:801) */
+.cp-company-hero__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+}
+
+/* шаг абзацев 12px (pages.css:803) */
+.cp-company-hero__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+}
+
+/* Факты компании: сетка 3 колонки, шаг 24px, низ 40px «как есть»
+   (pages.css:805). Числа — роль ui-h2 в разметке, подписи — ui-small. */
+.cp-company-stats {
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* плашка 20/24 «как есть» (pages.css:807; 20px вне шкалы — как
+   --ui-field-pad-inline), радиус и фон — radius-card/primary оригинала */
+.cp-company-stats__item {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem var(--ui-space-5);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* цвет числа на тёмном — override роли ui-h2 (пара cp-holding__title) */
+.cp-company-stats__value {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* white 75% оригинала (pages.css:811) → on-dark-muted — AA-пара T2.3 */
+.cp-company-stats__label {
+  color: var(--ui-color-text-on-dark-muted);
+}
+
+/* заголовок раздела: mb 32px .section__title (components.css:341); роль в
+   разметке — ui-h3 = .section-title--h3 оригинала (fs-h3 42px/1.3,
+   pages.css:880) */
+.cp-company-title {
+  margin: 0 0 var(--ui-space-6);
+}
+
+/* Преимущества: сетка 4 колонки, шаг 24px (pages.css:813); низ 56px
+   company-section-gap «как есть» (pages.css:884) */
+.cp-company-adv {
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: repeat(4, 1fr);
+  margin: 0 0 3.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+/* плашка 24/20 «как есть» (pages.css:815); фон — маппинг --color-blue-700
+   (tokens/semantic.css --ui-color-surface-blue-deep) */
+.cp-company-adv__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-5) 1.25rem;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-blue-deep);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* цвет заголовка на тёмном — override роли ui-h4 (cp-holding__title) */
+.cp-company-adv__title {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* «Где мы работаем»: пара фото+подпись, шаг 24px (pages.css:821);
+   подпись несёт ui-figure__caption (шаг 8px = pages.css:825) */
+.cp-company-where {
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: repeat(2, 1fr);
+  margin-bottom: 3.5rem;
+}
+
+/* высота фото 280px «как есть» (pages.css:823) */
+.cp-company-where__photo {
+  width: 100%;
+  height: 17.5rem;
+  border-radius: var(--ui-radius-md);
+}
+
+/* CTA-баннер (banner-card оригинала, pages.css:656–674): min-height 320px,
+   низ 56px company-section-gap; фото — подложка (object-fit — ui-image--cover) */
+.cp-company-banner {
+  display: flex;
+  position: relative;
+  align-items: center;
+  overflow: hidden;
+  min-height: 20rem;
+  margin-bottom: 3.5rem;
+  border-radius: var(--ui-radius-md);
+}
+
+.cp-company-banner__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* тело: колонка по центру, шаг 12px, паддинг 40px «как есть»
+   (pages.css:667); оверлей rgba(0,40,86,.55) (pages.css:666) — тинт
+   primary 55% лестницы T14.7 */
+.cp-company-banner__body {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  align-items: center;
+  width: 100%;
+  padding: 2.5rem;
+  background-color: var(--ui-color-primary-a55);
+  color: var(--ui-color-text-on-dark);
+  text-align: center;
+}
+
+/* цвет заголовка на тёмном — override роли ui-h2 (cp-holding__title) */
+.cp-company-banner__title {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* ширина текста 560px «как есть» (pages.css:674) */
+.cp-company-banner__text {
+  max-width: 35rem;
+}
+
 /* Модалка направления стажировки: контент внутри ui-modal */
 .cp-dir-modal {
   display: grid;
@@ -1362,6 +1527,22 @@
 @media (max-width: 1023px) {
   .cp-directions__grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cp-company-hero {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp-company-hero__photo {
+    height: 16.25rem;
+  }
+
+  .cp-company-adv {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cp-company-where {
+    grid-template-columns: 1fr;
   }
 
   .cp-employers__grid {
@@ -1437,6 +1618,11 @@
   .cp-vac-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .cp-company-stats,
+  .cp-company-adv {
+    grid-template-columns: 1fr;
   }
 
   .cp-page-head--split {

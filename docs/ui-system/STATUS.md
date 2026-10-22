@@ -104,7 +104,7 @@
 | T16.8 | todo | EPIC-16: закрывающая эпика — 8 новых проб compare.mjs (body-bg/header-link/dropdown-item/footer-link/row-title/row-item/pill-icon/reset-control), свежий compare, REPORT/PLAN |
 | T15.6 | todo | EPIC-15 (страничные задачи; идут после DS-батча EPIC-16): пилот — adoption-хвосты (ui-field--compact в анкетах-модалках, кнопка education без --sm) + актуализация REPORT (compact уже в ДС с T14.6); первая внутри эпика |
 | T15.1 | todo | EPIC-15 (раунд 2 проверок пилота, 21.10): пилот — детальные event.html/article.html; закрывает мёртвые ссылки с 6 страниц |
-| T15.2 | todo | EPIC-15: пилот — company.html; мёртвая ссылка с companies |
+| T15.2 | done | смержена |
 | T15.3 | todo | EPIC-15: пилот — education-catalog.html; мёртвая ссылка с education, потребитель list-page-сайдбара |
 | T15.4 | todo | EPIC-15: пилот — internship.html + internship-apply/event-apply |
 | T15.5 | todo | EPIC-15: пилот — events-search.html + пагинация events (в оригинале есть, клон пропустил) |
