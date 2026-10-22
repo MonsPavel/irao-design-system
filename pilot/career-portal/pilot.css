@@ -763,69 +763,125 @@
   font-weight: var(--ui-fw-h2);
 }
 
-/* ── подвал сайта (сайт-зона: каркас паттерна footer) ── */
+/* ── подвал сайта (сайт-зона: каркас паттерна footer) ──
+   T16.4: тон и типографика — по оригиналу src/blocks/footer/footer.css
+   (REPORT §8.2 №5). Паттерн footer ДС здесь не применяется и не
+   перестраивается: он переносит композицию, визуал подвала бренд-специфичен
+   (patterns/footer/README, don't), его on-dark-стилистика остаётся у ДС.
+   Для сайта career-portal применяется сайт-тема оригинала: белый фон,
+   тёмные ссылки 14/500 без подчёркивания; mapping — комментарии у правил
+   ниже, источник значений — footer.css (строки в каждом правиле). */
 
 .cp-footer {
-  background-color: var(--ui-color-primary-deep);
-  color: var(--ui-color-text-on-dark);
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
 }
 
+/* Ссылки футера — ui-link--nav (T16.3): fs-small/fw-small 14/500 и снятое
+   подчёркивание несёт модификатор (Implementation requirements п.2 T16.4 —
+   свойства ui-link через .cp-footer__link не переопределяются). Цвет
+   фиксирует сайт-зона (Technical considerations T16.4 — одна строка против
+   primary базы .ui-link): у оригинала цвет .footer__link не меняют ни
+   :visited, ни :hover (footer.css:34-41) — «потемнения» visited нет
+   (Implementation requirements п.3), аффорданс наведения остаётся у --nav
+   (opacity .7, как у шапки). Каскад: pilot.css позднее ui-core.min.css в
+   <head> — при равной специфичности (0,2,0) с .ui-link:visited/:hover
+   побеждает это правило. */
+.cp-footer .ui-link {
+  color: var(--ui-color-text);
+}
+
+/* Каркас grid клона не перестраивается (Out of scope T16.4). Зазор колонок
+   — 40px .footer__inner (footer.css:10; вне шкалы §3.2 — «как есть»,
+   прецедент --ui-button-pad-inline); вертикальный ритм 48px — padding
+   .footer (footer.css:3, --ui-space-7); выравнивание по центру строки —
+   как во flex-каркасе оригинала (footer.css:8). */
 .cp-footer__inner {
   display: grid;
-  gap: var(--ui-space-6);
-  align-items: start;
+  gap: 2.5rem;
+  align-items: center;
   grid-template-columns: auto 2fr 2fr 1fr;
   padding-top: var(--ui-space-7);
   padding-bottom: var(--ui-space-7);
 }
 
+/* Колонка ссылок: шаг строк 9px (footer.css:26; вне шкалы §3.2 — «как
+   есть»); строки 14px/1.35 — .footer__links li (footer.css:29-32): двойной
+   межстрочный базис li (роль body 27px) делал бы строки колонки выше
+   оригинала. */
 .cp-footer__links {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-2);
+  gap: 0.5625rem;
   margin: 0;
   padding: 0;
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
   list-style: none;
 }
 
-.cp-footer__link {
-  color: var(--ui-color-text-on-dark);
+/* nowrap и межстрочное 1.35 пунктов — .footer__link (footer.css:35-38);
+   у nav-варианта 1.1 — компакт строки шапки, колонке футера не подходит. */
+.cp-footer__links .ui-link {
+  line-height: var(--ui-lh-small);
+  white-space: nowrap;
 }
 
-.cp-footer__link:hover {
-  color: var(--ui-color-text-on-dark-muted);
-}
-
+/* Контакты: шаг блоков 28px (footer.css:48; вне шкалы §3.2 — «как есть»). */
 .cp-footer__contacts {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-3);
+  gap: 1.75rem;
 }
 
+/* Пара label/значение: шаг 4px (--ui-space-1, footer.css:54); строки
+   14/500/1.35 — .footer__contact-label и .footer__contact-value
+   (footer.css:62-74): наследуется в label и адрес (tel:/mailto:-ссылки
+   несут те же 14/500 сами — модификатор --nav; их 1.35 — правилом ниже). */
 .cp-footer__contact {
   display: flex;
   flex-direction: column;
   gap: var(--ui-space-1);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
 }
 
+/* Label — muted оригинала (footer.css:66): #808080 → gray-700 — AA-замена
+   T2.3 («принято ДС», прецедент крошек T14.5); полупрозрачность on-dark
+   снята — цвет несёт токен. */
 .cp-footer__contact-label {
-  opacity: 0.6;
+  color: var(--ui-color-text-muted);
+}
+
+/* Межстрочное контактных ссылок — как у значений (1.35). */
+.cp-footer__contact .ui-link {
+  line-height: var(--ui-lh-small);
 }
 
 .cp-footer__contact-group {
   display: flex;
-  gap: var(--ui-space-6);
+  /* 40px .footer__contact-group (footer.css:59; вне шкалы §3.2 — «как есть»). */
+  gap: 2.5rem;
 }
 
-.cp-footer__contact-link {
-  color: var(--ui-color-text-on-dark);
-}
-
+/* Правая колонка: соцсети сверху, копирайт снизу (footer.css:79-86);
+   шаг 24px — --ui-space-5 (в шкале). */
 .cp-footer__right {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-3);
+  gap: var(--ui-space-5);
   align-items: flex-end;
+  align-self: stretch;
+  justify-content: space-between;
+}
+
+/* Копирайт — одна строка, как в оригинале: у оригинала flex-колонка
+   .footer__right ширится по содержимому; grid-колонка 1fr клона уже —
+   строка переносилась. Сетка не перестраивается (Out of scope) —
+   однострочный вид держит nowrap. */
+.cp-footer__right .ui-small {
+  white-space: nowrap;
 }
 
 .cp-footer__socials {

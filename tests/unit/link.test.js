@@ -387,7 +387,7 @@ describe('adoption пилота — футер на ui-link--nav (T16.4, Testing
     expect(footerHtml, 'nav-лендмарка меню подвала на месте').toContain(
       '<nav aria-label="Меню подвала">',
     );
-    const footerLinks = footerHtml.match(/class="cp-footer__link[^"]*"/g) ?? [];
+    const footerLinks = footerHtml.match(/class="cp-footer__link[ "][^"]*"/g) ?? [];
     expect(footerLinks.length, 'пять ссылок колонки').toBe(5);
     for (const cls of footerLinks) {
       expect(cls, `${cls} — на nav-варианте`).toContain('ui-link--nav');
@@ -431,9 +431,10 @@ describe('adoption пилота — футер на ui-link--nav (T16.4, Testing
   it('колонка ссылок: шаг строк 9px (0.5625rem — вне шкалы §3.2, «как есть», footer.css:26), межстрочное 1.35, nowrap (footer.css:35-38)', () => {
     const ul = blockOf(pilotCss, '.cp-footer__links');
     expect(ul).toContain('gap: 0.5625rem;');
-    expect(ul, 'строки li — fs-small/lh-small (18.9px, .footer__links li footer.css:29-32)').toContain(
-      'font-size: var(--ui-fs-small);',
-    );
+    expect(
+      ul,
+      'строки li — fs-small/lh-small (18.9px, .footer__links li footer.css:29-32)',
+    ).toContain('font-size: var(--ui-fs-small);');
     expect(ul).toContain('line-height: var(--ui-lh-small);');
     const linkLh = blockOf(pilotCss, '.cp-footer__links .ui-link');
     expect(linkLh, 'nowrap пунктов — сайт-зона').toContain('white-space: nowrap;');
@@ -459,11 +460,16 @@ describe('adoption пилота — футер на ui-link--nav (T16.4, Testing
     expect(blockOf(pilotCss, '.cp-footer__contact-group')).toContain('gap: 2.5rem;');
   });
 
-  it('правая колонка: stretch + space-between (соцсети сверху, копирайт снизу — footer.css:79-86), шаг 24px (--ui-space-5)', () => {
+  it('правая колонка: stretch + space-between (соцсети сверху, копирайт снизу — footer.css:79-86), шаг 24px (--ui-space-5); копирайт однострочный, как в оригинале', () => {
     const right = blockOf(pilotCss, '.cp-footer__right');
     expect(right).toContain('align-self: stretch;');
     expect(right).toContain('justify-content: space-between;');
     expect(right).toContain('gap: var(--ui-space-5);');
+    const copy = blockOf(pilotCss, '.cp-footer__right .ui-small');
+    expect(
+      copy,
+      'в grid-каркасе 1fr строка копирайта переносится — однострочный вид оригинала держит nowrap',
+    ).toContain('white-space: nowrap;');
   });
 
   it('каркас: колонки/зазор 40px (2.5rem, footer.css:10) по оригиналу; сетка не перестраивается (Out of scope)', () => {

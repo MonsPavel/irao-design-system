@@ -432,13 +432,17 @@ function footerHtml() {
       <img src="assets/icons/logo-footer.svg" alt="Интер РАО ЕЭС" width="137" height="131">
     </a>
 
+    <!-- Ссылки футера (T16.4) — ui-link--nav (T16.3): fs-small/fw-small 14/500,
+         без подчёркивания (пункты навигации в nav-структуре, WCAG 1.4.1);
+         цвет фиксирует сайт-зона pilot.css — как в оригинале (.footer__link
+         footer.css:34-41), visited/hover цвет не меняют -->
     <nav aria-label="Меню подвала">
       <ul class="cp-footer__links">
-        <li><a class="cp-footer__link ui-link" href="vacancies.html">Вакансии</a></li>
-        <li><a class="cp-footer__link ui-link" href="internships.html">Школьникам и студентам</a></li>
-        <li><a class="cp-footer__link ui-link" href="media.html">Медиа</a></li>
-        <li><a class="cp-footer__link ui-link" href="#">Политика конфиденциальности</a></li>
-        <li><a class="cp-footer__link ui-link" href="#">Правила обработки персональных данных</a></li>
+        <li><a class="cp-footer__link ui-link ui-link--nav" href="vacancies.html">Вакансии</a></li>
+        <li><a class="cp-footer__link ui-link ui-link--nav" href="internships.html">Школьникам и студентам</a></li>
+        <li><a class="cp-footer__link ui-link ui-link--nav" href="media.html">Медиа</a></li>
+        <li><a class="cp-footer__link ui-link ui-link--nav" href="#">Политика конфиденциальности</a></li>
+        <li><a class="cp-footer__link ui-link ui-link--nav" href="#">Правила обработки персональных данных</a></li>
       </ul>
     </nav>
 
@@ -450,11 +454,11 @@ function footerHtml() {
       <div class="cp-footer__contact-group">
         <div class="cp-footer__contact">
           <span class="cp-footer__contact-label">Телефон</span>
-          <a class="cp-footer__contact-link ui-link" href="tel:+74956648840">+7 495 664-88-40</a>
+          <a class="cp-footer__contact-link ui-link ui-link--nav" href="tel:+74956648840">+7 495 664-88-40</a>
         </div>
         <div class="cp-footer__contact">
           <span class="cp-footer__contact-label">Email</span>
-          <a class="cp-footer__contact-link ui-link" href="mailto:career@interrao.ru">career@interrao.ru</a>
+          <a class="cp-footer__contact-link ui-link ui-link--nav" href="mailto:career@interrao.ru">career@interrao.ru</a>
         </div>
       </div>
     </div>
