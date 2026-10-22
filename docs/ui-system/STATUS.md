@@ -96,7 +96,7 @@
 | T16.13 | todo | EPIC-16 (раунд 4): ДС+пилот — детальные vacancy/apply: зарплата ui-lead+muted (18), секции ui-h4 (28/500), DS: ui-form__aside-label fs-micro/fw-micro + aside-title primary, file-кнопка против ui-button--light |
 | T16.6 | done | смержена |
 | T16.7 | todo | EPIC-16: ДС — ui-button--text (fs-small-regular, underline, muted); REPORT §8.2 №8 |
-| T16.4 | todo | EPIC-16: пилот — футер по оригиналу (белый, ссылки 14/500 plain); REPORT §8.2 №5; после T16.3 |
+| T16.4 | done | смержена |
 | T16.5 | todo | EPIC-16: пилот — строки/сайдбар по канону lpp-row (title 20/500 plain, pad 24/28, «Сбросить» текстовый, промо ui-card--filled); CTA-пилюля приходит из T16.11; REPORT §8.2 №6; после T16.2/T16.7/T16.11 |
 | T16.14 | todo | EPIC-16 (раунд 4): пилот — фильтры медиа (тип контента+рубрики) как ui-tag--blue (первый потребитель); размер фильтр-тега (ориг h40) — решение по probe; после T16.5 |
 | T16.15 | todo | EPIC-16 (раунд 4): пилот — промо-блок adv-marquee (internships/practices): строки 40/18/13 uppercase primary (сейчас 42/24/20 белым); сайт-зона pilot.css |
