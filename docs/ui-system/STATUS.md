@@ -88,7 +88,7 @@
 | T14.12 | done | смержена |
 | T16.1 | done | EPIC-16 (пиксель-перфект зоны shell, раунд 3 от 22.10): пилот — белый фон страницы + крошки видны (z-order статичной шапки в pilot.css); замеры REPORT §8.2 №1–№2; выполнена 22.10 (2 правки pilot.css + пересборка, верификация 5 страниц) |
 | T16.2 | done | смержена |
-| T16.3 | todo | EPIC-16: ДС+пилот — ui-link--nav (fs-small, без подчёркивания, hover opacity) + ui-dropdown__item fs16 + паттерн header + adoption шапки; REPORT §8.2 №4 |
+| T16.3 | done | смержена |
 | T16.9 | todo | EPIC-16 (бывш. T15.7, перенесена реш. владельца 22.10 «весь UI — в DS-эпик»): ДС — цвет подписи ui-field (P2 из REPORT §4, AA-замена gray-700) |
 | T16.10 | todo | EPIC-16 (бывш. T15.8, перенесена реш. владельца 22.10): ДС — ui-tag--on-photo (P2 из REPORT §4, белый на primary 40px) |
 | T16.11 | todo | EPIC-16: ДС — калибровка ui-button--pill (рамка+кружок primary, hover-свап accent, метка uppercase fs13/ls 0.04); находка владельца 22.10, REPORT §8.2 №6 + mapping §3; до T16.5 |
