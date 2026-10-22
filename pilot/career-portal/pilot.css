@@ -955,6 +955,52 @@
   margin: var(--ui-space-4) 0;
 }
 
+/* Панель фильтров каталога обучения (T15.3; оригинал .vac-filters,
+   pages.css:14–20): flex-лента пилюль ui-select wrap; gap 16px —
+   --ui-space-4, отступ снизу 2.5rem «как есть» (40px вне шкалы §3.2 —
+   прецедент --ui-card-gap). */
+.cp-catalog-filters {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-4);
+  margin-bottom: 2.5rem;
+}
+
+/* Ширину пилюли задаёт сайт (канон list-page): flex-basis 260px оригинала
+   (vacancy-search.css:41, «как есть») — без неё бокс нативного select
+   сжимается до самой длинной опции и подпись триггера подрезается.
+   6 фильтров переносятся лентой (Technical considerations T15.3:
+   прецедент вакансий был 3–4). */
+.cp-catalog-filters .cp-pill {
+  flex: 0 0 260px;
+}
+
+/* Скрытая подпись select-пилюли (label[for] канона ui-select T7.3):
+   в оригинале видимых подписей нет — имя доступно ассистивным технологиям,
+   визуал не меняет (техника visually-hidden, WCAG 2.5.3). */
+.cp-vh {
+  box-sizing: border-box;
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+/* Пагинация каталога по центру (T15.3; оригинал — inline-обёртка
+   education-catalog.html:57: flex + margin-top 48px = --ui-space-7). */
+.cp-catalog-nav {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--ui-space-7);
+}
+
 /* Лента разделов сразу после page-head: сверху ритм ведёт сам page-head */
 .cp-page-head + .ui-chip {
   margin-bottom: var(--ui-space-4);
