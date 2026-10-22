@@ -67,6 +67,10 @@
   border-radius: var(--ui-radius-pill);
   background-color: transparent;
   color: var(--ui-color-text);
+  /* Сброс UA-дефолта якоря (T16.2, REPORT §8.2 №3): страницы собирают
+     a.ui-button для переходов-действий — кнопочный вид не несёт подчёркивания
+     ни в одном состоянии, hover меняет только цвет (ADR-0010). */
+  text-decoration: none;
   font-family: var(--ui-font-family);
   font-size: var(--ui-fs-small);
   font-weight: var(--ui-fw-small);
