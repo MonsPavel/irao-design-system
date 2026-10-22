@@ -375,3 +375,100 @@ describe('подключение и гейты (DoD)', () => {
     expect(spec).toContain('focus-visible');
   });
 });
+
+describe('adoption пилота — футер на ui-link--nav (T16.4, Testing requirements: пины до браузерной пробы)', () => {
+  const build = readFileSync(join(root, 'pilot', 'career-portal', 'build.mjs'), 'utf8');
+  const pilotCss = stripCssComments(
+    readFileSync(join(root, 'pilot', 'career-portal', 'pilot.css'), 'utf8'),
+  );
+  const footerHtml = build.match(/function footerHtml[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
+
+  it('разметка футера: меню подвала — nav[aria-label], все ссылки колонки и контактов — ui-link--nav (Implementation requirements п.2)', () => {
+    expect(footerHtml, 'nav-лендмарка меню подвала на месте').toContain(
+      '<nav aria-label="Меню подвала">',
+    );
+    const footerLinks = footerHtml.match(/class="cp-footer__link[^"]*"/g) ?? [];
+    expect(footerLinks.length, 'пять ссылок колонки').toBe(5);
+    for (const cls of footerLinks) {
+      expect(cls, `${cls} — на nav-варианте`).toContain('ui-link--nav');
+    }
+    const contactLinks = footerHtml.match(/class="cp-footer__contact-link[^"]*"/g) ?? [];
+    expect(contactLinks.length, 'tel:/mailto: контактов — тоже ссылки футера').toBe(2);
+    for (const cls of contactLinks) {
+      expect(cls, `${cls} — на nav-варианте`).toContain('ui-link--nav');
+    }
+  });
+
+  it('копирайт «© 1998–2026, ПАО …» — роль small (fs-small-regular 14/fw 500 — .footer__copyright footer.css:110-114)', () => {
+    expect(footerHtml).toMatch(/class="ui-small"[^>]*>© 1998–2026/);
+  });
+
+  it('.cp-footer: белый фон и тёмный текст оригинала (bg --ui-color-surface, color --ui-color-text — REPORT §8.2 №5)', () => {
+    const block = blockOf(pilotCss, '.cp-footer');
+    expect(block, 'правило .cp-footer найдено').toBeTruthy();
+    expect(block).toContain('background-color: var(--ui-color-surface);');
+    expect(block).toContain('color: var(--ui-color-text);');
+  });
+
+  it('цвет ссылок футера фиксирован сайт-зоной (Technical considerations T16.4: одна строка против primary базы); правило .cp-footer__link on-dark снято', () => {
+    const block = blockOf(pilotCss, '.cp-footer .ui-link');
+    expect(block, 'site-правка цвета — одна строка на контейнер футера').toBeTruthy();
+    expect(block).toContain('color: var(--ui-color-text);');
+    expect(
+      blockOf(pilotCss, '.cp-footer__link'),
+      'старое on-dark-правило .cp-footer__link удалено',
+    ).toBeNull();
+    expect(
+      blockOf(pilotCss, '.cp-footer__link:hover'),
+      'on-dark-hover .cp-footer__link:hover удалён (hover несёт --nav)',
+    ).toBeNull();
+    expect(
+      blockOf(pilotCss, '.cp-footer__contact-link'),
+      'on-dark-правило контактных ссылок удалено (цвет общим правилом)',
+    ).toBeNull();
+  });
+
+  it('колонка ссылок: шаг строк 9px (0.5625rem — вне шкалы §3.2, «как есть», footer.css:26), межстрочное 1.35, nowrap (footer.css:35-38)', () => {
+    const ul = blockOf(pilotCss, '.cp-footer__links');
+    expect(ul).toContain('gap: 0.5625rem;');
+    expect(ul, 'строки li — fs-small/lh-small (18.9px, .footer__links li footer.css:29-32)').toContain(
+      'font-size: var(--ui-fs-small);',
+    );
+    expect(ul).toContain('line-height: var(--ui-lh-small);');
+    const linkLh = blockOf(pilotCss, '.cp-footer__links .ui-link');
+    expect(linkLh, 'nowrap пунктов — сайт-зона').toContain('white-space: nowrap;');
+    expect(linkLh, 'у --nav lh 1.1 (компакт шапки) — колонке футера 1.35').toContain(
+      'line-height: var(--ui-lh-small);',
+    );
+  });
+
+  it('контакты: 14/500/1.35 (footer.css:62-74), label — muted (AA gray-700) без opacity, шаг блоков 28px (1.75rem), внутри 4px, группа 40px (2.5rem)', () => {
+    const contact = blockOf(pilotCss, '.cp-footer__contact');
+    expect(contact).toContain('font-size: var(--ui-fs-small);');
+    expect(contact, 'вес label/value — fw-small 500').toContain('font-weight: var(--ui-fw-small);');
+    expect(contact).toContain('line-height: var(--ui-lh-small);');
+    expect(contact, 'шаг внутри пары — --ui-space-1 (4px, footer.css:54)').toContain(
+      'gap: var(--ui-space-1);',
+    );
+    const label = blockOf(pilotCss, '.cp-footer__contact-label');
+    expect(label, 'label — muted оригинала (#808080 → gray-700, AA T2.3)').toContain(
+      'color: var(--ui-color-text-muted);',
+    );
+    expect(label, 'полупрозрачность on-dark снята — цвет несёт токен').not.toContain('opacity');
+    expect(blockOf(pilotCss, '.cp-footer__contacts')).toContain('gap: 1.75rem;');
+    expect(blockOf(pilotCss, '.cp-footer__contact-group')).toContain('gap: 2.5rem;');
+  });
+
+  it('правая колонка: stretch + space-between (соцсети сверху, копирайт снизу — footer.css:79-86), шаг 24px (--ui-space-5)', () => {
+    const right = blockOf(pilotCss, '.cp-footer__right');
+    expect(right).toContain('align-self: stretch;');
+    expect(right).toContain('justify-content: space-between;');
+    expect(right).toContain('gap: var(--ui-space-5);');
+  });
+
+  it('каркас: колонки/зазор 40px (2.5rem, footer.css:10) по оригиналу; сетка не перестраивается (Out of scope)', () => {
+    const inner = blockOf(pilotCss, '.cp-footer__inner');
+    expect(inner).toContain('gap: 2.5rem;');
+    expect(inner, 'grid-каркас клона сохранён').toContain('grid-template-columns');
+  });
+});
