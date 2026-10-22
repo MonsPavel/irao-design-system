@@ -12,6 +12,11 @@
  * локальные цветные hover: .vac-card__company:hover, .breadcrumbs a:hover) —
  * компонент переносит идею цветного hover на явный класс и токены.
  *
+ * Единственное исключение — nav-вариант (T16.3): пункты навигации (меню,
+ * шапка, футер) в структурном контексте (<nav[aria-label]>) WCAG 1.4.1
+ * не обязывает подчёркивать — они различимы самим положением; inline-ссылки
+ * контента остаются подчёркнутыми (граница — README do/don't).
+ *
  * Цвета/подчёркивание — только токены слоя 2 (Implementation requirements
  * п.1): --ui-color-primary/text-muted/text-on-dark(-muted); link-токены цвета
  * не заводились (правило «слой 3 — только если двум сайтам нужно различие»).
@@ -99,6 +104,24 @@
   color: var(--ui-color-text-on-dark);
 }
 
+/* ── ui-link--nav: пункты навигации (меню/шапка/футер, T16.3). Размер и вес —
+      .header__link career-portal (fs-small 14 / fw-small 500); подчёркивание
+      снято: WCAG 1.4.1 обязывает различать ссылку без цвета у INLINE-ссылок
+      контента, пункты навигации в структурном контексте (<nav[aria-label]>,
+      списки меню) различимы самим положением — исключение задокументировано
+      в README (do/don't «Навигационные ссылки»), inline-ссылки контента
+      остаются подчёркнутыми (политика базы, T4.1). :visited — общее с default
+      (text-muted): nav-ссылки переходят между страницами одного сайта, цвет
+      посещённой меняется как у обычных. Размер наследуемо переопределяем
+      узкими сайт-случаями (например .cp-header__vi) — модификатор его задаёт,
+      но сайт может сузить. ── */
+
+.ui-link--nav {
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  text-decoration: none;
+}
+
 /* ── :hover — только под (hover: hover); :active — color-mix ── */
 
 @media (hover: hover) {
@@ -116,6 +139,17 @@
        .ui-link:hover (color-mix primary) — тёмный текст на blue-700 = 1.78:1
        (поймано e2e-контрастом). */
     color: var(--ui-color-text-on-dark);
+  }
+
+  /* Nav-hover — ТОЛЬКО opacity 0.7 (одобренный дизайн .header__link:hover
+     career-portal): opacity даёт группам навигации более точную картину и не
+     требует новых цветовых токенов (Technical considerations T16.3); цветной
+     hover nav-варианту не добавляется (Out of scope). Цвет переобъявлен —
+     тот же приём, что у --button: без него при hover просачивался color-mix
+     базы. Производное состояние ADR-0010: парами токенов не гейтится. */
+  .ui-link--nav:hover {
+    color: var(--ui-color-primary);
+    opacity: 0.7;
   }
 }
 

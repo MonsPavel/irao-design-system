@@ -24,6 +24,11 @@
   .uls-example {
     margin: 0 0 var(--ui-space-5);
   }
+  .uls-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2) var(--ui-space-4);
+  }
 </style>
 
 <section aria-labelledby="ui-link-text-heading">
@@ -126,5 +131,22 @@
     Только для «переход-выглядит-как-действие»: навигация на другой адрес. Действие на странице
     (отправка, раскрытие) — <code>ui-button</code> (T4.2). Подробнее — do/don't в README.md
     компонента.
+  </p>
+</section>
+
+<section aria-labelledby="ui-link-nav-heading">
+  <h2 id="ui-link-nav-heading">Пункты навигации (ui-link--nav)</h2>
+  <!-- T16.3: nav-вариант демонстрируется в структурном контексте nav[aria-label] —
+       ровно там, где снятие подчёркивания легитимно (WCAG 1.4.1). -->
+  <nav class="uls-example uls-nav" aria-label="Демо: пункты навигации">
+    <a class="ui-link ui-link--nav" id="ui-link-nav" href="#ui-link-nav-heading">Вакансии</a>
+    <a class="ui-link ui-link--nav" href="#ui-link-nav-heading">Школьникам и студентам</a>
+    <a class="ui-link ui-link--nav" href="#ui-link-nav-heading">Медиа</a>
+  </nav>
+  <p class="uls-example ui-small ui-text--muted">
+    Пункты меню/шапки/футера: <code>fs-small</code>/<code>fw-small</code> (14/500), без
+    подчёркивания — структурный контекст <code>&lt;nav aria-label&gt;</code> (WCAG 1.4.1);
+    hover — opacity 0.7. Inline-ссылки контента остаются на default (подчёркнуты всегда).
+    Подробнее — do/don't в README.md компонента.
   </p>
 </section>
