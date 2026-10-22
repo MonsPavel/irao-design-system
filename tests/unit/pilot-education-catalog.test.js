@@ -177,8 +177,20 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
     );
     expect(
       catalogHtml,
-      'недоступная стрелка — button[disabled], не disabled на <a> (канон T6.3)',
-    ).toMatch(/<button class="ui-pagination__arrow" type="button" disabled aria-label="Назад">/);
+      'недоступная стрелка — button[disabled] с каноническим именем «Предыдущая страница» (README ui-pagination:17, T6.3;Accessibility requirements: aria-метки по канону)',
+    ).toMatch(
+      /<button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">/,
+    );
+    expect(
+      catalogHtml,
+      'доступная стрелка — «Следующая страница» (README ui-pagination:18) и href на СЛЕДУЮЩУЮ страницу, не на себя (?page=2, ui-pagination.html:32; иначе лишняя Tab-остановка с ложным обещанием перехода — Do README)',
+    ).toMatch(
+      /<a class="ui-pagination__arrow" href="education-catalog\.html\?page=2" aria-label="Следующая страница">/,
+    );
+    expect(
+      catalogHtml,
+      'стрелки с прозой «Назад»/«Вперёд» не по канону — не применяются',
+    ).not.toMatch(/aria-label="Назад"|aria-label="Вперёд"/);
   });
 
   it('классы оригинала не копируются — только cp-* поверх ui-* (Implementation requirements п.1; Out of scope: отдельного паттерна строк не заводим)', () => {

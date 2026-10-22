@@ -1673,11 +1673,11 @@ ${offers}
 
     <div class="cp-catalog-nav">
       <nav class="ui-pagination" aria-label="Пагинация: каталог обучения">
-        <button class="ui-pagination__arrow" type="button" disabled aria-label="Назад">${CATALOG_ARROW_LEFT}</button>
+        <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${CATALOG_ARROW_LEFT}</button>
         <span class="ui-pagination__page" aria-current="page">1</span>
         <a class="ui-pagination__page" href="education-catalog.html?page=2" aria-label="Страница 2">2</a>
         <a class="ui-pagination__page" href="education-catalog.html?page=3" aria-label="Страница 3">3</a>
-        <a class="ui-pagination__arrow" href="education-catalog.html" aria-label="Вперёд">${ARROW}</a>
+        <a class="ui-pagination__arrow" href="education-catalog.html?page=2" aria-label="Следующая страница">${ARROW}</a>
       </nav>
     </div>
   </div>
