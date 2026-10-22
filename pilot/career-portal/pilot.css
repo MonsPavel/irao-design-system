@@ -19,12 +19,18 @@
 /* ── страница ── */
 
 .cp-page {
-  background-color: var(--ui-color-surface-muted);
+  /* Фон страницы — белый оригинала (--color-surface); blue-50
+     (--ui-color-surface-muted) — токен «фон карточек», он остаётся
+     точечным внутри (герой-поиск, cp-pill), не на всей странице. */
+  background-color: var(--ui-color-surface);
   color: var(--ui-color-text);
 }
 
-/* Статичный хедер внутренних страниц (главная несёт абсолютный) */
-.cp-header--static {
+/* Статичный хедер внутренних страниц (главная несёт абсолютный).
+   Селектор заквайлифицирован (.cp-header.cp-header--static): при равной
+   специфичности с более нижним .cp-header { position: absolute }
+   статика перебивалась — шапка накрывала полосу крошек (T16.1). */
+.cp-header.cp-header--static {
   position: static;
   border-bottom: var(--ui-border-width) solid var(--ui-color-border-muted);
   background-color: var(--ui-color-surface);

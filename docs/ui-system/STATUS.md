@@ -95,3 +95,11 @@
 | T15.7 | todo | EPIC-15: ДС — цвет подписи ui-field (P2 из REPORT §4, AA-замена gray-700) |
 | T15.8 | todo | EPIC-15: ДС — ui-tag--on-photo (P2 из REPORT §4, белый на primary 40px) |
 | T15.9 | todo | EPIC-15: закрывающая — compare на 20 страниц, гейт мёртвых ссылок dist, REPORT/PLAN; последняя |
+| T16.1 | done | EPIC-16 (пиксель-перфект зоны shell, раунд 3 от 22.10): пилот — белый фон страницы + крошки видны (z-order статичной шапки в pilot.css); замеры REPORT §8.2 №1–№2; выполнена 22.10 (2 правки pilot.css + пересборка, верификация 5 страниц) |
+| T16.2 | todo | EPIC-16: ДС — a.ui-button text-decoration: none (кнопки-ссылки без подчёркивания); REPORT §8.2 №3 |
+| T16.3 | todo | EPIC-16: ДС+пилот — ui-link--nav (fs-small, без подчёркивания, hover opacity) + ui-dropdown__item fs16 + паттерн header + adoption шапки; REPORT §8.2 №4 |
+| T16.4 | todo | EPIC-16: пилот — футер по оригиналу (белый, ссылки 14/500 plain); REPORT §8.2 №5; после T16.3 |
+| T16.5 | todo | EPIC-16: пилот — строки/сайдбар по канону lpp-row (title 20/500 plain, pad 24/28, CTA pill primary-рамка/кружок, «Сбросить» текстовый, промо ui-card--filled); REPORT §8.2 №6 |
+| T16.6 | todo | EPIC-16: ДС — ui-pagination--bare (без стрелок); REPORT §8.2 №7 |
+| T16.7 | todo | EPIC-16: ДС — ui-button--text (fs-small-regular, underline, muted); REPORT §8.2 №8 |
+| T16.8 | todo | EPIC-16: закрывающая — 8 новых проб compare.mjs (body-bg/header-link/dropdown-item/footer-link/row-title/row-item/pill-icon/reset-control), свежий compare, REPORT/PLAN; последняя |
