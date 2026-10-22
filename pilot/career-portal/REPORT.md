@@ -202,7 +202,7 @@ probe-данные 22.10 в силе. Находки ниже — это зон�
 | 2 | пилот | **крошки не видны** (на «вакансиях» и всех статичных внутренних) — ✅ закрыто T16.1 (22.10) | `.ui-breadcrumbs` в DOM, rect `y=0 h=62` — за абсолютной шапкой: `.cp-header--static` (pilot.css) перебит позднейшим `.cp-header{position:absolute}`. После фикса (селектор `.cp-header.cp-header--static`): crumbs `y=125 h=62` visible на статичных страницах; в оригинале `y=137 h=62` (остаточные 12px — высота шапки, зона T16.3). На главной шапка absolute и крошек нет — как в оригинале | T16.1 |
 | 3 | **ДС** | **кнопки-ссылки подчёркнуты** | `a.btn` tdl `none` → `a.ui-button` tdl `underline` (UA-дефолт якоря: `.ui-button` не сбрасывает text-decoration) | T16.2 |
 | 4 | ДС+пилот | **шапка: другой размер и подчёркнутые пункты** | `.header__link` fs 14/500, tdl none → `.cp-header .ui-link` fs 20, tdl underline; dropdown-пункты: fs 16/lh 20 → fs 20 (паддинги 8/12/15 совпали) | T16.3 |
-| 5 | пилот | **футер тёмный on-dark vs белый** — ✅ закрыто T16.4 (22.10) | футер bg `#FFFFFF`, ссылки fs 14/500 `#1F1F1F`, nowrap, h 227 → футер клона bg `--ui-color-primary-deep` `rgb(21,42,79)`, ссылки fs 20/400 on-dark underline, h 290. После T16.4: bg white, ссылки/контакты 14/500/1.35 без линии `#1F1F1F` nowrap, шаги 9/28/4/40/24 и right stretch+space-between — computed-матч оригинала, h 227 (проба vacancies/index 22.10); label muted `#808080`→gray-700 — AA T2.3 «принято ДС» | T16.4 |
+| 5 | пилот | **футер тёмный on-dark vs белый** — ✅ закрыто T16.4 (22.10) | футер bg `#FFFFFF`, ссылки fs 14/500 `#1F1F1F`, nowrap, h 227 → футер клона bg `--ui-color-primary-deep` `rgb(21,42,79)`, ссылки fs 20/400 on-dark underline, h 290. После T16.4: bg white, ссылки/контакты 14/500/1.35 без линии `#1F1F1F` nowrap, шаги 9/28/4/40/24 и right stretch+space-between, hover — accent `rgb(242,103,34)` (footer.css:43,76; сайт-строка под `@media (hover: hover)`) — computed-матч оригинала, h 227 (проба vacancies/index 22.10); label muted `#808080`→gray-700 — AA T2.3 «принято ДС» | T16.4 |
 | 6 | пилот | **строки списка и сайдбар: не по канону T14.10** | title: h2 fs 20/500 plain `#1F1F1F` → ui-link fs 28 underline navy; строка pad «24px 28px» → 16px; CTA пилюля: border primary + кружок primary fs 13 → без рамки, кружок accent `rgb(242,103,34)` fs 14; «Сбросить» — текст-кнопка fs 14/400 underline muted → outline-кнопка 52px; промо-карточка — `ui-card--filled` (blue-50, pad 20, r16) отсутствует | T16.5 |
 | 7 | **ДС** | **пагинация всегда со стрелками** | `.pagination` — только страницы 1..3 → `.ui-pagination` содержит 2 `ui-pagination__arrow` | T16.6 |
 | 8 | **ДС** | нет текстовой кнопки (для «Сбросить» оригинала) | кнопка-текст fs 14/400 underline muted — аналога нет (`ui-link` ≠ семантика кнопки) | T16.7 |
@@ -225,6 +225,11 @@ probe-данные 22.10 в силе. Находки ниже — это зон�
   перенос строки естественный (контент-разметка, не сетка); :visited-цвет
   проверен каскадом (правило pilot.css позднее ui-core при равной
   специфичности) — браузерный computed :visited браузеры маскируют.
+  Ревью 22.10 (по 7c26ebd): первая итерация T16.4 подавала hover как
+  «как в оригинале» — неверно (оригинал меняет цвет на accent,
+  footer.css:43,76); дивергенция закрыта в самой задаче — сайт-строка
+  accent-hover под `@media (hover: hover)` (проба: клон hover
+  `rgb(242,103,34)`/opacity 1 = оригинал), формулировки исправлены.
 
 ## 9. Раунд 4 (22.10, вечер): регрессия после T16.1 и расширение эпика
 

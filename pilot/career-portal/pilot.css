@@ -781,14 +781,29 @@
    подчёркивание несёт модификатор (Implementation requirements п.2 T16.4 —
    свойства ui-link через .cp-footer__link не переопределяются). Цвет
    фиксирует сайт-зона (Technical considerations T16.4 — одна строка против
-   primary базы .ui-link): у оригинала цвет .footer__link не меняют ни
-   :visited, ни :hover (footer.css:34-41) — «потемнения» visited нет
-   (Implementation requirements п.3), аффорданс наведения остаётся у --nav
-   (opacity .7, как у шапки). Каскад: pilot.css позднее ui-core.min.css в
-   <head> — при равной специфичности (0,2,0) с .ui-link:visited/:hover
-   побеждает это правило. */
+   primary базы .ui-link): :visited оригинал не задаёт — «потемнения»
+   посещённых нет (Implementation requirements п.3); hover оригинала,
+   напротив, меняет цвет на accent (footer.css:43, 76) — см. media-правило
+   ниже. Каскад: pilot.css позднее ui-core.min.css в <head> — при равной
+   специфичности (0,2,0) с .ui-link:visited побеждает это правило. */
 .cp-footer .ui-link {
   color: var(--ui-color-text);
+}
+
+/* Hover — accent, пара одобренного дизайна оригинала: .footer__link:hover и
+   .footer__contact-link:hover — var(--color-accent) #F26722 (footer.css:43,
+   76; variables.css:6). Hover nav-варианта (цвет не меняется + opacity .7) —
+   одобренный дизайн ШАПКИ (.header__link), футеру он не соответствует;
+   цвет base-правила выше и без этого правила перебивал бы цветную часть
+   --nav:hover, здесь переобъявлен accent явно, opacity сброшена в 1 —
+   у оригинала hover меняет только цвет. Под (hover: hover) — EPIC-4.
+   Исправление ревью T16.4 (7c26ebd подавал дивергенцию как «как в
+   оригинале»). */
+@media (hover: hover) {
+  .cp-footer .ui-link:hover {
+    color: var(--ui-color-accent);
+    opacity: 1;
+  }
 }
 
 /* Каркас grid клона не перестраивается (Out of scope T16.4). Зазор колонок

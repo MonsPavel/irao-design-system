@@ -434,8 +434,9 @@ function footerHtml() {
 
     <!-- Ссылки футера (T16.4) — ui-link--nav (T16.3): fs-small/fw-small 14/500,
          без подчёркивания (пункты навигации в nav-структуре, WCAG 1.4.1);
-         цвет фиксирует сайт-зона pilot.css — как в оригинале (.footer__link
-         footer.css:34-41), visited/hover цвет не меняют -->
+         цвет в покое и :visited фиксирует сайт-зона pilot.css (visited
+         оригинал не задаёт — потемнения нет), hover — accent оригинала
+         (footer.css:43,76) -->
     <nav aria-label="Меню подвала">
       <ul class="cp-footer__links">
         <li><a class="cp-footer__link ui-link ui-link--nav" href="vacancies.html">Вакансии</a></li>
