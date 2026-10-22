@@ -1753,6 +1753,104 @@ ${sections}
 </section>`;
 }
 
+/* ── компания группы: детальная страница (T15.2) ──
+   Оригинал — одна типовая страница, фиксированная за компанией
+   «АО «Интер РАО – Электрогенерация» (build.py company.html: крошки/h1).
+   Имя берём из data/companies.json — первая компания сегмента «Генерация»
+   (в байт-в-байт копии данных это та же компания); остальной контент —
+   фрагмент оригинала src/pages/company.html без выдумывания: описание,
+   3 факта, 4 преимущества, подписи «где мы работаем». Секции «Вакансии/
+   Стажировки/Практики компании», лента «Может быть интересно» и второй
+   баннер в композицию спеки T15.2 не входят (CTA ведёт на vacancies.html). */
+function companyMain() {
+  const company = COMP.companies.find((c) => c.segment === 'Генерация');
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Компании группы', 'companies.html'],
+    [company.name, ''],
+  ])}
+<section class="ui-section">
+  <div class="ui-container">
+    <div class="cp-company-hero">
+      <img class="ui-image ui-image--cover cp-company-hero__photo" src="assets/images/internship-1.png" alt="Производство компании ${esc(company.name)}" width="431" height="431" loading="lazy">
+      <div class="cp-company-hero__body">
+        <h1 class="ui-page-title">${esc(company.name)}</h1>
+        <div class="cp-company-hero__text">
+          <p class="ui-body">Генерирующая компания Группы «Интер РАО»: электростанции в Санкт-Петербурге и Ленинградской области общей мощностью более 2,5 ГВт.</p>
+          <p class="ui-body">Мы производим электрическую и тепловую энергию, развиваем современные технологии генерации и создаём условия для профессионального роста инженеров и специалистов.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Факты компании: числа — роль ui-h2 (Scope); цвет на тёмном несёт
+         сайт-зона (override роли — пара cp-holding__title). Список —
+         семантика фактов (Accessibility requirements). -->
+    <ul class="cp-company-stats">
+      <li class="cp-company-stats__item">
+        <span class="cp-company-stats__value ui-h2">2,5 ГВт</span>
+        <span class="cp-company-stats__label ui-small">установленная электрическая мощность</span>
+      </li>
+      <li class="cp-company-stats__item">
+        <span class="cp-company-stats__value ui-h2">500+</span>
+        <span class="cp-company-stats__label ui-small">специалистов работают в компании</span>
+      </li>
+      <li class="cp-company-stats__item">
+        <span class="cp-company-stats__value ui-h2">Топ-10</span>
+        <span class="cp-company-stats__label ui-small">региональных генерирующих компаний</span>
+      </li>
+    </ul>
+
+    <h2 class="ui-h2 cp-company-title">Преимущества компании</h2>
+    <ul class="cp-company-adv">
+      <li class="cp-company-adv__item">
+        <h3 class="ui-h4 cp-company-adv__title">Современное производство</h3>
+        <p class="ui-small">Новое оборудование и автоматизированные системы управления станциями.</p>
+      </li>
+      <li class="cp-company-adv__item">
+        <h3 class="ui-h4 cp-company-adv__title">Наставничество</h3>
+        <p class="ui-small">Программа наставничества для новых сотрудников и молодых специалистов.</p>
+      </li>
+      <li class="cp-company-adv__item">
+        <h3 class="ui-h4 cp-company-adv__title">Обучение и развитие</h3>
+        <p class="ui-small">Корпоративный университет, тренинги и компенсация обучения.</p>
+      </li>
+      <li class="cp-company-adv__item">
+        <h3 class="ui-h4 cp-company-adv__title">Стабильность</h3>
+        <p class="ui-small">Белая заработная плата, ДМС, соцпакет и гарантии по ТК РФ.</p>
+      </li>
+    </ul>
+
+    <!-- «Где мы работаем»: приближение подписями (Out of scope T15.2 —
+         карта-иллюстрация); пара фото+подпись — ui-figure (подпись
+         связана семантически), alt дублирует подпись (подпись не заменяет
+         alt — README ui-figure). -->
+    <h2 class="ui-h2 cp-company-title">Где мы работаем</h2>
+    <div class="cp-company-where">
+      <figure class="ui-figure cp-company-where__item">
+        <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
+        <figcaption class="ui-figure__caption ui-small ui-text--muted">Головной офис компании</figcaption>
+      </figure>
+      <figure class="ui-figure cp-company-where__item">
+        <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-4.jpg" alt="Производственные площадки и станции" width="313" height="208" loading="lazy">
+        <figcaption class="ui-figure__caption ui-small ui-text--muted">Производственные площадки и станции</figcaption>
+      </figure>
+    </div>
+
+    <!-- CTA-баннер (banner-card оригинала): фото — подложка под текстом
+         (alt="", README ui-image: подписывать декоративное нечего); кнопка —
+         ui-button на vacancies.html (Scope T15.2). -->
+    <div class="cp-company-banner">
+      <img class="ui-image ui-image--cover cp-company-banner__photo" src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
+      <div class="cp-company-banner__body">
+        <h2 class="ui-h2 cp-company-banner__title">Вакансии компании</h2>
+        <p class="ui-small cp-company-banner__text">Посмотрите открытые вакансии именно в нашей компании.</p>
+        <a class="ui-button ui-button--primary" href="vacancies.html">смотреть вакансии</a>
+      </div>
+    </div>
+  </div>
+</section>`;
+}
+
 /* ── 404 ── */
 
 function notFoundMain() {
@@ -1814,6 +1912,11 @@ const PAGES = [
     file: 'career-track.html',
     title: 'Карьерные треки — Портал карьеры Интер РАО',
     main: careerTrackMain(),
+  },
+  {
+    file: 'company.html',
+    title: 'АО «Интер РАО – Электрогенерация» — Портал карьеры Интер РАО',
+    main: companyMain(),
   },
   {
     file: 'companies.html',

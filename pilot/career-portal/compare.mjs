@@ -36,6 +36,7 @@ const PAGES = [
   'events.html',
   'media.html',
   'career-track.html',
+  'company.html',
   'companies.html',
   '404.html',
 ];

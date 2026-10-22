@@ -43,15 +43,20 @@ const blockOf = (css, selector) => {
 const pilotDir = join(root, 'pilot', 'career-portal');
 const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8');
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8');
-const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
+const pilotCssRaw = readFileSync(join(pilotDir, 'pilot.css'), 'utf8');
+const pilotCss = stripCssComments(pilotCssRaw);
 const companies = JSON.parse(readFileSync(join(pilotDir, 'data', 'companies.json'), 'utf8'));
 
-/** Разметка, которую возвращает companyMain() (один return-шаблон). */
-const companyHtml = build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;\n}/)?.[1] ?? '';
+/** Разметка, которую возвращает companyMain() (один return-шаблон;
+ *  хвост без `\n}` — рабочая копия Windows отдаёт CRLF, см. link.test.js). */
+const companyHtml = build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
 
 /** Кусок pilot.css от блоков компании до общего адаптива сайт-зоны. */
 const companyCssStart = pilotCss.indexOf('.cp-company-hero');
-const companyCss = pilotCss.slice(companyCssStart, pilotCss.indexOf('/* Сайт-зона пилота: адаптив'));
+const companyCss = pilotCss.slice(
+  companyCssStart,
+  pilotCss.indexOf('/* Сайт-зона пилота: адаптив'),
+);
 
 describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   it('PAGES содержит company.html с заголовком по канону оригинала (build.py: «АО «Интер РАО – Электрогенерация» — Портал карьеры Интер РАО»)', () => {
@@ -82,10 +87,7 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   it('company-hero: фото — ui-image (Scope), описание — два абзаца контента оригинала (src/pages/company.html:8–9, без выдумывания)', () => {
     expect(companyHtml).toMatch(/class="ui-image ui-image--cover cp-company-hero__photo"/);
     expect(companyHtml).toContain('Генерирующая компания Группы «Интер РАО»');
-    expect(
-      companyHtml,
-      'второй абзац описания оригинала',
-    ).toContain(
+    expect(companyHtml, 'второй абзац описания оригинала').toContain(
       'Мы производим электрическую и тепловую энергию, развиваем современные технологии генерации',
     );
     expect(companyHtml.match(/<p class="ui-body">/g)?.length ?? 0).toBe(2);
@@ -116,14 +118,14 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   });
 
   it('где мы работаем: две фигуры ui-figure с подписями оригинала (приближение вместо карты-иллюстрации — Out of scope T15.2)', () => {
-    expect(companyHtml.match(/<figure class="ui-figure cp-company-where__item">/g)?.length ?? 0).toBe(
-      2,
-    );
+    expect(
+      companyHtml.match(/<figure class="ui-figure cp-company-where__item">/g)?.length ?? 0,
+    ).toBe(2);
     expect(companyHtml).toContain('Головной офис компании');
     expect(companyHtml).toContain('Производственные площадки и станции');
-    expect(companyHtml.match(/class="ui-image ui-image--cover cp-company-where__photo"/g)?.length ?? 0).toBe(
-      2,
-    );
+    expect(
+      companyHtml.match(/class="ui-image ui-image--cover cp-company-where__photo"/g)?.length ?? 0,
+    ).toBe(2);
     expect(companyHtml, 'подпись связана с фото семантически').toContain(
       '<figcaption class="ui-figure__caption',
     );
@@ -179,10 +181,8 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
   });
 
   it('Technical considerations (переиспользование статов holding): две вариации — holding на glass-dark с рамкой и note, company на сплошном primary; решение зафиксировано комментарием', () => {
-    const section = pilotCss.slice(pilotCss.indexOf('/* ── компания:'));
-    expect(section, 'решение по унификации задокументировано в пилоте').toContain(
-      'holding',
-    );
+    const section = pilotCssRaw.slice(pilotCssRaw.indexOf('/* ── компания:'));
+    expect(section, 'решение по унификации задокументировано в пилоте').toContain('holding');
   });
 
   it('статы на сплошном primary (оригинал .company-stats__item background var(--color-primary), pages.css:807) — без hex', () => {
