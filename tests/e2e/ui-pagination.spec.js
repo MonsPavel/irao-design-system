@@ -6,7 +6,9 @@
  * текущая в середине); #uipag-short — короткий список без пропусков
  * (3 страницы, текущая 2 — все стрелки доступны); #uipag-first /
  * #uipag-last — краевые (3 страницы, текущая 1/3 — недоступна стрелка
- * назад/вперёд: button[disabled]). Проверяется:
+ * назад/вперёд: button[disabled]); #uipag-bare — вариант без стрелок
+ * (модификатор --bare, T16.6: как в career-portal — только страницы).
+ * Проверяется:
  *  1. семантика (AC): лендмарка nav с уникальным конвенционным именем;
  *     текущая — span + aria-current="page", ровно одна на инстанс;
  *     «…» — span aria-hidden; страницы-ссылки с именами «Страница N»;
@@ -40,6 +42,7 @@ const PAG = {
   short: 'uipag-short',
   first: 'uipag-first',
   last: 'uipag-last',
+  bare: 'uipag-bare',
 };
 
 /** Интерактивные элементы одной навигации в DOM-порядке (= Tab-порядок). */
@@ -75,6 +78,7 @@ test.describe('ui-pagination: семантика (T6.3)', () => {
       [PAG.short, '2'],
       [PAG.first, '1'],
       [PAG.last, '3'],
+      [PAG.bare, '1'],
     ]) {
       const nav = page.locator(`#${id}`);
       await expect(nav, `${id}: лендмарка`).toHaveAttribute('aria-label', /Пагинация/);
@@ -154,6 +158,48 @@ test.describe('ui-pagination: семантика (T6.3)', () => {
       const svgs = nav.locator('svg[aria-hidden="true"]');
       expect(await svgs.count(), `${id}: оба глифа декоративны`).toBeGreaterThanOrEqual(2);
     }
+  });
+
+  test('bare (T16.6): стрелок в DOM нет, разметка — только страницы; лендмарка и aria-current на месте', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-pagination');
+
+    const nav = page.locator(`#${PAG.bare}`);
+    // Стрелок нет вовсе (Report §8.2 №7: у оригинала стрелок в DOM нет —
+    // ionic-вариант; display:none — страховка, здесь разметка без стрелок).
+    await expect(nav.locator('.ui-pagination__arrow')).toHaveCount(0);
+    // Страницы-ссылки — единственные интерактивы навигации.
+    const links = nav.locator('a.ui-pagination__page');
+    await expect(links).toHaveCount(2);
+    for (const label of ['Страница 2', 'Страница 3']) {
+      await expect(nav.locator(`a[aria-label="${label}"]`)).toBeAttached();
+    }
+    // Навигация по страницам сохраняет смысловой контейнер (WCAG 2.4.4).
+    await expect(nav).toHaveAttribute('aria-label', /Пагинация/);
+    await expect(nav.locator(".ui-pagination__page[aria-current='page']")).toHaveText('1');
+  });
+
+  test('bare (T16.6): не добавляет таб-остановов — после последней страницы фокус покидает навигацию', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-pagination');
+
+    const nav = page.locator(`#${PAG.bare}`);
+    // Таб-стопы внутри bare-навигации — только ссылки страниц: 2 и 3
+    // (текущая 1 — span, не остановка).
+    await tabTo(page, nav.locator('a[aria-label="Страница 2"]'));
+    await expect(nav.locator('a[aria-label="Страница 2"]')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(
+      nav.locator('a[aria-label="Страница 3"]'),
+      'второй и последний стоп',
+    ).toBeFocused();
+    await page.keyboard.press('Tab');
+    const focusInside = await page.evaluate(
+      () => document.activeElement?.closest('#uipag-bare') !== null,
+    );
+    expect(focusInside, 'стрелок нет — Tab увёл фокус из навигации').toBe(false);
   });
 });
 
@@ -254,7 +300,7 @@ test.describe('ui-pagination: touch-цели и состояния (T6.3)', () =
   }) => {
     const page = await stand('ui-pagination');
 
-    for (const id of [PAG.full, PAG.short, PAG.first, PAG.last]) {
+    for (const id of [PAG.full, PAG.short, PAG.first, PAG.last, PAG.bare]) {
       const items = page.locator(`#${id} .ui-pagination__page, #${id} .ui-pagination__arrow`);
       const count = await items.count();
       expect(count, `${id}: элементы есть`).toBeGreaterThan(0);

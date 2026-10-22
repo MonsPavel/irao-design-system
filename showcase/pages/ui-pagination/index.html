@@ -1,15 +1,19 @@
-<!-- Стенд ui-pagination (T6.3): четыре навигации-сценария (Scope). Каждая —
-     автономный пример с разведённым aria-label (axe landmark-unique: 4 лендмарки
-     nav на одной странице обязаны различаться; конвенция имени «Пагинация…» —
-     README компонента). #uipag-full — полный список с окном страниц и «…»
-     (20 страниц, текущая 7: контракт окна — bitrix/snippets/pagination.php);
-     #uipag-short — короткий список без пропусков (3 страницы, текущая 2 — все
-     стрелки доступны); #uipag-first/#uipag-last — краевые сценарии (недоступна
-     стрелка назад/вперёд: button[disabled] — решение по нативной семантике,
-     career-portal <a disabled> невалиден). href «?page=N» — demo-адреса:
-     сервер отдаёт ту же страницу, клик по ссылкам безопасен; в бою URL — зона
-     шаблона (сниппет генерирует из шаблона '?page=#PAGE#' и т.п.). Пагинация
-     работает без JS по построению — JS-модуля у компонента нет. -->
+<!-- Стенд ui-pagination (T6.3; bare-сценарий — T16.6): пять навигаций-
+     сценариев. Каждая — автономный пример с разведённым aria-label (axe
+     landmark-unique: лендмарки nav на одной странице обязаны различаться;
+     конвенция имени «Пагинация…» — README компонента). #uipag-full — полный
+     список с окном страниц и «…» (20 страниц, текущая 7: контракт окна —
+     bitrix/snippets/pagination.php); #uipag-short — короткий список без
+     пропусков (3 страницы, текущая 2 — все стрелки доступны);
+     #uipag-first/#uipag-last — краевые сценарии (недоступна стрелка
+     назад/вперёд: button[disabled] — решение по нативной семантике,
+     career-portal <a disabled> невалиден); #uipag-bare — форма без стрелок
+     (T16.6, модификатор --bare: как .pagination оригинала career-portal на
+     списковых страницах — REPORT §8.2 №7, стрелок в DOM нет). href
+     «?page=N» — demo-адреса: сервер отдаёт ту же страницу, клик по ссылкам
+     безопасен; в бою URL — зона шаблона (сниппет генерирует из шаблона
+     '?page=#PAGE#' и т.п.). Пагинация работает без JS по построению —
+     JS-модуля у компонента нет. -->
 <section aria-labelledby="uipag-full-heading">
   <h2 id="uipag-full-heading">Полный список (окно страниц с «…»)</h2>
   <p class="ui-showcase-stand__note">
@@ -99,5 +103,24 @@
       <!-- prettier-ignore -->
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
+  </nav>
+</section>
+
+<section aria-labelledby="uipag-bare-heading">
+  <h2 id="uipag-bare-heading">Без стрелок (<code>--bare</code>)</h2>
+  <p class="ui-showcase-stand__note">
+    Форма компонента без стрелок (T16.6): как <code>.pagination</code> оригинала career-portal на
+    списковых страницах — в DOM только номера (3 страницы, текущая 1). Разметка вовсе не включает
+    стрелки; если разметка готовая, <code>--bare</code> прячет их <code>display: none</code> —
+    скрытое не фокусируется и не читается. Tab-остановы — только ссылки страниц 2 и 3.
+  </p>
+  <nav
+    id="uipag-bare"
+    class="ui-pagination ui-pagination--bare"
+    aria-label="Пагинация: без стрелок (bare)"
+  >
+    <span class="ui-pagination__page" aria-current="page">1</span>
+    <a class="ui-pagination__page" href="?page=2" aria-label="Страница 2">2</a>
+    <a class="ui-pagination__page" href="?page=3" aria-label="Страница 3">3</a>
   </nav>
 </section>

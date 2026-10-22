@@ -1,6 +1,6 @@
-<!-- ui-pagination (T6.3): канонический паттерн — краевой сценарий «первая
-     страница» (в нём живут все особые элементы; 12 страниц, окно ±1 —
-     умолчание сниппета: 1 2 … 12): nav[aria-label="Пагинация"]
+<!-- ui-pagination (T6.3; bare-форма — T16.6): канонический паттерн — краевой
+     сценарий «первая страница» (в нём живут все особые элементы; 12 страниц,
+     окно ±1 — умолчание сниппета: 1 2 … 12): nav[aria-label="Пагинация"]
      — конвенция имени лендмарки (Technical considerations; контекстное имя —
      README); недоступная стрелка «Назад» — button[type="button"][disabled] —
      нативно не фокусируется, не кликается, объявляется неактивной (в
@@ -15,7 +15,11 @@
      зона сайта/шаблона, генератор — bitrix/snippets/pagination.php).
      Пагинация работает без JS по построению (обычные ссылки) — JS-модуля и
      data-ui-* хуков у компонента нет. prettier-ignore у svg — конвенция
-     многострочных глифов (CONTRIBUTING). -->
+     многострочных глифов (CONTRIBUTING). Второй паттерн — форма без
+     стрелок (T16.6): модификатор --bare на блоке, разметка вовсе не
+     включает стрелки (как .pagination оригинала career-portal на списковых
+     страницах — REPORT §8.2 №7); лендмарки двух форм разведены именами
+     (axe landmark-unique). -->
 <nav class="ui-pagination" aria-label="Пагинация">
   <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">
     <!-- prettier-ignore -->
@@ -29,4 +33,9 @@
     <!-- prettier-ignore -->
     <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </a>
+</nav>
+<nav class="ui-pagination ui-pagination--bare" aria-label="Пагинация: без стрелок (bare)">
+  <span class="ui-pagination__page" aria-current="page">1</span>
+  <a class="ui-pagination__page" href="?page=2" aria-label="Страница 2">2</a>
+  <a class="ui-pagination__page" href="?page=3" aria-label="Страница 3">3</a>
 </nav>

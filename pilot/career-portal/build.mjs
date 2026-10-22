@@ -1209,16 +1209,14 @@ function vacanciesMain() {
 ${rows}
         </div>
 
-        <nav class="ui-pagination" aria-label="Пагинация: вакансии">
-          <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
+        <!-- ui-pagination--bare (T16.6): у оригинала .pagination на списковых
+             страницах стрелок нет вовсе (REPORT §8.2 №7, замер 22.10) —
+             разметка без ui-pagination__arrow + модификатор --bare;
+             стили страниц (44×44, aria-current) не меняются -->
+        <nav class="ui-pagination ui-pagination--bare" aria-label="Пагинация: вакансии">
           <span class="ui-pagination__page" aria-current="page">1</span>
           <a class="ui-pagination__page" href="vacancies.html?page=2" aria-label="Страница 2">2</a>
           <a class="ui-pagination__page" href="vacancies.html?page=3" aria-label="Страница 3">3</a>
-          <a class="ui-pagination__arrow" href="vacancies.html?page=2" aria-label="Следующая страница">
-            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
         </nav>
       </div>
     </div>
