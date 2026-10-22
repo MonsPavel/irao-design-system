@@ -149,6 +149,55 @@ describe('components/ui-tag/ui-tag.css — варианты (Scope T4.3: blue/or
   });
 });
 
+describe('T16.10 — модификатор «тег на фото» (ui-tag--on-photo)', () => {
+  const source = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8'),
+  );
+
+  it('токен высоты on-photo: 2.5rem (40px оригинала — pages.css:596/REPORT §3.3; вне шкалы §3.2 — перенос «как есть»)', () => {
+    expect(source).toMatch(/--ui-tag-height-on-photo:\s*2\.5rem;/);
+  });
+
+  it('модификатор: непрозрачная плашка primary/text-on-dark, высота — токен on-photo', () => {
+    const block = blockOf(css, '.ui-tag--on-photo');
+    expect(block, 'правило .ui-tag--on-photo найдено').toBeTruthy();
+    expect(block).toContain('min-height: var(--ui-tag-height-on-photo);');
+    expect(block).toContain('background-color: var(--ui-color-primary);');
+    expect(block).toContain('color: var(--ui-color-text-on-dark);');
+  });
+
+  it('модификатор объявлен ПОСЛЕ цветовых вариантов — перекрывает их при совместном использовании', () => {
+    expect(css.indexOf('.ui-tag--on-photo'), 'модификатор найден').toBeGreaterThan(-1);
+    expect(css.indexOf('.ui-tag--on-photo')).toBeGreaterThan(css.lastIndexOf('.ui-tag--navy'));
+  });
+
+  it('плашка не tint: без color-mix/альфы — контраст не зависит от фото (Technical considerations)', () => {
+    const block = blockOf(css, '.ui-tag--on-photo');
+    expect(block).not.toMatch(/color-mix|rgba?\(|-a\d+\b/);
+  });
+
+  it('алиас tag-on-photo в pairs.config.mjs — роль в покрытии гейта (Implementation requirements п.2)', () => {
+    const config = readFileSync(join(root, 'tests', 'contrast', 'pairs.config.mjs'), 'utf8');
+    const pair = config.match(/\{\s*id:\s*'tag-on-photo'[\s\S]*?\}/);
+    expect(pair, 'пара tag-on-photo найдена').toBeTruthy();
+    expect(pair[0]).toContain("fg: '--ui-color-text-on-dark'");
+    expect(pair[0]).toContain("bg: '--ui-color-primary'");
+  });
+
+  it("README: правило «когда on-photo» — только поверх фото/тёмного, на светлом фоне запрещён", () => {
+    const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
+    expect(readme).toContain('on-photo');
+    expect(readme).toMatch(/на светлом фоне/i);
+  });
+
+  it('стенд: вариант on-photo на фото-подложке', () => {
+    const html = readFileSync(join(root, 'showcase', 'pages', 'ui-tag', 'index.html'), 'utf8');
+    expect(html).toContain('id="ui-tag-on-photo"');
+    expect(html).toContain('id="ui-tag-on-photo-backdrop"');
+  });
+});
+
 describe('components/ui-tag/ui-tag.css — слот __icon (наследие media__tag-dot)', () => {
   const css = stripCssComments(
     readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8'),
