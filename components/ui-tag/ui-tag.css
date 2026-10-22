@@ -9,7 +9,8 @@
  * геометрия — --ui-tag-height/-gap/-letter-spacing (каждая со строкой в
  * таблице диффов), цвета — готовые пары «Цветов-смыслов: теги» (T2.2/T2.3)
  * плюс заведённая T4.3 --ui-color-tag-blue-bg. Отступы 4/12px — ступени
- * --ui-space-1/--ui-space-3 шкалы §3.2.
+ * --ui-space-1/--ui-space-3 шкалы §3.2. Модификатор --on-photo (T16.10) —
+ * оверлейный тег карточек с фото: primary/text-on-dark, 40px.
  *
  * Высота — min-height, не height (прецедент T4.2): 32px-база T3.6 растит тег
  * вместе с текстом (контент line-box 12×1.35 + паддинг 4×2 ≈ 24.2px меньше
@@ -76,6 +77,23 @@
 }
 
 .ui-tag--navy {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* T16.10: «тег на фото» — оверлейный тег карточек с фотографией (события —
+   формат, медиа — рубрика; REPORT §3.3 остаток раунда 1, probe education/
+   media: height 40). Оригинал красит тег на фото белым на --color-primary
+   независимо от «цветового» варианта — плашка непрозрачна и не tint:
+   контраст (12.58:1, пара tag-blue/on-dark гейта) не зависит от фотографии
+   (Technical considerations). Именование --on-photo («поверх фото»), не
+   --overlay — не путать с z-слоем. Объявлен ПОСЛЕ цветовых вариантов:
+   при совместном использовании перекрывает их (каскад, равная специфика).
+   Высота 40px — --ui-tag-height-on-photo (вне шкалы §3.2 — перенос «как
+   есть», прецедент --ui-chip-height). Правило применения — README.md:
+   только поверх фото/тёмного, на светлом фоне запрещён. */
+.ui-tag--on-photo {
+  min-height: var(--ui-tag-height-on-photo);
   background-color: var(--ui-color-primary);
   color: var(--ui-color-text-on-dark);
 }

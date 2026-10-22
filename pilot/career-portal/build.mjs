@@ -200,11 +200,13 @@ function vacancyRow(v) {
 
 /** карточка события (оригинал .event-card): ui-card--link + теги */
 function eventCard(e) {
+  // Тег на фото — ui-tag--on-photo (T16.10, REPORT §3.3): оригинал красит
+  // тег на фотографии белым на primary (40px) независимо от варианта вне фото.
   const reg = /открыта/.test(e.reg)
-    ? '<span class="ui-tag ui-tag--green">Регистрация</span>'
+    ? '<span class="ui-tag ui-tag--on-photo">Регистрация</span>'
     : /Завершено/.test(e.reg)
-      ? '<span class="ui-tag ui-tag--gray">Завершено</span>'
-      : `<span class="ui-tag ui-tag--orange">${esc(e.reg)}</span>`;
+      ? '<span class="ui-tag ui-tag--on-photo">Завершено</span>'
+      : `<span class="ui-tag ui-tag--on-photo">${esc(e.reg)}</span>`;
   return `<article class="ui-card ui-card--hover ui-card--link cp-event-card">
   <a class="ui-card__link" href="event.html">
     <div class="cp-event-card__photo-wrap">
@@ -225,14 +227,13 @@ function eventCard(e) {
 
 /** карточка статьи (оригинал .article-card): ui-card--link + точка-тег */
 function articleCard(a) {
-  const dot =
-    { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[a.type] ||
-    'ui-tag--blue';
+  // Тег на фото — ui-tag--on-photo (T16.10, REPORT §3.3): рубрика на снимке —
+  // белым на primary, точка-маркер красится подписью плашки (currentColor).
   return `<article class="ui-card ui-card--hover ui-card--link cp-article-card">
   <a class="ui-card__link" href="article.html">
     <div class="cp-article-card__photo-wrap">
       <img class="cp-article-card__photo" src="${esc(a.image)}" alt="" loading="lazy">
-      <span class="ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
+      <span class="ui-tag ui-tag--on-photo"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
     </div>
     <h3 class="ui-h4 cp-article-card__title">${esc(a.title)}</h3>
   </a>
@@ -834,14 +835,13 @@ const MEDIA_HOME = [
 ];
 
 function mediaHomeCard(card, extraClass = '') {
-  const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
-    card.type
-  ];
+  // Тег на фото — ui-tag--on-photo (T16.10, REPORT §3.3), как в articleCard:
+  // рубрика на снимке — белым на primary, без «цветового» варианта.
   return `<article class="ui-card ui-card--hover ui-card--link cp-media-card${extraClass}">
   <a class="ui-card__link" href="article.html">
     <div class="cp-article-card__photo-wrap">
       <img class="cp-article-card__photo" src="${esc(card.image)}" alt="" loading="lazy">
-      <span class="ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(card.type)}</span>
+      <span class="ui-tag ui-tag--on-photo"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(card.type)}</span>
     </div>
     ${card.desc ? `<h3 class="ui-h4 cp-article-card__title">${esc(card.caption)}</h3>\n    <p class="ui-small cp-article-card__date">${esc(card.date)}</p>` : `<p class="cp-article-card__title">${esc(card.caption)}</p>\n    <time class="cp-article-card__date ui-small ui-text--muted">${esc(card.date)}</time>`}
   </a>

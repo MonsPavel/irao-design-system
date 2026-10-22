@@ -185,7 +185,7 @@ describe('T16.10 — модификатор «тег на фото» (ui-tag--on
     expect(pair[0]).toContain("bg: '--ui-color-primary'");
   });
 
-  it("README: правило «когда on-photo» — только поверх фото/тёмного, на светлом фоне запрещён", () => {
+  it('README: правило «когда on-photo» — только поверх фото/тёмного, на светлом фоне запрещён', () => {
     const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
     expect(readme).toContain('on-photo');
     expect(readme).toMatch(/на светлом фоне/i);

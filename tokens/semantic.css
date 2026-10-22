@@ -192,6 +192,8 @@
   --ui-tag-gap: 0.375rem;
   /* career-portal: components.css:106 — letter-spacing .tag 0.02em; em — от размера роли (как --ui-link-underline-thickness) */
   --ui-tag-letter-spacing: 0.02em;
+  /* career-portal: высота оверлейного тега на фото 40px (pages.css:596 — .filter-tag 40px, ступень тегов-оверлеев; REPORT §3.3 «ui-tag blue на фото — белый на primary, 40px», probe education/media height 40); 40 вне шкалы отступов §3.2 (32→48) — перенос «как есть» (прецедент --ui-chip-height), используется как min-height (прецедент --ui-tag-height); T16.10 */
+  --ui-tag-height-on-photo: 2.5rem;
   /* новый: в career-portal бейджа нет; диаметр круга/min-height одной цифры — ступень шкалы §3.2 (24px), «99+» растёт в pill паддингом из --ui-space-1 */
   --ui-badge-size: 1.5rem;
 

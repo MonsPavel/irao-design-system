@@ -13,6 +13,9 @@
  *     меньше токена);
  *  2. точка-маркер __icon: 8×8 круг, красится currentColor варианта,
  *     aria-hidden в разметке;
+ *  2а. тег на фото --on-photo (T16.10): непрозрачная плашка primary/
+ *     text-on-dark, min-height 40 (--ui-tag-height-on-photo), оверлей на
+ *     фото-подложке стенда;
  *  3. ui-badge: круг 24×24 для одной цифры, pill для «99+» (ширина больше
  *     высоты, контент не обрезан), правило при 0 — атрибут hidden (глобальная
  *     гарантия base/reset.css), доступное имя ссылки без задвоения
@@ -36,6 +39,7 @@ const TAG = {
   gray: 'ui-tag-gray',
   navy: 'ui-tag-navy',
   blueIcon: 'ui-tag-blue-icon',
+  onPhoto: 'ui-tag-on-photo',
 };
 
 /** Идентификаторы бейджей стенда. */
@@ -178,6 +182,39 @@ standTest.describe('ui-tag (T4.3)', () => {
       expect(
         Math.abs(box.height - 8),
         `точка 8px по вертикали (факт ${box.height})`,
+      ).toBeLessThanOrEqual(0.5);
+    },
+  );
+
+  standTest(
+    'тег на фото (--on-photo, T16.10): непрозрачная плашка primary/text-on-dark, высота 40px, оверлей на подложке',
+    async ({ stand }) => {
+      const page = await stand('ui-tag');
+
+      const state = await stateOf(page, TAG.onPhoto);
+      expect(state.backgroundColor, 'фон — primary (не tint: контраст не зависит от фото)').toBe(
+        'rgb(0, 40, 86)',
+      );
+      expect(state.color, 'подпись — text-on-dark').toBe('rgb(255, 255, 255)');
+      expect(state.minHeight, 'min-height — --ui-tag-height-on-photo (40px)').toBe('40px');
+      expect(state.fontSize, 'типографика базы не меняется — fs-micro (12px)').toBe('12px');
+      expect(state.fontWeight, 'типографика базы не меняется — fw-caption').toBe('500');
+      expect(state.borderRadius, 'радиус pill — базы').toBe('100px');
+
+      // Тег — оверлей на фото-подложке (связка сайт-зоны карточки), фактическая
+      // высота = токену (контент ~24px < 40px — min-height активируется).
+      const overlay = await page.locator(`#${TAG.onPhoto}`).evaluate((el) => ({
+        wrapId: el.parentElement.id,
+        wrapHasPhoto: Boolean(el.parentElement.querySelector('img')),
+        position: getComputedStyle(el).position,
+      }));
+      expect(overlay.wrapId, 'тег внутри фото-подложки стенда').toBe('ui-tag-on-photo-backdrop');
+      expect(overlay.wrapHasPhoto, 'подложка — фотография (сценарий «поверх фото»)').toBe(true);
+      expect(overlay.position, 'тег позиционирован поверх подложки').toBe('absolute');
+      const box = await boxOf(page, TAG.onPhoto);
+      expect(
+        Math.abs(box.height - 40),
+        `фактическая высота = --ui-tag-height-on-photo (факт ${box.height})`,
       ).toBeLessThanOrEqual(0.5);
     },
   );
