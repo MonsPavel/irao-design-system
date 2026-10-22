@@ -32,11 +32,18 @@
  * Коллизия с краем вьюпорта решается сайтом модификатором — заметка
  * в README.md.
  *
- * Подпись пункта — роль body типографики T3.3 (16px career-portal = мобильная
- * ступень --ui-fs-body; рост по брейкпоинтам — системное поведение ролей,
- * литеральный 16px ломал бы масштабирование T3.6). Hover-фон — только под
- * @media (hover: hover) (конвенция EPIC-4). Вход-анимация гасится
- * prefers-reduced-motion (DoD EPIC-6; kill-switch base/reset гасит и переходы).
+ * Подпись пункта — ФИКС 16px «как есть» (T16.3): .header__dropdown-link career-portal
+ * fs 16 / lh 20 вне тройки ролей T3.3 (роль body растёт по брейкпоинтам, литеральный
+ * 16px в роли ломал бы масштабирование T3.6) — фикс-размер вне роли, токен
+ * --ui-dropdown-item-fs: 1rem (прецедент значения «как есть» вне шкалы — паддинг
+ * 28px --ui-button-pad-inline T14.3); межстрочное — 1.25 (= 20px при 16, оригинал
+ * line-height: 1.25, безразмерное — пара держится при переопределении fs темой).
+ * Подчёркивание снято (text-decoration: none): пункт — якорь без ui-link, UA-линия
+ * иначе наследуется из дефолта браузера; hover подчёркивание не добавляет —
+ * nav-контекст без inline-ссылок (политика подчёркивания — только у ui-link,
+ * T16.3). Hover-фон — только под @media (hover: hover) (конвенция EPIC-4). Вход-
+ * анимация гасится prefers-reduced-motion (DoD EPIC-6; kill-switch base/reset
+ * гасит и переходы).
  * Фокус пунктов и триггера рисует глобальная политика ADR-0001 (base/focus.css)
  * — компонент outline не гасит и не заменяет (кастомный inset-контур
  * career-portal не переносится: система гарантирует единый минимум). Состояние
@@ -142,10 +149,13 @@
   background-color: transparent;
   color: var(--ui-color-primary);
   font-family: var(--ui-font-family);
-  font-size: var(--ui-fs-body);
+  font-size: var(--ui-dropdown-item-fs);
   font-weight: var(--ui-fw-small);
-  line-height: var(--ui-lh-body);
+  line-height: 1.25;
   text-align: start;
+  /* Пункт — якорь/кнопка без ui-link: сброс UA-подчёркивания ссылки (глобального
+     сброса в ДС нет); hover подчёркивание не добавляет (T16.3). */
+  text-decoration: none;
   transition: background-color var(--ui-transition);
   cursor: pointer;
 }

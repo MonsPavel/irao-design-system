@@ -69,10 +69,28 @@
   justify-self: start;
 }
 
-/* Пункты меню — ui-link; сайт-зона добавляет только вес иnowrap-режим */
+/* Пункты меню — ui-link--nav (T16.3): размер, вес и межстрочное несёт
+   модификатор ДС; сайт-зона — аффорданс строки .header__link оригинала
+   (header.css:30-35): inline-flex с центром и gap 8px (--ui-space-2 — точная
+   пара шкалы §3.2; у текстовых пунктов без иконок на картинку не влияет),
+   nowrap-режим строки */
 .cp-header__menu .ui-link {
-  font-weight: var(--ui-fw-small);
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
   white-space: nowrap;
+}
+
+/* Триггер dropdown «Школьникам и студентам» — шрифт пункта меню одобренного
+   дизайна: .header__link--toggle оригинала расширяет .header__link
+   (fs 14 / lh 1.1, header.css:30-43) — доводка AC4 (полный computed-матч
+   шапки, приёмка T16.3). Компонентный триггер остаётся ролью body (растёт
+   по брейкпоинтам) — шрифт конкретной шапки сайт несёт сам (README
+   ui-dropdown: «сайт стилизует аффорданс сам»); вес 500 — компонентный
+   --ui-fw-small, совпадает. */
+.cp-header__menu .ui-dropdown__trigger {
+  font-size: var(--ui-fs-small);
+  line-height: 1.1;
 }
 
 .cp-header__logo img {
@@ -80,22 +98,33 @@
   height: auto;
 }
 
-/* Кнопка VI — заметная пилюля (оригинал .header__link--vi) */
+/* Кнопка VI — заметная пилюля. Оригинал .header__link--vi — собственные
+   переопределения поверх .header__link (header.css:143-149): font-size 15px,
+   паддинг 10px 18px, gap 10px (вес 500 и lh 1.1 — от базы .header__link).
+   15px вне тройки ролей T3.3 — перенос «как есть» в rem (прецедент 0.9375rem
+   — левый паддинг пункта dropdown); паддинг/gap вне шкалы отступов §3.2 —
+   «как есть» (прецедент --ui-card-gap); пересмотр — design-decision владельца.
+   Исправление приёмки T16.3: контекст-таблица спеки ошибочно считала fs
+   унаследованным 14px — фактически оригинал несёт явные 15px. */
 .cp-header__vi {
   display: inline-flex;
-  gap: var(--ui-space-2);
+  gap: 0.625rem;
   align-items: center;
-  padding: var(--ui-space-2) var(--ui-space-3);
+  padding: 0.625rem 1.125rem;
   border: 2px solid var(--ui-color-primary);
   border-radius: var(--ui-radius-pill);
   background-color: var(--ui-color-glass-light);
   color: var(--ui-color-primary);
+  font-size: 0.9375rem;
+  font-weight: var(--ui-fw-small);
+  line-height: 1.1;
 }
 
-/* Триггер поиска шапки */
+/* Триггер поиска шапки (.header__link--search оригинала — .header__link с
+   иконкой: gap 8px, как у всех пунктов меню) */
 .cp-header__search {
   display: inline-flex;
-  gap: var(--ui-space-1);
+  gap: var(--ui-space-2);
   align-items: center;
   color: var(--ui-color-primary);
 }

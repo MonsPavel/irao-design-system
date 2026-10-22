@@ -79,6 +79,18 @@ describe('patterns/header/header.html — контракт эталонной с
     );
   });
 
+  it('nav-ссылки шапки — ui-link ui-link--nav (T16.3: пункты навигации без подчёркивания, fs-small)', () => {
+    const links = [...markup.matchAll(/<a\b[^>]*class="([^"]*)"[^>]*>/g)]
+      .map(([tag, className]) => ({ tag, className }))
+      .filter(({ className }) => className.split(/\s+/).includes('ui-link'));
+    expect(links.length, 'nav-ссылки на ui-link есть').toBeGreaterThan(0);
+    for (const { tag, className } of links) {
+      expect(className, `каждый ui-link шапки — nav-вариант (пункт навигации): ${tag}`).toContain(
+        'ui-link--nav',
+      );
+    }
+  });
+
   it('логотип — ссылка на главную с доступным именем (T4.6: alt/имя, размеры — README)', () => {
     const logo = pattern.match(/<a\b[^>]*class="[^"]*hdp-logo[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
     expect(logo[0], 'логотип-ссылка на месте').not.toBe('');
@@ -150,6 +162,10 @@ describe('patterns/header/README.md — дока паттерна (AC: прав�
   it('правило aria-label навигаций: уникальные имена (Accessibility requirements)', () => {
     expect(readme, 'уникальные aria-label навигаций').toContain('aria-label');
     expect(readme, 'правило уникальности').toMatch(/уник/i);
+  });
+
+  it('пункты навигаций — ui-link--nav (T16.3): правило выбора варианта задокументировано', () => {
+    expect(readme, 'модификатор nav назван').toContain('ui-link--nav');
   });
 
   it('Bitrix-заметки: где стилизовать меню — bitrix:menu (AC, Scope)', () => {

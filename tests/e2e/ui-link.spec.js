@@ -14,13 +14,16 @@
  *  4. --button: пара primary/text-on-dark одобренного дизайна, hover —
  *     пара var(--ui-color-primary-hover) (career-portal .btn--primary:hover,
  *     ADR-0010), active — color-mix; подпись ≥ 4.5:1;
- *  5. focus-visible виден (AC): outline focus-тройки ADR-0001
+ *  5. --nav (T16.3): computed fs 14 / fw 500 / tdl none; hover — только
+ *     opacity 0.7 (одобренный .header__link:hover), цвет не меняется —
+ *     контраст computed-цвета сохраняется (производное ADR-0010);
+ *  6. focus-visible виден (AC): outline focus-тройки ADR-0001
  *     (глобальная гарантия base/focus.css); для on-dark — известный разрыв
  *     контраста focus-цвета primary на тёмной секции, замена зафиксирована
  *     за T9.2 (pairs.config.mjs) — проверяется только факт механизма;
- *  6. внешние ссылки стенда — target="_blank" только с rel~noopener;
+ *  7. внешние ссылки стенда — target="_blank" только с rel~noopener;
  *     icon-only — с aria-label (страховка DOM-уровня, гейты — html-validate);
- *  7. axe чист на стенде; эталоны 375/768/1280/1440 — только из
+ *  8. axe чист на стенде; эталоны 375/768/1280/1440 — только из
  *     контейнера/CI (ADR-0004).
  *
  * :visited e2e не проверяется — браузеры скрывают visited-историю (свойства
@@ -40,6 +43,7 @@ const LINK = {
   onDark: 'ui-link-on-dark',
   onDarkIconOnly: 'ui-link-on-dark-icon',
   button: 'ui-link-button',
+  nav: 'ui-link-nav',
 };
 
 /** Вычисленное состояние ссылки + фон подложки (data-ui-link-bg или body). */
@@ -52,6 +56,9 @@ const stateOf = (page, id) =>
       backgroundColor: style.backgroundColor,
       backdrop: getComputedStyle(scope ?? document.body).backgroundColor,
       fontSize: style.fontSize,
+      fontWeight: style.fontWeight,
+      lineHeight: style.lineHeight,
+      opacity: style.opacity,
       decorationLine: style.textDecorationLine,
       decorationThickness: style.textDecorationThickness,
       underlineOffset: style.textUnderlineOffset,
@@ -251,6 +258,29 @@ standTest.describe('ui-link (T4.1)', () => {
       );
       assertContrastAA(active, 'active button');
       await page.mouse.up();
+    },
+  );
+
+  standTest(
+    'nav: fs 14 / fw 500, tdl none; hover — только opacity 0.7, цвет и контраст не меняются (T16.3)',
+    async ({ stand }) => {
+      const page = await stand('ui-link');
+      const link = page.locator(`#${LINK.nav}`);
+
+      const rest = await stateOf(page, LINK.nav);
+      expect(rest.fontSize, 'пункт навигации — fs-small (14px)').toBe('14px');
+      expect(rest.fontWeight, 'fw-small (500)').toBe('500');
+      expect(rest.lineHeight, 'компактная строка пункта — lh 1.1 (14 × 1.1)').toBe('15.4px');
+      expect(rest.decorationLine, 'без подчёркивания (nav-структура, WCAG 1.4.1)').toBe('none');
+      expect(rest.color, 'цвет — primary базы, своего нет').toBe('rgb(0, 40, 86)');
+      expect(rest.opacity, 'в покое opacity не тронут').toBe('1');
+      assertContrastAA(rest, 'nav rest');
+
+      await link.hover();
+      const hover = await stateOf(page, LINK.nav);
+      expect(hover.opacity, 'hover — opacity 0.7 (одобренный .header__link:hover)').toBe('0.7');
+      expect(hover.color, 'цветного hover у nav нет — primary остаётся').toBe('rgb(0, 40, 86)');
+      expect(hover.decorationLine, 'hover подчёркивание не добавляет').toBe('none');
     },
   );
 

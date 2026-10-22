@@ -111,7 +111,10 @@
          иметь имя, когда их несколько). Dropdown T6.1: nav > ul > li > a,
          без role="menu" (ссылки-переходы — не команды). -->
     <nav class="hdp-header__nav" aria-label="Основное меню">
-      <a class="ui-link" href="/vacancies/">Вакансии</a>
+      <!-- Пункты навигации — ui-link--nav (T16.3): fs-small/fw-small, без
+           подчёркивания (структурный контекст nav — WCAG 1.4.1 допускает);
+           inline-ссылки контента остаются на default ui-link. -->
+      <a class="ui-link ui-link--nav" href="/vacancies/">Вакансии</a>
 
       <div class="ui-dropdown" data-ui-dropdown>
         <button class="ui-dropdown__trigger" type="button" id="hdp-sections-trigger">
@@ -143,7 +146,7 @@
         </nav>
       </div>
 
-      <a class="ui-link" href="/media/">Медиа</a>
+      <a class="ui-link ui-link--nav" href="/media/">Медиа</a>
     </nav>
 
     <!-- Логотип (T4.6): ссылка на главную с доступным именем. Демо —
@@ -199,7 +202,7 @@
         </svg>
         <span>Версия для слабовидящих</span>
       </button>
-      <a class="ui-link" href="/contacts/">Контакты</a>
+      <a class="ui-link ui-link--nav" href="/contacts/">Контакты</a>
 
       <!-- Поиск: триггер-ссылка к диалогу search-overlay (T7.6) —
            без JS переход на страницу результатов, с JS модуль откроет

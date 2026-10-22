@@ -164,6 +164,8 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | `--container-max` 1440px | `--ui-container-max: 90rem` | |
 | фокус pages.css:52 (outline 3px primary, offset 2px) | `--ui-focus-color/width/offset` | ADR-0001 |
 | z-index: 70 dropdown (components.css:376) | `--ui-z-dropdown: 70` | |
+| font-size `.header__dropdown-link` 16px (header.css, fs 16 / lh 20) | `--ui-dropdown-item-fs: 1rem` (межстрочное — безразмерное 1.25 = 20px при 16, оригинал `line-height: 1.25`) | T16.3: 16px вне тройки ролей T3.3 (роль body растёт 16→18→20 по брейкпоинтам) — фикс-размер пункта dropdown «как есть» (прецедент `--ui-button-pad-inline` 28px), пересмотр — design-decision владельца; до T16.3 пункт нёс `--ui-fs-body` (20px на десктопе — REPORT §8.2 №4) |
+| line-height `.header__link` 1.1 (header.css:36) | `line-height: 1.1` в модификаторе `.ui-link--nav` (безразмерное — компактная строка пункта навигации, токена нет: роль small несёт 1.35 для контентных ролей) | T16.3 (доводка приёмки AC4 — полный computed-матч шапки клона): 14 × 1.1 = 15.4px против 18.9px на роли small |
 
 ### Принято значение ДС (микрорасхождения сверки пилота — REPORT §3.3, T14.6)
 

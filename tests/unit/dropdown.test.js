@@ -108,6 +108,27 @@ describe('components/ui-dropdown/ui-dropdown.css — база (ADR-0002, Technic
     expect(css.slice(0, mediaIndex), 'до media-обёртки :hover нет').not.toContain(':hover');
   });
 
+  it('пункт меню (T16.3): fs 16 «как есть» — токен --ui-dropdown-item-fs (вне ролей T3.3), lh 1.25 (= 20px при 16)', () => {
+    const block = blockOf(css, '.ui-dropdown__item');
+    expect(block).toContain('font-size: var(--ui-dropdown-item-fs);');
+    expect(block).toContain('line-height: 1.25;');
+  });
+
+  it('токен --ui-dropdown-item-fs: 1rem в tokens/semantic.css (16px вне шкалы — прецедент «как есть», T14.3)', () => {
+    const tokens = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+    expect(tokens).toMatch(/--ui-dropdown-item-fs:\s*1rem;/);
+  });
+
+  it('пункт-якорь без подчёркивания: tdl none в правиле, hover подчёркивание не добавляет (AC T16.3)', () => {
+    const block = blockOf(css, '.ui-dropdown__item');
+    expect(block, 'сброс UA-подчёркивания якоря').toContain('text-decoration: none;');
+    const hover = blockOf(css, '.ui-dropdown__item:hover');
+    expect(hover, 'hover меняет только фон').not.toContain('text-decoration');
+    expect(block).toContain(
+      'padding: var(--ui-space-2) var(--ui-space-3) var(--ui-space-2) 0.9375rem;',
+    );
+  });
+
   it('вход-анимация меню объявлена и гасится prefers-reduced-motion (DoD EPIC-6)', () => {
     expect(css).toMatch(/@keyframes ui-dropdown-in\s*\{/);
     const reduceBlock = css.match(/@media \(prefers-reduced-motion: reduce\)\s*\{[\s\S]*?\}/);

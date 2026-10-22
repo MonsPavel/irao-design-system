@@ -179,6 +179,11 @@
   /* career-portal: --fw-body-bold (500) — вес вопроса FAQ .faq__q (fs-body × bold); отдельной «жирной роли» body в шкале T3.3 нет — вес-переменная, как в career-portal. Вне секции «Типографика»: стенд токенов рендерит fw/lh только в тройках с fs-ролью (showcase/tokens-stand.mjs), самостоятельный вес — компонентная секция */
   --ui-fw-body-bold: 500;
 
+  /* ── Dropdown (ui-dropdown, T16.3): типографика пункта ── */
+
+  /* career-portal: .header__dropdown-link 16px (fs 16 / lh 20) — перенос «как есть»: 16px вне тройки ролей T3.3 (роль body растёт 16→18→20 по брейкпоинтам, литерал в роли ломал бы масштабирование T3.6) — фикс-размер пункта dropdown вне роли, прецедент «как есть» вне шкалы (--ui-button-pad-inline 28px, T14.3); пересмотр — design-decision владельца */
+  --ui-dropdown-item-fs: 1rem;
+
   /* ── Теги и счётчики (ui-tag / ui-badge, T4.3): геометрия ── */
 
   /* career-portal: components.css:101 — height .tag 28px → rem; используется как min-height (прецедент T4.2: 32px-база T3.6 растит компонент вместе с текстом) */
