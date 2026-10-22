@@ -121,17 +121,33 @@ function selectField({
 }) {
   const fieldId = nextId(name);
   const opts = options
-    .map((option) => {
-      const value = typeof option === 'string' ? '' : option.value;
-      const text = typeof option === 'string' ? option : option.label;
-      const isSelected = value === selected || (!value && !selected && typeof option === 'object');
+    .map((option, index) => {
+      const isObject = typeof option === 'object';
+      const value = isObject ? option.value : '';
+      const text = isObject ? option.label : option;
+      // selected получает РОВНО одна опция: у объектов — совпадение value
+      // или пустой placeholder при пустом selected; у строковых списков
+      // ([плейсхолдер, ...]) — только первая (index === 0). Раньше selected
+      // получала каждая строковая опция: нативный select брал последнюю,
+      // и триггер пилюли показывал не плейсхолдер («Все регионы»), а
+      // последний пункт списка (баг видел и сайдбар vacancies, и форму
+      // отклика «Образование» вместо «Выберите»).
+      const isSelected = isObject
+        ? value === selected || (!value && !selected)
+        : !selected && index === 0;
       return `<option value="${esc(value)}"${isSelected ? ' selected' : ''}>${esc(text)}</option>`;
     })
     .join('');
   const select = `<select class="ui-field__select" id="${fieldId}" name="${name}"${required ? ' required' : ''}${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}${pill ? ' data-ui-select="wrap"' : ' data-ui-select'}>${opts}</select>`;
   if (pill) {
-    // пилюля фильтра: геометрию рисует сайт-зона (cp-pill), триггер растягивается
-    return `<div class="cp-pill">${select}</div>`;
+    // пилюля фильтра: геометрию рисует сайт (cp-pill), триггер растягивается.
+    // Подпись поля — label[for] РЯДОМ с обёрткой (канон ui-select после
+    // ревью T7.3: имя получают и нативный select, и построенный триггер —
+    // пара APG listbox-button); в оригинале видимых подписей нет —
+    // label визуально скрыт (cp-vh). Без label — прежний режим с
+    // aria-label (сайдбар вакансий, EPIC-14).
+    const labelHtml = label ? `<label class="cp-vh" for="${fieldId}">${esc(label)}</label>\n` : '';
+    return `${labelHtml}<div class="cp-pill">${select}</div>`;
   }
   return `<div class="ui-field${required ? ' ui-field--required' : ''}">
   <label class="ui-field__label" for="${fieldId}">${esc(label)}</label>
@@ -1579,6 +1595,95 @@ ${offers}
 </section>`;
 }
 
+/* ── каталог целевого обучения (T15.3) ──
+
+   Первый потребитель связки list-page «сайдбар/панель фильтров» за
+   пределами vacancies. Фильтры — 6 нативных select wrap-режимом ui-select
+   (пилюли cp-pill, ширина — сайт-зона); подписи — label[for] рядом
+   (канон ui-select T7.3, Accessibility requirements). Список предложений —
+   те же cp-offer-card, что на education.html (оригинал строит каталог
+   тем же offer_card в cards-grid--3, build.py:803); данные educat.json
+   целиком (6 предложений). Клиентской фильтрации нет — Out of scope
+   (селекты оригинала инертны, как фильтры-сайдбар vacancies).
+   Пагинация — ui-pagination СО стрелками: education-catalog — одна из двух
+   страниц оригинала, где .pagination содержит pagination__arrow
+   (src/pages/education-catalog.html:59–67; vacancies без стрелок — REPORT
+   §8.2 №7, поэтому там ui-pagination--bare). Недоступная стрелка —
+   button[disabled] (канон T6.3: в оригинале disabled на <a> невалиден). */
+const CATALOG_FILTERS = [
+  {
+    name: 'region',
+    label: 'Регион',
+    options: ['Все регионы', 'Москва', 'Санкт-Петербург', 'Омская область', 'Свердловская область'],
+  },
+  {
+    name: 'city',
+    label: 'Город',
+    options: ['Все города', 'Москва', 'Санкт-Петербург', 'Омск', 'Екатеринбург'],
+  },
+  {
+    name: 'direction',
+    label: 'Направление подготовки',
+    options: ['Все направления', 'Теплоэнергетика', 'Электроэнергетика', 'ИТ', 'Машиностроение'],
+  },
+  {
+    name: 'segment',
+    label: 'Сегмент бизнеса',
+    options: ['Все сегменты', 'Генерация', 'Розничный бизнес', 'Сервисы', 'Энергомашиностроение'],
+  },
+  {
+    name: 'org',
+    label: 'Образовательная организация',
+    options: ['Все образовательные организации', 'МЭИ', 'СПбПУ', 'ОмГТУ'],
+  },
+  {
+    name: 'level',
+    label: 'Уровень образования',
+    options: ['Все уровни', 'Высшее', 'Среднее профессиональное'],
+  },
+];
+
+const CATALOG_ARROW_LEFT =
+  '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function educationCatalogMain() {
+  const filters = CATALOG_FILTERS.map(
+    (f) => `      ${selectField({ name: f.name, label: f.label, options: f.options, pill: true })}`,
+  ).join('\n');
+  const offers = EDU.offers.map(offerCard).join('\n');
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Целевое обучение', 'education.html'],
+    ['Каталог предложений', ''],
+  ])}
+<section class="ui-section">
+  <div class="ui-container">
+    <div class="cp-page-head">
+      <h1 class="ui-page-title">Каталог предложений целевого обучения</h1>
+      <p class="cp-page-subtitle ui-lead">Выберите направление подготовки и компанию Группы «Интер РАО» — заявка оформляется на сайте «Работа России».</p>
+    </div>
+
+    <div class="cp-catalog-filters">
+${filters}
+    </div>
+
+    <div class="ui-grid ui-grid--3">
+${offers}
+    </div>
+
+    <div class="cp-catalog-nav">
+      <nav class="ui-pagination" aria-label="Пагинация: каталог обучения">
+        <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${CATALOG_ARROW_LEFT}</button>
+        <span class="ui-pagination__page" aria-current="page">1</span>
+        <a class="ui-pagination__page" href="education-catalog.html?page=2" aria-label="Страница 2">2</a>
+        <a class="ui-pagination__page" href="education-catalog.html?page=3" aria-label="Страница 3">3</a>
+        <a class="ui-pagination__arrow" href="education-catalog.html?page=2" aria-label="Следующая страница">${ARROW}</a>
+      </nav>
+    </div>
+  </div>
+</section>`;
+}
+
 /* ── мероприятия ── */
 
 function eventsMain() {
@@ -1905,6 +2010,11 @@ const PAGES = [
     file: 'education.html',
     title: 'Целевое обучение — Портал карьеры Интер РАО',
     main: educationMain(),
+  },
+  {
+    file: 'education-catalog.html',
+    title: 'Каталог предложений целевого обучения — Портал карьеры Интер РАО',
+    main: educationCatalogMain(),
   },
   { file: 'events.html', title: 'Мероприятия — Портал карьеры Интер РАО', main: eventsMain() },
   { file: 'media.html', title: 'Медиа — Портал карьеры Интер РАО', main: mediaMain() },

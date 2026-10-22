@@ -33,6 +33,7 @@ const PAGES = [
   'internships.html',
   'practices.html',
   'education.html',
+  'education-catalog.html',
   'events.html',
   'media.html',
   'career-track.html',
