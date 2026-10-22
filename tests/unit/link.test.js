@@ -428,6 +428,17 @@ describe('adoption пилота — футер на ui-link--nav (T16.4, Testing
     ).toBeNull();
   });
 
+  it('hover — accent оригинала (footer.css:43 .footer__link:hover, footer.css:76 .footer__contact-link:hover) под (hover: hover): цвет base-правила и opacity .7 nav-варианта перебиты сайт-зоной — у оригинала hover меняет только цвет (ревью 7c26ebd: false-claim «hover не меняет цвет» исправлен)', () => {
+    const mediaStart = pilotCss.indexOf('@media (hover: hover)');
+    expect(mediaStart, 'media-обёртка hover-правил в pilot.css (EPIC-4)').toBeGreaterThanOrEqual(0);
+    const block = blockOf(pilotCss.slice(mediaStart), '.cp-footer .ui-link:hover');
+    expect(block, 'site-hover футера — пара одобренного дизайна accent').toBeTruthy();
+    expect(block).toContain('color: var(--ui-color-accent);');
+    expect(block, 'у оригинала hover меняет только цвет — opacity nav-варианта сброшена').toContain(
+      'opacity: 1;',
+    );
+  });
+
   it('колонка ссылок: шаг строк 9px (0.5625rem — вне шкалы §3.2, «как есть», footer.css:26), межстрочное 1.35, nowrap (footer.css:35-38)', () => {
     const ul = blockOf(pilotCss, '.cp-footer__links');
     expect(ul).toContain('gap: 0.5625rem;');
