@@ -246,11 +246,13 @@ describe('T16.10 — ревью: контраст и провенанс on-photo
 
   it('пилот без применения on-photo: теги фото событий/медиа в тинтах — паритет с оригиналом (применение — решение владельца)', () => {
     const build = readFileSync(join(root, 'pilot', 'career-portal', 'build.mjs'), 'utf8');
-    expect(build, 'модификатор остаётся API ДС, пилотный хук откачен (ревью T16.10)').not.toContain(
-      'ui-tag--on-photo',
+    // Смотрим на генерируемую разметку: комментарии-маркеры реклассификации
+    // могут упоминать имя модификатора, применение — нет.
+    expect(build, 'модификатор остаётся API ДС, пилотный хук откачен (ревью T16.10)').not.toMatch(
+      /class="ui-tag ui-tag--on-photo/,
     );
     expect(build, 'тинты вариантов на фото на месте (events.html:270/302 оригинала)').toMatch(
-      /ui-tag--green/,
+      /class="ui-tag ui-tag--green"/,
     );
   });
 });
