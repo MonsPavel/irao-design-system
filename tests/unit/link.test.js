@@ -352,7 +352,7 @@ describe('подключение и гейты (DoD)', () => {
     expect(readme).toContain('aria-label');
   });
 
-  it('README компонента: nav-вариант — do (пункты меню/шапки/футера), don\'t (inline-текст контента), обоснование WCAG 1.4.1 (Implementation requirements п.2 T16.3)', () => {
+  it("README компонента: nav-вариант — do (пункты меню/шапки/футера), don't (inline-текст контента), обоснование WCAG 1.4.1 (Implementation requirements п.2 T16.3)", () => {
     const readme = readFileSync(join(root, 'components', 'ui-link', 'README.md'), 'utf8');
     expect(readme).toContain('ui-link--nav');
     expect(readme, 'do: пункты навигации').toMatch(/(?:меню|шапк|футер)/i);

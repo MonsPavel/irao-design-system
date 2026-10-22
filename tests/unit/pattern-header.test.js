@@ -85,10 +85,9 @@ describe('patterns/header/header.html — контракт эталонной с
       .filter(({ className }) => className.split(/\s+/).includes('ui-link'));
     expect(links.length, 'nav-ссылки на ui-link есть').toBeGreaterThan(0);
     for (const { tag, className } of links) {
-      expect(
-        className,
-        `каждый ui-link шапки — nav-вариант (пункт навигации): ${tag}`,
-      ).toContain('ui-link--nav');
+      expect(className, `каждый ui-link шапки — nav-вариант (пункт навигации): ${tag}`).toContain(
+        'ui-link--nav',
+      );
     }
   });
 

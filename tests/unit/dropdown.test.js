@@ -124,7 +124,9 @@ describe('components/ui-dropdown/ui-dropdown.css — база (ADR-0002, Technic
     expect(block, 'сброс UA-подчёркивания якоря').toContain('text-decoration: none;');
     const hover = blockOf(css, '.ui-dropdown__item:hover');
     expect(hover, 'hover меняет только фон').not.toContain('text-decoration');
-    expect(block).toContain('padding: var(--ui-space-2) var(--ui-space-3) var(--ui-space-2) 0.9375rem;');
+    expect(block).toContain(
+      'padding: var(--ui-space-2) var(--ui-space-3) var(--ui-space-2) 0.9375rem;',
+    );
   });
 
   it('вход-анимация меню объявлена и гасится prefers-reduced-motion (DoD EPIC-6)', () => {
