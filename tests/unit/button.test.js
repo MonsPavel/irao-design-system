@@ -134,6 +134,36 @@ describe('components/ui-button/ui-button.css — база (Implementation requir
   });
 });
 
+/**
+ * Сброс подчёркивания якоря (T16.2): страницы собирают `a.ui-button` для
+ * переходов-действий (REPORT §8.2 №3) — без сброса вся кнопочная поверхность
+ * якоря отрисована underline'ом UA-дефолта `a[href]`. Оригинал глобально
+ * сбрасывает ссылки (base.css:75 `a { text-decoration: none }`); в ДС
+ * глобального сброса нет (ui-link — underline всегда, T4.1), поэтому сброс —
+ * точечный, в базовом правиле кнопочного вида (конвенция BEM, T4.2).
+ */
+describe('components/ui-button/ui-button.css — сброс подчёркивания якоря (T16.2)', () => {
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-button', 'ui-button.css'), 'utf8'),
+  );
+
+  it('a.ui-button--primary: сброс в базовом правиле .ui-button — text-decoration: none (UA-дефолт a[href] не просачивается)', () => {
+    const block = blockOf(css, '.ui-button');
+    expect(block, 'правило .ui-button найдено').toBeTruthy();
+    expect(
+      block,
+      'сброс в базе — модификаторы (primary и остальные) наследуют её каскадом',
+    ).toContain('text-decoration: none;');
+  });
+
+  it('a.ui-button--outline: подчёркивание не возвращается ни в одном состоянии — декларация text-decoration в файле ровно одна (none в базе; hover меняет только цвет, ADR-0010)', () => {
+    const declarations = css.match(/text-decoration\s*:[^;]+;/g) ?? [];
+    expect(declarations, 'единственная декларация — сброс none в базе').toEqual([
+      'text-decoration: none;',
+    ]);
+  });
+});
+
 describe('components/ui-button/ui-button.css — варианты (Scope T4.2)', () => {
   const css = stripCssComments(
     readFileSync(join(root, 'components', 'ui-button', 'ui-button.css'), 'utf8'),

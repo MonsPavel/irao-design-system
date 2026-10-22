@@ -71,6 +71,10 @@
   font-size: var(--ui-fs-small);
   font-weight: var(--ui-fw-small);
   line-height: var(--ui-lh-small);
+  /* Сброс UA-дефолта якоря (T16.2, REPORT §8.2 №3): страницы собирают
+     a.ui-button для переходов-действий — кнопочный вид не несёт подчёркивания
+     ни в одном состоянии, hover меняет только цвет (ADR-0010). */
+  text-decoration: none;
   transition:
     background-color var(--ui-transition),
     color var(--ui-transition),

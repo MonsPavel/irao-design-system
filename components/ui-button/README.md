@@ -24,6 +24,7 @@
 | Элемент `.ui-button__label` | подпись; в `is-loading` остаётся в DOM (accessible name) |
 | Элемент `.ui-button__icon` | инлайн-SVG: `aria-hidden="true"`, `focusable="false"`, цвета — `currentColor` в `fill`/`stroke`; размер 1em |
 | Элемент `.ui-button__spinner` | декоративный (`aria-hidden="true"`); рисуется CSS на `currentColor` |
+| Подчёркивание | **сброс подчёркивания якоря гарантируется**: `a.ui-button` (переход-выглядит-как-действие) рисуется без underline — `text-decoration: none` в базовом правиле, во всех состояниях (T16.2); подчёркнутая ссылка — `ui-link` |
 | Состояние disabled | **атрибут** `disabled` — не фокусируется и не кликается нативно |
 | Состояние loading | класс `is-loading` + `aria-busy="true"` (ставит управляющий код формы/приложения) |
 | JS | не требуется (CSS-компонент; переключение loading — за формой, T5.5) |
