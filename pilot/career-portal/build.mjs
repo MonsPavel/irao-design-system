@@ -121,10 +121,20 @@ function selectField({
 }) {
   const fieldId = nextId(name);
   const opts = options
-    .map((option) => {
-      const value = typeof option === 'string' ? '' : option.value;
-      const text = typeof option === 'string' ? option : option.label;
-      const isSelected = value === selected || (!value && !selected && typeof option === 'object');
+    .map((option, index) => {
+      const isObject = typeof option === 'object';
+      const value = isObject ? option.value : '';
+      const text = isObject ? option.label : option;
+      // selected получает РОВНО одна опция: у объектов — совпадение value
+      // или пустой placeholder при пустом selected; у строковых списков
+      // ([плейсхолдер, ...]) — только первая (index === 0). Раньше selected
+      // получала каждая строковая опция: нативный select брал последнюю,
+      // и триггер пилюли показывал не плейсхолдер («Все регионы»), а
+      // последний пункт списка (баг видел и сайдбар vacancies, и форму
+      // отклика «Образование» вместо «Выберите»).
+      const isSelected = isObject
+        ? value === selected || (!value && !selected)
+        : !selected && index === 0;
       return `<option value="${esc(value)}"${isSelected ? ' selected' : ''}>${esc(text)}</option>`;
     })
     .join('');

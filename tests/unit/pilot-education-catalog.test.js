@@ -140,6 +140,19 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
     );
   });
 
+  it('selected получает только плейсхолдер (первая строковая опция при пустом selected): раньше selected получала КАЖДАЯ строковая опция — нативный select брал последнюю, и триггер пилюли показывал не плейсхолдер оригинала («Все регионы»), а последний пункт («Свердловская область»)', () => {
+    const selectFieldBody = build.slice(
+      build.indexOf('function selectField'),
+      build.indexOf('function radioGroup'),
+    );
+    const optionsMap =
+      selectFieldBody.match(/const opts = options([\s\S]*?)\.join\(''\)/)?.[1] ?? '';
+    expect(optionsMap, 'map получает индекс опции').toContain('.map((option, index) =>');
+    expect(optionsMap, 'строковая опция: selected только у первой (index === 0)').toMatch(
+      /index === 0/,
+    );
+  });
+
   it('выдача: все предложения educat.json (6) тем же offerCard, что на education.html (оригинaл каталога — тот же offer_card целиком, build.py:794 vs :803); данные — из файла, не литералы', () => {
     expect(educat.offers).toHaveLength(6);
     expect(catalogMainBody).toContain('EDU.offers.map(offerCard)');
