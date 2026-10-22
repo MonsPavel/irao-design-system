@@ -91,10 +91,11 @@
 | T16.3 | todo | EPIC-16: ДС+пилот — ui-link--nav (fs-small, без подчёркивания, hover opacity) + ui-dropdown__item fs16 + паттерн header + adoption шапки; REPORT §8.2 №4 |
 | T16.9 | todo | EPIC-16 (бывш. T15.7, перенесена реш. владельца 22.10 «весь UI — в DS-эпик»): ДС — цвет подписи ui-field (P2 из REPORT §4, AA-замена gray-700) |
 | T16.10 | todo | EPIC-16 (бывш. T15.8, перенесена реш. владельца 22.10): ДС — ui-tag--on-photo (P2 из REPORT §4, белый на primary 40px) |
+| T16.11 | todo | EPIC-16: ДС — калибровка ui-button--pill (рамка+кружок primary, hover-свап accent, метка uppercase fs13/ls 0.04); находка владельца 22.10, REPORT §8.2 №6 + mapping §3; до T16.5 |
 | T16.6 | todo | EPIC-16: ДС — ui-pagination--bare (без стрелок); REPORT §8.2 №7 |
 | T16.7 | todo | EPIC-16: ДС — ui-button--text (fs-small-regular, underline, muted); REPORT §8.2 №8 |
 | T16.4 | todo | EPIC-16: пилот — футер по оригиналу (белый, ссылки 14/500 plain); REPORT §8.2 №5; после T16.3 |
-| T16.5 | todo | EPIC-16: пилот — строки/сайдбар по канону lpp-row (title 20/500 plain, pad 24/28, CTA pill primary-рамка/кружок, «Сбросить» текстовый, промо ui-card--filled); REPORT §8.2 №6; после T16.2/T16.7 |
+| T16.5 | todo | EPIC-16: пилот — строки/сайдбар по канону lpp-row (title 20/500 plain, pad 24/28, «Сбросить» текстовый, промо ui-card--filled); CTA-пилюля приходит из T16.11; REPORT §8.2 №6; после T16.2/T16.7/T16.11 |
 | T16.8 | todo | EPIC-16: закрывающая эпика — 8 новых проб compare.mjs (body-bg/header-link/dropdown-item/footer-link/row-title/row-item/pill-icon/reset-control), свежий compare, REPORT/PLAN |
 | T15.6 | todo | EPIC-15 (страничные задачи; идут после DS-батча EPIC-16): пилот — adoption-хвосты (ui-field--compact в анкетах-модалках, кнопка education без --sm) + актуализация REPORT (compact уже в ДС с T14.6); первая внутри эпика |
 | T15.1 | todo | EPIC-15 (раунд 2 проверок пилота, 21.10): пилот — детальные event.html/article.html; закрывает мёртвые ссылки с 6 страниц |
