@@ -139,6 +139,13 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     );
   });
 
+  it('заголовки разделов «Преимущества компании»/«Где мы работаем» — роль ui-h3 (оригинал .section-title--h3 = fs-h3 42px/1.3, pages.css:880; тот же маппинг, что на companies.html; ревью T15.2: ui-h2 60px — в 1.4 раза крупнее оригинала)', () => {
+    expect(companyHtml.match(/<h2 class="ui-h3 cp-company-title">/g)?.length ?? 0).toBe(2);
+    expect(companyHtml, 'ui-h2 на разделах не применяется').not.toContain(
+      '<h2 class="ui-h2 cp-company-title">',
+    );
+  });
+
   it('фото с alt: контентные (hero, где мы работаем) — информативные, фоновое баннера — декоративное alt="" (README ui-image: подписывать декоративное нечего)', () => {
     const imgs = companyHtml.match(/<img\b[^>]*>/g) ?? [];
     expect(imgs.length, 'все img размечены').toBeGreaterThan(0);
@@ -216,6 +223,11 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     expect(blockOf(pilotCss, '.cp-company-banner__title')).toContain(
       'color: var(--ui-color-text-on-dark);',
     );
+  });
+
+  it('ширина текста баннера — 560px «как есть» (pages.css:674); паддинг тела — 40px «как есть» (pages.css:667), не ступень шкалы (--ui-space-7 = 48px — ревью T15.2: дивергенция от оригинала и ложный комментарий)', () => {
+    expect(blockOf(pilotCss, '.cp-company-banner__text')).toContain('max-width: 35rem;');
+    expect(blockOf(pilotCss, '.cp-company-banner__body')).toContain('padding: 2.5rem;');
   });
 
   it('в блоках компании нет hex и !important (инварианты системы; значения оригинала вне шкалы — rem «как есть» с комментарием-источником)', () => {
