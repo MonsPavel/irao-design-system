@@ -1800,7 +1800,7 @@ function companyMain() {
       </li>
     </ul>
 
-    <h2 class="ui-h2 cp-company-title">Преимущества компании</h2>
+    <h2 class="ui-h3 cp-company-title">Преимущества компании</h2>
     <ul class="cp-company-adv">
       <li class="cp-company-adv__item">
         <h3 class="ui-h4 cp-company-adv__title">Современное производство</h3>
@@ -1824,7 +1824,7 @@ function companyMain() {
          карта-иллюстрация); пара фото+подпись — ui-figure (подпись
          связана семантически), alt дублирует подпись (подпись не заменяет
          alt — README ui-figure). -->
-    <h2 class="ui-h2 cp-company-title">Где мы работаем</h2>
+    <h2 class="ui-h3 cp-company-title">Где мы работаем</h2>
     <div class="cp-company-where">
       <figure class="ui-figure cp-company-where__item">
         <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
