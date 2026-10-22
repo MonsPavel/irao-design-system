@@ -69,9 +69,9 @@
   justify-self: start;
 }
 
-/* Пункты меню — ui-link; сайт-зона добавляет только вес иnowrap-режим */
+/* Пункты меню — ui-link--nav (T16.3): размер и вес несёт модификатор ДС;
+   сайт-зоне остаётся только nowrap-режим строки (.header__link оригинала) */
 .cp-header__menu .ui-link {
-  font-weight: var(--ui-fw-small);
   white-space: nowrap;
 }
 
@@ -80,7 +80,8 @@
   height: auto;
 }
 
-/* Кнопка VI — заметная пилюля (оригинал .header__link--vi) */
+/* Кнопка VI — заметная пилюля (оригинал .header__link--vi):
+   fs-small (T16.3 — сегодня наследует 20px от страницы) + вес .header__link */
 .cp-header__vi {
   display: inline-flex;
   gap: var(--ui-space-2);
@@ -90,6 +91,8 @@
   border-radius: var(--ui-radius-pill);
   background-color: var(--ui-color-glass-light);
   color: var(--ui-color-primary);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
 }
 
 /* Триггер поиска шапки */

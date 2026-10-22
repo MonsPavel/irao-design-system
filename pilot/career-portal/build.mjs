@@ -337,7 +337,9 @@ function headerHtml({ staticHeader = false }) {
   return `<header class="cp-header${modifier}">
   <div class="ui-container cp-header__inner">
     <nav class="cp-header__menu cp-header__menu--left" aria-label="Основное меню">
-      <a class="ui-link" href="vacancies.html">Вакансии</a>
+      <!-- Пункты навигации — ui-link--nav (T16.3): fs-small/fw-small, без
+           подчёркивания, hover opacity — пара .header__link оригинала. -->
+      <a class="ui-link ui-link--nav" href="vacancies.html">Вакансии</a>
       <div class="ui-dropdown" data-ui-dropdown>
         <button class="ui-dropdown__trigger" type="button" id="cp-sections-trigger">
           Школьникам и студентам
@@ -352,7 +354,7 @@ function headerHtml({ staticHeader = false }) {
           </ul>
         </nav>
       </div>
-      <a class="ui-link" href="media.html">Медиа</a>
+      <a class="ui-link ui-link--nav" href="media.html">Медиа</a>
     </nav>
 
     <a class="cp-header__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
@@ -364,8 +366,8 @@ function headerHtml({ staticHeader = false }) {
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="2"/></svg>
         <span>Версия для слабовидящих</span>
       </button>
-      <a class="ui-link" href="index.html#contacts">Контакты</a>
-      <a class="cp-header__search ui-link" href="vacancies.html" data-ui-modal-target="cp-search-dialog">
+      <a class="ui-link ui-link--nav" href="index.html#contacts">Контакты</a>
+      <a class="cp-header__search ui-link ui-link--nav" href="vacancies.html" data-ui-modal-target="cp-search-dialog">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="2"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Поиск
       </a>
