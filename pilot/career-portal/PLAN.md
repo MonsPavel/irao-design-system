@@ -202,7 +202,7 @@ REPORT §8.3. Пины — tests/unit/link.test.js (adoption-блок T16.4).
 fs 14/500, tdl none; dropdown 16/20), T16.4 (footer-link MATCH 14/14 —
 bg white, ссылки 14/500, h 227), T16.6 (пагинация пилота `--bare`,
 стрелок 0), T16.7 (`ui-button--text` в ДС). Свежий compare
-(compare.json 2026-10-23T13:40:55Z, 14 страниц, 28 проб = 20 прежних +
+(compare.json 2026-10-23T14:09:53Z, 14 страниц, 28 проб = 20 прежних +
 8 shell-проб T16.8; viewer.html — пары скриншотов + таблица всех проб).
 **Открытым остаётся №6** (строки/сайдбар): числа проб `row-title`
 (fs 20 vs 28, color dark vs primary), `row-item` (pad 24/28 vs 16),
