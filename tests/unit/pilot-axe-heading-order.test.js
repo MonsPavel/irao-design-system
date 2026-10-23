@@ -1,0 +1,112 @@
+/**
+ * Юнит-пины a11y-фикса закрывающей пересверки (T15.9, ревью приёмки):
+ * AC «axe-пробы новых страниц: только известные исключения
+ * (KNOWN_AXE_EXCEPTIONS)» не выполнялся буквально — вне реестра были
+ * 1) axe `heading-order` на events-search/education-catalog (карточки
+ * несут h3 сразу после h1-страницы — пропуск уровня; канон ДС
+ * base/typography.css: «семантику страницы даёт реальный тег,
+ * h1→h2→h3 без пропусков — гейты irao/heading-order; класс — вид»);
+ * 2) color-contrast на кнопках offer-карточек «сайт „Работа России"» —
+ * та же одобренная пара `.ui-button--accent` 3.12:1, но цели axe несут
+ * атрибутные суффиксы ([href$=…][target=_blank]), которые регэксп
+ * записи реестра не матчит.
+ *
+ * Фикс (этот файл — красный до него):
+ *  - build.mjs: тег заголовка карточки — параметр eventCard/offerCard с
+ *    дефолтом 'h3' (старые events/education/event не меняются), выдача
+ *    новых events-search/education-catalog собирается с 'h2' (h1 → h2
+ *    карточек — без пропуска; вид несёт роль ui-h4, тег не влияет);
+ *  - tests/helpers/harness.js: match записи `.ui-button--accent`
+ *    дополнен lookahead'ом `[` — атрибутные суффиксы той же кнопки
+ *    того же класса попадают в то же исключение (не новое исключение —
+ *    тот же одобренный элемент; правило tests/README.md «расширять —
+ *    только записью сюда + в таблицу» соблюдено строкой таблицы).
+ *
+ * Поверхность браузера (axe на живых страницах dist) — проба
+ * .zcode/t159-axe-new-pages.mjs по протоколу T14.12 (не CI-гейт);
+ * здесь — пины исполняемой формы решения (практика
+ * pilot-events-search-pagination.test.js).
+ */
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { KNOWN_AXE_EXCEPTIONS, unexpectedViolations } from '../../tests/helpers/harness.js';
+
+const root = join(import.meta.dirname, '..', '..');
+
+/** CRLF-хост нормализуется (tests/unit/link.test.js). */
+const build = readFileSync(join(root, 'pilot', 'career-portal', 'build.mjs'), 'utf8').replace(
+  /\r\n/g,
+  '\n',
+);
+
+/** Тело функции до следующей секции-комментария `/* ──` (практика
+ *  pilot-events-search-pagination.test.js). */
+const sectionBody = (source, name) =>
+  source.match(new RegExp(`function ${name}[\\s\\S]*?(?=\\n/\\* ──)`))?.[0] ?? '';
+
+const eventsMainBody = sectionBody(build, 'eventsMain');
+const eventsSearchMainBody = sectionBody(build, 'eventsSearchMain');
+const catalogMainBody = sectionBody(build, 'educationCatalogMain');
+const eventCardBody = sectionBody(build, 'eventCard');
+const offerCardBody = sectionBody(build, 'offerCard');
+
+describe('build.mjs — заголовки карточек новых страниц без пропуска уровней (T15.9)', () => {
+  it('events-search: выдача — тот же eventCard, но с тегом h2 (h1 страницы → h2 карточек: первая карточка следует прямо за заголовком страницы)', () => {
+    expect(eventsSearchMainBody).toContain(`EVT.upcoming.map((event) => eventCard(event, 'h2'))`);
+  });
+
+  it('events.html не тронут: обычный map(eventCard) — h3 карточек там идут после секций h2 «Предстоящие»/«Прошедшие», порядок не нарушен (старая страница вне AC новых)', () => {
+    expect(eventsMainBody).toContain('EVT.upcoming.map(eventCard)');
+    expect(eventsMainBody).toContain('EVT.past.map(eventCard)');
+  });
+
+  it('education-catalog: предложения — offerCard с тегом h2 (первый offer следует за h1 без промежуточной секции — цель axe «.cp-offer-card__head > h3»)', () => {
+    expect(catalogMainBody).toContain(`EDU.offers.map((offer) => offerCard(offer, 'h2'))`);
+  });
+
+  it('eventCard/offerCard: тег заголовка — параметр с дефолтом h3 (events/education/event остаются на h3), вид несёт роль ui-h4 — тег не влияет на computed-стили', () => {
+    expect(eventCardBody).toMatch(/function eventCard\(e, headingTag = 'h3'\)/);
+    expect(eventCardBody).toMatch(/<\$\{headingTag\} class="ui-h4">/);
+    expect(offerCardBody).toMatch(/function offerCard\(o, headingTag = 'h3'\)/);
+    expect(offerCardBody).toMatch(/<\$\{headingTag\} class="ui-h4">/);
+  });
+});
+
+describe('KNOWN_AXE_EXCEPTIONS — атрибутные цели того же класса accent (T15.9)', () => {
+  /** Цвет-контраст узел: id + цель (форма результатов axe). */
+  const contrastNode = (target) => ({
+    id: 'color-contrast',
+    nodes: [{ target: [target] }],
+  });
+
+  it('кнопка «сайт „Работа России"» offer-карточки — цель с [href][target] — та же одобренная пара .ui-button--accent 3.12:1, известна реестру', () => {
+    const results = {
+      violations: [
+        contrastNode(
+          '.cp-offer-card:nth-child(1) > .cp-offer-card__footer > .ui-button--accent[href$="trudvsem.ru/"][target="_blank"]',
+        ),
+      ],
+    };
+    expect(unexpectedViolations(results)).toEqual([]);
+  });
+
+  it('негативный контроль: нарушение вне реестра (heading-order) остаётся неожиданным — реестр не расширяется мимо одобренных пар', () => {
+    const results = {
+      violations: [{ id: 'heading-order', nodes: [{ target: ['.cp-offer-card__head > h3'] }] }],
+    };
+    expect(unexpectedViolations(results)).toEqual(['heading-order → .cp-offer-card__head > h3']);
+  });
+
+  it('прежнее поведение в силе: голый .ui-button--accent и стендовый #ui-button-accent известны (сужения реестра нет); реестр не пустеет', () => {
+    expect(
+      unexpectedViolations({
+        violations: [contrastNode('.cp-find-bar > .ui-button--accent.ui-button[type="submit"]')],
+      }),
+    ).toEqual([]);
+    expect(
+      unexpectedViolations({ violations: [contrastNode('#ui-button-accent')] }),
+    ).toEqual([]);
+    expect(KNOWN_AXE_EXCEPTIONS.length).toBe(4);
+  });
+});
