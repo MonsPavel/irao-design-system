@@ -99,7 +99,16 @@ const nextId = (prefix) => `cp-${prefix}-${(uid += 1)}`;
 /** ui-field: текстовое поле (T5.1). compact — модификатор плотной высоты
  *  анкет-модалок (T14.6: min-height 48px на __input/__select; textarea
  *  высоту не меняет), потребитель — applyForm в модалке (T15.6). */
-function field({ label, name, type = 'text', required = false, placeholder = '', hint = '', id, compact = false }) {
+function field({
+  label,
+  name,
+  type = 'text',
+  required = false,
+  placeholder = '',
+  hint = '',
+  id,
+  compact = false,
+}) {
   const fieldId = id || nextId(name);
   const hintId = hint ? ` aria-describedby="${fieldId}-hint"` : '';
   const hintHtml = hint
