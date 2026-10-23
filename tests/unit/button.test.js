@@ -188,8 +188,10 @@ describe('components/ui-button/ui-button.css — модификатор text (T1
     expect(block).toContain('border: 0;');
     expect(block).toContain('background-color: transparent;');
     // Технические considerations T16.7: высота auto по строке — в блоке нет
-    // собственной height/min-height, кроме сброса базы.
-    expect(block, 'своей высоты, кроме сброса min-height, нет').not.toMatch(/height:/);
+    // собственной height, только сброс min-height базы.
+    expect(block, 'своей height нет — только сброс min-height').not.toMatch(
+      /(?:^|\n)\s*height:/,
+    );
   });
 
   it('fs-small-regular: размер наследует fs-small 14px базы, вес 400 — пара small × fw-body (прецедент fs-small-regular ui-select)', () => {

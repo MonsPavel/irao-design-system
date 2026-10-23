@@ -6,9 +6,11 @@
  * Источник — .btn career-portal (components.css:65–93): варианты
  * primary/accent/outline/light, высота 52px, радиус pill, переход 0.25s.
  * Расширения системы: размер sm, disabled, loading; hover/active — по T2.6/
- * ADR-0010. Кнопка — только для ДЕЙСТВИЙ: переход по адресу (страница,
- * якорь, файл, внешний сайт) — ui-link, «переход-выглядит-как-действие» —
- * ui-link--button (do/don't — README.md компонента).
+ * ADR-0010; текстовый вариант --text (T16.7) — действующее слово в текстовом
+ * контексте (underline-маркер, без фона/рамки/высоты). Кнопка — только для
+ * ДЕЙСТВИЙ: переход по адресу (страница, якорь, файл, внешний сайт) —
+ * ui-link, «переход-выглядит-как-действие» — ui-link--button (do/don't —
+ * README.md компонента).
  *
  * Все значения — токены слоя 2 (Implementation requirements п.1): высоты
  * --ui-button-height(-sm), рамка --ui-button-border-width, радиус/паддинги/
@@ -103,6 +105,28 @@
 .ui-button--light {
   background-color: var(--ui-color-surface-muted);
   color: var(--ui-color-primary);
+}
+
+/* ── Текстовая кнопка (T16.7): «Сбросить ×» оригинала (.vac-side__reset,
+      REPORT §8.2 №8 — fs 14/400, underline, muted, без фона и рамки) ──
+ *
+ * Действующее слово в текстовом контексте (сброс фильтров, отмена, очистить
+ * форму): подчёркивание — осознанный маркер действия в тексте (у обычных
+ * кнопок ДС марка фоном достаточна) — переопределяет сброс базы T16.2.
+ * Специфичность модификатора равна базе (.ui-button), правило стоит ПОСЛЕ
+ * базы — результат гарантирует порядок каскада. Высота не задаётся: min-height
+ * базы гасится (0) — размер по строке, НЕ 52px остальных вариантов
+ * (Technical considerations T16.7); паддинг 0 — как в оригинале.
+ * fs-small-regular — пара small × fw-body 400 (прецедент ui-select).
+ */
+.ui-button--text {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--ui-color-text-muted);
+  font-weight: var(--ui-fw-body);
+  text-decoration: underline;
 }
 
 /* ── Модификатор pill (T14.4): пилюля со стрелкой — самый частый CTA
@@ -266,6 +290,16 @@
     color: var(--ui-color-primary);
   }
 
+  /* T16.7: подпись primary оригинала-паттерна текстовых действий; фон
+     переобъявлен ЗАЩИТНО — generic-.ui-button:hover красит surface-hover,
+     у текстовой кнопки фона нет (как у каждого варианта — см. шапку).
+     Подчёркивание сохраняется: hover text-decoration не трогает, цвет
+     линии — как у текста (currentColor, UA-дефолт). */
+  .ui-button--text:hover {
+    background-color: transparent;
+    color: var(--ui-color-primary);
+  }
+
   /* T14.4: фон blue-50 оригинала (.pill-btn:hover pages.css:248) маппится на
      ту же одобренную hover-поверхность --ui-color-surface-hover (пара light).
      Подпись переобъявлена ЗАЩИТНО (первый урок шапки): без неё
@@ -301,6 +335,14 @@
 
 .ui-button--light:active {
   background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
+  color: var(--ui-color-primary);
+}
+
+/* T16.7: у текстовой кнопки фона нет и в active — generic-.ui-button:active
+   красил бы color-mix-заливкой (защитное переобъявление, конвенция шапки);
+   подпись — primary по hover-паре (как light/pill). */
+.ui-button--text:active {
+  background-color: transparent;
   color: var(--ui-color-primary);
 }
 
