@@ -398,7 +398,10 @@ function probeTokens(value) {
   if (typeof value.width === 'number') tokens['wh'] = `${value.width}×${value.height}`;
   if (value.styles) for (const [key, val] of Object.entries(value.styles)) tokens[key] = val;
   for (const [key, val] of Object.entries(value)) {
-    if (key === 'text' || key === 'styles' || key === 'width' || key === 'height') continue;
+    if (key === 'text' || key === 'styles' || key === 'width') continue;
+    // у компонентных проб высота уже показана в 'wh'; у rect-проб shell
+    // (width не снимается, height пишется самим shellProbe) — показываем
+    if (key === 'height' && typeof value.width === 'number') continue;
     tokens[key] = val;
   }
   return tokens;
