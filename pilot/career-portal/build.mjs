@@ -96,14 +96,16 @@ const nextId = (prefix) => `cp-${prefix}-${(uid += 1)}`;
 
 /* ── переиспользуемые фрагменты разметки (компоненты ДС) ── */
 
-/** ui-field: текстовое поле (T5.1) */
-function field({ label, name, type = 'text', required = false, placeholder = '', hint = '', id }) {
+/** ui-field: текстовое поле (T5.1). compact — модификатор плотной высоты
+ *  анкет-модалок (T14.6: min-height 48px на __input/__select; textarea
+ *  высоту не меняет), потребитель — applyForm в модалке (T15.6). */
+function field({ label, name, type = 'text', required = false, placeholder = '', hint = '', id, compact = false }) {
   const fieldId = id || nextId(name);
   const hintId = hint ? ` aria-describedby="${fieldId}-hint"` : '';
   const hintHtml = hint
     ? `\n    <p class="ui-field__hint" id="${fieldId}-hint">${esc(hint)}</p>`
     : '';
-  return `<div class="ui-field${required ? ' ui-field--required' : ''}">
+  return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
   <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>` : ''}</label>
   <input class="ui-field__input" type="${type}" id="${fieldId}" name="${name}"${required ? ' required' : ''}${placeholder ? ` placeholder="${esc(placeholder)}"` : ''}${hintId}>${hintHtml}
 </div>`;
@@ -118,6 +120,7 @@ function selectField({
   required = false,
   pill = false,
   ariaLabel,
+  compact = false,
 }) {
   const fieldId = nextId(name);
   const opts = options
@@ -149,7 +152,7 @@ function selectField({
     const labelHtml = label ? `<label class="cp-vh" for="${fieldId}">${esc(label)}</label>\n` : '';
     return `${labelHtml}<div class="cp-pill">${select}</div>`;
   }
-  return `<div class="ui-field${required ? ' ui-field--required' : ''}">
+  return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
   <label class="ui-field__label" for="${fieldId}">${esc(label)}</label>
   ${select}
 </div>`;
@@ -313,7 +316,9 @@ function offerCard(o) {
   </p>
   <p class="cp-offer-card__meta ui-small">${esc(o.company)} · ${esc(o.city)}</p>
   <div class="cp-offer-card__footer">
-    <a class="ui-button ui-button--accent ui-button--sm" href="https://trudvsem.ru/" target="_blank" rel="noopener">сайт «Работа России»</a>
+    <!-- базовая accent-кнопка 52px оригинала (раунд 2: probe height 52→32
+         при --sm, прочие стили совпали; T15.6 снял --sm) -->
+    <a class="ui-button ui-button--accent" href="https://trudvsem.ru/" target="_blank" rel="noopener">сайт «Работа России»</a>
   </div>
 </article>`;
 }
@@ -543,15 +548,20 @@ ${searchDialogHtml()}
 
 /* ── формы отклика ── */
 
-/** анкета отклика ( ui-form, T5.4) — используется на странице и в модалке */
-function applyForm({ id, note }) {
+/** анкета отклика ( ui-form, T5.4) — используется на странице и в модалке.
+ *  compact (T15.6): в модалке поля несут ui-field--compact (T14.6 — 48px
+ *  на input/select, как .apply-form .field__input pages.css:1208 оригинала);
+ *  textarea высоту не меняет (канон T14.6), радио/файл/согласие вне
+ *  модификатора. Страница-форма (vacancy-apply) несёт базовые 52px —
+ *  EPIC-15 README: решение T15.6. */
+function applyForm({ id, note, compact = false }) {
   return `<form class="ui-form" action="#${id}" method="post" data-cp-form novalidate>
   <div class="ui-form__layout">
     <div class="ui-form__main">
       <div class="ui-form__grid" data-cp-form-body>
-        ${field({ label: 'Фамилия', name: 'lastname', required: true })}
-        ${field({ label: 'Имя', name: 'firstname', required: true })}
-        ${field({ label: 'Отчество', name: 'middlename' })}
+        ${field({ label: 'Фамилия', name: 'lastname', required: true, compact })}
+        ${field({ label: 'Имя', name: 'firstname', required: true, compact })}
+        ${field({ label: 'Отчество', name: 'middlename', compact })}
         ${radioGroup({
           label: 'Пол',
           name: 'gender',
@@ -561,14 +571,14 @@ function applyForm({ id, note }) {
           ],
           required: true,
         })}
-        ${field({ label: 'Дата рождения', name: 'birthday', required: true, placeholder: 'ДД.ММ.ГГГГ' })}
-        ${field({ label: 'Телефон', name: 'phone', type: 'tel', required: true, placeholder: '+7 (___) ___-__-__' })}
-        ${field({ label: 'Email', name: 'email', type: 'email', required: true, placeholder: 'you@example.ru', id: `${id}-email` })}
-        ${field({ label: 'Гражданство', name: 'citizenship', required: true })}
-        ${selectField({ label: 'Образование', name: 'education', required: true, options: [{ label: 'Выберите', value: '' }, 'Высшее', 'Среднее профессиональное'] })}
-        ${field({ label: 'Учебное заведение', name: 'university', required: true })}
-        ${field({ label: 'Факультет / специальность', name: 'faculty', required: true })}
-        ${field({ label: 'Год окончания обучения', name: 'gradyear', required: true, placeholder: '2024' })}
+        ${field({ label: 'Дата рождения', name: 'birthday', required: true, placeholder: 'ДД.ММ.ГГГГ', compact })}
+        ${field({ label: 'Телефон', name: 'phone', type: 'tel', required: true, placeholder: '+7 (___) ___-__-__', compact })}
+        ${field({ label: 'Email', name: 'email', type: 'email', required: true, placeholder: 'you@example.ru', id: `${id}-email`, compact })}
+        ${field({ label: 'Гражданство', name: 'citizenship', required: true, compact })}
+        ${selectField({ label: 'Образование', name: 'education', required: true, options: [{ label: 'Выберите', value: '' }, 'Высшее', 'Среднее профессиональное'], compact })}
+        ${field({ label: 'Учебное заведение', name: 'university', required: true, compact })}
+        ${field({ label: 'Факультет / специальность', name: 'faculty', required: true, compact })}
+        ${field({ label: 'Год окончания обучения', name: 'gradyear', required: true, placeholder: '2024', compact })}
         <div class="ui-field ui-field--wide">
           <label class="ui-field__label" for="${id}-about">Дополнительная информация</label>
           <textarea class="ui-field__textarea" id="${id}-about" name="about" placeholder="Расскажите о релевантном опыте"></textarea>
@@ -615,7 +625,7 @@ function applyDialogHtml() {
   </button>
   <h2 class="ui-modal__title ui-h3" id="cp-apply-title">Анкета отклика</h2>
   <div class="ui-modal__body">
-    ${applyForm({ id: 'cp-apply', note: 'Ответим на почту, как только закончим его рассматривать.' })}
+    ${applyForm({ id: 'cp-apply', note: 'Ответим на почту, как только закончим его рассматривать.', compact: true })}
   </div>
 </dialog>`;
 }
