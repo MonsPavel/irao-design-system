@@ -10,6 +10,14 @@
 
 ### Changed
 
+- Цвет подписи поля: `ui-field__label` и legend группы радио (ui-radio-group)
+  несут новый токен `--ui-color-field-label` (gray-700 `#616161`) вместо
+  `--ui-color-text` — подпись «чуть тише текста, но читаема»: AA-замена серого
+  #808080 оригинала (`.apply-form .field__label`, pages.css:1206) по прецеденту
+  muted T2.3 — 6.19:1 на белом, 5.67:1 на blue-50 (визуальное изменение
+  поставки, T16.9; пары `field-label-on-*` контраст-гейта). Границы токена:
+  текст согласия чекбоксов/radio — контент, остаётся `--ui-color-text`;
+  кнопка-лейбл ui-file — визуал `.btn--light` (primary);
 - Горизонтальный паддинг полей: `4px 24px` → `4px 20px` (textarea `14px 20px`), как
   `.field__input` career-portal (components.css:150) — новый токен
   `--ui-field-pad-inline` (20px вне шкалы отступов — перенос «как есть», T14.6).
