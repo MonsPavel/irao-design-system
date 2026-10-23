@@ -5,7 +5,7 @@
  *
  * Что делает:
  *  1. читает мок-данные data/*.json (копия data/ оригинала);
- *  2. генерирует 12 страниц в pilot/career-portal/dist/ — разметка
+ *  2. генерирует 16 страниц в pilot/career-portal/dist/ — разметка
  *     СОБРАНА ИЗ КОМПОНЕНТОВ ДС (ui-button/ui-card/ui-field/ui-form/
  *     ui-modal/ui-tabs/ui-accordion/ui-select/ui-dropdown/ui-tag/
  *     ui-breadcrumbs/ui-pagination/ui-error/ui-vi + роли типографики и
@@ -74,6 +74,12 @@ const esc = (value) =>
     .replaceAll('<', '&lt;')
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;');
+
+/** дата data (dd.mm.yyyy | dd.mm.yy) → ISO для datetime-атрибутов <time> */
+const isoDate = (date) => {
+  const [day, month, year] = date.split('.');
+  return `${year.length === 2 ? `20${year}` : year}-${month}-${day}`;
+};
 
 const ARROW =
   '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -226,6 +232,14 @@ function vacancyRow(v) {
 </article>`;
 }
 
+/** статус регистрации события → текст и тинт ui-tag (правило карточки:
+ *  «открыта» → зелёный «Регистрация», «Завершено» → серый, иное — оранжевый) */
+function regTag(e) {
+  if (/открыта/.test(e.reg)) return { text: 'Регистрация', variant: 'green' };
+  if (/Завершено/.test(e.reg)) return { text: 'Завершено', variant: 'gray' };
+  return { text: e.reg, variant: 'orange' };
+}
+
 /** карточка события (оригинал .event-card): ui-card--link + теги */
 function eventCard(e) {
   // Теги на фото — тинты вариантов 28px, как в оригинале (events.html:270/302;
@@ -233,19 +247,15 @@ function eventCard(e) {
   // остаётся API ДС без пилотного применения — «белый на primary, 40px»
   // оригинала относится к фильтр-тегам (реклассификация REPORT §3.3, ревью
   // T16.10); применение поверх фото — решение владельца.
-  const reg = /открыта/.test(e.reg)
-    ? '<span class="ui-tag ui-tag--green">Регистрация</span>'
-    : /Завершено/.test(e.reg)
-      ? '<span class="ui-tag ui-tag--gray">Завершено</span>'
-      : `<span class="ui-tag ui-tag--orange">${esc(e.reg)}</span>`;
+  const reg = regTag(e);
   return `<article class="ui-card ui-card--hover ui-card--link cp-event-card">
   <a class="ui-card__link" href="event.html">
     <div class="cp-event-card__photo-wrap">
       <img class="cp-event-card__photo" src="${esc(e.image)}" alt="" loading="lazy">
-      ${reg}
+      <span class="ui-tag ui-tag--${reg.variant}">${esc(reg.text)}</span>
     </div>
     <div class="cp-event-card__body">
-      <time class="cp-event-card__date ui-small ui-text--muted" datetime="${esc(e.date.split('.').reverse().join('-'))}">${esc(e.date)}</time>
+      <time class="cp-event-card__date ui-small ui-text--muted" datetime="${esc(isoDate(e.date))}">${esc(e.date)}</time>
       <h3 class="ui-h4">${esc(e.title)}</h3>
       <p class="cp-event-card__meta">
         <span class="ui-tag ui-tag--blue">${esc(e.city)}</span>
@@ -284,6 +294,17 @@ function internCard(i, index) {
   <h3 class="ui-h4">${esc(i.title)}</h3>
   <p class="ui-small">${esc(i.short)}</p>
 </button>`;
+}
+
+/** связанная практика/стажировка в статье (оригинал render_internship_related:
+ *  та же карточка ссылкой на раздел, без модалки; build.py:107–116) */
+function internLinkCard(i, href) {
+  const paid = i.paid ? '<span class="ui-tag ui-tag--orange">оплачиваемая</span>' : '';
+  return `<a class="ui-card ui-card--hover cp-intern-card" href="${esc(href)}">
+  <p>${paid}</p>
+  <h3 class="ui-h4">${esc(i.title)}</h3>
+  <p class="ui-small">${esc(i.short)}</p>
+</a>`;
 }
 
 /** карточка стажёра */
@@ -1365,6 +1386,119 @@ function vacancyApplyMain(v = VAC.items[0]) {
 </section>`;
 }
 
+/* ── детальные «internship__*»: общий шаблон (T15.1) ── */
+
+/** Общий шаблон детальной семейства internship__* оригинала
+ *  (src/pages/event.html, internship.html — один фрагмент-шаблон):
+ *  main-колонка — шапка-тройка (h1 канона детальной ui-page-title + теги +
+ *  мета-строка), фото, контент-секции; aside — мета-строки «по образцу
+ *  aside вакансии»: ui-form__aside + dl (порт .form-aside ДС, как на
+ *  vacancy-apply; .internship__aside оригинала — та же карточка, pages.css:552).
+ *  Потребители: event.html (T15.1), internship.html (T15.4 переиспользует
+ *  функцию, не дублируя её).
+ *  Параметры: crumbs — цепочка breadcrumbs(); title — h1; tags —
+ *  [{text, variant}]; meta — {text, datetime}; photo — {src, alt, width,
+ *  height}; sections — [{title, html}]; aside — {title, rows: [[метка,
+ *  значение]], cta: {text, href}, note}. */
+function internshipDetail({ crumbs, title, tags, meta, photo, sections, aside }) {
+  const tagsHtml = tags
+    .map((tag) => `<span class="ui-tag ui-tag--${tag.variant}">${esc(tag.text)}</span>`)
+    .join('');
+  const sectionsHtml = sections
+    .map(
+      (section) => `<div class="cp-detail-section">
+  <h2 class="ui-h4">${esc(section.title)}</h2>
+  ${section.html}
+</div>`,
+    )
+    .join('\n');
+  const rowsHtml = aside.rows
+    .map(
+      ([label, value]) => `          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">${esc(label)}</dt>
+            <dd class="ui-form__aside-value">${esc(value)}</dd>
+          </div>`,
+    )
+    .join('\n');
+  const asideId = nextId('detail-aside');
+  return `${breadcrumbs(crumbs)}
+<section class="ui-section">
+  <div class="ui-container">
+    <div class="ui-form__layout">
+      <div class="cp-detail-main">
+        <header class="cp-detail-head">
+          <h1 class="ui-page-title">${esc(title)}</h1>
+          <p class="cp-detail-tags">${tagsHtml}</p>
+          <time class="ui-body" datetime="${esc(meta.datetime)}">${esc(meta.text)}</time>
+        </header>
+        <img class="ui-image ui-image--cover cp-detail-photo" src="${esc(photo.src)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}">
+        ${sectionsHtml}
+      </div>
+      <aside class="ui-form__aside" aria-labelledby="${asideId}">
+        <h2 class="ui-h4 ui-form__aside-title" id="${asideId}">${esc(aside.title)}</h2>
+        <dl class="ui-form__aside-list">
+${rowsHtml}
+        </dl>
+        <a class="ui-button ui-button--accent" href="${esc(aside.cta.href)}">${esc(aside.cta.text)}</a>
+        <p class="ui-micro ui-text--muted">${esc(aside.note)}</p>
+      </aside>
+    </div>
+  </div>
+</section>`;
+}
+
+/* ── мероприятие: детальная (T15.1) ── */
+
+function eventMain(e = EVT.upcoming[0]) {
+  const reg = regTag(e);
+  return internshipDetail({
+    crumbs: [
+      ['Главная', 'index.html'],
+      ['Мероприятия', 'events.html'],
+      ['День открытых дверей', ''],
+    ],
+    title: e.title,
+    tags: [
+      reg,
+      { text: e.city, variant: 'blue' },
+      { text: e.format, variant: 'gray' },
+      { text: e.audience, variant: 'gray' },
+    ],
+    // строка даты — фрагмент оригинала (время «14:00» в data нет);
+    // datetime — из data
+    meta: { text: '28 сентября 2026, 14:00', datetime: isoDate(e.date) },
+    // alt по контенту (Accessibility requirements): имя события из data
+    photo: { src: e.image, alt: e.title, width: 431, height: 431 },
+    sections: [
+      {
+        title: 'Подробное описание',
+        html: `<p class="ui-body">Приглашаем студентов технических специальностей на день открытых дверей генерирующей компании Группы «Интер РАО». Вы увидите, как устроена современная станция изнутри: машинный зал, блочный щит управления, лаборатории. Инженеры расскажут о производстве электроэнергии и ответят на вопросы о работе и стажировках в компании.</p>
+  <p class="ui-body">Встреча продлится около двух часов: экскурсия по объекту, презентация карьерных возможностей и неформальное общение с молодыми специалистами компании. Вход по предварительной регистрации.</p>`,
+      },
+      {
+        title: 'Кому будет полезно',
+        html: `<ul class="ui-list">
+    <li>Студентам энергетических и электротехнических специальностей;</li>
+    <li>Тем, кто рассматривает стажировки и практики в генерации;</li>
+    <li>Всем, кто хочет увидеть энергетическое производство изнутри.</li>
+  </ul>`,
+      },
+    ],
+    aside: {
+      title: 'Детали',
+      rows: [
+        ['Регион', e.region],
+        ['Город', e.city],
+        ['Дата', e.date],
+        ['Формат', e.format],
+      ],
+      // event-apply.html собирается в T15.4 (Out of scope T15.1)
+      cta: { text: 'подать заявку', href: 'event-apply.html' },
+      note: 'Повторная заявка на участие в этом мероприятии невозможна.',
+    },
+  });
+}
+
 /* ── стажировки/практики: лендинг ── */
 
 function internshipsMain(set) {
@@ -1779,6 +1913,79 @@ ${cards}
 </section>`;
 }
 
+/* ── статья: детальная (T15.1) ── */
+
+function articleMain(a = ART.items[0]) {
+  const dot =
+    { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[a.type] ||
+    'ui-tag--blue';
+  const relatedVacancies = VAC.items.slice(0, 3).map(vacancyRow).join('\n');
+  const relatedPractices = INT.practice.items
+    .slice(0, 3)
+    .map((item) => internLinkCard(item, 'practices.html'))
+    .join('\n');
+  const relatedInternships = INT.internship.items
+    .slice(0, 3)
+    .map((item) => internLinkCard(item, 'internships.html'))
+    .join('\n');
+  const relatedEducations = EDU.offers.slice(0, 3).map(offerCard).join('\n');
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Медиа', 'media.html'],
+    ['Студенты приступили к практике', ''],
+  ])}
+<section class="ui-section">
+  <div class="ui-container">
+    <article class="cp-article-page">
+      <h1 class="ui-page-title">${esc(a.title)}</h1>
+      <p class="cp-article-meta">
+        <span class="cp-article-type">${esc(a.type)}</span>
+        <time class="ui-small ui-text--muted" datetime="${esc(isoDate(a.date))}">${esc(a.date)}</time>
+        <span class="ui-tag ${dot}">${esc(a.rubric)}</span>
+      </p>
+      <div class="cp-article-gallery">
+        <figure class="ui-figure">
+          <img class="ui-image ui-image--cover cp-article-gallery__photo" src="${esc(a.image)}" alt="${esc(a.title)}" width="1447" height="824">
+        </figure>
+        <figure class="ui-figure">
+          <img class="ui-image ui-image--cover cp-article-gallery__photo" src="assets/images/students-photo-2.jpg" alt="Студенты на практике в компаниях Группы «Интер РАО»" width="431" height="431">
+        </figure>
+      </div>
+      <div class="cp-article-text">
+        <p class="ui-body">Сотни студентов технических специальностей приступили к производственной практике в компаниях Группы «Интер РАО». Молодые люди приобретают опыт по основным для компании направлениям: энергетика, тепловая автоматика, техническая диагностика, водоподготовка и экологическая станция, сети и подстанции, тепловые сети.</p>
+        <p class="ui-body">Каждому практиканту закреплён наставник из числа опытных сотрудников: он помогает разобраться в производственных процессах, поставить первую задачу и подготовить отчёт по требованиям учебного заведения.</p>
+        <p class="ui-body">Практика в Группе «Интер РАО» — это возможность увидеть, как теория из учебной программы превращается в реальные производственные результаты, и получить приглашение на работу ещё до выпуска.</p>
+        <p class="ui-body">Отбор на следующие практики стартует весной: следите за объявлениями в разделе «Школьникам и студентам».</p>
+      </div>
+    </article>
+
+    <!-- «материалы по теме» — секции related оригинала (build.py:849–863:
+         по 3 первых записи каждой сущности); строки вакансий — те же
+         cp-vac-rows, карточки — как на internships/education. Триггер
+         «откликнуться» остаётся без модалки — как в оригинале, где на
+         article.html диалога #vac-apply нет (modals.js:22 — молча выходит). -->
+    <div class="cp-article-related">
+      <h2 class="ui-h3">Связанные вакансии</h2>
+      <div class="cp-vac-rows">
+${relatedVacancies}
+      </div>
+      <h2 class="ui-h3">Связанные практики</h2>
+      <div class="ui-grid ui-grid--3">
+${relatedPractices}
+      </div>
+      <h2 class="ui-h3">Связанные стажировки</h2>
+      <div class="ui-grid ui-grid--3">
+${relatedInternships}
+      </div>
+      <h2 class="ui-h3">Связанные целевые обучения</h2>
+      <div class="ui-grid ui-grid--3">
+${relatedEducations}
+      </div>
+    </div>
+  </div>
+</section>`;
+}
+
 /* ── карьерные треки ── */
 
 function careerTrackMain() {
@@ -2036,7 +2243,17 @@ const PAGES = [
     main: educationCatalogMain(),
   },
   { file: 'events.html', title: 'Мероприятия — Портал карьеры Интер РАО', main: eventsMain() },
+  {
+    file: 'event.html',
+    title: 'День открытых дверей — Портал карьеры Интер РАО',
+    main: eventMain(),
+  },
   { file: 'media.html', title: 'Медиа — Портал карьеры Интер РАО', main: mediaMain() },
+  {
+    file: 'article.html',
+    title: 'Студенты приступили к практике — Портал карьеры Интер РАО',
+    main: articleMain(),
+  },
   {
     file: 'career-track.html',
     title: 'Карьерные треки — Портал карьеры Интер РАО',

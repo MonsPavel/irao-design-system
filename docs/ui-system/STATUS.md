@@ -103,7 +103,7 @@
 | T16.16 | todo | EPIC-16 (раунд 4): пилот — карточки компаний 14/500 + поднавигация career-track/education как ui-tabs--pill (завершение T14.9-adoption); section-title 42 fw — «принято ДС» в mapping |
 | T16.8 | done | смержена |
 | T15.6 | done | смержена |
-| T15.1 | todo | EPIC-15 (раунд 2 проверок пилота, 21.10): пилот — детальные event.html/article.html; закрывает мёртвые ссылки с 6 страниц |
+| T15.1 | done | смержена |
 | T15.2 | done | смержена |
 | T15.3 | done | смержена |
 | T15.4 | todo | EPIC-15: пилот — internship.html + internship-apply/event-apply |
