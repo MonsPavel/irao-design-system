@@ -168,7 +168,7 @@ function selectField({
     return `${labelHtml}<div class="cp-pill">${select}</div>`;
   }
   return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
-  <label class="ui-field__label" for="${fieldId}">${esc(label)}</label>
+  <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>` : ''}</label>
   ${select}
 </div>`;
 }
@@ -286,14 +286,12 @@ function articleCard(a) {
 </article>`;
 }
 
-/** карточка направления практики/стажировки → общая модалка */
-function internCard(i, index) {
-  const paid = i.paid ? '<span class="ui-tag ui-tag--orange">оплачиваемая</span>' : '';
-  return `<button class="ui-card ui-card--hover cp-intern-card" type="button" data-cp-intern="${index}" data-title="${esc(i.title)}" data-short="${esc(i.short)}" data-image="${esc(i.image || 'assets/images/internship-1.png')}">
-  <p>${paid}</p>
-  <h3 class="ui-h4">${esc(i.title)}</h3>
-  <p class="ui-small">${esc(i.short)}</p>
-</button>`;
+/** карточка направления практики/стажировки → детальная internship.html
+ *  (T15.4, AC: «карточки → internship.html»; в оригинале карточка-кнопка
+ *  открывает модалку направления — build.py:90, и детальная из него не
+ *  достижима; спека T15.4 решает: карточка ведёт на страницу) */
+function internCard(i) {
+  return internLinkCard(i, 'internship.html');
 }
 
 /** связанная практика/стажировка в статье (оригинал render_internship_related:
@@ -1386,6 +1384,210 @@ function vacancyApplyMain(v = VAC.items[0]) {
 </section>`;
 }
 
+/* ── заявка на стажировку: страница-форма (T15.4) ──
+   Паттерн vacancy-apply: страница-форма несёт базовые поля 52px (компакт —
+   только модалки, решение T15.6), success-ветка — мок без бэкенда. Состав
+   полей — оригинал internship-apply.html (build.py:779): ФИО, пол, дата
+   рождения, телефон, email, гражданство, вуз, специальность, курс-select,
+   статус образования + скрытый блок опыта (в оригинале forms.js его не
+   переключает — data-атрибуты без обработчика), textarea, согласие.
+   Курс — selectField (ui-field select-вариант формы вакансии — переиспользован,
+   вторая форма select не заводится, Technical considerations). Анкета
+   привязана к записи items[1] «Стажировка: разработчик» — та же, что
+   детальная internship.html. */
+function internshipApplyMain(i = INT.internship.items[1]) {
+  const reqStar = ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>`;
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Стажировки', 'internships.html'],
+    ['Заявка', ''],
+  ])}
+<section class="ui-section">
+  <div class="ui-container">
+    <h1 class="ui-page-title">Заявка на стажировку</h1>
+    <div class="ui-form__layout" style="margin-top: var(--ui-space-5);">
+      <div class="ui-form__main">
+        <p class="ui-small ui-text--muted">Стажировка: <strong>${esc(i.title.replace(/^Стажировка:\s*/, ''))}</strong>, ${esc(i.company)}</p>
+        <div class="cp-form-wrap">
+          <form class="ui-form" action="#ia" method="post" data-cp-form novalidate>
+  <div class="ui-form__layout">
+    <div class="ui-form__main" data-cp-form-body>
+      <div class="ui-form__grid">
+        ${field({ label: 'Фамилия', name: 'lastname', required: true, placeholder: 'Иванов' })}
+        ${field({ label: 'Имя', name: 'firstname', required: true, placeholder: 'Иван' })}
+        ${field({ label: 'Отчество', name: 'middlename', placeholder: 'Иванович' })}
+        ${radioGroup({
+          label: 'Пол',
+          name: 'gender',
+          options: [
+            ['Мужской', 'm'],
+            ['Женский', 'f'],
+          ],
+          required: true,
+        })}
+        ${field({ label: 'Дата рождения', name: 'birth', required: true, placeholder: 'ДД.ММ.ГГГГ' })}
+        ${field({ label: 'Телефон', name: 'phone', type: 'tel', required: true, placeholder: '+7 (___) ___-__-__' })}
+        ${field({ label: 'Email', name: 'email', type: 'email', required: true, placeholder: 'you@example.ru' })}
+        ${field({ label: 'Гражданство', name: 'citizenship', required: true, placeholder: 'Российская Федерация' })}
+        ${field({ label: 'Учебное заведение', name: 'university', required: true, placeholder: 'Название вуза или колледжа' })}
+        ${field({ label: 'Специальность', name: 'speciality', required: true, placeholder: 'Информационные технологии' })}
+        ${selectField({
+          label: 'Курс обучения',
+          name: 'course',
+          required: true,
+          options: [
+            { label: 'Выберите', value: '' },
+            '1 курс',
+            '2 курс',
+            '3 курс',
+            '4 курс',
+            'Магистратура',
+          ],
+        })}
+        <div class="ui-field ui-field--required ui-field--wide">
+          <fieldset class="ui-radio-group">
+            <legend class="ui-radio-group__legend">Статус образования${reqStar}</legend>
+            <div class="ui-radio-group__row">
+              <label class="ui-radio"><input class="ui-radio__input" type="radio" name="edustatus" value="inprogress" required checked data-edu-toggle>В процессе обучения</label>
+              <label class="ui-radio"><input class="ui-radio__input" type="radio" name="edustatus" value="finished" data-edu-toggle>Завершил обучение</label>
+            </div>
+          </fieldset>
+        </div>
+        <!-- условная ветка «Завершил обучение»: в оригинале скрыта и никогда
+             не показывается (forms.js переключатель не реализует,
+             internship-apply.html:71) — мок валидирует только видимые поля -->
+        <div class="ui-field ui-field--wide" data-experience-fields hidden>
+          <div class="ui-form__grid">
+            <fieldset class="ui-radio-group">
+              <legend class="ui-radio-group__legend">Наличие опыта работы${reqStar}</legend>
+              <div class="ui-radio-group__row">
+                <label class="ui-radio"><input class="ui-radio__input" type="radio" name="hasexp" value="yes" required>Да</label>
+                <label class="ui-radio"><input class="ui-radio__input" type="radio" name="hasexp" value="no" checked>Нет</label>
+              </div>
+            </fieldset>
+            ${field({ label: 'Последнее место работы', name: 'lastjob', required: true, placeholder: 'Название компании' })}
+            ${field({ label: 'Должность', name: 'lastpos', required: true, placeholder: 'Должность' })}
+            ${field({ label: 'Период работы', name: 'period', required: true, placeholder: '2023–2026' })}
+          </div>
+        </div>
+        <div class="ui-field ui-field--wide">
+          <label class="ui-field__label" for="ia-extra">Дополнительная информация</label>
+          <textarea class="ui-field__textarea" id="ia-extra" name="extra" placeholder="О чём нам стоит знать"></textarea>
+        </div>
+      </div>
+      <div class="ui-field ui-field--required">
+        <label class="ui-checkbox">
+          <input class="ui-checkbox__input" type="checkbox" name="consent" required>
+          <span>Я даю <a class="ui-link" href="#">согласие на обработку персональных данных</a> и ознакомлен(а) с <a class="ui-link" href="#">Политикой конфиденциальности</a>${reqStar}</span>
+        </label>
+      </div>
+      <div class="ui-form__actions">
+        <button class="ui-button ui-button--accent" type="submit">отправить заявку</button>
+      </div>
+    </div>
+  </div>
+  <div class="ui-form__success" data-cp-form-success hidden>
+    <h2 class="ui-h4 ui-form__success-title" tabindex="-1">Заявка отправлена</h2>
+    <p class="ui-body ui-form__success-text">Компания рассмотрит заявку и свяжется с вами по телефону или email в течение 10 рабочих дней. Повторная подача заявки на эту стажировку невозможна.</p>
+    <div class="ui-form__success-actions">
+      <a class="ui-button ui-button--outline" href="internships.html">К списку стажировок</a>
+    </div>
+  </div>
+</form>
+        </div>
+      </div>
+      <aside class="ui-form__aside" aria-labelledby="ia-aside-title">
+        <h2 class="ui-h4 ui-form__aside-title" id="ia-aside-title">${esc(i.title)}</h2>
+        <p class="ui-body ui-form__aside-text">${esc(i.company)}, ${esc(i.city)}. ${esc(i.schedule)}, оплачиваемая стажировка от 60 000 ₽.</p>
+        <dl class="ui-form__aside-list">
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Направление подготовки</dt>
+            <dd class="ui-form__aside-value">${esc(i.study)}</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Длительность</dt>
+            <dd class="ui-form__aside-value">6 месяцев</dd>
+          </div>
+        </dl>
+        <a class="ui-button ui-button--outline" href="internship.html">вернуться к стажировке</a>
+      </aside>
+    </div>
+  </div>
+</section>`;
+}
+
+/* ── заявка на мероприятие: страница-форма (T15.4) ──
+   Короткая форма (e-mail + ошибка + success) — оригинал event-apply.html
+   (build.py:832); CTA «подать заявку» с event.html замкнут (T15.1).
+   Ошибка поля — канон ui-field__error: слот с role="alert" в разметке
+   (текст фрагмента), вне --error скрыт CSS ДС; мок переключает состояние.
+   Aside — мета мероприятия из data (время «14:00» в data нет — фрагмент,
+   как на event.html T15.1). */
+function eventApplyMain(e = EVT.upcoming[0]) {
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Мероприятия', 'events.html'],
+    ['Заявка', ''],
+  ])}
+<section class="ui-section">
+  <div class="ui-container">
+    <h1 class="ui-page-title">Заявка на мероприятие</h1>
+    <div class="ui-form__layout" style="margin-top: var(--ui-space-5);">
+      <div class="ui-form__main">
+        <p class="ui-small ui-text--muted">Мероприятие: <strong>${esc(e.title)}</strong>, ${esc(e.date)}, ${esc(e.city)}</p>
+        <div class="cp-form-wrap">
+          <form class="ui-form" action="#ea" method="post" data-cp-form novalidate>
+  <div class="ui-form__layout">
+    <div class="ui-form__main" data-cp-form-body>
+      <div class="ui-field ui-field--required">
+        <label class="ui-field__label" for="ea-email">Email <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span></label>
+        <input class="ui-field__input" type="email" id="ea-email" name="email" required placeholder="you@example.ru" aria-describedby="ea-email-error">
+        <p class="ui-field__error" id="ea-email-error" role="alert">Укажите корректный email</p>
+      </div>
+      <div class="ui-field ui-field--required">
+        <label class="ui-checkbox">
+          <input class="ui-checkbox__input" type="checkbox" name="consent" required>
+          <span>Я даю <a class="ui-link" href="#">согласие на обработку персональных данных</a> и ознакомлен(а) с <a class="ui-link" href="#">Политикой конфиденциальности</a> <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span></span>
+        </label>
+      </div>
+      <div class="ui-form__actions">
+        <button class="ui-button ui-button--accent" type="submit">подать заявку</button>
+      </div>
+    </div>
+  </div>
+  <div class="ui-form__success" data-cp-form-success hidden>
+    <h2 class="ui-h4 ui-form__success-title" tabindex="-1">Заявка отправлена</h2>
+    <p class="ui-body ui-form__success-text">Мы отправим подтверждение и детали посещения на указанный email. Повторная заявка на участие в этом мероприятии невозможна.</p>
+    <div class="ui-form__success-actions">
+      <a class="ui-button ui-button--outline" href="events.html">К списку мероприятий</a>
+    </div>
+  </div>
+</form>
+        </div>
+      </div>
+      <aside class="ui-form__aside" aria-labelledby="ea-aside-title">
+        <h2 class="ui-h4 ui-form__aside-title" id="ea-aside-title">${esc(e.title)}</h2>
+        <dl class="ui-form__aside-list">
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Дата</dt>
+            <dd class="ui-form__aside-value">${esc(e.date)}, 14:00</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Город</dt>
+            <dd class="ui-form__aside-value">${esc(e.city)}</dd>
+          </div>
+          <div class="ui-form__aside-row">
+            <dt class="ui-form__aside-label">Формат</dt>
+            <dd class="ui-form__aside-value">${esc(e.format)}</dd>
+          </div>
+        </dl>
+        <a class="ui-button ui-button--outline" href="event.html">вернуться к мероприятию</a>
+      </aside>
+    </div>
+  </div>
+</section>`;
+}
+
 /* ── детальные «internship__*»: общий шаблон (T15.1) ── */
 
 /** Общий шаблон детальной семейства internship__* оригинала
@@ -1397,13 +1599,28 @@ function vacancyApplyMain(v = VAC.items[0]) {
  *  Потребители: event.html (T15.1), internship.html (T15.4 переиспользует
  *  функцию, не дублируя её).
  *  Параметры: crumbs — цепочка breadcrumbs(); title — h1; tags —
- *  [{text, variant}]; meta — {text, datetime}; photo — {src, alt, width,
- *  height}; sections — [{title, html}]; aside — {title, rows: [[метка,
- *  значение]], cta: {text, href}, note}. */
-function internshipDetail({ crumbs, title, tags, meta, photo, sections, aside }) {
+ *  [{text, variant}]; meta — {text, datetime} (опционален: у internship__head
+ *  даты нет, T15.4); salary — строка «зарплатной вилки» (опционален, T15.4:
+ *  span.vacancy__salary оригинала internship.html:12); company — {text,
+ *  href} (опционален, T15.4: a.vacancy__company → company.html, строка 13);
+ *  photo — {src, alt, width, height}; sections — [{title, html}]; aside —
+ *  {title, rows: [[метка, значение]], cta: {text, href}, note}. */
+function internshipDetail({ crumbs, title, tags, meta, salary, company, photo, sections, aside }) {
   const tagsHtml = tags
     .map((tag) => `<span class="ui-tag ui-tag--${tag.variant}">${esc(tag.text)}</span>`)
     .join('');
+  // хвост шапки-тройки: дата события и/или зарплата+компания стажировки
+  // (со сдвигом строки и отступами исходного шаблона — вывод event.html
+  // не меняется)
+  const headExtra = [
+    meta
+      ? `\n          <time class="ui-body" datetime="${esc(meta.datetime)}">${esc(meta.text)}</time>`
+      : '',
+    salary ? `\n          <span class="ui-body">${esc(salary)}</span>` : '',
+    company
+      ? `\n          <a class="ui-link" href="${esc(company.href)}">${esc(company.text)}</a>`
+      : '',
+  ].join('');
   const sectionsHtml = sections
     .map(
       (section) => `<div class="cp-detail-section">
@@ -1428,8 +1645,7 @@ function internshipDetail({ crumbs, title, tags, meta, photo, sections, aside })
       <div class="cp-detail-main">
         <header class="cp-detail-head">
           <h1 class="ui-page-title">${esc(title)}</h1>
-          <p class="cp-detail-tags">${tagsHtml}</p>
-          <time class="ui-body" datetime="${esc(meta.datetime)}">${esc(meta.text)}</time>
+          <p class="cp-detail-tags">${tagsHtml}</p>${headExtra}
         </header>
         <img class="ui-image ui-image--cover cp-detail-photo" src="${esc(photo.src)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}">
         ${sectionsHtml}
@@ -1499,12 +1715,69 @@ function eventMain(e = EVT.upcoming[0]) {
   });
 }
 
+/* ── стажировка: детальная (T15.4) ──
+   Оригинал — одна типовая страница internship.html за записью
+   «Стажировка: разработчик» (build.py:772; фрагмент internship.html:
+   компания/город/фото internship-2.png — это internship.items[1]).
+   Остальные стажировки — генеративные повторы (Out of scope). Шаблон —
+   общий internshipDetail из T15.1; шапка: теги (paid/schedule/study
+   оригинала internship.html:7–10), зарплатная вилка «от 60 000 ₽» и
+   компания-ссылка (в data зарплаты нет — фрагмент, как текст секций). */
+function internshipMain(i = INT.internship.items[1]) {
+  return internshipDetail({
+    crumbs: [
+      ['Главная', 'index.html'],
+      ['Стажировки', 'internships.html'],
+      ['Стажировка: разработчик', ''],
+    ],
+    title: i.title,
+    tags: [
+      // детальная пишет с заглавной (internship.html:8) против карточек
+      { text: 'Оплачиваемая', variant: 'orange' },
+      { text: i.schedule, variant: 'blue' },
+      { text: i.study, variant: 'gray' },
+    ],
+    salary: 'от 60 000 ₽',
+    company: { text: i.company, href: 'company.html' },
+    // alt по контенту (Accessibility requirements): имя стажировки из data
+    photo: { src: i.image, alt: i.title, width: 431, height: 431 },
+    sections: [
+      {
+        title: 'Примеры задач',
+        html: `<ul class="ui-list">
+    <li>Разработка внутренних сервисов Группы «Интер РАО»;</li>
+    <li>Интеграция систем по REST API;</li>
+    <li>Написание модульных тестов и участие в код-ревью;</li>
+    <li>Работа с базами данных и оптимизация запросов.</li>
+  </ul>`,
+      },
+      {
+        title: 'Детальное описание',
+        html: `<p class="ui-body">Стажировка в команде разработки ИТ-систем Группы «Интер РАО». Вы будете работать в продуктовой команде с опытным наставником: познакомитесь с процессами компании, рабочим стеком (Python, SQL, Git) и стандартами разработки. По итогам стажировки возможно трудоустройство на позицию младшего разработчика.</p>
+  <p class="ui-body">График гибридный: 2 дня в офисе, остальное — удалённо. Продолжительность стажировки — 6 месяцев, полгода реальных задач и роста.</p>`,
+      },
+    ],
+    aside: {
+      title: 'О стажировке',
+      rows: [
+        ['Компания', i.company],
+        ['Город', i.city],
+        ['Регион', i.region],
+        ['Направление подготовки', i.study],
+        ['Формат', i.schedule],
+      ],
+      cta: { text: 'подать заявку', href: 'internship-apply.html' },
+      note: 'Повторная подача заявки на эту стажировку невозможна.',
+    },
+  });
+}
+
 /* ── стажировки/практики: лендинг ── */
 
 function internshipsMain(set) {
   const data = INT[set];
   const isPractice = set === 'practice';
-  const cards = data.items.map((item, index) => internCard(item, index)).join('\n');
+  const cards = data.items.map(internCard).join('\n');
   const advantages = data.advantages.map(advCard).join('\n');
   const steps = timeline(data.steps);
   const photos = [
@@ -1589,41 +1862,10 @@ ${cards}
   </div>
 </section>
 
-<dialog class="ui-modal ui-modal--md" id="cp-intern-dialog" open data-ui-modal aria-labelledby="cp-intern-dialog-title">
-  <button class="ui-modal__close" type="button" aria-label="Закрыть">
-    <svg class="ui-modal__icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-  </button>
-  <h2 class="ui-modal__title ui-h3" id="cp-intern-dialog-title" data-cp-intern-title>Направление</h2>
-  <div class="ui-modal__body">
-    <div class="cp-dir-modal">
-      <img class="cp-dir-modal__photo" src="assets/images/internship-1.png" alt="" data-cp-intern-photo loading="lazy">
-      <p class="ui-body" data-cp-intern-short>Описание направления.</p>
-    </div>
-    <div class="cp-dir-modal__tasks">
-      <h3 class="ui-h4">Примеры задач, над которыми ты будешь работать:</h3>
-      <div class="ui-accordion ui-accordion--faq">
-        <details class="ui-accordion__item" open>
-          <summary class="ui-accordion__q">Ведение оперативных переключений и контроль параметров оборудования
-            <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="ui-accordion__a"><div class="ui-accordion__a-inner">
-            <p>Работа со схемой объекта и оперативной документацией, внимательность к деталям.</p>
-          </div></div>
-        </details>
-        <details class="ui-accordion__item">
-          <summary class="ui-accordion__q">Подготовка рабочего места и допуск бригад к ремонту
-            <svg class="ui-accordion__icon" aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 6l5 4 5-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </summary>
-          <div class="ui-accordion__a"><div class="ui-accordion__a-inner">
-            <p>Организационные навыки, знание норм охраны труда.</p>
-          </div></div>
-        </details>
-      </div>
-    </div>
-    <p><button class="ui-button ui-button--accent" type="button" data-ui-modal-target="cp-apply-dialog">подать заявку</button></p>
-  </div>
-</dialog>
-
+<!-- карточки направлений ведут на детальную internship.html (T15.4);
+     модалка направления снята — её содержимое («Примеры задач») перенесено
+     на страницу детальной. Мок-анкета отклика (T15.6, компакт 48px)
+     остаётся в каркасе страницы. -->
 ${applyDialogHtml()}
 
 <section class="ui-section">
@@ -2233,6 +2475,16 @@ const PAGES = [
     main: internshipsMain('practice'),
   },
   {
+    file: 'internship.html',
+    title: 'Стажировка: разработчик — Портал карьеры Интер РАО',
+    main: internshipMain(),
+  },
+  {
+    file: 'internship-apply.html',
+    title: 'Заявка на стажировку — Портал карьеры Интер РАО',
+    main: internshipApplyMain(),
+  },
+  {
     file: 'education.html',
     title: 'Целевое обучение — Портал карьеры Интер РАО',
     main: educationMain(),
@@ -2247,6 +2499,11 @@ const PAGES = [
     file: 'event.html',
     title: 'День открытых дверей — Портал карьеры Интер РАО',
     main: eventMain(),
+  },
+  {
+    file: 'event-apply.html',
+    title: 'Заявка на мероприятие — Портал карьеры Интер РАО',
+    main: eventApplyMain(),
   },
   { file: 'media.html', title: 'Медиа — Портал карьеры Интер РАО', main: mediaMain() },
   {

@@ -106,6 +106,6 @@
 | T15.1 | done | смержена |
 | T15.2 | done | смержена |
 | T15.3 | done | смержена |
-| T15.4 | todo | EPIC-15: пилот — internship.html + internship-apply/event-apply |
+| T15.4 | done | смержена |
 | T15.5 | todo | EPIC-15: пилот — events-search.html + пагинация events (в оригинале есть, клон пропустил) |
 | T15.9 | todo | EPIC-15: закрывающая — compare на 20 страниц, гейт мёртвых ссылок dist, REPORT/PLAN; последняя (DS-поставка T16.9/T16.10 к этому моменту на месте) |
