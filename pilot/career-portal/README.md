@@ -12,7 +12,7 @@
 
 ```
 pilot/career-portal/
-├── build.mjs        # сборка 16 страниц клона из data/*.json на ui-компонентах
+├── build.mjs        # сборка 20 страниц клона из data/*.json на ui-компонентах
 ├── compare.mjs      # сравнение с оригиналом: скриншоты + DOM-метрики
 ├── pilot.css        # стили ЗОНЫ САЙТА (cp-*): блоки без аналога в ДС
 ├── pilot.js         # скрипты зоны сайта (карусель, попап, мок-формы)
@@ -38,7 +38,7 @@ npm run serve                                   # → http://127.0.0.1:8080/pilo
 
 ```bash
 npm run serve &                                 # пилот должен быть доступен локально
-node pilot/career-portal/compare.mjs            # ~3 мин: 16 страниц × 2 версии
+node pilot/career-portal/compare.mjs            # ~3 мин: 20 страниц × 2 версии
 ```
 
 Продукт: `compare-output/viewer.html` (скриншоты парами),
