@@ -101,6 +101,21 @@ export const PAIRS = [
     usage: '.tag--gray (components.css:111) — текст тега muted, 12px',
   },
   {
+    id: 'field-label-on-surface',
+    fg: '--ui-color-field-label',
+    bg: '--ui-color-surface',
+    level: 'text',
+    usage:
+      'подпись поля ui-field__label на белом (модалки-анкеты, T16.9): исходный #808080 gray-600 давал 3.95:1 — AA-замена по прецеденту muted T2.3',
+  },
+  {
+    id: 'field-label-on-surface-muted',
+    fg: '--ui-color-field-label',
+    bg: '--ui-color-surface-muted',
+    level: 'text',
+    usage: 'подпись поля на приглушённом фоне форм blue-50 (страницы форм, T16.9)',
+  },
+  {
     id: 'text-on-error-bg',
     fg: '--ui-color-text',
     bg: '--ui-color-error-bg',

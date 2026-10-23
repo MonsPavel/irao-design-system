@@ -5,7 +5,8 @@
  * input/textarea/select (T5.1 — основа всех контролов форм; select — T5.2).
  *
  * Источник — .field* career-portal (components.css:130–187): флекс-колонка
- * с шагом 8px (--ui-space-2), label 14/500, контрол 52px с bg surface-muted
+ * с шагом 8px (--ui-space-2), label 14/500 серым field-label (T16.9), контрол
+ * 52px с bg surface-muted
  * и прозрачной рамкой (толщина зарезервирована — все состояния в одной
  * коробке), focus → белый фон + рамка primary (фирменный паттерн сохранён),
  * --error → рамка error + фон error-bg, текст ошибки fs-micro. Расширения
@@ -80,9 +81,15 @@
   grid-column: 1 / -1;
 }
 
+/* Подпись поля — отдельный токен цвета (T16.9): gray-700 вместо
+   --ui-color-text — подпись «чуть тише текста, но читаема» (AA-замена серого
+   #808080 оригинала по прецеденту muted T2.3, REPORT §3.3). Границы токена:
+   текст чекбокса/radio (согласие) — контент, остаётся --ui-color-text;
+   кнопка-лейбл ui-file — визуал .btn--light (primary); legend группы радио
+   (ui-radio-group__legend) — та же роль подписи поля, несёт тот же токен. */
 .ui-field__label {
   box-sizing: border-box;
-  color: var(--ui-color-text);
+  color: var(--ui-color-field-label);
   font-size: var(--ui-fs-small);
   font-weight: var(--ui-fw-small);
   line-height: var(--ui-lh-small);

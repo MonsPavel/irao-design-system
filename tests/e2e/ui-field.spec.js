@@ -53,6 +53,7 @@ const COLORS = Object.freeze({
   errorBg: 'rgb(255, 246, 244)', // --ui-red-50
   muted: 'rgb(97, 97, 97)', // --ui-gray-700
   text: 'rgb(31, 31, 31)', // --ui-black
+  fieldLabel: 'rgb(97, 97, 97)', // --ui-color-field-label = gray-700 (T16.9)
 });
 
 /** Клавиатурный обход до элемента (фокус с клавиатуры — :focus-visible, ADR-0001). */
@@ -130,6 +131,14 @@ standTest.describe('ui-field: матрица и состояния (T5.1)', () =
       expect(input.fontSize, 'fs-small (14px, как label career-portal)').toBe('14px');
       expect(input.fontFamily, 'поле не остаётся на UA-шрифте').toContain('Golos Text');
       expect(input.opacity, 'default без затемнения').toBe('1');
+
+      // Подпись поля — отдельный токен (T16.9): gray-700 вместо --ui-color-text.
+      const labelColor = await page
+        .locator(`label[for="${FLD.name}"]`)
+        .evaluate((el) => getComputedStyle(el).color);
+      expect(labelColor, 'цвет подписи — --ui-color-field-label (gray-700, AA-замена T16.9)').toBe(
+        COLORS.fieldLabel,
+      );
 
       // Фактическая высота = min-height (контент однострочного поля меньше).
       const box = await page.locator(`#${FLD.name}`).boundingBox();
@@ -379,6 +388,17 @@ standTest.describe('ui-field: матрица и состояния (T5.1)', () =
       expect(hintRatio, `hint на белом: ${hintRatio.toFixed(2)}:1 ≥ 4.5`).toBeGreaterThanOrEqual(
         4.5,
       );
+
+      // Подпись поля на белом (модалки-анкеты) — AA цели замены (T16.9):
+      // оригинальный #808080 давал 3.95:1.
+      const labelText = await page
+        .locator(`label[for="${FLD.email}"]`)
+        .evaluate((el) => getComputedStyle(el).color);
+      const labelRatio = contrastRatio(colorOf(labelText), colorOf(COLORS.surface));
+      expect(
+        labelRatio,
+        `подпись на белом: ${labelRatio.toFixed(2)}:1 ≥ 4.5`,
+      ).toBeGreaterThanOrEqual(4.5);
 
       const placeholder = await placeholderColorOf(page, FLD.email);
       const placeholderRatio = contrastRatio(colorOf(placeholder), colorOf(COLORS.surfaceMuted));

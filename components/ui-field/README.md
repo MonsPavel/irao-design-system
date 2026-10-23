@@ -19,7 +19,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 | Модификатор `.ui-field--required` | хук разметки «поле обязательное»: на корне; видимый маркер — элемент `__req` (собственных стилей у модификатора нет) |
 | Модификатор `.ui-field--wide` | поле на все колонки grid-родителя (`grid-column: 1 / -1`); потребитель — раскладка [ui-form](doc:ui-form) (T5.4), вне grid инертен |
 | Модификатор `.ui-field--compact` | плотная высота анкет-модалок: `min-height` `--ui-field-height-compact` (48px, `.apply-form .field__input` pages.css:1208 оригинала) на `__input`/`__select`; **textarea высоту не меняет** (многострочность важнее плотности), паддинг не трогает. Когда: формы в модалках / плотные анкеты; потребитель — apply-формы career-portal |
-| Элемент `.ui-field__label` | `label` 14/500 (`--ui-fs-small`/`--ui-fw-small`); **обязателен `for` с id контрола** (исключение — file-паттерн: `span` + `aria-labelledby`, см. [ui-file](doc:ui-file)) |
+| Элемент `.ui-field__label` | `label` 14/500 (`--ui-fs-small`/`--ui-fw-small`), цвет `--ui-color-field-label` (gray-700 — AA-замена серого #808080 оригинала, T16.9: подпись «чуть тише текста», 6.19:1 на белом); **обязателен `for` с id контрола** (исключение — file-паттерн: `span` + `aria-labelledby`, см. [ui-file](doc:ui-file)) |
 | Элемент `.ui-field__req` | маркер обязательности: видимая звёздочка `*` акцентом (одобренный `.req`, components.css:142) |
 | Элемент `.ui-field__req-text` | текст «обязательное поле» для скринридера внутри `__req`; визуально скрыт клипом (display:none запрещён) |
 | Элемент `.ui-field__input` | контрол: `input` типов text/email/tel/password/date/number |
@@ -202,6 +202,11 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 
 ## Известные границы
 
+- цвет подписи поля — токен `--ui-color-field-label` (T16.9): AA-замена серого
+  #808080 оригинала по прецеденту muted (T2.3). Границы токена: текст
+  согласия чекбокса/radio — контент, остаётся `--ui-color-text`; кнопка-лейбл
+  ui-file — визуал `.btn--light` (primary); legend группы радио — та же роль
+  «подпись поля», несёт тот же токен;
 - checkbox / radio — отдельные блоки на той же обвязке (T5.2: ui-checkbox,
   ui-radio + ui-radio-group), file — T5.3;
 - стрелка select (рендз-замечание T5.2): цвет — `background-color` из

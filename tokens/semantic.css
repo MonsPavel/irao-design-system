@@ -45,6 +45,8 @@
   --ui-color-text: var(--ui-black);
   /* career-portal: --color-text-muted (#808080 → gray-700 — AA-замена T2.3, design-decision: 6.19:1 на белом; примитив gray-600 остаётся эталоном) */
   --ui-color-text-muted: var(--ui-gray-700);
+  /* career-portal: .apply-form .field__label color --color-text-muted — серый подписи полей оригинала (#808080 gray-600, pages.css:1206; база .field__label components.css:137 несёт --color-text — ДС сводит ВСЕ подписи полей к одному серому, REPORT §3.3 остаток раунда 1, probe раунда 2). AA-замена по прецеденту muted T2.3: gray-700 6.19:1 на белом, 5.67:1 на blue-50 (design-decision владельца — T16.9); слой 2, не примитив: тема переопределяет одну точку, семантика «приглушённый, но AA» — та же ступень, что у muted */
+  --ui-color-field-label: var(--ui-gray-700);
   /* career-portal: --color-text-on-dark */
   --ui-color-text-on-dark: var(--ui-white);
   /* career-portal: --color-text-on-dark-muted */

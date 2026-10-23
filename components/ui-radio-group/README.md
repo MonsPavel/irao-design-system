@@ -12,7 +12,7 @@ html-validate (`irao/radio-group-fieldset`, T5.2 AC).
 | Что | Значение |
 |---|---|
 | Блок `.ui-radio-group` | `fieldset`-корень: UA-ресет (margin/padding/border сброшены) — группа живёт в потоке обвязки `ui-field` |
-| Элемент `.ui-radio-group__legend` | `legend` — подпись группы в стиле label обвязки (fs-small/fw-small одобренного `.field__label`); шаг до ряда `--ui-space-2` |
+| Элемент `.ui-radio-group__legend` | `legend` — подпись группы в стиле label обвязки (fs-small/fw-small одобренного `.field__label`) и на её токене цвета `--ui-color-field-label` (T16.9: та же роль «подпись поля»; текст самих радио — контент, остаётся `--ui-color-text`); шаг до ряда `--ui-space-2` |
 | Элемент `.ui-radio-group__row` | ряд вариантов: `display: flex; flex-wrap: wrap; gap: var(--ui-space-5)` (24px одобренного `.radio-row`) — длинные ярлыки переносятся |
 | Ярлыки | `.ui-radio` (компонент ui-radio) внутри `__row`, общий `name`, один `required` |
 | JS | модуля нет — выбор и стрелки нативные |

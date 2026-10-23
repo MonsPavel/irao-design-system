@@ -386,12 +386,12 @@ describe('components/ui-radio + ui-radio-group (T5.2)', () => {
     expect(rootBlock).toContain('border: none;');
   });
 
-  it('legend — подпись группы в стиле label обвязки (fs-small/fw-small); шаг до ряда — --ui-space-2', () => {
+  it('legend — подпись группы в стиле label обвязки (fs-small/fw-small) на токене подписи поля (T16.9); шаг до ряда — --ui-space-2', () => {
     const legend = blockOf(groupCss, '.ui-radio-group__legend');
     expect(legend).toContain('box-sizing: border-box;');
     expect(legend).toContain('padding: 0;');
     expect(legend).toContain('margin-bottom: var(--ui-space-2);');
-    expect(legend).toContain('color: var(--ui-color-text);');
+    expect(legend).toContain('color: var(--ui-color-field-label);');
     expect(legend).toContain('font-size: var(--ui-fs-small);');
     expect(legend).toContain('font-weight: var(--ui-fw-small);');
     expect(legend).toContain('line-height: var(--ui-lh-small);');
