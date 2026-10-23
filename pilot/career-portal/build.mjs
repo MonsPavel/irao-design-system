@@ -5,7 +5,7 @@
  *
  * Что делает:
  *  1. читает мок-данные data/*.json (копия data/ оригинала);
- *  2. генерирует 16 страниц в pilot/career-portal/dist/ — разметка
+ *  2. генерирует 20 страниц в pilot/career-portal/dist/ — разметка
  *     СОБРАНА ИЗ КОМПОНЕНТОВ ДС (ui-button/ui-card/ui-field/ui-form/
  *     ui-modal/ui-tabs/ui-accordion/ui-select/ui-dropdown/ui-tag/
  *     ui-breadcrumbs/ui-pagination/ui-error/ui-vi + роли типографики и
@@ -83,6 +83,12 @@ const isoDate = (date) => {
 
 const ARROW =
   '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/** глиф «Назад» пагинации (канон ui-pagination, как ARROW для «Вперёд»);
+ *  потребители — education-catalog (T15.3, была CATALOG_ARROW_LEFT) и
+ *  events (T15.5) — обе страницы оригинала со стрелками .pagination. */
+const ARROW_LEFT =
+  '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 const ARROW_UP_RIGHT =
   '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -217,6 +223,24 @@ function breadcrumbs(items) {
     })
     .join('\n');
   return `<nav class="ui-breadcrumbs cp-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
+}
+
+/** строка «найти по списку» (оригинал .vac-find vacancies.html:278–281 и
+ *  .events-search-bar events-search.html:153–156): форма + ui-field
+ *  type=search + кнопка сабмита; нативный GET без JS — работа фильтра зона
+ *  бэкенда (Out of scope T15.5). Общий helper vacancies и events-search
+ *  (T15.5, Technical considerations: events-search — единственный второй
+ *  потребитель панели, дублирования не плодить); вариант кнопки —
+ *  параметр: vacancies — accent «Найти», events-search — primary «найти»
+ *  (оригинал). role="search" на обеих — канон поисковой формы WAI (в
+ *  оригинале role стоит только на vacancies — их недосмотр). */
+function findBar({ action, placeholder, label, text, variant = 'accent' }) {
+  return `<form class="cp-find-bar" action="${esc(action)}" method="get" role="search">
+  <div class="ui-field">
+    <input class="ui-field__input" type="search" name="q" placeholder="${esc(placeholder)}" aria-label="${esc(label)}">
+  </div>
+  <button class="ui-button ui-button--${variant}" type="submit">${esc(text)}</button>
+</form>`;
 }
 
 /** строка вакансии (оригинал .vac-row): ui-card + связка сайт-зоны */
@@ -1247,12 +1271,14 @@ function vacanciesMain() {
       </aside>
 
       <div class="cp-vac-main">
-        <form class="cp-vac-find" action="vacancies.html" method="get" role="search">
-          <div class="ui-field">
-            <input class="ui-field__input" type="search" name="q" placeholder="Токарь, карбюраторщик" aria-label="Поиск вакансий">
-          </div>
-          <button class="ui-button ui-button--accent" type="submit">Найти</button>
-        </form>
+        <!-- панель поиска — общий findBar vacancies/events-search (T15.5,
+             Technical considerations: переиспользуемая cp-функция) -->
+        ${findBar({
+          action: 'vacancies.html',
+          placeholder: 'Токарь, карбюраторщик',
+          label: 'Поиск вакансий',
+          text: 'Найти',
+        })}
 
         <!-- ui-chip (T14.8), ссылочная форма: GET-фильтр как в оригинале,
              активный — aria-current="page" из разметки, JS не нужен -->
@@ -2038,9 +2064,6 @@ const CATALOG_FILTERS = [
   },
 ];
 
-const CATALOG_ARROW_LEFT =
-  '<svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
 function educationCatalogMain() {
   const filters = CATALOG_FILTERS.map(
     (f) => `      ${selectField({ name: f.name, label: f.label, options: f.options, pill: true })}`,
@@ -2068,7 +2091,7 @@ ${offers}
 
     <div class="cp-catalog-nav">
       <nav class="ui-pagination" aria-label="Пагинация: каталог обучения">
-        <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${CATALOG_ARROW_LEFT}</button>
+        <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${ARROW_LEFT}</button>
         <span class="ui-pagination__page" aria-current="page">1</span>
         <a class="ui-pagination__page" href="education-catalog.html?page=2" aria-label="Страница 2">2</a>
         <a class="ui-pagination__page" href="education-catalog.html?page=3" aria-label="Страница 3">3</a>
@@ -2111,6 +2134,71 @@ ${upcoming}
     <h2 class="ui-h2">Прошедшие</h2>
     <div class="ui-grid ui-grid--3">
 ${past}
+    </div>
+
+    <!-- ui-pagination СО стрелками (T15.5): events — вторая из двух страниц
+         оригинала, где .pagination содержит pagination__arrow (events.html:
+         358–367; vacancies без стрелок — REPORT §8.2 №7, там ui-pagination
+         --bare). Недоступная стрелка — button[disabled] (канон T6.3: в
+         оригинале disabled на <a> невалиден); мок-пагинация ?page=N без
+         бэкенда (Out of scope T15.5). -->
+    <div class="cp-events-nav">
+      <nav class="ui-pagination" aria-label="Пагинация: мероприятия">
+        <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${ARROW_LEFT}</button>
+        <span class="ui-pagination__page" aria-current="page">1</span>
+        <a class="ui-pagination__page" href="events.html?page=2" aria-label="Страница 2">2</a>
+        <a class="ui-pagination__arrow" href="events.html?page=2" aria-label="Следующая страница">${ARROW}</a>
+      </nav>
+    </div>
+  </div>
+</section>`;
+}
+
+/* ── поиск мероприятий (T15.5) ──
+
+   «Все мероприятия» навигации оригинала (build.py:817–823): панель поиска —
+   общий findBar vacancies (Technical considerations: единственный второй
+   потребитель панели, дублирования не плодить), тулбар «Найдено: N» с
+   фильтр-тегами — прецедент cp-media-toolbar media.html (активного состояния
+   у оригинала нет — events-search.html:158–164, aria-current не ставится),
+   выдача — все предстоящие события тем же eventCard, что на events.html
+   (оригинал строит страницу тем же events_upcoming(), build.py:821).
+   Клиентской фильтрации нет — Out of scope; пагинации на странице нет
+   (в оригинале тоже нет). Крошки: «Мероприятия» — ссылка, ровно один
+   aria-current (Implementation requirements п.2). */
+function eventsSearchMain() {
+  const cards = EVT.upcoming.map(eventCard).join('\n');
+  return `${breadcrumbs([
+    ['Главная', 'index.html'],
+    ['Мероприятия', 'events.html'],
+    ['Поиск', ''],
+  ])}
+<section class="ui-section">
+  <div class="ui-container">
+    <div class="cp-page-head">
+      <h1 class="ui-page-title">Поиск мероприятий</h1>
+    </div>
+
+    ${findBar({
+      action: 'events-search.html',
+      placeholder: 'Название мероприятия, город или ключевое слово',
+      label: 'Поиск мероприятий',
+      text: 'найти',
+      variant: 'primary',
+    })}
+
+    <div class="cp-media-toolbar">
+      <span class="ui-tag ui-tag--gray">Найдено: ${EVT.upcoming.length}</span>
+      <nav class="ui-chip" aria-label="Фильтры мероприятий">
+        <a class="ui-chip__pill" href="events-search.html">Все</a>
+        <a class="ui-chip__pill" href="events-search.html">Экскурсии</a>
+        <a class="ui-chip__pill" href="events-search.html">Чемпионаты</a>
+        <a class="ui-chip__pill" href="events-search.html">Вебинары</a>
+      </nav>
+    </div>
+
+    <div class="ui-grid ui-grid--3">
+${cards}
     </div>
   </div>
 </section>`;
@@ -2495,6 +2583,11 @@ const PAGES = [
     main: educationCatalogMain(),
   },
   { file: 'events.html', title: 'Мероприятия — Портал карьеры Интер РАО', main: eventsMain() },
+  {
+    file: 'events-search.html',
+    title: 'Поиск мероприятий — Портал карьеры Интер РАО',
+    main: eventsSearchMain(),
+  },
   {
     file: 'event.html',
     title: 'День открытых дверей — Портал карьеры Интер РАО',
