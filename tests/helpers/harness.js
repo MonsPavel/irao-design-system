@@ -61,13 +61,22 @@ export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
   },
   {
     id: 'color-contrast',
-    match: /(^|\s)\.ui-button--accent(?=$|\s|:)/,
+    // Отрицательный lookahead на продолжение CSS-идентификатора: матчит
+    // ЛЮБОЕ продолжение селектора того же элемента (конец, пробел,
+    // псевдокласс `:hover`, атрибут `[href…]`, цепочку классов
+    // `.ui-button--accent.ui-button[…]`), но не более длинное имя класса
+    // (`.ui-button--accent-hover` — другая цель, не исключение).
+    match: /(^|\s)\.ui-button--accent(?![\w-])/,
     reason:
       'та же белая подпись на accent в канонической разметке БЕЗ id — живые примеры ' +
       'док-страниц по шаблону T10.1 (showcase/dist/docs/): разметка побайтово та же, ' +
       'что на стенде (исключение #ui-button-accent выше) — то же одобренное значение ' +
       '3.12:1, изменение — design-decision владельца; токен-уровень — ' +
-      'tests/contrast/pairs.config.mjs (T2.6/ADR-0010)',
+      'tests/contrast/pairs.config.mjs (T2.6/ADR-0010). T15.9: axe составляет цели с ' +
+      'продолжениями селектора того же элемента (.ui-button--accent.ui-button[type…] — ' +
+      'кнопки «Найти» find-бара; .ui-button--accent[href…][target…] — кнопки внешних ' +
+      'ссылок offer-карточек пилота career-portal «сайт „Работа России“»); класс и ' +
+      'одобренная пара те же — не новое исключение, а узнавание той же записи',
   },
   {
     id: 'color-contrast',

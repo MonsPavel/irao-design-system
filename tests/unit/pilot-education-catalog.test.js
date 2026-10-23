@@ -153,9 +153,9 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
     );
   });
 
-  it('выдача: все предложения educat.json (6) тем же offerCard, что на education.html (оригинaл каталога — тот же offer_card целиком, build.py:794 vs :803); данные — из файла, не литералы', () => {
+  it('выдача: все предложения educat.json (6) тем же offerCard, что на education.html (оригинaл каталога — тот же offer_card целиком, build.py:794 vs :803); данные — из файла, не литералы. Тег заголовка карточки h2 (T15.9, axe heading-order: первый offer прямо за h1 страницы; на education.html карточки остались h3)', () => {
     expect(educat.offers).toHaveLength(6);
-    expect(catalogMainBody).toContain('EDU.offers.map(offerCard)');
+    expect(catalogMainBody).toContain(`EDU.offers.map((offer) => offerCard(offer, 'h2'))`);
     expect(catalogMainBody, 'без slice — education.html берёт первые 3').not.toContain(
       'EDU.offers.slice',
     );

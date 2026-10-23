@@ -269,14 +269,24 @@ probe-набор парами card-title/salary/aside-label/filter-tag/company),
   внутренних ссылок, **0 DEAD**; подключен в запуск compare
   (падает до браузеров); юнит-пин — tests/unit/pilot-link-gate.test.js.
   Включение в CI — решение владельца (REPORT §10.6).
-- **Свежий compare** — 20 страниц × 2 (compare.json 2026-10-23T20:29:14Z,
+- **Свежий compare** — 20 страниц × 2 (compare.json 2026-10-23T21:37:28Z,
   28 проб, viewer.html); shell-пробы — MATCH на новых страницах;
   «закрыто/принято ДС» §3.3 подтвердились на новых страницах; №6/№8 —
   без изменений (T16.11/T16.5).
+- **axe AC (фикс-раунд 24.10 по ревью приёмки)** — «только известные
+  исключения» теперь буквально: heading-order на events-search/
+  education-catalog устранён разметкой (тег заголовка карточки —
+  параметр eventCard/offerCard через map-безопасный cardHeading,
+  новые страницы собираются с h2; старые не тронуты; docHeight не
+  изменился); 9 атрибутных color-contrast-целей той же одобренной пары
+  accent узнаны расширенным match реестра KNOWN_AXE_EXCEPTIONS
+  (`(?![\w-])`, + строка tests/README.md; stands-sweep 45/45).
+  Пины — tests/unit/pilot-axe-heading-order.test.js; проба — вне
+  реестра 0 на всех 8 новых страницах (REPORT §10.3–§10.4).
 - **Отметки остатков**: compact — принят (T15.6); label — T16.9 в ДС
   (остаток форм-страниц — бэклог); on-photo — T16.10 (API без пилотного
   применения); P3 — в бэклоге.
-- **Новые кандидаты (BACKLOG)**: axe heading-order карточек списков
-  (P2, пре-существующая систематика — media/career-track тоже),
-  подписи полей форм-страниц 31 vs muted 97 (P3), регэксп
-  KNOWN_AXE_EXCEPTIONS против атрибутных целей (low).
+- **Кандидаты (BACKLOG)**: heading-order карточек на СТАРЫХ
+  media/career-track (P2 — новые страницы исправлены), подписи полей
+  форм-страниц 31 vs muted 97 (P3), пилюля поиска events-search (low,
+  сайт-зона).

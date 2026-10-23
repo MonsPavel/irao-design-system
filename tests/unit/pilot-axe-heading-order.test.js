@@ -65,11 +65,14 @@ describe('build.mjs — заголовки карточек новых стра�
     expect(catalogMainBody).toContain(`EDU.offers.map((offer) => offerCard(offer, 'h2'))`);
   });
 
-  it('eventCard/offerCard: тег заголовка — параметр с дефолтом h3 (events/education/event остаются на h3), вид несёт роль ui-h4 — тег не влияет на computed-стили', () => {
-    expect(eventCardBody).toMatch(/function eventCard\(e, headingTag = 'h3'\)/);
-    expect(eventCardBody).toMatch(/<\$\{headingTag\} class="ui-h4">/);
-    expect(offerCardBody).toMatch(/function offerCard\(o, headingTag = 'h3'\)/);
-    expect(offerCardBody).toMatch(/<\$\{headingTag\} class="ui-h4">/);
+  it('eventCard/offerCard: тег заголовка — через map-безопасный cardHeading (дефолт h3; идиома .map(eventCard) передаёт (элемент, индекс) — числовой индекс не становится тегом, регрессия сборки 24.10 «<0 class="ui-h4">» в dist пинится санитайзером h1–h6); вид несёт роль ui-h4 — тег не влияет на computed-стили', () => {
+    expect(build).toContain(
+      `const cardHeading = (headingTag) => (/^h[1-6]$/.test(headingTag ?? '') ? headingTag : 'h3');`,
+    );
+    expect(eventCardBody).toMatch(/function eventCard\(e, headingTag\)/);
+    expect(eventCardBody).toMatch(/<\$\{cardHeading\(headingTag\)\} class="ui-h4">/);
+    expect(offerCardBody).toMatch(/function offerCard\(o, headingTag\)/);
+    expect(offerCardBody).toMatch(/<\$\{cardHeading\(headingTag\)\} class="ui-h4">/);
   });
 });
 
@@ -98,15 +101,16 @@ describe('KNOWN_AXE_EXCEPTIONS — атрибутные цели того же �
     expect(unexpectedViolations(results)).toEqual(['heading-order → .cp-offer-card__head > h3']);
   });
 
-  it('прежнее поведение в силе: голый .ui-button--accent и стендовый #ui-button-accent известны (сужения реестра нет); реестр не пустеет', () => {
+  it('прежнее поведение в силе: голый .ui-button--accent, стендовый #ui-button-accent и цепочка классов .ui-button--accent.ui-button[type…] известны; более длинное имя класса (.ui-button--accent-hover) — НЕ исключение (сужения/расширения мимо класса нет); реестр не пустеет', () => {
     expect(
       unexpectedViolations({
         violations: [contrastNode('.cp-find-bar > .ui-button--accent.ui-button[type="submit"]')],
       }),
     ).toEqual([]);
+    expect(unexpectedViolations({ violations: [contrastNode('#ui-button-accent')] })).toEqual([]);
     expect(
-      unexpectedViolations({ violations: [contrastNode('#ui-button-accent')] }),
-    ).toEqual([]);
+      unexpectedViolations({ violations: [contrastNode('.x .ui-button--accent-hover')] }),
+    ).toEqual(['color-contrast → .x .ui-button--accent-hover']);
     expect(KNOWN_AXE_EXCEPTIONS.length).toBe(4);
   });
 });
