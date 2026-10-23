@@ -395,9 +395,10 @@ standTest.describe('ui-field: матрица и состояния (T5.1)', () =
         .locator(`label[for="${FLD.email}"]`)
         .evaluate((el) => getComputedStyle(el).color);
       const labelRatio = contrastRatio(colorOf(labelText), colorOf(COLORS.surface));
-      expect(labelRatio, `подпись на белом: ${labelRatio.toFixed(2)}:1 ≥ 4.5`).toBeGreaterThanOrEqual(
-        4.5,
-      );
+      expect(
+        labelRatio,
+        `подпись на белом: ${labelRatio.toFixed(2)}:1 ≥ 4.5`,
+      ).toBeGreaterThanOrEqual(4.5);
 
       const placeholder = await placeholderColorOf(page, FLD.email);
       const placeholderRatio = contrastRatio(colorOf(placeholder), colorOf(COLORS.surfaceMuted));
