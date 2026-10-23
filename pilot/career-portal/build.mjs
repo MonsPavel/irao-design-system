@@ -5,7 +5,7 @@
  *
  * Что делает:
  *  1. читает мок-данные data/*.json (копия data/ оригинала);
- *  2. генерирует 16 страниц в pilot/career-portal/dist/ — разметка
+ *  2. генерирует 20 страниц в pilot/career-portal/dist/ — разметка
  *     СОБРАНА ИЗ КОМПОНЕНТОВ ДС (ui-button/ui-card/ui-field/ui-form/
  *     ui-modal/ui-tabs/ui-accordion/ui-select/ui-dropdown/ui-tag/
  *     ui-breadcrumbs/ui-pagination/ui-error/ui-vi + роли типографики и
