@@ -251,8 +251,10 @@ describe('T16.10 — ревью: контраст и провенанс on-photo
     expect(build, 'модификатор остаётся API ДС, пилотный хук откачен (ревью T16.10)').not.toMatch(
       /class="ui-tag ui-tag--on-photo/,
     );
+    // Тинт подставляется переменной из regTag() (T15.1 вынесла статус
+    // регистрации события в общую функцию — eventCard и детальная event.html)
     expect(build, 'тинты вариантов на фото на месте (events.html:270/302 оригинала)').toMatch(
-      /class="ui-tag ui-tag--green"/,
+      /class="ui-tag ui-tag--\$\{reg\.variant\}"/,
     );
   });
 });
