@@ -74,6 +74,14 @@ describe('data — запись «Стажировка: разработчик»
     expect(item.paid).toBe(true);
     expect(item.image).toBe('assets/images/internship-2.png');
   });
+
+  it('events.json upcoming[0] — то же мероприятие, что фрагмент event-apply ( aside заявки берёт Дата/Город/Формат из data)', () => {
+    const event = events.upcoming[0];
+    expect(event.title).toBe('День открытых дверей в «Интер РАО – Электрогенерация»');
+    expect(event.date).toBe('28.09.2026');
+    expect(event.city).toBe('Санкт-Петербург');
+    expect(event.format).toBe('Очно');
+  });
 });
 
 describe('build.mjs — три страницы в PAGES (T15.4 Scope; заголовки build.py:772/779/833)', () => {
@@ -81,15 +89,9 @@ describe('build.mjs — три страницы в PAGES (T15.4 Scope; заго�
     expect(build).toMatch(/\{\s*file: 'internship.html',/);
     expect(build).toMatch(/\{\s*file: 'internship-apply.html',/);
     expect(build).toMatch(/\{\s*file: 'event-apply.html',/);
-    expect(build).toContain(
-      `title: 'Стажировка: разработчик — Портал карьеры Интер РАО'`,
-    );
-    expect(build).toContain(
-      `title: 'Заявка на стажировку — Портал карьеры Интер РАО'`,
-    );
-    expect(build).toContain(
-      `title: 'Заявка на мероприятие — Портал карьеры Интер РАО'`,
-    );
+    expect(build).toContain(`title: 'Стажировка: разработчик — Портал карьеры Интер РАО'`);
+    expect(build).toContain(`title: 'Заявка на стажировку — Портал карьеры Интер РАО'`);
+    expect(build).toContain(`title: 'Заявка на мероприятие — Портал карьеры Интер РАО'`);
   });
 
   it('порядок страниц — по оригиналу build.py: internship+apply между practices и education; event-apply между event и media', () => {
@@ -114,9 +116,9 @@ describe('build.mjs — internship.html: общий шаблон детальн�
   });
 
   it('шаблон расширен опциональными salary/company, meta опционален (у internship__head оригинала даты нет); событийный вывод не меняется — time рендерится только при meta', () => {
-    expect(internshipDetailBody).toMatch(/meta \?/);
-    expect(internshipDetailBody).toMatch(/salary \?/);
-    expect(internshipDetailBody).toMatch(/company \?/);
+    expect(internshipDetailBody).toMatch(/meta\s*\?/);
+    expect(internshipDetailBody).toMatch(/salary\s*\?/);
+    expect(internshipDetailBody).toMatch(/company\s*\?/);
   });
 
   it('данные — из internships.json items[1] (Implementation requirements п.1), не литералы', () => {
@@ -131,9 +133,11 @@ describe('build.mjs — internship.html: общий шаблон детальн�
 
   it('шапка-тройка оригинала: теги (оплачиваемая/график/направление), зарплатная вилка, компания ссылкой на company.html (internship.html:7–13)', () => {
     expect(internshipMainBody).toContain("text: 'Оплачиваемая'");
-    expect(internshipMainBody).toContain('variant: \'orange\'');
-    expect(internshipMainBody).toContain('salary: \'от 60 000 ₽\'');
-    expect(internshipMainBody).toMatch(/company: \{\s*text: i\.company,\s*href: 'company\.html',?\s*\}/);
+    expect(internshipMainBody).toContain("variant: 'orange'");
+    expect(internshipMainBody).toContain("salary: 'от 60 000 ₽'");
+    expect(internshipMainBody).toMatch(
+      /company: \{\s*text: i\.company,\s*href: 'company\.html',?\s*\}/,
+    );
   });
 
   it('секции оригинала: «Примеры задач» (список) и «Детальное описание» (два абзаца фрагмента, internship.html:18–32)', () => {
@@ -146,9 +150,7 @@ describe('build.mjs — internship.html: общий шаблон детальн�
     expect(internshipMainBody).toContain(
       'Стажировка в команде разработки ИТ-систем Группы «Интер РАО».',
     );
-    expect(internshipMainBody).toContain(
-      'График гибридный: 2 дня в офисе, остальное — удалённо.',
-    );
+    expect(internshipMainBody).toContain('График гибридный: 2 дня в офисе, остальное — удалённо.');
   });
 
   it('фото — из data (internship-2.png), alt по контенту (практика T15.1)', () => {
@@ -162,9 +164,7 @@ describe('build.mjs — internship.html: общий шаблон детальн�
       expect(internshipMainBody, `строка aside «${row}»`).toContain(`'${row}'`);
     }
     expect(internshipMainBody).toMatch(/href: 'internship-apply\.html'/);
-    expect(internshipMainBody).toContain(
-      'Повторная подача заявки на эту стажировку невозможна.',
-    );
+    expect(internshipMainBody).toContain('Повторная подача заявки на эту стажировку невозможна.');
   });
 });
 
@@ -191,12 +191,10 @@ describe('build.mjs — internship-apply.html: анкета по паттерн�
   });
 
   it('h1 — ui-page-title «Заявка на стажировку» (Out of scope: form-card__title fs-h3 не переносится — клон несёт канон 60px)', () => {
-    expect(internshipApplyMainBody).toMatch(
-      /<h1 class="ui-page-title">Заявка на стажировку<\/h1>/,
-    );
+    expect(internshipApplyMainBody).toMatch(/<h1 class="ui-page-title">Заявка на стажировку<\/h1>/);
   });
 
-  it('состав полей — по оригиналу internship-apply.html (Implementation requirements п.1: имена оригинала)', () => {
+  it("состав полей — по оригиналу internship-apply.html (Implementation requirements п.1: имена оригинала); поля helper'ов несут name в параметрах, инлайн-радио/согласие — в разметке", () => {
     for (const name of [
       'lastname',
       'firstname',
@@ -209,25 +207,31 @@ describe('build.mjs — internship-apply.html: анкета по паттерн�
       'university',
       'speciality',
       'course',
-      'edustatus',
-      'hasexp',
       'lastjob',
       'lastpos',
       'period',
-      'extra',
-      'consent',
     ]) {
       expect(internshipApplyMainBody, `поле name='${name}' из оригинала`).toContain(
         `name: '${name}'`,
       );
     }
+    // textarea — инлайн (прецедент applyForm: отдельного textarea-helper нет)
+    expect(internshipApplyMainBody).toContain('name="extra"');
+    for (const name of ['edustatus', 'hasexp', 'consent']) {
+      expect(internshipApplyMainBody, `инлайн-поле name='${name}' из оригинала`).toContain(
+        `name="${name}"`,
+      );
+    }
   });
 
   it('курс — selectField (ui-field select-вариант формы вакансии; Technical considerations: не заводить вторую форму select), опции оригинала', () => {
-    expect(internshipApplyMainBody).toContain("selectField({ label: 'Курс обучения'");
+    expect(internshipApplyMainBody).toContain('selectField({');
+    expect(internshipApplyMainBody).toContain("label: 'Курс обучения'");
     for (const option of ['Выберите', '1 курс', '2 курс', '3 курс', '4 курс', 'Магистратура']) {
-      expect(internshipApplyMainBody, `опция «${option}» оригинала (internship-apply.html:59–61)`)
-        .toContain(`'${option}'`);
+      expect(
+        internshipApplyMainBody,
+        `опция «${option}» оригинала (internship-apply.html:59–61)`,
+      ).toContain(`'${option}'`);
     }
     expect(
       internshipApplyMainBody,
@@ -262,7 +266,9 @@ describe('build.mjs — internship-apply.html: анкета по паттерн�
     expect(internshipApplyMainBody).toContain(
       'Компания рассмотрит заявку и свяжется с вами по телефону или email в течение 10 рабочих дней.',
     );
-    expect(internshipApplyMainBody).toContain('Повторная подача заявки на эту стажировку невозможна.');
+    expect(internshipApplyMainBody).toContain(
+      'Повторная подача заявки на эту стажировку невозможна.',
+    );
     expect(internshipApplyMainBody).toMatch(/href="internships\.html">К списку стажировок</);
   });
 
@@ -283,9 +289,7 @@ describe('build.mjs — event-apply.html: короткая форма (Scope; CT
   });
 
   it('h1 — ui-page-title «Заявка на мероприятие»; мета-строка из data (title/date/city events.json upcoming[0])', () => {
-    expect(eventApplyMainBody).toMatch(
-      /<h1 class="ui-page-title">Заявка на мероприятие<\/h1>/,
-    );
+    expect(eventApplyMainBody).toMatch(/<h1 class="ui-page-title">Заявка на мероприятие<\/h1>/);
     expect(eventApplyMainBody).toContain('Мероприятие: <strong>');
     expect(eventApplyMainBody).toMatch(/EVT\.upcoming\[0\]/);
   });
@@ -297,7 +301,7 @@ describe('build.mjs — event-apply.html: короткая форма (Scope; CT
   });
 
   it('согласие и submit «подать заявку»; success с текстом оригинала и возвратом к списку мероприятий', () => {
-    expect(eventApplyMainBody).toContain('name: \'consent\'');
+    expect(eventApplyMainBody).toContain('name="consent"');
     expect(eventApplyMainBody).toMatch(/>подать заявку</);
     expect(eventApplyMainBody).toMatch(/data-cp-form-success hidden/);
     expect(eventApplyMainBody).toContain(
@@ -307,9 +311,9 @@ describe('build.mjs — event-apply.html: короткая форма (Scope; CT
   });
 
   it('aside — мета заявки из data (Дата/Город/Формат), возврат к мероприятию (event-apply.html:33–48)', () => {
-    expect(eventApplyMainBody).toContain("'Дата'");
-    expect(eventApplyMainBody).toContain("'Город'");
-    expect(eventApplyMainBody).toContain("'Формат'");
+    expect(eventApplyMainBody).toContain('>Дата</dt>');
+    expect(eventApplyMainBody).toContain('>Город</dt>');
+    expect(eventApplyMainBody).toContain('>Формат</dt>');
     expect(eventApplyMainBody).toMatch(/href="event\.html">вернуться к мероприятию</);
   });
 });
@@ -317,6 +321,10 @@ describe('build.mjs — event-apply.html: короткая форма (Scope; CT
 describe('pilot.js — мок-формы видят только видимые поля (T15.4; forms.js оригинала)', () => {
   it('валидация пропускает скрытые условные ветки (closest("[hidden]")) — иначе checkValidity() считал бы скрытый блок опыта internship-apply и success не наступил бы никогда', () => {
     expect(pilotJs).toMatch(/closest\('\[hidden\]'\)/);
+  });
+
+  it('select: выбор проверяется индексом (у опций selectField клана value="" — плейсхолдер всегда первая опция); проверка «непустого value» считала бы выбранный курс пустым', () => {
+    expect(pilotJs).toMatch(/selectedIndex > 0/);
   });
 
   it('состояние ошибки — канон ui-field: --error на корне поля + aria-invalid на контроле; первое невалидное видимое поле получает фокус', () => {

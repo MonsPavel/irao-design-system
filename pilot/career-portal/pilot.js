@@ -133,12 +133,50 @@
     }
   }
 
-  /* ── мок-формы: сабмит → success-блок ui-form ── */
-
+  /* ── мок-формы: сабмит → success-блок ui-form (T15.4) ──
+     Порт форм.js оригинала (js/forms.js): валидируются ТОЛЬКО видимые
+     обязательные поля — «скрытые условные ветки не валидируем» (блок опыта
+     internship-apply скрыт, нативный checkValidity() считает и его — мок
+     никогда не дошёл бы до success). Состояние ошибки — канон ui-field:
+     --error на корне поля + aria-invalid на контроле (текст ошибки, где он
+     есть в разметке — ui-field__error event-apply — показывает CSS ДС);
+     первое невалидное видимое поле получает фокус. Отправки нет (мок,
+     без бэкенда). Ввод снимает состояние ошибки. */
   ARROW('[data-cp-form]').forEach(function (form) {
     form.addEventListener('submit', function (event) {
-      if (!form.checkValidity()) return; // нативная валидация остаётся
       event.preventDefault();
+      var firstError = null;
+      var fields = form.querySelectorAll('[required]');
+      for (var i = 0; i < fields.length; i += 1) {
+        var field = fields[i];
+        var hidden = field.closest('[hidden]');
+        var ok = true;
+        if (!hidden) {
+          var value = field.value.trim();
+          // select: у опций selectField клана value="" (выбранное значение
+          // уходит текстом опции) — выбор проверяем индексом, плейсхолдер
+          // всегда первая опция (канон selectField, T7.3)
+          if (field.tagName === 'SELECT') {
+            ok = field.selectedIndex > 0;
+          } else {
+            ok = field.type === 'checkbox' ? field.checked : value !== '';
+            if (ok && field.type === 'email') {
+              ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+            }
+          }
+        }
+        var wrap = field.closest('.ui-field');
+        if (wrap) {
+          wrap.classList.toggle('ui-field--error', !ok);
+          if (ok) field.removeAttribute('aria-invalid');
+          else field.setAttribute('aria-invalid', 'true');
+        }
+        if (!ok && !firstError && !hidden) firstError = field;
+      }
+      if (firstError) {
+        firstError.focus();
+        return;
+      }
       var body = form.querySelector('[data-cp-form-body]');
       var success = form.querySelector('[data-cp-form-success]');
       if (body && success) {
@@ -147,6 +185,12 @@
         var heading = success.querySelector('[tabindex="-1"]');
         if (heading && typeof heading.focus === 'function') heading.focus();
       }
+    });
+    form.addEventListener('input', function (event) {
+      var target = event.target;
+      var wrap = target.closest && target.closest('.ui-field');
+      if (wrap) wrap.classList.remove('ui-field--error');
+      if (target.removeAttribute) target.removeAttribute('aria-invalid');
     });
   });
 
@@ -163,25 +207,6 @@
       chip.setAttribute('aria-pressed', 'true');
     });
   });
-
-  /* ── модалка направления практики/стажировки: наполнение из data-атрибутов ── */
-
-  var internDialog = document.getElementById('cp-intern-dialog');
-  if (internDialog) {
-    ARROW('[data-cp-intern]').forEach(function (card) {
-      card.addEventListener('click', function () {
-        var title = internDialog.querySelector('[data-cp-intern-title]');
-        var short = internDialog.querySelector('[data-cp-intern-short]');
-        var photo = internDialog.querySelector('[data-cp-intern-photo]');
-        if (title) title.textContent = card.getAttribute('data-title') || '';
-        if (short) short.textContent = card.getAttribute('data-short') || '';
-        if (photo) photo.src = card.getAttribute('data-image') || '';
-        if (window.IraoUI && window.IraoUI.modal) {
-          window.IraoUI.modal.open(internDialog, { opener: card });
-        }
-      });
-    });
-  }
 
   /* ── поиск-оверлей: фокус в поле при открытии (сниппет паттерна) ── */
 
