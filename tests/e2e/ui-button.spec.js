@@ -5,7 +5,9 @@
  * (showcase/dist/stands/ui-button.html). Проверяется:
  *  1. матрица варианты × размеры × состояния: computed-стили каждого варианта
  *     из токенов (высота md 52px / sm 32px — min-height, Technical
- *     considerations T4.2; радиус pill; тройка small);
+ *     considerations T4.2; радиус pill; тройка small); текстовый вариант
+ *     --text (T16.7) — fs 14/400, muted, underline, без фона/рамки и высоты
+ *     (по строке, не 52px);
  *  2. hover (правила под @media (hover: hover)): primary/accent — пары
  *     одобренного дизайна (--ui-color-primary-hover = blue-700,
  *     --ui-color-accent-hover = accent-light); outline/light — значения
@@ -56,6 +58,7 @@ const BTN = {
   accent: 'ui-button-accent',
   outline: 'ui-button-outline',
   light: 'ui-button-light',
+  text: 'ui-button-text',
   pill: 'ui-button-pill',
   pillSm: 'ui-button-pill-sm',
   primarySm: 'ui-button-primary-sm',
@@ -88,6 +91,7 @@ const stateOf = (page, id) =>
       fontSize: style.fontSize,
       fontWeight: style.fontWeight,
       fontFamily: style.fontFamily,
+      textDecorationLine: style.textDecorationLine,
       opacity: style.opacity,
       outlineStyle: style.outlineStyle,
       outlineWidth: style.outlineWidth,
@@ -354,6 +358,25 @@ standTest.describe('ui-button (T4.2)', () => {
 
       const disabled = await stateOf(page, BTN.primaryDisabled);
       expect(disabled.opacity, 'disabled — затемнение --ui-opacity-disabled').toBe('0.3');
+
+      // Текстовая кнопка (T16.7): fs 14/400, muted, underline; фона/рамки нет,
+      // высота — по строке (min-height базы сброшен, НЕ 52px).
+      const text = await stateOf(page, BTN.text);
+      expect(text.backgroundColor, 'text — фон прозрачный').toBe('rgba(0, 0, 0, 0)');
+      expect(text.color, 'text — подпись --ui-color-text-muted (gray-700)').toBe('rgb(97, 97, 97)');
+      expect(text.textDecorationLine, 'text — underline-маркер действия в тексте').toBe(
+        'underline',
+      );
+      expect(text.fontSize, 'text — fs-small 14px из базы').toBe('14px');
+      expect(text.fontWeight, 'text — fw 400 (fs-small-regular, не fw-small 500)').toBe('400');
+      expect(text.minHeight, 'text — min-height базы сброшен (высота auto по строке)').toBe('0px');
+      expect(text.borderRadius, 'text — радиус pill не виден (фона/рамки нет)').toBe('100px');
+      const textBox = await page.locator(`#${BTN.text}`).boundingBox();
+      expect(
+        textBox.height,
+        `text: высота по строке ~19px (14 × lh 1.35), не 52px (факт ${textBox.height})`,
+      ).toBeLessThan(32);
+      expect(textBox.height, 'text: строка не схлопнулась').toBeGreaterThan(15);
     },
   );
 
@@ -424,6 +447,21 @@ standTest.describe('ui-button (T4.2)', () => {
         'hover pill — --ui-color-surface-hover (blue-100)',
       );
       expect(pill.color, 'подпись pill на hover — primary').toBe('rgb(0, 40, 86)');
+
+      // Текстовая кнопка (T16.7): подпись primary, фон остаётся прозрачным
+      // (защитное переобъявление против generic-.ui-button:hover),
+      // подчёркивание сохраняется — цвет линии едет за текстом (currentColor).
+      await page.locator(`#${BTN.text}`).hover();
+      const text = await settledState(
+        page,
+        BTN.text,
+        (s) => s.backgroundColor === 'rgba(0, 0, 0, 0)' && s.color === 'rgb(0, 40, 86)',
+        'hover text — подпись primary на прозрачном',
+      );
+      expect(text.color, 'hover text — подпись primary').toBe('rgb(0, 40, 86)');
+      expect(text.textDecorationLine, 'hover text — подчёркивание сохраняется (currentColor)').toBe(
+        'underline',
+      );
     },
   );
 
@@ -498,6 +536,21 @@ standTest.describe('ui-button (T4.2)', () => {
         expect(await clicksOf(page, BTN.primary), 'Space даёт click (счётчик накопительный)').toBe(
           2,
         );
+      },
+    );
+
+    standTest(
+      'text (T16.7): focus-ring не пропал на прозрачной кнопке — Tab рисует политику ADR-0001',
+      async ({ stand }) => {
+        const page = await stand('ui-button');
+
+        const text = page.locator(`#${BTN.text}`);
+        await tabTo(page, text);
+        const state = await stateOf(page, BTN.text);
+        expect(state.focusVisible, 'фокус пришёл с клавиатуры').toBe(true);
+        expect(state.outlineStyle, 'outline виден и на безфоновой кнопке (ADR-0001)').toBe('solid');
+        expect(state.outlineWidth, 'ширина — --ui-focus-width (3px)').toBe('3px');
+        expect(state.outlineColor, 'цвет — --ui-focus-color (primary)').toBe('rgb(0, 40, 86)');
       },
     );
 
@@ -585,7 +638,7 @@ standTest.describe('ui-button (T4.2)', () => {
         const ratio = ratioOf(await stateOf(page, id));
         expect(ratio, `${label}: ${ratio.toFixed(2)}:1 ≥ 4.5`).toBeGreaterThanOrEqual(4.5);
       };
-      for (const id of [BTN.ghost, BTN.primary, BTN.outline, BTN.light, BTN.pill]) {
+      for (const id of [BTN.ghost, BTN.primary, BTN.outline, BTN.light, BTN.pill, BTN.text]) {
         await assertAA(id, `default ${id}`);
       }
 
@@ -605,6 +658,9 @@ standTest.describe('ui-button (T4.2)', () => {
       await page.locator(`#${BTN.pill}`).hover();
       await settleTransitions(page);
       await assertAA(BTN.pill, 'hover pill');
+      await page.locator(`#${BTN.text}`).hover();
+      await settleTransitions(page);
+      await assertAA(BTN.text, 'hover text (primary на белом)');
 
       // hover accent — известный разрыв одобренного дизайна (accent-light),
       // пин факта симметрично default: до T13.5 hover accent не проверялся

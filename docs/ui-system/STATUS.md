@@ -95,7 +95,7 @@
 | T16.12 | todo | EPIC-16 (раунд 4, 22.10, REPORT §9): ДС+пилот — канон карточки списков: ui-h6 (20/500) в заголовках event/org/adv/offer/intern/timeline/person, мини-тайтл статей 14/500, подписи/даты по канону muted; ~96+ находок .zcode/reg-4 |
 | T16.13 | todo | EPIC-16 (раунд 4): ДС+пилот — детальные vacancy/apply: зарплата ui-lead+muted (18), секции ui-h4 (28/500), DS: ui-form__aside-label fs-micro/fw-micro + aside-title primary, file-кнопка против ui-button--light |
 | T16.6 | done | смержена |
-| T16.7 | todo | EPIC-16: ДС — ui-button--text (fs-small-regular, underline, muted); REPORT §8.2 №8 |
+| T16.7 | done | смержена |
 | T16.4 | done | смержена |
 | T16.5 | todo | EPIC-16: пилот — строки/сайдбар по канону lpp-row (title 20/500 plain, pad 24/28, «Сбросить» текстовый, промо ui-card--filled); CTA-пилюля приходит из T16.11; REPORT §8.2 №6; после T16.2/T16.7/T16.11 |
 | T16.14 | todo | EPIC-16 (раунд 4): пилот — фильтры медиа (тип контента+рубрики) как ui-tag--blue (первый потребитель); размер фильтр-тега (ориг h40) — решение по probe; после T16.5 |
