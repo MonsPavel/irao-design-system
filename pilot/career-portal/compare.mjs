@@ -41,6 +41,7 @@ const PAGES = [
   'education.html',
   'education-catalog.html',
   'events.html',
+  'events-search.html',
   'event.html',
   'event-apply.html',
   'media.html',

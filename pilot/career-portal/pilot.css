@@ -1001,6 +1001,16 @@
   margin-top: var(--ui-space-7);
 }
 
+/* Пагинация events по центру (T15.5; оригинал — inline-обёртка
+   events.html:357 — тот же приём, что education-catalog.html:57; пара
+   cp-catalog-nav). */
+.cp-events-nav {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--ui-space-7);
+}
+
 /* Лента разделов сразу после page-head: сверху ритм ведёт сам page-head */
 .cp-page-head + .ui-chip {
   margin-bottom: var(--ui-space-4);
@@ -1083,13 +1093,19 @@
   flex-direction: column;
 }
 
-.cp-vac-find {
+/* Строка «найти по списку» (бывшая cp-vac-find; T15.5 — общий класс панели
+   vacancies и events-search, разметка из helper findBar build.mjs):
+   flex-строка поле+кнопка (оригинал .vac-find pages.css:120 и
+   .events-search-bar pages.css:585; метрики оригинала расходятся с
+   токенами — REPORT). */
+.cp-find-bar {
+  box-sizing: border-box;
   display: flex;
   gap: var(--ui-space-2);
   margin-bottom: var(--ui-space-2);
 }
 
-.cp-vac-find .ui-field {
+.cp-find-bar .ui-field {
   flex: 1 1 auto;
 }
 

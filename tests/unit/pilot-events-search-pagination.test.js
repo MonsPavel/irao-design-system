@@ -58,7 +58,7 @@ const sectionBody = (source, name) =>
 /** Разметка, которую возвращает main()-функция (один return-шаблон;
  *  рабочая копия Windows отдаёт CRLF — хвост без `\n`, см. link.test.js). */
 const returnHtml = (source, name) =>
-  source.match(new RegExp(`function ${name}[\\s\\S]*?return \`([\\s\S]*?)\`;`))?.[1] ?? '';
+  source.match(new RegExp(`function ${name}[\\s\\S]*?return \`([\\s\\S]*?)\`;`))?.[1] ?? '';
 
 const eventsMainBody = sectionBody(build, 'eventsMain');
 const eventsSearchMainBody = sectionBody(build, 'eventsSearchMain');
@@ -156,14 +156,18 @@ describe('build.mjs — страница events-search.html (T15.5 Scope)', () =
   });
 
   it('классы оригинала не копируются — только cp-* поверх ui-* (Implementation requirements п.1)', () => {
-    expect(eventsSearchHtml).not.toMatch(/class="events-search-bar|class="media-toolbar|class="event-card/);
+    expect(eventsSearchHtml).not.toMatch(
+      /class="events-search-bar|class="media-toolbar|class="event-card/,
+    );
     expect(eventsSearchHtml).not.toMatch(/class="tag[ "]/);
   });
 });
 
 describe('build.mjs — пагинация events.html (T15.5 Scope)', () => {
   it('ui-pagination СО стрелками (оригинал содержит pagination__arrow, events.html:358–367; отличать от ui-pagination--bare vacancies — REPORT §8.2 №7)', () => {
-    expect(eventsMainBody).toContain('<nav class="ui-pagination" aria-label="Пагинация: мероприятия">');
+    expect(eventsMainBody).toContain(
+      '<nav class="ui-pagination" aria-label="Пагинация: мероприятия">',
+    );
     expect(eventsMainBody, 'стрелка «Назад» есть').toContain('ui-pagination__arrow');
     expect(eventsMainBody, 'модификатор --bare (без стрелок) не применяется').not.toContain(
       'ui-pagination--bare',
@@ -174,9 +178,7 @@ describe('build.mjs — пагинация events.html (T15.5 Scope)', () => {
     expect(eventsMainBody).toMatch(
       /<span class="ui-pagination__page" aria-current="page">1<\/span>/,
     );
-    expect(eventsMainBody).toMatch(
-      /href="events\.html\?page=2" aria-label="Страница 2">2<\/a>/,
-    );
+    expect(eventsMainBody).toMatch(/href="events\.html\?page=2" aria-label="Страница 2">2<\/a>/);
   });
 
   it('недоступная стрелка — button[disabled] с каноническим именем «Предыдущая страница» (в оригинале disabled на <a> невалиден — README ui-pagination), доступная — ссылка «Следующая страница» на СЛЕДУЮЩУЮ страницу, не на себя', () => {
@@ -237,8 +239,6 @@ describe('compare.mjs — страница в PAGES (T15.5 Scope; AC: compare.js
   });
 
   it('probe pagination-page существует (44px пара на events появляется от ui-pagination в разметке — AC)', () => {
-    expect(compare).toMatch(
-      /\['pagination-page', '\.pagination__page', '\.ui-pagination__page'\]/,
-    );
+    expect(compare).toMatch(/\['pagination-page', '\.pagination__page', '\.ui-pagination__page'\]/);
   });
 });
