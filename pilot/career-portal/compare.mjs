@@ -270,7 +270,10 @@ async function shellProbe(page, spec, side) {
     withText: spec.text !== false,
   });
   const extra = spec.extra
-    ? await read(spec.extra[side], spec.extra.fields, { rectName: spec.extra.rectName, withText: false })
+    ? await read(spec.extra[side], spec.extra.fields, {
+        rectName: spec.extra.rectName,
+        withText: false,
+      })
     : null;
   if (!main && !extra) return null;
   return { ...(main || {}), ...(extra || {}) };
@@ -360,10 +363,12 @@ for (const pageName of PAGES) {
       COMPONENT_PROBES.map(([name]) => [
         name,
         { original: originalProbes[name], pilot: pilotProbes[name] },
-      ]).concat(SHELL_PROBES.map(({ name }) => [
-        name,
-        { original: originalShellProbes[name], pilot: pilotShellProbes[name] },
-      ])),
+      ]).concat(
+        SHELL_PROBES.map(({ name }) => [
+          name,
+          { original: originalShellProbes[name], pilot: pilotShellProbes[name] },
+        ]),
+      ),
     ),
     pilotConsoleErrors: pilotErrors,
   };
@@ -380,7 +385,11 @@ console.log(`\nМетрики: ${join(OUT, 'compare.json')}`);
 /** viewer.html — пары скриншотов + таблица ВСЕХ проб страницы (прежние
  *  компонентные и новые shell): у расходящихся значений красная метка. */
 const esc = (value) =>
-  String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 
 /** Токены пробы для показа: «алиас=значение» (текст в json, не в таблице). */
 function probeTokens(value) {
@@ -420,7 +429,9 @@ function probeRow(name, pair) {
 const viewerSections = PAGES.map((pageName) => {
   const data = report.pages[pageName];
   const png = pageName.replace('.html', '.png');
-  const rows = Object.entries(data.probes).map(([name, pair]) => probeRow(name, pair)).join('');
+  const rows = Object.entries(data.probes)
+    .map(([name, pair]) => probeRow(name, pair))
+    .join('');
   return (
     `<section style="margin:24px 0"><h2 style="font:600 20px/1.3 system-ui">${esc(pageName)} ` +
     `<small style="color:#666;font-weight:400">— высота документа: оригинал ${data.docHeight.original}px / пилот ${data.docHeight.pilot}px</small></h2>` +
