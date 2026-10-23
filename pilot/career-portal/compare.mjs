@@ -17,17 +17,37 @@
  *  - viewer.html — пары скриншотов + таблица всех проб (новые и прежние).
  *
  * Запуск: node showcase/serve.mjs & node pilot/career-portal/compare.mjs
+ *
+ * Перед прогоном compare выполняет гейт мёртвых внутренних ссылок dist
+ * (check-links.mjs, T15.9): есть DEAD — прогон падает до браузеров.
+ * Отдельный запуск гейта: node pilot/career-portal/check-links.mjs
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
+import { collectDeadLinks } from './check-links.mjs';
 
 const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 const OUT = join(PILOT_DIR, 'compare-output');
 const ORIGINAL_BASE = 'https://monspavel.github.io/career-portal';
 const PILOT_BASE = 'http://127.0.0.1:8080/pilot/career-portal/dist';
 const VIEWPORT = { width: 1440, height: 900 };
+
+// Гейт мёртвых ссылок (T15.9) — в том же запуске, до браузеров: compare
+// строит пары страниц по PAGES, мёртвая внутренняя ссылка делает прогон
+// бессмысленным (уроки раунда 2 — REPORT §7). Падаем сразу, до траты ~5 мин.
+const linkGate = collectDeadLinks(join(PILOT_DIR, 'dist'));
+if (linkGate.dead.length > 0) {
+  console.error(
+    `Гейт ссылок: ${linkGate.dead.length} DEAD — compare остановлен:\n` +
+      linkGate.dead.map(({ page, href }) => `  ${page} → ${href}`).join('\n'),
+  );
+  process.exit(1);
+}
+console.log(
+  `Гейт ссылок: ${linkGate.checked.length} страниц, ${linkGate.links} внутренних ссылок, 0 DEAD`,
+);
 
 const PAGES = [
   'index.html',
