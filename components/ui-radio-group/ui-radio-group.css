@@ -22,8 +22,10 @@
  * красить: рамки нет, отметки радио нативны.
  *
  * Legend-подпись — в стиле label обвязки (fs-small/fw-small одобренного
- * .field__label). Без media/:hover — одобренным дизайном не заданы;
- * цветов вне токенов нет (VI §5).
+ * .field__label) и на том же токене цвета подписи поля --ui-color-field-label
+ * (T16.9: legend — имя группы, та же роль «подпись поля»); текст самих радио
+ * (ui-radio) — контент, остаётся --ui-color-text. Без media/:hover —
+ * одобренным дизайном не заданы; цветов вне токенов нет (VI §5).
  */
 
 .ui-radio-group {
@@ -37,7 +39,7 @@
   box-sizing: border-box;
   margin-bottom: var(--ui-space-2);
   padding: 0;
-  color: var(--ui-color-text);
+  color: var(--ui-color-field-label);
   font-size: var(--ui-fs-small);
   font-weight: var(--ui-fw-small);
   line-height: var(--ui-lh-small);
