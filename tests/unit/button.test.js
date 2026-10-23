@@ -189,9 +189,7 @@ describe('components/ui-button/ui-button.css — модификатор text (T1
     expect(block).toContain('background-color: transparent;');
     // Технические considerations T16.7: высота auto по строке — в блоке нет
     // собственной height, только сброс min-height базы.
-    expect(block, 'своей height нет — только сброс min-height').not.toMatch(
-      /(?:^|\n)\s*height:/,
-    );
+    expect(block, 'своей height нет — только сброс min-height').not.toMatch(/(?:^|\n)\s*height:/);
   });
 
   it('fs-small-regular: размер наследует fs-small 14px базы, вес 400 — пара small × fw-body (прецедент fs-small-regular ui-select)', () => {
@@ -234,7 +232,7 @@ describe('components/ui-button/ui-button.css — модификатор text (T1
     expect(pairs).toMatch(/id:\s*'muted-on-surface'/);
   });
 
-  it('README: строка API + do/don\'t — «действующее слово в текстовом контексте», отличие от ui-link (Scope)', () => {
+  it("README: строка API + do/don't — «действующее слово в текстовом контексте», отличие от ui-link (Scope)", () => {
     const readme = readFileSync(join(root, 'components', 'ui-button', 'README.md'), 'utf8');
     expect(readme, 'API-строка модификатора').toContain('`.ui-button--text`');
     expect(readme).toMatch(/текстов[оа][мj]? контекст/i);
