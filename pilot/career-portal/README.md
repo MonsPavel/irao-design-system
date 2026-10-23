@@ -13,7 +13,8 @@
 ```
 pilot/career-portal/
 ├── build.mjs        # сборка 20 страниц клона из data/*.json на ui-компонентах
-├── compare.mjs      # сравнение с оригиналом: скриншоты + DOM-метрики
+├── compare.mjs      # сравнение с оригиналом: гейт ссылок + скриншоты + DOM-метрики
+├── check-links.mjs  # гейт мёртвых внутренних ссылок dist (T15.9, без сети)
 ├── pilot.css        # стили ЗОНЫ САЙТА (cp-*): блоки без аналога в ДС
 ├── pilot.js         # скрипты зоны сайта (карусель, попап, мок-формы)
 ├── data/*.json      # мок-данные (байт-в-байт копия data/ оригинала)
@@ -38,26 +39,45 @@ npm run serve                                   # → http://127.0.0.1:8080/pilo
 
 ```bash
 npm run serve &                                 # пилот должен быть доступен локально
-node pilot/career-portal/compare.mjs            # ~3 мин: 20 страниц × 2 версии
+node pilot/career-portal/check-links.mjs        # гейт мёртвых ссылок dist (≈1 с)
+node pilot/career-portal/compare.mjs            # ~5 мин: 20 страниц × 2 версии
 ```
+
+**Гейт мёртвых ссылок (T15.9).** `check-links.mjs` — детерминированная
+проверка без сети: обходит все страницы dist (рекурсивно), парсит
+внутренние href (`*.html`) и падает (exit 1), если цель не существует.
+Внешние URL, якоря, `mailto:`/`tel:` и не-html href вне поверхности;
+`?query`/`#якорь` срезаются (`vacancies.html?page=2` → `vacancies.html`).
+Тот же гейт выполняет `compare.mjs` до браузерного прогона: есть DEAD —
+compare останавливается до траты минут на скриншоты. Решение о включении
+гейта в CI — отдельное решение владельца (Notes REPORT §10).
 
 Продукт: `compare-output/viewer.html` (скриншоты парами),
 `compare-output/compare.json` (метрики: высоты документов/блоков,
 computed-стилы probe-пар «класс оригинала → ui-компонент»).
 
+Таймауты: полный прогон 20 страниц ≈ 5 мин (страница — до 60 с на
+`goto`/`networkidle` + прокрутка lazy-картинок, у каждой версии свой
+браузер-контекст); при запуске в CI/обёртках закладывайте общий таймаут
+≥ 10 мин. Сеть нужна только до оригинала (GitHub Pages) — гейт ссылок
+работает без неё.
+
 ## Страницы клона
 
 `index` (все блоки главной), `vacancies` (фильтры + строки + пагинация),
 `vacancy` (детальная + модалка отклика), `vacancy-apply` (форма целиком),
-`internships`/`practices` (табы + карточки + таймлайн + FAQ), `education`,
-`events`, `media`, `career-track`, `companies`, `404`.
+`internships`/`practices` (табы + карточки + таймлайн + FAQ), `education`
++ `education-catalog` (сайдбар-каталог), `events` (+пагинация) и
+`events-search`, `event`/`article` (детальные), `internship` +
+`internship-apply`/`event-apply` (детальная и анкеты), `media`,
+`career-track`, `company`, `companies`, `404` — **20 страниц**, все
+внутренние ссылки резолвятся (гейт `check-links.mjs`, 0 DEAD).
 
-Не пересобраны (раунд 2, 21.10 — план пересборки в
-[EPIC-15](../../docs/ui-system/epics/EPIC-15-pilot-completeness/README.md)):
-генеративные карточки 12 вакансий (типаж одинаков), главная варианта 2;
-(event|event-apply|events-search|internship|internship-apply|article|
-company|education-catalog) — 8 типовых страниц, 4 из них сейчас
-мёртвые ссылки из собранных страниц (детали — REPORT §7).
+Не пересобраны (принципиально вне пилота, REPORT §1): генеративные
+карточки 12 вакансий (типаж одинаков) и главная варианта 2. Упрощения
+внутри типовых страниц — по Scope задач T15.1–T15.5 (например, карточки
+компаний клонирует companies.json; на company.html строки вакансий
+компании не воспроизводились — деталь в REPORT §10).
 
 ## Правила пилота
 
