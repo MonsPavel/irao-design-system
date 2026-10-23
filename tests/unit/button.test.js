@@ -20,7 +20,9 @@
  *    ADR-0010); disabled — атрибутный :disabled, правило ПОСЛЕ hover-блока;
  *    loading — is-loading в цепочке с блоком, спиннер на currentColor,
  *    лейбл визуально скрыт без display:none (accessible name сохраняется,
- *    Implementation requirements п.3);
+ *    Implementation requirements п.3); текстовый вариант --text (T16.7) —
+ *    без фона/рамки/высоты, fs-small-regular, muted, underline-маркер
+ *    действия в тексте;
  *  - инварианты системы: без !important, без hex, без фиксированных (px/rem)
  *    высот — min-height только из токенов (Technical considerations T4.2:
  *    min-height вместо height — совместимость с 32px-базой T3.6);
@@ -156,11 +158,93 @@ describe('components/ui-button/ui-button.css — сброс подчёркива
     ).toContain('text-decoration: none;');
   });
 
-  it('a.ui-button--outline: подчёркивание не возвращается ни в одном состоянии — декларация text-decoration в файле ровно одна (none в базе; hover меняет только цвет, ADR-0010)', () => {
+  it('a.ui-button--outline: подчёркивание не возвращается ни в одном состоянии — декларации text-decoration в файле ровно две, в порядке файла: сброс none в базе (T16.2) и осознанный underline текстового варианта --text (T16.7); остальные варианты и все hover/active-правила tdl не трогают (ADR-0010)', () => {
     const declarations = css.match(/text-decoration\s*:[^;]+;/g) ?? [];
-    expect(declarations, 'единственная декларация — сброс none в базе').toEqual([
+    expect(declarations, 'none в базе (T16.2) + underline у --text (T16.7)').toEqual([
       'text-decoration: none;',
+      'text-decoration: underline;',
     ]);
+  });
+});
+
+/**
+ * Текстовая кнопка (T16.7): «Сбросить ×» оригинала (.vac-side__reset,
+ * REPORT §8.2 №8) — fs 14/400, underline, muted, без фона и рамки.
+ * Действующее слово в текстовом контексте (сброс фильтров, отмена, очистить
+ * форму): подчёркивание — осознанный маркер действия в тексте, сброс базы
+ * T16.2 переопределяется обратно; высота — по строке (не 52px), hover —
+ * primary (подчёркивание сохраняется, цвет линии — currentColor).
+ */
+describe('components/ui-button/ui-button.css — модификатор text (T16.7)', () => {
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-button', 'ui-button.css'), 'utf8'),
+  );
+
+  it('computed-AC: фон прозрачный, рамки нет (border 0), паддинг 0 (как в оригинале), высота не задаётся (min-height 0 — размер по строке, не 52px)', () => {
+    const block = blockOf(css, '.ui-button--text');
+    expect(block, 'правило .ui-button--text найдено').toBeTruthy();
+    expect(block).toContain('min-height: 0;');
+    expect(block).toContain('padding: 0;');
+    expect(block).toContain('border: 0;');
+    expect(block).toContain('background-color: transparent;');
+    // Технические considerations T16.7: высота auto по строке — в блоке нет
+    // собственной height/min-height, кроме сброса базы.
+    expect(block, 'своей высоты, кроме сброса min-height, нет').not.toMatch(/height:/);
+  });
+
+  it('fs-small-regular: размер наследует fs-small 14px базы, вес 400 — пара small × fw-body (прецедент fs-small-regular ui-select)', () => {
+    const block = blockOf(css, '.ui-button--text');
+    expect(block, 'fs 14px приходит из базы (--ui-fs-small)').not.toContain('font-size');
+    expect(block).toContain('font-weight: var(--ui-fw-body);');
+  });
+
+  it('подпись muted, подчёркивание — переопределение сброса базы (маркер действия в тексте)', () => {
+    const block = blockOf(css, '.ui-button--text');
+    expect(block).toContain('color: var(--ui-color-text-muted);');
+    expect(block).toContain('text-decoration: underline;');
+  });
+
+  it('модификатор стоит ПОСЛЕ базы (равная специфичность с .ui-button — результат гарантирует порядок каскада, Implementation requirements T16.7 п.2)', () => {
+    const baseIndex = css.indexOf('.ui-button {');
+    const textIndex = css.indexOf('.ui-button--text {');
+    expect(baseIndex).toBeGreaterThan(-1);
+    expect(textIndex, '.ui-button--text после базы').toBeGreaterThan(baseIndex);
+  });
+
+  it('hover — подпись primary, фон переобъявлен прозрачным ЗАЩИТНО (generic-.ui-button:hover красит surface-hover — у текстовой кнопки фона нет); подчёркивание сохраняется — text-decoration hover не трогает (цвет линии — currentColor)', () => {
+    const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
+    const hover = blockOf(mediaBlock, '.ui-button--text:hover');
+    expect(hover, 'правило hover внутри media-обёртки').toBeTruthy();
+    expect(hover).toContain('background-color: transparent;');
+    expect(hover).toContain('color: var(--ui-color-primary);');
+    expect(hover, 'underline из модификатора сохраняется').not.toContain('text-decoration');
+  });
+
+  it('active — фон остаётся прозрачным, подпись primary (защитно против generic-.ui-button:active; конвенция active-цвета по hover — как у light/pill)', () => {
+    const block = blockOf(css, '.ui-button--text:active');
+    expect(block, 'правило .ui-button--text:active найдено').toBeTruthy();
+    expect(block).toContain('background-color: transparent;');
+    expect(block).toContain('color: var(--ui-color-primary);');
+  });
+
+  it('контраст-гейт: пара muted/белый уже в pairs.config (muted-on-surface, AA-замена gray-700 T2.3) — текстовая кнопка читает существующую пару', () => {
+    const pairs = readFileSync(join(root, 'tests', 'contrast', 'pairs.config.mjs'), 'utf8');
+    expect(pairs).toMatch(/id:\s*'muted-on-surface'/);
+  });
+
+  it('README: строка API + do/don\'t — «действующее слово в текстовом контексте», отличие от ui-link (Scope)', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-button', 'README.md'), 'utf8');
+    expect(readme, 'API-строка модификатора').toContain('`.ui-button--text`');
+    expect(readme).toMatch(/текстов[оа][мj]? контекст/i);
+    // Do/don't: отличие от ui-link — семантика действия против перехода.
+    expect(readme).toMatch(
+      /ui-button--text[\s\S]{0,600}?ui-link|ui-link[\s\S]{0,600}?ui-button--text/,
+    );
+  });
+
+  it('стенд (showcase/pages/ui-button): пример текстовой кнопки в матрице', () => {
+    const html = readFileSync(join(root, 'showcase', 'pages', 'ui-button', 'index.html'), 'utf8');
+    expect(html).toContain('id="ui-button-text"');
   });
 });
 
