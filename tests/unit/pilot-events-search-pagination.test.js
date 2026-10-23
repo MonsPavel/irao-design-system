@@ -144,8 +144,8 @@ describe('build.mjs — страница events-search.html (T15.5 Scope)', () =
     expect(chipNav, 'ни один фильтр не активен').not.toContain('aria-current');
   });
 
-  it('выдача: все предстоящие события events.json тем же eventCard, что на events.html (оригинал строит страницу тем же events_upcoming(), build.py:821); данные — из файла, не литералы', () => {
-    expect(eventsSearchMainBody).toContain('EVT.upcoming.map(eventCard)');
+  it('выдача: все предстоящие события events.json тем же eventCard, что на events.html (оригинал строит страницу тем же events_upcoming(), build.py:821); данные — из файла, не литералы. Тег заголовка карточки h2 (T15.9, axe heading-order: выдача прямо за h1 страницы — канон «h1→h2→h3 без пропусков»; на events.html карточки остались h3)', () => {
+    expect(eventsSearchMainBody).toContain(`EVT.upcoming.map((event) => eventCard(event, 'h2'))`);
     expect(eventsSearchMainBody, 'без slice — events.html берёт полный список').not.toContain(
       'EVT.upcoming.slice',
     );

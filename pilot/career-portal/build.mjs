@@ -264,8 +264,19 @@ function regTag(e) {
   return { text: e.reg, variant: 'orange' };
 }
 
-/** карточка события (оригинал .event-card): ui-card--link + теги */
-function eventCard(e) {
+/** Тег заголовка карточки: только строка h1–h6, иначе дефолт h3.
+ *  Защита идиомы `.map(eventCard)`: map передаёт (элемент, индекс) —
+ *  числовой индекс не имеет права стать тегом (регрессия сборки 24.10:
+ *  `<0 class="ui-h4">` в dist при `map(eventCard)`). Вид заголовка несёт
+ *  роль ui-h4, тег — семантика страницы (канон base/typography.css:
+ *  «h1→h2→h3 без пропусков»); события-search/каталог собираются с 'h2'. */
+const cardHeading = (headingTag) => (/^h[1-6]$/.test(headingTag ?? '') ? headingTag : 'h3');
+
+/** карточка события (оригинал .event-card): ui-card--link + теги.
+ *  headingTag (T15.9, axe heading-order): дефолт h3 — на events.html
+ *  карточки идут после секций h2 «Предстоящие/Прошедшие», выдача
+ *  events-search собирается с 'h2' (карточка — сразу за h1 страницы). */
+function eventCard(e, headingTag) {
   // Теги на фото — тинты вариантов 28px, как в оригинале (events.html:270/302;
   // pages.css:573 только позиционирует). Модификатор ui-tag--on-photo (T16.10)
   // остаётся API ДС без пилотного применения — «белый на primary, 40px»
@@ -280,7 +291,7 @@ function eventCard(e) {
     </div>
     <div class="cp-event-card__body">
       <time class="cp-event-card__date ui-small ui-text--muted" datetime="${esc(isoDate(e.date))}">${esc(e.date)}</time>
-      <h3 class="ui-h4">${esc(e.title)}</h3>
+      <${cardHeading(headingTag)} class="ui-h4">${esc(e.title)}</${cardHeading(headingTag)}>
       <p class="cp-event-card__meta">
         <span class="ui-tag ui-tag--blue">${esc(e.city)}</span>
         <span class="ui-tag ui-tag--gray">${esc(e.format)}</span>
@@ -354,11 +365,14 @@ function orgCard(o) {
 </article>`;
 }
 
-/** карточка предложения целевого обучения */
-function offerCard(o) {
+/** карточка предложения целевого обучения. headingTag (T15.9, axe
+ *  heading-order): дефолт h3 — education.html/event.html несут секции
+ *  h2 перед карточками; каталог education-catalog собирается с 'h2'
+ *  (первый offer — сразу за h1 страницы). */
+function offerCard(o, headingTag) {
   return `<article class="ui-card ui-card--hover cp-offer-card">
   <div class="cp-offer-card__head">
-    <h3 class="ui-h4">${esc(o.direction)}</h3>
+    <${cardHeading(headingTag)} class="ui-h4">${esc(o.direction)}</${cardHeading(headingTag)}>
     <time class="cp-offer-card__date ui-small ui-text--muted">${esc(o.date)}</time>
   </div>
   <p class="ui-small">${esc(o.short)}</p>
@@ -2068,7 +2082,11 @@ function educationCatalogMain() {
   const filters = CATALOG_FILTERS.map(
     (f) => `      ${selectField({ name: f.name, label: f.label, options: f.options, pill: true })}`,
   ).join('\n');
-  const offers = EDU.offers.map(offerCard).join('\n');
+  // Тег h2 заголовков offer-карточек (T15.9, axe heading-order): первый
+  // offer следует за h1 страницы без промежуточной секции (как в
+  // оригинале) — на education.html карточки остаются h3 (там сетка после
+  // секций h2).
+  const offers = EDU.offers.map((offer) => offerCard(offer, 'h2')).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Целевое обучение', 'education.html'],
@@ -2167,7 +2185,11 @@ ${past}
    (в оригинале тоже нет). Крошки: «Мероприятия» — ссылка, ровно один
    aria-current (Implementation requirements п.2). */
 function eventsSearchMain() {
-  const cards = EVT.upcoming.map(eventCard).join('\n');
+  // Тег h2 заголовков карточек (T15.9, axe heading-order): выдача идёт
+  // прямо за h1 страницы, промежуточной секции h2 нет (как в оригинале)
+  // — канон base/typography.css «h1→h2→h3 без пропусков»; на events.html
+  // карточки остаются h3 (там перед ними секции h2).
+  const cards = EVT.upcoming.map((event) => eventCard(event, 'h2')).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Мероприятия', 'events.html'],
