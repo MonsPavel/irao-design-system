@@ -2263,8 +2263,15 @@ ${cards}
 
 function mediaMain() {
   const cards = ART.items.map(articleCard).join('\n');
+  // Фильтры — теги-ссылки ui-tag--blue × ui-tag--filter (T16.14; канон
+  // .tag--blue.filter-tag оригинала, media.html:156 + pages.css:596):
+  // активная несёт aria-current="page" — состояние в ARIA (прецедент
+  // ui-chip), без JS.
   const rubrics = ART.rubrics
-    .map((rubric) => `<a class="ui-chip__pill" href="media.html">${esc(rubric)}</a>`)
+    .map(
+      (rubric) =>
+        `<a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">${esc(rubric)}</a>`,
+    )
     .join('\n      ');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
@@ -2279,14 +2286,14 @@ function mediaMain() {
 
     <div class="cp-media-toolbar">
       <span class="ui-tag ui-tag--gray">Тип контента:</span>
-      <nav class="ui-chip" aria-label="Тип контента">
-        <a class="ui-chip__pill" href="media.html" aria-current="page">Все</a>
-        <a class="ui-chip__pill" href="media.html">статьи</a>
-        <a class="ui-chip__pill" href="media.html">видео</a>
-        <a class="ui-chip__pill" href="media.html">подкасты</a>
+      <nav class="cp-media-toolbar__group" aria-label="Тип контента">
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html" aria-current="page">Все</a>
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">статьи</a>
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">видео</a>
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">подкасты</a>
       </nav>
-      <span class="ui-tag ui-tag--gray">Рубрики:</span>
-      <nav class="ui-chip" aria-label="Рубрики">
+      <span class="ui-tag ui-tag--gray cp-media-toolbar__rubrics-label">Рубрики:</span>
+      <nav class="cp-media-toolbar__group" aria-label="Рубрики">
       ${rubrics}
       </nav>
     </div>

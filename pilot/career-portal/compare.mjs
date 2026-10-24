@@ -275,6 +275,24 @@ const SHELL_PROBES = [
     pilot: '.ui-form__aside-value',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
   },
+  // Фильтр медиа-каталога (T16.14, REPORT §9.1 №5): тег-фильтр 40px —
+  // ui-tag--blue × ui-tag--filter. Первое вхождение на media.html —
+  // активный «Все» на обеих сторонах: плашка primary / text-on-dark
+  // (ARIA aria-current=page у клона, inline-стиль у оригинала), покой
+  // (blue-100/primary) гейтят e2e стенда ui-tag и пары tag-blue.
+  {
+    name: 'filter-tag',
+    original: '.filter-tag',
+    pilot: '.ui-tag--filter',
+    fields: {
+      fs: 'font-size',
+      fw: 'font-weight',
+      color: 'color',
+      bg: 'background-color',
+      radius: 'border-radius',
+    },
+    rect: true,
+  },
   // Кнопка «прикрепить файл» (T16.13: канон — пилюля btn--light на коробке
   // field__file). Визуал собирается ui-file (T5.3): коробка blue-50 с
   // прозрачной пилюлей-кнопкой ≡ канонной кнопке с bg blue-50 (bg самой
