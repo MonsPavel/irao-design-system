@@ -1366,24 +1366,30 @@ function vacancyMain(v = VAC.items[0]) {
     <article class="cp-vacancy-page">
       <header class="cp-vacancy-page__head">
         <h1 class="ui-page-title">${esc(v.title)}</h1>
-        <p class="cp-vacancy-page__salary">${esc(v.salary)} до вычета налога</p>
+        <!-- зарплата (T16.13): канон — литерал 18px muted (pages.css:271);
+             размер — литерал 1.125rem сайт-зоны (18px вне десктоп-шкалы ДС:
+             роль ui-lead лестницей ≥1024 даёт 24px и меняла бы одобренное
+             значение), цвет — ui-text--muted (AA gray-700, T2.3) -->
+        <p class="cp-vacancy-page__salary ui-text--muted">${esc(v.salary)} до вычета налога</p>
         <p class="cp-vacancy-page__place">${PLACE_PIN} ${esc(v.place)}</p>
       </header>
 
       <div class="cp-vacancy-page__section">
-        <h2 class="ui-h3">Что предстоит</h2>
+        <!-- подзаголовки секций (T16.13): канон fs-h4-тройка 28/500
+             (pages.css, --fs-h4) — роль ui-h4 вместо ui-h3 (42/500) -->
+        <h2 class="ui-h4">Что предстоит</h2>
         <p class="ui-body">${esc(v.short)} Работа ведётся на объекте ${esc(v.place)} в составе оперативной команды подразделения, с наставником на период адаптации.</p>
       </div>
       <div class="cp-vacancy-page__section">
-        <h2 class="ui-h3">Требования</h2>
+        <h2 class="ui-h4">Требования</h2>
         ${list(requirements)}
       </div>
       <div class="cp-vacancy-page__section">
-        <h2 class="ui-h3">Условия</h2>
+        <h2 class="ui-h4">Условия</h2>
         ${list(conditions)}
       </div>
       <div class="cp-vacancy-page__section">
-        <h2 class="ui-h3">Где предстоит работать</h2>
+        <h2 class="ui-h4">Где предстоит работать</h2>
         <div class="cp-vacancy-page__map" role="img" aria-label="Карта: ${esc(v.place)}"></div>
         <p class="ui-body"><b>Адрес:</b> ${PLACE_PIN} ${esc(v.address)}</p>
       </div>
