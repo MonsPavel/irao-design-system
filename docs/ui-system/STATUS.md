@@ -91,7 +91,7 @@
 | T16.3 | done | смержена |
 | T16.9 | done | смержена |
 | T16.10 | done | смержена |
-| T16.11 | todo | EPIC-16: ДС — калибровка ui-button--pill (рамка+кружок primary, hover-свап accent, метка uppercase fs13/ls 0.04); находка владельца 22.10, REPORT §8.2 №6 + mapping §3; до T16.5 |
+| T16.11 | done | смержена |
 | T16.12 | todo | EPIC-16 (раунд 4, 22.10, REPORT §9): ДС+пилот — канон карточки списков: ui-h6 (20/500) в заголовках event/org/adv/offer/intern/timeline/person, мини-тайтл статей 14/500, подписи/даты по канону muted; ~96+ находок .zcode/reg-4 |
 | T16.13 | todo | EPIC-16 (раунд 4): ДС+пилот — детальные vacancy/apply: зарплата ui-lead+muted (18), секции ui-h4 (28/500), DS: ui-form__aside-label fs-micro/fw-micro + aside-title primary, file-кнопка против ui-button--light |
 | T16.6 | done | смержена |
