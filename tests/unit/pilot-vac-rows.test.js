@@ -84,9 +84,9 @@ describe('build.mjs — строка вакансии cp-vac-row по связк
 });
 
 describe('build.mjs — сайдбар фильтров (T16.5 Scope)', () => {
-  it('«Сбросить» — ui-button--text (T16.7 доставлен, STATUS: done): outline 52px заменён; AC REPORT §8.2 №6/№8 — fs 14/400 underline muted', () => {
+  it('«Сбросить ×» — ui-button--text (T16.7 доставлен; × — паритет оригинала, vacancies.html:123, T16.5-бэклог): outline 52px заменён; AC REPORT §8.2 №6/№8 — fs 14/400 underline muted', () => {
     expect(vacanciesMainBody).toContain(
-      '<button class="ui-button ui-button--text" type="button">Сбросить</button>',
+      '<button class="ui-button ui-button--text" type="button">Сбросить &times;</button>',
     );
     expect(vacanciesMainBody, 'outline-вариант в сайдбаре не остаётся').not.toContain(
       'ui-button--outline',

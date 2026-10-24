@@ -287,6 +287,16 @@ standTest.describe('ui-link (T4.1)', () => {
       expect(hover.opacity, 'hover — opacity 0.7 (одобренный .header__link:hover)').toBe('0.7');
       expect(hover.color, 'цветного hover у nav нет — primary остаётся').toBe('rgb(0, 40, 86)');
       expect(hover.decorationLine, 'hover подчёркивание не добавляет').toBe('none');
+
+      // active — primary без затемнения (T16.3-бэклог): color-mix базы
+      // просачивался в nav при mousedown; одобренный .header__link своего
+      // :active не имеет — правило нейтрализует (приём --button).
+      await page.mouse.down();
+      const active = await stateOf(page, LINK.nav);
+      expect(active.color, 'active — primary, color-mix базы не просачивается').toBe(
+        'rgb(0, 40, 86)',
+      );
+      await page.mouse.up();
     },
   );
 

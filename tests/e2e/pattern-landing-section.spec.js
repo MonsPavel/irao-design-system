@@ -184,6 +184,28 @@ standTest.describe('patterns/landing-section: тёмная секция (on-dark
   );
 
   standTest(
+    'заголовок тёмной секции — детерминированный пин computed color (T14.1-бэклог: оставались только axe и снапшоты)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.addStyleTag({
+        content: '.lsp-probe-ondark { color: var(--ui-color-text-on-dark); }',
+      });
+      const same = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.className = 'lsp-probe-ondark';
+        document.body.appendChild(probe);
+        const title = document.querySelector('#lsp-dark-title');
+        const result = getComputedStyle(title).color === getComputedStyle(probe).color;
+        probe.remove();
+        return result;
+      });
+      expect(same, 'заголовок тёмной секции — text-on-dark (селектор :is(.ui-h1, .ui-h2))').toBe(
+        true,
+      );
+    },
+  );
+
+  standTest(
     'контраст текста тёмной секции ≥ 4.5:1 (Accessibility requirements)',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');

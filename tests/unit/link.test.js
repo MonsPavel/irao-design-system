@@ -471,16 +471,28 @@ describe('adoption пилота — футер на ui-link--nav (T16.4, Testing
     expect(blockOf(pilotCss, '.cp-footer__contact-group')).toContain('gap: 2.5rem;');
   });
 
-  it('правая колонка: stretch + space-between (соцсети сверху, копирайт снизу — footer.css:79-86), шаг 24px (--ui-space-5); копирайт однострочный, как в оригинале', () => {
+  it('правая колонка: stretch + space-between (соцсети сверху, копирайт снизу — footer.css:79-86), шаг 24px (--ui-space-5); копирайт однострочный на десктопе (nowrap), на ≤767 переносится (T16.4-бэклог: hscroll W400)', () => {
     const right = blockOf(pilotCss, '.cp-footer__right');
     expect(right).toContain('align-self: stretch;');
     expect(right).toContain('justify-content: space-between;');
     expect(right).toContain('gap: var(--ui-space-5);');
-    const copy = blockOf(pilotCss, '.cp-footer__right .ui-small');
+    // База — блок ДО media-ступени 767 (blockOf берёт первое вхождение,
+    // а внутри @media тот же селектор несёт white-space: normal).
+    const base = pilotCss.slice(0, pilotCss.indexOf('@media (max-width: 767px)'));
+    const copy = blockOf(base, '.cp-footer__right .ui-small');
     expect(
       copy,
       'в grid-каркасе 1fr строка копирайта переносится — однострочный вид оригинала держит nowrap',
     ).toContain('white-space: nowrap;');
+    // Ступень ≤767 — первая media-ступень 767 в файле (footer-блок; другие
+    // 767-блоки дальше). pilotCss без комментариев — маркер комментария
+    // в нём не живёт.
+    const mobileStart = pilotCss.indexOf('@media (max-width: 767px)');
+    const mobile = blockOf(pilotCss.slice(mobileStart), '.cp-footer__right .ui-small');
+    expect(
+      mobile,
+      'ступень ≤767 снимает nowrap — min-content «Правила обработки персональных данных» давал hscroll',
+    ).toContain('white-space: normal;');
   });
 
   it('каркас: колонки/зазор 40px (2.5rem, footer.css:10) по оригиналу; сетка не перестраивается (Out of scope)', () => {

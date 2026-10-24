@@ -42,6 +42,20 @@ const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8');
 const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
 const educat = JSON.parse(readFileSync(join(pilotDir, 'data', 'educat.json'), 'utf8'));
 
+/** Исполняемая копия чистой функции buildOptions из исходника build.mjs
+ *  (T15.3-бэклог: поведенческий пин «ровно одна selected»). build.mjs —
+ *  скрипт с верхнеуровневыми побочками (сборка), импортом не берётся —
+ *  тело функции вырезается из исходника и исполняется со стабом esc. */
+const buildOptions = (() => {
+  const start = build.indexOf('function buildOptions');
+  const end = build.indexOf('function selectField');
+  expect(start, 'buildOptions в build.mjs').toBeGreaterThan(-1);
+  expect(end, 'selectField после buildOptions').toBeGreaterThan(start);
+  return new Function('esc', `return (${build.slice(start, end)});`)((value) =>
+    String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;'),
+  );
+})();
+
 /** Разметка, которую возвращает educationCatalogMain() (один return-шаблон;
  *  рабочая копия Windows отдаёт CRLF — хвост без `\n`, см. link.test.js). */
 const catalogHtml =
@@ -140,17 +154,15 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
     );
   });
 
-  it('selected получает только плейсхолдер (первая строковая опция при пустом selected): раньше selected получала КАЖДАЯ строковая опция — нативный select брал последнюю, и триггер пилюли показывал не плейсхолдер оригинала («Все регионы»), а последний пункт («Свердловская область»)', () => {
+  it('selected получает только плейсхолдер (первая строковая опция при пустой selected): раньше selected получала КАЖДАЯ строковая опция — нативный select брал последнюю, и триггер пилюли показывал не плейсхолдер оригинала («Все регионы»), а последний пункт («Свердловская область»); логика вынесена в чистую buildOptions — исполняемый пин ниже, здесь source-пин вызова', () => {
     const selectFieldBody = build.slice(
       build.indexOf('function selectField'),
       build.indexOf('function radioGroup'),
     );
-    const optionsMap =
-      selectFieldBody.match(/const opts = options([\s\S]*?)\.join\(''\)/)?.[1] ?? '';
-    expect(optionsMap, 'map получает индекс опции').toContain('.map((option, index) =>');
-    expect(optionsMap, 'строковая опция: selected только у первой (index === 0)').toMatch(
-      /index === 0/,
-    );
+    expect(
+      selectFieldBody,
+      'selectField делегирует опции чистой buildOptions (исполняемый пин — describe buildOptions)',
+    ).toContain('buildOptions(options, selected)');
   });
 
   it('выдача: все предложения educat.json (6) тем же offerCard, что на education.html (оригинaл каталога — тот же offer_card целиком, build.py:794 vs :803); данные — из файла, не литералы. Тег заголовка карточки h2 (T15.9, axe heading-order: первый offer прямо за h1 страницы; на education.html карточки остались h3)', () => {
@@ -258,5 +270,44 @@ describe('compare.mjs — страница в PAGES (T15.3 Scope; AC: compare.js
       order.indexOf('education.html'),
     );
     expect(order.indexOf('education-catalog.html')).toBeLessThan(order.indexOf('events.html'));
+  });
+});
+
+describe('buildOptions — ровно одна selected на select (T15.3-бэклог: исполняемый пин)', () => {
+  /** Число selected-атрибутов в сгенерированных опциях. */
+  const selectedCount = (html) => (html.match(/ selected/g) ?? []).length;
+
+  it('смешанный список vacancy-apply ([{label,value}, строки], selected="") — ровно один selected (плейсхолдер)', () => {
+    const html = buildOptions(
+      [{ label: 'Выберите', value: '' }, 'Высшее', 'Среднее профессиональное'],
+      '',
+    );
+    expect(selectedCount(html), 'ровно одна selected').toBe(1);
+    expect(html).toContain('<option value="" selected>Выберите</option>');
+    expect(html).toContain('<option value="">Высшее</option>');
+  });
+
+  it('строковый список сайдбара (selected="") — ровно один selected, первая опция (плейсхолдер «Все регионы»)', () => {
+    const html = buildOptions(['Все регионы', 'Москва', 'Омская область'], '');
+    expect(selectedCount(html)).toBe(1);
+    expect(html).toContain('<option value="" selected>Все регионы</option>');
+  });
+
+  it('список объектов с selected="Высшее" — ровно один selected на совпавшем value', () => {
+    const html = buildOptions(
+      [
+        { label: 'Выберите', value: '' },
+        { label: 'Высшее', value: 'Высшее' },
+        { label: 'Среднее', value: 'Среднее' },
+      ],
+      'Высшее',
+    );
+    expect(selectedCount(html)).toBe(1);
+    expect(html).toContain('<option value="Высшее" selected>');
+  });
+
+  it('регрессия 0206496 не воспроизводится: строковые опции при пустом selected НЕ получают selected все', () => {
+    const html = buildOptions(['Все регионы', 'Москва', 'Санкт-Петербург'], '');
+    expect(selectedCount(html), 'одна, не три').toBe(1);
   });
 });

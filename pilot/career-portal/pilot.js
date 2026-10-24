@@ -141,40 +141,56 @@
      --error на корне поля + aria-invalid на контроле (текст ошибки, где он
      есть в разметке — ui-field__error event-apply — показывает CSS ДС);
      первое невалидное видимое поле получает фокус. Отправки нет (мок,
-     без бэкенда). Ввод снимает состояние ошибки. */
+     без бэкенда). Ввод снимает состояние ошибки; change (выбор в кастомном
+     listbox ui-select шлёт ТОЛЬКО change, T15.4-бэклог) — перевалидация
+     поля, как validateField в forms.js оригинала. */
   ARROW('[data-cp-form]').forEach(function (form) {
+    var checkField = function (field) {
+      var hidden = Boolean(field.closest('[hidden]'));
+      var ok = true;
+      if (!hidden) {
+        var value = field.value.trim();
+        // select: у опций selectField клана value="" (выбранное значение
+        // уходит текстом опции) — выбор проверяем индексом, плейсхолдер
+        // всегда первая опция (канон selectField, T7.3)
+        if (field.tagName === 'SELECT') {
+          ok = field.selectedIndex > 0;
+        } else {
+          ok = field.type === 'checkbox' ? field.checked : value !== '';
+          if (ok && field.type === 'email') {
+            ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+          }
+        }
+      }
+      var wrap = field.closest('.ui-field');
+      if (wrap) {
+        wrap.classList.toggle('ui-field--error', !ok);
+        if (ok) field.removeAttribute('aria-invalid');
+        else field.setAttribute('aria-invalid', 'true');
+      }
+      return { ok: ok, hidden: hidden };
+    };
+
     form.addEventListener('submit', function (event) {
       event.preventDefault();
       var firstError = null;
       var fields = form.querySelectorAll('[required]');
       for (var i = 0; i < fields.length; i += 1) {
-        var field = fields[i];
-        var hidden = field.closest('[hidden]');
-        var ok = true;
-        if (!hidden) {
-          var value = field.value.trim();
-          // select: у опций selectField клана value="" (выбранное значение
-          // уходит текстом опции) — выбор проверяем индексом, плейсхолдер
-          // всегда первая опция (канон selectField, T7.3)
-          if (field.tagName === 'SELECT') {
-            ok = field.selectedIndex > 0;
-          } else {
-            ok = field.type === 'checkbox' ? field.checked : value !== '';
-            if (ok && field.type === 'email') {
-              ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
-            }
-          }
-        }
-        var wrap = field.closest('.ui-field');
-        if (wrap) {
-          wrap.classList.toggle('ui-field--error', !ok);
-          if (ok) field.removeAttribute('aria-invalid');
-          else field.setAttribute('aria-invalid', 'true');
-        }
-        if (!ok && !firstError && !hidden) firstError = field;
+        var result = checkField(fields[i]);
+        if (!result.ok && !firstError && !result.hidden) firstError = fields[i];
       }
       if (firstError) {
-        firstError.focus();
+        // Фокус — на ВИДИМЫЙ контрол (WCAG 2.4.7, T15.4-бэклог): у select
+        // клана в wrap-режиме нативный select скрыт (ui-select__native,
+        // opacity 0 — ui-select.css:52); фокусить построенный триггер
+        // (прецедент btn.focus, ui-select.js:455). Без обёртки (без JS
+        // список не построен) видим сам нативный select.
+        var trigger =
+          firstError.tagName === 'SELECT'
+            ? firstError.closest('.ui-select') &&
+              firstError.closest('.ui-select').querySelector('.ui-select__trigger')
+            : null;
+        (trigger || firstError).focus();
         return;
       }
       var body = form.querySelector('[data-cp-form-body]');
@@ -186,11 +202,18 @@
         if (heading && typeof heading.focus === 'function') heading.focus();
       }
     });
-    form.addEventListener('input', function (event) {
+    var clearError = function (event) {
       var target = event.target;
       var wrap = target.closest && target.closest('.ui-field');
       if (wrap) wrap.classList.remove('ui-field--error');
       if (target.removeAttribute) target.removeAttribute('aria-invalid');
+    };
+    form.addEventListener('input', clearError);
+    form.addEventListener('change', function (event) {
+      // выбор курса в listbox: 'change' (ui-select.js:461) — снять ошибку и
+      // перевалидировать select (change от других контролов тоже валиден)
+      clearError(event);
+      if (event.target.tagName === 'SELECT') checkField(event.target);
     });
   });
 

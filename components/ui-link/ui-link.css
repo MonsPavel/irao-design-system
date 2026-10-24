@@ -160,6 +160,14 @@
   color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
 }
 
+/* Nav-active — primary, без затемнения (T16.3-бэклог: одобренный
+   .header__link career-portal своего :active не имеет, color-mix базы
+   темнил пункт при mousedown/тапе; тот же приём нейтрализации, что у
+   --button — цвет переобъявлен в ОБОИХ интерактивных состояниях). */
+.ui-link--nav:active {
+  color: var(--ui-color-primary);
+}
+
 .ui-link--on-dark:active {
   color: color-mix(in srgb, var(--ui-color-text-on-dark) 88%, black);
 }

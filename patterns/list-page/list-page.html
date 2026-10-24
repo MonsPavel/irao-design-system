@@ -552,14 +552,17 @@
 
   <!-- Строка вакансии: main-блок (заголовок-ссылка, место, описание, дата)
        + CTA-пилюля — сиблинги внутри article.ui-card--hover. Вид заголовка —
-       роль ui-h4 (20px, как .vac-row__title оригинала); уровень тега (h3)
-       задаёт семантика страницы. Место и дата — мета-строки с декоративными
-       иконками (aria-hidden). Демо-данные — правдоподобные вакансии по
-       мотивам моков пилота (data/vacancies.json), не дословно. -->
+       роль ui-h6 (канон «заголовок карточки списков» 20/500 color-text,
+       T16.12; ui-h4 давал 28px на lg — дифф из REPORT §8.2 №6; T16.5-бэклог:
+       демо не обновляли ни T16.12, ни T16.5 — копировавшие воспроизводили
+       fs 28); уровень тега (h3) задаёт семантика страницы. Место и дата —
+       мета-строки с декоративными иконками (aria-hidden). Демо-данные —
+       правдоподобные вакансии по мотивам моков пилота (data/vacancies.json),
+       не дословно. -->
   <div class="lpp-rows" id="lpp-rows-list">
     <article class="ui-card ui-card--hover lpp-row">
       <div class="lpp-row__main">
-        <h3 class="ui-h4 lpp-row__title">
+        <h3 class="ui-h6 lpp-row__title">
           <a href="vacancy.html">Ведущий инженер по эксплуатации энергоблоков</a>
         </h3>
         <span class="lpp-row__place ui-small ui-text--muted">
@@ -590,7 +593,7 @@
 
     <article class="ui-card ui-card--hover lpp-row">
       <div class="lpp-row__main">
-        <h3 class="ui-h4 lpp-row__title">
+        <h3 class="ui-h6 lpp-row__title">
           <a href="vacancy.html">Инженер-теплоэнергетик</a>
         </h3>
         <span class="lpp-row__place ui-small ui-text--muted">
@@ -621,7 +624,7 @@
 
     <article class="ui-card ui-card--hover lpp-row">
       <div class="lpp-row__main">
-        <h3 class="ui-h4 lpp-row__title">
+        <h3 class="ui-h6 lpp-row__title">
           <a href="vacancy.html">Специалист по цифровым продуктам</a>
         </h3>
         <span class="lpp-row__place ui-small ui-text--muted">
@@ -652,7 +655,7 @@
 
     <article class="ui-card ui-card--hover lpp-row">
       <div class="lpp-row__main">
-        <h3 class="ui-h4 lpp-row__title">
+        <h3 class="ui-h6 lpp-row__title">
           <a href="vacancy.html">Электромонтёр по обслуживанию подстанций</a>
         </h3>
         <span class="lpp-row__place ui-small ui-text--muted">
@@ -839,7 +842,7 @@
       <div class="lpp-rows" id="lpp-side-results-list">
         <article class="ui-card ui-card--hover lpp-row">
           <div class="lpp-row__main">
-            <h3 class="ui-h4 lpp-row__title">
+            <h3 class="ui-h6 lpp-row__title">
               <a href="vacancy.html">Менеджер по работе с клиентами</a>
             </h3>
             <span class="lpp-row__place ui-small ui-text--muted">
@@ -870,7 +873,7 @@
 
         <article class="ui-card ui-card--hover lpp-row">
           <div class="lpp-row__main">
-            <h3 class="ui-h4 lpp-row__title">
+            <h3 class="ui-h6 lpp-row__title">
               <a href="vacancy.html">Аналитик данных</a>
             </h3>
             <span class="lpp-row__place ui-small ui-text--muted">
@@ -900,7 +903,7 @@
 
         <article class="ui-card ui-card--hover lpp-row">
           <div class="lpp-row__main">
-            <h3 class="ui-h4 lpp-row__title">
+            <h3 class="ui-h6 lpp-row__title">
               <a href="vacancy.html">Оператор котельной</a>
             </h3>
             <span class="lpp-row__place ui-small ui-text--muted">

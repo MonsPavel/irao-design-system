@@ -22,7 +22,7 @@
  * (check-links.mjs, T15.9): есть DEAD — прогон падает до браузеров.
  * Отдельный запуск гейта: node pilot/career-portal/check-links.mjs
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
@@ -37,7 +37,16 @@ const VIEWPORT = { width: 1440, height: 900 };
 // Гейт мёртвых ссылок (T15.9) — в том же запуске, до браузеров: compare
 // строит пары страниц по PAGES, мёртвая внутренняя ссылка делает прогон
 // бессмысленным (уроки раунда 2 — REPORT §7). Падаем сразу, до траты ~5 мин.
-const linkGate = collectDeadLinks(join(PILOT_DIR, 'dist'));
+// existsSync-гард (T15.9-бэклог): при несобранном dist readdirSync даёт
+// сырой ENOENT-стектрейс — выводим сообщение CLI.
+const DIST = join(PILOT_DIR, 'dist');
+if (!existsSync(DIST)) {
+  console.error(
+    `dist не найден: ${DIST} — сначала соберите пилот: node pilot/career-portal/build.mjs`,
+  );
+  process.exit(1);
+}
+const linkGate = collectDeadLinks(DIST);
 if (linkGate.dead.length > 0) {
   console.error(
     `Гейт ссылок: ${linkGate.dead.length} DEAD — compare остановлен:\n` +

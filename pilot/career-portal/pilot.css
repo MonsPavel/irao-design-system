@@ -899,6 +899,18 @@
   white-space: nowrap;
 }
 
+/* T16.4-бэклог: nowrap колонки ссылок и копирайта на ≤767px снимается
+   (оригинал footer.css:150 возвращает перенос в этой же ступени) — иначе
+   min-content самого длинного пункта («Правила обработки персональных
+   данных») даёт горизонтальный скролл W400 (scrollWidth 579 > 400). */
+/* stylelint-disable-next-line media-feature-name-disallowed-list -- сайт-зона пилота: брейкпоинт оригинала (footer.css:121-151) */
+@media (max-width: 767px) {
+  .cp-footer__links .ui-link,
+  .cp-footer__right .ui-small {
+    white-space: normal;
+  }
+}
+
 .cp-footer__socials {
   display: flex;
   gap: var(--ui-space-2);
@@ -1037,8 +1049,13 @@
    правила ДС :where([aria-selected='true']) на токенах; :hover-вариант
    держит заливку при наведении (hover пилюли ДС специфичнее и гасит фон
    у невыбранных — его :not-исключение знает только aria-selected). */
-.cp-subnav .ui-tabs__tab[aria-current='page'],
-.cp-subnav .ui-tabs__tab[aria-current='page']:hover {
+/* Специфичность 0,4,0/0,5,0 — заведомо выше модификатора ДС
+   (.ui-tabs--pill .ui-tabs__tab:not([aria-selected='true']) — 0,3,0,
+   ui-tabs.css:161/172), порядок загрузки бандлов больше не влияет
+   (T16.16-бэклог: раньше пара держалась только тем, что pilot.css
+   грузится последним). */
+.ui-tabs--pill.cp-subnav .ui-tabs__tab[aria-current='page'],
+.ui-tabs--pill.cp-subnav .ui-tabs__tab[aria-current='page']:hover {
   background-color: var(--ui-color-primary);
   color: var(--ui-color-text-on-dark);
 }
@@ -1059,7 +1076,10 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: row;
-  gap: var(--ui-space-4);
+  /* 32px — .vac-row (pages.css:164; T16.5-бэклог: --ui-space-4 = 16px
+     расходились с оригиналом; на 1440 их поглощал space-between, на
+     сжатых ширинах строка сжималась сильнее оригинала) */
+  gap: var(--ui-space-6);
   align-items: center;
   justify-content: space-between;
   padding: var(--ui-space-5) 1.75rem;
@@ -1321,6 +1341,9 @@
   gap: 0.375rem;
   align-items: center;
   font-size: var(--ui-fs-small);
+  /* fw 500 — .media__tag оригинала несёт --fw-caption=500 (media.css:85;
+     T15.1-бэклог: наследуемые 400 расходились с оригиналом) */
+  font-weight: var(--ui-fw-small);
   letter-spacing: 0.02em;
   /* верхний регистр наследуется от .media__tag оригинала (media.css:85),
      pages.css:632 фон/паддинг снимает, трансформ не трогает */
@@ -1569,6 +1592,10 @@ a.cp-intern-card {
   display: block;
   padding: 0 var(--ui-space-3) var(--ui-space-3);
   color: var(--ui-color-text-muted);
+  /* fw 400 — .article-card__date оригинала (pages.css:610, маппинг
+     small-regular = small × fw 400, semantic.css:317; T15.1-бэклог:
+     роль ui-small тянет 500) */
+  font-weight: var(--ui-fw-body);
 }
 
 /* Карточка стажёра */
@@ -1871,6 +1898,13 @@ a.cp-intern-card {
   }
 
   .cp-company-hero__photo {
+    height: 16.25rem;
+  }
+
+  /* T15.1-бэклог: детальное фото event на ≤1023 — 260px оригинала
+     (.internship__photo, pages.css:933 внутри @media max-width:1023px);
+     фикс 26.25rem (420px) — только десктопная половина правила. */
+  .cp-detail-photo {
     height: 16.25rem;
   }
 

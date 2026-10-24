@@ -50,11 +50,13 @@ function htmlPages(distDir) {
 }
 
 /** Внутренняя *.html-ссылка? Внешние/якоря/почта/телефон и не-html href —
- *  нет (Implementation requirements T15.9 п.1). */
+ *  нет (Implementation requirements T15.9 п.1). Схемы — без регистра
+ *  (HTTP:// — внешний, T15.9-бэклог: без i-флага распознавался как
+ *  внутренний). */
 const isInternalHtmlHref = (href) =>
   !href.startsWith('#') &&
-  !/^(mailto|tel):/.test(href) &&
-  !/^(https?:)?\/\//.test(href) &&
+  !/^(mailto|tel):/i.test(href) &&
+  !/^(https?:)?\/\//i.test(href) &&
   /\.html(?:[?#]|$)/i.test(href);
 
 /**
@@ -76,7 +78,14 @@ export function collectDeadLinks(distDir) {
     for (const [, href] of readFileSync(page, 'utf8').matchAll(/href=["']([^"']+)["']/g)) {
       if (!isInternalHtmlHref(href)) continue;
       links += 1;
-      const targetAbs = resolve(dirname(page), href.split(/[?#]/)[0]);
+      // Абсолютный внутренний href («/vacancies.html») резолвится от КОРНЯ
+      // dist, а не от корня ФС (T15.9-бэклог: resolve(dirname(page), …) для
+      // ведущего «/» давал ложный DEAD — latent, таких href сейчас нет,
+      // grep 0; фикс снимает ловушку).
+      const clean = href.split(/[?#]/)[0];
+      const targetAbs = isAbsolute(clean)
+        ? resolve(distDir, `.${clean}`)
+        : resolve(dirname(page), clean);
       if (!existsSync(targetAbs)) {
         dead.push({
           page: relative(distDir, page).replaceAll('\\', '/'),
@@ -94,10 +103,23 @@ const invokedDirectly =
   process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
 
 if (invokedDirectly) {
-  const distIndex = process.argv.indexOf('--dist');
-  const distArg = distIndex !== -1 ? process.argv[distIndex + 1] : undefined;
+  const argv = process.argv.slice(2);
+  const distIndex = argv.indexOf('--dist');
+  const distEqual = argv.find((arg) => arg.startsWith('--dist='));
+  const distArg = distIndex !== -1 ? argv[distIndex + 1] : distEqual?.slice('--dist='.length);
   if (distIndex !== -1 && !distArg) {
-    console.error('аргумент --dist без пути (доступен: --dist <путь-к-dist>)');
+    console.error('аргумент --dist без пути (доступен: --dist <путь-к-dist> | --dist=<путь>)');
+    process.exit(1);
+  }
+  // Неизвестные позиционные аргументы — ошибка, не молчаливый игнор
+  // (T15.9-бэклог: «node check-links.mjs другой-dist» давал зелёный
+  // прогон не по тому каталогу).
+  const stray = argv.filter((arg) => arg !== '--dist' && !arg.startsWith('--dist='));
+  if (distIndex !== -1 && distArg) stray.splice(stray.indexOf(distArg), 1);
+  if (stray.length > 0) {
+    console.error(
+      `неизвестные аргументы: ${stray.join(' ')} — доступен --dist <путь-к-dist> | --dist=<путь>`,
+    );
     process.exit(1);
   }
   const dist = distArg

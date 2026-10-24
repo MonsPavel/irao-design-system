@@ -102,7 +102,9 @@ const CAL =
 const CHEVRON =
   '<svg class="ui-dropdown__icon" aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>';
 
-/** уникальные id в пределах страницы */
+/** уникальные id в пределах страницы; счётчик сбрасывается на каждой
+ *  странице в цикле сборки (T15.4-бэклог: сквозной счётчик сдвигал id
+ *  последующих страниц при вставке новых — побайтовые диффы сборок). */
 let uid = 0;
 const nextId = (prefix) => `cp-${prefix}-${(uid += 1)}`;
 
@@ -132,6 +134,28 @@ function field({
 </div>`;
 }
 
+/** Опции selectField — ЧИСТАЯ функция (T15.3-бэклог: поведенческий пин;
+ *  юнит-тест исполняет тело из исходника). selected получает РОВНО одна
+ *  опция: у объектов — совпадение value или пустой placeholder при пустом
+ *  selected; у строковых списков ([плейсхолдер, ...]) — только первая
+ *  (index === 0). Раньше selected получала каждая строковая опция:
+ *  нативный select брал последнюю, и триггер пилюли показывал не
+ *  плейсхолдер («Все регионы»), а последний пункт списка (баг видел и
+ *  сайдбар vacancies, и форму отклика «Образование» вместо «Выберите»). */
+function buildOptions(options, selected = '') {
+  return options
+    .map((option, index) => {
+      const isObject = typeof option === 'object';
+      const value = isObject ? option.value : '';
+      const text = isObject ? option.label : option;
+      const isSelected = isObject
+        ? value === selected || (!value && !selected)
+        : !selected && index === 0;
+      return `<option value="${esc(value)}"${isSelected ? ' selected' : ''}>${esc(text)}</option>`;
+    })
+    .join('');
+}
+
 /** ui-field + ui-select: нативный select с кастомным listbox (T7.3) */
 function selectField({
   label,
@@ -144,24 +168,7 @@ function selectField({
   compact = false,
 }) {
   const fieldId = nextId(name);
-  const opts = options
-    .map((option, index) => {
-      const isObject = typeof option === 'object';
-      const value = isObject ? option.value : '';
-      const text = isObject ? option.label : option;
-      // selected получает РОВНО одна опция: у объектов — совпадение value
-      // или пустой placeholder при пустом selected; у строковых списков
-      // ([плейсхолдер, ...]) — только первая (index === 0). Раньше selected
-      // получала каждая строковая опция: нативный select брал последнюю,
-      // и триггер пилюли показывал не плейсхолдер («Все регионы»), а
-      // последний пункт списка (баг видел и сайдбар vacancies, и форму
-      // отклика «Образование» вместо «Выберите»).
-      const isSelected = isObject
-        ? value === selected || (!value && !selected)
-        : !selected && index === 0;
-      return `<option value="${esc(value)}"${isSelected ? ' selected' : ''}>${esc(text)}</option>`;
-    })
-    .join('');
+  const opts = buildOptions(options, selected);
   const select = `<select class="ui-field__select" id="${fieldId}" name="${name}"${required ? ' required' : ''}${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}${pill ? ' data-ui-select="wrap"' : ' data-ui-select'}>${opts}</select>`;
   if (pill) {
     // пилюля фильтра: геометрию рисует сайт (cp-pill), триггер растягивается.
@@ -366,15 +373,17 @@ function eventCard(e, headingTag) {
 function articleCard(a) {
   // Тег на фото — тинт варианта + точка, как .media__tag оригинала
   // (media.css:72–87); ui-tag--on-photo — API ДС без пилотного применения
-  // (реклассификация REPORT §3.3, ревью T16.10).
-  const dot =
-    { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[a.type] ||
-    'ui-tag--blue';
+  // (реклассификация REPORT §3.3, ревью T16.10). Вариант рубрики —
+  // КОНСТАНТА blue (T15.1-бэклог): оригинал жёстко кодирует tag--blue
+  // для любого типа (src/pages/article.html:7); типовой маппинг кодировал
+  // поведение, которого у оригинала нет, и имя dot вводило в заблуждение
+  // (это класс чипа рубрики, не media__tag-dot).
+  const rubricVariant = 'ui-tag--blue';
   return `<article class="ui-card ui-card--hover ui-card--link cp-article-card">
   <a class="ui-card__link" href="article.html">
     <div class="cp-article-card__photo-wrap">
       <img class="cp-article-card__photo" src="${esc(a.image)}" alt="" loading="lazy">
-      <span class="ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
+      <span class="ui-tag ${rubricVariant}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
     </div>
     <h3 class="ui-small cp-article-card__title">${esc(a.title)}</h3>
   </a>
@@ -1347,9 +1356,11 @@ function vacanciesMain() {
           <span class="cp-vac-side__label">Сортировка</span>
           ${selectField({ name: 'sort', options: ['По дате добавления', 'По зарплате'], pill: true, ariaLabel: 'Сортировка' })}
         </div>
-        <!-- «Сбросить» — ui-button--text (T16.7; REPORT §8.2 №6/№8:
-             текстовая fs 14/400 underline muted — оригинал .vac-side__reset) -->
-        <button class="ui-button ui-button--text" type="button">Сбросить</button>
+        <!-- «Сбросить ×» — ui-button--text (T16.7; REPORT §8.2 №6/№8:
+             текстовая fs 14/400 underline muted — оригинал .vac-side__reset;
+             подпись с × — паритет оригинала, vacancies.html:123, проба
+             reset-control compare) -->
+        <button class="ui-button ui-button--text" type="button">Сбросить &times;</button>
         <div class="ui-card ui-card--filled cp-vac-side__promo">
           <p class="ui-small">Если ты студент или выпускник — свяжись с нами и получи практику или стажировку в компаниях Группы.</p>
           <a class="ui-button ui-button--primary" href="practices.html">узнать подробнее</a>
@@ -1583,6 +1594,12 @@ function internshipApplyMain(i = INT.internship.items[1]) {
                 <label class="ui-radio"><input class="ui-radio__input" type="radio" name="hasexp" value="no" checked>Нет</label>
               </div>
             </fieldset>
+            <!-- required у скрытых полей — осознанная интерпретация
+                 (T15.4-бэклог): в оригинале required-атрибута нет, только
+                 визуальный .req; блок всегда hidden — валидация их не
+                 касается, атрибут инертен; звёздочка = «обязательные по
+                 оригиналу». Снятие required убрало бы и звёздочку —
+                 визуальный паритет пострадал бы. -->
             ${field({ label: 'Последнее место работы', name: 'lastjob', required: true, placeholder: 'Название компании' })}
             ${field({ label: 'Должность', name: 'lastpos', required: true, placeholder: 'Должность' })}
             ${field({ label: 'Период работы', name: 'period', required: true, placeholder: '2023–2026' })}
@@ -2637,91 +2654,99 @@ const PAGES = [
   {
     file: 'index.html',
     title: 'Портал карьеры Интер РАО — клон на irao-ui',
-    main: indexMain(),
+    main: () => indexMain(),
     staticHeader: false,
   },
-  { file: 'vacancies.html', title: 'Вакансии — Портал карьеры Интер РАО', main: vacanciesMain() },
+  {
+    file: 'vacancies.html',
+    title: 'Вакансии — Портал карьеры Интер РАО',
+    main: () => vacanciesMain(),
+  },
   {
     file: 'vacancy.html',
     title: 'Ведущий инженер по эксплуатации энергоблоков — Портал карьеры Интер РАО',
-    main: vacancyMain(),
+    main: () => vacancyMain(),
   },
   {
     file: 'vacancy-apply.html',
     title: 'Отклик на вакансию — Портал карьеры Интер РАО',
-    main: vacancyApplyMain(),
+    main: () => vacancyApplyMain(),
   },
   {
     file: 'internships.html',
     title: 'Стажировки — Портал карьеры Интер РАО',
-    main: internshipsMain('internship'),
+    main: () => internshipsMain('internship'),
   },
   {
     file: 'practices.html',
     title: 'Практики — Портал карьеры Интер РАО',
-    main: internshipsMain('practice'),
+    main: () => internshipsMain('practice'),
   },
   {
     file: 'internship.html',
     title: 'Стажировка: разработчик — Портал карьеры Интер РАО',
-    main: internshipMain(),
+    main: () => internshipMain(),
   },
   {
     file: 'internship-apply.html',
     title: 'Заявка на стажировку — Портал карьеры Интер РАО',
-    main: internshipApplyMain(),
+    main: () => internshipApplyMain(),
   },
   {
     file: 'education.html',
     title: 'Целевое обучение — Портал карьеры Интер РАО',
-    main: educationMain(),
+    main: () => educationMain(),
   },
   {
     file: 'education-catalog.html',
     title: 'Каталог предложений целевого обучения — Портал карьеры Интер РАО',
-    main: educationCatalogMain(),
+    main: () => educationCatalogMain(),
   },
-  { file: 'events.html', title: 'Мероприятия — Портал карьеры Интер РАО', main: eventsMain() },
+  {
+    file: 'events.html',
+    title: 'Мероприятия — Портал карьеры Интер РАО',
+    main: () => eventsMain(),
+  },
   {
     file: 'events-search.html',
     title: 'Поиск мероприятий — Портал карьеры Интер РАО',
-    main: eventsSearchMain(),
+    main: () => eventsSearchMain(),
   },
   {
     file: 'event.html',
     title: 'День открытых дверей — Портал карьеры Интер РАО',
-    main: eventMain(),
+    main: () => eventMain(),
   },
   {
     file: 'event-apply.html',
     title: 'Заявка на мероприятие — Портал карьеры Интер РАО',
-    main: eventApplyMain(),
+    main: () => eventApplyMain(),
   },
-  { file: 'media.html', title: 'Медиа — Портал карьеры Интер РАО', main: mediaMain() },
+  { file: 'media.html', title: 'Медиа — Портал карьеры Интер РАО', main: () => mediaMain() },
   {
     file: 'article.html',
     title: 'Студенты приступили к практике — Портал карьеры Интер РАО',
-    main: articleMain(),
+    main: () => articleMain(),
   },
   {
     file: 'career-track.html',
     title: 'Карьерные треки — Портал карьеры Интер РАО',
-    main: careerTrackMain(),
+    main: () => careerTrackMain(),
   },
   {
     file: 'company.html',
     title: 'АО «Интер РАО – Электрогенерация» — Портал карьеры Интер РАО',
-    main: companyMain(),
+    main: () => companyMain(),
   },
   {
     file: 'companies.html',
     title: 'Компании группы — Портал карьеры Интер РАО',
-    main: companiesMain(),
+    main: () => companiesMain(),
   },
   {
     file: '404.html',
     title: 'Страница не найдена — Портал карьеры Интер РАО',
-    main: notFoundMain(),
+    main: () => notFoundMain(),
   },
 ];
 
@@ -2742,7 +2767,8 @@ cpSync(join(PILOT, 'pilot.css'), join(OUT, 'pilot.css'));
 cpSync(join(PILOT, 'pilot.js'), join(OUT, 'pilot.js'));
 
 for (const { file, title, main, staticHeader = true } of PAGES) {
-  writeFileSync(join(OUT, file), page({ title, main, staticHeader }));
+  uid = 0; // id детерминированы в пределах страницы (см. докстринг nextId)
+  writeFileSync(join(OUT, file), page({ title, main: main(), staticHeader }));
   console.log(`built ${file}`);
 }
 console.log(`\nПилот собран: ${OUT}`);

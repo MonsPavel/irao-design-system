@@ -642,7 +642,9 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
           await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
             animations: 'disabled',
             caret: 'hide',
-            // Допуск 32 px — точечный, для AA-шума скруглений карточек у края
+            // Допуск 32 px — точечный, ТОЛЬКО для ветки results (T14.2-бэклог:
+            // был на обе ветки цикла, а диагноз покрывает скругления карточек
+            // у края снимка результатов): AA-шум скруглений карточек у края
             // element-снимка (тот же класс явления, что глобальные 8 px в
             // playwright.config.mjs — «лотерея растеризации», диагноз
             // pattern-form-page--desktop 19.10). T14.2 (h1 стал шкалой h2)
@@ -655,7 +657,10 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
             // требует toMatchSnapshot-механики и локального дубля настроек).
             // 32 px: запас 1.6× к наблюдённому максимуму (20) и 2.4× ниже
             // минимальной реальной регрессии (78 px, search-overlay PR #5).
-            maxDiffPixels: 32,
+            // У empty-ветки скруглённых карточек у правого среза нет
+            // (ui-empty без border-radius, пилюля прижата влево) — строгие
+            // глобальные 8 px.
+            maxDiffPixels: name === 'lpp-branch-results' ? 32 : 8,
           });
         }
       }
