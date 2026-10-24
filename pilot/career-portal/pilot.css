@@ -1011,9 +1011,35 @@
   margin-top: var(--ui-space-7);
 }
 
-/* Лента разделов сразу после page-head: сверху ритм ведёт сам page-head */
-.cp-page-head + .ui-chip {
-  margin-bottom: var(--ui-space-4);
+/* Поднавигация разделов (T16.16): вид трека и пилюль несёт модификатор
+   ui-tabs--pill (T14.9); сайт-зоне остаётся раскладка страницы — сетка
+   repeat(5, 1fr) трека (pages.css:975, «сетка 264»; README ui-tabs
+   «Модификатор --pill»: раскладка конкретной страницы, не вида) и
+   вертикальные отступы nav.tabs-pill (pages.css:969: 24/48 =
+   --ui-space-5/--ui-space-7). DS-маргин __list (32px под панелями)
+   сбрасывается: под лентой панелей нет — ритм блока ведёт nav. */
+.cp-subnav {
+  box-sizing: border-box;
+  margin: var(--ui-space-5) 0 var(--ui-space-7);
+}
+
+.cp-subnav .ui-tabs__list {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  margin: 0;
+}
+
+/* Активный раздел — aria-current="page" (семантика «текущая страница»,
+   прецедент ui-chip T14.8): CSS ДС активную пилюлю рисует только по
+   aria-selected — его ставит модуль ui-tabs.js, а межстраничные ссылки
+   без панелей он не инициализирует (контракт T13.6). Пара — реплика
+   правила ДС :where([aria-selected='true']) на токенах; :hover-вариант
+   держит заливку при наведении (hover пилюли ДС специфичнее и гасит фон
+   у невыбранных — его :not-исключение знает только aria-selected). */
+.cp-subnav .ui-tabs__tab[aria-current='page'],
+.cp-subnav .ui-tabs__tab[aria-current='page']:hover {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
 }
 
 /* Строка вакансии (T16.5): паддинг 24/28 — .vac-row (pages.css:163);
@@ -1626,10 +1652,15 @@ a.cp-intern-card {
   gap: var(--ui-space-1);
 }
 
-/* Простая карточка компании (companies) */
+/* Простая карточка компании (companies): паддинг 20/24 — inline-стиль
+   карточек companies.html:153+ («как есть»: вертикаль 20px вне шкалы
+   отступов §3.2 — прецедент cp-breadcrumbs 1.25rem; горизонталь 24px —
+   --ui-space-5). Имя — роль ui-small на внутреннем span (T16.16: канон
+   мини-карточки 14/500 = --fs-small-regular × --fw-small оригинала; цвет
+   наследует; отдельной типографской строки нет). */
 .cp-company-card {
   display: block;
-  padding: var(--ui-space-4);
+  padding: 1.25rem var(--ui-space-5);
   color: var(--ui-color-text);
   text-decoration: none;
 }

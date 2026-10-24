@@ -328,6 +328,53 @@ const SHELL_PROBES = [
     },
     rect: true,
   },
+  // Карточка компании (T16.16, REPORT §9.1 №7): канон мини-карточки — 14/500
+  // color-text (inline-стиль companies.html:153+: --fs-small-regular ×
+  // --fw-small = тройка small ДС, роль ui-small на ссылке), паддинг 20×24,
+  // высота строки в grid-3. Первое вхождение — companies.html.
+  {
+    name: 'company-card',
+    original: '.card--hover',
+    pilot: '.cp-company-card',
+    fields: {
+      fs: 'font-size',
+      fw: 'font-weight',
+      lh: 'line-height',
+      color: 'color',
+      padding: 'padding',
+    },
+    rect: true,
+  },
+  // Трек поднавигации разделов (T16.16, REPORT §9.1 №8): blue-50, pad 4,
+  // radius pill — модификатор ui-tabs--pill (T14.9-adoption); ширина трека
+  // следует контейнеру (shell 1345↔1361 — «принято»), высота 56↔60 —
+  // порог ≤4px (52 против 48 — решение T14.9).
+  {
+    name: 'subnav-track',
+    original: '.tabs-pill',
+    pilot: '.cp-subnav .ui-tabs__list',
+    fields: { bg: 'background-color', padding: 'padding', radius: 'border-radius' },
+    rect: true,
+  },
+  // Таб поднавигации: прозрачная пилюля, подпись text; fs/fw 20/400↔14/500 —
+  // «принято ДС» (решение спеки T14.9). Первое вхождение на страницах с
+  // поднавигацией — неактивная пилюля «Практики» на обеих сторонах.
+  {
+    name: 'subnav-tab',
+    original: '.tabs-pill__tab',
+    pilot: '.cp-subnav .ui-tabs__tab',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color', bg: 'background-color' },
+    rect: true,
+  },
+  // Активный таб поднавигации: заливка primary + text-on-dark (ARIA
+  // aria-current="page" вместо класса is-active — прецедент ui-chip T14.8).
+  {
+    name: 'subnav-tab-active',
+    original: '.tabs-pill__tab.is-active',
+    pilot: ".cp-subnav .ui-tabs__tab[aria-current='page']",
+    fields: { bg: 'background-color', color: 'color' },
+    rect: true,
+  },
 ];
 
 /** Пары блоков главной (высота секций). */

@@ -100,7 +100,7 @@
 | T16.5 | done | смержена |
 | T16.14 | done | смержена |
 | T16.15 | done | смержена |
-| T16.16 | todo | EPIC-16 (раунд 4): пилот — карточки компаний 14/500 + поднавигация career-track/education как ui-tabs--pill (завершение T14.9-adoption); section-title 42 fw — «принято ДС» в mapping |
+| T16.16 | done | смержена |
 | T16.8 | done | смержена |
 | T15.6 | done | смержена |
 | T15.1 | done | смержена |
