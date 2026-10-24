@@ -160,16 +160,16 @@
  * Каскад: правила hover/active/combined см. в своих секциях ниже.
  */
 .ui-button--pill {
-  min-height: var(--ui-button-height-pill);
   gap: var(--ui-space-3);
-  padding-block: 0;
-  padding-inline: var(--ui-button-pill-pad-inline);
+  min-height: var(--ui-button-height-pill);
   border: var(--ui-border-width) solid var(--ui-color-primary);
   background-color: var(--ui-color-surface);
   color: var(--ui-color-primary);
   font-size: var(--ui-button-pill-label-fs);
   letter-spacing: var(--ui-button-pill-letter-spacing);
   text-transform: uppercase;
+  padding-block: 0;
+  padding-inline: var(--ui-button-pill-pad-inline);
 }
 
 .ui-button--pill .ui-button__icon {
@@ -191,8 +191,8 @@
    30 ≤ 32 − 2×1 — в высоту sm помещается, min-height активен). Стрелка 16px
    сохраняется той же формулой (30 − 2×7). */
 .ui-button--pill.ui-button--sm {
-  min-height: var(--ui-button-height-sm);
   gap: var(--ui-space-2);
+  min-height: var(--ui-button-height-sm);
   padding-block: 0;
   padding-inline: var(--ui-button-pill-pad-inline-sm);
 }

@@ -441,9 +441,7 @@ describe('components/ui-button/ui-button.css — модификатор pill (T1
     expect(block, 'правило .ui-button--pill .ui-button__icon найдено').toBeTruthy();
     expect(block).toContain('width: var(--ui-button-pill-icon-size);');
     expect(block).toContain('height: var(--ui-button-pill-icon-size);');
-    expect(block).toContain(
-      'padding: calc((var(--ui-button-pill-icon-size) - 1rem) / 2);',
-    );
+    expect(block).toContain('padding: calc((var(--ui-button-pill-icon-size) - 1rem) / 2);');
     expect(block).toContain('border-radius: var(--ui-radius-pill);');
     expect(block).toContain('background-color: var(--ui-color-primary);');
     expect(block).toContain('color: var(--ui-color-text-on-dark);');
@@ -485,14 +483,12 @@ describe('components/ui-button/ui-button.css — модификатор pill (T1
     expect(icon, 'правило кружка sm найдено').toBeTruthy();
     expect(icon).toContain('width: var(--ui-button-pill-icon-size-sm);');
     expect(icon).toContain('height: var(--ui-button-pill-icon-size-sm);');
-    expect(icon).toContain(
-      'padding: calc((var(--ui-button-pill-icon-size-sm) - 1rem) / 2);',
-    );
+    expect(icon).toContain('padding: calc((var(--ui-button-pill-icon-size-sm) - 1rem) / 2);');
   });
 
-  it('контраст-гейт: обе роли кружка в покрытии — white/primary (on-dark-on-primary) и white/accent hover (алиас-пара T16.11, графика ≥3:1)', () => {
+  it('контраст-гейт: обе роли кружка в покрытии — white/primary (chip-active, 12.58:1 — text-порог) и white/accent hover (алиас-пара on-dark-on-accent T16.11, 3.12:1 ≥ 3:1 графика)', () => {
     const pairs = readFileSync(join(root, 'tests', 'contrast', 'pairs.config.mjs'), 'utf8');
-    expect(pairs).toMatch(/id:\s*'on-dark-on-primary'/);
+    expect(pairs).toMatch(/id:\s*'chip-active'/);
     expect(pairs).toMatch(/id:\s*'on-dark-on-accent'/);
   });
 
