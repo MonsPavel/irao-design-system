@@ -177,3 +177,25 @@ describe('compare.mjs — пробы строк/сайдбара (T16.5; Testing
     expect(compare).toContain("pilot: '.cp-vac-side__promo .ui-button--primary'");
   });
 });
+
+describe('probe-vac-rows.mjs — закрывающая проба data-*/строк (ревью T16.5)', () => {
+  /** JS без блочных комментариев: пины смотрят на исполняемый код. */
+  const probe = readFileSync(join(pilotDir, 'probe-vac-rows.mjs'), 'utf8')
+    .replace(/\r\n/g, '\n')
+    .replace(/\/\*[\s\S]*?\*\//g, '');
+
+  it('скрипт пробы закоммичен в инструментарий пилота (REPORT §8.2 №6 ссылается на него как на закрывающее доказательство)', () => {
+    expect(probe.length).toBeGreaterThan(500);
+  });
+
+  it('data-* читаются с САМОЙ строки — те же пер-сторонние селекторы, что у пары row-item (.vac-row / .cp-vac-row); подстрочный [class*="vac-row"] матчит контейнер vac-rows и даёт 10×null — холостая сверка (замечание ревью)', () => {
+    expect(probe).toContain("const ROW_SELECTOR = { original: '.vac-row', pilot: '.cp-vac-row' };");
+    expect(probe, 'подстрочный селектор контейнера снят (в коде)').not.toContain(
+      '[class*="vac-row"]',
+    );
+  });
+
+  it('нулевые значения не проходят за MATCH: отсутствующая строка — ошибка пробы, а не null-список', () => {
+    expect(probe).toMatch(/row is missing/i);
+  });
+});
