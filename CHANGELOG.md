@@ -183,8 +183,8 @@
   touch-минимум не нарушен;
 - Модификатор кнопки «пилюля со стрелкой» `.ui-button--pill` (T14.4): самый
   частый CTA оригинала (`.pill-btn` career-portal — «откликнуться →»):
-  h44 (`--ui-button-height-pill`), фон surface, рамка 1px, круглая иконка-
-  стрелка в кружке accent (`--ui-button-pill-icon-size`) на обычном
+  h44 (`--ui-button-height-pill`), фон surface, рамка 1px, круглая
+  иконка-стрелка в кружке accent (`--ui-button-pill-icon-size`) на обычном
   `__icon`; hover — `surface-hover`; совместим с `ui-button--sm`
   (кружок `--ui-button-pill-icon-size-sm`). Расширение API кнопки;
   потребитель — ветка «строки» паттерна списка (T14.10) и карточки-ссылки;

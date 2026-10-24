@@ -2,7 +2,7 @@
  * e2e ui-tabs (T6.2; Testing requirements + AC) — клавиатурный цикл APG tabs,
  * roving tabindex, деградация без JS, JSON-кейс (Bitrix), axe, эталоны.
  *
- * Поверхность — стенд ui-tabs (showcase/pages/ui-tabs) с двумя секциями:
+ * Поверхность — стенд ui-tabs (showcase/pages/ui-tabs) с тремя секциями:
  * #uitab-static — статические табы (канонический паттерн: табы-ссылки на
  * панели, контент карьерных треков career-portal) и #uitab-json — табы,
  * отрендеренные стендовым скриптом из `<script type="application/json"

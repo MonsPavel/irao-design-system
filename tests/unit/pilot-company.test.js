@@ -235,7 +235,7 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     expect(companyCss).not.toContain('!important');
   });
 
-  it('адаптив сайт-зоны: 1023 — hero в колонку, преимущества 2×2, где-мы-работаем в колонку (pages.css:902–913); 767 — статы и преимущества в колонку (pages.css:929)', () => {
+  it('адаптив сайт-зоны: 1023 — hero в колонку, преимущества 2×2, где-мы-работаем в колонку (у оригинала hero/adv сворачиваются на 1279 — pages.css:896–906; конвенция пилота — две ступени, 1279 поглощена в 1023: полоса 1024–1279 просторнее оригинала); 767 — статы и преимущества в колонку (pages.css:929)', () => {
     const m1023 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 1023px)'));
     const m767 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 767px)'));
     for (const selector of ['.cp-company-hero', '.cp-company-adv', '.cp-company-where']) {

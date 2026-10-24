@@ -968,7 +968,8 @@
 }
 
 /* Ширину пилюли задаёт сайт (канон list-page): flex-basis 260px оригинала
-   (vacancy-search.css:41, «как есть») — без неё бокс нативного select
+   (pages.css:467, «как есть»; vacancy-search.css:41 из прежней цитаты
+   не существует ни в одном зеркале) — без неё бокс нативного select
    сжимается до самой длинной опции и подпись триггера подрезается.
    6 фильтров переносятся лентой (Technical considerations T15.3:
    прецедент вакансий был 3–4). */
@@ -1042,7 +1043,7 @@
   color: var(--ui-color-text-on-dark);
 }
 
-/* Строка вакансии (T16.5): паддинг 24/28 — .vac-row (pages.css:163);
+/* Строка вакансии (T16.5): паддинг 24/28 — .vac-row (pages.css:165);
    горизонталь 28px вне шкалы отступов §3.2 — перенос «как есть» (прецедент
    --ui-button-pad-inline), вертикаль — --ui-space-5. flex-direction: row —
    сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть
@@ -1077,14 +1078,16 @@
 
 /* Заголовок строки — роль ui-h6 (T16.12: канон «заголовок карточки
    списков» 20/500; ui-h4 давал 28px на lg — REPORT §8.2 №6). Цвет роль не
-   задаёт — наследует body (--ui-color-text #1F1F1F, pages.css:167), НЕ
-   heading-navy заголовочных ролей. */
+   задаёт — наследует body (--ui-color-text #1F1F1F — variables.css:9
+   оригинала, не pages.css), НЕ heading-navy заголовочных ролей. */
 
 /* Ссылка заголовка — plain <a> (ui-link снят): цвет наследует заголовку,
-   подчёркивания нет — .vac-row__title a (pages.css:169), канон
-   .lpp-row__title a (list-page.html:140–143). Overlay не растягивается:
-   кликабельная зона — поле заголовка (Implementation requirements T16.5
-   п.1), пилюля остаётся независимой целью. */
+   подчёркивания нет — .vac-row__title a (pages.css:172), канон
+   .lpp-row__title a (list-page.html:140–143). Overlay оригинала (a::after
+   inset:0 — pages.css:174 + position:relative строки :160) не
+   воспроизводится по решению спеки T16.5 п.1: кликабельная зона — поле
+   заголовка, пилюля остаётся независимой целью — зона клика уже, чем в
+   оригинале (осознанное отклонение, REPORT §8.2 №8). */
 .cp-vac-row__title a {
   color: inherit;
   text-decoration: none;
@@ -1165,8 +1168,12 @@
 /* Строка «найти по списку» (бывшая cp-vac-find; T15.5 — общий класс панели
    vacancies и events-search, разметка из helper findBar build.mjs):
    flex-строка поле+кнопка (оригинал .vac-find pages.css:120 и
-   .events-search-bar pages.css:585; метрики оригинала расходятся с
-   токенами — REPORT). */
+   .events-search-bar pages.css:585). Метрики events-search оригинала
+   расходятся с принятыми (материал для REPORT T15.9): поле — пилюля
+   border-radius: var(--radius-pill) против --ui-radius-sm 0.5rem и высота
+   56 против 52 (events-search.html:154); общий findBar наследует метрики
+   vacancies — gap 8px и margin-bottom 8px против .events-search-bar
+   gap 16px / margin-bottom 40px (pages.css:586–589). */
 .cp-find-bar {
   box-sizing: border-box;
   display: flex;
@@ -1583,7 +1590,7 @@ a.cp-intern-card {
 }
 
 /* Тулбар медиа-каталога (T16.14: зазоры по канону .media-toolbar
-   pages.css:608 — gap 12px, подписи группы в центре ленты). Фильтры —
+   pages.css:594 — gap 12px, подписи группы в центре ленты). Фильтры —
    ui-tag--blue × ui-tag--filter (ДС, T16.14), подписи — ui-tag--gray. */
 .cp-media-toolbar {
   box-sizing: border-box;
@@ -1601,7 +1608,7 @@ a.cp-intern-card {
   display: contents;
 }
 
-/* «Рубрики:» — отступ группы 24px (оригинал media.html:165, inline
+/* «Рубрики:» — отступ группы 24px (оригинал media.html:160, inline
    margin-left: 24px поверх gap 12px ленты; inline-стили запрещены —
    VI-инвариант §5). */
 .cp-media-toolbar__rubrics-label {

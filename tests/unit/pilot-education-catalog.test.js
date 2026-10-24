@@ -219,7 +219,7 @@ describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 S
     expect(filters).toContain('margin-bottom: 2.5rem;');
   });
 
-  it('ширину пилюли задаёт сайт: flex 0 0 260px оригинала (vacancy-search.css:41 «как есть»; канон list-page — без basis бокс select сжимается)', () => {
+  it('ширину пилюли задаёт сайт: flex 0 0 260px оригинала (pages.css:467 «как есть»; канон list-page — без basis бокс select сжимается)', () => {
     expect(blockOf(pilotCss, '.cp-catalog-filters .cp-pill')).toContain('flex: 0 0 260px;');
   });
 

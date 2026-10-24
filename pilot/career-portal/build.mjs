@@ -165,6 +165,8 @@ function selectField({
   const select = `<select class="ui-field__select" id="${fieldId}" name="${name}"${required ? ' required' : ''}${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}${pill ? ' data-ui-select="wrap"' : ' data-ui-select'}>${opts}</select>`;
   if (pill) {
     // пилюля фильтра: геометрию рисует сайт (cp-pill), триггер растягивается.
+    // compact здесь игнорируется осознанно: пилюля — сайт-зона (cp-pill),
+    // компактность — режим ui-field; pill-вызовы compact не передают.
     // Подпись поля — label[for] РЯДОМ с обёрткой (канон ui-select после
     // ревью T7.3: имя получают и нативный select, и построенный триггер —
     // пара APG listbox-button); в оригинале видимых подписей нет —
@@ -284,16 +286,18 @@ function findBar({ action, placeholder, label, text, variant = 'accent' }) {
 </form>`;
 }
 
-/** строка вакансии (оригинал .vac-row, build.py:69–86): ui-card + связка
+/** строка вакансии (оригинал .vac-row, build.py:68–86): ui-card + связка
  *  сайт-зоны lpp-row (канон ветки «строки» list-page, T14.10; приёмка T16.5).
  *  Заголовок — роль ui-h6 (T16.12: канон «заголовок карточки списков» —
  *  20/500 и цвет текста, роль цвет не задаёт; ui-h4 давал 28px на lg —
  *  REPORT §8.2 №6, замер fs 20 vs 28) с ОБЫЧНОЙ ссылкой внутри: класс
- *  ui-link снят (fs 28/underline/primary — отклонение), кликабельная зона —
- *  поле заголовка, как в оригинале (.vac-row__title a); overlay
- *  ui-card--link не включается — пилюля остаётся независимой целью.
+ *  ui-link снят (fs 28/underline/primary — отклонение); overlay оригинала
+ *  (a::after inset:0 — pages.css:174) не воспроизводится по решению спеки
+ *  T16.5 п.1 — кликабельная зона: поле заголовка (.vac-row__title a),
+ *  пилюля остаётся независимой целью — зона клика уже, чем в оригинале;
+ *  overlay ui-card--link не включается.
  *  data-* — паритет оригинала для мок-фильтрации js/filters.js
- *  (build.py:72–79): region/city/spec/segment/company/exp/position (первое
+ *  (build.py:74–79): region/city/spec/segment/company/exp/position (первое
  *  слово титула — split по пробелу: в JS split() без аргумента отдаёт
  *  строку целиком, канон — .trim().split(/\s+/)[0], как Python str.split()), accessible «1»/«0», salary — только цифры, date yyyymmdd. */
 function vacancyRow(v) {

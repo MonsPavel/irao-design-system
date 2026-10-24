@@ -21,7 +21,7 @@ career-portal (карьерные треки: таб-кнопки с `is-active`
 | Начальный выбор | при инициализации выбирается таб с `aria-current="page"` в разметке; без него — первый таб (см. [Начальный выбор из разметки](#начальный-выбор-из-разметки-aria-currentpage)) |
 | JS | `IraoUI.tabs`: `init()`, `selector`; хук разметки — `data-ui-tabs`; повторный `init()` инициализирует инстансы, отрендеренные после загрузки |
 | Событие | `irao-ui:tabs-select` на корне (`bubbles: true`) — на смене выбора после инициализации (стартовый выбор события не диспатчит) |
-| Токены | `--ui-button-height`, `--ui-button-border-width`, `--ui-radius-pill`, `--ui-color-{primary, primary-hover, text-on-dark}`, `--ui-fs-small`/`--ui-fw-small`/`--ui-lh-small`, `--ui-space-3/4/5/6`, `--ui-transition`; focus-тройка ADR-0001 |
+| Токены | `--ui-button-height`, `--ui-button-border-width`, `--ui-radius-pill`, `--ui-color-{primary, primary-hover, text-on-dark, surface-muted, text}`, `--ui-fs-small`/`--ui-fw-small`/`--ui-lh-small`, `--ui-space-1/3/4/5/6`, `--ui-transition`; focus-тройка ADR-0001 (surface-muted/text/space-1 — модификатор `--pill`, раздел ниже) |
 
 ```html
 <div class="ui-tabs" data-ui-tabs>

@@ -5,7 +5,7 @@
  *
  * Канон — ветка «строки» паттерна list-page (T14.10, lpp-row): заголовок-
  * ссылка 20/500 без подчёркивания цветом ТЕКСТА (не heading-navy), паддинг
- * строки 24/28 (pages.css:163), CTA-пилюля — калибровка T16.11 (без
+ * строки 24/28 (pages.css:165), CTA-пилюля — калибровка T16.11 (без
  * site-zone override), «Сбросить» — ui-button--text (T16.7), промо —
  * ui-card--filled. Причина заголовка: ui-h4 даёт 28px на lg (REPORT
  * §8.2 №6, замер fs 20 vs 28) — роль ui-h6 (T16.12, канон «заголовок
@@ -58,7 +58,7 @@ describe('build.mjs — строка вакансии cp-vac-row по связк
     expect(vacancyRowBody).toContain('<article class="ui-card ui-card--hover cp-vac-row"');
   });
 
-  it('data-атрибуты фильтра строки сохранены в разметке — паритет оригинала (build.py:72–79, мок-фильтрация js/filters.js; Implementation requirements п.2)', () => {
+  it('data-атрибуты фильтра строки сохранены в разметке — паритет оригинала (build.py:74–79, мок-фильтрация js/filters.js; Implementation requirements п.2)', () => {
     for (const attr of [
       'data-region="${esc(v.region)}"',
       'data-city="${esc(v.city)}"',
@@ -102,7 +102,7 @@ describe('build.mjs — сайдбар фильтров (T16.5 Scope)', () => {
 });
 
 describe('pilot.css — сайт-зона строки cp-vac-row (T16.5 Scope; токены, ADR-0002)', () => {
-  it('строка: box-sizing на корне (ADR-0002), паддинг 24/28 — var(--ui-space-5) 1.75rem (оригинал .vac-row pages.css:163; канон .lpp-row list-page.html:118) и flex-direction: row — сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть ряд: list-page.html:105–106,113)', () => {
+  it('строка: box-sizing на корне (ADR-0002), паддинг 24/28 — var(--ui-space-5) 1.75rem (оригинал .vac-row pages.css:165; канон .lpp-row list-page.html:118) и flex-direction: row — сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть ряд: list-page.html:105–106,113)', () => {
     const row = blockOf(pilotCss, '.cp-vac-row');
     expect(row, '.cp-vac-row найдено').toBeTruthy();
     expect(row).toContain('box-sizing: border-box;');
@@ -124,7 +124,7 @@ describe('pilot.css — сайт-зона строки cp-vac-row (T16.5 Scope; 
     expect(blockOf(pilotCss, '.cp-vac-rows')).toContain('gap: var(--ui-space-4);');
   });
 
-  it('ссылка заголовка — цвет наследует заголовку (текст страницы, НЕ heading-navy), подчёркивания нет (оригинал .vac-row__title a pages.css:169; канон .lpp-row__title a list-page.html:140–143)', () => {
+  it('ссылка заголовка — цвет наследует заголовку (текст страницы, НЕ heading-navy), подчёркивания нет (оригинал .vac-row__title a pages.css:172; канон .lpp-row__title a list-page.html:140–143)', () => {
     const anchor = blockOf(pilotCss, '.cp-vac-row__title a');
     expect(anchor, 'сайт-зона для plain <a> (UA-дефолт синий с линией)').toBeTruthy();
     expect(anchor).toContain('color: inherit;');

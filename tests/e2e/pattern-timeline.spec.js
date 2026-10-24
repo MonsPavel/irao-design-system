@@ -206,7 +206,7 @@ standTest.describe('patterns/timeline: адаптив — ряд и мобиль
         return result;
       });
       expect(pairs.bg, 'фон точки — --ui-color-surface-hover (= blue-100 оригинала)').toBe(true);
-      expect(pairs.fg, 'номер точки — --ui-color-primary (контраст 12.9:1)').toBe(true);
+      expect(pairs.fg, 'номер точки — --ui-color-primary (контраст ≈12.6:1)').toBe(true);
     },
   );
 });

@@ -75,7 +75,7 @@ describe('build.mjs — фильтры обеих групп как ui-tag--blue
 });
 
 describe('pilot.css — тулбар cp-media-toolbar по канону (T16.14 Scope: минимальный align, зазоры по замеру)', () => {
-  it('зазор ленты 12px (--ui-space-3 — .media-toolbar pages.css:608: flex/wrap/gap 12px); выравнивание подписей — центр (оригинал align-self: center на span)', () => {
+  it('зазор ленты 12px (--ui-space-3 — .media-toolbar pages.css:594: flex/wrap/gap 12px); выравнивание подписей — центр (оригинал align-self: center на span)', () => {
     const toolbar = blockOf(pilotCss, '.cp-media-toolbar');
     expect(toolbar, '.cp-media-toolbar найдено').toBeTruthy();
     expect(toolbar).toContain('box-sizing: border-box;');
@@ -92,7 +92,7 @@ describe('pilot.css — тулбар cp-media-toolbar по канону (T16.14 
     expect(group).toContain('display: contents;');
   });
 
-  it('«Рубрики:» — отступ группы 24px (--ui-space-5; оригинал media.html:165 inline margin-left: 24px — без inline-стилей)', () => {
+  it('«Рубрики:» — отступ группы 24px (--ui-space-5; оригинал media.html:160 inline margin-left: 24px — без inline-стилей)', () => {
     const label = blockOf(pilotCss, '.cp-media-toolbar__rubrics-label');
     expect(label, 'крючок подписи рубрик найден').toBeTruthy();
     expect(label).toContain('margin-left: var(--ui-space-5);');

@@ -249,7 +249,9 @@
 
   <!-- Крошки (T4.7 + ритм T14.5): nav[aria-label] > ol[role="list"],
        микроразметка BreadcrumbList; текущая страница («Вакансии») — span +
-       aria-current="page" (не ссылка), как в оригинале vacancies.html:146.
+       aria-current="page" (не ссылка), как в оригинале — композицию крошек
+       списка задаёт build.py:687 (crumbs [('Главная', link), ('Вакансии',
+       None)]), вставляет layout_body (build.py:228–233).
        Обвязка lpp-breadcrumbs несёт вертикальный ритм страницы (полоса 62px):
        компонент отступов не получает (инвариант T4.7). Крошки в DOM раньше
        page-head (конвенция паттернов T8.2). -->
@@ -542,8 +544,10 @@
   </p>
 
   <!-- Заголовок выдачи — h2 (иерархия h1 → h2 → h3 без пропусков: строки —
-       h3; гейт irao/heading-order). tabindex="-1" — цель фокуса гварда
-       стенда после применения фильтра ветки (сниппет внизу). -->
+       h3; гейт irao/heading-order). tabindex="-1" — цель фокуса серверного
+       сниппета в бою (применение фильтра — перезагрузка с якорем); на
+       стенде ветка «строки» фокус-гвардом не различается: гвард фокусит
+       только #lpp-side-results и #lpp-title. -->
   <h2 class="ui-h3" id="lpp-rows-title" tabindex="-1">Открытые вакансии</h2>
 
   <!-- Строка вакансии: main-блок (заголовок-ссылка, место, описание, дата)
@@ -717,7 +721,11 @@
   <div class="lpp-layout">
     <!-- Сайдбар: лендмарка aside с именем из видимого заголовка
          (aria-labelledby). Sticky/scrollable — связка lpp-side от md;
-         tabindex="0" — keyboard access прокручиваемого региона. -->
+         tabindex="0" — keyboard access прокручиваемого региона.
+         Трейд-офф осознанный: прокрутка существует только от md — на мобиле
+         aside в потоке и фокусируем без прокручиваемого содержимого (axe
+         scrollable-region-focusable чист; прецедента tabindex="0" в других
+         паттернах нет). -->
     <aside class="lpp-side" id="lpp-side-panel" tabindex="0" aria-labelledby="lpp-side-title">
       <h2 class="ui-h4" id="lpp-side-title">Фильтры вакансий</h2>
 

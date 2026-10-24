@@ -116,7 +116,7 @@ describe('patterns/timeline/timeline.html — mini-эталон (Scope T14.11)',
     expect(style[1], 'фон точки — --ui-color-surface-hover (blue-100 оригинала)').toMatch(
       /background-color:\s*var\(--ui-color-surface-hover\)/,
     );
-    expect(style[1], 'номер точки — --ui-color-primary (пара оригинала, контраст 12.9:1)').toMatch(
+    expect(style[1], 'номер точки — --ui-color-primary (пара оригинала, контраст ≈12.6:1)').toMatch(
       /color:\s*var\(--ui-color-primary\)/,
     );
     expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(
