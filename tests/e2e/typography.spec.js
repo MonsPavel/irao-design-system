@@ -187,8 +187,8 @@ test.describe('типографика (T3.3)', () => {
       }
       // Модификатор ui-h6--primary (T16.12, adv/offer): тройка — от роли,
       // цвет — primary (прецедент цветных вариантов ui-tag).
-      const primary = await page.evaluate(() =>
-        getComputedStyle(document.querySelector('.ui-h6--primary')).color,
+      const primary = await page.evaluate(
+        () => getComputedStyle(document.querySelector('.ui-h6--primary')).color,
       );
       expect(primary, `${name}: ui-h6--primary — color = --ui-color-primary`).toBe(
         'rgb(0, 40, 86)',

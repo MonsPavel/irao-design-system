@@ -1304,9 +1304,9 @@ a.cp-intern-card {
    по фактическому канону). Паттерн «как есть»: -webkit-box + line-clamp. */
 .cp-intern-card .ui-small {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
   overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 /* Лендинг стажировок: обложка */
