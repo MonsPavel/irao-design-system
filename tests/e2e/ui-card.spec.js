@@ -130,7 +130,13 @@ standTest.describe('ui-card (T4.4)', () => {
         after.boxShadow,
         'тень — --ui-shadow-md (0 12px 32px blue-800-10, career-portal components.css:124)',
       ).toContain('rgba(0, 40, 86, 0.1)');
-      expect(after.boxShadow).toContain('0px 12px 32px');
+      // Геометрия тени — с допуском 0.5px: webkit квантует blur/offset
+      // («0px 11.965287px 31.907434px», ночной 40060880043), строковое
+      // toContain('0px 12px 32px') мигало flaky между прогонами.
+      const shadow = after.boxShadow.match(/0px ([\d.]+)px ([\d.]+)px/);
+      expect(shadow, 'тень двухкоординатная (offset-y, blur)').not.toBeNull();
+      expect(Number(shadow[1]), 'offset-y тени 12px').toBeCloseTo(12, 0);
+      expect(Number(shadow[2]), 'blur тени 32px').toBeCloseTo(32, 0);
     },
   );
 

@@ -270,7 +270,13 @@ standTest.describe('ui-link (T4.1)', () => {
       const rest = await stateOf(page, LINK.nav);
       expect(rest.fontSize, 'пункт навигации — fs-small (14px)').toBe('14px');
       expect(rest.fontWeight, 'fw-small (500)').toBe('500');
-      expect(rest.lineHeight, 'компактная строка пункта — lh 1.1 (14 × 1.1)').toBe('15.4px');
+      // parseFloat + toBeCloseTo: webkit сериализует 15.4px как «15.400001px»
+      // (квантование layout-единиц; ночной 40060880043) — сравнение строк
+      // ловило фантом, допуск 0.05px фантом гасит, регрессию lh видит.
+      expect(
+        parseFloat(rest.lineHeight),
+        'компактная строка пункта — lh 1.1 (14 × 1.1)',
+      ).toBeCloseTo(15.4, 1);
       expect(rest.decorationLine, 'без подчёркивания (nav-структура, WCAG 1.4.1)').toBe('none');
       expect(rest.color, 'цвет — primary базы, своего нет').toBe('rgb(0, 40, 86)');
       expect(rest.opacity, 'в покое opacity не тронут').toBe('1');

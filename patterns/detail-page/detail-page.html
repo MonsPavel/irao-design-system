@@ -115,6 +115,18 @@
     margin-top: var(--ui-space-5);
   }
 
+  /* CTA related-карточек под rem-стрессом (32px-база T3.6 — reflow WCAG
+     1.4.4): «Откликнуться» — одно слово, пилюля (--ui-button-pad-inline
+     1.75rem = 56px×2 на 32px-базе + слово 196px = 316px) не входит в контент
+     карточки @768 (264px) — выталкивалась за вьюпорт, hscroll +5px в
+     браузерах без scrollbar-gutter (chromium маскировал гаттером; nightly
+     40060880043). anywhere — не break-word: только он снижает min-content,
+     слово ломается лишь когда пилюля не влезает (растёт в высоту); на
+     нормальной базе рендер прежний байт-в-байт (эталоны не переснимались). */
+  .dpp-related__grid .ui-button {
+    overflow-wrap: anywhere;
+  }
+
   /* md (768, шкала T2.5): aside — вторая колонка и sticky (top — одобренный
      24px .form-aside). DOM-порядок не меняется: чтение — контент → aside. */
   @media (min-width: 768px) {
