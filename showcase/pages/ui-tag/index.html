@@ -1,11 +1,13 @@
 <p class="ui-showcase-stand__note">
   Стенд ui-tag / ui-badge (T4.3): все варианты тега одобренного дизайна career-portal (`.tag`,
   components.css:96–112), точка-маркер <code>__icon</code>, счётчик <code>ui-badge</code> (круг,
-  переполнение «99+», правило при 0) и оверлейный «тег на фото» <code>--on-photo</code> (T16.10).
+  переполнение «99+», правило при 0), оверлейный «тег на фото» <code>--on-photo</code> (T16.10)
+  и интерактивный «фильтр-тег» <code>--filter</code> (T16.14).
   Сценарии — <code>tests/e2e/ui-tag.spec.js</code> (computed-пары цветов на вариант, геометрия
   min-height 28px, контраст ≥ 4.5:1 сквозной с T2.3, axe, эталоны 375/768/1280/1440); правило
-  дублирования значения бейджа и правило при 0 — README.md компонентов. Тег — декоративная аннотация
-  и не интерактивен; чипы фильтров — паттерн T8.1. VI-перекраска тегов — функциональная проверка
+  дублирования значения бейджа и правило при 0 — README.md компонентов. База тега — декоративная
+  аннотация и не интерактивна; фильтр-тег — интерактивная форма на ссылке (--filter, T16.14);
+  чипы фильтров — ui-chip (T14.8). VI-перекраска тегов — функциональная проверка
   T9.1.
 </p>
 
@@ -104,6 +106,29 @@
     (<code>--ui-tag-height-on-photo</code>, вне шкалы §3.2 — перенос «как есть»). Плашка не tint —
     контраст 14.60:1 не зависит от снимка (гейт: алиас <code>tag-on-photo</code>). Только поверх
     фото/тёмного; на светлом фоне — цветовые варианты базы 28px (правило — README.md компонента).
+  </p>
+</section>
+
+<section aria-labelledby="ui-tag-filter-heading">
+  <h2 id="ui-tag-filter-heading">Фильтр-тег (--filter)</h2>
+  <p class="utg-row">
+    <span class="ui-tag ui-tag--gray" id="ui-tag-filter-label">Тип контента:</span>
+    <a class="ui-tag ui-tag--blue ui-tag--filter" id="ui-tag-filter" href="#ui-tag-filter-heading">статьи</a>
+    <a class="ui-tag ui-tag--blue ui-tag--filter" id="ui-tag-filter-active" href="#ui-tag-filter-heading" aria-current="page">Все</a>
+    <a class="ui-tag ui-tag--blue ui-tag--filter" href="#ui-tag-filter-heading">видео</a>
+  </p>
+  <p class="utg-row ui-small ui-text--muted">
+    Интерактивная форма тега — ссылка-фильтр каталога
+    (<code>.tag--blue.filter-tag</code> career-portal, media.html:156 + pages.css:596; T16.14 —
+    первый потребитель цветного тега в роли фильтра). Модификатор размера ставится
+    <strong>вместе</strong> с цветовым вариантом: высота 40px
+    (<code>--ui-tag-height-filter</code>), паддинг 8/20, типографика — роль small целиком
+    (fs-small × fw-small — 14/500, probe reg-4/media.json; letter-spacing 0.02em базы).
+    Активное состояние — <code>aria-current="page"</code> на ссылке (не класс): плашка
+    <code>--ui-color-primary</code> / <code>--ui-color-text-on-dark</code> (пара
+    <code>tag-on-photo</code>, 14.60:1) — inline-стиль активного «Все» оригинала. Hover
+    оригинала нет — модификатор не вводит; фокус — глобальная политика ADR-0001.
+    Фильтры-чипы 36px — <code>ui-chip</code> (T14.8).
   </p>
 </section>
 

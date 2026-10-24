@@ -16,6 +16,8 @@
  *  2а. тег на фото --on-photo (T16.10): непрозрачная плашка primary/
  *     text-on-dark, min-height 40 (--ui-tag-height-on-photo), оверлей на
  *     фото-подложке стенда;
+ *  2б. фильтр-тег --filter (T16.14): ссылка-фильтр 40px (роль small),
+ *     пара tag-blue в покое, активный aria-current — primary/text-on-dark;
  *  3. ui-badge: круг 24×24 для одной цифры, pill для «99+» (ширина больше
  *     высоты, контент не обрезан), правило при 0 — атрибут hidden (глобальная
  *     гарантия base/reset.css), доступное имя ссылки без задвоения
@@ -40,6 +42,9 @@ const TAG = {
   navy: 'ui-tag-navy',
   blueIcon: 'ui-tag-blue-icon',
   onPhoto: 'ui-tag-on-photo',
+  filter: 'ui-tag-filter',
+  filterActive: 'ui-tag-filter-active',
+  filterLabel: 'ui-tag-filter-label',
 };
 
 /** Идентификаторы бейджей стенда. */
@@ -216,6 +221,66 @@ standTest.describe('ui-tag (T4.3)', () => {
         Math.abs(box.height - 40),
         `фактическая высота = --ui-tag-height-on-photo (факт ${box.height})`,
       ).toBeLessThanOrEqual(0.5);
+    },
+  );
+
+  standTest(
+    'фильтр-тег (--filter, T16.14): 40px/паддинг 8/20/роль small, пара blue в покое, активный aria-current — плашка primary/text-on-dark',
+    async ({ stand }) => {
+      const page = await stand('ui-tag');
+
+      // Покой: цветовой вариант --blue не тронут (первый потребитель
+      // tag--blue в роли фильтра), геометрия/типографика — модификатора.
+      const rest = await stateOf(page, TAG.filter);
+      expect(rest.backgroundColor, 'фон покоя — blue-100 (пара tag-blue)').toBe(
+        'rgb(232, 238, 254)',
+      );
+      expect(rest.color, 'подпись покоя — primary').toBe('rgb(0, 40, 86)');
+      expect(rest.minHeight, 'min-height — --ui-tag-height-filter (40px)').toBe('40px');
+      expect(rest.borderRadius, 'радиус pill — базы').toBe('100px');
+      expect(rest.fontSize, 'роль small: fs-small (14px)').toBe('14px');
+      expect(rest.fontWeight, 'роль small: fw-small (500 от .tag --fw-caption — probe reg-4)').toBe(
+        '500',
+      );
+      const spacing = Number.parseFloat(rest.letterSpacing);
+      expect(
+        Math.abs(spacing - 0.28),
+        `letter-spacing 0.02em × 14px = 0.28px (факт ${rest.letterSpacing})`,
+      ).toBeLessThanOrEqual(0.01);
+      const restBox = await boxOf(page, TAG.filter);
+      expect(
+        Math.abs(restBox.height - 40),
+        `фактическая высота = --ui-tag-height-filter (факт ${restBox.height})`,
+      ).toBeLessThanOrEqual(0.5);
+      const restPadding = await page
+        .locator(`#${TAG.filter}`)
+        .evaluate((el) => getComputedStyle(el).padding);
+      expect(restPadding, 'паддинг 8px 20px (--ui-space-2 × --ui-tag-filter-pad-inline)').toBe(
+        '8px 20px',
+      );
+
+      // Интерактивная форма — ссылка (GET-фильтр оригинала), сброс
+      // подчёркивания на модификаторе.
+      const restLink = await page.locator(`#${TAG.filter}`).evaluate((el) => ({
+        tag: el.tagName.toLowerCase(),
+        tdl: getComputedStyle(el).textDecorationLine,
+        cursor: getComputedStyle(el).cursor,
+      }));
+      expect(restLink.tag, 'фильтр — <a href> (Implementation requirements T16.14 п.1)').toBe('a');
+      expect(restLink.tdl, 'подчёркивание якоря снято (прецедент ui-chip__pill)').toBe('none');
+
+      // Активное состояние — ARIA-крючком (не класс): inline-стиль активного
+      // «Все» оригинала (media.html:156) — пара tag-on-photo (14.60:1).
+      const active = page.locator(`#${TAG.filterActive}`);
+      await expect(active).toHaveAttribute('aria-current', 'page');
+      const activeState = await stateOf(page, TAG.filterActive);
+      expect(activeState.backgroundColor, 'активный фон — primary').toBe('rgb(0, 40, 86)');
+      expect(activeState.color, 'активная подпись — text-on-dark').toBe('rgb(255, 255, 255)');
+
+      // Подпись группы («Тип контента:») — аннотация --gray 28px, не фильтр.
+      const label = await stateOf(page, TAG.filterLabel);
+      expect(label.backgroundColor, 'подпись группы — tag-gray-bg').toBe('rgb(240, 241, 243)');
+      expect(label.minHeight, 'подпись группы — базовая высота 28px').toBe('28px');
     },
   );
 

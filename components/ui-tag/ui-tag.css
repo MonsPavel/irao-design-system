@@ -108,11 +108,46 @@
 
 /* Точка-маркер: 8px (--ui-space-2 шкалы §3.2, media__tag-dot), круг —
    pill-радиус в квадратном боксе (паттерн спиннера ui-button). Цвет —
-   currentColor: красится подписью варианта, CSS-цвет сознательно не задаётся. */
+   currentColor: красится цветом подписи варианта, CSS-цвет сознательно не задаётся. */
 .ui-tag__icon {
   box-sizing: border-box;
   width: var(--ui-space-2);
   height: var(--ui-space-2);
   border-radius: var(--ui-radius-pill);
   background-color: currentColor;
+}
+
+/* T16.14: «фильтр-тег» — интерактивная форма тега: ссылка-фильтр каталога
+   (.tag--blue.filter-tag оригинала, media.html:156 + pages.css:596 — первый
+   потребитель цветного тега в роли фильтра). Модификатор размера: несёт
+   ТОЛЬКО геометрию/типографику (высота 40px — --ui-tag-height-filter, паддинг
+   8/20 — --ui-space-2 × --ui-tag-filter-pad-inline, роль small целиком
+   fs-small × fw-small × lh-small — probe reg-4/media.json: fs 14/fw 500/lh
+   1.35; вес и letter-spacing 0.02em остаются от базы .tag) и ставится
+   ВМЕСТЕ с цветовым вариантом: class="ui-tag ui-tag--blue ui-tag--filter"
+   (цвета покоя — пара tag-blue, primary на blue-100, гейт T2.3). Интерактивная
+   форма — обязательно ссылка (<a href>, GET-фильтр оригинала): сброс
+   подчёркивания якоря глобальной политики — text-decoration: none
+   (прецедент ui-chip__pill); фокус — ADR-0001 (a:focus-visible) без правок.
+   Активное состояние — ARIA-крючком [aria-current='page'], НЕ классом
+   (прецедент ui-chip__pill:where): плашка primary + text-on-dark — inline
+   background: var(--color-primary); color: #fff активного «Все» оригинала
+   (media.html:156, education.html:35), готовая пара tag-on-photo (14.60:1).
+   Правило ПОСЛЕ цветовых вариантов и on-photo: перекрывает их порядком
+   каскада при равной (одноклассовой через :where) специфичности
+   (прецедент --on-photo). Hover оригинала у .filter-tag нет (глобальный
+   a { color: inherit; text-decoration: none } base.css:75 без :hover) —
+   модификатор hover не вводит (паритет, Technical considerations). */
+.ui-tag--filter {
+  min-height: var(--ui-tag-height-filter);
+  padding: var(--ui-space-2) var(--ui-tag-filter-pad-inline);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  text-decoration: none;
+}
+
+.ui-tag--filter:where([aria-current='page']) {
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
 }
