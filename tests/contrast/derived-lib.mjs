@@ -31,6 +31,14 @@ import { contrastRatio, normalizeColor, parseColor, resolveTokenColor } from './
  * TypeError-ом деконструкции «Cannot destructure property 'base'…» без
  * указания причины; evaluateDerivedContrast кладёт сообщение в configErrors. */
 export function resolveColorSpec(spec, primitives, semantic) {
+  if (spec === null || typeof spec !== 'object') {
+    // T13.9-бэклог: внятная ошибка покрывала только спеку-объект; пара вовсе
+    // без fg/bg (spec undefined) падала TypeError-ом чтения .token —
+    // крипичное сообщение в configErrors вместо причины.
+    throw new Error(
+      `спека цвета отсутствует или не объект — укажите {token} или {mix: {base, percent, with}}: ${JSON.stringify(spec)}`,
+    );
+  }
   if (spec.token !== undefined) {
     return resolveTokenColor(spec.token, new Map([...primitives, ...semantic]));
   }

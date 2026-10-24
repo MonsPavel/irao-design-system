@@ -111,6 +111,10 @@ describe('ревизия производных: спецификации цве
     // «Cannot destructure property 'base' of 'undefined'».
     expect(() => resolveColorSpec({}, primitives, semantic)).toThrow(/token\/mix/);
     expect(() => resolveColorSpec({ mix: null }, primitives, semantic)).toThrow(/token\/mix/);
+    // T13.9-бэклог: спека вовсе не объект (пара без fg/bg) — раньше падала
+    // TypeError-ом чтения .token, теперь — внятная ошибка конфига.
+    expect(() => resolveColorSpec(undefined, primitives, semantic)).toThrow(/не объект/);
+    expect(() => resolveColorSpec(null, primitives, semantic)).toThrow(/не объект/);
 
     const result = evaluateDerivedContrast({
       primitives,
@@ -123,6 +127,12 @@ describe('ревизия производных: спецификации цве
           bg: { token: '--ui-color-surface' },
           usage: 'тест',
         },
+        {
+          id: 'no-fg',
+          level: 'large',
+          bg: { token: '--ui-color-surface' },
+          usage: 'тест',
+        },
       ],
       exceptions: [],
     });
@@ -132,6 +142,13 @@ describe('ревизия производных: спецификации цве
           message.includes('no-spec') && message.includes('fg') && message.includes('token/mix'),
       ),
       `configErrors содержит внятную причину: ${JSON.stringify(result.configErrors)}`,
+    ).toBe(true);
+    expect(
+      result.configErrors.some(
+        (message) =>
+          message.includes('no-fg') && message.includes('fg') && message.includes('не объект'),
+      ),
+      `configErrors содержит внятную причину отсутствующей спеки: ${JSON.stringify(result.configErrors)}`,
     ).toBe(true);
     // Пара без разрешённых цветов не попадает в строки гейта.
     expect(result.rows.map((row) => row.id)).toEqual([]);

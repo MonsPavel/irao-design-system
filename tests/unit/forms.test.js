@@ -509,10 +509,10 @@ describe('html-validate: правило irao/radio-group-fieldset (T5.2, AC)', (
       existsSync(join(root, 'tests', 'lint-cases', 'html', 'radio-group-with-legend.html')),
     ).toBe(true);
     expect(registry).toMatch(
-      /file:\s*'html\/radio-without-fieldset\.html'[\s\S]*?irao\/radio-group-fieldset/,
+      /file:\s*'html\/radio-without-fieldset\.html'[\s\S]{0,300}?irao\/radio-group-fieldset/,
     );
     expect(registry).toMatch(
-      /file:\s*'html\/radio-group-with-legend\.html'[\s\S]*?expect:\s*'pass'/,
+      /file:\s*'html\/radio-group-with-legend\.html'[\s\S]{0,300}?expect:\s*'pass'/,
     );
   });
 
@@ -521,10 +521,16 @@ describe('html-validate: правило irao/radio-group-fieldset (T5.2, AC)', (
     for (const fixture of ['radio-same-name-two-forms.html', 'radio-nameless-pair.html']) {
       expect(existsSync(join(root, 'tests', 'lint-cases', 'html', fixture)), fixture).toBe(true);
     }
+    // Окно {0,300} ограничено размером одной записи реестра: ленивый
+    // [\s\S]*? без границы при переезде/смене expect записи сматчил бы
+    // expect СЛЕДУЮЩЕЙ записи (T13.9-бэклог; тот же идиом у
+    // radio-group-with-legend ниже).
     expect(registry).toMatch(
-      /file:\s*'html\/radio-same-name-two-forms\.html'[\s\S]*?expect:\s*'pass'/,
+      /file:\s*'html\/radio-same-name-two-forms\.html'[\s\S]{0,300}?expect:\s*'pass'/,
     );
-    expect(registry).toMatch(/file:\s*'html\/radio-nameless-pair\.html'[\s\S]*?expect:\s*'pass'/);
+    expect(registry).toMatch(
+      /file:\s*'html\/radio-nameless-pair\.html'[\s\S]{0,300}?expect:\s*'pass'/,
+    );
   });
 });
 

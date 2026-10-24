@@ -190,8 +190,18 @@ describe('tokens/semantic.css — тинты primary (T14.7)', () => {
     expect(new Set(tintNames)).toEqual(new Set(Object.keys(TINTS).map(tintName)));
   });
 
-  it('лестница процентов растёт монотонно (10 < 20 < 26 < 55 < 94)', () => {
-    const percents = Object.values(TINTS);
+  it('лестница процентов реального файла растёт монотонно (10 < 20 < 26 < 55 < 94)', () => {
+    // Проценты выводятся из ДЕКЛАРАЦИЙ semantic.css (суффиксы имён тинтов),
+    // не из замороженного литерала TINTS: прежний вариант сравнивал литерал
+    // с его же сортировкой — таутология (T14.7-бэклог); реальный файл
+    // проверяется, а точные значения каждой ступени — тестом выше.
+    const percents = [...declarations.keys()]
+      .map((name) => name.match(/^--ui-color-primary-a(\d+)$/))
+      .filter(Boolean)
+      .map((match) => Number(match[1]));
+    expect(percents.length, 'тинты primary в файле').toBeGreaterThanOrEqual(
+      Object.keys(TINTS).length,
+    );
     expect(percents).toEqual([...percents].sort((a, b) => a - b));
   });
 });

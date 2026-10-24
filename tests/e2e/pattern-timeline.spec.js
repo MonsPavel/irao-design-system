@@ -226,8 +226,11 @@ standTest.describe('patterns/timeline: соединительная линия (
         }),
       );
       for (const [i, line] of mobileLines.entries()) {
+        // content === '""' в допуск НЕ входит (T14.11-бэклог): пустой content
+        // с заданным фоном рисует видимый брус — линия есть; отсутствие —
+        // только content/display: none.
         expect(
-          line.content === 'none' || line.display === 'none' || line.content === '""',
+          line.content === 'none' || line.display === 'none',
           `колонка: у этапа №${i + 1} линии нет`,
         ).toBe(true);
       }

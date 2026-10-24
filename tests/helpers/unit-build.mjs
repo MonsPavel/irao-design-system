@@ -71,9 +71,16 @@ function latestSourceMtimeMs(dir) {
   return latest;
 }
 
-/** Свежесть сборки: штамп существует и новее новейшего исходника. */
+/** Свежесть сборки: штамп существует, новее новейшего исходника и ключевые
+ *  артефакты на месте. Проверка артефактов — «самолечение»: при ручной чистке
+ *  dist/showcase-dist между прогонами свежий штамп давал no-op и тесты падали
+ *  ENOENT (T13.7-бэклог: штамп-мемоизация убила самолечение). */
 function buildIsUpToDate(root, stampPath) {
   try {
+    const artifactsExist =
+      existsSync(join(root, 'dist', 'ui-core.min.css')) &&
+      existsSync(join(root, 'showcase', 'dist', 'stands', 'tokens.html'));
+    if (!artifactsExist) return false;
     return statSync(stampPath).mtimeMs > latestSourceMtimeMs(root);
   } catch {
     return false; // штампа нет — собираем

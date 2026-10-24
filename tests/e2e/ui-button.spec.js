@@ -290,10 +290,15 @@ standTest.describe('ui-button (T4.2)', () => {
         expect(state.fontSize, `${id}: fs-small`).toBe('14px');
         expect(state.fontWeight, `${id}: fw-small`).toBe('500');
         expect(state.fontFamily, `${id}: кнопка не остаётся на UA-шрифте`).toContain('Golos Text');
+        // Паддинг базы — computed-пин (T14.3-бэклог: AC «12px 28px» был
+        // закрыт только source-пином юнита): блок --ui-space-3 + inline
+        // --ui-button-pad-inline (1.75rem).
+        expect(state.padding, `${id}: паддинг базы 12px 28px`).toBe('12px 28px');
       }
 
       const sm = await stateOf(page, BTN.primarySm);
       expect(sm.minHeight, 'sm — --ui-button-height-sm (32px)').toBe('32px');
+      expect(sm.padding, 'sm: вертикаль --ui-space-1 (4px), горизонталь 28px').toBe('4px 28px');
 
       // Пилюля со стрелкой (T14.4, калибровка T16.11 — байт-канон
       // probe-сверки): min-height 44px, фон surface, рамка 1px primary,

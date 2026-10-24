@@ -149,7 +149,7 @@ describe('components/ui-button/ui-button.css — сброс подчёркива
     readFileSync(join(root, 'components', 'ui-button', 'ui-button.css'), 'utf8'),
   );
 
-  it('a.ui-button--primary: сброс в базовом правиле .ui-button — text-decoration: none (UA-дефолт a[href] не просачивается)', () => {
+  it('сброс в базовом правиле .ui-button — text-decoration: none (UA-дефолт a[href] не просачивается); модификаторы (в т.ч. primary/outline) наследуют её каскадом', () => {
     const block = blockOf(css, '.ui-button');
     expect(block, 'правило .ui-button найдено').toBeTruthy();
     expect(
@@ -158,7 +158,7 @@ describe('components/ui-button/ui-button.css — сброс подчёркива
     ).toContain('text-decoration: none;');
   });
 
-  it('a.ui-button--outline: подчёркивание не возвращается ни в одном состоянии — декларации text-decoration в файле ровно две, в порядке файла: сброс none в базе (T16.2) и осознанный underline текстового варианта --text (T16.7); остальные варианты и все hover/active-правила tdl не трогают (ADR-0010)', () => {
+  it('подчёркивание не возвращается ни в одном состоянии — декларации text-decoration в файле ровно две, в порядке файла: сброс none в базе (T16.2) и осознанный underline текстового варианта --text (T16.7); остальные варианты и все hover/active-правила tdl не трогают (ADR-0010)', () => {
     const declarations = css.match(/text-decoration\s*:[^;]+;/g) ?? [];
     expect(declarations, 'none в базе (T16.2) + underline у --text (T16.7)').toEqual([
       'text-decoration: none;',

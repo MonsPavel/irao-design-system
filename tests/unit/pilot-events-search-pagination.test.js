@@ -65,11 +65,16 @@ const eventsSearchMainBody = sectionBody(build, 'eventsSearchMain');
 const eventsSearchHtml = returnHtml(build, 'eventsSearchMain');
 const vacanciesMainBody = sectionBody(build, 'vacanciesMain');
 
-/** Тело переиспользуемого helper'а строки поиска (до следующей функции). */
+/** Тело переиспользуемого helper'а строки поиска (до следующей функции).
+ *  Якорь конца — 'function vacancyRow' (реально следующая функция, T15.5-
+ *  бэклог): radioGroup определён ДО findBar, прежний тернарник всегда брал
+ *  build.length — срез до конца файла, и пины role="search"/method="get"/
+ *  type="search" удовлетворялись shell-формой из headerHtml, не ловя потерю
+ *  атрибута в самом findBar. */
 const findBarBody = build.slice(
   build.indexOf('function findBar'),
-  build.indexOf('function radioGroup') > build.indexOf('function findBar')
-    ? build.indexOf('function radioGroup')
+  build.indexOf('function vacancyRow') > build.indexOf('function findBar')
+    ? build.indexOf('function vacancyRow')
     : build.length,
 );
 

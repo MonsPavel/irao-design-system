@@ -250,7 +250,14 @@ test.describe('масштабирование: zoom 200% и 32px-база (T3.6,
           );
         }
       } finally {
-        await session.send('Emulation.clearDeviceMetricsOverride');
+        // clear в собственном try/catch (T13.9-бэклог): если clear бросит
+        // (мёртвая страница/сессия при падении теста), detach не пропустится,
+        // а исходная ошибка ассерта не подменится ошибкой clear.
+        try {
+          await session.send('Emulation.clearDeviceMetricsOverride');
+        } catch {
+          // сессия уже мертва — снимать нечего
+        }
         await session.detach();
       }
     });
