@@ -1369,31 +1369,56 @@ a.cp-intern-card {
   align-items: flex-start;
 }
 
-/* Бегущая «типографская» полоса преимуществ (сайт-зона) */
+/* Бегущая «типографская» полоса преимуществ (сайт-зона). T16.15 — канон
+   .adv-marquee (pages.css:1058–1081): строки 40/18/13 fw 500 uppercase
+   ls 0.02em color primary на светлом blue-50. 40/18/13 вне шкалы ДС —
+   литералы «как есть» (токены ДС не требуются, Implementation requirements
+   п.1); отступы/радиус/фон — на токенах ДС (space-7 = 48, radius-md = 16 =
+   --radius-card оригинала, surface-muted = blue-50). */
 .cp-adv-marquee {
+  box-sizing: border-box;
   display: grid;
-  gap: var(--ui-space-4);
+  gap: var(--ui-space-7);
   align-items: center;
-  grid-template-columns: 1fr 1fr;
-  padding: var(--ui-space-5);
-  border-radius: var(--ui-radius-lg);
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-text-on-dark);
+  grid-template-columns: 1.2fr 1fr;
+  padding: var(--ui-space-7);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
 }
 
 .cp-adv-marquee__type {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-2);
+  gap: var(--ui-space-3);
+  min-width: 0;
 }
 
-.cp-adv-marquee__line--xl {
-  font-size: var(--ui-fs-h3);
-  font-weight: var(--ui-fw-h3);
+/* Строка-база (pages.css:1070): fw 500, uppercase через CSS (контент
+   строчный — a11y), ls 0.02em, color primary; межстрочное наследует 1.35 */
+.cp-adv-marquee__line {
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-fw-body-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
+/* Подписи «Группа «Интер РАО»» / «опыт · наставники…» (pages.css:1077) */
+.cp-adv-marquee__line--bar {
+  font-size: 1.125rem;
+}
+
+/* Мелкая подпись «оплачиваемые программы…» (pages.css:1079) */
 .cp-adv-marquee__line--sm {
-  opacity: 0.8;
+  font-size: 0.8125rem;
+  font-weight: var(--ui-fw-small);
+}
+
+/* Базовая крупная строка «НАЧНИ КАРЬЕРУ…» (pages.css:1081) */
+.cp-adv-marquee__line--xl {
+  font-size: 2.5rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: normal;
 }
 
 .cp-adv-marquee__body {

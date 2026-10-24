@@ -310,6 +310,24 @@ const SHELL_PROBES = [
     pilot: '.ui-file__button',
     fields: { color: 'color', radius: 'border-radius' },
   },
+  // Базовая строка промо-блока «бегущие строки» (T16.15, REPORT §9.1 №6):
+  // канон 40/500 uppercase, ls 0 (база 0.02em — pages.css:1070/1081), primary
+  // на светлом blue-50. Первое вхождение — internships.html; подписи --bar 18
+  // и мелкая --sm 13 несут ту же базу строк (fw/tt/color) и гейтятся этой
+  // парой по общим полям.
+  {
+    name: 'marquee-line',
+    original: '.adv-marquee__line--xl',
+    pilot: '.cp-adv-marquee__line--xl',
+    fields: {
+      fs: 'font-size',
+      fw: 'font-weight',
+      color: 'color',
+      ls: 'letter-spacing',
+      tt: 'text-transform',
+    },
+    rect: true,
+  },
 ];
 
 /** Пары блоков главной (высота секций). */

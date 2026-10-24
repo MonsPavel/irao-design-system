@@ -1945,10 +1945,12 @@ ${applyDialogHtml()}
   <div class="ui-container">
     <div class="cp-adv-marquee">
       <div class="cp-adv-marquee__type" aria-hidden="true">
-        <span class="cp-adv-marquee__line">Группа «Интер РАО»</span>
+        <!-- T16.15: бирки строк — по ролям оригинала (internships.html:247–250):
+             подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px) -->
+        <span class="cp-adv-marquee__line cp-adv-marquee__line--bar">Группа «Интер РАО»</span>
         <span class="cp-adv-marquee__line cp-adv-marquee__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
         <span class="cp-adv-marquee__line cp-adv-marquee__line--xl">НАЧНИ КАРЬЕРУ В ЭНЕРГЕТИКЕ ЕЩЁ ВО ВРЕМЯ УЧЁБЫ</span>
-        <span class="cp-adv-marquee__line">опыт · наставники · трудоустройство</span>
+        <span class="cp-adv-marquee__line cp-adv-marquee__line--bar">опыт · наставники · трудоустройство</span>
       </div>
       <div class="cp-adv-marquee__body">
         <img class="cp-adv-marquee__photo" src="${esc(data.advantages_companies.image)}" alt="">
