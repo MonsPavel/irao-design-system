@@ -15,7 +15,7 @@
  *  - build.mjs: тег заголовка карточки — параметр eventCard/offerCard с
  *    дефолтом 'h3' (старые events/education/event не меняются), выдача
  *    новых events-search/education-catalog собирается с 'h2' (h1 → h2
- *    карточек — без пропуска; вид несёт роль ui-h4, тег не влияет);
+ *    карточек — без пропуска; вид несёт роль ui-h6 с T16.12, тег не влияет);
  *  - tests/helpers/harness.js: match записи `.ui-button--accent`
  *    дополнен lookahead'ом `[` — атрибутные суффиксы той же кнопки
  *    того же класса попадают в то же исключение (не новое исключение —
@@ -65,14 +65,14 @@ describe('build.mjs — заголовки карточек новых стра�
     expect(catalogMainBody).toContain(`EDU.offers.map((offer) => offerCard(offer, 'h2'))`);
   });
 
-  it('eventCard/offerCard: тег заголовка — через map-безопасный cardHeading (дефолт h3; идиома .map(eventCard) передаёт (элемент, индекс) — числовой индекс не становится тегом, регрессия сборки 24.10 «<0 class="ui-h4">» в dist пинится санитайзером h1–h6); вид несёт роль ui-h4 — тег не влияет на computed-стили', () => {
+  it('eventCard/offerCard: тег заголовка — через map-безопасный cardHeading (дефолт h3; идиома .map(eventCard) передаёт (элемент, индекс) — числовой индекс не становится тегом, регрессия сборки 24.10 «<0 class="ui-h6">» в dist пинится санитайзером h1–h6); вид несёт роль ui-h6 (T16.12: канон карточки списков 20/500) — тег не влияет на computed-стили', () => {
     expect(build).toContain(
       `const cardHeading = (headingTag) => (/^h[1-6]$/.test(headingTag ?? '') ? headingTag : 'h3');`,
     );
     expect(eventCardBody).toMatch(/function eventCard\(e, headingTag\)/);
-    expect(eventCardBody).toMatch(/<\$\{cardHeading\(headingTag\)\} class="ui-h4">/);
+    expect(eventCardBody).toMatch(/<\$\{cardHeading\(headingTag\)\} class="ui-h6">/);
     expect(offerCardBody).toMatch(/function offerCard\(o, headingTag\)/);
-    expect(offerCardBody).toMatch(/<\$\{cardHeading\(headingTag\)\} class="ui-h4">/);
+    expect(offerCardBody).toMatch(/<\$\{cardHeading\(headingTag\)\} class="ui-h6 ui-h6--primary">/);
   });
 });
 
