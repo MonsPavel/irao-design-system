@@ -10,6 +10,23 @@
 
 ### Changed
 
+- Калибровка `ui-button--pill` по байт-канону оригинала `.pill-btn` (T16.11,
+  probe-сверка original/clone): рамка — primary вместо серой
+  `--ui-border-color`; кружок-иконка — primary с белой стрелкой, на hover
+  свапается в accent (accent — hover-состояние, не покой), фон пилюли на
+  hover — `--ui-color-surface-muted` (blue-50) вместо blue-100; метка —
+  fs 13 (`--ui-button-pill-label-fs`), `text-transform: uppercase`,
+  letter-spacing 0.04em (`--ui-button-pill-letter-spacing`); паддинг
+  `0 6px 0 20px` (`--ui-button-pill-pad-inline`), гэп 12px (`--ui-space-3`);
+  в `--sm` кружок 30px (`--ui-button-pill-icon-size-sm`), паддинг
+  `0 5px 0 16px` (`--ui-button-pill-pad-inline-sm`), гэп 8. Решения T14.4
+  (серая рамка, статичный accent-кружок, fs-small, ступени паддинга)
+  переоткрыты директивой пиксель-перфект; uppercase ставит CSS — текст в
+  DOM строчный (скринридер/локализация читают исходный регистр); пара
+  hover-кружка (text-on-dark/accent, 3.12:1 — графика ≥ 3:1) — алиас
+  `on-dark-on-accent` контраст-гейта. Применяется на всех страницах пилота
+  автоматически (`pillButton()` уже собирает `ui-button--pill`);
+  визуальное изменение поставки;
 - Цвет подписи поля: `ui-field__label` и legend группы радио (ui-radio-group)
   несут новый токен `--ui-color-field-label` (gray-700 `#616161`) вместо
   `--ui-color-text` — подпись «чуть тише текста, но читаема»: AA-замена серого

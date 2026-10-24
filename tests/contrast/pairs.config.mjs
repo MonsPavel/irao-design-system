@@ -333,6 +333,14 @@ export const PAIRS = [
     usage:
       'акцент как иконка/индикатор на белом; текстовые пары accent (кнопки, hover) — T4.2/T2.6',
   },
+  {
+    id: 'on-dark-on-accent',
+    fg: '--ui-color-text-on-dark',
+    bg: '--ui-color-accent',
+    level: 'non-text',
+    usage:
+      'белая стрелка на accent-кружке CTA-пилюли на hover (ui-button--pill, T16.11: кружок свапается primary → accent, pages.css:250): 3.12:1 ≥ 3:1 — графика/иконка WCAG 1.4.11 (как текст — известный разрыв кнопочных пар, T2.3/T2.6); base-роль кружка (text-on-dark на primary, 12.58:1) — пара on-dark-on-primary',
+  },
 ];
 
 /**

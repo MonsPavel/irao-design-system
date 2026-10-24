@@ -29,7 +29,7 @@
 | Состояние disabled | **атрибут** `disabled` — не фокусируется и не кликается нативно |
 | Состояние loading | класс `is-loading` + `aria-busy="true"` (ставит управляющий код формы/приложения) |
 | JS | не требуется (CSS-компонент; переключение loading — за формой, T5.5) |
-| Токены | `--ui-button-height(-sm)`, `--ui-button-height-pill`, `--ui-button-pill-icon-size(-sm)`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
+| Токены | `--ui-button-height(-sm)`, `--ui-button-height-pill`, `--ui-button-pill-icon-size(-sm)`, `--ui-button-pill-pad-inline(-sm)`, `--ui-button-pill-label-fs`, `--ui-button-pill-letter-spacing`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, `--ui-color-surface-muted` (hover пилюли), пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
 
 ```html
 <button class="ui-button ui-button--primary" type="submit">Отправить отклик</button>
@@ -74,29 +74,42 @@
 
 Самый частый CTA оригинала career-portal (`.pill-btn`, REPORT §3.3:
 «откликнуться →», «подробнее →»): компактная пилюля 44px, фон surface, рамка
-1px `--ui-border-color`, круглая иконка-стрелка в кружке accent. Пилот заменял
-её `ui-button--outline` (h52, рамка 2px) — CTA выходил тяжелее и неузнаваемее
-макета.
+1px primary, круглая иконка-стрелка в кружке primary (на hover — accent).
+Пилот заменял её `ui-button--outline` (h52, рамка 2px) — CTA выходил тяжелее
+и неузнаваемее макета.
 
 - **Когда**: CTA строки списка (T14.10) и карточки-ссылки — короткое
   приглашающее действие с иконкой-стрелкой («откликнуться», «подробнее»).
 - **Границы**: обычные действия форм и панелей — базовые варианты
   (primary/outline/…); pill — не «пятый цвет», а CTA-паттерн строк/карточек.
   Иконочные кнопки без лейбла — отдельная потребность (Out of scope T4.2).
-- **Геометрия**: `--ui-button-height-pill` (44px — прецедент touch-токена
-  пагинации), паддинг из шкалы: 16px/4px inline (оригинал 20/6 — страницы
-  css/pages.css:221), 4px block; кружок `--ui-button-pill-icon-size` (2rem,
-  фон `--ui-color-accent`, стрелка `--ui-color-text-on-dark`) на обычном
-  `__icon` — без нового элемента, доступное имя кнопки = лейбл; hover —
-  фон `--ui-color-surface-hover` (одобренная поверхность), радиус пилюли —
-  общий `--ui-radius-pill`.
+- **Геометрия** (байт-канон probe-сверки T16.11): `--ui-button-height-pill`
+  (44px — прецедент touch-токена пагинации), паддинг `0 6px 0 20px`
+  (`--ui-button-pill-pad-inline` — перенос «как есть», pages.css:221),
+  вертикаль 0, гэп 12px (`--ui-space-3`); кружок `--ui-button-pill-icon-size`
+  (2rem) на обычном `__icon` — без нового элемента, доступное имя кнопки =
+  лейбл; радиус пилюли — общий `--ui-radius-pill`.
+- **Правило варианта**: кружок — primary (`--ui-color-primary`) со стрелкой
+  `text-on-dark`; **accent — состояние hover** (свап под `@media
+  (hover: hover)`, pages.css:250), не покой; hover пилюли — фон
+  `--ui-color-surface-muted` (blue-50, pages.css:248).
+- **Метка** (правило варианта, происхождение — uppercase-стиль варфрейма
+  оригинала): fs 13 (`--ui-button-pill-label-fs`), fw-small,
+  `text-transform: uppercase`, `letter-spacing: 0.04em`
+  (`--ui-button-pill-letter-spacing`). Uppercase ставит CSS — текст в разметке
+  остаётся строчным: локализация и скринридер читают исходный регистр.
+  Применять с короткими глагольными CTA (одно-два слова): длинная подпись в
+  uppercase+13px хуже читается.
 - **С `--sm`**: комбинированный модификатор даёт компактную версию — высота
-  sm-токена (32px), кружок `--ui-button-pill-icon-size-sm` (1.5rem; оригинал
-  `.pill-btn--sm` уплотняет иконку так же — pages.css:254).
+  sm-токена (32px), гэп 8 и паддинг `0 5px 0 16px`
+  (`--ui-button-pill-pad-inline-sm`), кружок
+  `--ui-button-pill-icon-size-sm` (1.875rem/30px — канон `.pill-btn--sm`,
+  pages.css:254).
 - **A11y**: стрелка `aria-hidden="true"` (декоративная), имя — лейбл;
   touch-цель 44px; контраст подписи primary/surface — пара outline
-  (≥ 4.5:1); белая стрелка на accent — известная пара кнопок (3.12:1,
-  исключение T2.3/T2.6, как у `--accent`).
+  (≥ 4.5:1); стрелка на primary — 12.58:1, на hover-кружке accent — 3.12:1 —
+  графика ≥ 3:1 (WCAG 1.4.11, пара `on-dark-on-accent` гейта; как текст —
+  известный разрыв кнопочных пар, T2.3/T2.6).
 
 ```html
 <button class="ui-button ui-button--pill" type="button">
