@@ -168,8 +168,16 @@
   --ui-button-height-pill: 2.75rem;
   /* career-portal: pages.css:240/241 — .pill-btn__icon 32×32 (кружок икон-слота) → rem; 32px — ступень шкалы §3.2 (прецедент --ui-badge-size: диаметр круга; T14.4) */
   --ui-button-pill-icon-size: 2rem;
-  /* новый (T14.4): кружок в комбинированном ui-button--pill.ui-button--sm — оригинал .pill-btn--sm тоже уплотняет иконку (pages.css:254, 32→30px); здесь ступень шкалы §3.2 24px (прецедент --ui-badge-size): кружок обязан помещаться в высоту sm (2rem − рамка 2×1px), иначе min-height sm — no-op (урок ревью T4.2) */
-  --ui-button-pill-icon-size-sm: 1.5rem;
+  /* career-portal: pages.css:254 — .pill-btn--sm .pill-btn__icon 30×30 (кружок sm) → rem; калибровка T16.11: 30px перенесён «как есть» (вне шкалы отступов §3.2 — прецедент --ui-button-height-pill, заменяет ступень 24px решения T14.4: пиксель-перфект переоткрывает до байт-канона); 30 ≤ 32 − 2×1 (рамка) — кружок помещается в высоту sm, min-height активен (урок ревью T4.2) */
+  --ui-button-pill-icon-size-sm: 1.875rem;
+  /* career-portal: pages.css:221 — padding .pill-btn 0 6px 0 20px, горизонталь → rem; 20px/6px вне шкалы отступов §3.2 — перенос «как есть» по probe T16.11 (прецеденты --ui-field-pad-inline/--ui-tag-gap; решение T14.4 16/4 переоткрыто директивой пиксель-перфект); вертикаль 0 — в правиле компонента (структурный сброс, не величина) */
+  --ui-button-pill-pad-inline: 1.25rem 0.375rem;
+  /* career-portal: pages.css:254 — padding .pill-btn--sm 0 5px 0 16px, горизонталь → rem; 5px вне шкалы §3.2 — перенос «как есть» (прецедент --ui-button-pill-pad-inline; T16.11) */
+  --ui-button-pill-pad-inline-sm: 1rem 0.3125rem;
+  /* career-portal: pages.css:229 — font-size .pill-btn 13px (метка) → rem; 13px вне тройки ролей T3.3 — перенос «как есть» по probe T16.11 (прецедент --ui-dropdown-item-fs; решение T14.4 fs-small 14 переоткрыто директивой пиксель-перфект); пересмотр — design-decision владельца */
+  --ui-button-pill-label-fs: 0.8125rem;
+  /* career-portal: pages.css:230 — letter-spacing .pill-btn 0.04em (uppercase-метка); em — от размера метки, масштабируется с --ui-button-pill-label-fs; прецедент --ui-tag-letter-spacing (T16.11) */
+  --ui-button-pill-letter-spacing: 0.04em;
 
   /* ── Пагинация (ui-pagination, T6.3): геометрия ── */
 
