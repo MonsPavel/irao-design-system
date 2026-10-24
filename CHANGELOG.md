@@ -115,6 +115,27 @@
   фильтр-ссылки `.tag--blue.filter-tag` (pages.css:596), теги на фото несут
   тинты 28px — в пилоте модификатор не применяется (паритет с оригиналом),
   применение — решение владельца (зона T16.14);
+- Модификатор тега «фильтр-ссылка» `.ui-tag--filter` (T16.14; REPORT §9.1
+  №5): интерактивная форма тега — ссылка-фильтр каталога
+  (`.tag--blue.filter-tag` career-portal, media.html:156 + pages.css:596) —
+  первый потребитель цветного тега в роли фильтра. Размер: 40px
+  (`--ui-tag-height-filter`, min-height; 40 вне шкалы §3.2 — перенос «как
+  есть», прецедент `--ui-tag-height-on-photo`), паддинг 8/20
+  (`--ui-space-2` × `--ui-tag-filter-pad-inline`; 20px — прецедент
+  `--ui-field-pad-inline`), типографика — роль small целиком
+  (`fs-small × fw-small × lh-small` = 14/500/1.35 — probe reg-4/media.json:
+  fw 500 остаётся у `.tag` от `--fw-caption`, `--fw-small-regular` 400
+  фильтр-тег не получает — pages.css:596 переносит только font-size);
+  letter-spacing 0.02em базы. Ставится ВМЕСТЕ с цветовым вариантом
+  (`ui-tag--blue ui-tag--filter` — цвета покоя несёт `--blue`, пара
+  `tag-blue`); активное состояние — ARIA `aria-current="page"` → плашка
+  primary/text-on-dark (готовая пара `tag-on-photo`, форма inline-стиля
+  активного «Все» оригинала; прецедент `ui-chip__pill:where`);
+  `text-decoration: none` — сброс ссылки (на `<span>` не применять —
+  README ui-tag «Когда фильтр»); hover не вводится (у `.filter-tag`
+  оригинала нет). Adoption пилота: mediaMain — фильтры обеих групп на
+  связке, чипы сняты, тулбар по канону (gap 12px, отступ «Рубрики:» 24px);
+  probe-пара `filter-tag` в compare.mjs; визуальное изменение поставки;
 - Модификатор пагинации «без стрелок» `.ui-pagination--bare` (T16.6; REPORT
   §8.2 №7): форма компонента только из страниц — как `.pagination` оригинала
   career-portal на списковых страницах (у того стрелок в DOM нет вовсе).
