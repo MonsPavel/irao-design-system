@@ -1016,25 +1016,60 @@
   margin-bottom: var(--ui-space-4);
 }
 
-/* Строка вакансии: ui-card + сайт-зона раскладки строки (GAP: нет list-row) */
+/* Строка вакансии (T16.5): паддинг 24/28 — .vac-row (pages.css:163);
+   горизонталь 28px вне шкалы отступов §3.2 — перенос «как есть» (прецедент
+   --ui-button-pad-inline), вертикаль — --ui-space-5. flex-direction: row —
+   сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть
+   ряд — канон .lpp-row, list-page.html:110–119). box-sizing на корне
+   связки — ADR-0002. */
 .cp-vac-rows {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-2);
+  gap: var(--ui-space-4);
 }
 
 .cp-vac-row {
+  box-sizing: border-box;
   display: flex;
+  flex-direction: row;
   gap: var(--ui-space-4);
   align-items: center;
   justify-content: space-between;
-  padding: var(--ui-space-4);
+  padding: var(--ui-space-5) 1.75rem;
 }
 
+/* Main-блок: шаг 8px — .vac-row__main (pages.css:168; канон
+   .lpp-row__main, list-page.html:124–131); min-width: 0 — длинные
+   заголовки переносятся, не распирают флекс. */
 .cp-vac-row__main {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-1);
+  gap: var(--ui-space-2);
+  min-width: 0;
+}
+
+/* Заголовок строки — роль ui-h6 (T16.12: канон «заголовок карточки
+   списков» 20/500; ui-h4 давал 28px на lg — REPORT §8.2 №6). Цвет роль не
+   задаёт — наследует body (--ui-color-text #1F1F1F, pages.css:167), НЕ
+   heading-navy заголовочных ролей. */
+
+/* Ссылка заголовка — plain <a> (ui-link снят): цвет наследует заголовку,
+   подчёркивания нет — .vac-row__title a (pages.css:169), канон
+   .lpp-row__title a (list-page.html:140–143). Overlay не растягивается:
+   кликабельная зона — поле заголовка (Implementation requirements T16.5
+   п.1), пилюля остаётся независимой целью. */
+.cp-vac-row__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Hover строки перекрашивает ссылку в primary (pages.css:178) — только под
+   hover-гвардом (дисциплина EPIC-4); канон list-page.html:145–148. */
+@media (hover: hover) {
+  .cp-vac-row:hover .cp-vac-row__title a {
+    color: var(--ui-color-primary);
+  }
 }
 
 .cp-vac-row__place,
@@ -1081,12 +1116,20 @@
   font-weight: var(--ui-fw-small);
 }
 
-.cp-vac-side__promo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-3);
-  padding: var(--ui-space-4);
+/* «Сбросить» — прижата к левому краю панели (оригинал .vac-side__reset
+   align-self: flex-start, pages.css:101). Вид строки (fs 14/400, underline,
+   muted, высота по строке, а не 52px) несёт сам компонент ui-button--text
+   (T16.7; REPORT §8.2 №6/№8) — сайт-зона задаёт только положение. */
+.cp-vac-side > .ui-button--text {
+  box-sizing: border-box;
+  align-self: flex-start;
 }
+
+/* Промо-карточка сайдбара — ui-card--filled без геометрических override:
+   bg blue-50 (--ui-color-surface-muted), радиус 16 (--ui-radius-md),
+   вертикальная связка и шаг — база ui-card (gap 14px --ui-card-gap «как
+   есть», padding 24px против 20 оригинала — «принято ДС» REPORT §3.3,
+   mapping). Класс в разметке — hook пробы side-promo. */
 
 .cp-vac-main {
   display: flex;
