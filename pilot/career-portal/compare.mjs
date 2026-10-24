@@ -177,6 +177,41 @@ const SHELL_PROBES = [
     tag: true,
     rect: true,
   },
+  // Заголовок карточки события (T16.12, REPORT §9.1 №1): канон 20/500
+  // color-text — probe-пара раунда 4, заводится при закрытии T16.12 (§9.2).
+  // Селектор по РОЛИ, не по тегу: выдача events-search собирает карточки
+  // с h2 (T15.9), карточки событий — h3/h2 по месту страницы.
+  {
+    name: 'card-title',
+    original: '.event-card__title',
+    pilot: '.cp-event-card__body .ui-h6',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+    tag: true,
+  },
+  // Мини-тайтл карточки статьи (T16.12): 14/500 color-text
+  {
+    name: 'article-title',
+    original: '.article-card__title',
+    pilot: '.cp-article-card__title',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+    tag: true,
+  },
+  // Заголовок залитой карточки преимущества (T16.12): 20/500 primary.
+  // Селектор ограничен сеткой преимуществ — на career-track ui-card--filled
+  // несут ещё и карточки треков (вне T16.12, ложно попали бы в пробу).
+  {
+    name: 'card-title-primary',
+    original: '.adv-card__title',
+    pilot: '.cp-adv-grid .ui-card--filled h3',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  // Шорт карточки организации (T16.12): подпись muted (AA-цвет gray-700)
+  {
+    name: 'card-short',
+    original: '.org-card__short',
+    pilot: '.cp-org-card .ui-text--muted',
+    fields: { fs: 'font-size', color: 'color' },
+  },
 ];
 
 /** Пары блоков главной (высота секций). */

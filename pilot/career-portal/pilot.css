@@ -1297,6 +1297,18 @@ a.cp-intern-card {
   text-decoration: none;
 }
 
+/* Шорт карточки направления — обрез 3 строки (T16.12): перенос
+   .dir-card__short оригинала (pages.css:1045–1054 — clamp 3; в спеке T16.12
+   строка «как .org-card__short», но clamp в оригинале несёт именно
+   dir-card__short, у .org-card__short (pages.css:833) обреза нет — применено
+   по фактическому канону). Паттерн «как есть»: -webkit-box + line-clamp. */
+.cp-intern-card .ui-small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
 /* Лендинг стажировок: обложка */
 .cp-cover-hero {
   display: flex;

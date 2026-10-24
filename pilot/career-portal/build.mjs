@@ -267,9 +267,10 @@ function regTag(e) {
 /** Тег заголовка карточки: только строка h1–h6, иначе дефолт h3.
  *  Защита идиомы `.map(eventCard)`: map передаёт (элемент, индекс) —
  *  числовой индекс не имеет права стать тегом (регрессия сборки 24.10:
- *  `<0 class="ui-h4">` в dist при `map(eventCard)`). Вид заголовка несёт
- *  роль ui-h4, тег — семантика страницы (канон base/typography.css:
- *  «h1→h2→h3 без пропусков»); события-search/каталог собираются с 'h2'. */
+ *  `<0 class="ui-h6">` в dist при `map(eventCard)`). Вид заголовка несёт
+ *  роль ui-h6 (T16.12: канон карточки списков 20/500), тег — семантика
+ *  страницы (канон base/typography.css: «h1→h2→h3 без пропусков»);
+ *  события-search/каталог собираются с 'h2'. */
 const cardHeading = (headingTag) => (/^h[1-6]$/.test(headingTag ?? '') ? headingTag : 'h3');
 
 /** карточка события (оригинал .event-card): ui-card--link + теги.
@@ -291,7 +292,7 @@ function eventCard(e, headingTag) {
     </div>
     <div class="cp-event-card__body">
       <time class="cp-event-card__date ui-small ui-text--muted" datetime="${esc(isoDate(e.date))}">${esc(e.date)}</time>
-      <${cardHeading(headingTag)} class="ui-h4">${esc(e.title)}</${cardHeading(headingTag)}>
+      <${cardHeading(headingTag)} class="ui-h6">${esc(e.title)}</${cardHeading(headingTag)}>
       <p class="cp-event-card__meta">
         <span class="ui-tag ui-tag--blue">${esc(e.city)}</span>
         <span class="ui-tag ui-tag--gray">${esc(e.format)}</span>
@@ -301,7 +302,11 @@ function eventCard(e, headingTag) {
 </article>`;
 }
 
-/** карточка статьи (оригинал .article-card): ui-card--link + точка-тег */
+/** карточка статьи (оригинал .article-card): ui-card--link + точка-тег.
+ *  Заголовок — мини-тайтл 14/500 (T16.12): .article-card__title оригинала —
+ *  fs-small/fw-small (media.css/pages.css:608); роль ui-small на семантике
+ *  заголовка — канон «визуал ≠ семантика» (typography-roles.md), один выбор
+ *  с mediaHomeCard (решение по review спеки T16.12). */
 function articleCard(a) {
   // Тег на фото — тинт варианта + точка, как .media__tag оригинала
   // (media.css:72–87); ui-tag--on-photo — API ДС без пилотного применения
@@ -315,7 +320,7 @@ function articleCard(a) {
       <img class="cp-article-card__photo" src="${esc(a.image)}" alt="" loading="lazy">
       <span class="ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
     </div>
-    <h3 class="ui-h4 cp-article-card__title">${esc(a.title)}</h3>
+    <h3 class="ui-small cp-article-card__title">${esc(a.title)}</h3>
   </a>
   <time class="cp-article-card__date ui-small ui-text--muted">${esc(a.date)}</time>
 </article>`;
@@ -330,34 +335,37 @@ function internCard(i) {
 }
 
 /** связанная практика/стажировка в статье (оригинал render_internship_related:
- *  та же карточка ссылкой на раздел, без модалки; build.py:107–116) */
+ *  та же карточка ссылкой на раздел, без модалки; build.py:107–116;
+ *  T16.12: заголовок — ui-h6 20/500 (.dir-card__title), шорт — muted
+ *  (.dir-card__short)) */
 function internLinkCard(i, href) {
   const paid = i.paid ? '<span class="ui-tag ui-tag--orange">оплачиваемая</span>' : '';
   return `<a class="ui-card ui-card--hover cp-intern-card" href="${esc(href)}">
   <p>${paid}</p>
-  <h3 class="ui-h4">${esc(i.title)}</h3>
-  <p class="ui-small">${esc(i.short)}</p>
+  <h3 class="ui-h6">${esc(i.title)}</h3>
+  <p class="ui-small ui-text--muted">${esc(i.short)}</p>
 </a>`;
 }
 
-/** карточка стажёра */
+/** карточка стажёра (T16.12: имя — ui-h6 20/500, шорт — muted) */
 function internPerson(p, photo) {
   const tags = p.tags.map((tag) => `<span class="ui-tag ui-tag--blue">${esc(tag)}</span>`).join('');
   return `<article class="ui-card ui-card--hover cp-intern-person">
   <img class="cp-intern-person__photo" src="${esc(photo)}" alt="" loading="lazy">
   <div class="cp-intern-person__body">
-    <p class="ui-h5">${esc(p.name)}</p>
+    <p class="ui-h6">${esc(p.name)}</p>
     <p>${tags}</p>
-    <p class="ui-small">${esc(p.short)}</p>
+    <p class="ui-small ui-text--muted">${esc(p.short)}</p>
   </div>
 </article>`;
 }
 
-/** карточка организации (целевое обучение) */
+/** карточка организации (целевое обучение; T16.12: заголовок — ui-h6 20/500
+ *  color-text — наследование, шорт — muted) */
 function orgCard(o) {
   return `<article class="ui-card ui-card--hover cp-org-card">
-  <h3 class="ui-h4">${esc(o.name)}</h3>
-  <p class="ui-small">${esc(o.short)}</p>
+  <h3 class="ui-h6">${esc(o.name)}</h3>
+  <p class="ui-small ui-text--muted">${esc(o.short)}</p>
   <p class="cp-org-card__meta">
     <span class="ui-tag ui-tag--blue">${esc(o.type)}</span>
     <span class="ui-tag ui-tag--gray">${esc(o.city)}</span>
@@ -368,11 +376,13 @@ function orgCard(o) {
 /** карточка предложения целевого обучения. headingTag (T15.9, axe
  *  heading-order): дефолт h3 — education.html/event.html несут секции
  *  h2 перед карточками; каталог education-catalog собирается с 'h2'
- *  (первый offer — сразу за h1 страницы). */
+ *  (первый offer — сразу за h1 страницы). T16.12: направление —
+ *  ui-h6--primary (20/500, .offer-card__direction оригинала), шорт —
+ *  color-text без muted (.offer-card__short). */
 function offerCard(o, headingTag) {
   return `<article class="ui-card ui-card--hover cp-offer-card">
   <div class="cp-offer-card__head">
-    <${cardHeading(headingTag)} class="ui-h4">${esc(o.direction)}</${cardHeading(headingTag)}>
+    <${cardHeading(headingTag)} class="ui-h6 ui-h6--primary">${esc(o.direction)}</${cardHeading(headingTag)}>
     <time class="cp-offer-card__date ui-small ui-text--muted">${esc(o.date)}</time>
   </div>
   <p class="ui-small">${esc(o.short)}</p>
@@ -389,10 +399,12 @@ function offerCard(o, headingTag) {
 </article>`;
 }
 
-/** карточка преимущества (залитая) */
+/** карточка преимущества (залитая; T16.12: заголовок — ui-h6--primary
+ *  (.adv-card__title оригинала), текст — color-text без muted
+ *  (.adv-card__text)) */
 function advCard(a) {
   return `<article class="ui-card ui-card--filled">
-  <h3 class="ui-h4">${esc(a.title)}</h3>
+  <h3 class="ui-h6 ui-h6--primary">${esc(a.title)}</h3>
   <p class="ui-small">${esc(a.text)}</p>
 </article>`;
 }
@@ -412,14 +424,15 @@ function faq(items) {
   return `<h2 class="ui-h2">Вопросы и ответы</h2>\n<div class="ui-accordion ui-accordion--faq">\n${html}\n</div>`;
 }
 
-/** таймлайн этапов (сайт-зона — в ДС нет) */
+/** таймлайн этапов (сайт-зона — в ДС нет; T16.12: заголовок — ui-h6 20/500
+ *  color-text (.timeline__title), текст — muted (.timeline__text)) */
 function timeline(steps) {
   return steps
     .map(
       (step, index) => `<div class="cp-timeline__stage">
   <div class="cp-timeline__dot">${index + 1}</div>
-  <div class="ui-h5">${esc(step.title)}</div>
-  <p class="ui-small">${esc(step.text)}</p>
+  <div class="ui-h6">${esc(step.title)}</div>
+  <p class="ui-small ui-text--muted">${esc(step.text)}</p>
 </div>`,
     )
     .join('\n');
@@ -941,7 +954,8 @@ const MEDIA_HOME = [
 function mediaHomeCard(card, extraClass = '') {
   // Тег на фото — тинт варианта + точка, как в articleCard (маркер
   // реклассификации REPORT §3.3 — ревью T16.10: on-photo в пилоте не
-  // применяется).
+  // применяется). Заголовок (ветка с desc) — мини-тайтл 14/500, один выбор
+  // с articleCard (T16.12); дата — muted (.media__card-date оригинала).
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
     card.type
   ];
@@ -951,7 +965,7 @@ function mediaHomeCard(card, extraClass = '') {
       <img class="cp-article-card__photo" src="${esc(card.image)}" alt="" loading="lazy">
       <span class="ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(card.type)}</span>
     </div>
-    ${card.desc ? `<h3 class="ui-h4 cp-article-card__title">${esc(card.caption)}</h3>\n    <p class="ui-small cp-article-card__date">${esc(card.date)}</p>` : `<p class="cp-article-card__title">${esc(card.caption)}</p>\n    <time class="cp-article-card__date ui-small ui-text--muted">${esc(card.date)}</time>`}
+    ${card.desc ? `<h3 class="ui-small cp-article-card__title">${esc(card.caption)}</h3>\n    <p class="ui-small ui-text--muted cp-article-card__date">${esc(card.date)}</p>` : `<p class="cp-article-card__title">${esc(card.caption)}</p>\n    <time class="cp-article-card__date ui-small ui-text--muted">${esc(card.date)}</time>`}
   </a>
 </article>`;
 }

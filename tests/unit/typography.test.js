@@ -19,9 +19,11 @@
  *    build.mjs генерирует stands/typography.html;
  *  - дока «Роли типографики» (Definition of Done: роли и когда какую
  *    использовать);
- *  - цвет заголовков (T14.1): роли ui-h1…ui-h6 несут --ui-color-heading
- *    (alias на --ui-color-primary = #002856 career-portal), текстовые роли
- *    цвет не задают — наследуют body (--ui-color-text).
+ *  - цвет заголовков (T14.1): роли ui-h1…ui-h5 и ui-page-title несут
+ *    --ui-color-heading (alias на --ui-color-primary = #002856 career-portal),
+ *    текстовые роли цвет не задают — наследуют body (--ui-color-text);
+ *    ui-h6 — тоже наследует: роль «заголовок карточки списков» (T16.12),
+ *    вариант primary — модификатор ui-h6--primary.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -101,9 +103,15 @@ describe('base/typography.css — классы ролей (Scope T3.3)', () => {
 });
 
 describe('цвет заголовков: --ui-color-heading (T14.1)', () => {
-  /** Заголовочные роли несут токен; текстовые цвет не задают — наследуют body. */
-  const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'page-title'];
-  const TEXT_ROLES = ['lead', 'body', 'small', 'caption', 'micro'];
+  /**
+   * Заголовочные роли несут токен; текстовые цвет не задают — наследуют body.
+   * Исключение — ui-h6 (T16.12): роль «заголовок карточки списков», канон
+   * career-portal красит карточные заголовки color-text (`.event-card__title`
+   * и др.), поэтому цвет не задаёт — наследует; вариант primary —
+   * модификатором .ui-h6--primary (прецедент цветных вариантов ui-tag).
+   */
+  const HEADING_ROLES = ['h1', 'h2', 'h3', 'h4', 'h5', 'page-title'];
+  const TEXT_ROLES = ['lead', 'body', 'small', 'caption', 'micro', 'h6'];
 
   const css = stripCssComments(readFileSync(join(root, 'base', 'typography.css'), 'utf8'));
   const semantic = stripCssComments(readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8'));
@@ -138,6 +146,38 @@ describe('цвет заголовков: --ui-color-heading (T14.1)', () => {
       expect(block).not.toContain('color:');
     },
   );
+});
+
+describe('Роль «заголовок карточки списков»: ui-h6 (T16.12)', () => {
+  const css = stripCssComments(readFileSync(join(root, 'base', 'typography.css'), 'utf8'));
+
+  it('ui-h6 цвет не задаёт — наследует body: канон карточных заголовков career-portal color-text (pages.css:579 .event-card__title и др.)', () => {
+    const block = blockOf(css, '.ui-h6');
+    expect(block, 'правило .ui-h6 найдено').toBeTruthy();
+    expect(block).not.toContain('color:');
+  });
+
+  it('модификатор ui-h6--primary — цвет primary (adv/offer, pages.css:509/841; прецедент цветных вариантов ui-tag)', () => {
+    const block = blockOf(css, '.ui-h6--primary');
+    expect(block, 'правило .ui-h6--primary найдено').toBeTruthy();
+    expect(block).toContain('color: var(--ui-color-primary);');
+  });
+
+  it('модификатор задаёт только цвет: тройка fs/lh/fw остаётся на роли (правило «роль задаёт тройку целиком», T3.3)', () => {
+    const block = blockOf(css, '.ui-h6--primary');
+    expect(block).not.toContain('font-size');
+    expect(block).not.toContain('font-weight');
+    expect(block).not.toContain('line-height');
+  });
+
+  it('роль в доках: строка «заголовок карточки списков» в typography-roles.md (Scope T16.12)', () => {
+    const doc = readFileSync(
+      join(root, 'docs', 'ui-system', 'architecture', 'typography-roles.md'),
+      'utf8',
+    );
+    expect(doc).toMatch(/ui-h6[^\n]*заголовок карточки списков/i);
+    expect(doc).toContain('ui-h6--primary');
+  });
 });
 
 describe('Роль «заголовок страницы»: ui-page-title (T14.2)', () => {

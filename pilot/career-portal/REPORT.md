@@ -297,8 +297,8 @@ footer-link/row-title/row-item/pill-icon/reset-control; сущности нет 
 
 | # | Класс | Замер (ориг → клон) | Объём | Куда |
 |---|---|---|---|---|
-| 1 | заголовки карточек | 20/500 dark (adv/offer — primary), article/media — 14/500 → клон ui-h4 28 / ui-h5 24 | ~96+ | **T16.12 (new)** |
-| 2 | подписи/шорты/даты карточек | 14/400 muted (org/timeline/intern/person/date) → клон 14/500 dark без muted-класса | ~40 | **T16.12 (new)** (muted — AA-политика) |
+| 1 | заголовки карточек | 20/500 dark (adv/offer — primary), article/media — 14/500 → клон ui-h4 28 / ui-h5 24 | ~96+ | ✅ закрыто T16.12 (24.10): ДС — ui-h6 закреплён за «заголовком карточки списков» (цвет наследует — канон color-text; adv/offer — модификатор ui-h6--primary; мини-тайтл статей — ui-small на h3); adoption одним батчем; probe до/после (.zcode/accept-t1612-*.json): заголовки 20/500 rgb(31,31,31) (adv/offer rgb(0,40,86)), статьи 14/500 — совпало; lh 25 против 26–27 — «принято ДС» (порог ≤4px); probe-пары card-title/article-title/card-title-primary/card-short — в compare.mjs (гейт закрывающей T16.8) |
+| 2 | подписи/шорты/даты карточек | 14/400 muted (org/timeline/intern/person/date) → клон 14/500 dark без muted-класса | ~40 | ✅ закрыто T16.12 (24.10): ui-small ui-text--muted (AA gray-700 — политика T2.3; fw 500 — small-роль ДС, «принято ДС» §9.1 №12); offer-short/adv-text — color-text без muted (канон); clamp 3 шорта направлений — сайт-зона (канон .dir-card__short pages.css:1045, в спеке приписан org-card — см. mapping); probe: rgb(97,97,97) на org/timeline/intern/person/date, rgb(31,31,31) на offer-short/adv-text — совпало с допуском AA |
 | 3 | деталка вакансии | salary 18/400 muted → 42/500 navy; секции h2 28/500 → 42/500; li lh 29→27 | ~10 | **T16.13 (new)** (li — «принято ДС» lh-body) |
 | 4 | aside анкеты | label 12/400 muted → 20/400; title primary не задан (28 dark); text 14/400 → ui-body; file-кнопка btn--light отсутствует | ~6 | **T16.13 (new)** |
 | 5 | медиа-фильтры | tag--blue (blue-100, primary, r100, h40, fs 14/400) → белые чипы ui-chip__pill | 7 | **T16.14 (new)** |
@@ -329,10 +329,13 @@ footer-link/row-title/row-item/pill-icon/reset-control; сущности нет 
   pill-icon/reset, §8.2); пары раунда 4 (card-title/salary/aside-label/
   filter-tag/marquee-company) — не входят в Scope T16.8, заводятся при
   закрытии T16.12–T16.16 (сейчас фиксов ещё нет — пики §9.1 задокументированы
-  числами reg-4).
+  числами reg-4). **Начато T16.12 (24.10):** пары card-title/article-title/
+  card-title-primary/card-short добавлены в compare.mjs (shell-пробы,
+  первый вхождение на каждой странице; методика §2) — закрывающая T16.8
+  гейтит карточный класс находок №1/№2 машинно.
 - Политики «принято ДС» (AA muted, fw small, lh-body) — без задач;
   появление «клон не применил muted там, где оригинал muted» —
-  внутри T16.12 (подписи карточек).
+  внутри T16.12 (подписи карточек) — ✅ применено (24.10, §9.1 №2).
 
 ## 5. Что сработало без доработок
 

@@ -13,10 +13,11 @@
  *     заголовков −0.02em (перенос макета career-portal), текстовых ролей —
  *     normal;
  *  3. body-дефолты страницы (font/color/bg) и ui-text--muted — из токенов;
- *  3а. цвет заголовков (T14.1): computed color ролей ui-h1…ui-h6 и
+ *  3а. цвет заголовков (T14.1): computed color ролей ui-h1…ui-h5 и
  *      ui-page-title (T14.2) = --ui-color-heading (#002856 = primary
- *      career-portal) на всех вьюпортах; текстовые роли наследуют body
- *      (--ui-color-text);
+ *      career-portal) на всех вьюпортах; текстовые роли и ui-h6 (T16.12,
+ *      «заголовок карточки списков») наследуют body (--ui-color-text),
+ *      модификатор ui-h6--primary — primary;
  *  4. ui-list: маркеры disc/decimal, отступы из шкалы spacing; ui-address
  *     без браузерного курсива;
  *  5. иерархия заголовков зелёная на ВСЕХ страницах showcase
@@ -159,7 +160,7 @@ test.describe('типографика (T3.3)', () => {
     expect(root, 'база html — 16px (дефолт полигона)').toBe(16);
   });
 
-  test('цвет заголовков — --ui-color-heading #002856, текстовые роли наследуют body (T14.1)', async ({
+  test('цвет заголовков — --ui-color-heading #002856, текстовые роли и ui-h6 наследуют body (T14.1/T16.12)', async ({
     stand,
   }) => {
     const page = await stand('typography');
@@ -169,19 +170,29 @@ test.describe('типографика (T3.3)', () => {
       for (const [cls, role] of ROLES) {
         const color = await roleColor(page, cls);
         expect(color, `${name}: образец роли ${cls} есть на стенде`).not.toBeNull();
-        if (role.startsWith('h')) {
+        if (role.startsWith('h') && role !== 'h6') {
           // computed-color = --ui-color-heading → primary #002856 (career-portal):
           // тема с отличным primary красит заголовки через alias сама (T14.1).
           expect(color, `${name} ${cls}: color = --ui-color-heading (#002856)`).toBe(
             'rgb(0, 40, 86)',
           );
         } else {
-          // Текстовые роли цвет не задают — наследуют body (--ui-color-text).
+          // Текстовые роли и ui-h6 (T16.12: «заголовок карточки списков» —
+          // канон карточных заголовков color-text) цвет не задают — наследуют
+          // body (--ui-color-text).
           expect(color, `${name} ${cls}: color = --ui-color-text (наследование body)`).toBe(
             'rgb(31, 31, 31)',
           );
         }
       }
+      // Модификатор ui-h6--primary (T16.12, adv/offer): тройка — от роли,
+      // цвет — primary (прецедент цветных вариантов ui-tag).
+      const primary = await page.evaluate(
+        () => getComputedStyle(document.querySelector('.ui-h6--primary')).color,
+      );
+      expect(primary, `${name}: ui-h6--primary — color = --ui-color-primary`).toBe(
+        'rgb(0, 40, 86)',
+      );
     }
   });
 

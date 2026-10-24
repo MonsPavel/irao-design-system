@@ -33,8 +33,10 @@
  *  - цвет: заголовочные роли несут --ui-color-heading (T14.1; career-portal:
  *    все заголовки #002856 = --color-primary) — alias на primary, тема с
  *    отличным primary красит заголовки сама; текстовые роли цвет не задают —
- *    наследуют body (--ui-color-text); override цвета заголовка — осознанное
- *    решение (design-decision);
+ *    наследуют body (--ui-color-text); исключение — ui-h6 (T16.12): роль
+ *    «заголовок карточки списков», канон карточных заголовков — color-text,
+ *    вариант primary — модификатор ui-h6--primary; override цвета заголовка —
+ *    осознанное решение (design-decision);
  *  - text-wrap: pretty/balance не используется (нет в матрице браузеров —
  *    Technical considerations T3.3; кандидат на minor-улучшение позже);
  *  - никаких !important (инвариант системы) и никакого hex — только токены.
@@ -58,8 +60,9 @@ body {
 
 /* ── Заголовочные роли: career-portal page-title/section__title (−0.02em) ── */
 /* Цвет — --ui-color-heading (= primary #002856, T14.1): в одобренном макете
-   все заголовки тёмно-синие; тема с отличным primary красит их сама. Override
-   цвета заголовка — осознанное решение (design-decision), не «просто цвет». */
+   заголовки страниц/разделов тёмно-синие; тема с отличным primary красит их
+   сама. Исключение — ui-h6 (T16.12, см. ниже). Override цвета заголовка —
+   осознанное решение (design-decision), не «просто цвет». */
 
 .ui-h1 {
   color: var(--ui-color-heading);
@@ -94,7 +97,12 @@ body {
 }
 
 /* Роли h5/h6 §3.2: в career-portal их нет (см. --ui-fs-h5/h6); трекинг —
-   как у остальных заголовочных ролей. */
+   как у остальных заголовочных ролей. Исключение по цвету — ui-h6 (T16.12):
+   роль «заголовок карточки списков» — канон карточных заголовков career-portal
+   красит color-text (.event-card__title/.org-card__name/…), поэтому цвет
+   не задаётся — наследуется от body (--ui-color-text); вариант primary
+   (adv/offer, pages.css:509/841) — модификатором, прецедент — цветные
+   варианты ui-tag. */
 .ui-h5 {
   color: var(--ui-color-heading);
   font-size: var(--ui-fs-h5);
@@ -104,11 +112,14 @@ body {
 }
 
 .ui-h6 {
-  color: var(--ui-color-heading);
   font-size: var(--ui-fs-h6);
   font-weight: var(--ui-fw-h6);
   line-height: var(--ui-lh-h6);
   letter-spacing: -0.02em;
+}
+
+.ui-h6--primary {
+  color: var(--ui-color-primary);
 }
 
 /* Роль «заголовок страницы» (T14.2): h1 внутренних страниц со шкалой h2 —
