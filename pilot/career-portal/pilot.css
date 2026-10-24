@@ -1531,13 +1531,30 @@ a.cp-intern-card {
   padding: var(--ui-space-3);
 }
 
-/* Тулбар медиа-каталога */
+/* Тулбар медиа-каталога (T16.14: зазоры по канону .media-toolbar
+   pages.css:608 — gap 12px, подписи группы в центре ленты). Фильтры —
+   ui-tag--blue × ui-tag--filter (ДС, T16.14), подписи — ui-tag--gray. */
 .cp-media-toolbar {
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ui-space-2);
+  gap: var(--ui-space-3);
   align-items: center;
   margin: var(--ui-space-4) 0;
+}
+
+/* Группа фильтров — плоская в ленте тулбара (фильтры — прямые дети
+   flex-ленты оригинала, перенос поэлементный): nav остаётся именованным
+   landmark-маркером, в раскладку не вмешивается. */
+.cp-media-toolbar__group {
+  display: contents;
+}
+
+/* «Рубрики:» — отступ группы 24px (оригинал media.html:165, inline
+   margin-left: 24px поверх gap 12px ленты; inline-стили запрещены —
+   VI-инвариант §5). */
+.cp-media-toolbar__rubrics-label {
+  margin-left: var(--ui-space-5);
 }
 
 /* Карточка предложения целевого обучения */

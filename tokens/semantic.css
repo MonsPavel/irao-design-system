@@ -204,6 +204,10 @@
   --ui-tag-letter-spacing: 0.02em;
   /* career-portal: высота оверлейного тега на фото 40px (pages.css:596 — .filter-tag 40px, ступень тегов-оверлеев; REPORT §3.3 «ui-tag blue на фото — белый на primary, 40px», probe education/media height 40); 40 вне шкалы отступов §3.2 (32→48) — перенос «как есть» (прецедент --ui-chip-height), используется как min-height (прецедент --ui-tag-height); T16.10 */
   --ui-tag-height-on-photo: 2.5rem;
+  /* career-portal: height .filter-tag 40px (pages.css:596 — фильтр-ссылки медиа/образования/событий, media.html:156) → rem; 40 вне шкалы отступов §3.2 — перенос «как есть» (прецеденты --ui-tag-height-on-photo/--ui-button-height-pill: одинаковые значения у разных API несут собственные токены, как 44px пагинации и пилюли), используется как min-height (прецедент --ui-tag-height); T16.14 */
+  --ui-tag-height-filter: 2.5rem;
+  /* career-portal: padding .filter-tag 8px 20px (pages.css:596) — горизонталь → rem; 20px вне шкалы отступов §3.2 — перенос «как есть» (прецедент --ui-field-pad-inline); вертикаль 8px — ступень шкалы --ui-space-2; T16.14 */
+  --ui-tag-filter-pad-inline: 1.25rem;
   /* новый: в career-portal бейджа нет; диаметр круга/min-height одной цифры — ступень шкалы §3.2 (24px), «99+» растёт в pill паддингом из --ui-space-1 */
   --ui-badge-size: 1.5rem;
 

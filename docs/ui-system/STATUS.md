@@ -98,7 +98,7 @@
 | T16.7 | done | смержена |
 | T16.4 | done | смержена |
 | T16.5 | done | смержена |
-| T16.14 | todo | EPIC-16 (раунд 4): пилот — фильтры медиа (тип контента+рубрики) как ui-tag--blue (первый потребитель); размер фильтр-тега (ориг h40) — решение по probe; после T16.5 |
+| T16.14 | done | смержена |
 | T16.15 | todo | EPIC-16 (раунд 4): пилот — промо-блок adv-marquee (internships/practices): строки 40/18/13 uppercase primary (сейчас 42/24/20 белым); сайт-зона pilot.css |
 | T16.16 | todo | EPIC-16 (раунд 4): пилот — карточки компаний 14/500 + поднавигация career-track/education как ui-tabs--pill (завершение T14.9-adoption); section-title 42 fw — «принято ДС» в mapping |
 | T16.8 | done | смержена |

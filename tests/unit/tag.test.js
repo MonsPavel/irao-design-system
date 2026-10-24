@@ -259,6 +259,79 @@ describe('T16.10 — ревью: контраст и провенанс on-photo
   });
 });
 
+describe('T16.14 — модификатор «фильтр-тег» (ui-tag--filter, поверх цветового варианта)', () => {
+  const source = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8'),
+  );
+
+  it('токен высоты фильтра: 2.5rem (40px канона pages.css:596 .filter-tag; вне шкалы §3.2 — перенос «как есть», прецедент --ui-tag-height-on-photo/--ui-button-height-pill)', () => {
+    expect(source).toMatch(/--ui-tag-height-filter:\s*2\.5rem;/);
+  });
+
+  it('токен горизонтального паддинга фильтра: 1.25rem (20px pages.css:596; вне шкалы §3.2 — прецедент --ui-field-pad-inline); вертикаль 8px — --ui-space-2 шкалы', () => {
+    expect(source).toMatch(/--ui-tag-filter-pad-inline:\s*1\.25rem;/);
+  });
+
+  it('модификатор: только размер/типографика — высота и паддинг из токенов, роль small целиком (probe reg-4/media.json: fs 14, fw 500, lh 1.35 — вес и интервал остаются от .tag)', () => {
+    const block = blockOf(css, '.ui-tag--filter');
+    expect(block, 'правило .ui-tag--filter найдено').toBeTruthy();
+    expect(block).toContain('min-height: var(--ui-tag-height-filter);');
+    expect(block).toContain('padding: var(--ui-space-2) var(--ui-tag-filter-pad-inline);');
+    expect(block).toContain('font-size: var(--ui-fs-small);');
+    expect(block).toContain('font-weight: var(--ui-fw-small);');
+    expect(block).toContain('line-height: var(--ui-lh-small);');
+    // Интерактивная форма тега — ссылка: сброс подчёркивания якоря
+    // (глобальная политика ссылок ДС; прецедент ui-chip__pill).
+    expect(block).toContain('text-decoration: none;');
+    // Цвета модификатор не задаёт — их несёт цветовой вариант (--blue).
+    expect(block).not.toContain('background-color');
+  });
+
+  it('letter-spacing не переопределяется — 0.02em базы = probe 0.28px при 14px', () => {
+    const block = blockOf(css, '.ui-tag--filter');
+    expect(block, 'ls канона несёт база .tag').not.toContain('letter-spacing');
+  });
+
+  it('активное состояние — ARIA-крючком [aria-current=page], плашка primary + text-on-dark (канон inline background: var(--color-primary); color: #fff — media.html:156, education.html:35; прецедент ui-chip__pill:where)', () => {
+    const active = blockOf(css, ".ui-tag--filter:where([aria-current='page'])");
+    expect(active, 'правило активного фильтра найдено').toBeTruthy();
+    expect(active).toContain('background-color: var(--ui-color-primary);');
+    expect(active).toContain('color: var(--ui-color-text-on-dark);');
+    // :where() — специфичность одноклассовой: правило побеждает --blue
+    // порядком каскада, а не весом селектора (прецедент ui-chip/ui-tabs).
+    expect(active).not.toContain('!important');
+  });
+
+  it('модификатор объявлен ПОСЛЕ цветовых вариантов и on-photo — активное правило перекрывает их порядком каскада (равная спецификация)', () => {
+    const filterIdx = css.indexOf('.ui-tag--filter');
+    expect(filterIdx, 'модификатор найден').toBeGreaterThan(-1);
+    expect(filterIdx).toBeGreaterThan(css.lastIndexOf('.ui-tag--navy'));
+    expect(css.indexOf(".ui-tag--filter:where([aria-current='page'])")).toBeGreaterThan(
+      css.indexOf('.ui-tag--on-photo'),
+    );
+  });
+
+  it('цветов вне готовых пар нет: пара покоя — tag-blue (primary/blue-100), активная — tag-on-photo (text-on-dark/primary, 14.60:1); новых пар не заводится', () => {
+    const config = readFileSync(join(root, 'tests', 'contrast', 'pairs.config.mjs'), 'utf8');
+    expect(config).toMatch(/\{\s*id:\s*'tag-blue'/);
+    expect(config).toMatch(/\{\s*id:\s*'tag-on-photo'/);
+  });
+
+  it('README: фильтр-тег — интерактивная форма тега на ссылке, состояние aria-current, применение в пилоте (mediaMain)', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-tag', 'README.md'), 'utf8');
+    expect(readme).toContain('ui-tag--filter');
+    expect(readme).toContain('aria-current');
+    expect(readme).toContain('T16.14');
+  });
+
+  it('стенд: сценарий фильтра — покой и активное состояние', () => {
+    const html = readFileSync(join(root, 'showcase', 'pages', 'ui-tag', 'index.html'), 'utf8');
+    expect(html).toContain('id="ui-tag-filter"');
+    expect(html).toContain('id="ui-tag-filter-active"');
+  });
+});
+
 describe('components/ui-tag/ui-tag.css — слот __icon (наследие media__tag-dot)', () => {
   const css = stripCssComments(
     readFileSync(join(root, 'components', 'ui-tag', 'ui-tag.css'), 'utf8'),
