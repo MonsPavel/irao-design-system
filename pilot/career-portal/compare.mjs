@@ -177,6 +177,37 @@ const SHELL_PROBES = [
     tag: true,
     rect: true,
   },
+  // Заголовок карточки события (T16.12, REPORT §9.1 №1): канон 20/500
+  // color-text — probe-пара раунда 4, заводится при закрытии T16.12 (§9.2)
+  {
+    name: 'card-title',
+    original: '.event-card__title',
+    pilot: '.cp-event-card__body h3',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+    tag: true,
+  },
+  // Мини-тайтл карточки статьи (T16.12): 14/500 color-text
+  {
+    name: 'article-title',
+    original: '.article-card__title',
+    pilot: '.cp-article-card__title',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+    tag: true,
+  },
+  // Заголовок залитой карточки преимущества (T16.12): 20/500 primary
+  {
+    name: 'card-title-primary',
+    original: '.adv-card__title',
+    pilot: '.ui-card--filled h3',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  // Шорт карточки организации (T16.12): подпись muted (AA-цвет gray-700)
+  {
+    name: 'card-short',
+    original: '.org-card__short',
+    pilot: '.cp-org-card .ui-text--muted',
+    fields: { fs: 'font-size', color: 'color' },
+  },
 ];
 
 /** Пары блоков главной (высота секций). */
