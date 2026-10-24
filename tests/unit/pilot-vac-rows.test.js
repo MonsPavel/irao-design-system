@@ -46,7 +46,10 @@ describe('build.mjs — строка вакансии cp-vac-row по связк
   it('заголовок строки — h2 роли ui-h6 с ОБЫЧНОЙ ссылкой внутри (класс ui-link снят; T16.12: 20/500 color-text; ui-h4 на lg = 28px — REPORT §8.2 №6)', () => {
     expect(vacancyRowBody).toContain('<h2 class="ui-h6 cp-vac-row__title">');
     expect(vacancyRowBody).toContain('<a href="vacancy.html">');
-    expect(vacancyRowBody, 'ui-link в заголовке строки не применяется (fs 28, underline, primary — отклонение)').not.toContain('ui-link');
+    expect(
+      vacancyRowBody,
+      'ui-link в заголовке строки не применяется (fs 28, underline, primary — отклонение)',
+    ).not.toContain('ui-link');
     expect(vacancyRowBody, 'ui-h4 не возвращается (fs 28 на lg)').not.toContain('ui-h4');
   });
 
@@ -63,10 +66,10 @@ describe('build.mjs — строка вакансии cp-vac-row по связк
       'data-segment="${esc(v.segment)}"',
       'data-company="${esc(v.company)}"',
       'data-exp="${esc(v.experience)}"',
-      'data-position="${esc(v.title.split()[0])}"',
+      'data-position="${esc(v.title.trim().split(/\\s+/)[0])}"',
       'data-accessible="${v.accessible',
       'data-salary="',
-      'data-date="${esc(v.date.split(\'.\').reverse().join(\'\'))}"',
+      "data-date=\"${esc(v.date.split('.').reverse().join(''))}\"",
     ]) {
       expect(vacancyRowBody, `${attr} — как в оригинале`).toContain(attr);
     }
@@ -140,7 +143,10 @@ describe('pilot.css — сайт-зона строки cp-vac-row (T16.5 Scope; 
   });
 
   it('промо-карточка без геометрических override: ui-card--filled несёт bg/радиус/паддинг сам (паддинг 24 vs 20 — «принято ДС» REPORT §3.3/mapping)', () => {
-    expect(blockOf(pilotCss, '.cp-vac-side__promo'), 'правило удалено — остаётся hook пробы').toBeNull();
+    expect(
+      blockOf(pilotCss, '.cp-vac-side__promo'),
+      'правило удалено — остаётся hook пробы',
+    ).toBeNull();
   });
 
   it('в блоке строки/сайдбара нет hex и !important (инварианты системы)', () => {

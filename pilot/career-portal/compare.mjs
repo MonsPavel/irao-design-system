@@ -146,11 +146,13 @@ const SHELL_PROBES = [
       rectName: 'footerHeight',
     },
   },
-  // заголовок первой строки списка (REPORT §8.2 №6): тег + типографика
+  // заголовок первой строки списка (REPORT §8.2 №6): тег + типографика.
+  // Селектор по РОЛИ (T16.5): строка несёт ui-h6 — канон «заголовок
+  // карточки списков» T16.12 (20/500 color-text); ui-h4 давал 28px на lg.
   {
     name: 'row-title',
     original: '.vac-row__title',
-    pilot: '.cp-vac-row .ui-h4',
+    pilot: '.cp-vac-row .ui-h6',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     tag: true,
   },
@@ -175,6 +177,23 @@ const SHELL_PROBES = [
     pilot: '.cp-vac-side .ui-button',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     tag: true,
+    rect: true,
+  },
+  // Промо-карточка сайдбара (T16.5, REPORT §8.2 №6): ui-card--filled —
+  // bg blue-50 и радиус 16 от компонента; паддинг — база ДС 24px против 20
+  // оригинала («принято ДС» REPORT §3.3/mapping, как у всех ui-card).
+  {
+    name: 'side-promo',
+    original: '.vac-side__promo',
+    pilot: '.cp-vac-side__promo',
+    fields: { bg: 'background-color', padding: 'padding', radius: 'border-radius' },
+  },
+  // Primary-кнопка промо без подчёркивания (T16.2; REPORT §8.2 №3)
+  {
+    name: 'promo-btn',
+    original: '.vac-side__promo .btn--primary',
+    pilot: '.cp-vac-side__promo .ui-button--primary',
+    fields: { fs: 'font-size', tdl: 'text-decoration-line' },
     rect: true,
   },
   // Заголовок карточки события (T16.12, REPORT §9.1 №1): канон 20/500

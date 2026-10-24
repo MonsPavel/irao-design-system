@@ -243,11 +243,22 @@ function findBar({ action, placeholder, label, text, variant = 'accent' }) {
 </form>`;
 }
 
-/** строка вакансии (оригинал .vac-row): ui-card + связка сайт-зоны */
+/** строка вакансии (оригинал .vac-row, build.py:69–86): ui-card + связка
+ *  сайт-зоны lpp-row (канон ветки «строки» list-page, T14.10; приёмка T16.5).
+ *  Заголовок — роль ui-h6 (T16.12: канон «заголовок карточки списков» —
+ *  20/500 и цвет текста, роль цвет не задаёт; ui-h4 давал 28px на lg —
+ *  REPORT §8.2 №6, замер fs 20 vs 28) с ОБЫЧНОЙ ссылкой внутри: класс
+ *  ui-link снят (fs 28/underline/primary — отклонение), кликабельная зона —
+ *  поле заголовка, как в оригинале (.vac-row__title a); overlay
+ *  ui-card--link не включается — пилюля остаётся независимой целью.
+ *  data-* — паритет оригинала для мок-фильтрации js/filters.js
+ *  (build.py:72–79): region/city/spec/segment/company/exp/position (первое
+ *  слово титула — split по пробелу: в JS split() без аргумента отдаёт
+ *  строку целиком, канон — .trim().split(/\s+/)[0], как Python str.split()), accessible «1»/«0», salary — только цифры, date yyyymmdd. */
 function vacancyRow(v) {
-  return `<article class="ui-card ui-card--hover cp-vac-row">
+  return `<article class="ui-card ui-card--hover cp-vac-row" data-region="${esc(v.region)}" data-city="${esc(v.city)}" data-spec="${esc(v.specialization)}" data-segment="${esc(v.segment)}" data-company="${esc(v.company)}" data-exp="${esc(v.experience)}" data-position="${esc(v.title.trim().split(/\s+/)[0])}" data-accessible="${v.accessible ? '1' : '0'}" data-salary="${esc(v.salary.replace(/\D/g, ''))}" data-date="${esc(v.date.split('.').reverse().join(''))}">
   <div class="cp-vac-row__main">
-    <h2 class="ui-h4"><a class="ui-link" href="vacancy.html">${esc(v.title)}</a></h2>
+    <h2 class="ui-h6 cp-vac-row__title"><a href="vacancy.html">${esc(v.title)}</a></h2>
     <span class="cp-vac-row__place ui-small">${PLACE_PIN}${esc(v.place)}</span>
     <p class="cp-vac-row__short ui-small">${esc(v.short)}</p>
     <time class="cp-vac-row__date ui-small" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
@@ -1291,7 +1302,9 @@ function vacanciesMain() {
           <span class="cp-vac-side__label">Сортировка</span>
           ${selectField({ name: 'sort', options: ['По дате добавления', 'По зарплате'], pill: true, ariaLabel: 'Сортировка' })}
         </div>
-        <button class="ui-button ui-button--outline" type="button">Сбросить</button>
+        <!-- «Сбросить» — ui-button--text (T16.7; REPORT §8.2 №6/№8:
+             текстовая fs 14/400 underline muted — оригинал .vac-side__reset) -->
+        <button class="ui-button ui-button--text" type="button">Сбросить</button>
         <div class="ui-card ui-card--filled cp-vac-side__promo">
           <p class="ui-small">Если ты студент или выпускник — свяжись с нами и получи практику или стажировку в компаниях Группы.</p>
           <a class="ui-button ui-button--primary" href="practices.html">узнать подробнее</a>
