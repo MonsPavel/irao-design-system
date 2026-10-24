@@ -299,8 +299,8 @@ footer-link/row-title/row-item/pill-icon/reset-control; сущности нет 
 |---|---|---|---|---|
 | 1 | заголовки карточек | 20/500 dark (adv/offer — primary), article/media — 14/500 → клон ui-h4 28 / ui-h5 24 | ~96+ | ✅ закрыто T16.12 (24.10): ДС — ui-h6 закреплён за «заголовком карточки списков» (цвет наследует — канон color-text; adv/offer — модификатор ui-h6--primary; мини-тайтл статей — ui-small на h3); adoption одним батчем; probe до/после (.zcode/accept-t1612-*.json): заголовки 20/500 rgb(31,31,31) (adv/offer rgb(0,40,86)), статьи 14/500 — совпало; lh 25 против 26–27 — «принято ДС» (порог ≤4px); probe-пары card-title/article-title/card-title-primary/card-short — в compare.mjs (гейт закрывающей T16.8) |
 | 2 | подписи/шорты/даты карточек | 14/400 muted (org/timeline/intern/person/date) → клон 14/500 dark без muted-класса | ~40 | ✅ закрыто T16.12 (24.10): ui-small ui-text--muted (AA gray-700 — политика T2.3; fw 500 — small-роль ДС, «принято ДС» §9.1 №12); offer-short/adv-text — color-text без muted (канон); clamp 3 шорта направлений — сайт-зона (канон .dir-card__short pages.css:1045, в спеке приписан org-card — см. mapping); probe: rgb(97,97,97) на org/timeline/intern/person/date, rgb(31,31,31) на offer-short/adv-text — совпало с допуском AA |
-| 3 | деталка вакансии | salary 18/400 muted → 42/500 navy; секции h2 28/500 → 42/500; li lh 29→27 | ~10 | **T16.13 (new)** (li — «принято ДС» lh-body) |
-| 4 | aside анкеты | label 12/400 muted → 20/400; title primary не задан (28 dark); text 14/400 → ui-body; file-кнопка btn--light отсутствует | ~6 | **T16.13 (new)** |
+| 3 | деталка вакансии | salary 18/400 muted → 42/500 navy; секции h2 28/500 → 42/500; li lh 29→27 | ~10 | ✅ закрыто T16.13 (24.10): salary — литерал 18px сайт-зоны + `ui-text--muted` (спека предлагала роль `ui-lead` — отклонена по замеру: лестница роли на ≥1024 даёт 24px против литеральных 18, меняло бы одобренное значение; mapping, design-decision); секции h2 — роль `ui-h4` (28/500 — MATCH); li lh — «принято ДС» lh-body; probe до/после (.zcode/accept-t1613-*.json): salary 18/400, h2 28/500 — совпало (цвет muted gray-700 — AA №11); probe-пары salary/section-h2 — в compare.mjs (гейт закрывающей T16.8) |
+| 4 | aside анкеты | label 12/400 muted → 20/400; title primary не задан (28 dark); text 14/400 → ui-body; file-кнопка btn--light отсутствует | ~6 | ✅ закрыто T16.13 (24.10): ДС ui-form — метка fs-micro × fw-micro + muted (третья точка fs-micro), текст fs-small × fw 400 роли (решение «компонентный fs»: fw-small 500 ui-small не даёт канонную пару), значение fs-small × fw-small (сопутствующая правка — value в спеке не назван, дифф 20/400 ↔ 14/500 в тех же парах); title — цвет primary уже на крючке (reg-4 факт: 28/500 primary совпадало — пункт контекста задачи устарел), размер несёт роль ui-h4; file-кнопка — пилюля ui-file (T5.3) уже портит btn--light: probe file-box/file-button — MATCH (bg кнопки прозрачен на blue-50 коробке ≡ канону визуально); probe до/после: label 12/400, text 14/400, value 14/500 — совпало (muted — AA); probe-пары aside-title/text/label/value/file-box/file-button — в compare.mjs |
 | 5 | медиа-фильтры | tag--blue (blue-100, primary, r100, h40, fs 14/400) → белые чипы ui-chip__pill | 7 | **T16.14 (new)** |
 | 6 | adv-marquee | 40/18/13 fw500 uppercase primary на светлом → 42/24/20 белым | ~24 | **T16.15 (new)** |
 | 7 | карточки компаний | имя 14/500 → 20/400 (наследование ui-card) | ~50 | **T16.16 (new)** |
@@ -332,7 +332,10 @@ footer-link/row-title/row-item/pill-icon/reset-control; сущности нет 
   числами reg-4). **Начато T16.12 (24.10):** пары card-title/article-title/
   card-title-primary/card-short добавлены в compare.mjs (shell-пробы,
   первый вхождение на каждой странице; методика §2) — закрывающая T16.8
-  гейтит карточный класс находок №1/№2 машинно.
+  гейтит карточный класс находок №1/№2 машинно. **Продолжено T16.13 (24.10):**
+  пары salary/section-h2/aside-title/aside-text/aside-label/aside-value/
+  file-box/file-button добавлены в compare.mjs (shell-пробы, первое
+  вхождение; методика §2) — гейтит классы находок №3/№4 машинно.
 - Политики «принято ДС» (AA muted, fw small, lh-body) — без задач;
   появление «клон не применил muted там, где оригинал muted» —
   внутри T16.12 (подписи карточек) — ✅ применено (24.10, §9.1 №2).
