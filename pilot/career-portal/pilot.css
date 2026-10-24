@@ -1018,31 +1018,34 @@
 
 /* Строка вакансии (T16.5): паддинг 24/28 — .vac-row (pages.css:163);
    горизонталь 28px вне шкалы отступов §3.2 — перенос «как есть» (прецедент
-   --ui-button-pad-inline), вертикаль — --ui-space-5. Канон связки .lpp-row
-   (patterns/list-page/list-page.html:110–119, T14.10). box-sizing на корне
+   --ui-button-pad-inline), вертикаль — --ui-space-5. flex-direction: row —
+   сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть
+   ряд — канон .lpp-row, list-page.html:110–119). box-sizing на корне
    связки — ADR-0002. */
 .cp-vac-rows {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-2);
+  gap: var(--ui-space-4);
 }
 
 .cp-vac-row {
   box-sizing: border-box;
   display: flex;
+  flex-direction: row;
   gap: var(--ui-space-4);
   align-items: center;
   justify-content: space-between;
   padding: var(--ui-space-5) 1.75rem;
 }
 
-/* Main-блок: min-width: 0 — длинные заголовки переносятся, не распирают
-   флекс (канон .lpp-row__main, list-page.html:124–131). */
+/* Main-блок: шаг 8px — .vac-row__main (pages.css:168; канон
+   .lpp-row__main, list-page.html:124–131); min-width: 0 — длинные
+   заголовки переносятся, не распирают флекс. */
 .cp-vac-row__main {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-1);
+  gap: var(--ui-space-2);
   min-width: 0;
 }
 

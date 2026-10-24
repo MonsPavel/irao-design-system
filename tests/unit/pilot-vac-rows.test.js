@@ -102,20 +102,26 @@ describe('build.mjs — сайдбар фильтров (T16.5 Scope)', () => {
 });
 
 describe('pilot.css — сайт-зона строки cp-vac-row (T16.5 Scope; токены, ADR-0002)', () => {
-  it('строка: box-sizing на корне (ADR-0002) и паддинг 24/28 — var(--ui-space-5) 1.75rem (оригинал .vac-row pages.css:163; канон .lpp-row list-page.html:118)', () => {
+  it('строка: box-sizing на корне (ADR-0002), паддинг 24/28 — var(--ui-space-5) 1.75rem (оригинал .vac-row pages.css:163; канон .lpp-row list-page.html:118) и flex-direction: row — сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть ряд: list-page.html:105–106,113)', () => {
     const row = blockOf(pilotCss, '.cp-vac-row');
     expect(row, '.cp-vac-row найдено').toBeTruthy();
     expect(row).toContain('box-sizing: border-box;');
+    expect(row).toContain('flex-direction: row;');
     expect(row).toContain('padding: var(--ui-space-5) 1.75rem;');
     expect(row, 'паддинг 16px (--ui-space-4) — отклонение, снят').not.toContain(
       'padding: var(--ui-space-4);',
     );
   });
 
-  it('main-блок строки: box-sizing (ADR-0002) и min-width: 0 — длинные заголовки переносятся (канон .lpp-row__main, list-page.html:124–131)', () => {
+  it('main-блок строки: box-sizing (ADR-0002), шаг 8px (--ui-space-2 — .vac-row__main pages.css:168) и min-width: 0 — длинные заголовки переносятся (канон .lpp-row__main, list-page.html:124–131)', () => {
     const main = blockOf(pilotCss, '.cp-vac-row__main');
     expect(main).toContain('box-sizing: border-box;');
+    expect(main).toContain('gap: var(--ui-space-2);');
     expect(main).toContain('min-width: 0;');
+  });
+
+  it('лента строк: шаг 16px (--ui-space-4 — .vac-rows pages.css:154; канон .lpp-rows list-page.html:95–100)', () => {
+    expect(blockOf(pilotCss, '.cp-vac-rows')).toContain('gap: var(--ui-space-4);');
   });
 
   it('ссылка заголовка — цвет наследует заголовку (текст страницы, НЕ heading-navy), подчёркивания нет (оригинал .vac-row__title a pages.css:169; канон .lpp-row__title a list-page.html:140–143)', () => {
