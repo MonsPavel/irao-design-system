@@ -170,7 +170,7 @@ describe('components/ui-form/ui-form.css — aside-типографика кан
     expect(label).toContain('color: var(--ui-color-text-muted);');
   });
 
-  it(".ui-form__aside-text — компонентный fs-small (решение T16.13 «компонентный fs vs утилита»); fw 400 несёт роль разметки (ui-body) — пара fs-small-regular канона (AC: 14/400)", () => {
+  it('.ui-form__aside-text — компонентный fs-small (решение T16.13 «компонентный fs vs утилита»); fw 400 несёт роль разметки (ui-body) — пара fs-small-regular канона (AC: 14/400)', () => {
     const text = blockOf(css, '.ui-form__aside-text');
     expect(text, 'правило __aside-text найдено').toBeTruthy();
     expect(text).toContain('font-size: var(--ui-fs-small);');
