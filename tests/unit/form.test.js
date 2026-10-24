@@ -145,6 +145,59 @@ describe('components/ui-form/ui-form.css — раскладка (T5.4)', () => {
   });
 });
 
+describe('components/ui-form/ui-form.css — aside-типографика канона (T16.13)', () => {
+  // Канон — career-portal pages.css:411–419: .form-aside__title (fs-h4 ×
+  // fw-h4, primary), __text (fs-small-regular 14/400), __label (fs-micro 12,
+  // muted; fw наследует body 400 = fw-micro), __value (fs-small-regular ×
+  // fw-small = 14/500). Проба раунда 4 (REPORT §9.1 №4): клон рендерил
+  // метку 20/400, текст 20/400, значение 20/400 — хуки без типографики.
+  const path = join(root, 'components', 'ui-form', 'ui-form.css');
+  const css = stripCssComments(readFileSync(path, 'utf8'));
+
+  /** Последний блок по селектору: __aside-value стоит и в групповом ресете
+   *  (последним селектором — blockOf вернул бы его), и в собственном правиле. */
+  const lastBlockOf = (source, selector) => {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matches = [...source.matchAll(new RegExp(`(?:^|\\n)${escaped}\\s*\\{([^}]*)\\}`, 'g'))];
+    return matches.length ? matches[matches.length - 1][1] : null;
+  };
+
+  it('.ui-form__aside-label — fs-micro × fw-micro + muted (третья точка fs-micro; AC: 12/400 muted)', () => {
+    const label = blockOf(css, '.ui-form__aside-label');
+    expect(label, 'правило __aside-label найдено').toBeTruthy();
+    expect(label).toContain('font-size: var(--ui-fs-micro);');
+    expect(label).toContain('font-weight: var(--ui-fw-micro);');
+    expect(label).toContain('color: var(--ui-color-text-muted);');
+  });
+
+  it('.ui-form__aside-text — компонентный fs-small (решение T16.13 «компонентный fs vs утилита»); fw 400 несёт роль разметки (ui-body) — пара fs-small-regular канона (AC: 14/400)', () => {
+    const text = blockOf(css, '.ui-form__aside-text');
+    expect(text, 'правило __aside-text найдено').toBeTruthy();
+    expect(text).toContain('font-size: var(--ui-fs-small);');
+    expect(
+      text.includes('font-weight'),
+      'fw не задаётся компонентом — его несёт роль ui-body (400); ui-small отвергнут: fw-small 500 не даёт канонную пару',
+    ).toBe(false);
+  });
+
+  it('.ui-form__aside-value — fs-small × fw-small (канон .form-aside__value 14/500; сопутствующая правка REPORT §9.1 №4 — клон рендерил 20/400)', () => {
+    const value = lastBlockOf(css, '.ui-form__aside-value');
+    expect(value, 'собственное правило __aside-value найдено (не групповой ресет)').toBeTruthy();
+    expect(value).toContain('font-size: var(--ui-fs-small);');
+    expect(value).toContain('font-weight: var(--ui-fw-small);');
+  });
+
+  it('.ui-form__aside-title — primary (канон .form-aside__title color-primary; размер 28/500 несёт роль ui-h4 разметки — тройка не дублируется)', () => {
+    const title = blockOf(css, '.ui-form__aside-title');
+    expect(title, 'правило __aside-title найдено').toBeTruthy();
+    expect(title).toContain('color: var(--ui-color-primary);');
+    expect(
+      title.includes('font-size'),
+      'размер — у роли ui-h4 (28/500 совпадает с каноном), компонент fs не переобъявляет',
+    ).toBe(false);
+  });
+});
+
 describe('components/ui-form/ui-form.html — канонический паттерн (T5.4)', () => {
   const path = join(root, 'components', 'ui-form', 'ui-form.html');
   const html = readFileSync(path, 'utf8').replace(/\r\n/g, '\n');

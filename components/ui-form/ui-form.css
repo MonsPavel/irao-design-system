@@ -52,6 +52,11 @@
  * Типографика заголовков/текстов — роли base в разметке (ui-h4/ui-body/
  * ui-small — паттерн ui-alert/ui-card: компонент текстовые стили не
  * переобъявляет); элементам-крючкам остаётся только смысловой цвет.
+ * Исключение — aside-панель (T16.13): канон .form-aside_* (pages.css:411–419)
+ * несёт типографику метки/текста/значения на крючках (fs-micro × fw-micro +
+ * muted; fs-small; fs-small × fw-small — выбор «компонентный fs» по probe:
+ * fw-small 500 роли ui-small не даёт канонную пару fs-small-regular 14/400),
+ * титулу — роль ui-h4 в разметке (28/500 = канон) + цвет primary крючком.
  * VI-режим: цветов вне токенов нет (инвариант §5). !important нет;
  * box-sizing на корнях (ADR-0002).
  */
@@ -124,7 +129,14 @@
   background-color: var(--ui-color-surface-muted);
 }
 
-/* Элементы-крючки: типографику дают роли разметки (шапка). */
+/* Типографика aside (T16.13, канон pages.css:411–419): титул несёт роль
+   разметки (ui-h4 28/500 — совпадает с каноном fs-h4 × fw-h4), цвет —
+   primary канона; текст/метка/значение — типографика НА КРЮЧКЕ (исключение
+   из паттерна «роли в разметке»: канон .form-aside_* определяет размеры
+   сам, а пары fw текста у ролей расходятся — fw-small 500 не даёт канонную
+   fs-small-regular 14/400). Текст — fs-small (fs-small-regular), fw 400
+   остаётся у роли ui-body; метка — fs-micro × fw-micro + muted (третья
+   точка fs-micro); значение — fs-small × fw-small (14/500). */
 
 .ui-form__aside-title {
   box-sizing: border-box;
@@ -133,6 +145,7 @@
 
 .ui-form__aside-text {
   box-sizing: border-box;
+  font-size: var(--ui-fs-small);
 }
 
 /* ADR-0002 «класс компонента полностью определяет свой вид»: UA-дефолты
@@ -161,10 +174,14 @@
 .ui-form__aside-label {
   box-sizing: border-box;
   color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-micro);
 }
 
 .ui-form__aside-value {
   box-sizing: border-box;
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
 }
 
 /* ── Кнопки формы (одобренный .form-card__submit: слева, не на всю ширину) ── */

@@ -212,6 +212,67 @@ const SHELL_PROBES = [
     pilot: '.cp-org-card .ui-text--muted',
     fields: { fs: 'font-size', color: 'color' },
   },
+  // ── Деталка вакансии и aside анкеты (T16.13, REPORT §9.1 №3/№4) ──
+  // Зарплата (vacancy.html): канон — литерал 18px muted (pages.css:271);
+  // клон — литерал 1.125rem сайт-зоны + ui-text--muted (AA gray-700).
+  {
+    name: 'salary',
+    original: '.vacancy-page__salary',
+    pilot: '.cp-vacancy-page__salary',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  // Подзаголовок секции детальной (vacancy.html): канон fs-h4-тройка 28/500 —
+  // роль ui-h4 (было ui-h3 42/500)
+  {
+    name: 'section-h2',
+    original: '.vacancy-page__section h2',
+    pilot: '.cp-vacancy-page__section h2',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  // Aside анкеты (vacancy-apply.html): титул primary (28/500 — роль ui-h4),
+  // текст 14/400 (fs-small крючка × fw роли ui-body), метка 12/400 muted
+  // (fs-micro × fw-micro крючка), значение 14/500 (fs-small × fw-small)
+  {
+    name: 'aside-title',
+    original: '.form-aside__title',
+    pilot: '.ui-form__aside-title',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  {
+    name: 'aside-text',
+    original: '.form-aside__text',
+    pilot: '.ui-form__aside-text',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  {
+    name: 'aside-label',
+    original: '.form-aside__label',
+    pilot: '.ui-form__aside-label',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  {
+    name: 'aside-value',
+    original: '.form-aside__value',
+    pilot: '.ui-form__aside-value',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
+  // Кнопка «прикрепить файл» (T16.13: канон — пилюля btn--light на коробке
+  // field__file). Визуал собирается ui-file (T5.3): коробка blue-50 с
+  // прозрачной пилюлей-кнопкой ≡ канонной кнопке с bg blue-50 (bg самой
+  // кнопки литерально расходится — прозрачный на blue-50 коробке; сравниваем
+  // подпись/радиус кнопки и фон коробки).
+  {
+    name: 'file-box',
+    original: '.field__file',
+    pilot: '.ui-file',
+    fields: { bg: 'background-color', radius: 'border-radius' },
+  },
+  {
+    name: 'file-button',
+    original: '.field__file .btn--light',
+    pilot: '.ui-file__button',
+    fields: { color: 'color', radius: 'border-radius' },
+  },
 ];
 
 /** Пары блоков главной (высота секций). */
