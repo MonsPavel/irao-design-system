@@ -225,6 +225,47 @@ function breadcrumbs(items) {
   return `<nav class="ui-breadcrumbs cp-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
 }
 
+/** поднавигация разделов «школьникам и студентам» (T16.16) — вид nav.tabs-pill
+ *  оригинала (pages.css:969–1001) = модификатор ui-tabs--pill (T14.9): трек
+ *  blue-50, прозрачные пилюли, активная — заливка primary. Замер 24.10
+ *  (.zcode/accept-t1616-probe-before.json, career-track/education/events —
+ *  форма одна): трек blue-50 pad 4/radius pill, табы h48/20/400 text
+ *  прозрачные, активная primary/text-on-dark, hover — подпись primary;
+ *  расхождений с каноном T14.9 нет (высота 48 против 52 — порог ≤4px эпика,
+ *  fs 14 против 20 — «принято ДС» решением T14.9) — DS-правка не требуется.
+ *
+ *  Межстраничные ССЫЛКИ, не табы: модуль ui-tabs.js НЕ подключается —
+ *  data-ui-tabs требует панели у каждого таба (контракт T13.6), а ссылки
+ *  ведут на страницы; активный раздел — семантика aria-current="page"
+ *  (прецедент ui-chip T14.8/ui-breadcrumbs). CSS ДС рисует активную пилюлю
+ *  по aria-selected — пару активного состояния несёт сайт-зона .cp-subnav
+ *  (реплика :where([aria-selected='true']) на токенах). Сетка repeat(5,1fr)
+ *  («сетка 264») и nav-маргины 24/48 — зона страницы (README ui-tabs
+ *  «Модификатор --pill»): тоже сайт-зона .cp-subnav.
+ *
+ *  Параметр current — href текущей страницы (aria-current="page", ровно
+ *  один). Потребители: educationMain/eventsMain/careerTrackMain. */
+function subnav(current) {
+  const items = [
+    ['practices.html', 'Практики'],
+    ['internships.html', 'Стажировки'],
+    ['education.html', 'Целевое обучение'],
+    ['career-track.html', 'Карьерный трек'],
+    ['events.html', 'Мероприятия'],
+  ];
+  const tabs = items
+    .map(
+      ([href, label]) =>
+        `      <a class="ui-tabs__tab" href="${href}"${href === current ? ' aria-current="page"' : ''}>${label}</a>`,
+    )
+    .join('\n');
+  return `<nav class="ui-tabs ui-tabs--pill cp-subnav" aria-label="Разделы школьникам и студентам">
+  <div class="ui-tabs__list">
+${tabs}
+  </div>
+</nav>`;
+}
+
 /** строка «найти по списку» (оригинал .vac-find vacancies.html:278–281 и
  *  .events-search-bar events-search.html:153–156): форма + ui-field
  *  type=search + кнопка сабмита; нативный GET без JS — работа фильтра зона
@@ -2020,13 +2061,7 @@ function educationMain() {
       <h1 class="ui-page-title">Целевое обучение</h1>
       <p class="cp-page-subtitle ui-lead">Учись по целевому договору — с гарантированным местом работы в Группе после выпуска.</p>
     </div>
-    <nav class="ui-chip" aria-label="Разделы школьникам и студентам">
-      <a class="ui-chip__pill" href="practices.html">Практики</a>
-      <a class="ui-chip__pill" href="internships.html">Стажировки</a>
-      <a class="ui-chip__pill" href="education.html" aria-current="page">Целевое обучение</a>
-      <a class="ui-chip__pill" href="career-track.html">Карьерный трек</a>
-      <a class="ui-chip__pill" href="events.html">Мероприятия</a>
-    </nav>
+    ${subnav('education.html')}
   </div>
 </section>
 
@@ -2171,13 +2206,7 @@ function eventsMain() {
       <h1 class="ui-page-title">Мероприятия</h1>
       <p class="cp-page-subtitle ui-lead">Дни открытых дверей, экскурсии и чемпионаты Группы «Интер РАО».</p>
     </div>
-    <nav class="ui-chip" aria-label="Разделы школьникам и студентам">
-      <a class="ui-chip__pill" href="practices.html">Практики</a>
-      <a class="ui-chip__pill" href="internships.html">Стажировки</a>
-      <a class="ui-chip__pill" href="education.html">Целевое обучение</a>
-      <a class="ui-chip__pill" href="career-track.html">Карьерный трек</a>
-      <a class="ui-chip__pill" href="events.html" aria-current="page">Мероприятия</a>
-    </nav>
+    ${subnav('events.html')}
 
     <h2 class="ui-h2">Предстоящие</h2>
     <div class="ui-grid ui-grid--3">
@@ -2418,13 +2447,7 @@ ${tracks}
       <h1 class="ui-page-title">Карьерные треки</h1>
       <p class="cp-page-subtitle ui-lead">Путь от студента до руководителя направления — со всеми ступенями, сроками и требованиями.</p>
     </div>
-    <nav class="ui-chip" aria-label="Разделы школьникам и студентам">
-      <a class="ui-chip__pill" href="practices.html">Практики</a>
-      <a class="ui-chip__pill" href="internships.html">Стажировки</a>
-      <a class="ui-chip__pill" href="education.html">Целевое обучение</a>
-      <a class="ui-chip__pill" href="career-track.html" aria-current="page">Карьерный трек</a>
-      <a class="ui-chip__pill" href="events.html">Мероприятия</a>
-    </nav>
+    ${subnav('career-track.html')}
 
     <div class="ui-tabs" data-ui-tabs>
       <div class="ui-tabs__list">
@@ -2451,10 +2474,18 @@ function companiesMain() {
   }
   const sections = [...groups.entries()]
     .map(([segment, names]) => {
+      // Имя компании — роль ui-small на САМОЙ ссылке-карточке (T16.16: канон
+      // мини-карточки 14/500 — inline-стиль карточек companies.html:153+
+      // `--fs-small-regular` × `--fw-small` = тройка small ДС; цвет наследует
+      // от .cp-company-card). Решение по замеру (accept-t1616-probe):
+      // вариант спеки «роль на внутреннем span» оставляет строке статтер
+      // родительского блока (27px) — карточка 69px против 61px оригинала;
+      // роль на ссылке (один текстовый узел, БЭМ-расширений не требует)
+      // даёт байт-пару 14/500/1.35 и высоту 61.
       const cards = names
         .map(
           (name) =>
-            `        <a class="ui-card ui-card--hover cp-company-card" href="company.html">${esc(name)}</a>`,
+            `        <a class="ui-card ui-card--hover ui-small cp-company-card" href="company.html">${esc(name)}</a>`,
         )
         .join('\n');
       return `    <h2 class="ui-h3">${esc(segment)}</h2>
