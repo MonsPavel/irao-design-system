@@ -3,9 +3,15 @@
      сайт (эмбед/ссылка), компонент навешивает только вид. Имя кнопки —
      параметр разметки (aria-label, «Смотреть видео …», не «play»); постер
      декоративен (alt="") — имя несёт обёртка; overlay/play aria-hidden.
-     Play-иконка — слот (svg-стрелка сайта или глиф), канон — глиф ▶. -->
+     Play-иконка — слот (svg-стрелка сайта или глиф), канон — глиф ▶.
+     width/height постера — интринсик кадра (гейт T4.6: CLS; CSS компонента
+     ведёт ширину 100%, высота — по аспекту). Img — в одну строку: prettier
+     печатает void-элементы самозакрытыми (/>), а гейт void-style требует
+     HTML5 без слэша — prettier-ignore сохраняет img без слэша (прецедент
+     ui-image, T4.6). -->
 <button class="ui-video" type="button" aria-label="Смотреть видео о работе в компании">
-  <img class="ui-video__poster" src="poster.jpg" alt="" loading="lazy" />
+  <!-- prettier-ignore -->
+  <img class="ui-video__poster" src="poster.jpg" alt="" width="960" height="540" loading="lazy">
   <span class="ui-video__overlay" aria-hidden="true"></span>
   <span class="ui-video__play" aria-hidden="true">▶</span>
   <span class="ui-video__time">24:23</span>

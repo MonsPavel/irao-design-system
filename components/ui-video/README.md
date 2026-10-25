@@ -27,7 +27,7 @@ accent и временем в правом нижнем углу. Потреби
 
 ```html
 <button class="ui-video" type="button" aria-label="Смотреть видео о работе в компании">
-  <img class="ui-video__poster" src="poster.jpg" alt="" loading="lazy">
+  <img class="ui-video__poster" src="poster.jpg" alt="" width="960" height="540" loading="lazy">
   <span class="ui-video__overlay" aria-hidden="true"></span>
   <span class="ui-video__play" aria-hidden="true">▶</span>
   <span class="ui-video__time">24:23</span>
@@ -43,7 +43,9 @@ accent и временем в правом нижнем углу. Потреби
   (T17.6): производная следует за primary в темах автоматически.
 - Высоту кадра ведёт постер (`width: 100%`, высота авто): фиксированные
   высоты оригинала (720/420/240) не переносились — раскладка и ритм секции
-  остаются сайт-зоной.
+  остаются сайт-зоной. Атрибуты `width`/`height` постера — интринсик кадра:
+  гейт T4.6 (резерв места до загрузки, CLS), CSS ведёт ширину, высота — по
+  аспекту атрибутов.
 - Hover/переходы не перенесены: в одобренном виде пилота их нет (клик —
   заглушка); состояний компонент не диктует.
 
