@@ -648,57 +648,6 @@
   color: var(--ui-color-surface);
 }
 
-/* ── video (сайт-зона) ── */
-
-.cp-video__player {
-  display: block;
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  border-radius: var(--ui-radius-lg);
-  background-color: var(--ui-color-primary);
-}
-
-.cp-video__poster {
-  display: block;
-  object-fit: cover;
-  width: 100%;
-}
-
-.cp-video__overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 40%,
-    color-mix(in srgb, var(--ui-color-primary) 72%, transparent) 100%
-  );
-}
-
-.cp-video__play {
-  display: inline-flex;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  align-items: center;
-  justify-content: center;
-  width: 5.5rem;
-  height: 5.5rem;
-  border-radius: 50%;
-  background-color: var(--ui-color-accent);
-  color: var(--ui-color-text-on-dark);
-  transform: translate(-50%, -50%);
-}
-
-.cp-video__time {
-  position: absolute;
-  right: var(--ui-space-4);
-  bottom: var(--ui-space-4);
-  color: var(--ui-color-text-on-dark);
-}
-
 /* ── media: сетка главной (сайт-зона; карточки — ui-card) ── */
 
 .cp-media__grid {
