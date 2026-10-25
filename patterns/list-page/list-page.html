@@ -74,9 +74,16 @@
   /* Ширину пилюли задаёт сайт (career-portal: flex-basis 260px) — без неё
      бокс нативного select'а сжимается до самой длинной опции и подпись
      триггера подрезается. Нативный select скрыт модулем (opacity 0) — стилим
-     только геометрию. */
+     только геометрию. max-width: 100% — reflow-гранула 32px-гейта T3.6
+     (12rem @32px = 384px распирал обёртку до 416px на 375): на нормальной
+     базе 12rem меньше контейнера — рендер прежний. */
+  .lpp-pill {
+    max-width: 100%;
+  }
+
   .lpp-pill select {
     width: 12rem;
+    max-width: 100%;
   }
 
   /* Вертикальный ритм page-head (reset системы обнуляет margin p/h). */
@@ -140,6 +147,20 @@
   .lpp-row__title a {
     color: inherit;
     text-decoration: none;
+  }
+
+  /* CTA-кнопки под rem-стрессом (32px-база T3.6 — reflow WCAG 1.4.4): тот же
+     приём, что .dpp-related__grid .ui-button (фикс ночного hscroll 48b0e79) —
+     только anywhere снижает min-content; при стрессе кнопка растёт в высоту,
+     на нормальной базе рендер прежний (эталоны от гранулы не зависят —
+     проверено прогоном). 32px-гейт T3.6: пилюля строки «Откликнуться» (pad
+     1.75rem×2 + слово) не входила в ячейку сетки @768 (scrollWidth +317),
+     outline-кнопка карточек выдачи — заходила в scrollbar-gutter-зону body
+     (+13px body-scrollWidth). Селектор накрывает обе: строки (pill) и
+     карточки выдачи (outline) — #lpp-grid как крючок сайт-зоны. */
+  .lpp-rows .ui-button,
+  #lpp-grid .ui-button {
+    overflow-wrap: anywhere;
   }
 
   @media (hover: hover) {
@@ -228,7 +249,11 @@
      внутри overflow: hidden/auto (README паттерна detail-page). */
   @media (min-width: 768px) {
     .lpp-layout {
-      grid-template-columns: 17.5rem minmax(0, 1fr);
+      /* Доли на md (канон detail-page): фиксированный rem-трек под стрессом
+         32px-базы T3.6 не переживает (17.5rem = 560px @32px — выдаче на 768
+         оставались ~160px, строки ломались, scrollWidth +317) — доли сжимаются
+         обе. Rem-токен сайдбара включается от lg. */
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .lpp-side {
@@ -236,6 +261,15 @@
       top: var(--ui-space-5);
       max-height: calc(100vh - 2 * var(--ui-space-5));
       overflow-y: auto;
+    }
+  }
+
+  /* lg (1024): сайдбар получает ширину одобренного .vac-side — 17.5rem
+     (pages.css:185); фиксированный трек безопасен: на 1024/32px = 560px
+     выдаче остаётся ~360px (min-content строк проходит). */
+  @media (min-width: 1024px) {
+    .lpp-layout {
+      grid-template-columns: 17.5rem minmax(0, 1fr);
     }
   }
 </style>
@@ -354,7 +388,7 @@
        определяет контекст страницы, шрифт — роль). href карточек —
        demo-адреса, как в каноническом паттерне ui-card; реальные URL — зона
        шаблона. -->
-  <div class="ui-grid ui-grid--3" id="lpp-grid">
+  <div class="ui-grid ui-grid--3" id="lpp-grid" data-ui-check-layout>
     <article class="ui-card ui-card--hover ui-card--link">
       <p>
         <span class="ui-tag ui-tag--blue">Электроэнергетика</span>

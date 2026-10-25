@@ -38,10 +38,20 @@ import { test } from '../helpers/harness.js';
 
 /**
  * Ключевые стенды гейта (Scope T3.6: base, типографика, grid; стенд формы
- * добавится сюда с появлением формы — EPIC-5). Расширять синхронно с
- * разметкой узлов — пин синхронизации: tests/unit/scaling.test.js.
+ * добавлен с EPIC-5; класс «кнопка-в-карточке под rem-стрессом» добавляет
+ * паттерны с сетками карточек — ночной hscroll detail-page @768 32px-база
+ * был проявлением, 24.10). Расширять синхронно с разметкой узлов — пин
+ * синхронизации: tests/unit/scaling.test.js.
  */
-const CHECK_STANDS = Object.freeze(['base', 'typography', 'layout']);
+const CHECK_STANDS = Object.freeze([
+  'base',
+  'typography',
+  'layout',
+  'patterns/list-page',
+  'patterns/detail-page',
+  'patterns/form-page',
+  'patterns/landing-section',
+]);
 
 /** Базы зум-сценария A (CSS-вьюпорт = база/2: 640 и 384 — обе ≥ 320 T3.4). */
 const ZOOM_BASE_WIDTHS = Object.freeze([1280, 768]);
@@ -70,18 +80,37 @@ const collectViolations = (page) =>
 
     // 1. Горизонтальный скролл страницы (проверка design-qa career-portal
     //    scrollWidth === clientWidth, автоматизирована T3.4, тут — под зумом).
-    const pageOverflow = (el, name) => {
-      const delta = el.scrollWidth - el.clientWidth;
-      if (delta > 0) {
-        violations.push({
-          kind: 'hscroll',
-          node: name,
-          detail: `scrollWidth ${el.scrollWidth} > clientWidth ${el.clientWidth} (+${delta}px)`,
-        });
-      }
-    };
-    pageOverflow(document.documentElement, 'html');
-    pageOverflow(document.body, 'body');
+    //    Канон переполнения страницы — html: скроллится он. body-мера ловит
+    //    ложные positives при классической полосе прокрутки: scrollbar-gutter
+    //    сужает body.clientWidth на её ширину (~15px), и контент, легально
+    //    доходящий до html-края (scrollWidth ≤ html.clientWidth), попадает в
+    //    gutter-зону body — «переполнения» нет, скролла нет (случай
+    //    patterns/list-page @375/32px: строки до 374 при html 375; и
+    //    chromium на 768 всегда имел body-гаттер — rem-стресс поднял класс).
+    //    body-нарушение репортим только когда html тоже переполнен
+    //    (действительный скролл) ИЛИ body шире html-клиента (контент
+    //    выдавлен ЗА html-край — реальная поломка).
+    const htmlOverflow =
+      document.documentElement.scrollWidth - document.documentElement.clientWidth;
+    const bodyOverflow = document.body.scrollWidth - document.body.clientWidth;
+    const bodyClient = document.body.clientWidth;
+    const htmlClient = document.documentElement.clientWidth;
+    if (htmlOverflow > 0) {
+      violations.push({
+        kind: 'hscroll',
+        node: 'html',
+        detail: `scrollWidth ${document.documentElement.scrollWidth} > clientWidth ${htmlClient} (+${htmlOverflow}px)`,
+      });
+    }
+    if (bodyOverflow > 0 && (htmlOverflow > 0 || bodyClient > htmlClient)) {
+      violations.push({
+        kind: 'hscroll',
+        node: 'body',
+        detail:
+          `scrollWidth ${document.body.scrollWidth} > clientWidth ${bodyClient} (+${bodyOverflow}px)` +
+          ` [html scrollWidth ${document.documentElement.scrollWidth} / clientWidth ${htmlClient}]`,
+      });
+    }
 
     // 2. Ключевые узлы — контракт data-ui-check-layout.
     const nodes = [...document.querySelectorAll('[data-ui-check-layout]')];

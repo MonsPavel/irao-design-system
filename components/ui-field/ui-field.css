@@ -100,9 +100,19 @@
   color: var(--ui-color-accent);
 }
 
-/* Скринридер-текст маркера: вне потока и клипом — вид даёт разметка. */
+/* Скринридер-текст маркера: sr-only клипом (канон ui-file__input — GOV.UK/
+   USWDS): бокс 1px вне потока, overflow+margin -1px гасят вклад бокса в
+   scroll-переполнение (гейт T3.6 32px-база: голый absolute+nowrap без
+   1px-геометрии распирал scrollWidth +2px @768/32px). НЕ display:none —
+   текст остаётся в a11y-дереве (имя поля слышат с маркером). */
 .ui-field__req-text {
+  box-sizing: border-box;
   position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
   white-space: nowrap;
   clip-path: inset(50%);
 }

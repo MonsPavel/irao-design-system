@@ -1,33 +1,36 @@
 /* zcode-workflow
-description: "Ночной AFK-конвейер irao-ui (аналог health-log night-cycle): берёт
-  задачи из docs/ui-system/STATUS.md по зависимостям из файлов задач; для каждой
-  — ветка от main, TDD-реализация, УСИЛЕННОЕ ревью (severity-модель ecc
-  code-reviewer: critical/high всегда блокируют и правятся, до 3 раундов),
-  независимая приёмка по Acceptance Criteria/DoD, gate (validate-backlog + npm
-  lint/test:unit, когда настроены), мердж --no-ff в main и push. Неблокирующие
-  medium/low замечания собираются в docs/process/nightly/BACKLOG.md. Окно
-  18:00–08:00: новые задачи не начинаются позже 06:00 (cutoffHour=6, решение
-  07.10 — было 04:00), 06:00–08:00 — зона доделывания начатого, после 08:00 цикл
-  завершается. Утренний предел 08:00–12:00 (второй рубеж). force=true — без
-  лимитов времени. Сбой на задаче блокирует только её — ночь продолжается."
-whenToUse: "Вечерний запуск на ночь из корня репозитория irao-design-system:
-  «Запусти workflow night-cycle до 08:00» (последняя задача — не позже 06:00).
-  Днём — только с force=true. Требует чистого рабочего дерева (незакоммиченные
-  .zcode/ игнорируются) и запущенной машины без сна."
+description: >-
+  Ночной AFK-конвейер irao-ui (аналог health-log night-cycle): берёт
+    задачи из docs/ui-system/STATUS.md по зависимостям из файлов задач; для каждой
+    — ветка от main, TDD-реализация, УСИЛЕННОЕ ревью (severity-модель ecc
+    code-reviewer: critical/high всегда блокируют и правятся, до 3 раундов),
+    независимая приёмка по Acceptance Criteria/DoD, gate (validate-backlog + npm
+    lint/test:unit, когда настроены; + полный контейнерный npm run test:docker,
+    когда диф ветки трогает каталоги, влияющие на рендер — components/patterns/
+    tokens/base/showcase/tests-e2e/tests-visual; docker-демон недоступен —
+    advisory-пропуск), мердж --no-ff в main и push. Неблокирующие
+    medium/low замечания собираются в docs/process/nightly/BACKLOG.md. Окно
+    18:00–08:00: новые задачи не начинаются позже 06:00 (cutoffHour=6, решение
+    07.10 — было 04:00), 06:00–08:00 — зона доделывания начатого, после 08:00 цикл
+    завершается. Утренний предел 08:00–12:00 (второй рубеж). force=true — без
+    лимитов времени. Сбой на задаче блокирует только её — ночь продолжается.
+whenToUse: |-
+  Вечерний запуск на ночь из корня репозитория irao-design-system:
+    «Запусти workflow night-cycle до 08:00» (последняя задача — не позже 06:00).
+    Днём — только с force=true. Требует чистого рабочего дерева (незакоммиченные
+    .zcode/ игнорируются) и запущенной машины без сна.
 args:
   cutoffHour:
     type: number
     description: Локальный час, после которого конвейер не начинает новые задачи (6
       = последняя задача не берётся позже 06:00 — решение 07.10; начатая задача
       спокойно доводится до конца).
-    required: false
     default: 6
   force:
     type: boolean
     description: "true — игнорировать проверки времени (ночное окно 18:00–08:00 и
       утренний предел 08:00–12:00): запуск в любое время, остановка по
       исчерпанию реестра, лимиту задач или вручную."
-    required: false
     default: false
   windowEndHour:
     type: number
@@ -35,7 +38,6 @@ args:
       18:00–08:00, решение 07.10): после этого времени цикл завершается, если
       ещё работает между задачами; 06:00–08:00 — зона доделывания начатого
       (новые задачи не берутся с 06:00)."
-    required: false
     default: 8
 */
 interface ImplResult {
@@ -261,6 +263,47 @@ async function runGate(): Promise<{ ok: boolean; details: string }> {
       const l = await world.run("cmd", ["/c", "npm", "run", "lint"], { timeoutMs: 600000 });
       if (l.exitCode !== 0) return { ok: false, details: "npm run lint упал:\n" + (l.stdout + l.stderr).slice(0, 2000) };
       parts.push("npm run lint зелёный");
+    }
+    // Контейнерный visual/e2e-гейт (урок трёх поломок main post-factum:
+    // search-overlay PR #5, typography PR #6, tokens-stand f5a0c44 —
+    // задача меняла рендер, эталоны, которые это видят, не переснимались,
+    // visual-CI краснел после мерджа). Если диф ветки трогает каталоги,
+    // влияющие на рендер, — полный контейнерный прогон chromium
+    // (npm run test:docker, БЕЗ --update-snapshots: устаревший эталон
+    // обязан уронить gate ДО мерджа, а не перезаписаться). Компонент →
+    // все эталоны, где он виден, точной картой не покрывается (урок
+    // PR #5: grep по модификатору мало — эталон паттерна на базе
+    // компонента тоже видит изменение), поэтому полный набор.
+    const VISUAL_DIRS = ["components/", "patterns/", "tokens/", "base/", "showcase/", "tests/e2e/", "tests/visual/"];
+    const diff = await world.run("git", ["diff", "--name-only", "main...HEAD"]);
+    const touched = diff.exitCode === 0
+      ? diff.stdout.split("\n").map((s) => s.trim()).filter(Boolean)
+      : [];
+    const visualTouched = touched.filter((p) => VISUAL_DIRS.some((dir) => p.startsWith(dir)));
+    if (typeof scripts["test:docker"] === "string" && visualTouched.length > 0) {
+      // Контейнер-паритет требует живого демона: недоступен — advisory-пропуск
+      // (ночь не должна вставать из-за выключенного Docker Desktop).
+      const daemon = await world.run("docker", ["version", "--format", "ok"], { timeoutMs: 30000 });
+      if (daemon.exitCode !== 0) {
+        parts.push("npm run test:docker ПРОПУЩЕН — docker-демон недоступен (advisory; прогнать вручную до v1.0)");
+      } else {
+        const d = await world.run("cmd", ["/c", "npm", "run", "test:docker"], { timeoutMs: 1800000 });
+        if (d.exitCode !== 0) {
+          return {
+            ok: false,
+            details:
+              "npm run test:docker упал (диф трогает визуальные каталоги: " +
+              visualTouched.slice(0, 5).join(", ") +
+              (visualTouched.length > 5 ? "…" : "") +
+              ") — вероятно, устаревшие эталоны: пересними их в контейнере " +
+              "(npm run test:docker -- <спека> --update-snapshots) или почини рендер:\n" +
+              (d.stdout + d.stderr).slice(-2000),
+          };
+        }
+        parts.push(
+          "npm run test:docker зелёный (" + visualTouched.length + " визуальных файлов в дифе)",
+        );
+      }
     }
   } catch {
     parts.push("package.json ещё нет — npm-шаги gate пропущены (до T1.1/T1.2/T1.6)");
@@ -532,7 +575,7 @@ lines.push("### Последние коммиты main", "", "```", recent.stdou
 lines.push("### Как проверялось", "",
   "- Каждая задача: усиленное независимое ревью (severity-модель ecc code-reviewer) — critical/high блокируют мердж и правятся всегда (до " + maxReviewRounds + " раундов).",
   "- Каждая задача: независимая приёмка по ## Acceptance Criteria / ## Definition of Done с доказательствами.",
-  "- Gate перед мерджем: node tools/validate-backlog.mjs + npm run lint/test:unit (когда настроены).",
+  "- Gate перед мерджем: node tools/validate-backlog.mjs + npm run lint/test:unit (когда настроены); при дифе, трогающем визуальные каталоги, — полный контейнерный npm run test:docker (устаревшие эталоны роняют gate до мерджа; docker недоступен — advisory-пропуск).",
   "- Мердж --no-ff в main, push после каждой задачи (мог не пройти — помечено в примечаниях).", "");
 await artifact.markdown("night-report", lines.join("\n"), {
   title: "Итоги ночного цикла",
@@ -583,7 +626,7 @@ const result: WorkflowReport = {
     "после каждого мерджа — push origin main (при сбоях сети помечено в примечаниях)",
   ],
   notCovered: [
-    "e2e/Playwright и визуальная регрессия не входят в ночной gate — их включает T1.4/T1.5 по плану",
+    "ночная матрица firefox/webkit и nightly-прогон остаются за Nightly cycle (в ночном gate — полный контейнерный chromium при визуальных диффах)",
     remaining > 0 ? `не тронуты ${remaining} задач реестра (следующие прогоны)` : "реестр исчерпан",
     blockedNow.length > 0 ? "заблокированные ветки сохранены локально и запушены, но не влиты" : "",
   ].filter((s) => s !== ""),

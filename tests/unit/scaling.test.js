@@ -31,8 +31,11 @@ const checkStands = () => {
   return [...match[1].matchAll(/'([^']+)'/g)].map((item) => item[1]);
 };
 
-/** Все источники стендов полигона: showcase/pages/<name>/index.html и канонические
- * паттерны components/<name>/<name>.html (generateShowcase showcase/build.mjs). */
+/** Все стенды полигона по дискавери stands.js (listStands — единый источник
+ * с e2e/axe-обходами) + файл-носитель каждого: расширенный стенд
+ * showcase/pages/<name>/index.html, канонический паттерн
+ * components/<name>/<name>.html или patterns/<name>/<name>.html (T7.x).
+ * Имена совпадают с listStands() — как их видит stand() и CHECK_STANDS. */
 const standSources = () => {
   const sources = [];
   const pagesDir = join(root, 'showcase', 'pages');
@@ -46,6 +49,12 @@ const standSources = () => {
     if (!entry.isDirectory() || !entry.name.startsWith('ui-')) continue;
     const pattern = join(componentsDir, entry.name, `${entry.name}.html`);
     if (existsSync(pattern)) sources.push({ name: entry.name, file: pattern });
+  }
+  const patternsDir = join(root, 'patterns');
+  for (const entry of readdirSync(patternsDir, { withFileTypes: true })) {
+    if (!entry.isDirectory()) continue;
+    const pattern = join(patternsDir, entry.name, `${entry.name}.html`);
+    if (existsSync(pattern)) sources.push({ name: `patterns/${entry.name}`, file: pattern });
   }
   return sources;
 };
