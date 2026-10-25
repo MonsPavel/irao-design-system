@@ -76,6 +76,25 @@ describe('build.mjs — заголовки карточек новых стра�
   });
 });
 
+describe('build.mjs — старые страницы media/career-track без пропуска уровней (решение владельца 25.10, T15.9-бэклог)', () => {
+  it('media.html: выдача articleCard с h2 (карточки сразу за h1 — axe heading-order «.ui-card__link > h3»)', () => {
+    expect(build).toContain(`ART.items.map((item) => articleCard(item, 'h2'))`);
+  });
+
+  it('career-track.html: трек-карточки h2 (сразу за h1, до секции «Материалы»), вид — та же роль ui-h4', () => {
+    const trackBody = build.match(/function careerTrackMain[\s\S]*?(?=\n\/\* ──)/)?.[0] ?? '';
+    expect(trackBody).toContain('<h2 class="ui-h4">${esc(track.name)}</h2>');
+  });
+
+  it('articleCard параметризован по образцу eventCard (map-безопасный cardHeading, дефолт h3); «Материалы по теме» career-track — дефолт h3 после секционного h2 — не меняется', () => {
+    expect(build).toMatch(/function articleCard\(a, headingTag = 'h3'\)/);
+    // тег — через локальный heading (cardHeading), как eventCard/offerCard
+    expect(build).toContain('const heading = cardHeading(headingTag);');
+    expect(build).toMatch(/<\$\{heading\} class="ui-small cp-article-card__title">/);
+    expect(build).toContain('ART.items.slice(0, 4).map(articleCard)');
+  });
+});
+
 describe('KNOWN_AXE_EXCEPTIONS — атрибутные цели того же класса accent (T15.9)', () => {
   /** Цвет-контраст узел: id + цель (форма результатов axe). */
   const contrastNode = (target) => ({

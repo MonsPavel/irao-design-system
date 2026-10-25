@@ -632,6 +632,15 @@ standTest.describe('ui-button (T4.2)', () => {
         await clicksOf(page, BTN.primaryDisabled),
         'клик по disabled игнорируется нативно',
       ).toBe(0);
+
+      // Hover не красит disabled (AC «не отвечает ховером как кликабельная»,
+      // решение владельца 25.10 по T13.5-бэклогу): :not(:disabled) в hover-
+      // правилах — фон остаётся покоя, не уходит в hover-пару под opacity 0.3.
+      await disabled.hover();
+      const hovered = await disabled.evaluate((el) => getComputedStyle(el).backgroundColor);
+      expect(hovered, 'hover по disabled — фон покоя primary, hover-пара не применяется').toBe(
+        'rgb(0, 40, 86)',
+      );
     });
   });
 

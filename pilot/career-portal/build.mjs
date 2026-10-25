@@ -369,8 +369,11 @@ function eventCard(e, headingTag) {
  *  Заголовок — мини-тайтл 14/500 (T16.12): .article-card__title оригинала —
  *  fs-small/fw-small (media.css/pages.css:608); роль ui-small на семантике
  *  заголовка — канон «визуал ≠ семантика» (typography-roles.md), один выбор
- *  с mediaHomeCard (решение по review спеки T16.12). */
-function articleCard(a) {
+ *  с mediaHomeCard (решение по review спеки T16.12).
+ *  headingTag (решение владельца 25.10, T15.9-бэклог): дефолт h3 — карточки
+ *  после секционного h2; 'h2' — выдача сразу за h1 страницы (media.html),
+ *  прецедент eventCard/cardHeading. */
+function articleCard(a, headingTag = 'h3') {
   // Тег на фото — тинт варианта + точка, как .media__tag оригинала
   // (media.css:72–87); ui-tag--on-photo — API ДС без пилотного применения
   // (реклассификация REPORT §3.3, ревью T16.10). Вариант рубрики —
@@ -379,13 +382,14 @@ function articleCard(a) {
   // поведение, которого у оригинала нет, и имя dot вводило в заблуждение
   // (это класс чипа рубрики, не media__tag-dot).
   const rubricVariant = 'ui-tag--blue';
+  const heading = cardHeading(headingTag);
   return `<article class="ui-card ui-card--hover ui-card--link cp-article-card">
   <a class="ui-card__link" href="article.html">
     <div class="cp-article-card__photo-wrap">
       <img class="cp-article-card__photo" src="${esc(a.image)}" alt="" loading="lazy">
       <span class="ui-tag ${rubricVariant}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
     </div>
-    <h3 class="ui-small cp-article-card__title">${esc(a.title)}</h3>
+    <${heading} class="ui-small cp-article-card__title">${esc(a.title)}</${heading}>
   </a>
   <time class="cp-article-card__date ui-small ui-text--muted">${esc(a.date)}</time>
 </article>`;
@@ -2314,7 +2318,9 @@ ${cards}
 /* ── медиа-каталог ── */
 
 function mediaMain() {
-  const cards = ART.items.map(articleCard).join('\n');
+  // 'h2' (решение владельца 25.10, T15.9-бэклог): выдача сразу за h1 —
+  // axe heading-order ловил пропуск h1→h3.
+  const cards = ART.items.map((item) => articleCard(item, 'h2')).join('\n');
   // Фильтры — теги-ссылки ui-tag--blue × ui-tag--filter (T16.14; канон
   // .tag--blue.filter-tag оригинала, media.html:156 + pages.css:596):
   // активная несёт aria-current="page" — состояние в ARIA (прецедент
@@ -2443,8 +2449,10 @@ function careerTrackMain() {
     .map((tab, index) => {
       const tracks = tab.tracks
         .map(
+          // h2 (решение владельца 25.10, T15.9-бэклог): трек-карточки идут
+          // сразу за h1 (без секционного h2) — пропуск h1→h3 ловил axe.
           (track) => `      <article class="ui-card ui-card--filled">
-        <h3 class="ui-h4">${esc(track.name)}</h3>
+        <h2 class="ui-h4">${esc(track.name)}</h2>
         <p class="ui-small">${esc(track.steps.map((step) => step.name).join(' → '))}</p>
       </article>`,
         )

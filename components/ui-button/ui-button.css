@@ -273,35 +273,38 @@
 }
 
 /* ── :hover — только под (hover: hover); пары/значения одобренного дизайна,
-      generic ghost — одобренная hover-поверхность blue-100 ── */
+      generic ghost — одобренная hover-поверхность blue-100. Все hover-цели
+      несут :not(:disabled) (AC «не отвечает ховером как кликабельная»,
+      решение владельца 25.10 по T13.5-бэклогу): disabled-кнопка не уходит
+      в hover-пару под opacity 0.3 — и базой, и любым вариантом. ── */
 
 @media (hover: hover) {
-  .ui-button:hover {
+  .ui-button:not(:disabled):hover {
     background-color: var(--ui-color-surface-hover);
     color: var(--ui-color-text);
   }
 
-  .ui-button--primary:hover {
+  .ui-button--primary:not(:disabled):hover {
     background-color: var(--ui-color-primary-hover);
     /* Подпись переобъявлена: без неё просачивался цвет generic-.ui-button:hover
        (тёмный текст на blue-700 = 1.78:1 — поймано контрастом e2e). */
     color: var(--ui-color-text-on-dark);
   }
 
-  .ui-button--accent:hover {
+  .ui-button--accent:not(:disabled):hover {
     background-color: var(--ui-color-accent-hover);
     color: var(--ui-color-text-on-dark);
   }
 
   /* career-portal components.css:90: заливка primary, подпись белая. */
-  .ui-button--outline:hover {
+  .ui-button--outline:not(:disabled):hover {
     border-color: var(--ui-color-primary);
     background-color: var(--ui-color-primary);
     color: var(--ui-color-text-on-dark);
   }
 
   /* career-portal components.css:93: фон blue-100 (--ui-color-surface-hover). */
-  .ui-button--light:hover {
+  .ui-button--light:not(:disabled):hover {
     background-color: var(--ui-color-surface-hover);
     color: var(--ui-color-primary);
   }
@@ -311,7 +314,7 @@
      у текстовой кнопки фона нет (как у каждого варианта — см. шапку).
      Подчёркивание сохраняется: hover text-decoration не трогает, цвет
      линии — как у текста (currentColor, UA-дефолт). */
-  .ui-button--text:hover {
+  .ui-button--text:not(:disabled):hover {
     background-color: transparent;
     color: var(--ui-color-primary);
   }
@@ -323,40 +326,40 @@
      просачивался цвет generic-.ui-button:hover. Кружок свапается
      primary → accent (pages.css:250) — accent здесь состояние hover,
      не покой. */
-  .ui-button--pill:hover {
+  .ui-button--pill:not(:disabled):hover {
     background-color: var(--ui-color-surface-muted);
     color: var(--ui-color-primary);
   }
 
-  .ui-button--pill:hover .ui-button__icon {
+  .ui-button--pill:not(:disabled):hover .ui-button__icon {
     background-color: var(--ui-color-accent);
   }
 }
 
 /* ── :active — color-mix 88% + black (одобренным дизайном active не задан) ── */
 
-.ui-button:active {
+.ui-button:not(:disabled):active {
   background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
   color: var(--ui-color-text);
 }
 
-.ui-button--primary:active {
+.ui-button--primary:not(:disabled):active {
   background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
   color: var(--ui-color-text-on-dark);
 }
 
-.ui-button--accent:active {
+.ui-button--accent:not(:disabled):active {
   background-color: color-mix(in srgb, var(--ui-color-accent) 88%, black);
   color: var(--ui-color-text-on-dark);
 }
 
-.ui-button--outline:active {
+.ui-button--outline:not(:disabled):active {
   border-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
   background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);
   color: var(--ui-color-text-on-dark);
 }
 
-.ui-button--light:active {
+.ui-button--light:not(:disabled):active {
   background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);
   color: var(--ui-color-primary);
 }
@@ -364,7 +367,7 @@
 /* T16.7: у текстовой кнопки фона нет и в active — generic-.ui-button:active
    красил бы color-mix-заливкой (защитное переобъявление, конвенция шапки);
    подпись — primary по hover-паре (как light/pill). */
-.ui-button--text:active {
+.ui-button--text:not(:disabled):active {
   background-color: transparent;
   color: var(--ui-color-primary);
 }
@@ -374,7 +377,7 @@
    переобъявлена (против просачивания generic-.ui-button:active). Кружок в
    active не трогается: при нажатии мышью hover активен одновременно —
    кружок остаётся accent, как у оригинала (active в pages.css не задан). */
-.ui-button--pill:active {
+.ui-button--pill:not(:disabled):active {
   background-color: color-mix(in srgb, var(--ui-color-surface-muted) 88%, black);
   color: var(--ui-color-primary);
 }

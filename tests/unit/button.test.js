@@ -213,7 +213,7 @@ describe('components/ui-button/ui-button.css — модификатор text (T1
 
   it('hover — подпись primary, фон переобъявлен прозрачным ЗАЩИТНО (generic-.ui-button:hover красит surface-hover — у текстовой кнопки фона нет); подчёркивание сохраняется — text-decoration hover не трогает (цвет линии — currentColor)', () => {
     const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
-    const hover = blockOf(mediaBlock, '.ui-button--text:hover');
+    const hover = blockOf(mediaBlock, '.ui-button--text:not(:disabled):hover');
     expect(hover, 'правило hover внутри media-обёртки').toBeTruthy();
     expect(hover).toContain('background-color: transparent;');
     expect(hover).toContain('color: var(--ui-color-primary);');
@@ -221,7 +221,7 @@ describe('components/ui-button/ui-button.css — модификатор text (T1
   });
 
   it('active — фон остаётся прозрачным, подпись primary (защитно против generic-.ui-button:active; конвенция active-цвета по hover — как у light/pill)', () => {
-    const block = blockOf(css, '.ui-button--text:active');
+    const block = blockOf(css, '.ui-button--text:not(:disabled):active');
     expect(block, 'правило .ui-button--text:active найдено').toBeTruthy();
     expect(block).toContain('background-color: transparent;');
     expect(block).toContain('color: var(--ui-color-primary);');
@@ -297,19 +297,20 @@ describe('components/ui-button/ui-button.css — производные сост
     readFileSync(join(root, 'components', 'ui-button', 'ui-button.css'), 'utf8'),
   );
 
-  it('все :hover-правила — ТОЛЬКО внутри @media (hover: hover) (Implementation requirements п.4)', () => {
+  it('все :hover-правила — ТОЛЬКО внутри @media (hover: hover); каждая hover-цель несёт :not(:disabled) (AC «не отвечает ховером как кликабельная», решение владельца 25.10)', () => {
     const mediaIndex = css.indexOf('@media (hover: hover)');
     expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
     const beforeMedia = css.slice(0, mediaIndex);
     expect(beforeMedia, 'до media-обёртки :hover-селекторов нет').not.toContain(':hover');
     const mediaBlock = css.slice(mediaIndex);
     for (const selector of [
-      '.ui-button:hover',
-      '.ui-button--primary:hover',
-      '.ui-button--accent:hover',
-      '.ui-button--outline:hover',
-      '.ui-button--light:hover',
-      '.ui-button--pill:hover',
+      '.ui-button:not(:disabled):hover',
+      '.ui-button--primary:not(:disabled):hover',
+      '.ui-button--accent:not(:disabled):hover',
+      '.ui-button--outline:not(:disabled):hover',
+      '.ui-button--light:not(:disabled):hover',
+      '.ui-button--pill:not(:disabled):hover',
+      '.ui-button--text:not(:disabled):hover',
     ]) {
       expect(mediaBlock).toContain(selector);
     }
@@ -317,44 +318,44 @@ describe('components/ui-button/ui-button.css — производные сост
 
   it('hover primary/accent — пары одобренного дизайна, подпись переобъявлена (против просачивания)', () => {
     const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
-    const primary = blockOf(mediaBlock, '.ui-button--primary:hover');
+    const primary = blockOf(mediaBlock, '.ui-button--primary:not(:disabled):hover');
     expect(primary).toContain('background-color: var(--ui-color-primary-hover);');
     expect(primary).toContain('color: var(--ui-color-text-on-dark);');
-    const accent = blockOf(mediaBlock, '.ui-button--accent:hover');
+    const accent = blockOf(mediaBlock, '.ui-button--accent:not(:disabled):hover');
     expect(accent).toContain('background-color: var(--ui-color-accent-hover);');
     expect(accent).toContain('color: var(--ui-color-text-on-dark);');
   });
 
   it('hover outline/light — значения одобренного дизайна (career-portal components.css:90/93)', () => {
     const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
-    const outline = blockOf(mediaBlock, '.ui-button--outline:hover');
+    const outline = blockOf(mediaBlock, '.ui-button--outline:not(:disabled):hover');
     // .btn--outline:hover { background: var(--color-primary); color: #FFFFFF; }
     expect(outline).toContain('background-color: var(--ui-color-primary);');
     expect(outline).toContain('color: var(--ui-color-text-on-dark);');
-    const light = blockOf(mediaBlock, '.ui-button--light:hover');
+    const light = blockOf(mediaBlock, '.ui-button--light:not(:disabled):hover');
     // .btn--light:hover { background: var(--color-surface-blue-100); }
     expect(light).toContain('background-color: var(--ui-color-surface-hover);');
     expect(light).toContain('color: var(--ui-color-primary);');
   });
 
   it('active — color-mix 88% + black над токеном варианта (одобренным дизайном active не задан)', () => {
-    expect(blockOf(css, '.ui-button--primary:active')).toContain(
+    expect(blockOf(css, '.ui-button--primary:not(:disabled):active')).toContain(
       'background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);',
     );
-    expect(blockOf(css, '.ui-button--accent:active')).toContain(
+    expect(blockOf(css, '.ui-button--accent:not(:disabled):active')).toContain(
       'background-color: color-mix(in srgb, var(--ui-color-accent) 88%, black);',
     );
-    expect(blockOf(css, '.ui-button--outline:active')).toContain(
+    expect(blockOf(css, '.ui-button--outline:not(:disabled):active')).toContain(
       'background-color: color-mix(in srgb, var(--ui-color-primary) 88%, black);',
     );
-    expect(blockOf(css, '.ui-button--light:active')).toContain(
+    expect(blockOf(css, '.ui-button--light:not(:disabled):active')).toContain(
       'background-color: color-mix(in srgb, var(--ui-color-surface-hover) 88%, black);',
     );
     // Подписи переобъявлены — против просачивания generic-правила (как в ui-link).
-    expect(blockOf(css, '.ui-button--primary:active')).toContain(
+    expect(blockOf(css, '.ui-button--primary:not(:disabled):active')).toContain(
       'color: var(--ui-color-text-on-dark);',
     );
-    expect(blockOf(css, '.ui-button--outline:active')).toContain(
+    expect(blockOf(css, '.ui-button--outline:not(:disabled):active')).toContain(
       'color: var(--ui-color-text-on-dark);',
     );
   });
@@ -449,11 +450,11 @@ describe('components/ui-button/ui-button.css — модификатор pill (T1
 
   it('pill hover — фон surface-muted (blue-50 оригинала pages.css:248 — байт-канон T16.11, был surface-hover blue-100), подпись переобъявлена primary; кружок свапается primary → accent (pages.css:250) там же под (hover: hover)', () => {
     const mediaBlock = css.slice(css.indexOf('@media (hover: hover)'));
-    const pill = blockOf(mediaBlock, '.ui-button--pill:hover');
+    const pill = blockOf(mediaBlock, '.ui-button--pill:not(:disabled):hover');
     expect(pill, 'правило hover внутри media-обёртки').toBeTruthy();
     expect(pill).toContain('background-color: var(--ui-color-surface-muted);');
     expect(pill).toContain('color: var(--ui-color-primary);');
-    const icon = blockOf(mediaBlock, '.ui-button--pill:hover .ui-button__icon');
+    const icon = blockOf(mediaBlock, '.ui-button--pill:not(:disabled):hover .ui-button__icon');
     expect(icon, 'hover-свап кружка в media-обёртке').toBeTruthy();
     expect(icon).toContain('background-color: var(--ui-color-accent);');
   });
@@ -464,7 +465,7 @@ describe('components/ui-button/ui-button.css — модификатор pill (T1
   });
 
   it('pill active — color-mix 88% + black над hover-токеном surface-muted (конвенция ADR-0010: active считается над hover-поверхностью варианта), подпись primary', () => {
-    const block = blockOf(css, '.ui-button--pill:active');
+    const block = blockOf(css, '.ui-button--pill:not(:disabled):active');
     expect(block, 'правило .ui-button--pill:active найдено').toBeTruthy();
     expect(block).toContain(
       'background-color: color-mix(in srgb, var(--ui-color-surface-muted) 88%, black);',
