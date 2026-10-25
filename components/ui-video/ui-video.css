@@ -1,0 +1,93 @@
+/** @define video */
+
+/*!
+ * irao-ui — ui-video: видео-постер «кадр + play-кнопка + метка времени»
+ * (задача T17.6, EPIC-17).
+ *
+ * Источник — видео-блок главной career-portal (оригинал
+ * src/blocks/video-block/, реального плеера нет — клик-заглушка) в
+ * интерпретации пилота (.cp-video__player/poster/overlay/play/time,
+ * pilot.css:653–700 — одобренные значения, переносятся «как есть»):
+ * обёртка-кнопка с постером, градиент-оверлей к primary 72% (нарастает к
+ * низу кадра — метка времени читается на любом постере), круглая
+ * play-кнопка accent 88px и время 24:23 в правом нижнем углу.
+ *
+ * Компонент статический (вид): поведение воспроизведения — слот сайта
+ * (Out of scope T17.6 — эмбед/ссылка за постером; при появлении — отдельная
+ * задача). Обёртка — button или a: класс навешивает только вид, клик ведёт
+ * потребитель. A11y: доступное имя — параметр разметки (aria-label на
+ * обёртке, «Смотреть видео …», не «play» — do/don't README); постер
+ * декоративен (alt="") — имя несёт обёртка; overlay/play aria-hidden.
+ *
+ * Высоту кадра ведёт постер (width 100%, object-fit cover, высота авто):
+ * фиксированные высоты оригинала (720/420/240) — сайт-зона (REPORT §3.4).
+ * Фон обёртки primary страхует кадр до загрузки постера и виден в радиусах
+ * при узких постерах.
+ *
+ * Цвета — только существующие токены (Implementation requirements п.2):
+ * пара accent + on-dark — уже одобренная (как ui-button--accent, контраст
+ * 3.12:1 — исключение реестра axe, ADR-0010); градиент — primary-a72,
+ * ступень лестницы тинтов (T17.6). Размер play — токен-хук
+ * --ui-video-play-size (5.5rem = 88px одобренного дизайна): потребитель
+ * перекрашивает/масштабирует без fork'а.
+ */
+
+.ui-video {
+  --ui-video-play-size: 5.5rem;
+  box-sizing: border-box;
+  display: block;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ui-radius-lg);
+  background-color: var(--ui-color-primary);
+}
+
+/* ── Элементы (Scope): постер/оверлей/play/время ── */
+
+/* Кадр: cover во всю ширину, высоту ведёт пропорция картинки. */
+.ui-video__poster {
+  box-sizing: border-box;
+  display: block;
+  object-fit: cover;
+  width: 100%;
+}
+
+/* Оверлей: градиент к primary-a72 от 40% кадра — тёмная подложка метки
+   времени на светлых постерах (оригинал видео-блока главной). */
+.ui-video__overlay {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, var(--ui-color-primary-a72) 100%);
+}
+
+/* Play-кнопка: круг accent с on-dark-стрелкой (слот сайта: svg-стрелка
+   или глиф), размер — токен-хук корня --ui-video-play-size. */
+.ui-video__play {
+  box-sizing: border-box;
+  display: inline-flex;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  align-items: center;
+  justify-content: center;
+  width: var(--ui-video-play-size);
+  height: var(--ui-video-play-size);
+  border-radius: 50%;
+  background-color: var(--ui-color-accent);
+  color: var(--ui-color-text-on-dark);
+  transform: translate(-50%, -50%);
+}
+
+/* Метка времени: on-dark в правом нижнем углу — читается поверх
+   градиент-оверлея. */
+.ui-video__time {
+  box-sizing: border-box;
+  position: absolute;
+  right: var(--ui-space-4);
+  bottom: var(--ui-space-4);
+  color: var(--ui-color-text-on-dark);
+}

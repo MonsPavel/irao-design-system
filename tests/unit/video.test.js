@@ -189,7 +189,7 @@ describe('стенд (showcase/pages/ui-video/index.html)', () => {
 
   it('ссылочная форма: обёртка <a> — поведение слот сайта (Context)', () => {
     expect(html).toContain('id="ui-video-link"');
-    expect(html).toMatch(/<a class="ui-video" href="/);
+    expect(html).toMatch(/<a\s+class="ui-video"\s+href="/);
   });
 
   it('демо токен-хука --ui-video-play-size: размер play без fork’а (Scope)', () => {

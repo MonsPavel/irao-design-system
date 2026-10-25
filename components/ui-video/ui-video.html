@@ -1,0 +1,12 @@
+<!-- ui-video (T17.6): канонический паттерн. Обёртка — <button type="button">
+     (кликабельный плей) или <a href="…"> — поведение воспроизведения несёт
+     сайт (эмбед/ссылка), компонент навешивает только вид. Имя кнопки —
+     параметр разметки (aria-label, «Смотреть видео …», не «play»); постер
+     декоративен (alt="") — имя несёт обёртка; overlay/play aria-hidden.
+     Play-иконка — слот (svg-стрелка сайта или глиф), канон — глиф ▶. -->
+<button class="ui-video" type="button" aria-label="Смотреть видео о работе в компании">
+  <img class="ui-video__poster" src="poster.jpg" alt="" loading="lazy" />
+  <span class="ui-video__overlay" aria-hidden="true"></span>
+  <span class="ui-video__play" aria-hidden="true">▶</span>
+  <span class="ui-video__time">24:23</span>
+</button>
