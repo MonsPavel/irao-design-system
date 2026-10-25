@@ -109,3 +109,19 @@
 | T15.4 | done | смержена |
 | T15.5 | done | смержена |
 | T15.9 | done | смержена |
+| T17.1 | todo | EPIC-17 (полнота ДС: портал из компонентов, раунд 5 от 25.10): паттерн-слой ui-patterns.css в dist — каноны lpp/ddp/fpp исполняемым CSS; ключевое решение владельца A (слой) / B (копипаста+гейт); пилот снимает дубликаты строк/сайдбара/page-head/крошек/find-bar |
+| T17.2 | todo | EPIC-17: базовая утилита visually-hidden ui-vh (снимает cp-vh, унификация с sr-only полей/файла) |
+| T17.3 | todo | EPIC-17: фото-секция ui-section--photo + оверлей-градиенты — приём 5 фоновых секций пилота (hero/production/holding/why-us/company-banner) |
+| T17.4 | todo | EPIC-17: компонент ui-stat (варианты glass/filled/deep) — статы holding/company (10 инстансов) |
+| T17.5 | todo | EPIC-17: медиа-карточка ui-card--media — event/article/intern-person (3 копии одного каркаса) |
+| T17.6 | todo | EPIC-17: видео-постер ui-video (постер+play+время) — блок «Видео о работе» главной |
+| T17.7 | todo | EPIC-17: карусель ui-carousel + фото-галерея (JS-модуль в dist) — production/направления, ~120 строк pilot.js; P3, кандидат бэклога по решению владельца |
+| T17.8 | todo | EPIC-17: CTA-карточка ui-card--cta (primary/accent/row) — cta-mail, «Все вакансии», тело баннера |
+| T17.9 | todo | EPIC-17: nav-карточки (lnk-card, тон-хук) + лента логотипов + ui-button--round — students/employers |
+| T17.10 | todo | EPIC-17: adoption таймлайна — пилот на паттерн T14.11, cp-timeline снимается (обкатка процесса) |
+| T17.11 | todo | EPIC-17: ui-tabs активная пилюля по aria-current="page" (DS) + канон поднавигации nvp — снимает пару cp-subnav специфичности 0,4,0 |
+| T17.12 | todo | EPIC-17: пилюля select-фильтра ui-select--pill + find-bar в паттерн-слой — 4 контекста cp-pill |
+| T17.13 | todo | EPIC-17: каркасы шапки/подвала hsp/ftp в паттерн-слой (режимы absolute/static, светлый 4-колоночный футер, соц-кнопки — остаток §8.3) |
+| T17.14 | todo | EPIC-17: детальные страницы на ddp-канон — vacancy/event/internship/article/company, ~350 строк pilot.css |
+| T17.15 | todo | EPIC-17: лендинг-композиции hro/mrq/mdl/cvh + решение по спец-тинтам violet/green/rose (тон-хук сайт-зоны) |
+| T17.16 | todo | EPIC-17 (закрывающая): ценз полноты до/после (2022 строк → ≤600, ~46 cp-блоков → ≤18), гейт «новые cp-визуальные блоки запрещены» в compare, REPORT/PLAN/CONTRIBUTING/mapping |
