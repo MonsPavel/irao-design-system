@@ -311,3 +311,21 @@ describe('пилот: 10 инстансов на компоненте, прав�
     }
   });
 });
+
+describe('пилот: REPORT синхронен с фактом T17.4 (ревью high: рассинхрон доки и кода)', () => {
+  const report = readFileSync(join(root, 'pilot', 'career-portal', 'REPORT.md'), 'utf8');
+
+  it('§3.4: высота пилотного holding — 603 после T17.4 (618 устарело; compare 25.10, probe до/после)', () => {
+    expect(report).toMatch(/\|\s*holding\s*\|\s*798\s*\|\s*603\s*\|/);
+    expect(report, 'старая высота 618 из таблицы убрана').not.toMatch(
+      /\|\s*holding\s*\|\s*798\s*\|\s*618\s*\|/,
+    );
+  });
+
+  it('§3.3: mapping-запись осознанного отклонения — lh значения 1.35→1.1 (роль ui-h2), строка 81→66px, блок −15px вне порога ±4px', () => {
+    expect(report, 'lh 1.35→1.1 зафиксирован').toMatch(/1[.,]35\s*→\s*1[.,]1\b/);
+    expect(report, 'строка значения 81→66px').toMatch(/81\s*→\s*66/);
+    expect(report, 'дельта блока 618→603').toMatch(/618\s*→\s*603/);
+    expect(report, 'ссылка на задачу T17.4').toMatch(/T17\.4/);
+  });
+});
