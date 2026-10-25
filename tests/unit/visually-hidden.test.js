@@ -23,9 +23,10 @@
  * Скринридер-инвариант пилюль/полей (axe label/form-label) — e2e-пробы
  * приёмки, не unit.
  */
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { buildForUnitTests } from '../helpers/unit-build.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 
@@ -88,19 +89,33 @@ describe('base/reset.css — канон утилиты .ui-vh (T17.2)', () => {
 });
 
 describe('dist — класс доезжает до сайтов (unit-пин регресса сборки)', () => {
+  // Читатели собранного dist дожидаются билда прогона (tests/helpers/
+  // unit-build.mjs, T13.7): в свежем CI-чекауте dist ещё нет, и параллельный
+  // билдер tokens-stand/themes мог не успеть к этому воркеру (флак ENOENT,
+  // ловили на stat-пине, CI 40212544247).
+  beforeAll(async () => {
+    await buildForUnitTests(root);
+  }, 60000);
+
   it('dist/ui-core.min.css содержит .ui-vh с клипом (base в ядре — CSS_CORE_ORDER showcase/build.mjs)', () => {
     const core = readFileSync(join(root, 'dist', 'ui-core.min.css'), 'utf8');
     expect(core, 'класс .ui-vh в собранном ядре').toContain('.ui-vh');
     expect(core, 'канонический клип в собранном ядре').toContain('inset(50%)');
   });
 
-  it('пилот: скопированное в dist/ds ядро несёт .ui-vh — утилита доступна страницам пилота (build.mjs копирует dist/ → dist/ds/)', () => {
-    const pilotCore = readFileSync(
-      join(root, 'pilot', 'career-portal', 'dist', 'ds', 'ui-core.min.css'),
-      'utf8',
-    );
-    expect(pilotCore, '.ui-vh в рантайме ДС пилота').toContain('.ui-vh');
-  });
+  // Пилотный dist требует чекаут career-portal (--ref, build.mjs:39–54) —
+  // в CI его нет: тест выполняется там, где пилот собран (ночной гейт),
+  // гард — по прецеденту tests/unit/pilot-link-gate.test.js:160.
+  it.skipIf(!existsSync(join(root, 'pilot', 'career-portal', 'dist', 'ds', 'ui-core.min.css')))(
+    'пилот: скопированное в dist/ds ядро несёт .ui-vh — утилита доступна страницам пилота (build.mjs копирует dist/ → dist/ds/)',
+    () => {
+      const pilotCore = readFileSync(
+        join(root, 'pilot', 'career-portal', 'dist', 'ds', 'ui-core.min.css'),
+        'utf8',
+      );
+      expect(pilotCore, '.ui-vh в рантайме ДС пилота').toContain('.ui-vh');
+    },
+  );
 });
 
 describe('локальные дубли сняты (AC: grep — sr-only-блоков в компонентах нет)', () => {

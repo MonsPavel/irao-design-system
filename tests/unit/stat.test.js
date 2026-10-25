@@ -36,7 +36,8 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { buildForUnitTests } from '../helpers/unit-build.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 
@@ -234,6 +235,14 @@ describe('стенд (showcase/pages/ui-stat/index.html)', () => {
 });
 
 describe('подключение и дист (DoD, Testing requirements)', () => {
+  // presence-пин читает собранный dist: воркер дожидается билда прогона
+  // (tests/helpers/unit-build.mjs, T13.7) — в свежем CI-чекауте dist ещё нет,
+  // и параллельный билдер tokens-stand/themes мог не успеть (флак ENOENT,
+  // CI 40212544247).
+  beforeAll(async () => {
+    await buildForUnitTests(root);
+  }, 60000);
+
   it("'ui-stat' в COMPONENTS showcase/build.mjs — CSS в dist/ui-core.min.css", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
     // Пин точнее card-прецедента: в комментариях списка COMPONENTS есть ']'
