@@ -1,0 +1,21 @@
+<!-- ui-stat (T17.4): канонический паттерн. Статы — семантика списка фактов:
+     <ul> из <li class="ui-stat"> (прецедент holding-списка). Размер значения
+     несёт РОЛЬ в разметке (ui-h2 у статов, ui-h4 у преимуществ) — компонент
+     задаёт только поверхность и ритм. Вариант --glass живёт на фото-секции
+     (T17.3): стекло + рамка on-dark-muted. Сноска __note опциональна. -->
+<ul class="ui-grid ui-grid--3">
+  <li class="ui-stat ui-stat--glass">
+    <span class="ui-stat__value ui-h2">50%</span>
+    <span class="ui-stat__label">молодых специалистов получают карьерное продвижение</span>
+    <span class="ui-stat__note">* по данным мониторинга</span>
+  </li>
+  <li class="ui-stat ui-stat--glass">
+    <span class="ui-stat__value ui-h2">60+</span>
+    <span class="ui-stat__label">тысяч человек работают в Группе</span>
+    <span class="ui-stat__note">* по данным годового отчёта Группы</span>
+  </li>
+  <li class="ui-stat ui-stat--filled">
+    <span class="ui-stat__value ui-h2">Топ-10</span>
+    <span class="ui-stat__label ui-small">региональных генерирующих компаний</span>
+  </li>
+</ul>

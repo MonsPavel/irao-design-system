@@ -437,6 +437,8 @@
   color: var(--ui-color-text-on-dark);
 }
 
+/* Статы холдинга — ui-stat--glass (T17.4): стекло/рамка/сноска и цвет
+   значений несёт компонент; сетка — раскладка сайт-зоны. */
 .cp-holding__stats {
   display: grid;
   gap: var(--ui-space-3);
@@ -444,27 +446,6 @@
   margin: var(--ui-space-7) 0 0;
   padding: 0;
   list-style: none;
-}
-
-.cp-holding__stat {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-4);
-  border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-glass-dark);
-  color: var(--ui-color-text-on-dark);
-}
-
-.cp-holding__stat-value {
-  font-size: var(--ui-fs-h2);
-  font-weight: var(--ui-fw-h2);
-}
-
-.cp-holding__stat-note {
-  font-size: var(--ui-fs-micro);
-  opacity: 0.72;
 }
 
 /* ── employers: лента логотипов (сайт-зона) ── */
@@ -1726,7 +1707,8 @@ a.cp-intern-card {
 }
 
 /* Факты компании: сетка 3 колонки, шаг 24px, низ 40px «как есть»
-   (pages.css:805). Числа — роль ui-h2 в разметке, подписи — ui-small. */
+   (pages.css:805). Плашки — ui-stat--filled (T17.4): primary-поверхность,
+   геометрия 20/24 и цвета значений/подписей несёт компонент. */
 .cp-company-stats {
   display: grid;
   gap: var(--ui-space-5);
@@ -1734,27 +1716,6 @@ a.cp-intern-card {
   margin: 0 0 2.5rem;
   padding: 0;
   list-style: none;
-}
-
-/* плашка 20/24 «как есть» (pages.css:807; 20px вне шкалы — как
-   --ui-field-pad-inline), радиус и фон — radius-card/primary оригинала */
-.cp-company-stats__item {
-  display: flex;
-  flex-direction: column;
-  padding: 1.25rem var(--ui-space-5);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-text-on-dark);
-}
-
-/* цвет числа на тёмном — override роли ui-h2 (пара cp-holding__title) */
-.cp-company-stats__value {
-  color: var(--ui-color-text-on-dark);
-}
-
-/* white 75% оригинала (pages.css:811) → on-dark-muted — AA-пара T2.3 */
-.cp-company-stats__label {
-  color: var(--ui-color-text-on-dark-muted);
 }
 
 /* заголовок раздела: mb 32px .section__title (components.css:341); роль в
@@ -1765,7 +1726,8 @@ a.cp-intern-card {
 }
 
 /* Преимущества: сетка 4 колонки, шаг 24px (pages.css:813); низ 56px
-   company-section-gap «как есть» (pages.css:884) */
+   company-section-gap «как есть» (pages.css:884). Плашки — ui-stat--deep
+   (T17.4): blue-deep, 24/20, шаг 12 и цвета несёт компонент. */
 .cp-company-adv {
   display: grid;
   gap: var(--ui-space-5);
@@ -1773,23 +1735,6 @@ a.cp-intern-card {
   margin: 0 0 3.5rem;
   padding: 0;
   list-style: none;
-}
-
-/* плашка 24/20 «как есть» (pages.css:815); фон — маппинг --color-blue-700
-   (tokens/semantic.css --ui-color-surface-blue-deep) */
-.cp-company-adv__item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-3);
-  padding: var(--ui-space-5) 1.25rem;
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface-blue-deep);
-  color: var(--ui-color-text-on-dark);
-}
-
-/* цвет заголовка на тёмном — override роли ui-h4 (cp-holding__title) */
-.cp-company-adv__title {
-  color: var(--ui-color-text-on-dark);
 }
 
 /* «Где мы работаем»: пара фото+подпись, шаг 24px (pages.css:821);

@@ -125,6 +125,7 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 | tabs-pill стажировок | 20px/400, прозрачные, заливка активной | `ui-tabs--pill` fs-small 14/500, заливка активной | **закрыто T14.9**: активная заливка primary и цвета совпали на internships/practices; остаток — типографика: fs 14 vs 20 и fw 500 vs 400 (решение спеки T14.9 — fs-small-масштаб, «принято ДС»), высота 52 vs 48 — ≤4px порог эпика; **T16.16**: adoption модификатора на поднавигации career-track/education/events — тот же статус значений (§9.1 №8) |
 | chip | 36px, fw 400 | `ui-chip` 36px, fw 500 | **закрыто T14.8**: высота 36, радиус, цвета пар совпали (vacancies/practices); fw 400→500 — роль small в ДС, «принято ДС»; на internships проба попала в активный чип («все направления» `aria-pressed="true"` в пилоте — дефолтный фильтр; в оригинале активного нет) — артефакт выборки + осознанное начальное состояние |
 | FAQ (ui-accordion) | summary padding 20×24 | padding 24 | **принято ДС** — близко, микро (решение пилота 20.10) |
+| holding stat value (ui-stat) | lh 1.1 (holding.css:66) | lh 1.1 (роль ui-h2) | **закрыто T17.4** (adoption: статы холдинга/компании на ui-stat, 10 инстансов): до — lh 1.35 (случайное наследование body пилота; снято вместе с cp-правилом) → роль ui-h2 по Implementation requirements п.2/п.4: lh значения 1.35→1.1, строка 81→66px, блок holding 618→603 (−15px, вне порога ±4px — осознанно: lh 1.1 — канон оригинала), docHeight главной 8219→8204; company-блоки — дельта 0 (probe до/после `.zcode/accept-t174-*.json`, compare 20 страниц 25.10; блоки company-stats/company-adv — в BLOCK_PROBES compare) |
 | checkbox / pagination | — | — | probe MATCH (высоты 20px, страницы пагинации) |
 
 ### 3.4 Высоты блоков главной (px, оригинал → пилот)
@@ -134,7 +135,7 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 | hero | 808 | 808 | совпало |
 | production | 760 | 649 | сайт-зона: пилот плотнее |
 | directions | 652 | 446 | сайт-зона: карточки оригинала «воздушнее» |
-| holding | 798 | 618 | сайт-зона |
+| holding | 798 | 603 | сайт-зона (было 618 до T17.4: статы на ui-stat, lh значения 1.35→1.1 — mapping §3.3) |
 | employers | 583 | 224 | сайт-зона: сетка логотипов оригинала крупнее |
 | why-us | 1350 | 1019 | сайт-зона |
 | vacancy-search | 310 | 267 | сайт-зона + ui-select-пилюли ниже |
@@ -149,7 +150,8 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 от −52% (career-track 2893→1429, упрощённые данные — ограничение (в)) до
 +12% (media 1764→1969, спец-сетка); vacancies 3224→3259 (+1% — после
 добавления крошек, которых в переносе 20.10 не было). Блоки главной не
-менялись с 20.10 (сайт-зона лендинга вне EPIC-14); закрытие §3.3 меняет
+менялись с 20.10 (сайт-зона лендинга вне EPIC-14; исключение — holding
+после T17.4: 618→603, см. §3.3); закрытие §3.3 меняет
 внутренние страницы.
 
 ## 4. Чего в ДС нет (собрано как зона сайта) — статус после EPIC-14

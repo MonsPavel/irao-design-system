@@ -1,0 +1,112 @@
+/** @define stat */
+
+/*!
+ * irao-ui — ui-stat: плашка «крупное значение + подпись + опциональная
+ * сноска» (задача T17.4, EPIC-17).
+ *
+ * Источник — три вариации чисел-плашек career-portal, собранные пилотом
+ * руками (T15.2 «унификация дороже двух вариаций» — компонент с вариантами
+ * снимает вопрос):
+ *  - holding (стекло на фото): .cp-holding__stat* пилота ← .holding__stat*
+ *    оригинала (src/blocks/holding/holding.css) — glass-dark + рамка
+ *    on-dark-muted, паддинг 16, шаг 8, сноска fs-micro;
+ *  - company (primary): .company-stats__item оригинала (pages.css:806–811)
+ *    — сплошной primary 20/24, подпись white-75% → on-dark-muted (AA-пара
+ *    T2.3), шаг значений не задан (0 «как есть»);
+ *  - advantages (blue-deep): .company-adv__item оригинала (pages.css:815)
+ *    — surface-blue-deep 24/20, шаг 12, текст on-dark.
+ *
+ * Типографика значения — НЕ компонентом (урок «визуал ≠ семантика»,
+ * typography-roles): размер несёт роль в разметке (ui-h2 у статов, ui-h4 у
+ * преимуществ), элемент __value только перекрашивает роль в text-on-dark —
+ * заголовочные роли красят в --ui-color-heading (primary), на тёмной
+ * плашке нечитаемо (прецедент override'а .cp-company-stats__value пилота).
+ * lh-h2 роли (1.1) — заодно канон оригинала .holding__stat-value
+ * (line-height 1.1); унаследованный 1.35 плашек пилота снимался вместе с
+ * правилом сайт-зоны (probe T17.4: строка значения 81→66px на 1440).
+ *
+ * Поверхность — токен-хук --ui-stat-surface с дефолтом primary: второй
+ * потребитель (годовые отчёты, «о компании» других сайтов группы)
+ * перекрашивает базу без fork'а (Notes T17.4). Варианты --glass/--deep —
+ * фиксированные поверхности одобренного дизайна, хук не слушают
+ * (специфичность 0-2-0 > 0-1-0).
+ *
+ * Цвета — только существующие токены (Implementation requirements п.3):
+ * glass-dark, primary, surface-blue-deep, text-on-dark(-muted); on-dark-пары
+ * гейтятся T2.3 (on-dark-on-surface-dark, on-dark-muted-on-surface-dark,
+ * on-dark-on-surface-blue-deep). Прозрачность 0.72 сноски holding пилота
+ * maps на on-dark-muted (Context T17.4; прецедент AA-замены white-75%).
+ * Подпись на тёмном — on-dark-muted (канон company); у --glass/--deep
+ * переопределена в text-on-dark — значения оригинала (holding desc и
+ * adv text — белый, менять нельзя: инвариант «значения одобренного
+ * дизайна не менять»).
+ */
+
+.ui-stat {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-4) var(--ui-space-5);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-stat-surface, var(--ui-color-primary));
+  color: var(--ui-color-text-on-dark);
+}
+
+/* ── Элементы (Scope): __value — роль-хук ui-h2/ui-h4 на сайте ── */
+
+/* Перекраска роли в on-dark; размер/начертание — у роли в разметке. */
+.ui-stat__value {
+  box-sizing: border-box;
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Подпись — вторичный текст тёмной плашки (канон Context T17.4). */
+.ui-stat__label {
+  box-sizing: border-box;
+  color: var(--ui-color-text-on-dark-muted);
+}
+
+/* Сноска — fs-micro + on-dark-muted: прозрачность 0.72 пилота maps на
+   токен-парой (эффективный rgba(255,255,255,.72) → slate-400 AA-пара). */
+.ui-stat__note {
+  box-sizing: border-box;
+  color: var(--ui-color-text-on-dark-muted);
+  font-size: var(--ui-fs-micro);
+}
+
+/* ── Варианты поверхностей (Scope) ── */
+
+/* Стекло на фото-секции: рамка on-dark-muted — разделитель стекла и фона;
+   паддинг 16 «как есть» (пилот .cp-holding__stat); подпись on-dark —
+   оригинал .holding__stat-desc. Живёт внутри фото-секции (T17.3). */
+.ui-stat--glass {
+  padding: var(--ui-space-4);
+  border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);
+  background-color: var(--ui-color-glass-dark);
+}
+
+.ui-stat--glass .ui-stat__label {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Primary (база): геометрия оригинала pages.css:806 — плашка 20/24 «как
+   есть» (20px вне шкалы §3.2 — прецедент --ui-field-pad-inline), шаг
+   значений оригинал не задаёт — 0 «как есть». Поверхность — дефолт хука
+   базы (--ui-stat-surface → primary), вариант её не дублирует. */
+.ui-stat--filled {
+  gap: 0;
+  padding: 1.25rem var(--ui-space-5);
+}
+
+/* Blue-deep (маппинг --color-blue-700): 24/20 «как есть» (pages.css:815),
+   шаг 12; подпись on-dark — оригинал .company-adv__text. */
+.ui-stat--deep {
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-5) 1.25rem;
+  background-color: var(--ui-color-surface-blue-deep);
+}
+
+.ui-stat--deep .ui-stat__label {
+  color: var(--ui-color-text-on-dark);
+}

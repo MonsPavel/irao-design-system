@@ -1185,20 +1185,20 @@ ${directionsGrid}
   <div class="ui-container cp-holding__inner">
     <h2 class="cp-holding__title ui-h2">Один из крупнейших энергетических холдингов России</h2>
     <ul class="cp-holding__stats">
-      <li class="cp-holding__stat">
-        <span class="cp-holding__stat-value">50%</span>
-        <span>молодых специалистов получают карьерное продвижение в&nbsp;течение 2-х лет после старта работы в&nbsp;Группе</span>
-        <span class="cp-holding__stat-note">* по данным агрегированного мониторинга в&nbsp;области трудоустройства и&nbsp;развития выпускников</span>
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">50%</span>
+        <span class="ui-stat__label">молодых специалистов получают карьерное продвижение в&nbsp;течение 2-х лет после старта работы в&nbsp;Группе</span>
+        <span class="ui-stat__note">* по данным агрегированного мониторинга в&nbsp;области трудоустройства и&nbsp;развития выпускников</span>
       </li>
-      <li class="cp-holding__stat">
-        <span class="cp-holding__stat-value">60+</span>
-        <span>тысяч человек работают в&nbsp;Группе</span>
-        <span class="cp-holding__stat-note">* по данным годового отчёта Группы за&nbsp;2024&nbsp;год</span>
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">60+</span>
+        <span class="ui-stat__label">тысяч человек работают в&nbsp;Группе</span>
+        <span class="ui-stat__note">* по данным годового отчёта Группы за&nbsp;2024&nbsp;год</span>
       </li>
-      <li class="cp-holding__stat">
-        <span class="cp-holding__stat-value">Топ-20</span>
-        <span>крупнейших компаний РФ по&nbsp;чистой прибыли</span>
-        <span class="cp-holding__stat-note">* по данным Forbes за&nbsp;2024&nbsp;год</span>
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">Топ-20</span>
+        <span class="ui-stat__label">крупнейших компаний РФ по&nbsp;чистой прибыли</span>
+        <span class="ui-stat__note">* по данным Forbes за&nbsp;2024&nbsp;год</span>
       </li>
     </ul>
   </div>
@@ -2568,41 +2568,41 @@ function companyMain() {
       </div>
     </div>
 
-    <!-- Факты компании: числа — роль ui-h2 (Scope); цвет на тёмном несёт
-         сайт-зона (override роли — пара cp-holding__title). Список —
-         семантика фактов (Accessibility requirements). -->
+    <!-- Факты компании: ui-stat--filled (T17.4) — числа роль ui-h2, цвет
+         on-dark несёт компонент (override роли); список — семантика фактов
+         (Accessibility requirements). -->
     <ul class="cp-company-stats">
-      <li class="cp-company-stats__item">
-        <span class="cp-company-stats__value ui-h2">2,5 ГВт</span>
-        <span class="cp-company-stats__label ui-small">установленная электрическая мощность</span>
+      <li class="ui-stat ui-stat--filled">
+        <span class="ui-stat__value ui-h2">2,5 ГВт</span>
+        <span class="ui-stat__label ui-small">установленная электрическая мощность</span>
       </li>
-      <li class="cp-company-stats__item">
-        <span class="cp-company-stats__value ui-h2">500+</span>
-        <span class="cp-company-stats__label ui-small">специалистов работают в компании</span>
+      <li class="ui-stat ui-stat--filled">
+        <span class="ui-stat__value ui-h2">500+</span>
+        <span class="ui-stat__label ui-small">специалистов работают в компании</span>
       </li>
-      <li class="cp-company-stats__item">
-        <span class="cp-company-stats__value ui-h2">Топ-10</span>
-        <span class="cp-company-stats__label ui-small">региональных генерирующих компаний</span>
+      <li class="ui-stat ui-stat--filled">
+        <span class="ui-stat__value ui-h2">Топ-10</span>
+        <span class="ui-stat__label ui-small">региональных генерирующих компаний</span>
       </li>
     </ul>
 
     <h2 class="ui-h3 cp-company-title">Преимущества компании</h2>
     <ul class="cp-company-adv">
-      <li class="cp-company-adv__item">
-        <h3 class="ui-h4 cp-company-adv__title">Современное производство</h3>
-        <p class="ui-small">Новое оборудование и автоматизированные системы управления станциями.</p>
+      <li class="ui-stat ui-stat--deep">
+        <h3 class="ui-h4 ui-stat__value">Современное производство</h3>
+        <p class="ui-small ui-stat__label">Новое оборудование и автоматизированные системы управления станциями.</p>
       </li>
-      <li class="cp-company-adv__item">
-        <h3 class="ui-h4 cp-company-adv__title">Наставничество</h3>
-        <p class="ui-small">Программа наставничества для новых сотрудников и молодых специалистов.</p>
+      <li class="ui-stat ui-stat--deep">
+        <h3 class="ui-h4 ui-stat__value">Наставничество</h3>
+        <p class="ui-small ui-stat__label">Программа наставничества для новых сотрудников и молодых специалистов.</p>
       </li>
-      <li class="cp-company-adv__item">
-        <h3 class="ui-h4 cp-company-adv__title">Обучение и развитие</h3>
-        <p class="ui-small">Корпоративный университет, тренинги и компенсация обучения.</p>
+      <li class="ui-stat ui-stat--deep">
+        <h3 class="ui-h4 ui-stat__value">Обучение и развитие</h3>
+        <p class="ui-small ui-stat__label">Корпоративный университет, тренинги и компенсация обучения.</p>
       </li>
-      <li class="cp-company-adv__item">
-        <h3 class="ui-h4 cp-company-adv__title">Стабильность</h3>
-        <p class="ui-small">Белая заработная плата, ДМС, соцпакет и гарантии по ТК РФ.</p>
+      <li class="ui-stat ui-stat--deep">
+        <h3 class="ui-h4 ui-stat__value">Стабильность</h3>
+        <p class="ui-small ui-stat__label">Белая заработная плата, ДМС, соцпакет и гарантии по ТК РФ.</p>
       </li>
     </ul>
 

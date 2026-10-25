@@ -161,6 +161,7 @@ const COMPONENTS = [
   'ui-table', // T7.4 — таблицы: базовая/--zebra/--compact, скролл-зона (регион tabindex+role+aria-label, градиент кромки), sticky-заголовок, карточная трансформация --cards (<md пары «заголовок–значение» из data-label; гейт irao/table-card-data-label)
   'ui-loader', // T7.5 — индикация загрузки: спиннер svg + текст role="status" (не голый спиннер, гейт irao/loader-text-status), --sm/--block/--overlay, aria-busy-паттерн
   'ui-chip', // T14.8 — интерактивный фильтр-чип: кнопочная (aria-pressed) и ссылочная (aria-current) формы, активное состояние ARIA-атрибутом, без JS
+  'ui-stat', // T17.4 — плашка «значение + подпись + сноска»: варианты поверхностей --glass (стекло на фото) / --filled (primary) / --deep (blue-deep), размер значения — ролью в разметке
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css.
