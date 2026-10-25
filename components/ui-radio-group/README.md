@@ -25,7 +25,7 @@ html-validate (`irao/radio-group-fieldset`, T5.2 AC).
     <legend class="ui-radio-group__legend">
       Формат работы
       <span class="ui-field__req"><span aria-hidden="true">*</span><span
-        class="ui-field__req-text">обязательное поле</span></span>
+        class="ui-field__req-text ui-vh">обязательное поле</span></span>
     </legend>
     <div class="ui-radio-group__row">
       <label class="ui-radio">

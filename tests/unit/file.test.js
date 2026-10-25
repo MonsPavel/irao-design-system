@@ -529,7 +529,7 @@ describe('дока компонента (DoD T5.3 — правило анти-п
       'visibility: hidden',
       'career-portal',
       'sr-only',
-      'clip-path',
+      '.ui-vh',
       'role="status"',
       'aria-labelledby',
       'aria-describedby',

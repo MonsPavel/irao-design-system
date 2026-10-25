@@ -5,7 +5,8 @@
      тексте ошибки — вставленная/обновлённая ошибка объявляется скринридером
      (паттерн 02-architecture §6.3). Required-маркер не только цветом:
      звёздочка акцентом (aria-hidden — декоративна) + текст «обязательное
-     поле» скринридеру (ui-field__req-text скрыт клипом, не display:none).
+     поле» скринридеру (ui-field__req-text скрыт утилитой .ui-vh из
+     base/reset.css, T17.2 — не display:none).
      Нативные атрибуты: required, autocomplete="email" (WCAG 1.3.5 — не
      отключать; рекомендации по типам — README.md). Placeholder — пример
      формата, НЕ замена label (политика — README.md). Расширенный стенд
@@ -16,7 +17,7 @@
     Служебный e-mail
     <span class="ui-field__req"
       ><span aria-hidden="true">*</span
-      ><span class="ui-field__req-text">обязательное поле</span></span
+      ><span class="ui-field__req-text ui-vh">обязательное поле</span></span
     >
   </label>
   <input
