@@ -93,20 +93,20 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     expect(companyHtml.match(/<p class="ui-body">/g)?.length ?? 0).toBe(2);
   });
 
-  it('company-stats: семантичный список ul из 3 фактов, числа — роль ui-h2 (Scope), подписи — ui-small (Accessibility requirements)', () => {
+  it('company-stats: семантичный список ul из 3 фактов — ui-stat--filled (T17.4), числа — роль ui-h2, подписи — ui-small (Accessibility requirements)', () => {
     expect(companyHtml).toContain('<ul class="cp-company-stats">');
-    expect(companyHtml.match(/<li class="cp-company-stats__item">/g)?.length ?? 0).toBe(3);
-    expect(companyHtml.match(/class="cp-company-stats__value ui-h2"/g)?.length ?? 0).toBe(3);
-    expect(companyHtml.match(/class="cp-company-stats__label ui-small"/g)?.length ?? 0).toBe(3);
+    expect(companyHtml.match(/<li class="ui-stat ui-stat--filled">/g)?.length ?? 0).toBe(3);
+    expect(companyHtml.match(/class="ui-stat__value ui-h2"/g)?.length ?? 0).toBe(3);
+    expect(companyHtml.match(/class="ui-stat__label ui-small"/g)?.length ?? 0).toBe(3);
     for (const value of ['2,5 ГВт', '500+', 'Топ-10']) {
       expect(companyHtml, `факт «${value}» из оригинала`).toContain(value);
     }
   });
 
-  it('преимущества: список-сетка сайт-зоны из 4 пунктов (заголовок ui-h4 + текст ui-small, контент оригинала company.html:22–25)', () => {
+  it('преимущества: список-сетка сайт-зоны из 4 пунктов — ui-stat--deep (T17.4), заголовок ui-h4 + текст ui-small, контент оригинала company.html:22–25', () => {
     expect(companyHtml).toContain('<ul class="cp-company-adv">');
-    expect(companyHtml.match(/<li class="cp-company-adv__item">/g)?.length ?? 0).toBe(4);
-    expect(companyHtml.match(/<h3 class="ui-h4 cp-company-adv__title">/g)?.length ?? 0).toBe(4);
+    expect(companyHtml.match(/<li class="ui-stat ui-stat--deep">/g)?.length ?? 0).toBe(4);
+    expect(companyHtml.match(/<h3 class="ui-h4 ui-stat__value">/g)?.length ?? 0).toBe(4);
     for (const title of [
       'Современное производство',
       'Наставничество',
@@ -166,17 +166,12 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
 });
 
 describe('pilot.css — сайт-зона компании cp-company-* (T15.2 Scope, правила пилота: токены --ui-*)', () => {
-  it('блоки страницы существуют: hero, stats (+item/value/label), adv (+item/title), where, banner (+photo/body/title)', () => {
+  it('блоки страницы существуют: hero, stats/adv (сетки — плашки сняты в ui-stat T17.4), where, banner (+photo/body/title)', () => {
     for (const selector of [
       '.cp-company-hero',
       '.cp-company-hero__photo',
       '.cp-company-stats',
-      '.cp-company-stats__item',
-      '.cp-company-stats__value',
-      '.cp-company-stats__label',
       '.cp-company-adv',
-      '.cp-company-adv__item',
-      '.cp-company-adv__title',
       '.cp-company-where',
       '.cp-company-banner',
       '.cp-company-banner__photo',
@@ -185,35 +180,55 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     ]) {
       expect(blockOf(pilotCss, selector), `${selector} найдено`).toBeTruthy();
     }
+    // T17.4: плашки стат/преимуществ — компонент ui-stat (--filled/--deep):
+    // правила сайт-zones сняты, у сеток остались только раскладки.
+    for (const removed of [
+      '.cp-company-stats__item',
+      '.cp-company-stats__value',
+      '.cp-company-stats__label',
+      '.cp-company-adv__item',
+      '.cp-company-adv__title',
+    ]) {
+      expect(blockOf(pilotCss, removed), `${removed} снято (ui-stat, T17.4)`).toBeFalsy();
+    }
   });
 
-  it('Technical considerations (переиспользование статов holding): две вариации — holding на glass-dark с рамкой и note, company на сплошном primary; решение зафиксировано комментарием', () => {
+  it('Technical considerations (унификация статов): две вариации holding/company сняты в компонент ui-stat (T17.4) — решение задокументировано комментарием у сеток', () => {
     const section = pilotCssRaw.slice(pilotCssRaw.indexOf('/* ── компания:'));
-    expect(section, 'решение по унификации задокументировано в пилоте').toContain('holding');
-  });
-
-  it('статы на сплошном primary (оригинал .company-stats__item background var(--color-primary), pages.css:807) — без hex', () => {
-    const item = blockOf(pilotCss, '.cp-company-stats__item');
-    expect(item).toContain('background-color: var(--ui-color-primary);');
-    expect(item).toContain('color: var(--ui-color-text-on-dark);');
-  });
-
-  it('числа статов: роль ui-h2 в разметке, on-dark цвет — override роли сайт-зоной (пара cp-holding__title); подпись — on-dark-muted (AA-замена white 75%, T2.3)', () => {
-    expect(blockOf(pilotCss, '.cp-company-stats__value')).toContain(
-      'color: var(--ui-color-text-on-dark);',
+    expect(section, 'ссылка на ui-stat в комментарий сетки стат').toContain('ui-stat--filled');
+    expect(section, 'ссылка на ui-stat--deep в комментарий сетки преимуществ').toContain(
+      'ui-stat--deep',
     );
-    expect(blockOf(pilotCss, '.cp-company-stats__label')).toContain(
+  });
+
+  it('статы на сплошном primary (оригинал .company-stats__item background var(--color-primary), pages.css:807) — поверхность и цвета несёт ui-stat--filled (T17.4)', () => {
+    const stat = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-stat', 'ui-stat.css'), 'utf8'),
+    );
+    expect(blockOf(stat, '.ui-stat')).toContain(
+      'background-color: var(--ui-stat-surface, var(--ui-color-primary));',
+    );
+    expect(blockOf(stat, '.ui-stat--filled')).toContain('padding: 1.25rem var(--ui-space-5);');
+  });
+
+  it('числа статов: роль ui-h2 в разметке, on-dark цвет — override роли компонентом ui-stat__value; подпись — on-dark-muted (AA-замена white 75%, T2.3)', () => {
+    const stat = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-stat', 'ui-stat.css'), 'utf8'),
+    );
+    expect(blockOf(stat, '.ui-stat__value')).toContain('color: var(--ui-color-text-on-dark);');
+    expect(blockOf(stat, '.ui-stat__label')).toContain(
       'color: var(--ui-color-text-on-dark-muted);',
     );
   });
 
-  it('карточки преимуществ — surface-blue-deep (маппинг --color-blue-700 оригинала, pages.css:815 → tokens/semantic.css)', () => {
-    const item = blockOf(pilotCss, '.cp-company-adv__item');
-    expect(item).toContain('background-color: var(--ui-color-surface-blue-deep);');
-    expect(item).toContain('color: var(--ui-color-text-on-dark);');
-    expect(blockOf(pilotCss, '.cp-company-adv__title')).toContain(
-      'color: var(--ui-color-text-on-dark);',
+  it('карточки преимуществ — surface-blue-deep (маппинг --color-blue-700 оригинала, pages.css:815) несёт ui-stat--deep (T17.4)', () => {
+    const stat = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-stat', 'ui-stat.css'), 'utf8'),
     );
+    expect(blockOf(stat, '.ui-stat--deep')).toContain(
+      'background-color: var(--ui-color-surface-blue-deep);',
+    );
+    expect(blockOf(stat, '.ui-stat--deep')).toContain('gap: var(--ui-space-3);');
   });
 
   it('оверлей баннера — тинт primary-a55 (rgba(0,40,86,.55) оригинала, pages.css:666 — ступень лестницы T14.7)', () => {

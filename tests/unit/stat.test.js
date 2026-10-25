@@ -234,7 +234,10 @@ describe('стенд (showcase/pages/ui-stat/index.html)', () => {
 describe('подключение и дист (DoD, Testing requirements)', () => {
   it("'ui-stat' в COMPONENTS showcase/build.mjs — CSS в dist/ui-core.min.css", () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
-    expect(build).toMatch(/const COMPONENTS = \[[^\]]*'ui-stat'[^\]]*\]/);
+    // Пин точнее card-прецедента: в комментариях списка COMPONENTS есть ']'
+    // (ui-pagination: button[disabled]) — регэксп «до закрывающей скобки»
+    // не пересекает хвост списка.
+    expect(build).toMatch(/'ui-stat',\s*\/\/ T17\.4/);
   });
 
   it('presence-пин dist: .ui-stat доезжает до сайтов в ui-core.min.css (регресс сборки)', () => {
@@ -273,8 +276,8 @@ describe('пилот: 10 инстансов на компоненте, прав�
   });
 
   it('company: 3 факта --filled (значение ui-h2 + подпись ui-small), 4 преимущества --deep (значение ui-h4)', () => {
-    expect(build.match(/ui-stat--filled/g)?.length ?? 0).toBe(3);
-    expect(build.match(/ui-stat--deep/g)?.length ?? 0).toBe(4);
+    expect(build.match(/class="ui-stat ui-stat--filled"/g)?.length ?? 0).toBe(3);
+    expect(build.match(/class="ui-stat ui-stat--deep"/g)?.length ?? 0).toBe(4);
     expect(build).toMatch(/class="ui-stat__value ui-h2"/);
     expect(build).toMatch(/class="ui-h4 ui-stat__value"/);
     expect(build).toMatch(/class="ui-small ui-stat__label"/);
