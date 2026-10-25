@@ -90,6 +90,8 @@
   --ui-color-primary-a26: color-mix(in srgb, var(--ui-color-primary) 26%, transparent);
   /* career-portal: оверлеи rgba(0, 40, 86, 0.55) (components.css:447 — модалка, pages.css:669 — banner-card); примитив --ui-blue-800-55 существует (--ui-color-overlay), тинт от primary следует за темой */
   --ui-color-primary-a55: color-mix(in srgb, var(--ui-color-primary) 55%, transparent);
+  /* career-portal: градиент-оверлей видео-постера (видео-блок главной: transparent 40% → primary 72% к низу кадра — метка времени читается на любом постере; пилот — pilot.css:670, color-mix 72%); ступень для ui-video (T17.6); форма/Baseline/границы — примечание a10 */
+  --ui-color-primary-a72: color-mix(in srgb, var(--ui-color-primary) 72%, transparent);
   /* career-portal: hero-оверлей rgba(0, 40, 86, 0.94) (src/blocks/hero/hero.css:24 — градиент, нарастающий к низу hero); пилот — pilot.css:121 (color-mix 94%) */
   --ui-color-primary-a94: color-mix(in srgb, var(--ui-color-primary) 94%, transparent);
 
