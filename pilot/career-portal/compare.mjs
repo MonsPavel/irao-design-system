@@ -403,6 +403,13 @@ const BLOCK_PROBES = {
     ['cta-mail', '.cta-mail', '.cp-cta-mail__card'],
     ['footer', '.footer', '.cp-footer'],
   ],
+  // Статы компании на ui-stat (T17.4): сетки — сайт-зона, плашки — компонент;
+  // блоки гейтят высоты миграции (AC: порог ±4px). Оригинал несёт те же
+  // классы блоков (.company-stats/.company-adv, pages.css:805/813).
+  'company.html': [
+    ['company-stats', '.company-stats', '.cp-company-stats'],
+    ['company-adv', '.company-adv', '.cp-company-adv'],
+  ],
 };
 
 const STYLES = [
