@@ -47,12 +47,14 @@
 
 /* ── Элементы (Scope): постер/оверлей/play/время ── */
 
-/* Кадр: cover во всю ширину, высоту ведёт пропорция картинки. */
+/* Кадр: cover во всю ширину, высоту ведёт аспект атрибутов (height: auto —
+   интринсик width/height из разметки резервирует место, гейт T4.6). */
 .ui-video__poster {
   box-sizing: border-box;
   display: block;
   object-fit: cover;
   width: 100%;
+  height: auto;
 }
 
 /* Оверлей: градиент к primary-a72 от 40% кадра — тёмная подложка метки

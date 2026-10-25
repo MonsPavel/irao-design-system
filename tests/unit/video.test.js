@@ -86,8 +86,10 @@ describe('components/ui-video/ui-video.css — обёртка и элемент�
     expect(block).toContain('display: block;');
     expect(block).toContain('object-fit: cover;');
     expect(block).toContain('width: 100%;');
-    // Высоты оригинала (720/420/240) — сайт-зона: фиксированных высот нет.
-    expect(block).not.toContain('height');
+    // Высота — по аспекту атрибутов width/height (гейт T4.6: CLS): auto,
+    // а не фикс-высоты оригинала (720/420/240 — сайт-зона). Прецедент ui-image.
+    expect(block).toContain('height: auto;');
+    expect(block).not.toMatch(/height:\s*(?!auto)[0-9]/);
   });
 
   it('__overlay: градиент transparent 40% → primary-a72 (Context «градиент к primary 72%»)', () => {
