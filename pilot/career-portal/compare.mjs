@@ -397,7 +397,7 @@ const BLOCK_PROBES = {
     ['why-us', '.why-us', '.cp-why-us'],
     ['vacancy-search', '.vacancy-search', '#vacancies'],
     ['students', '.students--illustrated', '#students'],
-    ['video-block', '.video-block', '.cp-video__player'],
+    ['video-block', '.video-block', '.ui-video'],
     ['media', '.media', '#media'],
     ['team', '.team', '.cp-team__photo'],
     ['cta-mail', '.cta-mail', '.cp-cta-mail__card'],

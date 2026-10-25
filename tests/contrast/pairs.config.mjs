@@ -398,6 +398,13 @@ export const EXCEPTIONS = [
       'родственен --ui-color-overlay); см. обоснование a10',
   },
   {
+    token: '--ui-color-primary-a72',
+    reason:
+      'тинт primary (T17.6): декоративная поверхность — градиент-оверлей видео-постера ui-video ' +
+      '(видео-блок главной: нарастание к низу кадра, pilot.css:670) — подложка метки времени, ' +
+      'текст на нём — парой on-dark с композитом (e2e ui-video); см. обоснование a10',
+  },
+  {
     token: '--ui-color-primary-a94',
     reason:
       'тинт primary (T14.7): декоративная поверхность — hero-оверлей 94% (hero.css:24, pilot.css:121) — ' +

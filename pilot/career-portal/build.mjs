@@ -1260,13 +1260,13 @@ ${studentCards}
 <section class="ui-section">
   <div class="ui-container">
     <h2 class="ui-h2">Видео о работе в компании</h2>
-    <button class="cp-video__player" type="button">
-      <img class="cp-video__poster" src="assets/images/video-poster-irao.jpg" alt="" loading="lazy">
-      <span class="cp-video__overlay" aria-hidden="true"></span>
-      <span class="cp-video__play" aria-hidden="true">
+    <button class="ui-video" type="button" aria-label="Смотреть видео о работе в компании">
+      <img class="ui-video__poster" src="assets/images/video-poster-irao.jpg" alt="" loading="lazy">
+      <span class="ui-video__overlay" aria-hidden="true"></span>
+      <span class="ui-video__play" aria-hidden="true">
         <svg width="26" height="30" viewBox="0 0 26 30" fill="none"><path d="M25 15L1.5 28.856L1.5 1.144L25 15Z" fill="currentColor"/></svg>
       </span>
-      <span class="cp-video__time">24:23</span>
+      <span class="ui-video__time">24:23</span>
     </button>
   </div>
 </section>

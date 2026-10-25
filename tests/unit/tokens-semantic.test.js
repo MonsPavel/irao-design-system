@@ -164,12 +164,13 @@ describe('tokens/semantic.css — структура слоя 2 (ADR-0009)', () 
 });
 
 describe('tokens/semantic.css — тинты primary (T14.7)', () => {
-  /** Ступени тинтов (Scope T14.7): суффикс = процент primary в смеси. */
-  const TINTS = Object.freeze({ a10: 10, a20: 20, a26: 26, a55: 55, a94: 94 });
+  /** Ступени тинтов (Scope T14.7; a72 — T17.6, градиент-оверлей ui-video):
+   *  суффикс = процент primary в смеси. */
+  const TINTS = Object.freeze({ a10: 10, a20: 20, a26: 26, a55: 55, a72: 72, a94: 94 });
 
   const tintName = (step) => `--ui-color-primary-${step}`;
 
-  it('пять ступеней a10/a20/a26/a55/a94 объявлены (Scope T14.7)', () => {
+  it('ступени a10/a20/a26/a55/a72/a94 объявлены (Scope T14.7; a72 — T17.6)', () => {
     for (const step of Object.keys(TINTS)) {
       expect(declarations.get(tintName(step)), `${tintName(step)} отсутствует`).toBeDefined();
     }
@@ -190,7 +191,7 @@ describe('tokens/semantic.css — тинты primary (T14.7)', () => {
     expect(new Set(tintNames)).toEqual(new Set(Object.keys(TINTS).map(tintName)));
   });
 
-  it('лестница процентов реального файла растёт монотонно (10 < 20 < 26 < 55 < 94)', () => {
+  it('лестница процентов реального файла растёт монотонно (10 < 20 < 26 < 55 < 72 < 94)', () => {
     // Проценты выводятся из ДЕКЛАРАЦИЙ semantic.css (суффиксы имён тинтов),
     // не из замороженного литерала TINTS: прежний вариант сравнивал литерал
     // с его же сортировкой — таутология (T14.7-бэклог); реальный файл

@@ -1,0 +1,101 @@
+<p class="ui-showcase-stand__note">
+  Стенд ui-video (T17.6): видео-постер «кадр + play + метка времени» — обёртка-кнопка
+  (или ссылка) с градиент-оверлеем к primary-a72. Компонент статический (вид): поведение
+  воспроизведения — слот сайта. Сценарии — <code>tests/e2e/ui-video.spec.js</code>:
+  computed-геометрия, axe (имя кнопки, контраст метки), эталоны 375/768/1280/1440.
+</p>
+
+<style>
+  /* Стеновая сценарные стили — не API компонента: разметка проб с шириной
+     колонки 720px (кадр главной), между пробами шаг --ui-space-5. */
+  .uvid-col {
+    max-width: 45rem;
+    margin: 0 0 var(--ui-space-5);
+  }
+
+  /* Демо токен-хука размера play: масштаб без fork'а (Scope T17.6). */
+  .uvid-play-size {
+    --ui-video-play-size: 4rem;
+  }
+</style>
+
+<section aria-labelledby="ui-video-canonical-heading">
+  <h2 id="ui-video-canonical-heading">Канон: обёртка-кнопка</h2>
+  <div class="uvid-col">
+    <button class="ui-video" type="button" aria-label="Смотреть видео о работе в компании" id="ui-video-default">
+      <img
+        class="ui-video__poster"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27960%27%20height%3D%27540%27%3E%3Crect%20width%3D%27960%27%20height%3D%27540%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27740%27%20cy%3D%27140%27%20r%3D%27160%27%20fill%3D%27%23164B89%27%20opacity%3D%270.7%27%2F%3E%3Cpath%20d%3D%27M0%20440%20L240%20280%20L480%20460%20L720%20300%20L960%20450%20L960%20540%20L0%20540%20Z%27%20fill%3D%27%23F26722%27%20opacity%3D%270.35%27%2F%3E%3C/svg%3E"
+        alt=""
+        width="960"
+        height="540"
+        loading="lazy"
+      >
+      <span class="ui-video__overlay" aria-hidden="true"></span>
+      <span class="ui-video__play" aria-hidden="true">▶</span>
+      <span class="ui-video__time">24:23</span>
+    </button>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Канон (Implementation requirements п.3): <code>&lt;button type="button"&gt;</code> с именем на
+    обёртке (<code>aria-label="Смотреть видео …"</code>, не «play»), постер
+    <code>alt=""</code> + <code>loading="lazy"</code>, overlay/play
+    <code>aria-hidden</code>. Play-иконка — слот (svg-стрелка сайта или глиф).
+  </p>
+</section>
+
+<section aria-labelledby="ui-video-link-heading">
+  <h2 id="ui-video-link-heading">Ссылочная форма</h2>
+  <div class="uvid-col">
+    <a
+      class="ui-video"
+      href="https://rutube.ru/video/career/"
+      aria-label="Смотреть видео о работе в компании на Rutube"
+      id="ui-video-link"
+    >
+      <img
+        class="ui-video__poster"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27960%27%20height%3D%27540%27%3E%3Crect%20width%3D%27960%27%20height%3D%27540%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27400%27%20r%3D%27180%27%20fill%3D%27%23164B89%27%20opacity%3D%270.6%27%2F%3E%3Ccircle%20cx%3D%27780%27%20cy%3D%27160%27%20r%3D%27120%27%20fill%3D%27%23F26722%27%20opacity%3D%270.3%27%2F%3E%3C/svg%3E"
+        alt=""
+        width="960"
+        height="540"
+        loading="lazy"
+      >
+      <span class="ui-video__overlay" aria-hidden="true"></span>
+      <span class="ui-video__play" aria-hidden="true">▶</span>
+      <span class="ui-video__time">24:23</span>
+    </a>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Обёртка <code>&lt;a&gt;</code>: переход на эмбед/страницу видео несёт сайт (Context —
+    «обёртка-кнопка или ссылка»), вид тот же; Enter — нативный переход ссылки.
+  </p>
+</section>
+
+<section aria-labelledby="ui-video-size-heading">
+  <h2 id="ui-video-size-heading">Размер play — токен-хук</h2>
+  <div class="uvid-col">
+    <button
+      class="ui-video uvid-play-size"
+      type="button"
+      aria-label="Смотреть видео года — отчёт Группы"
+      id="ui-video-play-size"
+    >
+      <img
+        class="ui-video__poster"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27960%27%20height%3D%27540%27%3E%3Crect%20width%3D%27960%27%20height%3D%27540%27%20fill%3D%27%23164B89%27%2F%3E%3Cpath%20d%3D%27M0%20540%20C240%20300%20480%20500%20720%20260%20L960%20400%20L960%20540%20Z%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27480%27%20cy%3D%27180%27%20r%3D%27100%27%20fill%3D%27%23002856%27%20opacity%3D%270.8%27%2F%3E%3C/svg%3E"
+        alt=""
+        width="960"
+        height="540"
+        loading="lazy"
+      >
+      <span class="ui-video__overlay" aria-hidden="true"></span>
+      <span class="ui-video__play" aria-hidden="true">▶</span>
+      <span class="ui-video__time">12:04</span>
+    </button>
+  </div>
+  <p class="ui-small ui-text--muted">
+    <code>--ui-video-play-size: 4rem</code> на блоке: дефолт 5.5rem (88px одобренного
+    дизайна), плотные медиа-каталоги масштабируют play без fork'а.
+  </p>
+</section>

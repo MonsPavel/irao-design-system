@@ -162,6 +162,7 @@ const COMPONENTS = [
   'ui-loader', // T7.5 — индикация загрузки: спиннер svg + текст role="status" (не голый спиннер, гейт irao/loader-text-status), --sm/--block/--overlay, aria-busy-паттерн
   'ui-chip', // T14.8 — интерактивный фильтр-чип: кнопочная (aria-pressed) и ссылочная (aria-current) формы, активное состояние ARIA-атрибутом, без JS
   'ui-stat', // T17.4 — плашка «значение + подпись + сноска»: варианты поверхностей --glass (стекло на фото) / --filled (primary) / --deep (blue-deep), размер значения — ролью в разметке
+  'ui-video', // T17.6 — видео-постер: обёртка button/a + постер + градиент-оверлей primary-a72 + круглая play accent (--ui-video-play-size) + метка времени; поведение воспроизведения — слот сайта
 ];
 
 /** VI-модуль (T9.1): CSS собирается ОТДЕЛЬНЫМ файлом dist/ui-vi.min.css.
