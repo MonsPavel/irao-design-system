@@ -93,6 +93,18 @@ export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
       'сохраняется — Implementation requirements T4.2 п.3): axe видит бокс ' +
       'текста без краски; спиннер aria-hidden',
   },
+  {
+    id: 'color-contrast',
+    // Глиф ▶ канона/стенда ui-video (T17.6) + svg-стрелка сайта: тот же
+    // lookahead-механизм, что у .ui-button--accent (не более длинное имя).
+    match: /(^|\s)\.ui-video__play(?![\w-])/,
+    reason:
+      'стрелка play на accent-кружке — та же одобренная пара on-dark на accent ' +
+      '3.12:1 (как ui-button--accent; ui-video T17.6): как графика/иконка ' +
+      'WCAG 1.4.11 ≥ 3:1 проходит, глиф ▶ канона axe меряет как мелкий текст ' +
+      '4.5:1; изменение пары — design-decision владельца; токен-уровень — ' +
+      'tests/contrast/pairs.config.mjs (пара on-dark-on-accent, T2.6/ADR-0010)',
+  },
 ]);
 
 /**
