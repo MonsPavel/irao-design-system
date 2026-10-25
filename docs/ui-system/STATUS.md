@@ -114,7 +114,7 @@
 | T17.3 | todo | EPIC-17: фото-секция ui-section--photo + оверлей-градиенты — приём 5 фоновых секций пилота (hero/production/holding/why-us/company-banner) |
 | T17.4 | done | смержена |
 | T17.5 | todo | EPIC-17: медиа-карточка ui-card--media — event/article/intern-person (3 копии одного каркаса) |
-| T17.6 | todo | EPIC-17: видео-постер ui-video (постер+play+время) — блок «Видео о работе» главной |
+| T17.6 | done | смержена |
 | T17.7 | todo | EPIC-17: карусель ui-carousel + фото-галерея (JS-модуль в dist) — production/направления, ~120 строк pilot.js; P3, кандидат бэклога по решению владельца |
 | T17.8 | todo | EPIC-17: CTA-карточка ui-card--cta (primary/accent/row) — cta-mail, «Все вакансии», тело баннера |
 | T17.9 | todo | EPIC-17: nav-карточки (lnk-card, тон-хук) + лента логотипов + ui-button--round — students/employers |
