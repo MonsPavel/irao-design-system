@@ -21,7 +21,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 | Модификатор `.ui-field--compact` | плотная высота анкет-модалок: `min-height` `--ui-field-height-compact` (48px, `.apply-form .field__input` pages.css:1208 оригинала) на `__input`/`__select`; **textarea высоту не меняет** (многострочность важнее плотности), паддинг не трогает. Когда: формы в модалках / плотные анкеты; потребитель — apply-формы career-portal |
 | Элемент `.ui-field__label` | `label` 14/500 (`--ui-fs-small`/`--ui-fw-small`), цвет `--ui-color-field-label` (gray-700 — AA-замена серого #808080 оригинала, T16.9: подпись «чуть тише текста», 6.19:1 на белом); **обязателен `for` с id контрола** (исключение — file-паттерн: `span` + `aria-labelledby`, см. [ui-file](doc:ui-file)) |
 | Элемент `.ui-field__req` | маркер обязательности: видимая звёздочка `*` акцентом (одобренный `.req`, components.css:142) |
-| Элемент `.ui-field__req-text` | текст «обязательное поле» для скринридера внутри `__req`; визуально скрыт клипом (display:none запрещён) |
+| Элемент `.ui-field__req-text` | текст «обязательное поле» для скринридера внутри `__req`; визуально скрыт утилитой `.ui-vh` (base/reset.css, T17.2; display:none запрещён) |
 | Элемент `.ui-field__input` | контрол: `input` типов text/email/tel/password/date/number |
 | Элемент `.ui-field__select` | нативный `select` в коробке поля (T5.2): `appearance: none` (без индикатора запрещено); выпадающий список остаётся нативным |
 | Элемент `.ui-field__select-wrap` | обёртка select (обязательна): точка позиционирования стрелки — `::after` с `mask-image` по svg без цвета (alpha-маска) и `background-color: var(--ui-color-text-muted)` — цвет стрелки токен-перекрашиваемый |
@@ -36,7 +36,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 <div class="ui-field ui-field--required ui-field--error">
   <label class="ui-field__label" for="apply-email">
     Служебный e-mail
-    <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>
+    <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>
   </label>
   <input class="ui-field__input" type="email" id="apply-email" name="email"
          placeholder="name@example.com" autocomplete="email" required
@@ -78,7 +78,8 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 2. видимый маркер `__req` — звёздочка акцентом; она декоративна
    (`aria-hidden="true"`) — цвет сам по себе смысл не передаёт (WCAG 1.4.1);
 3. текст «обязательное поле» для скринридера — `ui-field__req-text` внутри
-   маркера (визуально скрыт клипом, в a11y-дереве есть).
+   маркера (визуально скрыт утилитой `.ui-vh` — base/reset.css, T17.2;
+   в a11y-дереве есть).
 
 Корень помечается модификатором `--required` (хук для стилей/скриптов).
 Формулировка при ошибке — «Заполните поле …», не «поле обязательно» (пользователь
@@ -188,7 +189,7 @@ primary, `--error` → рамка error + фон error-bg, текст ошибк
 ```php
 <div class="ui-field <?= $errors['email'] ? 'ui-field--error' : '' ?>">
   <label class="ui-field__label" for="apply-email">
-    Служебный e-mail<span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>
+    Служебный e-mail<span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>
   </label>
   <input class="ui-field__input" type="email" id="apply-email" name="email"
          value="<?= htmlspecialchars($form['email']) ?>"

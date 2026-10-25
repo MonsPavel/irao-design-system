@@ -110,7 +110,7 @@
 | T15.5 | done | смержена |
 | T15.9 | done | смержена |
 | T17.1 | todo | EPIC-17 (полнота ДС: портал из компонентов, раунд 5 от 25.10): паттерн-слой ui-patterns.css в dist — каноны lpp/ddp/fpp исполняемым CSS; ключевое решение владельца A (слой) / B (копипаста+гейт); пилот снимает дубликаты строк/сайдбара/page-head/крошек/find-bar |
-| T17.2 | todo | EPIC-17: базовая утилита visually-hidden ui-vh (снимает cp-vh, унификация с sr-only полей/файла) |
+| T17.2 | done | смержена |
 | T17.3 | todo | EPIC-17: фото-секция ui-section--photo + оверлей-градиенты — приём 5 фоновых секций пилота (hero/production/holding/why-us/company-banner) |
 | T17.4 | todo | EPIC-17: компонент ui-stat (варианты glass/filled/deep) — статы holding/company (10 инстансов) |
 | T17.5 | todo | EPIC-17: медиа-карточка ui-card--media — event/article/intern-person (3 копии одного каркаса) |

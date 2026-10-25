@@ -991,19 +991,8 @@
 
 /* Скрытая подпись select-пилюли (label[for] канона ui-select T7.3):
    в оригинале видимых подписей нет — имя доступно ассистивным технологиям,
-   визуал не меняет (техника visually-hidden, WCAG 2.5.3). */
-.cp-vh {
-  box-sizing: border-box;
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  border: 0;
-  white-space: nowrap;
-  clip-path: inset(50%);
-}
+   визуал не меняет. Скрытие — утилитой ДС .ui-vh из ui-core (T17.2):
+   локальная копия приёма .cp-vh снята — один приём в одном месте. */
 
 /* Пагинация каталога по центру (T15.3; оригинал — inline-обёртка
    education-catalog.html:57: flex + margin-top 48px = --ui-space-7). */

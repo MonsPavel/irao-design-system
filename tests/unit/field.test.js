@@ -205,16 +205,18 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
     expect(readonly).toContain('cursor: default;');
   });
 
-  it('required-маркер: __req — акцентный (career-portal .req); __req-text визуально скрыт без display:none (текст для скринридера)', () => {
+  it('required-маркер: __req — акцентный (career-portal .req); скрытие __req-text — утилитой .ui-vh (T17.2): локальный sr-only-блок компонента снят, приём живёт в base/reset.css', () => {
     const req = blockOf(css, '.ui-field__req');
     expect(req, 'правило маркера найдено').toBeTruthy();
     expect(req).toContain('color: var(--ui-color-accent);');
 
-    const reqText = blockOf(css, '.ui-field__req-text');
-    expect(reqText, 'правило скрытого текста найдено').toBeTruthy();
-    expect(reqText).toContain('position: absolute;');
-    expect(reqText).toContain('clip-path: inset(50%);');
-    expect(reqText, 'display:none убрал бы текст из a11y-дерева').not.toContain('display: none');
+    // T17.2: один приём в одном месте — канон visually-hidden в base/.ui-vh;
+    // локальная копия компонента снята (раньше здесь был полный sr-only-набор).
+    expect(
+      blockOf(css, '.ui-field__req-text'),
+      'локальное правило скрытия снято (T17.2)',
+    ).toBeNull();
+    expect(css, 'clip-приём ушёл в base/.ui-vh').not.toContain('clip-path');
   });
 
   it('инварианты системы: без !important и hex (vi-перекраска, §5); media и :hover отсутствуют (одобренным дизайном не заданы)', () => {
@@ -336,8 +338,10 @@ describe('канонический паттерн ui-field (components/ui-field/
     expect(html, 'видимая звёздочка декоративна (смысл — текстом)').toMatch(
       /class="ui-field__req"[^>]*>\s*<span aria-hidden="true">\*<\/span\s*>/,
     );
-    const reqText = html.match(/ui-field__req-text">([^<]+)</)?.[1];
-    expect(reqText, 'текст маркера для скринридера').toBe('обязательное поле');
+    const reqText = html.match(/ui-field__req-text ui-vh">([^<]+)</)?.[1];
+    expect(reqText, 'текст маркера для скринридера, скрыт утилитой .ui-vh (T17.2)').toBe(
+      'обязательное поле',
+    );
   });
 
   it('ошибка — визуал и aria в одном паттерне: aria-invalid, aria-describedby (hint+error), role="alert", id ошибки', () => {

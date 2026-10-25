@@ -26,7 +26,7 @@ primary. Галочку рисует браузер — кастомные ко�
            required aria-invalid="true" aria-describedby="consent-error">
     <span>Я даю <a class="ui-link" href="/privacy/">согласие на обработку персональных
       данных</a><span class="ui-field__req"><span aria-hidden="true">*</span><span
-      class="ui-field__req-text">обязательное поле</span></span></span>
+      class="ui-field__req-text ui-vh">обязательное поле</span></span></span>
   </label>
   <p class="ui-field__error" id="consent-error" role="alert">Без согласия отклик отправить нельзя</p>
 </div>

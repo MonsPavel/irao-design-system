@@ -148,7 +148,7 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
       build.indexOf('function radioGroup'),
     );
     expect(selectFieldBody.length).toBeGreaterThan(200);
-    expect(selectFieldBody).toMatch(/label class="cp-vh" for="\$\{fieldId\}"/);
+    expect(selectFieldBody).toMatch(/label class="ui-vh" for="\$\{fieldId\}"/);
     expect(selectFieldBody, 'aria-label в пилюле с label не дублирует подпись').toMatch(
       /\$\{ariaLabel \? ` aria-label="\$\{esc\(ariaLabel\)\}"` : ''\}/,
     );
@@ -213,8 +213,8 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
 });
 
 describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 Scope, правила пилота: токены --ui-*)', () => {
-  it('блоки существуют: cp-catalog-filters, cp-vh, cp-catalog-nav — и несут box-sizing на корне (ADR-0002)', () => {
-    for (const selector of ['.cp-catalog-filters', '.cp-vh', '.cp-catalog-nav']) {
+  it('блоки существуют: cp-catalog-filters, cp-catalog-nav — и несут box-sizing на корне (ADR-0002)', () => {
+    for (const selector of ['.cp-catalog-filters', '.cp-catalog-nav']) {
       const block = blockOf(pilotCss, selector);
       expect(block, `${selector} найдено`).toBeTruthy();
       expect(block, `${selector}: box-sizing первой строкой (ADR-0002)`).toContain(
@@ -235,12 +235,9 @@ describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 S
     expect(blockOf(pilotCss, '.cp-catalog-filters .cp-pill')).toContain('flex: 0 0 260px;');
   });
 
-  it('cp-vh — техника visually-hidden для label[for]: в оригинале видимых подписей нет, имя доступно ассистивным технологиям (WCAG 2.5.3)', () => {
-    const vh = blockOf(pilotCss, '.cp-vh');
-    expect(vh).toContain('position: absolute;');
-    expect(vh).toContain('overflow: hidden;');
-    expect(vh).toContain('width: 1px;');
-    expect(vh).toContain('height: 1px;');
+  it('cp-vh удалён (T17.2): приём visually-hidden перенесён в ДС — подписи пилюлей скрывает утилита .ui-vh из ui-core, пилот не хранит копию приёма', () => {
+    expect(pilotCss, 'правила и строки cp-vh в pilot.css нет').not.toContain('cp-vh');
+    expect(build, 'генератор пилюль на утилите ДС').toMatch(/label class="ui-vh"/);
   });
 
   it('обёртка пагинации — по центру с ритмом 48px (--ui-space-7; оригинал education-catalog.html:57)', () => {

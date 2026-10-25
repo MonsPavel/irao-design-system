@@ -11,7 +11,8 @@
  * --ui-color-surface-hover); подсказка — micro/muted (визуал
  * .field__file-hint). АНТИ-ПАТТЕРН career-portal (класс D аудита,
  * pages.css:242: `.field__file input { display: none }`) НЕ переносится:
- * нативный input визуально скрыт классическим sr-only (клип 1px) — остаётся
+ * нативный input визуально скрыт утилитой .ui-vh из base/reset.css (T17.2 —
+ * локальный sr-only-набор снят, один приём в одном месте) — остаётся
  * в tab-порядке, a11y-дереве и отправке формы. Правило системы «на нативных
  * контролах запрещены display:none/visibility:hidden» — README.md.
  *
@@ -25,10 +26,11 @@
  * скрытая кнопка-действие, не контрол значения), фокус после сброса модуль
  * возвращает на инпут.
  *
- * Фокус: sr-only инпут получает глобальный outline политики ADR-0001
- * (base/focus.css), но он невидим за клипом — видимый индикатор рисует
- * кнопка-лейбл через :has(.ui-file__input:focus-visible) той же тройкой
- * токенов (прецедент :has — стрелка select, T5.2). outline нигде не гасится.
+ * Фокус: скрытый .ui-vh-инпут получает глобальный outline политики
+ * ADR-0001 (base/focus.css), но он невидим за клипом — видимый индикатор
+ * рисует кнопка-лейбл через :has(.ui-file__input:focus-visible) той же
+ * тройкой токенов (прецедент :has — стрелка select, T5.2). outline нигде
+ * не гасится.
  *
  * disabled — нативный атрибут: диалог не открывается нативно, видимый
  * аффорданс (кнопка-лейбл) гаснет токеном --ui-opacity-disabled — аналог
@@ -87,23 +89,11 @@
   box-sizing: border-box;
 }
 
-/* Нативный input — sr-only клипом: классический паттерн (GOV.UK/USWDS) —
-   бокс 1px вне потока, отступ -1px гасит вклад 1px в скролл-переполнение
-   страницы. НЕ display:none/visibility:hidden/opacity: контрол остаётся в
-   tab-порядке, a11y-дереве и отправке формы (класс D аудита). 1px —
-   каноничная геометрия паттерна; токена для неё нет, создавать ради
-   одного значения — анти-overengineering. */
-.ui-file__input {
-  box-sizing: border-box;
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  white-space: nowrap;
-  clip-path: inset(50%);
-}
+/* Нативный input скрыт утилитой .ui-vh из base/reset.css (T17.2): разметка
+   канона несёт class="ui-file__input ui-vh" — класс остаётся хуком
+   :has-фокуса и JS-модуля, геометрию скрытия даёт утилита. Локальный
+   sr-only-набор снят: НЕ display:none/visibility:hidden/opacity — контрол
+   остаётся в tab-порядке, a11y-дереве и отправке формы (класс D аудита). */
 
 /* Значение выбора: текст ведёт модуль (render()); role="status" — в
    разметке, обновление озвучивается скринридером нативно. Длинное имя
@@ -149,8 +139,8 @@
   line-height: var(--ui-lh-micro);
 }
 
-/* Видимый фокус: sr-only outline инпута невидим за клипом — обводку той же
-   тройкой токенов ADR-0001 рисует кнопка-лейбл. */
+/* Видимый фокус: скрытый .ui-vh-инпут outline невидим за клипом — обводку
+   той же тройкой токенов ADR-0001 рисует кнопка-лейбл. */
 .ui-file__button:has(.ui-file__input:focus-visible) {
   outline: var(--ui-focus-width) solid var(--ui-focus-color);
   outline-offset: var(--ui-focus-offset);

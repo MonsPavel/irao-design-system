@@ -1,6 +1,7 @@
-<!-- ui-file (T5.3): файловый инпут — кнопка-лейбл + sr-only input. АНТИ-ПАТТЕРН
-     career-portal (.field__file input { display: none }, класс D аудита)
-     исправлен: инпут скрыт клипом — tab-порядок, скринридер и отправка формы
+<!-- ui-file (T5.3): файловый инпут — кнопка-лейбл + скрытый утилитой .ui-vh
+     input (base/reset.css, T17.2). АНТИ-ПАТТЕРН career-portal
+     (.field__file input { display: none }, класс D аудита) исправлен:
+     инпут скрыт клипом — tab-порядок, скринридер и отправка формы
      живы. Кнопка-лейбл — ЕДИНСТВЕННЫЙ label инпута (клик открывает выбор
      нативно, без JS); имя полю несёт aria-labelledby на текст обвязки
      И на подпись кнопки (второй label — нарушение axe
@@ -18,13 +19,13 @@
     Резюме
     <span class="ui-field__req"
       ><span aria-hidden="true">*</span
-      ><span class="ui-field__req-text">обязательное поле</span></span
+      ><span class="ui-field__req-text ui-vh">обязательное поле</span></span
     >
   </span>
   <div class="ui-file" data-ui-file>
     <label class="ui-file__button">
       <input
-        class="ui-file__input"
+        class="ui-file__input ui-vh"
         type="file"
         id="ui-resume"
         name="resume"

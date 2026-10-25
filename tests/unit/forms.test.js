@@ -330,7 +330,7 @@ describe('канонический паттерн ui-checkbox (components/ui-che
   it('required-маркер не только цветом: звёздочка aria-hidden + текст скринридеру (паттерн T5.1)', () => {
     expect(labelBlock).toContain('class="ui-field__req"');
     expect(labelBlock).toMatch(/<span aria-hidden="true">\*<\/span\s*>/);
-    expect(html.match(/ui-field__req-text">([^<]+)</)?.[1]).toBe('обязательное поле');
+    expect(html.match(/ui-field__req-text ui-vh">([^<]+)</)?.[1]).toBe('обязательное поле');
   });
 
   it('появляется в потоке: без tabindex, без inline-стилей (VI §5)', () => {

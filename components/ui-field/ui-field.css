@@ -41,9 +41,9 @@
  *
  * Required-маркер __req: видимая звёздочка (акцент одобренного .req) —
  * декоративна (aria-hidden в разметке), смысл несёт визуально скрытый
- * __req-text «обязательное поле» (клип по образцу ui-button__label:
- * display:none убрал бы текст из a11y-дерева) — маркер не только цветом
- * (WCAG 1.4.1). Правило required-паттерна — README.md.
+ * __req-text «обязательное поле» (утилита .ui-vh из base/reset.css,
+ * T17.2: display:none убрал бы текст из a11y-дерева) — маркер не только
+ * цветом (WCAG 1.4.1). Правило required-паттерна — README.md.
  *
  * Placeholder красится токеном muted с opacity: 1: пара контраст-гейта
  * muted-on-surface-muted (T2.3) рассчитана на непрозрачный цвет — Firefox
@@ -95,26 +95,13 @@
   line-height: var(--ui-lh-small);
 }
 
-/* Звёздочка — цвет одобренного .field__label .req (components.css:142). */
+/* Звёздочка — цвет одобренного .field__label .req (components.css:142).
+   Текст маркера __req-text «обязательное поле» — в разметке канона рядом
+   с семантическим классом несёт утилиту .ui-vh (base/reset.css, T17.2):
+   локальный sr-only-набор снят — один приём в одном месте. НЕ display:none —
+   текст остаётся в a11y-дереве (имя поля слышат с маркером). */
 .ui-field__req {
   color: var(--ui-color-accent);
-}
-
-/* Скринридер-текст маркера: sr-only клипом (канон ui-file__input — GOV.UK/
-   USWDS): бокс 1px вне потока, overflow+margin -1px гасят вклад бокса в
-   scroll-переполнение (гейт T3.6 32px-база: голый absolute+nowrap без
-   1px-геометрии распирал scrollWidth +2px @768/32px). НЕ display:none —
-   текст остаётся в a11y-дереве (имя поля слышат с маркером). */
-.ui-field__req-text {
-  box-sizing: border-box;
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  white-space: nowrap;
-  clip-path: inset(50%);
 }
 
 /* ── Контролы: input всех типов, select и textarea — одна коробка ── */

@@ -8,6 +8,10 @@
  *    полагается на этот сброс — legacy-сброс сайта подключён позже и
  *    побеждает равные универсальные селекторы;
  *  - [hidden] сильнее любых display-правил — доступность скрытия без JS;
+ *  - утилита .ui-vh (T17.2) — visually-hidden: элемент убран из вида, но
+ *    доступен скринридерам (подписи select-пилюль, «обязательное поле»,
+ *    файловые инпуты). Один приём в одном месте — компоненты и сайты
+ *    группы не копируют набор, а ставят класс рядом с семантическим;
  *  - scrollbar-gutter: stable — сетка не сдвигается при появлении скролла
  *    (урок career-portal);
  *  - img block/max-width, ресет отступов body/h1–h4/p/ul/ol;
@@ -35,6 +39,28 @@
 [hidden] {
   /* stylelint-disable-next-line declaration-no-important -- осознанное исключение (T3.1, байты career-portal): [hidden] обязан бить любые display-правила legacy */
   display: none !important;
+}
+
+/* Утилита visually-hidden (T17.2): элемент убран из вида, но остаётся в
+   потоке доступности — скринридер читает, таб-порядок жив. Канонический
+   набор (GOV.UK/USWDS, прецедент ui-select T7.3): бокс 1px вне потока,
+   overflow + margin −1px гасят вклад бокса в scroll-переполнение
+   (гейт T3.6 32px-база), clip-path inset(50%) срезает пиксель — НЕ clip
+   (легаси-дублёр остался только в ui-skip-link) и НЕ display:none (убрал
+   бы текст из a11y-дерева). Forced-colors-особенностей нет: скрытие
+   остаётся скрытием в любом режиме. НЕ для фокусуемых вне таб-порядка
+   элементов — «не прятать фокусуемое» (do/don't — base/README.md). */
+.ui-vh {
+  box-sizing: border-box;
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  white-space: nowrap;
+  clip-path: inset(50%);
 }
 
 /* Резервируем место под полосу прокрутки ещё до появления длинного контента.

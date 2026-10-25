@@ -129,7 +129,7 @@ function field({
     ? `\n    <p class="ui-field__hint" id="${fieldId}-hint">${esc(hint)}</p>`
     : '';
   return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
-  <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>` : ''}</label>
+  <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>` : ''}</label>
   <input class="ui-field__input" type="${type}" id="${fieldId}" name="${name}"${required ? ' required' : ''}${placeholder ? ` placeholder="${esc(placeholder)}"` : ''}${hintId}>${hintHtml}
 </div>`;
 }
@@ -177,13 +177,14 @@ function selectField({
     // Подпись поля — label[for] РЯДОМ с обёрткой (канон ui-select после
     // ревью T7.3: имя получают и нативный select, и построенный триггер —
     // пара APG listbox-button); в оригинале видимых подписей нет —
-    // label визуально скрыт (cp-vh). Без label — прежний режим с
-    // aria-label (сайдбар вакансий, EPIC-14).
-    const labelHtml = label ? `<label class="cp-vh" for="${fieldId}">${esc(label)}</label>\n` : '';
+    // label визуально скрыт утилитой ДС .ui-vh (T17.2: локальная копия
+    // приёма снята — один приём в одном месте).
+    // Без label — прежний режим с aria-label (сайдбар вакансий, EPIC-14).
+    const labelHtml = label ? `<label class="ui-vh" for="${fieldId}">${esc(label)}</label>\n` : '';
     return `${labelHtml}<div class="cp-pill">${select}</div>`;
   }
   return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
-  <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>` : ''}</label>
+  <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>` : ''}</label>
   ${select}
 </div>`;
 }
@@ -201,7 +202,7 @@ function radioGroup({ label, name, options, required = false }) {
     .join('\n      ');
   return `<div class="ui-field${required ? ' ui-field--required' : ''}">
   <fieldset class="ui-radio-group">
-    <legend class="ui-radio-group__legend">${esc(label)}${required ? ' <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>' : ''}</legend>
+    <legend class="ui-radio-group__legend">${esc(label)}${required ? ' <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>' : ''}</legend>
     <div class="ui-radio-group__row">
       ${radios}
     </div>
@@ -736,7 +737,7 @@ function applyForm({ id, note, compact = false }) {
           <span class="ui-field__label" id="${id}-resume-label">Резюме (файлом/ссылкой)</span>
           <div class="ui-file" data-ui-file>
             <label class="ui-file__button">
-              <input class="ui-file__input" type="file" id="${id}-resume" name="resume" accept=".docx,.pdf" aria-labelledby="${id}-resume-label ${id}-resume-button-text">
+              <input class="ui-file__input ui-vh" type="file" id="${id}-resume" name="resume" accept=".docx,.pdf" aria-labelledby="${id}-resume-label ${id}-resume-button-text">
               <span class="ui-file__button-text" id="${id}-resume-button-text">прикрепить файл</span>
             </label>
             <p class="ui-file__value" role="status">Файл не выбран</p>
@@ -1529,7 +1530,7 @@ function vacancyApplyMain(v = VAC.items[0]) {
    привязана к записи items[1] «Стажировка: разработчик» — та же, что
    детальная internship.html. */
 function internshipApplyMain(i = INT.internship.items[1]) {
-  const reqStar = ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>`;
+  const reqStar = ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>`;
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Стажировки', 'internships.html'],
@@ -1679,14 +1680,14 @@ function eventApplyMain(e = EVT.upcoming[0]) {
   <div class="ui-form__layout">
     <div class="ui-form__main" data-cp-form-body>
       <div class="ui-field ui-field--required">
-        <label class="ui-field__label" for="ea-email">Email <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span></label>
+        <label class="ui-field__label" for="ea-email">Email <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span></label>
         <input class="ui-field__input" type="email" id="ea-email" name="email" required placeholder="you@example.ru" aria-describedby="ea-email-error">
         <p class="ui-field__error" id="ea-email-error" role="alert">Укажите корректный email</p>
       </div>
       <div class="ui-field ui-field--required">
         <label class="ui-checkbox">
           <input class="ui-checkbox__input" type="checkbox" name="consent" required>
-          <span>Я даю <a class="ui-link" href="#">согласие на обработку персональных данных</a> и ознакомлен(а) с <a class="ui-link" href="#">Политикой конфиденциальности</a> <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span></span>
+          <span>Я даю <a class="ui-link" href="#">согласие на обработку персональных данных</a> и ознакомлен(а) с <a class="ui-link" href="#">Политикой конфиденциальности</a> <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span></span>
         </label>
       </div>
       <div class="ui-form__actions">

@@ -91,22 +91,18 @@ describe('components/ui-file/ui-file.css — коробка, кнопка, sr-on
     expect(block).toContain('cursor: pointer;');
   });
 
-  it('.ui-file__input — sr-only КЛИПОМ (Scope T5.3): не display:none, не visibility:hidden, не opacity — класс D аудита в систему не переносится', () => {
-    const block = blockOf(css, '.ui-file__input');
-    expect(block, 'правило sr-only инпута найдено').toBeTruthy();
-    expect(block).toContain('position: absolute;');
-    expect(block, 'классический sr-only: бокс 1px').toContain('width: 1px;');
-    expect(block).toContain('height: 1px;');
-    expect(block).toContain('overflow: hidden;');
-    expect(block, 'клип вместо display:none — инпут остаётся в tab-порядке').toContain(
-      'clip-path: inset(50%);',
+  it('.ui-file__input — скрытие утилитой .ui-vh из base (T17.2): локальный sr-only-блок снят, приём — один в одном месте; подмены display/visibility по-прежнему запрещены (класс D аудита)', () => {
+    // T17.2: канон visually-hidden перенесён в base/reset.css (.ui-vh);
+    // инпут канона несёт class="ui-file__input ui-vh" — класс остаётся
+    // хуком :has-фокуса и JS-модуля, геометрию скрытия даёт утилита.
+    expect(blockOf(css, '.ui-file__input'), 'локальное sr-only-правило снято (T17.2)').toBeNull();
+    expect(css, 'clip-приём ушёл в base/.ui-vh').not.toContain('clip-path');
+    expect(css, 'display:none убрал бы контрол из клавиатуры (анти-паттерн)').not.toMatch(
+      /display:\s*none/,
     );
-    expect(
-      block,
-      'display:none убрал бы контрол из клавиатуры (анти-паттерн career-portal)',
-    ).not.toContain('display');
-    expect(block, 'visibility:hidden тоже убирает из a11y-дерева').not.toContain('visibility');
-    expect(block, 'opacity:0 — та же подмена, запрещена').not.toContain('opacity');
+    expect(css, 'visibility:hidden тоже убирает из a11y-дерева').not.toMatch(
+      /visibility:\s*hidden/,
+    );
   });
 
   it('фокус: обводку рисует кнопка-лейбл через :has (Technical considerations T5.3), тройка токенов ADR-0001; outline нигде не гасится', () => {
@@ -406,7 +402,9 @@ describe('канонический паттерн ui-file (components/ui-file/ui
 
     const inputTag = html.match(/<input\b[^>]*>/s)?.[0] ?? '';
     expect(inputTag).toContain('type="file"');
-    expect(inputTag).toContain('class="ui-file__input"');
+    expect(inputTag, 'скрытие — утилитой .ui-vh рядом с классом-хуком (T17.2)').toContain(
+      'class="ui-file__input ui-vh"',
+    );
     expect(inputTag, 'accept — пример из career-portal (Technical considerations T5.3)').toContain(
       'accept=".doc,.docx,.pdf"',
     );
@@ -531,7 +529,7 @@ describe('дока компонента (DoD T5.3 — правило анти-п
       'visibility: hidden',
       'career-portal',
       'sr-only',
-      'clip-path',
+      '.ui-vh',
       'role="status"',
       'aria-labelledby',
       'aria-describedby',

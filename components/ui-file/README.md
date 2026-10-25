@@ -1,10 +1,11 @@
 # ui-file
 
 Доступный файловый инпут: кнопка-лейбл + визуально-скрытый нативный
-`input[type="file"]` (sr-only клипом), значение выбора с `role="status"`,
-доступная кнопка сброса. Задача T5.3 закрывает класс D аудита career-portal:
-`.field__file input { display: none }` (css/pages.css:242) прятал нативный
-контрол — стилизованная кнопка не замещала клавиатуру и скринридера.
+`input[type="file"]` (утилита `.ui-vh`, base/reset.css), значение выбора с
+`role="status"`, доступная кнопка сброса. Задача T5.3 закрывает класс D
+аудита career-portal: `.field__file input { display: none }` (css/pages.css:242)
+прятал нативный контрол — стилизованная кнопка не замещала клавиатуру и
+скринридера.
 Источник визуала — одобренный `.field__file` (css/pages.css:231–244:
 флекс-коробка, gap 12px, 52px, фон surface-blue-50, радиус sm) и кнопка
 `.btn--light` (components.css:92–93). Обвязка и состояния ошибки — `ui-field`
@@ -16,24 +17,17 @@
 (а также `opacity: 0`-подмены и снятие из tab-порядка).** Такие приёмы убирают
 контрол из tab-порядка и a11y-дерева — клавиатура и скринридер теряют поле
 (анти-пример career-portal выше). Единственный разрешённый способ визуального
-скрытия живого контрола — **sr-only-клип** (классический паттерн):
+скрытия живого контрола — утилита **`.ui-vh`** из base/reset.css (T17.2:
+канонический sr-only-клип, один приём в одном месте — набор не копируется в
+компоненты). Инпут канона несёт класс рядом с хуком компонента:
 
-```css
-.ui-file__input {
-  position: absolute;
-  overflow: hidden;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  white-space: nowrap;
-  clip-path: inset(50%);
-}
+```html
+<input class="ui-file__input ui-vh" type="file" …>
 ```
 
 Контрол остаётся в tab-порядке, именуется скринридером, отправляется с формой.
-Для не-интерактивных текстов (например, `ui-field__req-text`) достаточно
-`clip-path: inset(50%)` — там клавиатурная достижимость не нужна.
+Тот же приём скрывает не-интерактивные тексты (например, `ui-field__req-text`)
+— из вида убран, в a11y-дереве остаётся.
 
 ## API
 
@@ -41,7 +35,7 @@
 |---|---|
 | Блок `.ui-file` | коробка `.field__file`: flex (перенос длинного имени), gap `--ui-space-3` (12px), `min-height: var(--ui-field-height)` (52px одобренного; не `height` — 32px-база T3.6), padding `--ui-space-1 --ui-space-4` (4px 16px), фон `--ui-color-surface-muted`, радиус `--ui-radius-sm` |
 | Элемент `.ui-file__button` | кнопка-лейбл — **единственный `label` инпута**: клик открывает выбор нативно, без JS; визуал `.btn--light` (подпись primary, pill, hover `--ui-color-surface-hover`); высота — `calc(var(--ui-field-height) - var(--ui-space-2))` (52px минус вертикальный паддинг коробки); паддинг 12×24 — **осознанно плотнее базовой кнопки 12×28** (решение владельца 25.10, T14.3-бэклог): пилюля живёт ВНУТРИ коробки поля (другой контекст плотности, чем standalone-кнопка; принцип «выглядит-как-кнопка не плотнее кнопки» на вложенные в поле элементы не распространяется) — кнопочный токен `--ui-button-pad-inline` на неё не переносится |
-| Элемент `.ui-file__input` | нативный `input[type="file"]`, sr-only клипом (см. правило выше); `accept`, `required`, `disabled` — нативные атрибуты |
+| Элемент `.ui-file__input` | нативный `input[type="file"]`, скрыт утилитой `.ui-vh` рядом с классом-хуком (см. правило выше; T17.2); `accept`, `required`, `disabled` — нативные атрибуты |
 | Элемент `.ui-file__button-text` | подпись кнопки («прикрепить файл» — паттерн career-portal); несёт `id` и входит **второй** в `aria-labelledby` инпута — Label in Name, WCAG 2.5.3 (см. секцию ниже) |
 | Элемент `.ui-file__value` | значение выбора: «Файл не выбран» / «Выбран файл: имя, размер»; **`role="status"` в разметке** — обновление озвучивается скринридером |
 | Элемент `.ui-file__reset` | кнопка «Убрать файл»: нативный `button type="button"`, скрыта (`hidden`) до выбора; очищает инпут и возвращает на него фокус |
@@ -55,11 +49,11 @@
 <div class="ui-field ui-field--required ui-field--error">
   <span class="ui-field__label" id="resume-label">
     Резюме
-    <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text">обязательное поле</span></span>
+    <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>
   </span>
   <div class="ui-file" data-ui-file>
     <label class="ui-file__button">
-      <input class="ui-file__input" type="file" id="resume" name="resume"
+      <input class="ui-file__input ui-vh" type="file" id="resume" name="resume"
              accept=".doc,.docx,.pdf" required aria-invalid="true"
              aria-labelledby="resume-label resume-button-text" aria-describedby="resume-hint resume-error">
       <span class="ui-file__button-text" id="resume-button-text">прикрепить файл</span>
@@ -162,7 +156,7 @@ accessible name в AT). Поэтому:
   <span class="ui-field__label" id="apply-resume-label">Резюме</span>
   <div class="ui-file" data-ui-file>
     <label class="ui-file__button">
-      <input class="ui-file__input" type="file" id="apply-resume" name="resume"
+      <input class="ui-file__input ui-vh" type="file" id="apply-resume" name="resume"
              accept=".doc,.docx,.pdf" required
              aria-labelledby="apply-resume-label apply-resume-button-text"
              <?= $errors['resume'] ? 'aria-invalid="true" aria-describedby="apply-resume-error"' : '' ?>>
