@@ -71,8 +71,8 @@
    токен-парой (эффективный rgba(255,255,255,.72) → slate-400 AA-пара). */
 .ui-stat__note {
   box-sizing: border-box;
-  font-size: var(--ui-fs-micro);
   color: var(--ui-color-text-on-dark-muted);
+  font-size: var(--ui-fs-micro);
 }
 
 /* ── Варианты поверхностей (Scope) ── */

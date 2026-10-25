@@ -72,7 +72,7 @@ describe('components/ui-stat/ui-stat.css — база (Scope T17.4, ADR-0002)', 
     expect(block).toContain('border-radius: var(--ui-radius-md);');
   });
 
-  it('поверхность — токен-хук --ui-stat-surface, дефолт primary (Notes: кастомизация без fork\'а)', () => {
+  it("поверхность — токен-хук --ui-stat-surface, дефолт primary (Notes: кастомизация без fork'а)", () => {
     const block = blockOf(css, '.ui-stat');
     expect(block).toContain('background-color: var(--ui-stat-surface, var(--ui-color-primary));');
     // on-dark-пары цветов в компоненте (Scope): текст корня — text-on-dark.
@@ -114,7 +114,9 @@ describe('components/ui-stat/ui-stat.css — база (Scope T17.4, ADR-0002)', 
 });
 
 describe('components/ui-stat/ui-stat.css — варианты поверхностей (Scope T17.4)', () => {
-  const css = stripCssComments(readFileSync(join(root, 'components', 'ui-stat', 'ui-stat.css'), 'utf8'));
+  const css = stripCssComments(
+    readFileSync(join(root, 'components', 'ui-stat', 'ui-stat.css'), 'utf8'),
+  );
 
   it('--glass: стекло glass-dark + рамка on-dark-muted, паддинг 16 «как есть» (пилот pilot.css:449)', () => {
     const block = blockOf(css, '.ui-stat--glass');
@@ -171,9 +173,9 @@ describe('components/ui-stat/ui-stat.css — варианты поверхнос
         // полный набор проверяется составом правил выше; здесь — цветовой:
       }
     }
-    const colorVars = [...css.matchAll(/var\((--ui-(?:stat-surface|color|white|blue|slate)[a-z0-9-]*)/g)].map(
-      (m) => m[1],
-    );
+    const colorVars = [
+      ...css.matchAll(/var\((--ui-(?:stat-surface|color|white|blue|slate)[a-z0-9-]*)/g),
+    ].map((m) => m[1]);
     expect(colorVars.length, 'цветовые ссылки есть').toBeGreaterThan(0);
     for (const token of colorVars) {
       expect(allowed, `${token} — токен из одобренного набора T17.4`).toContain(token);
@@ -259,7 +261,12 @@ describe('подключение и дист (DoD, Testing requirements)', () =>
     expect(readme).toContain('--filled');
     expect(readme).toContain('--deep');
     expect(readme).toMatch(/ui-h2|роль/);
-    for (const section of ['## API', '## Клавиатура и a11y', "## Do / Don't", '## Известные границы']) {
+    for (const section of [
+      '## API',
+      '## Клавиатура и a11y',
+      "## Do / Don't",
+      '## Известные границы',
+    ]) {
       expect(readme, `секция ${section}`).toContain(section);
     }
   });
