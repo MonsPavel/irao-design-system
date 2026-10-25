@@ -212,7 +212,10 @@ describe('components/ui-field/ui-field.css — обвязка и контрол�
 
     // T17.2: один приём в одном месте — канон visually-hidden в base/.ui-vh;
     // локальная копия компонента снята (раньше здесь был полный sr-only-набор).
-    expect(blockOf(css, '.ui-field__req-text'), 'локальное правило скрытия снято (T17.2)').toBeNull();
+    expect(
+      blockOf(css, '.ui-field__req-text'),
+      'локальное правило скрытия снято (T17.2)',
+    ).toBeNull();
     expect(css, 'clip-приём ушёл в base/.ui-vh').not.toContain('clip-path');
   });
 

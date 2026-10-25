@@ -105,13 +105,17 @@ describe('dist — класс доезжает до сайтов (unit-пин р
 
 describe('локальные дубли сняты (AC: grep — sr-only-блоков в компонентах нет)', () => {
   it('ui-field.css: локального правила .ui-field__req-text нет, clip-приём из компонента ушёл', () => {
-    const css = stripCssComments(readFileSync(join(root, 'components', 'ui-field', 'ui-field.css'), 'utf8'));
+    const css = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-field', 'ui-field.css'), 'utf8'),
+    );
     expect(blockOf(css, '.ui-field__req-text'), 'sr-only-блок снят (T17.2)').toBeNull();
     expect(css, 'clip-path больше не живёт в ui-field.css').not.toContain('clip-path');
   });
 
   it('ui-file.css: локального правила .ui-file__input нет, clip-приём из компонента ушёл (класс остаётся хуком :has-фокуса и JS)', () => {
-    const css = stripCssComments(readFileSync(join(root, 'components', 'ui-file', 'ui-file.css'), 'utf8'));
+    const css = stripCssComments(
+      readFileSync(join(root, 'components', 'ui-file', 'ui-file.css'), 'utf8'),
+    );
     expect(blockOf(css, '.ui-file__input'), 'sr-only-блок снят (T17.2)').toBeNull();
     expect(css, 'clip-path больше не живёт в ui-file.css').not.toContain('clip-path');
   });
