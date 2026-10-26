@@ -41,6 +41,12 @@
  *
  * Фокус самой карточки (не ссылки) неприменим: article не интерактивен;
  * hover-перекраска ссылки — career-portal pages.css:53, под hover-гвардом.
+ *
+ * CTA-карточка (ui-card--cta, T17.8): залитая поверхность (варианты --primary/
+ * --accent, босой --cta — фото-оверлей баннера), центр-композиция, ритм
+ * pad 48/24 + gap space-3, радиус lg; --row — space-between со слотом
+ * действия (плашка «Все 140 вакансий»). Источник — cp-cta-mail__card/
+ * cp-vacancy-search__all пилота career-portal (adoption T17.8).
  */
 
 .ui-card {
@@ -64,6 +70,63 @@
 .ui-card--filled {
   border-color: var(--ui-color-surface-muted);
   background-color: var(--ui-color-surface-muted);
+}
+
+/* ── CTA-карточка (T17.8): крупная плашка с призывом. Источники —
+      .cp-cta-mail__card (pad 48/24, центр, primary) и
+      .cp-vacancy-search__all (accent, space-between, слот действия-стрелка)
+      пилота career-portal; consumers — «Нет подходящей вакансии?» и
+      «Все 140 вакансий» главной. ── */
+
+/* Центр-композиция и ритм (Implementation requirements п.2): pad 48/24
+   (space-7/space-5), шаг space-3, радиус lg. Без варианта поверхности
+   карточка остаётся на базовой surface — босой --cta берёт тело баннера
+   компании (центр-композиция поверх фото-оверлея, фон — за фото-секцией
+   T17.3). Дети центрируются крест-осью; текст — text-align. */
+.ui-card--cta {
+  align-items: center;
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-7) var(--ui-space-5);
+  border-radius: var(--ui-radius-lg);
+  text-align: center;
+}
+
+/* Поверхности — только токены; on-dark-пара текста — компонентом (п.1).
+   Контраст on-dark на accent — одобренное исключение 3.12:1 (T2.6/
+   ADR-0010, пара on-dark-on-accent в tests/contrast/pairs.config.mjs);
+   axe-запись реестра — tests/helpers/harness.js (как ui-button--accent). */
+.ui-card--cta--primary {
+  border-color: var(--ui-color-primary);
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
+}
+
+.ui-card--cta--accent {
+  border-color: var(--ui-color-accent);
+  background-color: var(--ui-color-accent);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Заголовочные роли на заливке — on-dark: цвет роли heading = primary —
+   на primary-заливке заголовок невидим (живой баг пилота до T17.8:
+   cp-cta-mail__card красил фон, но не роли). Специфичность 0-2-0 против
+   0-1-0 роли — порядок подключения не важен; ui-h6 цвета не несёт и
+   наследует сам. */
+.ui-card--cta--primary :is(.ui-h1, .ui-h2, .ui-h3, .ui-h4, .ui-h5, .ui-page-title),
+.ui-card--cta--accent :is(.ui-h1, .ui-h2, .ui-h3, .ui-h4, .ui-h5, .ui-page-title) {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Row — горизонтальная плашка space-between со слотом действия
+   (стрелка/кнопка; svg сайта — разметке, компонент даёт слот): ритм плитки
+   — pad space-5, выравнивание и текст — по исходнику
+   (cp-vacancy-search__all). Плитка-ссылка: сама карточка <a>, hover-механик
+   нет (Out of scope: действие внутри). */
+.ui-card--cta--row {
+  flex-direction: row;
+  justify-content: space-between;
+  padding: var(--ui-space-5);
+  text-align: start;
 }
 
 /* ── Слоты (Scope): __media — место под ui-image (T4.6) ── */

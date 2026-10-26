@@ -226,27 +226,30 @@ describe('components/ui-card/ui-card.css — CTA-карточка (T17.8: --cta 
   it.each([
     ['--primary', '--ui-color-primary'],
     ['--accent', '--ui-color-accent'],
-  ])('--cta%s: поверхность токеном %s + on-dark-пара текста компонентом (Implementation requirements п.1)', (variant, token) => {
-    const block = blockOf(css, `.ui-card--cta${variant}`);
-    expect(block, `правило .ui-card--cta${variant} найдено`).toBeTruthy();
-    expect(block).toContain(`background-color: var(${token});`);
-    expect(block).toContain(`border-color: var(${token});`);
-    expect(block).toContain('color: var(--ui-color-text-on-dark);');
-  });
+  ])(
+    '--cta%s: поверхность токеном %s + on-dark-пара текста компонентом (Implementation requirements п.1)',
+    (variant, token) => {
+      const block = blockOf(css, `.ui-card--cta${variant}`);
+      expect(block, `правило .ui-card--cta${variant} найдено`).toBeTruthy();
+      expect(block).toContain(`background-color: var(${token});`);
+      expect(block).toContain(`border-color: var(${token});`);
+      expect(block).toContain('color: var(--ui-color-text-on-dark);');
+    },
+  );
 
   it('заголовочные роли на заливке — on-dark (цвет роли heading = primary, на primary-заливке невидим; on-dark-пара — компонентом)', () => {
-    const block = blockOf(
-      css,
-      '.ui-card--cta--primary :is(.ui-h1, .ui-h2, .ui-h3, .ui-h4, .ui-h5, .ui-page-title)',
+    // Селекторы длинные — prettier держит их по одному на строку; пин —
+    // на наличие обоих селекторов и объявления в правиле между ними.
+    expect(css).toMatch(
+      /\.ui-card--cta--primary :is\(\.ui-h1, \.ui-h2, \.ui-h3, \.ui-h4, \.ui-h5, \.ui-page-title\)/,
     );
-    expect(block, 'правило перекраски заголовочных ролей найдено').toBeTruthy();
-    expect(block).toContain('color: var(--ui-color-text-on-dark);');
-    // Одинаково для обеих поверхностей (accent-заливка тоже несёт тёмные роли).
-    const accentBlock = blockOf(
-      css,
-      '.ui-card--cta--accent :is(.ui-h1, .ui-h2, .ui-h3, .ui-h4, .ui-h5, .ui-page-title)',
+    expect(css).toMatch(
+      /\.ui-card--cta--accent :is\(\.ui-h1, \.ui-h2, \.ui-h3, \.ui-h4, \.ui-h5, \.ui-page-title\)/,
     );
-    expect(accentBlock, 'то же правило для --accent').toBeTruthy();
+    const start = css.indexOf('.ui-card--cta--primary :is(');
+    const end = css.indexOf('.ui-card--cta--row', start);
+    const rule = css.slice(start, end);
+    expect(rule).toContain('color: var(--ui-color-text-on-dark);');
   });
 
   it('--row: space-between со слотом действия; ритм плитки — pad space-5 (cp-vacancy-search__all)', () => {
@@ -325,12 +328,12 @@ describe('пилот (T17.8): CTA-плашки на модификаторе, п
 describe('axe-реестр (T17.8): on-dark текст accent-варианта — известное исключение', () => {
   it('строка KNOWN_AXE_EXCEPTIONS для .ui-card--cta--accent (harness.js, как ui-video__play)', () => {
     const harness = readFileSync(join(root, 'tests', 'helpers', 'harness.js'), 'utf8');
-    const entry = harness.match(/\{\s*id:\s*'color-contrast',[\s\S]*?\.ui-card--cta--accent[\s\S]*?\}/);
+    const entry = harness.match(
+      /\{\s*id:\s*'color-contrast',[\s\S]*?\.ui-card--cta--accent[\s\S]*?\}/,
+    );
     expect(entry, 'запись реестра найдена').toBeTruthy();
     expect(entry[0], 'обоснование записано').toContain('reason:');
-    expect(entry[0], 'lookahead: не матчит более длинное имя класса').toContain(
-      '(?![\\w-])',
-    );
+    expect(entry[0], 'lookahead: не матчит более длинное имя класса').toContain('(?![\\w-])');
   });
 
   it('токен-уровень уже покрыт: пара on-dark-on-accent в pairs.config.mjs (T2.6/ADR-0010)', () => {
@@ -338,7 +341,7 @@ describe('axe-реестр (T17.8): on-dark текст accent-варианта �
     expect(config).toContain("id: 'on-dark-on-accent'");
   });
 
-  it('README компонента: CTA-модификатор и do/don\'t (один призыв, действующее слово)', () => {
+  it("README компонента: CTA-модификатор и do/don't (один призыв, действующее слово)", () => {
     const readme = readFileSync(join(root, 'components', 'ui-card', 'README.md'), 'utf8');
     expect(readme).toContain('ui-card--cta');
     expect(readme).toMatch(/один призыв/i);
