@@ -155,6 +155,7 @@ test.describe('ui-button', () => {
 | color-contrast | `#ui-button-*-disabled` | контраст disabled — декоративный (AC T4.2): WCAG 1.4.3 исключает неактивные компоненты; визуал — `--ui-opacity-disabled` |
 | color-contrast | `#ui-button-*-loading` | лейбл в is-loading визуально скрыт (clip-path, accessible name сохраняется — T4.2 п.3): axe видит бокс текста без краски; спиннер aria-hidden |
 | color-contrast | `.ui-video__play` (без id, вкл. продолжения селектора того же элемента; не более длинное имя класса) | стрелка play на accent-кружке ui-video (T17.6) — та же одобренная пара on-dark на accent 3.12:1 (как ui-button--accent): как графика WCAG 1.4.11 ≥ 3:1 проходит, глиф ▶ канона axe меряет как мелкий текст 4.5:1; изменение — design-decision владельца; токен-уровень — `tests/contrast/pairs.config.mjs` (пара on-dark-on-accent, T2.6/ADR-0010) |
+| color-contrast | `.ui-card--cta--accent` (без id, вкл. продолжения селектора того же элемента; не более длинное имя класса) | текст/стрелка CTA-карточки на accent-заливке (T17.8) — та же одобренная пара on-dark на accent 3.12:1 (как ui-button--accent/ui-video__play): подпись плитки fs-h4 20px/500 axe меряет как мелкий текст 4.5:1; изменение — design-decision владельца; токен-уровень — `tests/contrast/pairs.config.mjs` (пара on-dark-on-accent, T2.6/ADR-0010) |
 
 Три исключения стенда ui-button (rev T4.2 → T13.5, одна строка для
 сверки с e2e): `#ui-button-accent` — одобренный 3.12:1 (2.91:1 на hover,

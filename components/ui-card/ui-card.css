@@ -84,8 +84,8 @@
    компании (центр-композиция поверх фото-оверлея, фон — за фото-секцией
    T17.3). Дети центрируются крест-осью; текст — text-align. */
 .ui-card--cta {
-  align-items: center;
   gap: var(--ui-space-3);
+  align-items: center;
   padding: var(--ui-space-7) var(--ui-space-5);
   border-radius: var(--ui-radius-lg);
   text-align: center;

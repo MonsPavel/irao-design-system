@@ -1240,8 +1240,8 @@ ${whyCards.slice(1).join('\n')}
           <button class="ui-button ui-button--accent" type="submit">найти</button>
         </div>
       </form>
-      <a class="cp-vacancy-search__all" href="vacancies.html">
-        <span>Все 140 вакансий</span>
+      <a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" href="vacancies.html">
+        <span class="ui-h4">Все 140 вакансий</span>
         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><path d="M8 26L26 8M12 8h14v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
     </div>
@@ -1289,10 +1289,10 @@ ${mediaCards}
 
 <section class="ui-section" id="contacts-block">
   <div class="ui-container">
-    <div class="cp-cta-mail__card">
+    <div class="ui-card ui-card--cta ui-card--cta--primary">
       <h2 class="ui-h2">Нет подходящей вакансии?</h2>
       <p class="ui-lead">Расскажи о себе — возможно, мы ищем именно тебя!</p>
-      <p><a class="cp-cta-mail__email ui-link" href="mailto:career@interrao.ru">career@interrao.ru</a></p>
+      <a class="ui-h2 ui-link ui-link--on-dark" href="mailto:career@interrao.ru">career@interrao.ru</a>
     </div>
   </div>
 </section>
@@ -2627,7 +2627,7 @@ function companyMain() {
          ui-button на vacancies.html (Scope T15.2). -->
     <div class="cp-company-banner">
       <img class="ui-image ui-image--cover cp-company-banner__photo" src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
-      <div class="cp-company-banner__body">
+      <div class="cp-company-banner__body ui-card ui-card--cta">
         <h2 class="ui-h2 cp-company-banner__title">Вакансии компании</h2>
         <p class="ui-small cp-company-banner__text">Посмотрите открытые вакансии именно в нашей компании.</p>
         <a class="ui-button ui-button--primary" href="vacancies.html">смотреть вакансии</a>
