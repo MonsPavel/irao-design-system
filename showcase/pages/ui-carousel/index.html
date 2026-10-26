@@ -1,0 +1,314 @@
+<!-- Стенд ui-carousel (T17.7): две формы. #ucar-carousel — карусель со
+     степпером-таблистом в фото-композиции (контекст блока «Производство»
+     career-portal: фон+glow+позиции — связки сайт-зоны ucar-* на токенах,
+     компонент несёт только вид элементов); данные слайдов — JSON в
+     разметке (компонент не ходит в сеть), первый слайд продублирован в
+     слотах (деградация без JS), стрелки/степпер несут hidden — модуль
+     снимает. #ucar-gallery — фото-галерея prev/next в модалке направлений
+     (ui-modal, триггер data-ui-modal-target): стрелки — ui-button--light
+     (светлый контекст попапа; on-dark-вид .ui-carousel__arrow здесь
+     невидим) — модуль вешает поведение на data-хуки, а не на класс.
+     Сценарии — tests/e2e/ui-carousel.spec.js: клавиатура APG-табов,
+     no-JS-деградация, axe, эталоны 375/768/1280/1440. -->
+<style>
+  /* Связки сайт-зоны фото-секции (позиции/glow — зона композиции, T17.7):
+     компонент ui-carousel не позиционирует элементы. */
+  .ucar-production {
+    position: relative;
+    overflow: hidden;
+    margin: 0 0 var(--ui-space-6);
+  }
+
+  .ucar-production__bg {
+    position: absolute;
+    inset: 0;
+  }
+
+  .ucar-production__bg img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* glow «Производства» пилота (pilot.css:279): градиент к primary */
+  .ucar-production__glow {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--ui-color-primary) 88%, transparent) 0%,
+      color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%,
+      transparent 100%
+    );
+  }
+
+  /* on-dark-контекст фото-секции: типографика слотов перекрашивается
+     композицией (ui-h2/ui-lead красят heading/text — связка пилота
+     cp-production__title/__text) */
+  .ucar-production .ui-h2,
+  .ucar-production .ui-lead {
+    color: var(--ui-color-text-on-dark);
+  }
+
+  /* фото слайда: mobile — в потоке по центру; ≥768px — absolute справа
+     (пилот cp-production__photo: right/bottom, max-height 42rem) */
+  .ucar-production .ui-carousel__photo {
+    width: 100%;
+    max-width: 420px;
+    height: 320px;
+    margin: var(--ui-space-5) auto 0;
+    object-fit: contain;
+    object-position: bottom center;
+  }
+
+  /* стрелки: mobile — строка в потоке; ≥768px — absolute над степпером */
+  .ucar-production__arrows {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--ui-space-4);
+    padding: 0 var(--ui-container-pad) var(--ui-space-4);
+  }
+
+  .ucar-production .ui-carousel__body {
+    max-width: 40rem;
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-6) var(--ui-container-pad) 0;
+  }
+
+  .ucar-production .ui-carousel__stepper {
+    max-width: 62rem;
+    padding: var(--ui-space-5) var(--ui-container-pad) var(--ui-space-6);
+    flex-wrap: wrap;
+  }
+
+  .ucar-production .ui-carousel__tab {
+    min-width: 10rem;
+    flex: 0 1 auto;
+  }
+
+  @media (min-width: 768px) {
+    .ucar-production .ui-carousel__photo {
+      position: absolute;
+      right: var(--ui-container-pad);
+      bottom: 0;
+      width: auto;
+      max-width: none;
+      max-height: 42rem;
+    }
+
+    .ucar-production__arrows {
+      position: absolute;
+      bottom: 9rem;
+      right: 10rem;
+      padding: 0;
+    }
+
+    .ucar-production .ui-carousel__body {
+      padding-top: var(--ui-space-8);
+      padding-bottom: 14rem;
+    }
+  }
+
+  /* модалка направлений: контентная раскладка попапа — сайт
+     (прецедент cp-directions__photo/__nav pilot.css:400) */
+  .ucar-gallery__photo {
+    display: block;
+    object-fit: cover;
+    width: 100%;
+    border-radius: var(--ui-radius-md);
+  }
+
+  .ucar-gallery__nav {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 var(--ui-space-4);
+    padding: 0 var(--ui-space-2);
+  }
+</style>
+
+<section aria-labelledby="ucar-carousel-heading">
+  <h2 id="ucar-carousel-heading">Карусель слайдов (data-ui-carousel)</h2>
+  <p class="ui-showcase-stand__note">
+    Данные слайдов — JSON в разметке (<code>&lt;script type="application/json"&gt;</code>); без JS
+    виден первый слайд (продублирован в слотах), стрелки и степпер скрыты (<code>hidden</code> —
+    снимает модуль). Клавиатура на табах: <kbd>←</kbd>/<kbd>→</kbd> с зацикливанием и
+    automatic-активацией, <kbd>Home</kbd>/<kbd>End</kbd>; <kbd>Tab</kbd> уходит за степпер
+    (roving tabindex). Событие <code>irao-ui:carousel-select</code> — точка расширения сайта.
+  </p>
+  <div class="ucar-production">
+    <div class="ucar-production__bg" aria-hidden="true">
+      <img
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271440%27%20height%3D%27760%27%3E%3Crect%20width%3D%271440%27%20height%3D%27760%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%27800%27%20y%3D%27300%27%20width%3D%27640%27%20height%3D%27460%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%27200%27%20y%3D%27480%27%20width%3D%27400%27%20height%3D%27280%27%20fill%3D%27%23164B89%27%20opacity%3D%270.6%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+      >
+    </div>
+    <div class="ucar-production__glow" aria-hidden="true"></div>
+    <section class="ui-carousel" data-ui-carousel>
+      <script type="application/json" data-ui-carousel-slides>
+        [
+          {
+            "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Ccircle%20cx%3D%27292%27%20cy%3D%27260%27%20r%3D%27110%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Cpath%20d%3D%27M172%20674V520a120%20120%200%200%201%20240%200v154Z%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E",
+            "title": "Производство",
+            "text": "Вклад каждого сотрудника на производстве — это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и был уверен в завтрашнем дне.",
+            "count": "25 вакансий"
+          },
+          {
+            "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Ccircle%20cx%3D%27292%27%20cy%3D%27260%27%20r%3D%27110%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Cpath%20d%3D%27M192%20674V530a100%20100%200%200%201%20200%200v144Z%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E",
+            "title": "Женские вакансии на производстве",
+            "text": "Мы создаём комфортные условия для работы женщин на производстве: удобный график, современное оборудование и поддержка команды.",
+            "count": "13 вакансий"
+          },
+          {
+            "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20x%3D%27142%27%20y%3D%27420%27%20width%3D%27300%27%20height%3D%27254%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%27292%27%20cy%3D%27260%27%20r%3D%27110%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E",
+            "title": "Административная работа",
+            "text": "Организационная поддержка ключевых процессов компании. Работа в команде профессионалов и широкие возможности для развития.",
+            "link": "Подробнее об офисе"
+          }
+        ]
+      </script>
+      <img
+        class="ui-carousel__photo"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Ccircle%20cx%3D%27292%27%20cy%3D%27260%27%20r%3D%27110%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Cpath%20d%3D%27M172%20674V520a120%20120%200%200%201%20240%200v154Z%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+        alt="Производство"
+        width="585"
+        height="674"
+        data-ui-carousel-photo
+      >
+      <div class="ui-carousel__body">
+        <h3 class="ui-h2" data-ui-carousel-title>Производство</h3>
+        <p class="ui-lead" data-ui-carousel-text>
+          Вклад каждого сотрудника на производстве — это основа нашего успеха. Нам важно, чтобы
+          каждый чувствовал свою значимость и был уверен в завтрашнем дне.
+        </p>
+        <p>
+          <a class="ui-button ui-button--light" href="#" data-ui-carousel-link>
+            Подробнее: 25 вакансий
+          </a>
+        </p>
+      </div>
+      <div class="ucar-production__arrows">
+        <button
+          class="ui-carousel__arrow"
+          type="button"
+          data-ui-carousel-prev
+          hidden
+          aria-label="Предыдущий слайд"
+        >
+          <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true" focusable="false"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button
+          class="ui-carousel__arrow"
+          type="button"
+          data-ui-carousel-next
+          hidden
+          aria-label="Следующий слайд"
+        >
+          <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true" focusable="false"><path d="M2 2l20 23L2 48" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <ul class="ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
+        <li>
+          <button class="ui-carousel__tab" type="button" role="tab" aria-selected="true">
+            <span class="ui-carousel__tab-num" aria-hidden="true">1</span>
+            <span>
+              <span class="ucar-tab-title">Производство</span>
+              <span class="ui-small ucar-tab-count">25 вакансий</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button class="ui-carousel__tab" type="button" role="tab" aria-selected="false">
+            <span class="ui-carousel__tab-num" aria-hidden="true">2</span>
+            <span>
+              <span class="ucar-tab-title">Женские вакансии</span>
+              <span class="ui-small ucar-tab-count">13 вакансий</span>
+            </span>
+          </button>
+        </li>
+        <li>
+          <button class="ui-carousel__tab" type="button" role="tab" aria-selected="false">
+            <span class="ui-carousel__tab-num" aria-hidden="true">3</span>
+            <span>
+              <span class="ucar-tab-title">Административная работа</span>
+              <span class="ui-small ucar-tab-count">16 вакансий</span>
+            </span>
+          </button>
+        </li>
+      </ul>
+    </section>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Контент таба (номер/подпись/счётчик) и раскладка секции — зона сайта: классы
+    <code>ucar-*</code> не входят в API компонента.
+  </p>
+</section>
+
+<section aria-labelledby="ucar-gallery-heading">
+  <h2 id="ucar-gallery-heading">Фото-галерея (data-ui-gallery)</h2>
+  <p class="ui-showcase-stand__note">
+    Вторая форма — prev/next по JSON-массиву фото (модалка направлений career-portal). Стрелки —
+    обычные кнопки с data-хуками: модуль вешает поведение на <code>data-ui-gallery-prev/next</code>,
+    а не на класс — в светлом попапе вид стрелок несёт <code>ui-button</code>. Открытие —
+    <code>IraoUI.modal</code> (прецедент пилота); программный выбор фото —
+    <code>IraoUI.carousel.select(root, index)</code>.
+  </p>
+  <button class="ui-button ui-button--primary" type="button" data-ui-modal-target="ucar-gallery-dialog">
+    Открыть галерею направлений
+  </button>
+
+  <dialog
+    class="ui-modal ui-modal--md"
+    id="ucar-gallery-dialog"
+    open
+    data-ui-modal
+    aria-labelledby="ucar-gallery-dialog-title"
+  >
+    <button class="ui-modal__close" type="button" aria-label="Закрыть">
+      <svg class="ui-modal__icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <h3 class="ui-modal__title ui-h3" id="ucar-gallery-dialog-title">Направление</h3>
+    <div class="ui-modal__body" data-ui-gallery>
+      <script type="application/json" data-ui-gallery-photos>
+        [
+          "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27590%27%20height%3D%27400%27%3E%3Crect%20width%3D%27590%27%20height%3D%27400%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27295%27%20cy%3D%27200%27%20r%3D%27140%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E",
+          "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27590%27%20height%3D%27400%27%3E%3Crect%20width%3D%27590%27%20height%3D%27400%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27295%27%20cy%3D%27200%27%20r%3D%27140%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E",
+          "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27590%27%20height%3D%27400%27%3E%3Crect%20width%3D%27590%27%20height%3D%27400%27%20fill%3D%27%23002856%27%2F%3E%3Cpath%20d%3D%27M0%20400V240l180-120%20180%20120%20230-160v320Z%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+        ]
+      </script>
+      <img
+        class="ucar-gallery__photo"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27590%27%20height%3D%27400%27%3E%3Crect%20width%3D%27590%27%20height%3D%27400%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27295%27%20cy%3D%27200%27%20r%3D%27140%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="590"
+        height="400"
+        data-ui-gallery-photo
+      >
+      <div class="ucar-gallery__nav">
+        <button
+          class="ui-button ui-button--light ui-button--sm"
+          type="button"
+          data-ui-gallery-prev
+          hidden
+          aria-label="Предыдущее фото"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button
+          class="ui-button ui-button--light ui-button--sm"
+          type="button"
+          data-ui-gallery-next
+          hidden
+          aria-label="Следующее фото"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M2 8h11M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+      <p class="ui-h5">Электрогенерация</p>
+      <p class="ui-body">
+        Производство электрической энергии — основа энергетической системы страны.
+      </p>
+    </div>
+  </dialog>
+</section>
