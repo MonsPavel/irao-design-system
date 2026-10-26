@@ -19,14 +19,24 @@
  *     текста ссылки), вложенная кнопка остаётся кликабельной (переход не
  *     происходит);
  *  5. контраст текста на карточках (сквозной с T2.3, либа tests/contrast):
- *     ≥ 4.5:1 на surface и surface-muted;
- *  6. axe: стенд чист — известных исключений нет;
+ *     ≥ 4.5:1 на surface и surface-muted; on-dark на primary (CTA) ≥ 4.5:1;
+ *     on-dark на accent CTA — одобренное исключение 3.12:1 (T2.6/ADR-0010);
+ *  6. axe: violations вне реестра = 0 — accent CTA-карточка покрыта строкой
+ *     KNOWN_AXE_EXCEPTIONS (T17.8, как ui-button--accent/ui-video__play);
  *  7. эталоны 375/768/1280/1440 — только из контейнера/CI (ADR-0004).
  */
 import { expect } from '@playwright/test';
 
 import { contrastRatio } from '../contrast/lib.mjs';
-import { a11y, openStand, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js';
+import {
+  a11y,
+  KNOWN_AXE_EXCEPTIONS,
+  openStand,
+  shot,
+  test as standTest,
+  unexpectedViolations,
+  VIEWPORTS,
+} from '../helpers/harness.js';
 
 /** Идентификаторы стенда (showcase/pages/ui-card/index.html). */
 const CARD = {
@@ -37,6 +47,9 @@ const CARD = {
   link: 'ui-card-link',
   linkTitle: 'ui-card-link-title',
   linkButton: 'ui-card-link-button',
+  ctaPrimary: 'ui-card-cta-primary',
+  ctaEmail: 'ui-card-cta-email',
+  ctaAccentRow: 'ui-card-cta-accent-row',
 };
 
 /** Вычисленное состояние карточки/ссылки. */
@@ -317,14 +330,129 @@ standTest.describe('ui-card (T4.4)', () => {
     },
   );
 
-  standTest('axe: нарушения отсутствуют — известных исключений нет (AC)', async ({ stand }) => {
-    const page = await stand('ui-card');
-    const results = await a11y(page).analyze();
-    expect(
-      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
-      'axe: violations = []',
-    ).toEqual([]);
-  });
+  standTest(
+    'CTA-карточка (T17.8): computed-значения поверхностей, ритма и on-dark-пары',
+    async ({ stand }) => {
+      const page = await stand('ui-card');
+
+      // Primary-центр: ритм pad 48/24 (space-7/space-5), шаг space-3, радиус lg;
+      // заливка primary, on-dark-пара компонентом.
+      const primary = await page.locator(`#${CARD.ctaPrimary}`).evaluate((el) => {
+        const s = getComputedStyle(el);
+        return {
+          display: s.display,
+          flexDirection: s.flexDirection,
+          alignItems: s.alignItems,
+          gap: s.gap,
+          padding: s.padding,
+          borderRadius: s.borderRadius,
+          textAlign: s.textAlign,
+          backgroundColor: s.backgroundColor,
+          color: s.color,
+        };
+      });
+      expect(primary.display, 'слоты на флексе базы').toBe('flex');
+      expect(primary.flexDirection).toBe('column');
+      expect(primary.alignItems, 'центр-композиция (дети по крест-оси)').toBe('center');
+      expect(primary.gap, 'шаг слотов — --ui-space-3 (12px)').toBe('12px');
+      expect(primary.padding, 'ритм — pad 48/24 (--ui-space-7/--ui-space-5)').toBe('48px 24px');
+      expect(primary.borderRadius, 'радиус — --ui-radius-lg (24px)').toBe('24px');
+      expect(primary.textAlign).toBe('center');
+      expect(primary.backgroundColor, 'заливка — --ui-color-primary').toBe('rgb(0, 40, 86)');
+      expect(primary.color, 'on-dark-пара текста — компонентом').toBe('rgb(255, 255, 255)');
+
+      // Заголовочная роль на заливке — on-dark: цвет роли heading = primary,
+      // на заливке primary заголовок был бы невидим (живой баг пилота до T17.8).
+      const h2Color = await page
+        .locator(`#${CARD.ctaPrimary} .ui-h2`)
+        .evaluate((el) => getComputedStyle(el).color);
+      expect(h2Color, 'ui-h2 на primary-заливке — on-dark (не heading)').toBe('rgb(255, 255, 255)');
+
+      // Контраст email-ссылки на primary ≥ 4.5:1 (ui-link--on-dark).
+      const email = await page.locator(`#${CARD.ctaEmail}`).evaluate((el) => ({
+        color: getComputedStyle(el).color,
+        fs: getComputedStyle(el).fontSize,
+      }));
+      expect(email.color).toBe('rgb(255, 255, 255)');
+      const primaryRatio = contrastRatio(email.color, primary.backgroundColor);
+      expect(
+        primaryRatio,
+        `on-dark на primary: ${primaryRatio.toFixed(2)}:1 ≥ 4.5`,
+      ).toBeGreaterThanOrEqual(4.5);
+
+      // Row: горизонтальная плашка space-between со слотом действия.
+      const row = await page.locator(`#${CARD.ctaAccentRow}`).evaluate((el) => {
+        const s = getComputedStyle(el);
+        return {
+          display: s.display,
+          flexDirection: s.flexDirection,
+          justifyContent: s.justifyContent,
+          alignItems: s.alignItems,
+          padding: s.padding,
+          backgroundColor: s.backgroundColor,
+          color: s.color,
+        };
+      });
+      expect(row.display).toBe('flex');
+      expect(row.flexDirection, 'row — плашка горизонтальная').toBe('row');
+      expect(row.justifyContent, 'слот действия прижат к правому краю').toBe('space-between');
+      expect(row.alignItems, 'вертикальное центрирование слота').toBe('center');
+      expect(row.padding, 'ритм плитки — pad space-5 (cp-vacancy-search__all)').toBe('24px');
+      expect(row.backgroundColor, 'заливка — --ui-color-accent').toBe('rgb(242, 103, 34)');
+
+      // Подпись плитки — роль ui-h4, перекрашена компонентом в on-dark.
+      const span = await page
+        .locator(`#${CARD.ctaAccentRow} .ui-h4`)
+        .evaluate((el) => getComputedStyle(el).color);
+      expect(span, 'ui-h4 на accent-заливке — on-dark').toBe('rgb(255, 255, 255)');
+
+      // Стрелка — svg сайта в слоте действия, aria-hidden (имя ссылки = текст).
+      const svgHidden = await page
+        .locator(`#${CARD.ctaAccentRow} svg`)
+        .evaluate((el) => el.getAttribute('aria-hidden'));
+      expect(svgHidden, 'иконка слота — aria-hidden (декоративная)').toBe('true');
+      await expect(page.locator(`#${CARD.ctaAccentRow}`)).toHaveAccessibleName('Все 140 вакансий');
+    },
+  );
+
+  standTest(
+    'контраст on-dark на accent CTA-карточки — одобренное исключение 3.12:1 (T2.6/ADR-0010)',
+    async ({ stand }) => {
+      const page = await stand('ui-card');
+      const { color, backdrop } = await page.locator(`#${CARD.ctaAccentRow}`).evaluate((el) => ({
+        color: getComputedStyle(el).color,
+        backdrop: getComputedStyle(el).backgroundColor,
+      }));
+      const ratio = contrastRatio(color, backdrop);
+      // Точная пара одобренного дизайна: 3.12:1 (< 4.5 мелкого текста —
+      // axe-исключение строкой реестра, тест ниже).
+      expect(ratio, `on-dark на accent: ${ratio.toFixed(2)}:1 = одобренные 3.12:1`).toBeCloseTo(
+        3.12,
+        2,
+      );
+    },
+  );
+
+  standTest(
+    'axe: violations вне реестра = 0 (accent CTA — строка реестра, как ui-video__play)',
+    async ({ stand }) => {
+      const page = await stand('ui-card');
+      const results = await a11y(page).analyze();
+      expect(unexpectedViolations(results), 'axe: ноль нарушений вне KNOWN_AXE_EXCEPTIONS').toEqual(
+        [],
+      );
+      // AC T17.8 «контраст-гейт (исключение — строкой)»: запись реестра
+      // обязана существовать — подпись плитки fs-h4 20px/500 axe меряет как
+      // мелкий текст 4.5:1 (пара on-dark-on-accent 3.12:1, T2.6/ADR-0010).
+      expect(
+        KNOWN_AXE_EXCEPTIONS.some(
+          (exception) =>
+            exception.id === 'color-contrast' && exception.match.test('.ui-card--cta--accent'),
+        ),
+        'запись реестра для .ui-card--cta--accent ведена (harness.js + tests/README.md)',
+      ).toBe(true);
+    },
+  );
 
   standTest('эталоны 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({ stand }) => {
     const page = await stand('ui-card');

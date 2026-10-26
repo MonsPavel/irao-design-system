@@ -154,10 +154,16 @@
 
   /* Босой --cta — демонстрация композиции баннера (фон-оверлей — за T17.3):
      стенд-класс имитирует сайт-зону; пары on-dark-on-primary-deep гейтятся
-     (landing-section). */
+     (landing-section). Заголовочная роль перекрашивает сайт — компонент красит
+     роли только на собственных заливках (--primary/--accent); прецедент —
+     cp-company-banner__title пилота. */
   .ucd-cta-banner {
     border: 0;
     background-color: var(--ui-color-primary-deep);
+    color: var(--ui-color-text-on-dark);
+  }
+
+  .ucd-cta-banner .ui-h2 {
     color: var(--ui-color-text-on-dark);
   }
 </style>
