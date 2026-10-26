@@ -1043,6 +1043,12 @@ function mediaHomeCard(card, extraClass = '') {
 function indexMain() {
   const productionSlidesJson = JSON.stringify(PRODUCTION_SLIDES);
   const directionsJson = JSON.stringify(DIRECTIONS_DATA);
+  // Фото-галерея попапа (форма data-ui-gallery компонента ui-carousel):
+  // плоский массив фото по направлениям — каждый рендерил photos[0]
+  // (pilot.js renderDirection); перелистывание фото = перелистывание
+  // направлений (тексты обновляет сайт по событию irao-ui:carousel-select).
+  const directionPhotos = DIRECTIONS_DATA.map((item) => item.photos[0]);
+  const directionPhotosJson = JSON.stringify(directionPhotos);
   const directionsGrid = DIRECTIONS.map(
     (name, index) => `      <li>
         <button class="cp-directions__card" type="button" data-cp-direction="${index}">
@@ -1093,7 +1099,7 @@ function indexMain() {
     (
       slide,
       index,
-    ) => `    <li><button class="cp-production__tab" type="button" role="tab" aria-selected="${index === 0 ? 'true' : 'false'}">
+    ) => `    <li role="presentation"><button class="cp-production__tab ui-carousel__tab" type="button" role="tab" aria-selected="${index === 0 ? 'true' : 'false'}">
       <span class="cp-production__tab-num">${index + 1}</span>
       <span class="cp-production__tab-body">
         <span class="cp-production__tab-title">${esc(slide.title)}</span>
@@ -1124,25 +1130,25 @@ function indexMain() {
   </div>
 </section>
 
-<section class="cp-production" data-cp-production>
+<section class="cp-production ui-carousel" data-ui-carousel>
   <div class="cp-production__bg" aria-hidden="true">
     <img src="assets/images/factory-big.jpg" alt="" loading="lazy">
   </div>
   <div class="cp-production__glow" aria-hidden="true"></div>
-  <img class="cp-production__photo" src="assets/images/worker-production.png" alt="Сотрудник на производстве" width="585" height="674" data-cp-production-photo loading="lazy">
-  <div class="cp-production__body">
-    <h2 class="cp-production__title ui-h2" data-cp-production-title>Производство</h2>
-    <p class="cp-production__text ui-lead" data-cp-production-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
-    <p><a class="ui-button ui-button--light" href="vacancies.html" data-cp-production-link>Подробнее о вакансии</a></p>
+  <img class="cp-production__photo ui-carousel__photo" src="assets/images/worker-production.png" alt="Сотрудник на производстве" width="585" height="674" data-ui-carousel-photo loading="lazy">
+  <div class="cp-production__body ui-carousel__body">
+    <h2 class="cp-production__title ui-h2" data-ui-carousel-title>Производство</h2>
+    <p class="cp-production__text ui-lead" data-ui-carousel-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
+    <p><a class="ui-button ui-button--light" href="vacancies.html" data-ui-carousel-link>Подробнее о вакансии</a></p>
   </div>
-  <button class="cp-production__arrow cp-production__arrow--prev" type="button" data-cp-production-prev aria-label="Предыдущий слайд">
+  <button class="cp-production__arrow cp-production__arrow--prev ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
     <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
-  <button class="cp-production__arrow cp-production__arrow--next" type="button" data-cp-production-next aria-label="Следующий слайд">
+  <button class="cp-production__arrow cp-production__arrow--next ui-carousel__arrow" type="button" data-ui-carousel-next hidden aria-label="Следующий слайд">
     <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M2 2l20 23L2 48" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
-  <script type="application/json" data-cp-production-slides>${productionSlidesJson.replaceAll('</', '<\\/')}</script>
-  <ul class="cp-production__stepper" role="tablist" aria-label="Направления производства">
+  <script type="application/json" data-ui-carousel-slides>${productionSlidesJson.replaceAll('</', '<\\/')}</script>
+  <ul class="cp-production__stepper ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
 ${stepperTabs}
   </ul>
 </section>
@@ -1162,13 +1168,14 @@ ${directionsGrid}
     <svg class="ui-modal__icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
   </button>
   <h2 class="ui-modal__title ui-h3" id="cp-direction-dialog-title" data-cp-dir-title>Направление</h2>
-  <div class="ui-modal__body">
-    <img class="cp-directions__photo" src="assets/images/popup-teplogen.jpg" alt="" data-cp-dir-photo width="590" height="400">
+  <div class="ui-modal__body ui-carousel" data-ui-gallery>
+    <script type="application/json" data-ui-gallery-photos>${directionPhotosJson.replaceAll('</', '<\\/')}</script>
+    <img class="cp-directions__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">
     <div class="cp-directions__nav">
-      <button class="ui-button ui-button--light ui-button--sm" type="button" data-cp-dir-prev aria-label="Предыдущее фото">
+      <button class="ui-button ui-button--light ui-button--sm" type="button" data-ui-gallery-prev hidden aria-label="Предыдущее фото">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
-      <button class="ui-button ui-button--light ui-button--sm" type="button" data-cp-dir-next aria-label="Следующее фото">
+      <button class="ui-button ui-button--light ui-button--sm" type="button" data-ui-gallery-next hidden aria-label="Следующее фото">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
     </div>
