@@ -2,88 +2,40 @@
  * pilot/career-portal/pilot.js — СКРИПТЫ ЗОНЫ САЙТА пилотного клона
  * career-portal. Интерактив компонентов (дропдауны, табы, селекты, модалки,
  * аккордеоны, VI) — модули dist/ui.min.js (window.IraoUI); здесь только
- * поведение сайт-зоны: карусель «Производство», попап «Направлений»,
- * мок-поведение форм (успех после сабмита), мок-переключение aria-pressed
- * кнопочных чипов ui-chip.
+ * поведение сайт-зоны: попап «Направлений» (тексты направлений поверх
+ * карусели-галереи Irao.carousel), мок-поведение форм (успех после сабмита),
+ * мок-переключение aria-pressed кнопочных чипов ui-chip.
  *
- * Деградация без JS: карусель показывает первый слайд (данные в разметке),
- * попап направлений не открывается (кнопки остаются в разметке), формы
- * отправляются нативно. Vanilla ES5, новых зависимостей нет (ADR-0005).
+ * Карусель «Производство» и фото-галерея попапа направлений с T17.7 —
+ * компонент ui-carousel (data-ui-carousel / data-ui-gallery, модуль
+ * IraoUI.carousel в ui.min.js): ~120 строк ES5-поведения перенесены в
+ * компонент, сайт остаётся только с данными направления попапа.
+ *
+ * Деградация без JS: карусель показывает первый слайд (данные в разметке,
+ * контролы hidden), попап направлений не открывается (кнопки остаются в
+ * разметке), формы отправляются нативно. Vanilla ES5, новых зависимостей
+ * нет (ADR-0005).
  */
 (function () {
   'use strict';
 
   var ARROW = document.querySelectorAll.bind(document);
 
-  /* ── карусель «Производство»: данные в <script type="application/json"> ── */
-
-  var production = document.querySelector('[data-cp-production]');
-  if (production) {
-    var slides = [];
-    var slidesScript = production.querySelector('[data-cp-production-slides]');
-    if (slidesScript) {
-      try {
-        slides = JSON.parse(slidesScript.textContent);
-      } catch {
-        slides = [];
-      }
-    }
-    var index = 0;
-    var photo = production.querySelector('[data-cp-production-photo]');
-    var title = production.querySelector('[data-cp-production-title]');
-    var text = production.querySelector('[data-cp-production-text]');
-    var link = production.querySelector('[data-cp-production-link]');
-    var tabs = production.querySelectorAll('.cp-production__tab');
-
-    function render() {
-      var slide = slides[index];
-      if (!slide) return;
-      if (photo) {
-        photo.src = slide.photo;
-        photo.alt = slide.title;
-      }
-      if (title) title.textContent = slide.title;
-      if (text) text.textContent = slide.text;
-      if (link) {
-        link.textContent = 'Подробнее: ' + slide.count;
-      }
-      for (var i = 0; i < tabs.length; i++) {
-        var selected = String(i) === String(index);
-        tabs[i].setAttribute('aria-selected', selected ? 'true' : 'false');
-      }
-    }
-
-    function go(step) {
-      index = (index + step + slides.length) % slides.length;
-      render();
-    }
-
-    var prev = production.querySelector('[data-cp-production-prev]');
-    var next = production.querySelector('[data-cp-production-next]');
-    if (prev)
-      prev.addEventListener('click', function () {
-        go(-1);
-      });
-    if (next)
-      next.addEventListener('click', function () {
-        go(1);
-      });
-    for (var t = 0; t < tabs.length; t++) {
-      (function (tab) {
-        tab.addEventListener('click', function () {
-          index = Array.prototype.indexOf.call(tabs, tab);
-          render();
-        });
-      })(tabs[t]);
-    }
-  }
-
-  /* ── попап «Направления деятельности»: один ui-modal + наполнение из JSON ── */
+  /* ── попап «Направления деятельности»: галерея фото — IraoUI.carousel
+     (data-ui-gallery), тексты направления — сайт-зона. Событие
+     irao-ui:carousel-select (detail.index) синхронизирует тексты с
+     перелистыванием фото (плоский JSON фото попапа = фото направлений по
+     порядку); клик по карточке направления выставляет фото через
+     IraoUI.carousel.select (ленивая инициализация — прецедент modal.open). ── */
 
   var directionsGrid = document.querySelector('[data-cp-directions]');
   if (directionsGrid) {
     var directions = [];
-    var dirScript = directionsGrid.querySelector('[data-cp-directions-data]');
+    // Данные — в <script> секции направлений (как в оригинале: section →
+    // data-directions-data). Поиск внутри UL directionsGrid не находил
+    // скрипт (он сосед секции) — тексты попапа в пилоте не обновлялись
+    // никогда; при переносе галереи на компонент поиск поднят до документа.
+    var dirScript = document.querySelector('[data-cp-directions-data]');
     if (dirScript) {
       try {
         directions = JSON.parse(dirScript.textContent);
@@ -91,46 +43,38 @@
         directions = [];
       }
     }
-    var dirIndex = 0;
     var dialog = document.getElementById('cp-direction-dialog');
-    var dirPhoto = dialog && dialog.querySelector('[data-cp-dir-photo]');
     var dirTitle = dialog && dialog.querySelector('[data-cp-dir-title]');
     var dirSubtitle = dialog && dialog.querySelector('[data-cp-dir-subtitle]');
     var dirText = dialog && dialog.querySelector('[data-cp-dir-text]');
+    var galleryRoot = dialog && dialog.querySelector('[data-ui-gallery]');
 
-    function renderDirection() {
-      var item = directions[dirIndex];
+    function renderDirection(index) {
+      var item = directions[index];
       if (!item) return;
-      if (dirPhoto) dirPhoto.src = item.photos[0] || '';
       if (dirTitle) dirTitle.textContent = item.title;
       if (dirSubtitle) dirSubtitle.textContent = item.subtitle;
       if (dirText) dirText.textContent = item.text;
     }
 
+    if (galleryRoot) {
+      galleryRoot.addEventListener('irao-ui:carousel-select', function (event) {
+        renderDirection(event.detail.index);
+      });
+    }
+
     ARROW('[data-cp-direction]').forEach(function (button) {
       button.addEventListener('click', function () {
-        dirIndex = Number(button.getAttribute('data-cp-direction')) || 0;
-        renderDirection();
+        var index = Number(button.getAttribute('data-cp-direction')) || 0;
+        renderDirection(index);
+        if (galleryRoot && window.IraoUI && window.IraoUI.carousel) {
+          window.IraoUI.carousel.select(galleryRoot, index);
+        }
         if (dialog && window.IraoUI && window.IraoUI.modal) {
           window.IraoUI.modal.open(dialog, { opener: button });
         }
       });
     });
-
-    var dirPrev = dialog && dialog.querySelector('[data-cp-dir-prev]');
-    var dirNext = dialog && dialog.querySelector('[data-cp-dir-next]');
-    if (dirPrev) {
-      dirPrev.addEventListener('click', function () {
-        dirIndex = (dirIndex - 1 + directions.length) % directions.length;
-        renderDirection();
-      });
-    }
-    if (dirNext) {
-      dirNext.addEventListener('click', function () {
-        dirIndex = (dirIndex + 1) % directions.length;
-        renderDirection();
-      });
-    }
   }
 
   /* ── мок-формы: сабмит → success-блок ui-form (T15.4) ──

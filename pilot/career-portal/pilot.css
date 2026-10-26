@@ -257,7 +257,10 @@
   background-color: color-mix(in srgb, #ff3134 20%, transparent);
 }
 
-/* ── production: карусель (сайт-зона + pilot.js) ── */
+/* ── production: карусель (T17.7 — компонент ui-carousel) ──
+   Вид карусели (стрелки on-dark, табы-степпер с рамкой, активный glass-dark)
+   несёт ui-carousel; здесь — только композиция секции (bg/glow/позиции).
+   Данные слайдов — data-ui-carousel-slides, поведение — IraoUI.carousel. */
 
 .cp-production {
   position: relative;
@@ -276,6 +279,9 @@
   height: 100%;
 }
 
+/* pointer-events: none — оригинал (production.css:38): absolute-оверлей без
+   него перехватывает клики по табам/стрелкам компонента (артефакт пилота
+   снят при переносе карусели на ui-carousel). */
 .cp-production__glow {
   position: absolute;
   inset: 0;
@@ -285,6 +291,7 @@
     color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%,
     transparent 100%
   );
+  pointer-events: none;
 }
 
 .cp-production__photo {
@@ -307,15 +314,12 @@
   color: var(--ui-color-text-on-dark);
 }
 
+/* Позиции стрелок (вид — ui-carousel__arrow, компонент): абсолют
+   относительно секции — композиция оригинала. */
 .cp-production__arrow {
-  display: inline-flex;
   position: absolute;
   bottom: 9rem;
   z-index: 5;
-  align-items: center;
-  justify-content: center;
-  padding: var(--ui-space-2);
-  color: var(--ui-color-text-on-dark);
 }
 
 .cp-production__arrow--prev {
@@ -326,32 +330,15 @@
   right: 10rem;
 }
 
+/* Позиция степпера (flex/gap/сброс списка — ui-carousel__stepper,
+   компонент): ширина ленты и выравнивание с контейнером — композиция. */
 .cp-production__stepper {
-  display: flex;
-  gap: var(--ui-space-2);
   max-width: 62rem;
-  margin: 0;
   padding: 0 var(--ui-container-pad) var(--ui-space-6);
-  list-style: none;
 }
 
-.cp-production__tab {
-  display: flex;
-  flex: 1 1 0;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-2);
-  border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);
-  background: transparent;
-  color: var(--ui-color-text-on-dark-muted);
-  text-align: left;
-}
-
-.cp-production__tab[aria-selected='true'] {
-  border-color: var(--ui-color-surface);
-  background-color: var(--ui-color-glass-dark);
-  color: var(--ui-color-text-on-dark);
-}
-
+/* Контент таба (типографирует разметка сайта — README ui-carousel):
+   номер, подпись, счётчик. Вид рамки/состояний — ui-carousel__tab. */
 .cp-production__tab-num {
   flex: 0 0 auto;
 }
