@@ -115,7 +115,7 @@
 | T17.4 | done | смержена |
 | T17.5 | todo | EPIC-17: медиа-карточка ui-card--media — event/article/intern-person (3 копии одного каркаса) |
 | T17.6 | done | смержена |
-| T17.7 | todo | EPIC-17: карусель ui-carousel + фото-галерея (JS-модуль в dist) — production/направления, ~120 строк pilot.js; P3, кандидат бэклога по решению владельца |
+| T17.7 | blocked | технический сбой на середине конвейера 26.10: ветка task/T17.7 отсутствует (локально и на origin), коммитов T17.7 и components/ui-carousel нет — наработок задачи в репозитории не обнаружено; незакоммиченные правки в дереве (аудит доков 25.10) к задаче не относятся |
 | T17.8 | todo | EPIC-17: CTA-карточка ui-card--cta (primary/accent/row) — cta-mail, «Все вакансии», тело баннера |
 | T17.9 | todo | EPIC-17: nav-карточки (lnk-card, тон-хук) + лента логотипов + ui-button--round — students/employers |
 | T17.10 | todo | EPIC-17: adoption таймлайна — пилот на паттерн T14.11, cp-timeline снимается (обкатка процесса) |
