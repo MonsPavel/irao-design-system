@@ -400,7 +400,7 @@ const BLOCK_PROBES = {
     ['video-block', '.video-block', '.ui-video'],
     ['media', '.media', '#media'],
     ['team', '.team', '.cp-team__photo'],
-    ['cta-mail', '.cta-mail', '.cp-cta-mail__card'],
+    ['cta-mail', '.cta-mail', '.ui-card--cta--primary'],
     ['footer', '.footer', '.cp-footer'],
   ],
   // Статы компании на ui-stat (T17.4): сетки — сайт-зона, плашки — компонент;

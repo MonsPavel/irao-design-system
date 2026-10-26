@@ -130,6 +130,6 @@ describe('KNOWN_AXE_EXCEPTIONS — атрибутные цели того же �
     expect(
       unexpectedViolations({ violations: [contrastNode('.x .ui-button--accent-hover')] }),
     ).toEqual(['color-contrast → .x .ui-button--accent-hover']);
-    expect(KNOWN_AXE_EXCEPTIONS.length).toBe(5); // 4 кнопочных + .ui-video__play (T17.6)
+    expect(KNOWN_AXE_EXCEPTIONS.length).toBe(6); // 4 кнопочных + .ui-video__play (T17.6) + .ui-card--cta--accent (T17.8)
   });
 });

@@ -105,6 +105,19 @@ export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
       '4.5:1; изменение пары — design-decision владельца; токен-уровень — ' +
       'tests/contrast/pairs.config.mjs (пара on-dark-on-accent, T2.6/ADR-0010)',
   },
+  {
+    id: 'color-contrast',
+    // On-dark текст CTA-карточки на accent-заливке (T17.8): тот же
+    // lookahead-механизм, что у .ui-button--accent (не более длинное имя).
+    match: /(^|\s)\.ui-card--cta--accent(?![\w-])/,
+    reason:
+      'текст/стрелка CTA-карточки на accent-заливке (ui-card--cta--accent, ' +
+      'T17.8) — та же одобренная пара on-dark на accent 3.12:1 (как ' +
+      'ui-button--accent/ui-video__play): подпись плитки fs-h4 20px/500 axe ' +
+      'меряет как мелкий текст 4.5:1 (пара on-dark-on-accent, T2.6/ADR-0010); ' +
+      'изменение пары — design-decision владельца; токен-уровень — ' +
+      'tests/contrast/pairs.config.mjs',
+  },
 ]);
 
 /**

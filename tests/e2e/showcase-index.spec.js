@@ -17,3 +17,25 @@ test('индекс showcase открывается, axe чист, эталон �
     await shot(page, { name: 'showcase-index', viewport });
   }
 });
+
+test('индекс без горизонтального переполнения на шкале вьюпортов (гейт hscroll)', async ({
+  page,
+}) => {
+  // Приёмка T17.8: литеральная markdown-ссылка в описании карточки каталога
+  // (README ui-tabs, «[APG tabs](https://…/tabs/)») не переносится и на
+  // мобильном даёт scrollWidth 381 при вьюпорте 375 — эталоны такое маскируют
+  // (fullPage-скриншот запекает ширину контента). Гейт по паттерну
+  // pattern-detail-page.spec.js:75 — на всей шкале вьюпортов эталонов.
+  for (const viewport of Object.keys(VIEWPORTS)) {
+    await openIndex(page);
+    await page.setViewportSize(VIEWPORTS[viewport]);
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(
+      scrollWidth,
+      `${viewport}: индекс без горизонтального скролла (${scrollWidth} ≤ ${clientWidth})`,
+    ).toBeLessThanOrEqual(clientWidth);
+  }
+});

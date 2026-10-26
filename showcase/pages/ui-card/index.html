@@ -111,3 +111,59 @@
     — только на hover-устройствах.
   </p>
 </section>
+
+<section aria-labelledby="ui-card-cta-heading">
+  <h2 id="ui-card-cta-heading">CTA-карточка</h2>
+  <div class="ucd-cta-stack">
+    <div class="ui-card ui-card--cta ui-card--cta--primary" id="ui-card-cta-primary">
+      <h3 class="ui-h2">Нет подходящей вакансии?</h3>
+      <p class="ui-lead">Расскажи о себе — возможно, мы ищем именно тебя!</p>
+      <a class="ui-link ui-link--on-dark" id="ui-card-cta-email" href="mailto:career@interrao.ru">career@interrao.ru</a>
+    </div>
+    <a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" id="ui-card-cta-accent-row" href="#ui-card-cta-heading">
+      <span class="ui-h4">Все 140 вакансий</span>
+      <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34" fill="none">
+        <path d="M8 26L26 8M12 8h14v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <div class="ui-card ui-card--cta ucd-cta-banner" id="ui-card-cta-banner">
+      <h3 class="ui-h2">Вакансии компании</h3>
+      <p class="ui-small">Босой --cta: центр-композиция на сайт-фон — тело фото-баннера
+      (заливку-оверлей несёт ui-section--photo, T17.3; здесь стенд-класс имитирует сайт).</p>
+    </div>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Модификатор задаёт поверхность/центрирование/ритм (pad 48/24 = <code>--ui-space-7</code>/<code>--ui-space-5</code>,
+    шаг <code>--ui-space-3</code>, радиус <code>--ui-radius-lg</code>); содержимое — ролями base и готовыми
+    контролами. On-dark-пара — компонентом: заголовочные роли на заливке перекрашиваются сами (цвет
+    роли heading = primary — на заливке невидим), ссылкам — <code>ui-link--on-dark</code>. Row —
+    space-between со слотом действия (svg — разметке сайта), pad <code>--ui-space-5</code>. Контраст
+    on-dark на accent 3.12:1 — одобренное исключение (T2.6/ADR-0010; axe — строка реестра
+    <code>KNOWN_AXE_EXCEPTIONS</code>). Один призыв на карточку — см. Do/Don't README.
+  </p>
+</section>
+
+<style>
+  /* CTA-карточки — широкие композиции (плашки на всю колонку контента),
+     не карточки сетки списков — свой стек вместо ucd-grid. */
+  .ucd-cta-stack {
+    display: grid;
+    gap: var(--ui-space-5);
+    margin: 0 0 var(--ui-space-5);
+  }
+
+  /* Босой --cta — демонстрация композиции баннера (фон-оверлей — за T17.3):
+     стенд-класс имитирует сайт-зону; пары on-dark-on-primary-deep гейтятся
+     (landing-section). Заголовочная роль перекрашивает сайт — компонент красит
+     роли только на собственных заливках (--primary/--accent); прецедент —
+     cp-company-banner__title пилота. */
+  .ucd-cta-banner {
+    border: 0;
+    background-color: var(--ui-color-primary-deep);
+    color: var(--ui-color-text-on-dark);
+  }
+
+  .ucd-cta-banner .ui-h2 {
+    color: var(--ui-color-text-on-dark);
+  }
+</style>

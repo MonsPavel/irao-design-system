@@ -1,11 +1,10 @@
 # ui-card
 
-Карточка-основа: варианты одобренного дизайна career-portal (`.card`,
-components.css:115–127) — база, `--hover`, `--filled` — плюс слоты
-`__media`/`__title`/`__body`/`__footer` и паттерн **карточка-ссылка**
-(stretched link) из `.vac-card` (pages.css:38–83): контент-ссылка растягивается
-на карточку, фокус-обводка проходит по всей площади, вложенные интерактивы
-остаются достижимыми. Задача T4.4. Ключевой компонент списковых страниц.
+Карточка-основа: базовый вид, `--hover`, `--filled` и CTA-плашка `--cta`, слоты
+`__media`/`__title`/`__body`/`__footer` и паттерн **карточка-ссылка** (stretched link):
+контент-ссылка растягивается на карточку, фокус-обводка проходит по всей площади, вложенные
+интерактивы остаются достижимыми. Ключевой компонент списковых страниц — паттерн [«Страница
+списка»](stand:patterns/list-page).
 
 ## API
 
@@ -14,6 +13,10 @@ components.css:115–127) — база, `--hover`, `--filled` — плюс сл�
 | Блок | `.ui-card` на `<article>` (или `<div>`) — коробка: фон surface, рамка `--ui-border-color`, радиус `--ui-radius-md` (16px, career-portal `--radius-card`) |
 | Модификатор `.ui-card--hover` | hover-эффект: рамка `--ui-color-border-hover` (#B9C6DE) + тень `--ui-shadow-md` (0 12px 32px blue-800-10). **Только под `@media (hover: hover)`** — на таче не «залипает» |
 | Модификатор `.ui-card--filled` | фон и рамка `--ui-color-surface-muted` — приглушённая «бесшовная» карточка (career-portal `.card--filled`) |
+| Модификатор `.ui-card--cta` | CTA-карточка (T17.8): центр-композиция (дети по крест-оси, `text-align: center`), ритм — pad 48/24 (`--ui-space-7`/`--ui-space-5`), шаг `--ui-space-3`, радиус `--ui-radius-lg`. Поверхность — вариантом ниже; босой `--cta` остаётся на базовой surface (тело фото-баннера, фон — за `ui-section--photo` T17.3) |
+| Вариант `.ui-card--cta--primary` | заливка `--ui-color-primary`, текст — on-dark-пара компонентом (заголовочные роли `ui-h1…h5`/`ui-page-title` внутри перекрашиваются тоже: цвет роли heading = primary — на заливке невидим) |
+| Вариант `.ui-card--cta--accent` | заливка `--ui-color-accent`, on-dark-пара; контраст 3.12:1 — одобренное исключение (T2.6/ADR-0010, пара `on-dark-on-accent`; axe — строка реестра `KNOWN_AXE_EXCEPTIONS`) |
+| Вариант `.ui-card--cta--row` | горизонтальная плашка `space-between` со слотом действия (стрелка/кнопка); ритм плитки — pad `--ui-space-5`; применяется к `<a>`-карточке |
 | Модификатор `.ui-card--link` | включает паттерн карточки-ссылки (в паре с `.ui-card__link` на контент-ссылке) |
 | Элемент `.ui-card__link` | контент-ссылка паттерна: растягивается на карточку (`::after` c `inset: 0`), доступное имя остановки — её текст |
 | Слот `.ui-card__media` | место под изображение — `ui-image` (T4.6) |
@@ -21,7 +24,7 @@ components.css:115–127) — база, `--hover`, `--filled` — плюс сл�
 | Слот `.ui-card__body` | основной контент |
 | Слот `.ui-card__footer` | действия/мета; прижат к низу (`margin-top: auto`) — в сетке списковых страниц действия выравниваются по нижней кромке |
 | JS | не требуется (CSS-компонент) |
-| Токены | `--ui-border-width`, `--ui-border-color`, `--ui-color-border-hover`, `--ui-radius-md`, `--ui-color-surface(-muted)`, `--ui-shadow-md`, `--ui-space-5` (паддинг 24px), `--ui-card-gap` (14px), `--ui-focus-*`, `--ui-transition` |
+| Токены | `--ui-border-width`, `--ui-border-color`, `--ui-color-border-hover`, `--ui-radius-md`, `--ui-color-surface(-muted)`, `--ui-shadow-md`, `--ui-space-5` (паддинг 24px), `--ui-card-gap` (14px), `--ui-focus-*`, `--ui-transition`; CTA: `--ui-space-7`/`--ui-space-5`/`--ui-space-3`, `--ui-radius-lg`, `--ui-color-primary`, `--ui-color-accent`, `--ui-color-text-on-dark` |
 
 ```html
 <article class="ui-card ui-card--hover ui-card--link">
@@ -35,6 +38,40 @@ components.css:115–127) — база, `--hover`, `--filled` — плюс сл�
   </div>
 </article>
 ```
+
+## CTA-карточка (`--cta`, T17.8)
+
+Один приём «крупная плашка с призывом»: «Нет подходящей вакансии?» (primary, email-CTA),
+«Все 140 вакансий» (accent, стрелка-CTA) главной career-portal. Модификатор задаёт
+поверхность/центрирование/ритм; содержимое — ролями base (`ui-h2`/`ui-lead`) и готовыми
+контролами (`ui-link`/`ui-button`) — компонент шрифты не переобъявляет:
+
+```html
+<div class="ui-card ui-card--cta ui-card--cta--primary">
+  <h2 class="ui-h2">Нет подходящей вакансии?</h2>
+  <p class="ui-lead">Расскажи о себе — возможно, мы ищем именно тебя!</p>
+  <a class="ui-link ui-link--on-dark" href="mailto:career@interrao.ru">career@interrao.ru</a>
+</div>
+```
+
+Row-вариант — плитка-ссылка со слотом действия (svg-иконка — разметке сайта, компонент даёт
+слот, не иконку):
+
+```html
+<a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" href="vacancies.html">
+  <span class="ui-h4">Все 140 вакансий</span>
+  <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34" fill="none"><!-- arrow-up-right --></svg>
+</a>
+```
+
+- **On-dark-пара — компонентом**: на заливке заголовочные роли перекрашиваются сами
+  (`ui-h1…h5`/`ui-page-title` → `--ui-color-text-on-dark`) — цвет роли heading равен primary и
+  на primary-заливке невидим. Ссылкам внутри ставьте `ui-link--on-dark` (готовый контрол).
+- **Контраст on-dark на accent** — 3.12:1: одобренное исключение (T2.6/ADR-0010, пара
+  `on-dark-on-accent`); axe-прогон опирается на строку реестра `KNOWN_AXE_EXCEPTIONS`
+  (`tests/helpers/harness.js`).
+- **Босой `--cta`** (без варианта поверхности) — центр-композиция на базовой surface: так
+  применяется к телу фото-баннера компании, чей оверлей несёт `ui-section--photo` (T17.3).
 
 ## Геометрия и значения
 
@@ -110,6 +147,16 @@ components.css:115–127) — база, `--hover`, `--filled` — плюс сл�
 - **Don't**: вкладывать интерактив внутрь самой `.ui-card__link` — вложенный
   в ссылку интерактив недоступен; все интерактивы — сиблинги ссылки внутри
   карточки.
+- **Do**: CTA-карточка — один призыв на карточку: заголовок + lead + одно
+  действие (`ui-link`/`ui-button`). Две competing цели размывают фокус плашки —
+  разбейте на две карточки.
+- **Do**: текст действия CTA — действующее слово («написать нам», «смотреть
+  вакансии»), прецедент ui-button: доступное имя описывает назначение, а не
+  «подробнее»/«жми».
+- **Don't**: наливать `--cta--accent`/`--cta--primary` без содержимого ролями —
+  on-dark-пару компонент применяет к заголовочным ролям и наследованию; текст
+  вне ролей/наследования (например, «серые» утилиты сайта) проверяйте на
+  заливке отдельно.
 
 ## Bitrix (шаблоны)
 
@@ -130,5 +177,8 @@ components.css:115–127) — база, `--hover`, `--filled` — плюс сл�
   элемент (например, `input`) поднимайте вручную (`position: relative;
   z-index: 1`) — кард-паттерны с полями форм — EPIC-5/EPIC-8.
 - Карусели карточек — P2 (Out of scope T4.4).
+- CTA-плашка `--row` — `<a>`-карточка без hover-механик (фон/тень не меняются):
+  осознанный перенос Out of scope T17.8 — действие внутри плашки, отклик
+  несёт контент; hover-поведение — design-decision владельца при ревизии.
 - VI-перекраска карточек не проверялась в этой задаче — функциональная
   проверка читаемости за T9.1 (Scope T4.4).

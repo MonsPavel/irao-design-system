@@ -29,3 +29,26 @@
     оформляйте ui-button/ui-link.
   </p>
 </article>
+
+<!-- CTA-карточка (T17.8): крупная плашка с призывом. Поверхность — вариант
+     (--primary/--accent; босой --cta — фото-оверлей баннера), on-dark-пара
+     текста — компонентом (заголовочные роли красятся сами); содержимое —
+     ролями и готовыми контролами. Один призыв на карточку (см. README). -->
+<div class="ui-card ui-card--cta ui-card--cta--primary">
+  <h2 class="ui-h2">Нет подходящей вакансии?</h2>
+  <p class="ui-lead">Расскажи о себе — возможно, мы ищем именно тебя!</p>
+  <a class="ui-link ui-link--on-dark" href="mailto:career@interrao.ru">career@interrao.ru</a>
+</div>
+
+<a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" href="vacancies.html">
+  <span class="ui-h4">Все 140 вакансий</span>
+  <svg aria-hidden="true" width="34" height="34" viewBox="0 0 34 34" fill="none">
+    <path
+      d="M8 26L26 8M12 8h14v14"
+      stroke="currentColor"
+      stroke-width="2.4"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </svg>
+</a>
