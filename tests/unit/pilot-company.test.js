@@ -131,9 +131,9 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     );
   });
 
-  it('banner-card: CTA-панель с фото ui-image и ui-button «смотреть вакансии» на vacancies.html (Scope)', () => {
+  it('banner-card: CTA-панель с фото ui-image и ui-button «смотреть вакансии» на vacancies.html (Scope); тело — CTA-центр-композиция на ui-card--cta (T17.8)', () => {
     expect(companyHtml).toMatch(/class="ui-image ui-image--cover cp-company-banner__photo"/);
-    expect(companyHtml).toContain('<div class="cp-company-banner__body">');
+    expect(companyHtml).toContain('<div class="cp-company-banner__body ui-card ui-card--cta">');
     expect(companyHtml).toMatch(
       /<a class="ui-button ui-button--primary" href="vacancies.html">смотреть вакансии<\/a>/,
     );
@@ -175,7 +175,9 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
       '.cp-company-where',
       '.cp-company-banner',
       '.cp-company-banner__photo',
-      '.cp-company-banner__body',
+      // T17.8: тело баннера — CTA-центр-композиция на модификаторе; сайт-правило
+      // перекрашено в дескриптор-селектор (0-2-0 против 0-2-0 модификатора).
+      '.cp-company-banner .cp-company-banner__body',
       '.cp-company-banner__title',
     ]) {
       expect(blockOf(pilotCss, selector), `${selector} найдено`).toBeTruthy();
@@ -231,8 +233,8 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     expect(blockOf(stat, '.ui-stat--deep')).toContain('gap: var(--ui-space-3);');
   });
 
-  it('оверлей баннера — тинт primary-a55 (rgba(0,40,86,.55) оригинала, pages.css:666 — ступень лестницы T14.7)', () => {
-    const body = blockOf(pilotCss, '.cp-company-banner__body');
+  it('оверлей баннера — тинт primary-a55 (rgba(0,40,86,.55) оригинала, pages.css:666 — ступень лестницы T14.7); раскладка тела — на модификаторе ui-card--cta (T17.8), сайт-правило держит оверлей/цвет', () => {
+    const body = blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body');
     expect(body).toContain('background-color: var(--ui-color-primary-a55);');
     expect(body).toContain('color: var(--ui-color-text-on-dark);');
     expect(blockOf(pilotCss, '.cp-company-banner__title')).toContain(
@@ -240,9 +242,14 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     );
   });
 
-  it('ширина текста баннера — 560px «как есть» (pages.css:674); паддинг тела — 40px «как есть» (pages.css:667), не ступень шкалы (--ui-space-7 = 48px — ревью T15.2: дивергенция от оригинала и ложный комментарий)', () => {
+  it('ширина текста баннера — 560px «как есть» (pages.css:674); паддинг тела — 40px «как есть» (pages.css:667), не ступень шкалы (--ui-space-7 = 48px — ревью T15.2: дивергенция от оригинала и ложный комментарий); рамка гасится (CTA-карточка без заливки несёт border базы, T17.8)', () => {
     expect(blockOf(pilotCss, '.cp-company-banner__text')).toContain('max-width: 35rem;');
-    expect(blockOf(pilotCss, '.cp-company-banner__body')).toContain('padding: 2.5rem;');
+    expect(blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body')).toContain(
+      'padding: 2.5rem;',
+    );
+    expect(blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body')).toContain(
+      'border: 0;',
+    );
   });
 
   it('в блоках компании нет hex и !important (инварианты системы; значения оригинала вне шкалы — rem «как есть» с комментарием-источником)', () => {
