@@ -240,6 +240,19 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
   const INIT_ATTR = 'data-ui-carousel-init';
   const GALLERY_INIT_ATTR = 'data-ui-gallery-init';
 
+  it('модуль ES5-совместим (ADR-0005): нет optional catch binding — ui.min.js это конкатенация, SyntaxError на ES5-движке валит все модули (ревью T17.7)', () => {
+    // ES2019 optional catch binding: `} catch {` — в ES5-движке синтаксическая
+    // ошибка во ВСЕМ бандле. Биндинги catch (x) обязаны использоваться в теле
+    // блока (иначе no-unused-vars и мёртвый клейм ES5).
+    expect(source, 'нет catch без биндинга (ES2019)').not.toMatch(/\}\s*catch\s*\{/);
+    for (const [, name, tail] of source.matchAll(/catch\s*\((\w+)\)\s*\{([\s\S]{0,400})/g)) {
+      expect(
+        tail.includes(name),
+        `биндинг catch (${name}) используется в теле блока — иначе no-unused-vars и рассинхрон с ADR-0005`,
+      ).toBe(true);
+    }
+  });
+
   /** Инстанс карусели — каноническая структура паттерна (спека T17.7). */
   const carouselHtml = (id) => `
     <section class="ui-carousel" data-ui-carousel id="${id}">

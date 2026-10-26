@@ -76,21 +76,22 @@
   var EVENT_NAME = 'irao-ui:' + MODULE_NAME + '-select';
 
   /* ── Чистые функции JSON-парса (Testing requirements: unit — чистая
-     функция; здесь — разбор строки данных в массив слайдов/фото). ── */
+     функция; здесь — разбор строки данных в массив слайдов/фото).
+     ES5-совместимость (ADR-0005): try/catch здесь НЕТ — битый JSON даёт
+     SyntaxError из JSON.parse, который перехватывает общий отказ
+     инициализации (init() → console.warn, catch с биндингом): optional
+     catch binding (ES2019) в конкатенированном ui.min.js был бы
+     синтаксической ошибкой для ВСЕХ модулей на ES5-движке. ── */
 
   /**
-   * Разобрать JSON-текст в массив слайдов. Битый JSON/не-массив — null
-   * (инстанс откажет с console.warn); не-объекты массива отбрасываются.
+   * Разобрать JSON-текст в массив слайдов. Битый JSON — SyntaxError
+   * (перехватывает отказ инициализации), не-массив — null (инстанс откажет
+   * с console.warn); не-объекты массива отбрасываются.
    * @param {string} text содержимое <script type="application/json">
    * @returns {Array<Object>|null} массив слайдов или null
    */
   function parseSlides(text) {
-    var data;
-    try {
-      data = window.JSON.parse(text);
-    } catch {
-      return null;
-    }
+    var data = window.JSON.parse(text);
     if (!Array.isArray(data)) {
       return null;
     }
@@ -104,18 +105,14 @@
   }
 
   /**
-   * Разобрать JSON-текст в массив фото (строк-URL). Битый JSON/не-массив —
-   * null; не-строки отбрасываются.
+   * Разобрать JSON-текст в массив фото (строк-URL). Битый JSON —
+   * SyntaxError (как parseSlides); не-массив — null; не-строки
+   * отбрасываются.
    * @param {string} text содержимое <script type="application/json">
    * @returns {Array<string>|null} массив фото или null
    */
   function parsePhotos(text) {
-    var data;
-    try {
-      data = window.JSON.parse(text);
-    } catch {
-      return null;
-    }
+    var data = window.JSON.parse(text);
     if (!Array.isArray(data)) {
       return null;
     }
