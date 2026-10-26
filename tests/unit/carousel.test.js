@@ -698,3 +698,46 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
   });
 });
+
+describe('errata AC4 скрин-пары (T17.7, решение владельца 27.10 — эскалация dwfq-e2d04771-1)', () => {
+  it('файл задачи несёт errata-примечание под AC4: пара выполняется по раскладке, отличия — снятие UA-артефактов в пользу одобренного оригинала', () => {
+    const task = readFileSync(
+      join(root, 'docs', 'ui-system', 'epics', 'EPIC-17-ds-full-coverage', 'T17.7-carousel.md'),
+      'utf8',
+    );
+    expect(task, 'errata-примечание под AC4').toMatch(
+      /Errata \(эскалация dwfq-e2d04771-1[\s\S]*выполняется по[\s\S]*649→651[\s\S]*пороге ±4px/,
+    );
+    expect(task, 'оговорка про стрелки (одобренный оригинал прозрачен)').toMatch(
+      /Errata[\s\S]*стрелки прозрачны on-dark[\s\S]*background:none/,
+    );
+    expect(task, 'оговорка про шрифт табов (одобренный оригинал — Golos)').toMatch(
+      /Errata[\s\S]*Golos Text[\s\S]*--ui-font-family/,
+    );
+  });
+
+  it('README компонента: раздел «Скрин-пара production (AC T17.7)» фиксирует те же два отличия и запрет воспроизведения артефактов', () => {
+    const readme = readFileSync(join(root, 'components', 'ui-carousel', 'README.md'), 'utf8');
+    const section = readme.match(/## Скрин-пара production \(AC T17\.7\)[\s\S]*?(?=\n## |$)/);
+    expect(section, 'раздел оговорки в README').toBeTruthy();
+    expect(section[0], 'стрелки: UA-подложка снята (on-dark, прозрачна)').toContain(
+      'ButtonFace',
+    );
+    expect(section[0], 'табы: Golos (--ui-font-family)').toContain('Golos');
+    expect(section[0], 'Δ2px в пороге ±4px').toContain('±4px');
+    expect(section[0], 'запрет воспроизведения артефактов (инвариант эпика)').toContain(
+      'одобренн',
+    );
+  });
+
+  it('REPORT пилота синхронен: production 760→651 с errata-ссылкой; строка §3.3 — осознанное отклонение', () => {
+    const report = readFileSync(join(root, 'pilot', 'career-portal', 'REPORT.md'), 'utf8');
+    const prodRow = report.match(/\| production \| 760 \| [^\n]*\|/);
+    expect(prodRow, 'строка production в таблице высот §3.4').toBeTruthy();
+    expect(prodRow[0]).toContain('651');
+    expect(prodRow[0]).toContain('errata');
+    expect(report, 'строка §3.3 — осознанное отклонение T17.7').toMatch(
+      /T17\.7[\s\S]*осознанн/,
+    );
+  });
+});

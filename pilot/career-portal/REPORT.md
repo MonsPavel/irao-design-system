@@ -127,13 +127,14 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 | FAQ (ui-accordion) | summary padding 20×24 | padding 24 | **принято ДС** — близко, микро (решение пилота 20.10) |
 | holding stat value (ui-stat) | lh 1.1 (holding.css:66) | lh 1.1 (роль ui-h2) | **закрыто T17.4** (adoption: статы холдинга/компании на ui-stat, 10 инстансов): до — lh 1.35 (случайное наследование body пилота; снято вместе с cp-правилом) → роль ui-h2 по Implementation requirements п.2/п.4: lh значения 1.35→1.1, строка 81→66px, блок holding 618→603 (−15px, вне порога ±4px — осознанно: lh 1.1 — канон оригинала), docHeight главной 8219→8204; company-блоки — дельта 0 (probe до/после `.zcode/accept-t174-*.json`, compare 20 страниц 25.10; блоки company-stats/company-adv — в BLOCK_PROBES compare) |
 | checkbox / pagination | — | — | probe MATCH (высоты 20px, страницы пагинации) |
+| production carousel (ui-carousel) | стрелки прозрачны on-dark (`button { background: none; border: none }` base.css), табы Golos | **закрыто T17.7** (adoption: карусель «Производство» на ui-carousel): до — UA-артефакты отсутствующего button-ресета пилота (стрелки — подложка ButtonFace rgb(240,240,240) + рамка 2px, табы — Arial); после — вид компонента (стрелки `border:0; background-color:transparent`, табы `--ui-font-family`), оба — приведение к одобренному оригиналу, воспроизведение артефактов запрещено инвариантом эпика; блок 649→651 (Δ2px в пороге ±4px), раскладка пары идентична — осознанная оговорка AC4 по errata файла задачи (эскалация dwfq-e2d04771-1, решение владельца 27.10; probe до/после `.zcode/accept-t177-prod-*.json`) |
 
 ### 3.4 Высоты блоков главной (px, оригинал → пилот)
 
 | Блок | Оригинал | Пилот | Источник расхождения |
 |---|---|---|---|
 | hero | 808 | 808 | совпало |
-| production | 760 | 649 | сайт-зона: пилот плотнее |
+| production | 760 | 651 | сайт-зона: пилот плотнее; T17.7 (миграция карусели на ui-carousel): 649→651 — Δ2px миграции в пороге ±4px (errata AC4 файла задачи: два видимых отличия пары до/после — осознанное снятие UA-артефактов стрелок/табов в пользу одобренного оригинала, строка §3.3) |
 | directions | 652 | 446 | сайт-зона: карточки оригинала «воздушнее» |
 | holding | 798 | 603 | сайт-зона (было 618 до T17.4: статы на ui-stat, lh значения 1.35→1.1 — mapping §3.3) |
 | employers | 583 | 224 | сайт-зона: сетка логотипов оригинала крупнее |
