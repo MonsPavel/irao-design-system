@@ -22,6 +22,8 @@
   .ucar-production__bg {
     position: absolute;
     inset: 0;
+    z-index: 0;
+    pointer-events: none;
   }
 
   .ucar-production__bg img {
@@ -30,16 +32,29 @@
     height: 100%;
   }
 
-  /* glow «Производства» пилота (pilot.css:279): градиент к primary */
+  /* glow «Производства» пилота (pilot.css:279): градиент к primary.
+     pointer-events: none — оригинал (production.css:38): без него
+     absolute-оверлей перехватывает клики по табам/стрелкам (артефакт
+     пилота — при переносе степпера на компонент критично). */
   .ucar-production__glow {
     position: absolute;
     inset: 0;
+    z-index: 1;
     background: linear-gradient(
       90deg,
       color-mix(in srgb, var(--ui-color-primary) 88%, transparent) 0%,
       color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%,
       transparent 100%
     );
+    pointer-events: none;
+  }
+
+  /* Контент секции — над подложками (слои оригинала: bg 0/glow 1/контент 3,
+     production.css:1–38): корень карусели static под absolute-оверлеями
+     не рисуется и не кликается. */
+  .ucar-production .ui-carousel {
+    position: relative;
+    z-index: 2;
   }
 
   /* on-dark-контекст фото-секции: типографика слотов перекрашивается
@@ -211,7 +226,7 @@
         </button>
       </div>
       <ul class="ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
-        <li>
+        <li role="presentation">
           <button class="ui-carousel__tab" type="button" role="tab" aria-selected="true">
             <span class="ui-carousel__tab-num" aria-hidden="true">1</span>
             <span>
@@ -220,7 +235,7 @@
             </span>
           </button>
         </li>
-        <li>
+        <li role="presentation">
           <button class="ui-carousel__tab" type="button" role="tab" aria-selected="false">
             <span class="ui-carousel__tab-num" aria-hidden="true">2</span>
             <span>
@@ -229,7 +244,7 @@
             </span>
           </button>
         </li>
-        <li>
+        <li role="presentation">
           <button class="ui-carousel__tab" type="button" role="tab" aria-selected="false">
             <span class="ui-carousel__tab-num" aria-hidden="true">3</span>
             <span>
