@@ -166,7 +166,10 @@ test.describe('ui-carousel: инициализация и клик (слоты, 
 
     await page.locator(SEL.next).click();
     await expect(page.locator(SEL.title)).toHaveText('Женские вакансии на производстве');
-    await expect(page.locator(SEL.photo)).toHaveAttribute('alt', 'Женские вакансии на производстве');
+    await expect(page.locator(SEL.photo)).toHaveAttribute(
+      'alt',
+      'Женские вакансии на производстве',
+    );
     await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
 
     await page.locator(SEL.prev).click();
@@ -290,7 +293,10 @@ test.describe('ui-carousel: фото-галерея (data-ui-gallery)', () => {
         }),
       firstSrc,
     );
-    expect(received.events.map((e) => e.index), 'next×3 + prev: 1,2,0,2').toEqual([1, 2, 0, 2]);
+    expect(
+      received.events.map((e) => e.index),
+      'next×3 + prev: 1,2,0,2',
+    ).toEqual([1, 2, 0, 2]);
     // alt декоративного фото не меняется модулем.
     await expect(page.locator(SEL.galleryPhoto)).toHaveAttribute('alt', '');
   });
