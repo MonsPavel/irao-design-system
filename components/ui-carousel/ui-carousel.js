@@ -312,6 +312,18 @@
       }
     }
 
+    /** Нормализация ARIA-состояния табов без рендера слотов (стартовый
+        индекс 0 — разметка уже несёт первый слайд; перезапись слотов
+        стёрла бы разметочные детали — nbsp в текстах пилота, alt фото).
+        Прецедент: оригинал/пилот рендерят ТОЛЬКО по действию. */
+    function syncTabs() {
+      for (var i = 0; i < tabs.length; i += 1) {
+        var active = i === current;
+        tabs[i].setAttribute('aria-selected', String(active));
+        tabs[i].setAttribute('tabindex', active ? '0' : '-1');
+      }
+    }
+
     /** Шаг относительно текущего с зацикливанием (пилот go(step)). */
     function go(step) {
       select((current + step + items.length) % items.length);
@@ -378,8 +390,15 @@
     root.classList.add(INIT_CLASS);
     root.setAttribute(initAttr, 'true');
 
-    // Стартовый рендер — silent: стартовое состояние не смена выбора.
-    select(current, false, true);
+    // Стартовое состояние: ARIA табов нормализуется всегда; слоты
+    // перезаписываются только при старте не с первого слайда (aria-selected
+    // в разметке на другом табе) — иначе разметка остаётся источником
+    // (деградация без JS и стартовый кадр идентичны, прецедент пилота:
+    // рендер только по действию). Старт — не смена выбора: silent.
+    syncTabs();
+    if (current !== 0) {
+      select(current, false, true);
+    }
 
     var instance = {
       root: root,

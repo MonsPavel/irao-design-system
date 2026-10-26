@@ -470,6 +470,24 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
       expect(slotsOf(rootEl).link.textContent).toBe('Подробнее');
     });
 
+    it('init при стартовом индексе 0 НЕ перезаписывает слоты (разметка — источник; пилот рендерит только по действию)', () => {
+      const withNbsp = carouselHtml('c1').replace(
+        '<p data-ui-carousel-text>Текст А</p>',
+        '<p data-ui-carousel-text>Вклад каждого на&nbsp;производстве</p>',
+      );
+      const { document } = makeSandbox({ bodyHtml: withNbsp });
+      const rootEl = document.getElementById('c1');
+      // aria-состояние нормализовано, а текст слота остался разметочным
+      // (nbsp жив — перезапись textContent стёрла бы сущность).
+      expect(tabsOf(rootEl)[0].getAttribute('tabindex')).toBe('0');
+      expect(rootEl.querySelector('[data-ui-carousel-text]').innerHTML).toContain(
+        'на&nbsp;производстве',
+      );
+      // Первый клик рендерит из данных (как render() пилота по действию).
+      rootEl.querySelector('[data-ui-carousel-next]').click();
+      expect(rootEl.querySelector('[data-ui-carousel-text]').textContent).toBe('Текст Б');
+    });
+
     it('стартовый выбор из разметки: таб с aria-selected="true" (не первый) — стартовый', () => {
       const marked = carouselHtml('c1')
         .replace('aria-selected="true">1 Производство', 'aria-selected="false">1 Производство')
