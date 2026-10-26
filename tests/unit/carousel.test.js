@@ -113,7 +113,9 @@ describe('components/ui-carousel/ui-carousel.css — база (ADR-0002, пил�
 
   it('таб — рамка on-dark-muted, прозрачный фон; активный — :where([aria-selected]): glass-dark + белая рамка', () => {
     const tab = blockOf(css, '.ui-carousel__tab');
-    expect(tab).toContain('border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);');
+    expect(tab).toContain(
+      'border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);',
+    );
     expect(tab).toContain('background-color: transparent;');
     expect(tab).toContain('color: var(--ui-color-text-on-dark-muted);');
     expect(tab).toContain('text-align: left;');
@@ -311,8 +313,6 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
   /** Публичный API модуля из песочницы. */
   const apiOf = (sandbox) => sandbox.window.IraoUI.carousel;
 
-  const rootsOf = ({ document }) => [...document.querySelectorAll('[data-ui-carousel]')];
-  const galleriesOf = ({ document }) => [...document.querySelectorAll('[data-ui-gallery]')];
   const tabsOf = (root) => [...root.querySelectorAll('.ui-carousel__tab')];
   const slotsOf = (root) => ({
     photo: root.querySelector('[data-ui-carousel-photo]'),
@@ -428,7 +428,11 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     it('модуль снимает hidden со стрелок и степпера (JS-гарантированный контекст)', () => {
       const { document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
       const rootEl = document.getElementById('c1');
-      for (const selector of ['[data-ui-carousel-prev]', '[data-ui-carousel-next]', '.ui-carousel__stepper']) {
+      for (const selector of [
+        '[data-ui-carousel-prev]',
+        '[data-ui-carousel-next]',
+        '.ui-carousel__stepper',
+      ]) {
         expect(rootEl.querySelector(selector).hasAttribute('hidden'), `${selector} показан`).toBe(
           false,
         );
@@ -467,13 +471,12 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
 
     it('стартовый выбор из разметки: таб с aria-selected="true" (не первый) — стартовый', () => {
-      const marked = carouselHtml('c1').replace(
-        'aria-selected="true">1 Производство',
-        'aria-selected="false">1 Производство',
-      ).replace(
-        'aria-selected="false">2 Женские вакансии',
-        'aria-selected="true">2 Женские вакансии',
-      );
+      const marked = carouselHtml('c1')
+        .replace('aria-selected="true">1 Производство', 'aria-selected="false">1 Производство')
+        .replace(
+          'aria-selected="false">2 Женские вакансии',
+          'aria-selected="true">2 Женские вакансии',
+        );
       const { document } = makeSandbox({ bodyHtml: marked });
       const rootEl = document.getElementById('c1');
       const tabs = tabsOf(rootEl);
@@ -557,9 +560,11 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
 
       tabs[0].focus();
       const press = (key) =>
-        rootEl.querySelector('.ui-carousel__stepper').dispatchEvent(
-          new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
-        );
+        rootEl
+          .querySelector('.ui-carousel__stepper')
+          .dispatchEvent(
+            new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+          );
       const focused = (tab) => window.document.activeElement === tab;
 
       press('ArrowRight');

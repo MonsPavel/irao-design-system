@@ -88,7 +88,7 @@
     var data;
     try {
       data = window.JSON.parse(text);
-    } catch (err) {
+    } catch {
       return null;
     }
     if (!Array.isArray(data)) {
@@ -113,7 +113,7 @@
     var data;
     try {
       data = window.JSON.parse(text);
-    } catch (err) {
+    } catch {
       return null;
     }
     if (!Array.isArray(data)) {
@@ -170,7 +170,6 @@
           ') — данные слайдов отдаёт разметка, компонент не ходит в сеть',
       );
     }
-    /* eslint-disable-next-line no-var */
     var items = (isGallery ? parsePhotos : parseSlides)(dataScript.textContent);
     if (!items || !items.length) {
       throw new Error(
@@ -183,12 +182,8 @@
     }
 
     /* ── Контролы переключения: стрелки (обе формы) и степпер (карусель). ── */
-    var prev = root.querySelector(
-      isGallery ? '[data-ui-gallery-prev]' : '[data-ui-carousel-prev]',
-    );
-    var next = root.querySelector(
-      isGallery ? '[data-ui-gallery-next]' : '[data-ui-carousel-next]',
-    );
+    var prev = root.querySelector(isGallery ? '[data-ui-gallery-prev]' : '[data-ui-carousel-prev]');
+    var next = root.querySelector(isGallery ? '[data-ui-gallery-next]' : '[data-ui-carousel-next]');
 
     var stepper = null;
     var tabs = [];
@@ -295,9 +290,9 @@
         if (linkSlot) {
           // CTA: slide.link из данных, иначе строка пилота «Подробнее: N»
           // (PRODUCTION_SLIDES career-portal несут count, не link).
-          if (slide.link != null) {
+          if (slide.link !== null && slide.link !== undefined) {
             linkSlot.textContent = slide.link;
-          } else if (slide.count != null) {
+          } else if (slide.count !== null && slide.count !== undefined) {
             linkSlot.textContent = 'Подробнее: ' + slide.count;
           }
         }
