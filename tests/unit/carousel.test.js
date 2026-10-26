@@ -164,21 +164,26 @@ describe('канонический паттерн (components/ui-carousel/ui-car
   });
 
   it('деградация без JS: первый слайд продублирован в слотах (photo/title/text/link)', () => {
-    expect(html).toMatch(/<img[^>]*data-ui-carousel-photo[^>]*\ssrc="[^"]+"/);
+    const photoTag = html.match(/<img[^>]*data-ui-carousel-photo[^>]*>/)?.[0];
+    expect(photoTag, 'фото-слот в разметке').toBeTruthy();
+    expect(photoTag, 'первый слайд продублирован: src').toMatch(/\ssrc="[^"]+"/);
+    expect(photoTag, 'первый слайд продублирован: alt').toMatch(/\salt="[^"]+"/);
     expect(html).toMatch(/data-ui-carousel-title>[^<]+</);
     expect(html).toMatch(/data-ui-carousel-text>[^<]+</);
     expect(html).toMatch(/data-ui-carousel-link>[^<]+</);
     // Данные слайдов — JSON в разметке (компонент не ходит в сеть).
     expect(html).toMatch(
-      /<script type="application\/json" data-ui-carousel-slides>\[[\s\S]*?\]<\/script>/,
+      /<script type="application\/json" data-ui-carousel-slides>\s*\[[\s\S]*?\]\s*<\/script>/,
     );
   });
 
   it('галерея: JSON-массив фото и фото-слот с первым фото', () => {
     expect(html).toMatch(
-      /<script type="application\/json" data-ui-gallery-photos>\[[\s\S]*?\]<\/script>/,
+      /<script type="application\/json" data-ui-gallery-photos>\s*\[[\s\S]*?\]\s*<\/script>/,
     );
-    expect(html).toMatch(/<img[^>]*data-ui-gallery-photo[^>]*\ssrc="[^"]+"/);
+    const photoTag = html.match(/<img[^>]*data-ui-gallery-photo[^>]*>/)?.[0];
+    expect(photoTag, 'фото-слот галереи в разметке').toBeTruthy();
+    expect(photoTag, 'первое фото продублировано: src').toMatch(/\ssrc="[^"]+"/);
   });
 
   it('стрелки и степпер несут hidden в разметке — их снимает модуль (мёртвых контролов без JS нет)', () => {
@@ -545,7 +550,7 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
 
     it('клавиатура на табах: →/← с зацикливанием и automatic-активацией (фокус+выбор), Home/End', () => {
-      const { document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
+      const { window, document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
       const rootEl = document.getElementById('c1');
       const tabs = tabsOf(rootEl);
       const slots = slotsOf(rootEl);
@@ -555,25 +560,26 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
         rootEl.querySelector('.ui-carousel__stepper').dispatchEvent(
           new window.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
         );
+      const focused = (tab) => window.document.activeElement === tab;
 
       press('ArrowRight');
-      expect(tabs[1]).toHaveFocus();
+      expect(focused(tabs[1]), '→: фокус на втором табе (automatic)').toBe(true);
       expect(tabs[1].getAttribute('aria-selected')).toBe('true');
       expect(slots.title.textContent).toBe('Женские вакансии');
 
       press('ArrowRight');
       press('ArrowRight'); // с последнего — на первый (зацикливание)
-      expect(tabs[0]).toHaveFocus();
+      expect(focused(tabs[0]), '→: зацикливание, фокус на первом').toBe(true);
       expect(slots.title.textContent).toBe('Производство');
 
       press('ArrowLeft'); // с первого — на последний
-      expect(tabs[2]).toHaveFocus();
+      expect(focused(tabs[2]), '←: зацикливание, фокус на последнем').toBe(true);
       expect(slots.title.textContent).toBe('IT сфера');
 
       press('Home');
-      expect(tabs[0]).toHaveFocus();
+      expect(focused(tabs[0]), 'Home — первый').toBe(true);
       press('End');
-      expect(tabs[2]).toHaveFocus();
+      expect(focused(tabs[2]), 'End — последний').toBe(true);
       expect(slots.title.textContent).toBe('IT сфера');
     });
 

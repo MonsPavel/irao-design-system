@@ -1,0 +1,131 @@
+/** @define carousel */
+
+/*!
+ * irao-ui — ui-carousel: карусель «фото + заголовок + текст + CTA» со
+ * степпером-таблистом и вторая форма — фото-галерея prev/next (задача
+ * T17.7, EPIC-17).
+ *
+ * Источник — блок «Производство» главной career-portal в интерпретации
+ * пилота (.cp-production__arrow/stepper/tab, pilot.css:261–366 — одобренная
+ * интерпретация спеки T17.7: степпер-табы с рамкой on-dark-muted, активный —
+ * glass-dark + белая рамка; стрелки — кнопки-стрелки on-dark; обе формы —
+ * on-dark-контекст фото-секций). Значения переносятся «как есть» на токены:
+ * рамка/отступы — ступени шкалы §3.2 (--ui-space-2), стекло —
+ * --ui-color-glass-dark, приглушённый on-dark — --ui-color-text-on-dark-muted.
+ *
+ * Раскладка секции (фон/glow/позиции фото и стрелок) — зона композиции
+ * сайта (фото-секция + позиционирование): компонент несёт только вид
+ * элементов; собственных absolute/z-index у CSS нет (пин —
+ * tests/unit/carousel.test.js).
+ *
+ * Деградация без JS (Implementation requirements п.4): первый слайд
+ * продублирован в слотах разметки (photo/title/text/link — данные из
+ * <script type="application/json">), стрелки и степпер в разметке несут
+ * hidden — их снимает модуль ui-carousel.js при инициализации (симметрично
+ * атрибуту open в ui-modal: разметка правдива без JS — мёртвых контролов
+ * нет). Спека T17.7 упоминала «:root.js-хук уже есть в dist» — фактически
+ * его в системе нет, а data-селекторы не проходят БЭМ-гейт stylelint,
+ * поэтому скрытие построено на системном приёме «состояние ставит модуль»:
+ * display-правило компонента скрывает контролы по умолчанию, а класс
+ * .is-initialized на корне (ставит модуль) показывает их в JS-контексте.
+ *
+ * Степпер — честный tablist в разметке (канон спеки: роль, aria-selected,
+ * стрелки клавиатуры), табы — кнопки с ролью tab; roving tabindex (0 у
+ * активного, −1 у остальных) ставит модуль — прецедент ui-tabs (T6.2).
+ * Активный таб — :where([aria-selected='true']): семантика aria-selected —
+ * единственный источник правды, вклад в специфичность нулевой. Стрелки
+ * карусели — вне tablist (Implementation requirements п.3): обычные кнопки
+ * с aria-label.
+ *
+ * Hover и переходы не заданы: пилот cp-production их не несёт, значения
+ * одобренного дизайна не расширяются (граница — README «Известные границы»);
+ * AC reduced-motion выполнен конструктивно — анимаций и нет (пин —
+ * tests/unit/carousel.test.js). Фокус рисует глобальная политика ADR-0001
+ * (base/focus.css) — компонент outline не гасит и не заменяет. VI-режим:
+ * цветов вне токенов нет (§5) — перекраска vi.css накрывает компонент.
+ */
+
+/* ── Деградация без JS: контролы переключения скрыты по умолчанию ──
+   (первый слайд — в слотах разметки). Показ — на инициализированном
+   корне: класс is-initialized ставит модуль ui-carousel.js. */
+
+.ui-carousel {
+  box-sizing: border-box;
+}
+
+.ui-carousel.is-initialized .ui-carousel__arrow {
+  display: inline-flex;
+}
+
+.ui-carousel.is-initialized .ui-carousel__stepper {
+  display: flex;
+}
+
+/* ── Слоты активного слайда: контент — зона сайта (типографика ролями
+   ui-h2/ui-lead/ui-button в разметке, канон спеки) ── */
+
+.ui-carousel__photo {
+  box-sizing: border-box;
+}
+
+.ui-carousel__body {
+  box-sizing: border-box;
+}
+
+/* ── Стрелка — on-dark-иконка (пилот cp-production__arrow: inline-flex,
+   центр, padding 8px, цвет text-on-dark). Позиционирование (absolute/
+   offsets) — зона композиции секции. Прозрачный фон/рамка 0 — сброс
+   нативной кнопки (оригинал career-portal base.css button): без него
+   UA-стиль рисует ButtonFace-подложку — артефакт пилота снят переносом. */
+.ui-carousel__arrow {
+  box-sizing: border-box;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ui-space-2);
+  border: 0;
+  background-color: transparent;
+  color: var(--ui-color-text-on-dark);
+  cursor: pointer;
+}
+
+/* ── Степпер — flex-лента (пилот cp-production__stepper: gap 8px;
+   max-width/отступы ленты — зона композиции). Сброс списка — самостоятельный
+   (не полагается на глобальный reset сайта). ── */
+.ui-carousel__stepper {
+  box-sizing: border-box;
+  display: none;
+  gap: var(--ui-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Таб — рамка on-dark-muted (пилот cp-production__tab): flex 1 1 0 — табы
+   делят ленту поровну, text-align left — содержимое прижато к началу.
+   Шрифт — системный стек: без него нативная кнопка рендерит UA-семейство
+   (артефакт отсутствия button-ресета, оригинал base.css font-family:
+   inherit); размер не задаётся — контент таба (номер/подпись/счётчик)
+   типографирует разметка сайта. */
+.ui-carousel__tab {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 0;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-2);
+  border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);
+  background-color: transparent;
+  color: var(--ui-color-text-on-dark-muted);
+  font-family: var(--ui-font-family);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Активный таб — стекло + белая рамка (пилот cp-production__tab[aria-
+   selected]): атрибутный селектор внутри :where() — вклад в специфичность
+   нулевой (одноклассовое правило системы, прецедент ui-tabs T6.2). */
+.ui-carousel__tab:where([aria-selected='true']) {
+  border-color: var(--ui-color-surface);
+  background-color: var(--ui-color-glass-dark);
+  color: var(--ui-color-text-on-dark);
+}

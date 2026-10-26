@@ -1,0 +1,84 @@
+<!--
+  ui-carousel (T17.7): карусель «фото + заголовок + текст + CTA» со
+  степпером-таблистом и вторая форма — фото-галерея prev/next. Источник —
+  блок «Производство» главной career-portal в интерпретации пилота
+  (pilot.js:18–134, pilot.css:261–366).
+
+  Деградация без JS (Implementation requirements п.4): первый слайд
+  ПРОДУБЛИРОВАН в слотах разметки (photo/title/text/link — из JSON), стрелки
+  и степпер несут hidden — модуль ui-carousel.js (хук data-ui-carousel /
+  data-ui-gallery) снимает его при инициализации, как ui-modal снимает open:
+  разметка правдива без JS, мёртвых контролов нет. CSS-скрытие делает
+  display-правило компонента (стрелки/степпер display:none до класса
+  is-initialized, который ставит модуль).
+
+  Степпер — честный tablist В РАЗМЕТКЕ (канон спеки T17.7: роль, aria-selected,
+  стрелки клавиатуры), табы — кнопки role="tab" с aria-selected; roving
+  tabindex (0/−1) ставит модуль (прецедент ui-tabs T6.2). Стрелки карусели —
+  вне tablist, с aria-label. Без JS tabindex в разметке нет.
+
+  Данные — JSON в разметке (компонент не ходит в сеть, Implementation
+  requirements п.2): карусель — массив {photo,title,text,link,count},
+  галерея — массив фото-строк. Слоты и роль типографики контента — зона
+  сайта (ui-h2/ui-lead/ui-button в каноне). Раскладка фото-секции
+  (фон/glow/позиции) — зона композиции: канон показывает только API
+  компонента (см. README).
+-->
+
+<!-- Форма 1: карусель со степпером (блок «Производство») -->
+<section class="ui-carousel" data-ui-carousel>
+  <script type="application/json" data-ui-carousel-slides>
+    [
+      { "photo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='585' height='674'%3E%3Crect width='585' height='674' fill='%23002856'/%3E%3Ccircle cx='292' cy='337' r='210' fill='%23164B89'/%3E%3C/svg%3E", "title": "Производство", "text": "Вклад каждого сотрудника на производстве — это основа нашего успеха.", "count": "25 вакансий" },
+      { "photo": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='585' height='674'%3E%3Crect width='585' height='674' fill='%23164B89'/%3E%3Ccircle cx='292' cy='337' r='210' fill='%23002856'/%3E%3C/svg%3E", "title": "Женские вакансии на производстве", "text": "Мы создаём комфортные условия для работы женщин на производстве.", "count": "13 вакансий" }
+    ]
+  </script>
+  <img
+    class="ui-carousel__photo"
+    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='585' height='674'%3E%3Crect width='585' height='674' fill='%23002856'/%3E%3Ccircle cx='292' cy='337' r='210' fill='%23164B89'/%3E%3C/svg%3E"
+    alt="Производство"
+    width="585"
+    height="674"
+    data-ui-carousel-photo
+  >
+  <div class="ui-carousel__body">
+    <h2 class="ui-h2" data-ui-carousel-title>Производство</h2>
+    <p class="ui-lead" data-ui-carousel-text>
+      Вклад каждого сотрудника на производстве — это основа нашего успеха.
+    </p>
+    <a class="ui-button ui-button--light" href="#" data-ui-carousel-link>Подробнее: 25 вакансий</a>
+  </div>
+  <button class="ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
+    <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true" focusable="false"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="ui-carousel__arrow" type="button" data-ui-carousel-next hidden aria-label="Следующий слайд">
+    <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true" focusable="false"><path d="M2 2l20 23L2 48" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <ul class="ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
+    <li><button class="ui-carousel__tab" type="button" role="tab" aria-selected="true">Производство</button></li>
+    <li><button class="ui-carousel__tab" type="button" role="tab" aria-selected="false">Женские вакансии</button></li>
+  </ul>
+</section>
+
+<!-- Форма 2: фото-галерея prev/next (модалка направлений) -->
+<div class="ui-carousel" data-ui-gallery>
+  <script type="application/json" data-ui-gallery-photos>
+    [
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='590' height='400'%3E%3Crect width='590' height='400' fill='%23002856'/%3E%3Ccircle cx='295' cy='200' r='140' fill='%23164B89'/%3E%3C/svg%3E",
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='590' height='400'%3E%3Crect width='590' height='400' fill='%23164B89'/%3E%3Ccircle cx='295' cy='200' r='140' fill='%23002856'/%3E%3C/svg%3E"
+    ]
+  </script>
+  <img
+    src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='590' height='400'%3E%3Crect width='590' height='400' fill='%23002856'/%3E%3Ccircle cx='295' cy='200' r='140' fill='%23164B89'/%3E%3C/svg%3E"
+    alt=""
+    width="590"
+    height="400"
+    data-ui-gallery-photo
+  >
+  <button class="ui-carousel__arrow" type="button" data-ui-gallery-prev hidden aria-label="Предыдущее фото">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="ui-carousel__arrow" type="button" data-ui-gallery-next hidden aria-label="Следующее фото">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M2 8h11M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+</div>
