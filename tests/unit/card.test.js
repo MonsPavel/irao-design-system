@@ -325,6 +325,30 @@ describe('пилот (T17.8): CTA-плашки на модификаторе, п
   });
 });
 
+describe('errata AC ±4px (T17.8, решение владельца 26.10 — эскалация dwfq-25c6ee50-1)', () => {
+  it('файл задачи несёт errata-примечание под AC compare: осознанный допуск +11px для cta-mail', () => {
+    const task = readFileSync(
+      join(root, 'docs', 'ui-system', 'epics', 'EPIC-17-ds-full-coverage', 'T17.8-cta-card.md'),
+      'utf8',
+    );
+    expect(task, 'errata-примечание под AC ±4px').toMatch(
+      /Errata[\s\S]*допуск \+11px[\s\S]*275→286/,
+    );
+  });
+
+  it('REPORT §3.4 синхронен: cta-mail — осознанный допуск со ссылкой на errata, vacancy-search — в пороге', () => {
+    const report = readFileSync(join(root, 'pilot', 'career-portal', 'REPORT.md'), 'utf8');
+    const ctaRow = report.match(/\| cta-mail \| 364 \| [^\n]*\|/);
+    expect(ctaRow, 'строка cta-mail в таблице высот').toBeTruthy();
+    expect(ctaRow[0]).toContain('286');
+    expect(ctaRow[0]).toContain('+11');
+    expect(ctaRow[0]).toContain('errata');
+    const vacRow = report.match(/\| vacancy-search \| 310 \| [^\n]*\|/);
+    expect(vacRow, 'строка vacancy-search в таблице высот').toBeTruthy();
+    expect(vacRow[0]).toContain('дельта миграции 0');
+  });
+});
+
 describe('axe-реестр (T17.8): on-dark текст accent-варианта — известное исключение', () => {
   it('строка KNOWN_AXE_EXCEPTIONS для .ui-card--cta--accent (harness.js, как ui-video__play)', () => {
     const harness = readFileSync(join(root, 'tests', 'helpers', 'harness.js'), 'utf8');
