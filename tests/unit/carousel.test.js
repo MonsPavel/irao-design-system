@@ -720,14 +720,10 @@ describe('errata AC4 скрин-пары (T17.7, решение владельц
     const readme = readFileSync(join(root, 'components', 'ui-carousel', 'README.md'), 'utf8');
     const section = readme.match(/## Скрин-пара production \(AC T17\.7\)[\s\S]*?(?=\n## |$)/);
     expect(section, 'раздел оговорки в README').toBeTruthy();
-    expect(section[0], 'стрелки: UA-подложка снята (on-dark, прозрачна)').toContain(
-      'ButtonFace',
-    );
+    expect(section[0], 'стрелки: UA-подложка снята (on-dark, прозрачна)').toContain('ButtonFace');
     expect(section[0], 'табы: Golos (--ui-font-family)').toContain('Golos');
     expect(section[0], 'Δ2px в пороге ±4px').toContain('±4px');
-    expect(section[0], 'запрет воспроизведения артефактов (инвариант эпика)').toContain(
-      'одобренн',
-    );
+    expect(section[0], 'запрет воспроизведения артефактов (инвариант эпика)').toContain('одобренн');
   });
 
   it('REPORT пилота синхронен: production 760→651 с errata-ссылкой; строка §3.3 — осознанное отклонение', () => {
@@ -736,8 +732,6 @@ describe('errata AC4 скрин-пары (T17.7, решение владельц
     expect(prodRow, 'строка production в таблице высот §3.4').toBeTruthy();
     expect(prodRow[0]).toContain('651');
     expect(prodRow[0]).toContain('errata');
-    expect(report, 'строка §3.3 — осознанное отклонение T17.7').toMatch(
-      /T17\.7[\s\S]*осознанн/,
-    );
+    expect(report, 'строка §3.3 — осознанное отклонение T17.7').toMatch(/T17\.7[\s\S]*осознанн/);
   });
 });
