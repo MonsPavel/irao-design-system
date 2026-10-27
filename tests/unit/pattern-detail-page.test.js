@@ -12,7 +12,7 @@
  *  - schema.org-кейс: JobPosting-микроразметка эталонной вакансии —
  *    title, hiringOrganization, jobLocation, datePosted; для статей —
  *    Article (дока README паттерна);
- *  - связующие стили паттерна (dpp-*) живут <style>'ом стенда, НЕ в dist;
+ *  - связки паттерна (dpp-*) — в паттерн-слое (T17.1): patterns/patterns.css → dist/ui-patterns.css;
  *    значения — только токены --ui-*, media — только min-width шкалы T2.5;
  *  - sticky только ≥md (768): в мобильной базе позиционирования нет —
  *    aside идёт после контента (DOM-порядок = смысловой);
@@ -155,28 +155,30 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
     }
   });
 
-  /** Стили паттерна: из кода без HTML-комментариев (упоминание <style> в
-   * шапке-комментарии не должно попадать в срез). */
-  const styleOf = (source) => {
-    const code = source.replace(/<!--[\s\S]*?-->/g, '');
-    return code.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-  };
+  /** Связки паттерна — слой (T17.1): секция dpp исполняемого кода
+   *  patterns/patterns.css без комментариев (комментарии дока — история
+   *  переноса; слой общий для трёх паттернов — пины скоупятся на секцию dpp:
+   *  от первого правила до секции fpp). */
+  const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8').replace(/\r\n/g, '\n');
+  const layerCode = layer.replace(/\/\*[\s\S]*?\*\//g, '');
+  const style = layerCode.slice(
+    layerCode.indexOf('.dpp-breadcrumbs'),
+    layerCode.indexOf('.fpp-breadcrumbs'),
+  );
 
   it('sticky только ≥md: в мобильной базе позиционирования нет (aside — после контента)', () => {
-    const style = styleOf(pattern)[1];
-    expect(style, 'связки живут <style> стенда, не в dist').toContain('.dpp-aside');
+    expect(style, 'связки живут в паттерн-слое (T17.1)').toContain('.dpp-aside');
     // База (до первого media) — мобильная: sticky в ней нет (IR 1).
     const base = style.slice(0, style.indexOf('@media'));
     expect(base, 'база mobile-first: без position: sticky').not.toContain('position: sticky');
-    // Sticky — внутри min-width: 768px (шкала T2.5). Блок media в связках
-    // стенда закрывается на отступе 2 (правила внутри — на 4).
-    const md = style.match(/@media \(min-width: 768px\)\s*\{([\s\S]*?)\n {2}\}/) ?? [''];
+    // Sticky — внутри min-width: 768px (шкала T2.5). Блок media в слое
+    // закрывается на отступе 0 (правила внутри — на 2).
+    const md = style.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\n\}/) ?? [''];
     expect(md[0], 'sticky-правило в min-width: 768px (md)').toContain('position: sticky');
     expect(md[0]).toContain('.dpp-aside');
   });
 
   it('media связок — только min-width из шкалы брейкпоинтов T2.5', () => {
-    const style = styleOf(pattern)[1];
     const medias = [...style.matchAll(/@media \(min-width: (\d+)px\)/g)].map((m) => m[1]);
     expect(medias.length, 'медиа-точки в связках есть').toBeGreaterThan(0);
     for (const value of medias) {
@@ -186,7 +188,6 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
   });
 
   it('связующие стили паттерна — только токены: без hex и !important (инварианты системы)', () => {
-    const style = styleOf(pattern)[1];
     expect(style, 'hex в связках запрещён (hex только в tokens/primitives.css)').not.toMatch(
       /#[0-9a-fA-F]{3,8}\b/,
     );
@@ -194,7 +195,6 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
   });
 
   it('корни блоков связок — box-sizing: border-box (ADR-0002)', () => {
-    const style = styleOf(pattern)[1];
     for (const selector of ['.dpp-layout', '.dpp-main', '.dpp-aside']) {
       const rule = style.match(new RegExp(`${selector.replace(/[-]/g, '\\-')}\\s*\\{([^}]*)\\}`));
       expect(rule, `правило ${selector} найдено`).toBeTruthy();

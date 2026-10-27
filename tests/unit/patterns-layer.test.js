@@ -29,9 +29,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { BREAKPOINTS } from '../../stylelint.config.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
+
+/** Шкала брейкпоинтов T2.5 (значения BREAKPOINTS stylelint.config.mjs;
+ *  формат — строковые px-значения, прецедент pattern-detail-page.test.js). */
+const BREAKPOINTS = ['480', '768', '1024', '1280', '1440'];
 
 const LAYER_PATH = join(root, 'patterns', 'patterns.css');
 const PATTERN_SOURCES = {
@@ -52,20 +55,24 @@ try {
 const code = layer.replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '');
 
 /** Селекторы исполняемого кода: прелюдии @media/at-rule пропускаются. */
-const selectors = code
-  .split('\n')
-  .join('\n')
-  .match(/([^{}]+)\{/g)
-  ?.map((piece) => piece.replace(/\{$/, '').trim())
-  .filter((selector) => selector !== '' && !selector.startsWith('@')) ?? [];
+const selectors =
+  code
+    .split('\n')
+    .join('\n')
+    .match(/([^{}]+)\{/g)
+    ?.map((piece) => piece.replace(/\{$/, '').trim())
+    .filter((selector) => selector !== '' && !selector.startsWith('@')) ?? [];
 
 /** Классы-крючки селектора: все \.имена в нём. */
-const hookClasses = (selector) => selector.match(/\.[a-z][a-z0-9-]+/g) ?? [];
+const hookClasses = (selector) => selector.match(/\.[a-z][a-z0-9_-]*/g) ?? [];
 
 /** Классы паттерна из разметки дока (атрибуты class="", многострочные —
  *  схлопнуты; комментарии не участвуют). */
 const markupClasses = (html, prefix) => {
-  const collapsed = html.replace(/\r\n/g, '\n').replace(/<!--[\s\S]*?-->/g, '').replace(/\s+/g, ' ');
+  const collapsed = html
+    .replace(/\r\n/g, '\n')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .replace(/\s+/g, ' ');
   const attrs = collapsed.match(/class="[^"]*"/g) ?? [];
   const found = new Set();
   for (const attr of attrs) {
@@ -174,9 +181,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(main, 'шаг main-блока 8px').toContain('gap: var(--ui-space-2);');
     expect(main, 'min-width: 0 — перенос длинных заголовков').toContain('min-width: 0;');
     const rows = blockOf('.lpp-rows');
-    expect(rows, 'шаг ленты 16px — .vac-rows pages.css:157').toContain(
-      'gap: var(--ui-space-4);',
-    );
+    expect(rows, 'шаг ленты 16px — .vac-rows pages.css:157').toContain('gap: var(--ui-space-4);');
     const title = blockOf('.lpp-row__title a');
     expect(title, 'ссылка заголовка — plain (inherit, без линии)').toContain('color: inherit;');
     expect(title).toContain('text-decoration: none;');
@@ -189,8 +194,10 @@ describe('patterns/patterns.css — единый исходник паттерн
       lgBlock[0],
       'колонка сайдбара 17.5rem = 280px оригинала (калибровка T17.1: значение канона, не пилота)',
     ).toContain('grid-template-columns: 17.5rem minmax(0, 1fr);');
-    const base = code.slice(0, code.indexOf('@media'));
-    expect(base, 'мобильная база — одна колонка (mobile-first)').toContain(
+    // База лейаута — правило до первой media-ступени связки (mobile-first).
+    const layoutBase = code.match(/\.lpp-layout\s*\{([^}]*)\}/);
+    expect(layoutBase, '.lpp-layout найдено').toBeTruthy();
+    expect(layoutBase[1], 'мобильная база — одна колонка (mobile-first)').toContain(
       'grid-template-columns: minmax(0, 1fr);',
     );
     const mdBlock = code.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\n\}/);
@@ -224,7 +231,10 @@ describe('синхронность док-HTML паттернов и слоя (A
       const hooks = layerHooks(prefix);
 
       it('перенос исполнен: связки живут в слое, <style> в док-HTML больше нет', () => {
-        expect(html, '<style> перенесён в patterns/patterns.css').not.toContain('<style>');
+        expect(
+          html.replace(/<!--[\s\S]*?-->/g, ''),
+          '<style> перенесён в patterns/patterns.css (упоминания в комментариях — история переноса)',
+        ).not.toContain('<style>');
       });
 
       it('крючки слоя существуют в разметке дока (слой не изобретает имён)', () => {
@@ -271,14 +281,20 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
   });
 
   it('подключение опционально: слой получают только стенды трёх паттернов', () => {
-    for (const stand of ['patterns/list-page', 'patterns/detail-page', 'patterns/form-page']) {
-      const block = build.slice(build.indexOf(stand));
-      expect(block.slice(0, 2000), `${stand}: слой подключён стенду`).toContain('withPatterns');
+    for (const stand of ['list-page', 'detail-page', 'form-page']) {
+      // Якорь — title стенда: первое вхождение имени паттерна в build.mjs —
+      // список навигации buildNav, до frame-вызова.
+      const block = build.slice(build.indexOf(`title: 'patterns/${stand} — irao-ui showcase'`));
+      expect(block.slice(0, 800), `patterns/${stand}: слой подключён стенду`).toContain(
+        'withPatterns: true',
+      );
     }
-    // Остальные стенды слой не получают — опциональность подключения.
-    expect(build.match(/withPatterns/g)?.length, 'флаг включён адресно, не глобально').toBeLessThan(
-      6,
-    );
+    // Включение адресное: ровно три вызова frame() передают слой
+    // («withPatterns: true,»); остальные страницы полигона — нет.
+    expect(
+      build.match(/withPatterns: true,/g)?.length,
+      'получателей слоя ровно три — стенды трёх паттернов',
+    ).toBe(3);
   });
 
   it('self-check: dist/ui-patterns.css существует и несёт баннер версии', () => {
@@ -348,9 +364,7 @@ describe('пилот career-portal: слой подключён, ваканси�
     expect(pilotCss, 'шим пилюли сайдбара — на крючке слоя (до T17.12)').toContain(
       '.lpp-side__group .cp-pill',
     );
-    expect(pilotCss, 'шим «Сбросить» — на крючке слоя').toContain(
-      '.lpp-side > .ui-button--text',
-    );
+    expect(pilotCss, 'шим «Сбросить» — на крючке слоя').toContain('.lpp-side > .ui-button--text');
     expect(pilotCss, 'cp-vac-main остаётся (нет в списке снятия — ритм main-колонки)').toContain(
       '.cp-vac-main',
     );

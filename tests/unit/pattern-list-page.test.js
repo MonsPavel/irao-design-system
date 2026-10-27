@@ -9,8 +9,8 @@
  *    сетка ui-grid--3 с карточками (T4.4 + теги T4.3), пагинация (T6.3);
  *    вторая ветка — «ничего не найдено»: счётчик 0 + ui-empty (T4.8) с
  *    кнопкой сброса (ссылка на чистый URL — работает без JS);
- *  - связующие стили паттерна (пилюля фильтра — зона сайта) живут <style>'ом
- *    стенда, НЕ в dist; значения — только токены --ui-*;
+ *  - связки паттерна (lpp-*) живут в паттерн-слое (T17.1): patterns/patterns.css
+ *    → опциональный dist/ui-patterns.css; значения — только токены --ui-*;
  *  - сниппеты Technical considerations в доке: фокус на заголовок результатов
  *    после применения фильтра; счётчик — aria-live="polite";
  *  - Bitrix-заметки в доке (AC): bitrix:news.list — цикл карточек, GET-
@@ -91,8 +91,8 @@ describe('patterns/list-page/list-page.html — контракт эталонн�
     );
   });
 
-  it('выдача — сетка ui-grid--3, карточки T4.4 (ссылочные, --hover) с тегами T4.3', () => {
-    expect(pattern, 'сетка --3 паттерна (Scope)').toMatch(/class="ui-grid ui-grid--3"/);
+  it('выдача — сетка ui-grid--3 (+ крючок слоя lpp-grid, T17.1), карточки T4.4 (ссылочные, --hover) с тегами T4.3', () => {
+    expect(pattern, 'сетка --3 паттерна (Scope)').toMatch(/class="ui-grid ui-grid--3[ "]/);
     const cards = pattern.match(/ui-card--link/g) ?? [];
     expect(cards.length, 'карточки-ссылки — паттерн T4.4').toBeGreaterThanOrEqual(6);
     expect(pattern, 'теги T4.3 в карточках').toContain('ui-tag ui-tag--');
@@ -142,16 +142,14 @@ describe('patterns/list-page/list-page.html — контракт эталонн�
     expect(pattern.indexOf('id="lpp-filter"')).toBeLessThan(pattern.indexOf('ui-grid ui-grid--3'));
   });
 
-  it('связующие стили паттерна — только токены, без hex и !important (граница «showcase, не dist»)', () => {
-    expect(pattern, 'связки живут <style> стенда, не в dist').toContain('<style>');
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(
-      /#[0-9a-fA-F]{3,8}\b/,
-    );
-    expect(style[1], '!important в связках запрещён (инвариант системы)').not.toContain(
-      '!important',
-    );
-    expect(style[1], 'пилюля фильтра — зона сайта (именована lpp-*)').toContain('.lpp-pill');
+  it('связки паттерна — в паттерн-слое (T17.1): .lpp-pill там, без hex и !important', () => {
+    // T17.1 (вариант A): связки lpp-* перенесены из <style> стенда в слой
+    // patterns/patterns.css → dist/ui-patterns.css; полный контракт слоя —
+    // tests/unit/patterns-layer.test.js. Здесь — пин источника.
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8');
+    expect(layer, 'пилюля фильтра — зона слоя (именована lpp-*)').toContain('.lpp-pill');
+    expect(layer, 'hex в связках запрещён (инвариант системы)').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    expect(layer, '!important в связках запрещён (инвариант системы)').not.toContain('!important');
   });
 
   it('без inline-стилей (инвариант системы: перекраска vi.css накрывает всё)', () => {

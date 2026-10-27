@@ -8,10 +8,11 @@
   ветка «серверный ответ» (pre-rendered ошибки по контракту T5.6 + inline-
   сниппет фокуса) и ветка success.
 
-  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
-  подключены только компоненты; связующие стили ниже (fpp-*) — зона сайта
-  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
-  (showcase, не в dist).
+  Границы (patterns/README.md, 02-architecture §7): подключены только
+  компоненты; связки паттерна (fpp-*) живут в ПАТТЕРН-СЛОЕ (T17.1, вариант A):
+  patterns/patterns.css → опциональный dist/ui-patterns.css — сайты группы
+  подключают по желанию, в бою возможен и собственный CSS сайт-зоны
+  (template_styles.css).
 
   Референс: career-portal src/pages/vacancy-apply.html — переносится
   КОМПОЗИЦИЯ, не стили: двухколоночная раскладка «форма + aside-сводка»,
@@ -26,60 +27,15 @@
   раскладка .form-page career-portal (форма слева, aside 400px справа);
   DOM при этом не переставляется, порядок чтения не зависит от вьюпорта.
 -->
-<style>
-  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
-     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
-
-  /* Ритм крошек (T14.5): полоса 62px career-portal — components.css:14,
-     padding .breadcrumbs 20px 0 24px. Верх 20px вне шкалы отступов §3.2 —
-     перенос «как есть» (прецедент --ui-button-pad-inline, T14.3); низ 24px —
-     --ui-space-5. Компонент отступов не получает (инвариант T4.7): ритм несёт
-     шаблон — правило копируется вместе со сборкой паттерна. */
-  .fpp-breadcrumbs {
-    box-sizing: border-box;
-    padding-block: 1.25rem var(--ui-space-5);
-  }
-
-  /* page-head: вертикальный ритм (reset системы обнуляет margin p/h). */
-  .fpp-head {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-5);
-  }
-
-  .fpp-lead {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-3);
-  }
-
-  /* Форма — после page-head (reset обнуляет margin у form-блока ui-form). */
-  .fpp-form {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-6);
-  }
-
-  /* lg (1024, шкала T2.5): одобренная раскладка .form-page — форма слева
-     (колонка 1), aside-сводка справа (колонка 2). DOM-порядок не меняется:
-     aside остаётся раньше полей (решение выше). grid-row: 1 — оба элемента
-     в одной строке лейаута ui-form__layout. */
-  @media (min-width: 1024px) {
-    .fpp-form .ui-form__main {
-      grid-column: 1;
-      grid-row: 1;
-    }
-
-    .fpp-form .ui-form__aside {
-      grid-column: 2;
-      grid-row: 1;
-    }
-  }
-
-  /* Ветки цикла на стенде (реальность — отдельные загрузки страницы):
-     отступ содержимого ветки от заголовка/ноты (reset обнуляет margin form). */
-  .fpp-branch-body {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-5);
-  }
-</style>
+<!--
+  Связки паттерна (fpp-*) — ПАТТЕРН-СЛОЙ (T17.1, вариант A — решение
+  владельца 25.10): единый исходник patterns/patterns.css собирается в
+  опциональный dist/ui-patterns.css (порядок в head: токены → core →
+  patterns → сайт; на стенде подключает сборка). Значения перенесены сюда
+  1:1 из прежнего <style> (комментарии-источники «как есть»-литералов —
+  в исходнике слоя); разметка ниже несёт те же классы — док остаётся
+  источником правды (02-architecture §7, patterns/README.md).
+-->
 
 <section class="ui-section" id="fpp-page">
   <p class="ui-showcase-stand__note">

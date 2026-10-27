@@ -15,7 +15,7 @@
  *    requirements): сводка вакансии — ДО формы в порядке чтения на ВСЕХ
  *    вьюпортах (DOM: aside раньше main); от lg site-glue ставит aside в
  *    правую колонку grid'а (grid-column), порядок чтения не меняется;
- *  - связующие стили паттерна (fpp-*) живут <style>'ом стенда, НЕ в dist;
+ *  - связки паттерна (fpp-*) — в паттерн-слое (T17.1): patterns/patterns.css → dist/ui-patterns.css;
  *    значения — только токены --ui-*, media — только min-width шкалы T2.5.
  * Поверхность браузера (форма-цикл с JS/без, server-состояния, фокус, axe,
  * адаптив, эталоны) — tests/e2e/pattern-form-page.spec.js.
@@ -114,14 +114,17 @@ describe('patterns/form-page/form-page.html — контракт эталонн�
   });
 
   it("от lg site-glue ставит aside в правую колонку grid'а (grid-column), не двигая DOM", () => {
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'плейсмент колонок — в связках паттерна (lg, 1024)').toMatch(
+    // Связки fpp-* — паттерн-слой (T17.1): исполняемый код patterns/patterns.css.
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8')
+      .replace(/\r\n/g, '\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(layer, 'плейсмент колонок — в связках слоя (lg, 1024)').toMatch(
       /@media \(min-width: 1024px\)/,
     );
-    expect(style[1], 'main — колонка 1 (форма слева, одобренная раскладка)').toMatch(
+    expect(layer, 'main — колонка 1 (форма слева, одобренная раскладка)').toMatch(
       /\.ui-form__main\s*\{[^}]*grid-column:\s*1/,
     );
-    expect(style[1], 'aside — колонка 2 (сводка справа, как form-page career-portal)').toMatch(
+    expect(layer, 'aside — колонка 2 (сводка справа, как form-page career-portal)').toMatch(
       /\.ui-form__aside\s*\{[^}]*grid-column:\s*2/,
     );
   });
@@ -215,21 +218,23 @@ describe('patterns/form-page/form-page.html — контракт эталонн�
     }
   });
 
-  it('связующие стили паттерна — только токены, без hex и !important (граница «showcase, не dist»)', () => {
-    expect(pattern, 'связки живут <style> стенда, не в dist').toContain('<style>');
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(
-      /#[0-9a-fA-F]{3,8}\b/,
-    );
-    expect(style[1], '!important в связках запрещён (инвариант системы)').not.toContain(
-      '!important',
-    );
-    expect(style[1], 'связки паттерна именованы fpp-*').toContain('.fpp-');
+  it('связки паттерна — в паттерн-слое (T17.1), только токены: без hex и !important', () => {
+    // T17.1 (вариант A): связки fpp-* перенесены из <style> стенда в слой
+    // patterns/patterns.css → dist/ui-patterns.css; полный контракт слоя —
+    // tests/unit/patterns-layer.test.js. Здесь — пин источника.
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8');
+    expect(layer, 'связки паттерна именованы fpp-*').toContain('.fpp-');
+    expect(layer, 'hex в связках запрещён (инвариант системы)').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
+    expect(layer, '!important в связках запрещён (инвариант системы)').not.toContain('!important');
   });
 
   it('media в связках — только min-width из шкалы брейкпоинтов T2.5', () => {
-    const styles = pattern.match(/<style>([\s\S]*?)<\/style>/g) ?? [];
-    const media = (styles.join('').match(/@media[^{]+/g) ?? []).map((m) => m.trim());
+    // Связки fpp-* — паттерн-слой (T17.1): секция fpp patterns/patterns.css.
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8')
+      .replace(/\r\n/g, '\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const style = layer.slice(layer.indexOf('.fpp-breadcrumbs'));
+    const media = (style.match(/@media[^{]+/g) ?? []).map((m) => m.trim());
     for (const query of media) {
       expect(query, `media-запрос «${query}» — mobile-first min-width`).toMatch(
         /^@media \(min-width: (?:480|768|1024|1280|1440)px\)$/,
