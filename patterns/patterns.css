@@ -10,7 +10,8 @@
  * Слой = связки, которых НЕТ в компонентах: композиции страниц поверх
  * готовых ui-компонентов и ролей base. Компонентные стили (кнопки/карточки/
  * поля) слой не дублирует — гейт селекторов: только канонические префиксы
- * lpp- (list-page), dpp- (detail-page), fpp- (form-page); потомки —
+ * lpp- (list-page), ddp- (detail-page), fpp- (form-page), lnk-/lgo-
+ * (лендинг-связки nav-карточек и ленты логотипов, T17.9); потомки —
  * компоненты ui-*. Список пополняют задачи эпика (лендинг-связки, find-bar,
  * каркасы шапки/подвала — T17.9/T17.12/T17.13), не руками сайтов.
  *
@@ -447,4 +448,130 @@
 .fpp-branch-body {
   box-sizing: border-box;
   margin-top: var(--ui-space-5);
+}
+
+/* ════════════ Лендинг-связки (T17.9): nav-карточки и лента логотипов ════════════
+ *
+ * Порты блоков «Школьникам и студентам» (.cp-students__*) и «Популярные
+ * работодатели Группы» (.cp-employers__*) career-portal — типовой блок
+ * «партнёры/клиенты». Тон nav-карточки — параметр САЙТА (пара на
+ * токен-хуках --lnk-card-bg/--lnk-card-fg, Implementation requirements
+ * п.1 T17.9); контраст пары — обязанность сайта (do/don't с одобренными
+ * парами — patterns/landing-section/README.md). Иллюстрация/логотипы —
+ * контент сайта; круглая кнопка-стрелка — ui-button--round (T17.9).
+ * Разметка канона — patterns/landing-section/landing-section.html (док —
+ * источник правды, пин синхронности tests/unit/nav-cards-logo-grid.test.js).
+ *
+ * Мобильная база ДС: сетки — каркас ui-grid (1 колонка), ступени —
+ * min-width 768/1024 из шкалы T2.5 (лестница пилота 1023/767 инвертирована
+ * — Implementation requirements T17.1 п.4). */
+
+/* Сетка nav-карточек: шаг 12px (.cp-students__grid, pilot.css:504 —
+   --ui-space-3); ступени 2 (md) → 3 (lg). */
+.lnk-cards {
+  box-sizing: border-box;
+  gap: var(--ui-space-3);
+}
+
+@media (min-width: 768px) {
+  .lnk-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lnk-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Nav-карточка: карточка-Ссылка целиком (канон примера спеки: <a> с
+   aria-label «Подробнее: …» — имя несёт вся карточка, стрелка декоративна;
+   axe: имена карточек-ссылок). Геометрия — 1:1 порт .cp-students__card
+   (pilot.css:510): flex-колонка с прижатием кнопки к низу (space-between),
+   шаг 16px, min-height 22rem = 352px оригинала («как есть» — вне шкалы,
+   прецедент --ui-button-pad-inline), паддинг 24px, радиус md, клип
+   иллюстрации (overflow: hidden). Тон — пара хуков: дефолт — светлая
+   поверхность/текст (тон «light»); link-сброс подчёркивания якоря —
+   сброс базы T16.2 не применяется (связка не ui-button), явный none. */
+.lnk-card {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  justify-content: space-between;
+  overflow: hidden;
+  min-height: 22rem;
+  padding: var(--ui-space-5);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--lnk-card-bg, var(--ui-color-surface));
+  color: var(--lnk-card-fg, var(--ui-color-text));
+  text-decoration: none;
+}
+
+/* Заголовочные роли на заливке — пара хука (прецедент ui-card--cta T17.8:
+   роли несут --ui-color-heading с T14.1 — на тёмном тоне заголовок
+   невидим; живой баг пилота «невидимый h4» на navy-карточке закрыт).
+   Дефолт фолбэка — сама роль: светлые тона (пара не задана) не меняются.
+   ui-h6 цвета не несёт и наследует сам (T16.12) — в списке не нужен. */
+.lnk-card :is(.ui-h1, .ui-h2, .ui-h3, .ui-h4, .ui-h5, .ui-page-title) {
+  color: var(--lnk-card-fg, var(--ui-color-heading));
+}
+
+/* Иллюстрация — декоративный слот снизу-справа (порт .cp-students__card-illu,
+   Implementation requirements п.2: alt="" в разметке). Размер — от файла
+   (max-height 70% карточки, ширина по соотношению — рендер пилота). */
+.lnk-card__illu {
+  box-sizing: border-box;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  max-height: 70%;
+}
+
+/* Слот действия (круглая кнопка-стрелка ui-button--round): поверх
+   иллюстрации (z-пара «контент над фоном», порт .cp-students__card-btn)
+   и прижат вправо; вид контрола — модификатор ui-button--round. */
+.lnk-card__action {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  align-self: flex-end;
+}
+
+/* Сетка ленты логотипов «Работодатели Группы»: шаг 8px (.cp-employers__grid,
+   pilot.css:394 — --ui-space-2); ступени 4 (md) → 6 (lg) — инверсия лестницы
+   пилота (≤1023 → 4, ≤767 → 1). Каркас — ui-grid в разметке канона. */
+.lgo-grid {
+  box-sizing: border-box;
+  gap: var(--ui-space-2);
+}
+
+@media (min-width: 768px) {
+  .lgo-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .lgo-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+/* Рамочная плашка логотипа (порт .cp-employers__card, pilot.css:400):
+   img-плашка растянута на ячейку («img растянута» — width 100%, высота от
+   атрибутов канона — рендер пилота), радиус md, поверхность surface.
+   Рамка — --ui-color-border-muted (Спека T17.9): в пилоте рамка писалась
+   несуществующим токеном --ui-color-border и вычислялась 0px (рендер без
+   рамки); волосяная рамка slate-100 суб-видима на белых плашках-логотипах.
+   Паддинги «как есть» — нулевые: плашка обнимает логотип (в оригинале
+   паддингов нет). */
+.lgo-card {
+  box-sizing: border-box;
+  width: 100%;
+  border: var(--ui-border-width) solid var(--ui-color-border-muted);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
 }

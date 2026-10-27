@@ -125,6 +125,29 @@
       margin-inline: calc(-1 * var(--ui-container-pad-lg));
     }
   }
+
+  /* Тоны nav-карточек (T17.9) — ЗОНА САЙТА: пары одобренного дизайна
+     career-portal на токен-хуках связки (Implementation requirements п.1).
+     Демо-иллюстрации — svg-заглушки; контраст пар — таблица в README. */
+  .lnk-card--peach {
+    --lnk-card-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));
+    --ui-button-bg: var(--ui-color-accent);
+    --ui-button-color: var(--ui-color-text-on-dark);
+  }
+
+  .lnk-card--navy {
+    --lnk-card-bg: var(--ui-color-primary);
+    --lnk-card-fg: var(--ui-color-text-on-dark);
+    --ui-button-bg: var(--ui-color-surface);
+    --ui-button-color: var(--ui-color-primary);
+  }
+
+  .lnk-card--light {
+    --lnk-card-bg: var(--ui-color-surface);
+    --ui-button-bg: var(--ui-color-primary);
+    --ui-button-color: var(--ui-color-surface);
+    border: var(--ui-border-width) solid var(--ui-color-border);
+  }
 </style>
 
 <!-- Вариант 1 — светлая секция: каркас формулы (ui-section + ui-container +
@@ -301,5 +324,103 @@
       Секция с фото-фоном: фон и оверлей — система (ui-section--photo, T17.3),
       контент — сайт (on-dark-пары связкой lsp-photo, роль ui-h2).
     </p>
+  </div>
+</section>
+
+<!-- Вариант 5 — nav-карточки (lnk-card, T17.9): карточки-Ссылки «Школьникам
+     и студентам» (порт .cp-students__card career-portal). Тон — пара на
+     хуках --lnk-card-bg/--lnk-card-fg (зона сайта, классы выше), контраст
+     пары — обязанность сайта. Иллюстрация — декоративный слот (alt="");
+     круглая кнопка-стрелка — ui-button--round, aria-hidden: интерактив
+     один — вся карточка (доступное имя — aria-label, axe-имена ссылок). -->
+<section class="ui-section" id="lsp-nav-cards" aria-labelledby="lsp-nav-cards-title">
+  <p class="ui-showcase-stand__note">
+    Связка «nav-карточки» (<code>lnk-card</code>, T17.9): тон — пара на хуках
+    <code>--lnk-card-bg</code>/<code>--lnk-card-fg</code> (зона сайта, демо — одобренные пары
+    career-portal), иллюстрация — декоративный слот, стрелка —
+    <code>ui-button--round</code> (<code>aria-hidden</code>). Имя карточки-ссылки — <code>aria-label</code>.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-nav-cards-title">Школьникам и студентам</h2>
+    <div class="ui-grid lnk-cards lsp-grid" data-ui-check-layout>
+      <a class="lnk-card lnk-card--peach" href="list-page.html" aria-label="Подробнее: Стажировки и практики">
+        <div class="lnk-card__body">
+          <h3 class="ui-h4">Стажировки и практики</h3>
+          <p class="ui-small">Уникальный шанс получить опыт в&nbsp;энергетике!</p>
+        </div>
+        <img
+          class="lnk-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27240%27%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2758%27%20r%3D%2738%27%20fill%3D%27%23164B89%27%2F%3E%3Cpath%20d%3D%27M22%20240c0-52%2026-84%2058-84s58%2032%2058%2084z%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="160"
+          height="240"
+          loading="lazy"
+         >
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </a>
+
+      <a class="lnk-card lnk-card--navy" href="list-page.html" aria-label="Подробнее: Целевое обучение">
+        <div class="lnk-card__body">
+          <h3 class="ui-h4">Целевое обучение</h3>
+          <p class="ui-small">Поддержка на&nbsp;старте карьеры и&nbsp;гарантия трудоустройства</p>
+        </div>
+        <img
+          class="lnk-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27240%27%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2758%27%20r%3D%2738%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Cpath%20d%3D%27M22%20240c0-52%2026-84%2058-84s58%2032%2058%2084z%27%20fill%3D%27%23E8EEF6%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="160"
+          height="240"
+          loading="lazy"
+         >
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </a>
+
+      <a class="lnk-card lnk-card--light" href="list-page.html" aria-label="Подробнее: Карьерный трек">
+        <div class="lnk-card__body">
+          <h3 class="ui-h4">Карьерный трек</h3>
+          <p class="ui-small">Лучшие возможности для&nbsp;профессионального роста</p>
+        </div>
+        <img
+          class="lnk-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27240%27%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2758%27%20r%3D%2738%27%20fill%3D%27%23F26722%27%2F%3E%3Cpath%20d%3D%27M22%20240c0-52%2026-84%2058-84s58%2032%2058%2084z%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="160"
+          height="240"
+          loading="lazy"
+         >
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 6 — лента логотипов (lgo-grid/lgo-card, T17.9): сетка рамочных
+     плашек на ui-grid (порт .cp-employers career-portal — типовой блок
+     «партнёры/клиенты»). Плашка — img с растяжением (width 100%, размеры
+     атрибутами — гейт T4.6); логотипы — контент сайта. -->
+<section class="ui-section" id="lsp-logo-grid" aria-labelledby="lsp-logo-grid-title">
+  <p class="ui-showcase-stand__note">
+    Связка «лента логотипов» (<code>lgo-grid</code>/<code>lgo-card</code>, T17.9): сетка рамочных
+    плашек на <code>ui-grid</code> (шаг 8px, ступени 4/6 колонок), плашка — растянутый
+    <code>img</code> с радиусом md. Логотипы/подбор — контент сайта.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-logo-grid-title">Популярные работодатели Группы</h2>
+    <div class="ui-grid lgo-grid lsp-grid" data-ui-check-layout>
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2774%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2748%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2766%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2742%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Crect%20x%3D%2732%27%20y%3D%2734%27%20width%3D%2740%27%20height%3D%2740%27%20rx%3D%2710%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2770%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2744%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23F26722%27%2F%3E%3Ccircle%20cx%3D%2764%27%20cy%3D%2754%27%20r%3D%2720%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2796%27%20y%3D%2744%27%20width%3D%2762%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2796%27%20y%3D%2759%27%20width%3D%2740%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Crect%20x%3D%2732%27%20y%3D%2752%27%20width%3D%2740%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%2732%20y%3D%2736%27%20width%3D%2726%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2774%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2722%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2714%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2770%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2752%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+    </div>
   </div>
 </section>
