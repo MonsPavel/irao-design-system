@@ -131,8 +131,8 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     );
   });
 
-  it('banner-card: CTA-панель с фото ui-image и ui-button «смотреть вакансии» на vacancies.html (Scope); тело — CTA-центр-композиция на ui-card--cta (T17.8)', () => {
-    expect(companyHtml).toMatch(/class="ui-image ui-image--cover cp-company-banner__photo"/);
+  it('banner-card: CTA-панель с фото-подложкой и ui-button «смотреть вакансии» на vacancies.html (Scope); тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
+    expect(companyHtml).toContain('<div class="ui-section ui-section--photo cp-company-banner">');
     expect(companyHtml).toContain('<div class="cp-company-banner__body ui-card ui-card--cta">');
     expect(companyHtml).toMatch(
       /<a class="ui-button ui-button--primary" href="vacancies.html">смотреть вакансии<\/a>/,
@@ -166,7 +166,7 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
 });
 
 describe('pilot.css — сайт-зона компании cp-company-* (T15.2 Scope, правила пилота: токены --ui-*)', () => {
-  it('блоки страницы существуют: hero, stats/adv (сетки — плашки сняты в ui-stat T17.4), where, banner (+photo/body/title)', () => {
+  it('блоки страницы существуют: hero, stats/adv (сетки — плашки сняты в ui-stat T17.4), where, banner (+body/title; фото-подложка/оверлей — ui-section--photo T17.3)', () => {
     for (const selector of [
       '.cp-company-hero',
       '.cp-company-hero__photo',
@@ -174,9 +174,8 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
       '.cp-company-adv',
       '.cp-company-where',
       '.cp-company-banner',
-      '.cp-company-banner__photo',
-      // T17.8: тело баннера — CTA-центр-композиция на модификаторе; сайт-правило
-      // перекрашено в дескриптор-селектор (0-2-0 против 0-2-0 модификатора).
+      // T17.3: фото-подложка (__photo) и тинт сняты — слои несёт
+      // ui-section--photo; сайт держит только хук тинта и раскладку.
       '.cp-company-banner .cp-company-banner__body',
       '.cp-company-banner__title',
     ]) {
@@ -233,9 +232,11 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     expect(blockOf(stat, '.ui-stat--deep')).toContain('gap: var(--ui-space-3);');
   });
 
-  it('оверлей баннера — тинт primary-a55 (rgba(0,40,86,.55) оригинала, pages.css:666 — ступень лестницы T14.7); раскладка тела — на модификаторе ui-card--cta (T17.8), сайт-правило держит оверлей/цвет', () => {
+  it('оверлей баннера — тинт primary-a55 токен-хуком фото-секции (rgba(0,40,86,.55) оригинала, pages.css:666 — ступень лестницы T14.7); раскладка тела — на модификаторе ui-card--cta (T17.8), тело прозрачно поверх тинта', () => {
+    const banner = blockOf(pilotCss, '.cp-company-banner');
+    expect(banner).toContain('--ui-section-overlay-tint: var(--ui-color-primary-a55);');
     const body = blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body');
-    expect(body).toContain('background-color: var(--ui-color-primary-a55);');
+    expect(body).toContain('background-color: transparent;');
     expect(body).toContain('color: var(--ui-color-text-on-dark);');
     expect(blockOf(pilotCss, '.cp-company-banner__title')).toContain(
       'color: var(--ui-color-text-on-dark);',
