@@ -480,8 +480,15 @@ describe('пилот (T17.5): медиа-карточки на модифика�
 
   it('compare-пробы card-title/article-title ведут на модификатор (прецедент T17.8: селектор на компонент)', () => {
     const compare = readFileSync(join(root, 'pilot', 'career-portal', 'compare.mjs'), 'utf8');
-    expect(compare).toMatch(/pilot: '\.ui-card--media \.ui-card__body \.ui-h6'/);
-    expect(compare).toMatch(/pilot: '\.ui-card--media \.ui-card__body \.ui-small'/);
+    // событие опознаётся по __meta в теле (интерн-карточки internships раньше
+    // в DOM — их ui-h6-имя пробу не chainяет), мини-тайтл — заголовочный тег
+    // (дата time.ui-small пробу не chainяет)
+    expect(compare).toMatch(
+      /pilot: '\.ui-card--media \.ui-card__body:has\(\.ui-card__meta\) \.ui-h6'/,
+    );
+    expect(compare).toMatch(
+      /pilot: '\.ui-card--media \.ui-card__body :is\(h2, h3, h4\)\.ui-small'/,
+    );
   });
 });
 
