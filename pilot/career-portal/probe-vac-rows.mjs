@@ -79,6 +79,14 @@ const DATA_ATTRS = [
   'data-date',
 ];
 
+/** Вырожденный бокс интерактива — функциональная ошибка, а не стилевой дифф
+ *  (приёмка T17.1: слой .lpp-side от md клампит панель max-height + overflow-y,
+ *  flex-усадка при min-height: 0 компонента ui-button--text схлопнула
+ *  reset-control в 0px — height в MATCH/DIFF-логике исключён сознательно,
+ *  т.к. высоты пар легитимно расходятся («принято ДС»), но НУЛЕВОЙ бокс
+ *  не кликается — гейтится отдельной проблемой → exit 1). */
+const DEGENERATE_HEIGHT_PX = 1;
+
 const browser = await chromium.launch();
 
 async function readPair(page, selector) {
@@ -114,6 +122,13 @@ for (const side of ['original', 'pilot']) {
   for (const [name, origSel, pilotSel] of PAIRS) {
     result[side][name] = await readPair(page, side === 'original' ? origSel : pilotSel);
     if (!result[side][name]) problems.push(`${side}: ${name} — элемент не найден`);
+    else if (result[side][name].height <= DEGENERATE_HEIGHT_PX) {
+      problems.push(
+        `${side}: ${name} — вырожденный бокс (height ${result[side][name].height}px, селектор ${
+          side === 'original' ? origSel : pilotSel
+        })`,
+      );
+    }
   }
 
   // data-* первой строки — паритет; нет строки — ошибка пробы (ревью T16.5:

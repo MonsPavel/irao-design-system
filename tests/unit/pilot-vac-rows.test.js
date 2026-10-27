@@ -163,6 +163,11 @@ describe('pilot.css — шимы сайт-зоны на крючках слоя 
     );
   });
 
+  it('«Сбросить» не участвует в flex-усадке панели: flex-shrink: 0 (приёмка T17.1: слой .lpp-side от md клампит панель max-height 100vh−48px + overflow-y, контент 921px > клампа 852px @900 — при min-height: 0 компонента ui-button--text (ui-button.css:123) усадка схлопывала кнопку в 0px: хит-зона мертва, клик-автоматика таймаутит)', () => {
+    const align = blockOf(pilotCss, '.lpp-side > .ui-button--text');
+    expect(align, 'шим защищает бокс кнопки от усадки').toContain('flex-shrink: 0;');
+  });
+
   it('пилюля сайдбара — шим flex-basis: auto на крючке слоя (cp-pill до T17.12)', () => {
     const shim = blockOf(pilotCss, '.lpp-side__group .cp-pill');
     expect(shim, 'шим на крючке канона lpp-side__group').toBeTruthy();
@@ -246,5 +251,18 @@ describe('probe-vac-rows.mjs — закрывающая проба data-*/стр
       "const TITLE_ANCHOR = { original: '.vac-row__title a', pilot: '.lpp-row__title a' };",
     );
     expect(probe).not.toContain("'.cp-vac-row__title a'");
+  });
+
+  it('дегенерат-гейт пробы: вырожденный бокс (height ≤ 1) любой пары на любой стороне — ошибка пробы (приёмка T17.1: схлопнутый в 0px reset-control проходил пробу, т.к. height исключён из MATCH/DIFF-логики — нулевой бокс не кликается, это функциональная ошибка, а не стилевой дифф)', () => {
+    expect(probe, 'константа порога дегенерации').toContain('DEGENERATE_HEIGHT_PX');
+    expect(probe, 'вырожденный бокс попадает в problems → exit 1').toMatch(
+      /DEGENERATE_HEIGHT_PX[\s\S]{0,120}problems\.push/,
+    );
+  });
+
+  it('aside сайдбара — tabindex="0" (паритет канона list-page.html: прокручиваемый регион lpp-side от md — keyboard access, axe scrollable-region-focusable)', () => {
+    expect(vacanciesMainBody).toContain(
+      '<aside class="lpp-side" tabindex="0" aria-label="Фильтры вакансий">',
+    );
   });
 });

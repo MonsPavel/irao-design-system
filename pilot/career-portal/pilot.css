@@ -962,9 +962,16 @@
 /* «Сбросить» — прижата к левому краю панели (оригинал .vac-side__reset
    align-self: flex-start, pages.css:101). Вид строки (fs 14/400, underline,
    muted, высота по строке, а не 52px) несёт сам компонент ui-button--text
-   (T16.7; REPORT §8.2 №6/№8) — сайт-зона задаёт только положение. */
+   (T16.7; REPORT §8.2 №6/№8) — сайт-зона задаёт только положение.
+   flex-shrink: 0 — панель .lpp-side от md клампится каноном (max-height
+   100vh − 2·space-5 + overflow-y, patterns/patterns.css): при контенте
+   выше клампа flex-усадка при min-height: 0 компонента (ui-button.css:123)
+   схлопывала прямого ребёнка-кнопку в 0px — хит-зона мертва, клик-автоматика
+   таймаутит (приёмка T17.1); неусаживаемый бокс = контент панели
+   прокручивается, как и задумано каноном. */
 .lpp-side > .ui-button--text {
   box-sizing: border-box;
+  flex-shrink: 0;
   align-self: flex-start;
 }
 

@@ -1343,7 +1343,11 @@ function vacanciesMain() {
          main-колонка (cp-vac-main) остаётся сайт-зоной: композиция страницы
          с findBar — канона в док-HTML нет (T17.12). -->
     <div class="lpp-layout">
-      <aside class="lpp-side" aria-label="Фильтры вакансий">
+      <!-- tabindex="0" — паритет канона lpp-side (list-page.html): панель от md
+         прокручивается внутри себя (max-height + overflow-y слоя) —
+         прокручиваемый регион доступен с клавиатуры (axe
+         scrollable-region-focusable). -->
+    <aside class="lpp-side" tabindex="0" aria-label="Фильтры вакансий">
         <div class="lpp-side__group">
           <span class="lpp-pill__name">Регион</span>
           ${selectField({ name: 'region', options: ['Все регионы', 'Москва', 'Омская область', 'Санкт-Петербург'], pill: true, ariaLabel: 'Регион' })}
