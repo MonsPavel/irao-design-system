@@ -171,10 +171,10 @@
    портретного файла — +287px на internships.html до фикса; урок
    ui-section__bg base/layout.css: replaced-элементу размеры задают явно). */
 .ui-card--media .ui-card__media > :is(img) {
-  aspect-ratio: inherit;
-  height: auto;
   object-fit: cover;
   width: 100%;
+  height: auto;
+  aspect-ratio: inherit;
   border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
 }
 

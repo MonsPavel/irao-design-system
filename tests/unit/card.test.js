@@ -36,7 +36,8 @@
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, beforeAll } from 'vitest';
+import { buildForUnitTests } from '../helpers/unit-build.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 
@@ -601,5 +602,21 @@ describe('подключение и гейты (DoD)', () => {
     expect(readme).toContain('ui-card--link');
     expect(readme).toContain('T8.1');
     expect(readme).toContain('T4.6');
+  });
+});
+
+describe('presence-пин dist (T17.5, Testing requirements: пин модификатора в dist)', () => {
+  // presence-пин читает собранный dist: воркер дожидается билда прогона
+  // (tests/helpers/unit-build.mjs, T13.7) — практика presence-пина ui-video.
+  beforeAll(async () => {
+    await buildForUnitTests(root);
+  }, 60000);
+
+  it('модификатор --media и его слоты доезжают до сайтов в ui-core.min.css (регресс сборки)', () => {
+    const core = readFileSync(join(root, 'dist', 'ui-core.min.css'), 'utf8');
+    expect(core).toContain('.ui-card--media');
+    expect(core).toContain('.ui-card__media--square');
+    expect(core).toContain('.ui-card__media-tag');
+    expect(core).toContain('.ui-card__meta');
   });
 });
