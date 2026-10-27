@@ -91,6 +91,108 @@ describe('base/layout.css — секция (Scope T3.4)', () => {
   });
 });
 
+describe('base/layout.css — фото-секция ui-section--photo (T17.3)', () => {
+  const css = stripCssComments(readFileSync(join(root, 'base', 'layout.css'), 'utf8'));
+
+  it('.ui-section--photo: корень позиционирован и изолирован — фон z-index:-1 не убегает под фон обёрток сайта', () => {
+    const block = blockOf(css, '.ui-section--photo');
+    expect(block, 'правило .ui-section--photo найдено').toBeTruthy();
+    expect(block).toContain('box-sizing: border-box;');
+    expect(block).toContain('position: relative;');
+    // изоляция: negative-z дети красятся внутри секции (после её фона,
+    // до контента), а не в корневом stacking context страницы
+    expect(block).toContain('isolation: isolate;');
+  });
+
+  it('__bg: абсолютный слой inset:0, z-index:-1 — пара «контент над фоном» (прецедент pilot.css)', () => {
+    const block = blockOf(css, '.ui-section--photo .ui-section__bg');
+    expect(block, 'правило .ui-section--photo .ui-section__bg найдено').toBeTruthy();
+    expect(block).toContain('box-sizing: border-box;');
+    expect(block).toContain('position: absolute;');
+    expect(block).toContain('inset: 0;');
+    expect(block).toContain('z-index: -1;');
+  });
+
+  it('__bg img: absolute inset:0 + width/height:100% (приём pilot.css) — единственное height-объявление файла, fill уже размерённого слоя', () => {
+    const block = blockOf(css, '.ui-section--photo .ui-section__bg img');
+    expect(block, 'правило img фона найдено').toBeTruthy();
+    expect(block).toContain('position: absolute;');
+    expect(block).toContain('inset: 0;');
+    expect(block).toContain('object-fit: cover;');
+    expect(block).toContain('width: 100%;');
+    expect(block).toContain('height: 100%;');
+    // Почему fill-декларации обязательны (обе ветки проверены пробой
+    // скрин-пар T17.3): absolute-инсеты без размеров НЕ растягивают
+    // replaced-элемент (сохраняется внутреннее соотношение — бокс уезжал
+    // на ~6px от бокса пилота, кадр «плывёт»); флекс-fill ломают атрибуты
+    // width/height канона T4.6 (presentational-hint высоты блокирует
+    // stretch — бокс баннера уезжал на 326px вместо 320px). Явные 100%
+    // перекрывают и то и другое — рендер идентичен пилоту.
+  });
+
+  it('__overlay: слой поверх фото и под контентом (z-index:-1, позже __bg в DOM); base без pointer-events — клики доходят до контента (исключение — glow, канон production)', () => {
+    const block = blockOf(css, '.ui-section--photo .ui-section__overlay');
+    expect(block, 'правило .ui-section--photo .ui-section__overlay найдено').toBeTruthy();
+    expect(block).toContain('box-sizing: border-box;');
+    expect(block).toContain('position: absolute;');
+    expect(block).toContain('inset: 0;');
+    expect(block).toContain('z-index: -1;');
+    expect(block, 'база оверлея — под контентом, без pointer-events').not.toContain(
+      'pointer-events',
+    );
+    // DOM-порядок слоёв: __bg раньше __overlay (оверлей поверх фото)
+    expect(css.indexOf('.ui-section--photo .ui-section__bg {')).toBeLessThan(
+      css.indexOf('.ui-section--photo .ui-section__overlay {'),
+    );
+  });
+
+  it('--fade-bottom: фиксированный канон hero — surface→transparent сверху, transparent→primary-a94 снизу (Канон оригинала T17.3)', () => {
+    const block = blockOf(css, '.ui-section__overlay--fade-bottom');
+    expect(block, 'правило --fade-bottom найдено').toBeTruthy();
+    expect(block).toContain('background:');
+    expect(block).toContain('linear-gradient(180deg, var(--ui-color-surface) 0%, transparent 35%)');
+    expect(block).toContain(
+      'linear-gradient(180deg, transparent 60%, var(--ui-color-primary-a94) 100%)',
+    );
+  });
+
+  it('--glow: фиксированный канон production — градиент primary 88%→34%→transparent слева, НАД контентом (z-index: auto снимает -1 базы) и pointer-events: none (production.css:38)', () => {
+    const block = blockOf(css, '.ui-section__overlay--glow');
+    expect(block, 'правило --glow найдено').toBeTruthy();
+    expect(block).toContain('color-mix(in srgb, var(--ui-color-primary) 88%, transparent) 0%');
+    expect(block).toContain('color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%');
+    expect(block).toContain('transparent 100%');
+    // Стекинг glow — канон пилота (проба скрин-пар T17.3): полупрозрачная
+    // синь тонирует и контент (текст под градиентом) — z-index: auto;
+    // клики проходят сквозь (pointer-events: none оригинала).
+    const scoped = blockOf(css, '.ui-section--photo .ui-section__overlay--glow');
+    expect(scoped, 'scoped-правило стека найдено').toBeTruthy();
+    expect(scoped).toContain('z-index: auto;');
+    expect(scoped).toContain('pointer-events: none;');
+  });
+
+  it('--tint: цветовое затемнение токен-хуком --ui-section-overlay-tint; дефолт хука — none (transparent), сайт ставит ступень лестницы T14.7', () => {
+    const block = blockOf(css, '.ui-section__overlay--tint');
+    expect(block, 'правило --tint найдено').toBeTruthy();
+    expect(block).toContain('background-color: var(--ui-section-overlay-tint, transparent);');
+    // хук не задаёт дефолт в :root — «none» означает отсутствие заливки
+    expect(css).not.toMatch(/--ui-section-overlay-tint:\s*[^;]+;/);
+  });
+
+  it('модификатор не задаёт типографику/цвет текста — on-dark-пара остаётся на контенте (Implementation requirements T17.3 п.1)', () => {
+    const photoCss = css.slice(css.indexOf('.ui-section--photo'));
+    expect(photoCss, 'в слое фото-секции нет color:').not.toMatch(/(?:^|\n)\s*color:/);
+    expect(photoCss, 'в слое фото-секции нет font-').not.toMatch(/(?:^|\n)\s*font-/);
+  });
+
+  it('высота фона — по контенту секции: декларативных пропорций в модификаторе нет (min-height — сайту)', () => {
+    // Исключение — img фото-слоя (fill 100% уже размерённого absolute-слоя,
+    // T17.3): на высоту секции не влияет, пин ниже всего файла — в инвариантах.
+    const rest = css.replace(/\.ui-section--photo \.ui-section__bg img\s*\{[^}]*\}/, '');
+    expect(rest).not.toMatch(/(?:^|\n)\s*(?:min-)?height:\s/);
+  });
+});
+
 describe('base/layout.css — сетка (Scope T3.4)', () => {
   const css = stripCssComments(readFileSync(join(root, 'base', 'layout.css'), 'utf8'));
 
@@ -167,8 +269,18 @@ describe('base/layout.css — сетка (Scope T3.4)', () => {
 describe('base/layout.css — инварианты системы (Scope T3.4)', () => {
   const css = stripCssComments(readFileSync(join(root, 'base', 'layout.css'), 'utf8'));
 
-  it('запрет фиксированных высот: ни height, ни min-height (Scope T3.4)', () => {
-    expect(css).not.toMatch(/(?:^|\n)\s*(?:min-)?height:\s/);
+  it('запрет фиксированных высот: ни height, ни min-height (Scope T3.4) — исключение: fill-img фото-слоя T17.3 (только 100%)', () => {
+    // T17.3: img абсолютного фото-слоя несёт width/height:100% (fill уже
+    // размерённого слоя; иное — replaced-элемент с внутренним соотношением
+    // или presentational-hint атрибутов T4.6 — кадр «плывёт», проба
+    // скрин-пар). Исключение узкое: правило __bg img вырезается целиком,
+    // в нём высота обязана быть ровно 100% (пин в describe фото-секции);
+    // весь остальной файл — по-прежнему без height/min-height.
+    const rest = css.replace(/\.ui-section--photo \.ui-section__bg img\s*\{[^}]*\}/, '');
+    expect(rest).not.toMatch(/(?:^|\n)\s*(?:min-)?height:\s/);
+    const imgBlock = blockOf(css, '.ui-section--photo .ui-section__bg img');
+    expect(imgBlock, 'в исключении — ровно fill 100%, без других высот').toMatch(/height: 100%;/);
+    expect(imgBlock.replace(/height: 100%;/, '')).not.toMatch(/(?:min-)?height:/);
   });
 
   it('порядок чтения = порядок DOM: свойство order не используется (Accessibility requirements)', () => {

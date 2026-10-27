@@ -8,6 +8,9 @@
  *  - ui-section — вертикальный ритм секций из spacing-шкалы §3.2;
  *    ui-section--muted — приглушённая секция (порт .section--gray:
  *    фон --ui-color-surface-muted + радиус --ui-radius-lg);
+ *    ui-section--photo — секция с фотографическим фоном (T17.3):
+ *    слой __bg (img cover) + оверлеи __overlay--fade-bottom/--glow/--tint
+ *    под контентом (z-пара, изоляция стекинга);
  *  - ui-grid (+ --2/--3/--4) — адаптивная сетка карточек: 1 колонка на
  *    mobile → 2 на md → N на lg; --4 — 3 на xl → 4 на 2xl.
  *
@@ -90,6 +93,107 @@
 .ui-section--muted {
   border-radius: var(--ui-radius-lg);
   background-color: var(--ui-color-surface-muted);
+}
+
+/* ── Фото-секция: T17.3 — приём «фон inset:0 под контентом + оверлей»
+   career-portal (hero/production/holding/why-us/company-banner) ──
+ *
+ * Слои (z-пара, прецедент pilot.css): __bg и __overlay — absolute inset:0
+ * с z-index:-1; контент секции остаётся в потоке и красится над ними.
+ * isolation: isolate на корне — стекинг-контекст секции: negative-z дети
+ * красятся после фона секции и не убегают под фон обёрток сайта (классика
+ * z-index:-1 — фото «пропадает» под непрозрачной обёрткой).
+ *
+ * img фона — absolute inset:0 + width/height:100% (приём pilot.css):
+ * слой уже размерён секцией, fill строго по боксу __bg, object-fit: cover
+ * кадрирует файл любой пропорции. Почему не absolute-инсеты без размеров:
+ * replaced-элемент сохраняет внутреннее соотношение (бокс 801.98px вместо
+ * 808px на 1440 — кадр «плывёт»); почему не флекс-fill: атрибуты
+ * width/height канона T4.6 дают presentational-hint размеров — крест-ось
+ * stretch не применяется (бокс баннера уезжал на 326px вместо 320px).
+ * Явные 100% перекрывают и то и другое; единственное в layout.css
+ * исключение из инварианта T3.4 «без фиксированных высот» — fill 100%
+ * внутри уже размерённого абсолютного слоя, высота секции по-прежнему от
+ * контента (пин tests/unit/layout.test.js описывает исключение). img —
+ * декоративный по умолчанию: alt="" в каноне разметки, aria-hidden на
+ * обоих декоративных слоях.
+ *
+ * Высота секции — от контента (как в пилоте); декларативные пропорции
+ * (min-height) и клип/радиус (overflow/border-radius) — решения сайта.
+ * Модификатор типографику и цвет текста НЕ задаёт — on-dark-пары несёт
+ * контент (существующие роли). Пин формы — tests/unit/layout.test.js.
+ *
+ * Оверлеи — три канона одобренного дизайна:
+ *  - --fade-bottom (hero): градиент surface→transparent сверху + 
+ *    transparent→primary-a94 снизу (секция растворяется в страницу сверху
+ *    и в синь следующего блока снизу); красится ПОД контентом (канон
+ *    hero — оверлей внутри z:-1 слоя фона);
+ *  - --glow (production): горизонтальный градиент primary 88%→34%→
+ *    transparent слева; красится НАД контентом (канон production.css:38:
+ *    полупрозрачная синь тонирует и текст; z-index: auto снимает -1 базы,
+ *    pointer-events: none — клики проходят сквозь к карусели);
+ *  - --tint: цветовое затемнение токен-хуком --ui-section-overlay-tint;
+ *    дефолт хука — none (fallback transparent), сайт ставит ступень
+ *    лестницы тинтов T14.7 (в career-portal тинт баннера остался на теле
+ *    — заливка body-бокса, T17.3 проба скрин-пар).
+ * Градиентные варианты — фиксированные каноны; кастомизация — хуком
+ * (по прецеденту --ui-stat-surface). */
+.ui-section--photo {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+}
+
+.ui-section--photo .ui-section__bg {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+/* Единственное в файле height-объявление: fill 100% уже размерённого
+   абсолютного слоя (T17.3 — см. доку блока; инвариант T3.4 «высота от
+   контента» не затронут — слой не влияет на высоту секции). */
+.ui-section--photo .ui-section__bg img {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.ui-section--photo .ui-section__overlay {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.ui-section__overlay--fade-bottom {
+  background:
+    linear-gradient(180deg, var(--ui-color-surface) 0%, transparent 35%),
+    linear-gradient(180deg, transparent 60%, var(--ui-color-primary-a94) 100%);
+}
+
+.ui-section__overlay--glow {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ui-color-primary) 88%, transparent) 0%,
+    color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%,
+    transparent 100%
+  );
+}
+
+/* Канон production: glow НАД контентом (тонирование текста — вид
+   оригинала; специфичность 0-3-0 против 0-2-0 базы), клики сквозь. */
+.ui-section--photo .ui-section__overlay--glow {
+  z-index: auto;
+  pointer-events: none;
+}
+
+.ui-section__overlay--tint {
+  background-color: var(--ui-section-overlay-tint, transparent);
 }
 
 /* ── Сетка карточек: career-portal pages.css .cards-grid--2/3/4 ── */

@@ -88,7 +88,7 @@ const STAND_DESCRIPTIONS = {
   'patterns/list-page': 'Паттерн «Страница списка»: эталонная сборка из компонентов',
   'patterns/detail-page': 'Паттерн «Детальная страница»: крошки, контент + aside, JobPosting',
   'patterns/form-page': 'Паттерн «Страница формы»: форма отклика с aside-сводкой',
-  'patterns/landing-section': 'Паттерн «Landing-секция»: светлая, тёмная, full-bleed',
+  'patterns/landing-section': 'Паттерн «Landing-секция»: светлая, тёмная, full-bleed, фото-фон',
   'patterns/timeline': 'Паттерн «Таймлайн этапов»: нумерованные точки этапов процесса',
   'patterns/search-overlay': 'Паттерн «Поисковый оверлей» на ui-modal--full',
   'patterns/header': 'Паттерн «Шапка сайта» с навигацией и оверлеем поиска',

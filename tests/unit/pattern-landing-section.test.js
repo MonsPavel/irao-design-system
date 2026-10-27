@@ -29,7 +29,7 @@ const readmePath = join(root, 'patterns', 'landing-section', 'README.md');
 /** Разметка без связующих <style> (для пинов порядка DOM). */
 const markupOf = (html) => html.replace(/<style>[\s\S]*?<\/style>/g, '');
 
-describe('patterns/landing-section/landing-section.html — mini-эталон из 3 секций (Scope T8.3)', () => {
+describe('patterns/landing-section/landing-section.html — mini-эталон из 4 секций (Scope T8.3 + фото-фон T17.3)', () => {
   let pattern = '';
   try {
     pattern = readFileSync(patternPath, 'utf8');
@@ -38,9 +38,9 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     pattern = '';
   }
 
-  it('три секции-варианта на одном стенде: светлая → тёмная → с-фоном', () => {
+  it('четыре секции-варианта на одном стенде: светлая → тёмная → с-изображением → фото-фон', () => {
     const markup = markupOf(pattern);
-    const anchors = ['id="lsp-light"', 'id="lsp-dark"', 'id="lsp-image"'];
+    const anchors = ['id="lsp-light"', 'id="lsp-dark"', 'id="lsp-image"', 'id="lsp-photo"'];
     const indexes = anchors.map((marker) => markup.indexOf(marker));
     for (let i = 0; i < anchors.length; i += 1) {
       expect(indexes[i], `якорь «${anchors[i]}» на месте`).toBeGreaterThan(-1);
@@ -145,6 +145,39 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     expect(img[0], 'вне первого экрана — loading="lazy"').toContain('loading="lazy"');
   });
 
+  it('фото-фон секции — примитив ui-section--photo (T17.3): слои __bg/__overlay ДС, оверлей --fade-bottom, декоративные слои aria-hidden', () => {
+    const markup = markupOf(pattern);
+    const section = markup.match(/<section[^>]*id="lsp-photo"[\s\S]*?<\/section>/)?.[0] ?? '';
+    expect(section, 'секция lsp-photo найдена').not.toBe('');
+    expect(section, 'модификатор фото-секции').toContain('ui-section ui-section--photo');
+    // канон примера спеки T17.3: __bg с img (alt="" — декоративный) +
+    // оверлей --fade-bottom, оба aria-hidden; контент после слоёв.
+    const bg = section.match(/<div class="ui-section__bg"[\s\S]*?<\/div>/)?.[0] ?? '';
+    expect(bg, 'фон __bg на месте').not.toBe('');
+    expect(bg, 'img фона — alt=""').toContain('alt=""');
+    expect(section.indexOf('ui-section__bg'), '__bg до контента').toBeLessThan(
+      section.indexOf('ui-container'),
+    );
+    expect(section, 'оверлей --fade-bottom (канон hero) между фоном и контентом').toContain(
+      '<div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>',
+    );
+    expect(section.match(/aria-hidden="true"/g)?.length ?? 0, 'оба декоративных слоя скрыты').toBe(
+      2,
+    );
+    // img фона — правила T4.6 гейта irao/img-dimensions: размеры зафиксированы
+    expect(bg).toMatch(/width="\d+"[^>]*height="\d+"|height="\d+"[^>]*width="\d+"/);
+  });
+
+  it('связка on-dark текста фото-секции — пары токенов, без hex/!important (граница «система/сайт»)', () => {
+    const styles = [...pattern.matchAll(/<style>([\s\S]*?)<\/style>/g)].map((m) => m[1]).join('\n');
+    expect(styles, 'текст фото-секции — on-dark-пара').toMatch(
+      /\.lsp-photo[^{]*\{[^}]*--ui-color-text-on-dark/,
+    );
+    expect(styles, 'заголовок фото-секции — on-dark (роли несут --ui-color-heading)').toMatch(
+      /\.lsp-photo \.ui-container > :is\(\.ui-h1, \.ui-h2\)/,
+    );
+  });
+
   it('связующие стили паттерна — только токены, без hex и !important (граница «showcase, не dist»)', () => {
     expect(pattern, 'связки живут <style> стенда, не в dist').toContain('<style>');
     const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
@@ -220,6 +253,14 @@ describe('patterns/landing-section/README.md — правила секций и 
   it('full-bleed: отрицательные margin от container-pad, токенизированные ступени', () => {
     expect(readme, 'приём full-bleed задокументирован').toContain('container-pad');
     expect(readme, 'изображение — правила T4.6 (--cover/--ratio)').toContain('ui-image');
+  });
+
+  it('фото-фон (T17.3): примитив ui-section--photo, слои __bg/__overlay, хук --ui-section-overlay-tint названы', () => {
+    expect(readme, 'модификатор фото-секции назван').toContain('ui-section--photo');
+    expect(readme, 'слои фона/оверлея названы').toContain('__bg');
+    expect(readme, 'оверлей-хук тинта назван (лестница T14.7)').toContain(
+      '--ui-section-overlay-tint',
+    );
   });
 
   it("Do / Don't: уникальный дизайн секций не переносится в систему", () => {

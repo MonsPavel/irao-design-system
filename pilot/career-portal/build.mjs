@@ -1117,10 +1117,13 @@ function indexMain() {
     </button></li>`,
   ).join('\n');
 
-  return `<section class="cp-hero">
-  <div class="cp-hero__bg" aria-hidden="true">
+  return `<section class="ui-section ui-section--photo cp-hero">
+  <!-- фото-фон — ui-section--photo (T17.3): слои __bg/__overlay ДС
+       (z-пара «контент над фоном»), оверлей — канон --fade-bottom -->
+  <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/hero-city-1.png" alt="" loading="eager">
   </div>
+  <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
   <div class="cp-hero__content">
     <h1 class="cp-hero__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>
     <form class="cp-hero__search" action="vacancies.html" method="get" role="search">
@@ -1139,11 +1142,13 @@ function indexMain() {
   </div>
 </section>
 
-<section class="cp-production ui-carousel" data-ui-carousel>
-  <div class="cp-production__bg" aria-hidden="true">
+<section class="ui-section ui-section--photo cp-production ui-carousel" data-ui-carousel>
+  <!-- фон и glow-оверлей — ui-section--photo (T17.3): канон --glow
+       (горизонтальный градиент слева), оверлей под контентом -->
+  <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/factory-big.jpg" alt="" loading="lazy">
   </div>
-  <div class="cp-production__glow" aria-hidden="true"></div>
+  <div class="ui-section__overlay ui-section__overlay--glow" aria-hidden="true"></div>
   <img class="cp-production__photo ui-carousel__photo" src="assets/images/worker-production.png" alt="Сотрудник на производстве" width="585" height="674" data-ui-carousel-photo loading="lazy">
   <div class="cp-production__body ui-carousel__body">
     <h2 class="cp-production__title ui-h2" data-ui-carousel-title>Производство</h2>
@@ -1194,8 +1199,9 @@ ${directionsGrid}
   </div>
 </dialog>
 
-<section class="cp-holding">
-  <div class="cp-holding__bg" aria-hidden="true">
+<section class="ui-section ui-section--photo cp-holding">
+  <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст — контентом -->
+  <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/about-holding.jpg" alt="" loading="lazy">
   </div>
   <div class="ui-container cp-holding__inner">
@@ -1229,8 +1235,9 @@ ${employerLogos}
   </div>
 </section>
 
-<section class="cp-why-us">
-  <div class="cp-why-us__bg" aria-hidden="true">
+<section class="ui-section ui-section--photo cp-why-us">
+  <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст — контентом -->
+  <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/bg-elektro.jpg" alt="" loading="lazy">
   </div>
   <div class="ui-container cp-why-us__inner">
@@ -2651,11 +2658,17 @@ function companyMain() {
       </figure>
     </div>
 
-    <!-- CTA-баннер (banner-card оригинала): фото — подложка под текстом
-         (alt="", README ui-image: подписывать декоративное нечего); кнопка —
-         ui-button на vacancies.html (Scope T15.2). -->
-    <div class="cp-company-banner">
-      <img class="ui-image ui-image--cover cp-company-banner__photo" src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
+    <!-- CTA-баннер (banner-card оригинала): фото-секция ui-section--photo
+         (T17.3) — __bg-подложка (alt="", README ui-image: подписывать
+         декоративное нечего); тинт primary-a55 (pages.css:666) — на теле,
+         как в оригинале: заливка body-бокса со скруглением, полосы фото
+         видны сверху/снизу (паритет скрин-пар; полно-секционный оверлей
+         --tint дал бы сплошной тинт — другой вид). Кнопка — ui-button на
+         vacancies.html (Scope T15.2). -->
+    <div class="ui-section ui-section--photo cp-company-banner">
+      <div class="ui-section__bg" aria-hidden="true">
+        <img src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
+      </div>
       <div class="cp-company-banner__body ui-card ui-card--cta">
         <h2 class="ui-h2 cp-company-banner__title">Вакансии компании</h2>
         <p class="ui-small cp-company-banner__text">Посмотрите открытые вакансии именно в нашей компании.</p>

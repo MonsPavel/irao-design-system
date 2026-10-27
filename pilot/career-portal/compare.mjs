@@ -410,6 +410,9 @@ const BLOCK_PROBES = {
   'company.html': [
     ['company-stats', '.company-stats', '.cp-company-stats'],
     ['company-adv', '.company-adv', '.cp-company-adv'],
+    // Фото-секция ui-section--photo (T17.3): CTA-баннер (banner-card
+    // оригинала, pages.css:656–674) — высота миграции на модификатор ДС.
+    ['company-banner', '.banner-card', '.cp-company-banner'],
   ],
 };
 

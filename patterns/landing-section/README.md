@@ -1,8 +1,8 @@
 # Паттерн «Landing-секция» (T8.3)
 
-Правила сборки лендинг-секций из системных примитивов + mini-эталон из трёх
-секций (светлая / тёмная / с-изображением full-bleed). Эталон целиком:
-[`landing-section.html`](landing-section.html) — он же стенд
+Правила сборки лендинг-секций из системных примитивов + mini-эталон из четырёх
+секций (светлая / тёмная / с-изображением full-bleed / с-фото-фоном — T17.3).
+Эталон целиком: [`landing-section.html`](landing-section.html) — он же стенд
 `/showcase/dist/stands/patterns/landing-section.html` (генерируется
 `showcase/build.mjs`).
 
@@ -156,6 +156,52 @@ Outline клавиатурного фокуса рисует глобальна�
 `irao/img-dimensions`), `loading="lazy"` вне первого экрана, осмысленный `alt`
 (декоративный фон секции — `alt=""`).
 
+## Фото-фон секции (ui-section--photo, T17.3)
+
+Фотография на всю секцию под контентом — примитив **`ui-section--photo`**
+(base/layout.css, T17.3): секция изолирует стекинг, слои `__bg` (слот `img`)
+и `__overlay` красятся под контентом (z-пара `-1`, прецедент career-portal —
+hero/production/holding/why-us/company-banner):
+
+```html
+<section class="ui-section ui-section--photo" aria-labelledby="photo-title">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="factory.jpg" alt="" width="1600" height="900" loading="lazy">
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
+  <div class="ui-container">
+    <h2 class="ui-h2" id="photo-title">…</h2>
+  </div>
+</section>
+```
+
+- **Секция не задаёт типографику/цвет текста** — on-dark-пары
+  (`--ui-color-text-on-dark[-muted]`) несёт контент (существующие роли);
+  заголовочные роли возвращаются в on-dark связкой секции — как у
+  `lsp-dark` выше.
+- **Оверлеи** — три канона одобренного дизайна: `--fade-bottom`
+  (растворение в страницу сверху + в `primary-a94` снизу — канон hero),
+  `--glow` (горизонтальный градиент primary слева — канон production),
+  `--tint` — цветовое затемнение токен-хуком
+  **`--ui-section-overlay-tint`** (дефолт — none; сайт ставит ступень
+  лестницы тинтов T14.7, например `--ui-color-primary-a55`):
+
+  ```css
+  .my-banner {
+    --ui-section-overlay-tint: var(--ui-color-primary-a55);
+  }
+  ```
+
+- **img фона — декоративный**: `alt=""`, слои — `aria-hidden` (прецедент
+  пилота); размеры/`loading` — правила T4.6 (гейт `irao/img-dimensions`).
+- **Высота — от контента**; декларативные пропорции (`min-height`) и клип
+  радиуса (`overflow: hidden` + `border-radius`) — решения сайта. Ритм
+  `ui-section` действует как у обычной секции: если блок несёт собственную
+  вертикальную геометрию — погасите её в связке сайта (`padding: 0`).
+- Миграция из пилота career-portal: правила `__bg`/`__glow` сайт-зоны
+  снимаются, разметка переезжает на слои ДС (T17.3 — пять блоков:
+  hero/production/holding/why-us/company-banner).
+
 ## A11y
 
 - Заголовок секции — h2 с ролью `ui-h2`; секция именована
@@ -172,6 +218,8 @@ Outline клавиатурного фокуса рисует глобальна�
   сетка карточек»; новый CSS — только связки ритма и фон секции (зона сайта).
 - **Do**: для тёмной секции берите готовые on-dark-пары токенов и держите
   карточки светлыми.
+- **Do**: для фото-фона берите примитив `ui-section--photo` — не собирайте
+  абсолютный фон руками (z-пара/изоляция стекинга уже решены, T17.3).
 - **Don't**: не тащите уникальный дизайн секций (герои, коллажи, анимации) в
   систему — это зона сайтов (Out of scope T8.3).
 - **Don't**: не выдумывайте «тёмные» оттенки текста поверх тёмного фона —
@@ -198,5 +246,5 @@ Outline клавиатурного фокуса рисует глобальна�
 ## Тесты
 
 - Юнит-пины контракта: `tests/unit/pattern-landing-section.test.js`.
-- Поверхность браузера (3 секции, computed on-dark-цвета, bleed-геометрия по
+- Поверхность браузера (4 секции, computed on-dark-цвета, bleed-геометрия по
   вьюпортам, axe, адаптив, эталоны): `tests/e2e/pattern-landing-section.spec.js`.
