@@ -31,6 +31,9 @@ $asset->addCss('/local/ui/' . UI_VERSION . '/ui-core.min.css');
 // Тема бренда — опциональна (в MVP все сайты в дефолтном бренде). Если тема
 // есть, она идёт СТРОГО после core (порядок каскада core → theme → сайт):
 // $asset->addCss('/local/ui/' . UI_VERSION . '/themes/theme-corp.css');
+// Паттерн-слой (T17.1) — опционален: канонические связки страниц (lpp-/dpp-/fpp-),
+// порядок каскада токены → core → patterns → сайт (patterns/README.md):
+// $asset->addCss('/local/ui/' . UI_VERSION . '/ui-patterns.css');
 $asset->addCss('/local/ui/' . UI_VERSION . '/ui-vi.min.css');
 $asset->addJs('/local/ui/' . UI_VERSION . '/ui.min.js', true); // true => в конец, defer-семантика Bitrix
 ```
@@ -42,6 +45,7 @@ $asset->addJs('/local/ui/' . UI_VERSION . '/ui.min.js', true); // true => в к�
 | Файл | Что это | Как подключается |
 |---|---|---|
 | `ui-core.min.css` | токены → base → все компоненты, баннер версии+sha | первым (порядок каскада ниже) |
+| `ui-patterns.css` | паттерн-слой (T17.1): канонические связки страниц `lpp-`/`dpp-`/`fpp-` | опционально, после core — сайты без связок слоя не подключают |
 | `ui-vi.min.css` | модуль версии для слабовидящих (ГОСТ Р 52872), отдельным файлом | после core, всегда — кнопка входа в VI на любой странице |
 | `ui.min.js` | все JS-модули (классические IIFE), публичное API `window.IraoUI` | `addJs(…, true)` — в конец страницы |
 | `fonts/` | Golos Text woff2 (400/500/600, cyr/lat) + OFL-лицензия | не подключаются вручную: `@font-face` внутри core, `url()` относительно |

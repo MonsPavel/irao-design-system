@@ -15,11 +15,13 @@
   «Применить»/«Сбросить», промо ui-card--filled) + чипы направлений (T14.8)
   над выдачей строк.
 
-  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
-  подключены только компоненты; связующие стили ниже — зона сайта (в бою —
-  template_styles.css), на стенде они живут <style>'ом рядом (showcase, не в
-  dist). AJAX-фильтрация — зона сайта (Out of scope T8.1): паттерн работает
-  перезагрузкой GET-формы и без JS (Implementation requirements п.2).
+  Границы (patterns/README.md, 02-architecture §7): подключены только
+  компоненты; связки паттерна (lpp-*) живут в ПАТТЕРН-СЛОЕ (T17.1, вариант A):
+  patterns/patterns.css → опциональный dist/ui-patterns.css — сайты группы
+  подключают по желанию, в бою возможен и собственный CSS сайт-зоны
+  (template_styles.css). AJAX-фильтрация — зона сайта (Out of scope T8.1):
+  паттерн работает перезагрузкой GET-формы и без JS (Implementation
+  requirements п.2).
 
   Референс: career-portal src/pages/vacancies.html + блок vacancy-search
   (фильтры-пилюли) + build.py render_vacancy_card (строки .vac-row) —
@@ -29,253 +31,15 @@
   label[for] РЯДОМ с пилюлей (обёртка содержит только select — триггер накрыл
   бы всё её содержимое; имя поля получают и нативный select, и триггер).
 -->
-<style>
-  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
-     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
-
-  /* Ритм крошек (T14.5): полоса 62px career-portal — components.css:14,
-     padding .breadcrumbs 20px 0 24px. Верх 20px вне шкалы отступов §3.2 —
-     перенос «как есть» (прецедент --ui-button-pad-inline, T14.3); низ 24px —
-     --ui-space-5. Компонент отступов не получает (инвариант T4.7): ритм несёт
-     шаблон — правило копируется вместе со сборкой паттерна. */
-  .lpp-breadcrumbs {
-    box-sizing: border-box;
-    padding-block: 1.25rem var(--ui-space-5);
-  }
-
-  .lpp-filters {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--ui-space-3);
-    margin: var(--ui-space-5) 0;
-  }
-
-  /* «Пилюля» фильтра (замена .vacancy-search__select-wrap career-portal):
-     геометрия и рамка — здесь, триггер модуля растягивается на обёртку.
-     box-sizing на корне связки — ADR-0002. */
-  .lpp-pill {
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    padding: var(--ui-space-1) var(--ui-space-2);
-    border: var(--ui-border-width) solid var(--ui-color-border);
-    border-radius: var(--ui-radius-pill);
-    background-color: var(--ui-color-surface);
-  }
-
-  .lpp-pill__name {
-    margin-right: var(--ui-space-2);
-    font-size: var(--ui-fs-small);
-    font-weight: var(--ui-fw-small);
-    line-height: var(--ui-lh-small);
-  }
-
-  /* Ширину пилюли задаёт сайт (career-portal: flex-basis 260px) — без неё
-     бокс нативного select'а сжимается до самой длинной опции и подпись
-     триггера подрезается. Нативный select скрыт модулем (opacity 0) — стилим
-     только геометрию. max-width: 100% — reflow-гранула 32px-гейта T3.6
-     (12rem @32px = 384px распирал обёртку до 416px на 375): на нормальной
-     базе 12rem меньше контейнера — рендер прежний. */
-  .lpp-pill {
-    max-width: 100%;
-  }
-
-  .lpp-pill select {
-    width: 12rem;
-    max-width: 100%;
-  }
-
-  /* Вертикальный ритм page-head (reset системы обнуляет margin p/h). */
-  .lpp-count {
-    margin-top: var(--ui-space-2);
-  }
-
-  .lpp-lead {
-    margin-top: var(--ui-space-3);
-  }
-
-  /* ── Ветка «строки» (T14.10): порт .vac-row career-portal (pages.css:157–182).
-     Компонент «строка списка» сознательно не заводится (Out of scope T14.10):
-     связка собирает ui-card + роли base до появления второго потребителя. ── */
-
-  /* Лента строк: шаг 16px — .vac-rows (pages.css:157). */
-  .lpp-rows {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-4);
-  }
-
-  /* Строка вакансии: горизонталь — main-блок слева, CTA-пилюля справа
-     (space-between); на узких экранах пилюля переносится под текст.
-     Внутренний gap 48px (--ui-space-7) — ОСОЗНАННОЕ ОТКЛОНЕНИЕ от 32px
-     оригинала (pages.css:164): принят ступенчатый рост с широким
-     дыханием между текстом и CTA на десктопе (решение владельца 25.10,
-     T14.10-бэклог; запинено эталонами веток rows/side). flex-direction:
-     row — сброс колонки ui-card (карточка — flex-колонка, связка обязана
-     вернуть ряд). Горизонтальный паддинг 28px — pages.css:165, вне шкалы
-     отступов §3.2 — перенос «как есть» (прецедент --ui-button-pad-inline,
-     T14.3); вертикаль — паддинг ui-card. */
-  .lpp-row {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--ui-space-7);
-    padding: var(--ui-space-5) 1.75rem;
-  }
-
-  /* Main-блок строки: заголовок-ссылка, место, описание, дата (gap 8px —
-     pages.css:168); min-width: 0 — длинные заголовки переносятся, не
-     распирают флекс. */
-  .lpp-row__main {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--ui-space-2);
-    min-width: 0;
-  }
-
-  /* Заголовок-ссылка: цвет наследует заголовку (оригинал .vac-row__title a —
-     color: inherit), подчёркивания нет — как у ссылки карточки (T4.4);
-     hover строки перекрашивает ссылку в primary (pages.css:178), только под
-     hover:hover (дисциплина EPIC-4). Ссылка НЕ растягивается на карточку
-     (ui-card--link не включается): пилюля остаётся независимой целью —
-     инвариант вложенных интерактивов ui-card (Technical considerations
-     T14.10). */
-  .lpp-row__title a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-  /* CTA-кнопки под rem-стрессом (32px-база T3.6 — reflow WCAG 1.4.4): тот же
-     приём, что .dpp-related__grid .ui-button (фикс ночного hscroll 48b0e79) —
-     только anywhere снижает min-content; при стрессе кнопка растёт в высоту,
-     на нормальной базе рендер прежний (эталоны от гранулы не зависят —
-     проверено прогоном). 32px-гейт T3.6: пилюля строки «Откликнуться» (pad
-     1.75rem×2 + слово) не входила в ячейку сетки @768 (scrollWidth +317),
-     outline-кнопка карточек выдачи — заходила в scrollbar-gutter-зону body
-     (+13px body-scrollWidth). Селектор накрывает обе: строки (pill) и
-     карточки выдачи (outline) — #lpp-grid как крючок сайт-зоны. */
-  .lpp-rows .ui-button,
-  #lpp-grid .ui-button {
-    overflow-wrap: anywhere;
-  }
-
-  @media (hover: hover) {
-    .lpp-row:hover .lpp-row__title a {
-      color: var(--ui-color-primary);
-    }
-  }
-
-  /* Место и дата — мета-строки с декоративной иконкой; шаг 6px — pages.css:190,
-     вне шкалы — перенос «как есть». */
-  .lpp-row__place,
-  .lpp-row__date {
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-  }
-
-  /* ── Ветка «сайдбар фильтров» (T14.10): порт .vac-layout/.vac-side
-     career-portal (pages.css:185–197). Мобильная база — одна колонка (сайдбар
-     в потоке перед выдачей — порядок чтения «фильтры → результаты», как в
-     базовой ветке); рост — только min-width из шкалы брейкпоинтов T2.5. ── */
-  .lpp-layout {
-    box-sizing: border-box;
-    display: grid;
-    gap: var(--ui-space-7); /* 48px — .vac-layout (pages.css:186) */
-    align-items: start; /* sticky-потомок: без start сетка растянет панель */
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Сайдбар: колонка групп (gap 16px — pages.css:193). */
-  .lpp-side {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-4);
-  }
-
-  /* Форма сайдбара: вертикальный шаг групп (16px — pages.css:193). */
-  .lpp-side__form {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-4);
-  }
-
-  /* Группа «подпись + контрол»: шаг 8px — ритм подписи обвязки ui-field. */
-  .lpp-side__group {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-2);
-  }
-
-  /* Select-пилюля сайдбара — на всю ширину панели (оригинал .vac-side__dd):
-     триггер модуля растягивается на обёртку. */
-  .lpp-side__group .lpp-pill {
-    display: flex;
-  }
-
-  .lpp-side__group .lpp-pill select {
-    width: 100%;
-  }
-
-  /* Пара кнопок «Применить»/«Сбросить». */
-  .lpp-side__actions {
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--ui-space-3);
-  }
-
-  /* Выдача ветки: заголовок h2 → чипы направлений → строки (шаг 24px). */
-  .lpp-main {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-5);
-  }
-
-  /* md (768, шкала T2.5): grid «aside | выдача» — 280px колонка сайдбара
-     оригинала (pages.css:187, вне шкалы — перенос «как есть»); aside sticky
-     top 24px (pages.css:189). Панель выше вьюпорта прокручивается внутри
-     себя — keyboard access региона даёт tabindex="0" в разметке (axe
-     scrollable-region-focusable). Осторожно с предками: sticky не работает
-     внутри overflow: hidden/auto (README паттерна detail-page). */
-  @media (min-width: 768px) {
-    .lpp-layout {
-      /* Доли на md (канон detail-page): фиксированный rem-трек под стрессом
-         32px-базы T3.6 не переживает (17.5rem = 560px @32px — выдаче на 768
-         оставались ~160px, строки ломались, scrollWidth +317) — доли сжимаются
-         обе. Rem-токен сайдбара включается от lg. */
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
-
-    .lpp-side {
-      position: sticky;
-      top: var(--ui-space-5);
-      max-height: calc(100vh - 2 * var(--ui-space-5));
-      overflow-y: auto;
-    }
-  }
-
-  /* lg (1024): сайдбар получает ширину одобренного .vac-side — 17.5rem
-     (pages.css:185); фиксированный трек безопасен: на 1024/32px = 560px
-     выдаче остаётся ~360px (min-content строк проходит). */
-  @media (min-width: 1024px) {
-    .lpp-layout {
-      grid-template-columns: 17.5rem minmax(0, 1fr);
-    }
-  }
-</style>
+<!--
+  Связки паттерна (lpp-*) — ПАТТЕРН-СЛОЙ (T17.1, вариант A — решение
+  владельца 25.10): единый исходник patterns/patterns.css собирается в
+  опциональный dist/ui-patterns.css (порядок в head: токены → core →
+  patterns → сайт; на стенде подключает сборка). Значения перенесены сюда
+  1:1 из прежнего style-блока (комментарии-источники «как есть»-литералов —
+  в исходнике слоя); разметка ниже несёт те же классы — док остаётся
+  источником правды (02-architecture §7, patterns/README.md).
+-->
 
 <section class="ui-section" id="lpp-results" aria-labelledby="lpp-title">
   <p class="ui-showcase-stand__note">
@@ -385,13 +149,16 @@
   </form>
 
   <!-- Сетка карточек: ui-grid--3 (base/layout.css, T3.4) + карточки T4.4
-       (паттерн карточки-ссылки) с тегами T4.3. Заголовки карточек — h2 по
+       (паттерн карточки-ссылки) с тегами T4.3. Крючок слоя lpp-grid — грид-
+       ветка канона (CTA-кнопки карточек не распирают флекс под 32px-стрессом,
+       patterns/patterns.css; был id-крючок стенда — в CSS системы ID
+       запрещены, 02-architecture §1). Заголовки карточек — h2 по
        семантике страницы (h1 → h2 без пропусков: гейт irao/heading-order,
        AC T8.1), вид — роль ui-h3 («классы, а не теги», T3.3: уровень тега
        определяет контекст страницы, шрифт — роль). href карточек —
        demo-адреса, как в каноническом паттерне ui-card; реальные URL — зона
        шаблона. -->
-  <div class="ui-grid ui-grid--3" id="lpp-grid" data-ui-check-layout>
+  <div class="ui-grid ui-grid--3 lpp-grid" id="lpp-grid" data-ui-check-layout>
     <article class="ui-card ui-card--hover ui-card--link">
       <p>
         <span class="ui-tag ui-tag--blue">Электроэнергетика</span>

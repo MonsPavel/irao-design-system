@@ -115,7 +115,7 @@ const focusedDescriptor = (page) =>
 
 standTest.describe('patterns/form-page: эталонная сборка (Scope) — состав и границы', () => {
   standTest(
-    'собрана без нового CSS: подключены только файлы dist, связки — <style> стенда',
+    'подключены только файлы dist, связки — паттерн-слой ui-patterns.css (T17.1)',
     async ({ stand }) => {
       const page = await stand('patterns/form-page');
       const source = await page.request
@@ -125,17 +125,26 @@ standTest.describe('patterns/form-page: эталонная сборка (Scope) 
       const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
       expect(
         stylesheets.length,
-        'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
-      ).toBe(3);
+        'внешних стилей четыре — ui-core, ui-patterns (слой T17.1) и ui-vi из dist + showcase.css каркаса',
+      ).toBe(4);
       for (const link of stylesheets) {
-        expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
-          /ui-(core|vi)\.min\.css|showcase\.css/,
-        );
+        expect(
+          link,
+          'стилевой файл — dist (в т.ч. паттерн-слой T17.1) или стили каркаса полигона',
+        ).toMatch(/ui-(core|vi)\.min\.css|ui-patterns\.css|showcase\.css/);
       }
       expect(
         source,
-        'связующие стили паттерна — inline <style> стенда (showcase, не dist)',
-      ).toContain('<style>');
+        'связки — в слое (ui-patterns.css), <style> стенда перенесён (T17.1)',
+      ).not.toContain('<style>');
+      // Порядок каскада T17.1: слой после core, до стилей каркаса полигона.
+      const patternsIdx = source.indexOf('ui-patterns.css');
+      expect(patternsIdx, 'слой подключён после ui-core').toBeGreaterThan(
+        source.indexOf('ui-core.min.css'),
+      );
+      expect(patternsIdx, 'слой подключён до стилей каркаса').toBeLessThan(
+        source.indexOf('showcase.css'),
+      );
     },
   );
 

@@ -8,10 +8,11 @@
   schema.org/JobPosting (title, hiringOrganization, jobLocation, datePosted)
   как пример «когда уместно» (ТЗ №7); для статей — Article (README паттерна).
 
-  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
-  подключены только компоненты; связующие стили ниже (dpp-*) — зона сайта
-  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
-  (showcase, не в dist). Ссылка «Откликнуться» ведёт на страницу отклика
+  Границы (patterns/README.md, 02-architecture §7): подключены только
+  компоненты; связки паттерна (dpp-*) живут в ПАТТЕРН-СЛОЕ (T17.1, вариант A):
+  patterns/patterns.css → опциональный dist/ui-patterns.css — сайты группы
+  подключают по желанию, в бою возможен и собственный CSS сайт-зоны
+  (template_styles.css). Ссылка «Откликнуться» ведёт на страницу отклика
   (T8.3) и работает без JS.
 
   Референс: career-portal src/pages/vacancy.html + event.html (aside с
@@ -23,131 +24,15 @@
   overflow: hidden/auto и у flex-родителей без align-items: start
   (Технические considerations — README паттерна).
 -->
-<style>
-  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
-     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
-
-  /* Ритм крошек (T14.5): полоса 62px career-portal — components.css:14,
-     padding .breadcrumbs 20px 0 24px. Верх 20px вне шкалы отступов §3.2 —
-     перенос «как есть» (прецедент --ui-button-pad-inline, T14.3); низ 24px —
-     --ui-space-5. Компонент отступов не получает (инвариант T4.7): ритм несёт
-     шаблон — правило копируется вместе со сборкой паттерна. */
-  .dpp-breadcrumbs {
-    box-sizing: border-box;
-    padding-block: 1.25rem var(--ui-space-5);
-  }
-
-  /* page-head: вертикальный ритм (reset системы обнуляет margin p/h). */
-  .dpp-head {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-5);
-  }
-
-  .dpp-salary {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-3);
-  }
-
-  .dpp-tags {
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--ui-space-2);
-    margin-top: var(--ui-space-3);
-  }
-
-  .dpp-meta {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-3);
-  }
-
-  /* Лейаут «контент + aside»: мобильная база — одна колонка, aside в конце
-     потока (после контента — Accessibility requirements). Рост — только
-     min-width из шкалы брейкпоинтов T2.5. */
-  .dpp-layout {
-    box-sizing: border-box;
-    display: grid;
-    gap: var(--ui-space-7);
-    align-items: start;
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  /* Основная колонка: ритм секций контента (типографика — роли T3.3). */
-  .dpp-main {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-5);
-  }
-
-  /* Aside: порт .form-aside career-portal (панель на surface-muted, паддинг
-     и радиус — как у ui-form__aside, T5.4). Sticky включается только от md —
-     в мобильной базе позиционирования нет (Implementation requirements п.1). */
-  .dpp-aside {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-4);
-    padding: var(--ui-space-5);
-    border-radius: var(--ui-radius-md);
-    background-color: var(--ui-color-surface-muted);
-  }
-
-  /* Пары «метка — значение»: UA-дефолты dl/dd обнуляются (урок ui-form:
-     dd уезжал на 40px вправо от метки на legacy-сайте со своими margin). */
-  .dpp-aside__list,
-  .dpp-aside__row,
-  .dpp-aside__label,
-  .dpp-aside__value {
-    box-sizing: border-box;
-    margin: 0;
-  }
-
-  .dpp-aside__row {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-1);
-  }
-
-  /* Сетка related-карточек: отступ от заголовка секции (reset обнуляет). */
-  .dpp-related__grid {
-    box-sizing: border-box;
-    margin-top: var(--ui-space-5);
-  }
-
-  /* CTA related-карточек под rem-стрессом (32px-база T3.6 — reflow WCAG
-     1.4.4): «Откликнуться» — одно слово, пилюля (--ui-button-pad-inline
-     1.75rem = 56px×2 на 32px-базе + слово 196px = 316px) не входит в контент
-     карточки @768 (264px) — выталкивалась за вьюпорт, hscroll +5px в
-     браузерах без scrollbar-gutter (chromium маскировал гаттером; nightly
-     40060880043). anywhere — не break-word: только он снижает min-content,
-     слово ломается лишь когда пилюля не влезает (растёт в высоту); на
-     нормальной базе рендер прежний байт-в-байт (эталоны не переснимались). */
-  .dpp-related__grid .ui-button {
-    overflow-wrap: anywhere;
-  }
-
-  /* md (768, шкала T2.5): aside — вторая колонка и sticky (top — одобренный
-     24px .form-aside). DOM-порядок не меняется: чтение — контент → aside. */
-  @media (min-width: 768px) {
-    .dpp-layout {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    }
-
-    .dpp-aside {
-      position: sticky;
-      top: var(--ui-space-5);
-    }
-  }
-
-  /* lg (1024): aside получает ширину одобренного .form-aside — токен
-     --ui-form-aside-width (400px, слой 2). */
-  @media (min-width: 1024px) {
-    .dpp-layout {
-      grid-template-columns: minmax(0, 1fr) var(--ui-form-aside-width);
-    }
-  }
-</style>
+<!--
+  Связки паттерна (dpp-*) — ПАТТЕРН-СЛОЙ (T17.1, вариант A — решение
+  владельца 25.10): единый исходник patterns/patterns.css собирается в
+  опциональный dist/ui-patterns.css (порядок в head: токены → core →
+  patterns → сайт; на стенде подключает сборка). Значения перенесены сюда
+  1:1 из прежнего style-блока (комментарии-источники «как есть»-литералов —
+  в исходнике слоя); разметка ниже несёт те же классы — док остаётся
+  источником правды (02-architecture §7, patterns/README.md).
+-->
 
 <section class="ui-section" id="dpp-page">
   <p class="ui-showcase-stand__note">

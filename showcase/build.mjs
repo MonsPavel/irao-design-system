@@ -61,6 +61,7 @@ import {
   renderGuidePage,
 } from './guides.mjs';
 import { parseTokensFile, renderTokensStand, TOKENS_SOURCES } from './tokens-stand.mjs';
+import { patternLayerProblems } from './patterns-layer-gate.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -176,6 +177,20 @@ const COMPONENTS = [
  * подключают ui-vi.min.css осознанно, последним в каскаде), поэтому ui-vi
  * исключён из предупреждения discoverComponents ниже. */
 const CSS_VI = ['a11y/vi.css'];
+
+/**
+ * Паттерн-слой (T17.1, вариант A — решение владельца 25.10): канонические
+ * связки страниц (lpp-/ddp-/fpp-) собираются ОТДЕЛЬНЫМ ОПЦИОНАЛЬНЫМ файлом
+ * dist/ui-patterns.css — ui-core.min.css не меняется, сайты подключают слой
+ * по желанию (порядок в head: токены → core → patterns → сайт). Единый
+ * исходник — patterns/patterns.css (доки-паттерны остаются источником правды:
+ * разметка несёт те же классы, синхронность пинит tests/unit/patterns-layer.
+ * test.js). Селекторы слоя — только канонические префиксы (гейт ниже,
+ * selfChecks); компонентные стили слой не дублирует. Лендинг-связки,
+ * find-bar и каркасы шапки/подвала добавит в слой своими задачами эпик
+ * (T17.9/T17.12/T17.13), не копипаста сайтов.
+ */
+const CSS_PATTERNS = ['patterns/patterns.css'];
 
 /** JS vi-модуля — последним в ui.min.js (как JS_ORDER career-portal). */
 const JS_VI = ['a11y/vi.js'];
@@ -492,6 +507,11 @@ function frame({
   withNav = true,
   withFooter = true,
   frameHeader = true,
+  // Паттерн-слой (T17.1): опциональный dist/ui-patterns.css подключают ТОЛЬКО
+  // стенды паттернов, чьи связки переехали в слой (list/detail/form-page).
+  // Опциональность поставки на полигоне воспроизводится адресно: остальные
+  // страницы слой не получают (слоя «для всех» не существует).
+  withPatterns = false,
   preMain = '',
   pageFooter = '',
   navCurrent = null,
@@ -513,6 +533,9 @@ function frame({
     `  <link rel="stylesheet" href="${d}/ui-core.min.css">`,
   ];
   if (withVi) head.push(`  <link rel="stylesheet" href="${d}/ui-vi.min.css">`);
+  // Паттерн-слой — ПОСЛЕ ui-core, ДО стилей каркаса (токены → core → patterns
+  // → сайт; T17.1). Подключение адресное: см. withPatterns выше.
+  if (withPatterns) head.push(`  <link rel="stylesheet" href="${d}/ui-patterns.css">`);
   // Стили каркаса — ПОСЛЕ ui-core (редизайн 19.10): стилизуют только
   // .ui-showcase-* и каркасные элементы вокруг main, демо-областей не касаются.
   if (withFrameCss) head.push(`  <link rel="stylesheet" href="${d}/showcase.css">`);
@@ -874,13 +897,14 @@ async function generateShowcase({ themes }) {
   }
 
   // Стенд «patterns/list-page» (T8.1) — паттерн «Страница списка»: эталонная
-  // сборка страницы списка из готовых компонентов БЕЗ нового CSS (доки-
-  // паттерны живут в patterns/<name>/, CONTRIBUTING). Источник — канонический
-  // файл паттерна patterns/list-page/list-page.html: он же стенд (обе ветки —
-  // «с данными» и «пустая выдача» — рядом, как якоря-состояния T5.6), связки
-  // паттерна — <style> в нём (зона сайта, в dist не попадает). Каркас БЕЗ
-  // служебного <h1>: заголовок страницы несёт сам паттерн — h1 page-head
-  // (как error-404; два h1 — гейт irao/one-h1).
+  // сборка страницы списка из готовых компонентов (доки-паттерны живут в
+  // patterns/<name>/, CONTRIBUTING). Источник — канонический файл паттерна
+  // patterns/list-page/list-page.html: он же стенд (обе ветки — «с данными»
+  // и «пустая выдача» — рядом, как якоря-состояния T5.6); связки lpp-* —
+  // паттерн-слой dist/ui-patterns.css (T17.1, withPatterns: true ниже),
+  // разметка несёт те же классы. Каркас БЕЗ служебного <h1>: заголовок
+  // страницы несёт сам паттерн — h1 page-head (как error-404; два h1 —
+  // гейт irao/one-h1).
   const listPageStandSource = join(ROOT, 'patterns', 'list-page', 'list-page.html');
   if (existsSync(listPageStandSource)) {
     mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
@@ -890,6 +914,8 @@ async function generateShowcase({ themes }) {
       title: 'patterns/list-page — irao-ui showcase',
       // Без служебного h1: h1 несёт сам паттерн (page-head страницы списка).
       main: readFileSync(listPageStandSource, 'utf8').trim(),
+      // Связки lpp-* — паттерн-слой (T17.1): стенд подключает dist/ui-patterns.css.
+      withPatterns: true,
       themes,
       navCurrent: { kind: 'stand', name: 'patterns/list-page' },
       navMode: 'strip',
@@ -902,12 +928,12 @@ async function generateShowcase({ themes }) {
 
   // Стенд «patterns/detail-page» (T8.2) — паттерн «Детальная страница»:
   // эталонная сборка детальной страницы (крошки → page-head → контент+aside
-  // → related) из готовых компонентов БЕЗ нового CSS; JobPosting-микроразметка
-  // эталона — поверхность schema-парсера e2e. Источник — канонический файл
-  // паттерна patterns/detail-page/detail-page.html (он же стенд), связки
-  // паттерна — <style> в нём (зона сайта, в dist не попадает). Каркас БЕЗ
-  // служебного <h1>: заголовок страницы несёт сам паттерн — h1 page-head
-  // (как patterns/list-page; два h1 — гейт irao/one-h1).
+  // → related) из готовых компонентов; JobPosting-микроразметка эталона —
+  // поверхность schema-парсера e2e. Источник — канонический файл
+  // паттерна patterns/detail-page/detail-page.html (он же стенд); связки
+  // dpp-* — паттерн-слой dist/ui-patterns.css (T17.1, withPatterns: true
+  // ниже). Каркас БЕЗ служебного <h1>: заголовок страницы несет сам паттерн
+  // — h1 page-head (как patterns/list-page; два h1 — гейт irao/one-h1).
   const detailPageStandSource = join(ROOT, 'patterns', 'detail-page', 'detail-page.html');
   if (existsSync(detailPageStandSource)) {
     mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
@@ -917,6 +943,8 @@ async function generateShowcase({ themes }) {
       title: 'patterns/detail-page — irao-ui showcase',
       // Без служебного h1: h1 несёт сам паттерн (page-head детальной страницы).
       main: readFileSync(detailPageStandSource, 'utf8').trim(),
+      // Связки dpp-* — паттерн-слой (T17.1): стенд подключает dist/ui-patterns.css.
+      withPatterns: true,
       themes,
       navCurrent: { kind: 'stand', name: 'patterns/detail-page' },
       navMode: 'strip',
@@ -932,10 +960,11 @@ async function generateShowcase({ themes }) {
   // Стенд «patterns/form-page» (T8.3) — паттерн «Страница формы»: эталонная
   // сборка страницы-формы с информационной колонкой (крошки → page-head →
   // ui-form с aside-сводкой вакансии; полный форма-цикл T5.6 — ветки «живая
-  // форма» / «серверный ответ» / success — рядом как якоря-состояния) БЕЗ
-  // нового CSS; связки паттерна (fpp-*) — <style> в нём (зона сайта, в dist
-  // не попадает). Каркас БЕЗ служебного <h1>: заголовок страницы несёт сам
-  // паттерн — h1 page-head (как patterns/list-page; два h1 — гейт irao/one-h1).
+  // форма» / «серверный ответ» / success — рядом как якоря-состояния);
+  // связки fpp-* — паттерн-слой dist/ui-patterns.css (T17.1, withPatterns:
+  // true ниже). Каркас БЕЗ служебного <h1>: заголовок страницы несет сам
+  // паттерн — h1 page-head (как patterns/list-page; два h1 — гейт
+  // irao/one-h1).
   const formPageStandSource = join(ROOT, 'patterns', 'form-page', 'form-page.html');
   if (existsSync(formPageStandSource)) {
     mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
@@ -945,6 +974,8 @@ async function generateShowcase({ themes }) {
       title: 'patterns/form-page — irao-ui showcase',
       // Без служебного h1: h1 несёт сам паттерн (page-head страницы формы).
       main: readFileSync(formPageStandSource, 'utf8').trim(),
+      // Связки fpp-* — паттерн-слой (T17.1): стенд подключает dist/ui-patterns.css.
+      withPatterns: true,
       themes,
       navCurrent: { kind: 'stand', name: 'patterns/form-page' },
       navMode: 'strip',
@@ -1380,6 +1411,7 @@ async function generateShowcase({ themes }) {
       '      <ul class="ui-showcase-dist-list">',
       '        <li><code>ui-core.min.css</code> — tokens → base → компоненты;</li>',
       '        <li><code>ui-vi.min.css</code> — VI-модуль ГОСТ Р 52872, подключение осознанное;</li>',
+      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1), подключение опционально;</li>',
       '        <li><code>ui.min.js</code> — все JS-модули (IIFE).</li>',
       '      </ul>',
       '    </section>',
@@ -1418,6 +1450,8 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
   for (const name of [
     'ui-core.min.css',
     'ui-vi.min.css',
+    // Паттерн-слой (T17.1): опциональный файл поставки — структура §6.1.
+    'ui-patterns.css',
     'ui.min.js',
     'ui.dev.js',
     'fonts',
@@ -1432,9 +1466,27 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
     !existsSync(join(DIST, 'showcase.css')),
     'dist/showcase.css не должен существовать: стили каркаса — зона полигона (ADR-0006)',
   );
-  for (const name of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js', 'ui.dev.js']) {
+  for (const name of [
+    'ui-core.min.css',
+    'ui-vi.min.css',
+    'ui-patterns.css',
+    'ui.min.js',
+    'ui.dev.js',
+  ]) {
     const content = readFileSync(join(DIST, name), 'utf8');
     assert(content.startsWith('/*! irao-ui v'), `баннер версии не в начале dist/${name}`);
+  }
+  // Гейт паттерн-слоя (T17.1, Implementation requirements п.2 — «проверка в
+  // сборке»): селекторы слоя — только канонические префиксы lpp-|dpp-|fpp-
+  // (потомки — компоненты ui-*), ID и чужие namespace-крючки запрещены —
+  // защита от превращения слоя в свалку. Логика — showcase/patterns-layer-
+  // gate.mjs (чистая функция, импортируется и юнит-пинами — ревью T17.1:
+  // прежний инлайн-гейт с match без /g проверял только ПЕРВОЕ правило).
+  {
+    const layerProblems = patternLayerProblems(
+      readFileSync(join(ROOT, 'patterns/patterns.css'), 'utf8'),
+    );
+    assert(layerProblems.length === 0, `гейт селекторов слоя: ${layerProblems.join('; ')}`);
   }
   // Страницы используют собранный dist, не исходники (AC T1.3). Доки по
   // шаблону T10.1 — в том же обходе (ревью T10.1: сломанный rel каркаса
@@ -1513,6 +1565,22 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
         'standalone.html: страница проверки dist — только ui-core.min.css, без стилей каркаса',
       );
     }
+  }
+  // Паттерн-слой на полигоне (T17.1): подключение адресно — только стенды
+  // трёх паттернов, чьи связки живут в слое; остальные страницы (и каталог)
+  // слой не получают — опциональность воспроизводится на полигоне.
+  const patternLayerStands = new Set([
+    'stands/patterns/list-page.html',
+    'stands/patterns/detail-page.html',
+    'stands/patterns/form-page.html',
+  ]);
+  for (const rel of pages) {
+    const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');
+    const hasLayerLink = html.includes('ui-patterns.css">');
+    assert(
+      hasLayerLink === patternLayerStands.has(rel),
+      `${rel}: подключение ui-patterns.css ${patternLayerStands.has(rel) ? 'ожидается' : 'не ожидается'} (слой опционален, получатели — стенды трёх паттернов)`,
+    );
   }
   // Идемпотентность баннера: ни дат, ни меток времени.
   assert(
@@ -1594,6 +1662,10 @@ async function main() {
 
   const viCss = await bundle(CSS_VI, 'css');
 
+  // Паттерн-слой (T17.1): тот же конвейер, что у ui-core — минификация
+  // esbuild + баннер версии (emitRuntime ниже); подключение опционально.
+  const patternsCss = await bundle(CSS_PATTERNS, 'css');
+
   const jsFiles = [...COMPONENTS.map((name) => `components/${name}/${name}.js`), ...JS_VI].filter(
     (rel) => existsSync(join(ROOT, rel)),
   );
@@ -1613,6 +1685,9 @@ async function main() {
     mkdirSync(target, { recursive: true });
     writeFileSync(join(target, 'ui-core.min.css'), banner + coreCss);
     writeFileSync(join(target, 'ui-vi.min.css'), banner + viCss);
+    // Паттерн-слой (T17.1) — опциональный файл поставки: подключение — решение
+    // сайта, порядок в head после ui-core (токены → core → patterns → сайт).
+    writeFileSync(join(target, 'ui-patterns.css'), banner + patternsCss);
     writeFileSync(join(target, 'ui.min.js'), banner + uiJs);
     writeFileSync(join(target, 'ui.dev.js'), banner + uiDevJs);
     copyFonts(target);
@@ -1637,6 +1712,9 @@ async function main() {
   console.log(`irao-ui build: v${version} · git ${sha}`);
   console.log(`  dist/ui-core.min.css  ${coreCss.length} байт css + баннер`);
   console.log(`  dist/ui-vi.min.css    ${viCss.length} байт css + баннер`);
+  console.log(
+    `  dist/ui-patterns.css  ${patternsCss.length} байт css + баннер (паттерн-слой T17.1, опциональный)`,
+  );
   console.log(
     `  dist/ui.min.js        ${uiJs.length} байт js + баннер (${jsFiles.length} модулей)`,
   );

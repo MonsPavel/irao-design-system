@@ -203,15 +203,15 @@ jobs:
         run: zip -r irao-ui-dist.zip dist
 
       # Проверка содержимого артефакта в джобе (implementation requirements 1):
-      # полный dist по 02-architecture §6.1 — ui-core/ui-vi/ui.min.js +
-      # ui.dev.js (T12.2) + fonts/ + themes/. Баннер версии сверяется с
-      # package.json — на теге гейт gates уже гарантировал совпадение версии
-      # с тегом, значит в артефакте = тег.
+      # полный dist по 02-architecture §6.1 — ui-core/ui-vi/ui-patterns.css
+      # (паттерн-слой T17.1) /ui.min.js + ui.dev.js (T12.2) + fonts/ + themes/.
+      # Баннер версии сверяется с package.json — на теге гейт gates уже
+      # гарантировал совпадение версии с тегом, значит в артефакте = тег.
       - name: Verify zip structure (02-architecture §6.1) and banner (T1.3)
         run: |
           ZIP="irao-ui-dist.zip"
           CONTENT="$(unzip -l "$ZIP")"
-          for path in dist/ui-core.min.css dist/ui-vi.min.css dist/ui.min.js dist/ui.dev.js dist/fonts/ dist/themes/; do
+          for path in dist/ui-core.min.css dist/ui-vi.min.css dist/ui-patterns.css dist/ui.min.js dist/ui.dev.js dist/fonts/ dist/themes/; do
             if ! echo "$CONTENT" | grep -qF "$path"; then
               echo "zip-артефакт не соответствует 02-architecture §6.1: нет $path"
               exit 1

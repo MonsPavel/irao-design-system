@@ -253,8 +253,11 @@ describe('механизм deprecation: модуль window.IraoUI.dev (base/dep
 describe('сборка: dev-вариант ui.min.js (T12.2, showcase/build.mjs)', () => {
   it('ui.dev.js выпускается в обе точки раздачи и получает баннер версии + попадает в selfChecks', () => {
     expect(buildSource).toContain("join(target, 'ui.dev.js')");
+    // Список баннер-проверки рантайма: ui-patterns.css добавлен T17.1
+    // (паттерн-слой — четвёртый CSS-файл поставки с баннером); \s* —
+    // однострочный/многострочный вид списка не влияет на пин.
     expect(buildSource).toMatch(
-      /'ui-core\.min\.css', 'ui-vi\.min\.css', 'ui\.min\.js', 'ui\.dev\.js'/,
+      /'ui-core\.min\.css',\s*'ui-vi\.min\.css',\s*'ui-patterns\.css',\s*'ui\.min\.js',\s*'ui\.dev\.js'/,
     );
   });
 
