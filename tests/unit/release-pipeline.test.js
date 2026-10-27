@@ -33,6 +33,8 @@ describe('release.yml: гейты → матрица → VI-smoke → build → 
     for (const entry of [
       'dist/ui-core.min.css',
       'dist/ui-vi.min.css',
+      // Паттерн-слой (T17.1) — опциональный файл поставки, едет в zip.
+      'dist/ui-patterns.css',
       'dist/ui.min.js',
       // Ревью T12.2: dev-вариант части поставки (ui.dev.js, T12.2) — zip обязан
       // содержать его СТРУКТУРНО, а не «случайно уехал целиком» (zip -r dist).

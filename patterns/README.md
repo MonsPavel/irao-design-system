@@ -3,19 +3,35 @@
 Доки-паттерны страниц (header, list-page, form-page), собранные из готовых компонентов.
 
 - Можно: HTML из канонических паттернов `components/`.
-- Нельзя: новый CSS/JS — кода, попадающего в dist, здесь нет (02-architecture §7).
+- Нельзя: новый CSS/JS — кода, попадающего в dist, здесь нет (02-architecture §7),
+  КРОМЕ паттерн-слоя (оговорка T17.1, решение владельца 25.10 — вариант A).
+
+## Паттерн-слой (T17.1)
+
+Слой = связки, которых НЕТ в компонентах: канонические композиции страниц
+поверх готовых ui-компонентов. Каноны list/detail/form-страниц (классы
+`lpp-*` list-page, `dpp-*` detail-page, `fpp-*` form-page) живут единым
+исходником [`patterns.css`](patterns.css) и собираются в **опциональный**
+`dist/ui-patterns.css` (порядок в head: токены → core → patterns → сайт;
+`ui-core.min.css` не меняется). Доки-паттерны остаются источником правды:
+их HTML несёт те же классы, слой синхронен с разметкой (пины —
+`tests/unit/patterns-layer.test.js`, гейт префиксов — в сборке). Слой
+пополняют задачи эпика EPIC-17 (лендинг-связки T17.9, find-bar и пилюля
+фильтра T17.12, каркасы шапки/подвала T17.13) — не руками сайтов.
 
 Паттерны:
 
 - [`list-page/`](list-page/README.md) — «Страница списка» (T8.1): page-head с
-  фильтрами, сетка карточек, пагинация, empty-состояние; стенд —
-  `stands/patterns/list-page.html`.
+  фильтрами, сетка карточек, пагинация, empty-состояние; связки `lpp-*` —
+  в паттерн-слое (см. выше); стенд — `stands/patterns/list-page.html`.
 - [`detail-page/`](detail-page/README.md) — «Детальная страница» (T8.2):
   крошки, page-head, контент + sticky-aside, related, schema.org-кейс
-  (JobPosting/Article); стенд — `stands/patterns/detail-page.html`.
+  (JobPosting/Article); связки `dpp-*` — в паттерн-слое; стенд —
+  `stands/patterns/detail-page.html`.
 - [`form-page/`](form-page/README.md) — «Страница формы» (T8.3): крошки +
   h1 + lead, ui-form с aside-сводкой вакансии (до формы в порядке чтения),
-  полный форма-цикл (T5.6); стенд — `stands/patterns/form-page.html`.
+  полный форма-цикл (T5.6); связки `fpp-*` — в паттерн-слое; стенд —
+  `stands/patterns/form-page.html`.
 - [`landing-section/`](landing-section/README.md) — «Landing-секция» (T8.3):
   формула секции, тёмные секции (on-dark-пары), full-bleed в контейнере,
   правило границы «система / сайт»; mini-эталон из 3 секций; стенд —
