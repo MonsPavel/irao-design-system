@@ -111,7 +111,7 @@
 | T15.9 | done | смержена |
 | T17.1 | done | смержена |
 | T17.2 | done | смержена |
-| T17.3 | todo | EPIC-17: фото-секция ui-section--photo + оверлей-градиенты — приём 5 фоновых секций пилота (hero/production/holding/why-us/company-banner) |
+| T17.3 | done | смержена |
 | T17.4 | done | смержена |
 | T17.5 | todo | EPIC-17: медиа-карточка ui-card--media — event/article/intern-person (3 копии одного каркаса) |
 | T17.6 | done | смержена |
