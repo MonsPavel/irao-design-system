@@ -132,33 +132,16 @@
 
 /* ── hero (сайт-зона) ── */
 
+/* Фото-фон/оверлей — ui-section--photo (T17.3, канон --fade-bottom);
+   ритм ui-section погашен: вертикальную геометрию несёт min-height +
+   паддинги __content (паритет высот compare ±4px). */
 .cp-hero {
   display: flex;
   position: relative;
   flex-direction: column;
   overflow: hidden;
   min-height: 50.5rem;
-}
-
-.cp-hero__bg {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-
-.cp-hero__bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, var(--ui-color-surface) 0%, transparent 35%),
-    linear-gradient(180deg, transparent 60%, var(--ui-color-primary-a94) 100%);
-}
-
-.cp-hero__bg img {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
+  padding: 0;
 }
 
 .cp-hero__content {
@@ -260,38 +243,17 @@
 /* ── production: карусель (T17.7 — компонент ui-carousel) ──
    Вид карусели (стрелки on-dark, табы-степпер с рамкой, активный glass-dark)
    несёт ui-carousel; здесь — только композиция секции (bg/glow/позиции).
-   Данные слайдов — data-ui-carousel-slides, поведение — IraoUI.carousel. */
+   Данные слайдов — data-ui-carousel-slides, поведение — IraoUI.carousel.
+
+   Фото-фон и glow-оверлей — ui-section--photo (T17.3, канон --glow):
+   оверлей ДС красится под контентом, pointer-events-артефакт site-зоны
+   (original production.css:38) уходит вместе с правилом. Ритм ui-section
+   погашен — вертикальную геометрию несёт паддинг __body. */
 
 .cp-production {
   position: relative;
   overflow: hidden;
-}
-
-.cp-production__bg {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-
-.cp-production__bg img {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
-}
-
-/* pointer-events: none — оригинал (production.css:38): absolute-оверлей без
-   него перехватывает клики по табам/стрелкам компонента (артефакт пилота
-   снят при переносе карусели на ui-carousel). */
-.cp-production__glow {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--ui-color-primary) 88%, transparent) 0%,
-    color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%,
-    transparent 100%
-  );
-  pointer-events: none;
+  padding: 0;
 }
 
 .cp-production__photo {
@@ -399,20 +361,11 @@
 
 /* ── holding: фон + статистика (сайт-зона) ── */
 
+/* Фото-фон — ui-section--photo (T17.3, без оверлея); ритм ui-section
+   погашен — вертикальную геометрию несёт __inner (space-8). */
 .cp-holding {
   position: relative;
-}
-
-.cp-holding__bg {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-
-.cp-holding__bg img {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
+  padding: 0;
 }
 
 .cp-holding__inner {
@@ -453,20 +406,11 @@
 
 /* ── why-us: тёмная секция с карточками (сайт-зона) ── */
 
+/* Фото-фон — ui-section--photo (T17.3, без оверлея); ритм ui-section
+   погашен — вертикальную геометрию несёт __inner (space-8). */
 .cp-why-us {
   position: relative;
-}
-
-.cp-why-us__bg {
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-}
-
-.cp-why-us__bg img {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
+  padding: 0;
 }
 
 .cp-why-us__inner {
@@ -1585,34 +1529,32 @@ a.cp-intern-card {
 }
 
 /* CTA-баннер (banner-card оригинала, pages.css:656–674): min-height 320px,
-   низ 56px company-section-gap; фото — подложка (object-fit — ui-image--cover) */
+   низ 56px company-section-gap; фото-фон и тинт — фото-секция
+   ui-section--photo (T17.3): __bg-подложка ДС + оверлей --tint c хуком
+   --ui-section-overlay-tint (ступень лестницы T14.7 — primary-a55,
+   pages.css:666). Ритм ui-section погашен — высоту держит min-height +
+   тело; клип радиуса — overflow: hidden. */
 .cp-company-banner {
+  --ui-section-overlay-tint: var(--ui-color-primary-a55);
   display: flex;
   position: relative;
   align-items: center;
   overflow: hidden;
   min-height: 20rem;
   margin-bottom: 3.5rem;
+  padding: 0;
   border-radius: var(--ui-radius-md);
 }
 
-.cp-company-banner__photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
 /* тело — CTA-центр-композиция на модификаторе ui-card--cta (T17.8):
-   раскладку несёт компонент; оверлей primary-a55 (pages.css:666) и паддинг
-   40px «как есть» (pages.css:667) остаются сайт-зоной до фото-секции T17.3
-   (специфичность 0-2-0 против 0-2-0 модификатора, каскад после бандла ДС);
-   border гасится — заливка-оверлей без рамки. */
+   раскладку несёт компонент; фон гасится — тинт красит оверлей секции
+   (ui-section__overlay--tint за телом, T17.3), паддинг 40px «как есть»
+   (pages.css:667); border гасится — заливка-оверлей без рамки. */
 .cp-company-banner .cp-company-banner__body {
   width: 100%;
   padding: 2.5rem;
   border: 0;
-  background-color: var(--ui-color-primary-a55);
+  background-color: transparent;
   color: var(--ui-color-text-on-dark);
 }
 
