@@ -58,7 +58,7 @@ const PAIRS = [
 ];
 
 /** data-* первой строки — селектор строки пер-сторонний (см. шапку). */
-const ROW_SELECTOR = { original: '.vac-row', pilot: '.cp-vac-row' };
+const ROW_SELECTOR = { original: '.vac-row', pilot: '.lpp-row' };
 const TITLE_ANCHOR = { original: '.vac-row__title a', pilot: '.cp-vac-row__title a' };
 
 const DATA_ATTRS = [

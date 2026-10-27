@@ -828,14 +828,10 @@
 
 /* ── внутренние страницы ── */
 
-/* Ритм крошек (T14.5): связка из канона list-page (.lpp-breadcrumbs) —
-   полоса 62px оригинала (components.css:14, padding 20px 0 24px); верх
-   20px вне шкалы отступов — перенос «как есть», низ — --ui-space-5.
-   Компонент отступов не получает (инвариант T4.7): ритм несёт шаблон. */
-.cp-breadcrumbs {
-  box-sizing: border-box;
-  padding-block: 1.25rem var(--ui-space-5);
-}
+/* Ритм крошек — паттерн-слой T17.1 (lpp-breadcrumbs: полоса 62px оригинала,
+   components.css:14 — padding 20px 0 24px): дубликат cp-breadcrumbs снят,
+   разметка breadcrumbs() build.mjs несёт канон. Компонент отступов не
+   получает (инвариант T4.7): ритм несёт шаблон. */
 
 .cp-page-head {
   display: flex;
@@ -945,116 +941,29 @@
   color: var(--ui-color-text-on-dark);
 }
 
-/* Строка вакансии (T16.5): паддинг 24/28 — .vac-row (pages.css:165);
-   горизонталь 28px вне шкалы отступов §3.2 — перенос «как есть» (прецедент
-   --ui-button-pad-inline), вертикаль — --ui-space-5. flex-direction: row —
-   сброс колонки ui-card (карточка — flex-колонка, связка обязана вернуть
-   ряд — канон .lpp-row, list-page.html:110–119). box-sizing на корне
-   связки — ADR-0002. */
-.cp-vac-rows {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-4);
-}
+/* ── Строки/сайдбар вакансий — ПАТТЕРН-СЛОЙ (T17.1) ──
+   Дубликаты канона list-page (cp-breadcrumbs, cp-vac-rows, cp-vac-row*,
+   cp-vac-layout, cp-vac-side*) сняты: разметка build.mjs несёт классы
+   lpp-* из ds/ui-patterns.css (единый исходник patterns/patterns.css —
+   «канон исполняем», урок T16.5 о дрейфе копипасты). Остались ТОЛЬКО шимы
+   сайт-зоны для сущностей, которых в слое пока нет: пилюля фильтра cp-pill
+   (T17.12 переведёт на канон ДС) и положение текстовой кнопки «Сбросить».
+   cp-page-head/cp-find-bar — ритм страниц без канона в док-HTML (полное
+   снятие — adoption T17.12/T17.14). Раскладка страницы: cp-vac-main —
+   main-колонка с findBar/chips/пагинацией (нет в списке снятия T17.1). */
 
-.cp-vac-row {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: row;
-  /* 32px — .vac-row (pages.css:164; T16.5-бэклог: --ui-space-4 = 16px
-     расходились с оригиналом; на 1440 их поглощал space-between, на
-     сжатых ширинах строка сжималась сильнее оригинала) */
-  gap: var(--ui-space-6);
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--ui-space-5) 1.75rem;
-}
-
-/* Main-блок: шаг 8px — .vac-row__main (pages.css:168; канон
-   .lpp-row__main, list-page.html:124–131); min-width: 0 — длинные
-   заголовки переносятся, не распирают флекс. */
-.cp-vac-row__main {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-  min-width: 0;
-}
-
-/* Заголовок строки — роль ui-h6 (T16.12: канон «заголовок карточки
-   списков» 20/500; ui-h4 давал 28px на lg — REPORT §8.2 №6). Цвет роль не
-   задаёт — наследует body (--ui-color-text #1F1F1F — variables.css:9
-   оригинала, не pages.css), НЕ heading-navy заголовочных ролей. */
-
-/* Ссылка заголовка — plain <a> (ui-link снят): цвет наследует заголовку,
-   подчёркивания нет — .vac-row__title a (pages.css:172), канон
-   .lpp-row__title a (list-page.html:140–143). Overlay оригинала (a::after
-   inset:0 — pages.css:174 + position:relative строки :160) не
-   воспроизводится по решению спеки T16.5 п.1: кликабельная зона — поле
-   заголовка, пилюля остаётся независимой целью — зона клика уже, чем в
-   оригинале (осознанное отклонение, REPORT §8.2 №8). */
-.cp-vac-row__title a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* Hover строки перекрашивает ссылку в primary (pages.css:178) — только под
-   hover-гвардом (дисциплина EPIC-4); канон list-page.html:145–148. */
-@media (hover: hover) {
-  .cp-vac-row:hover .cp-vac-row__title a {
-    color: var(--ui-color-primary);
-  }
-}
-
-.cp-vac-row__place,
-.cp-vac-row__date {
-  display: inline-flex;
-  gap: var(--ui-space-1);
-  align-items: center;
-  color: var(--ui-color-text-muted);
-}
-
-.cp-vac-row__short {
-  color: var(--ui-color-text-muted);
-}
-
-/* Раскладка списка вакансий: сайдбар фильтров + выдача */
-.cp-vac-layout {
-  display: grid;
-  gap: var(--ui-space-5);
-  align-items: start;
-  grid-template-columns: 20rem 1fr;
-}
-
-.cp-vac-side {
-  display: flex;
-  position: sticky;
-  top: var(--ui-space-3);
-  flex-direction: column;
-  gap: var(--ui-space-4);
-}
-
-.cp-vac-side__group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
-
-/* Сайдбар-вариант пилюли селекта: вертикальная, на всю ширину колонки */
-.cp-vac-side .cp-pill {
+/* Сайдбар-вариант пилюли селекта: вертикальная, на всю ширину колонки.
+   Шим на крючке канона lpp-side__group, пока пилюля — cp-pill (T17.12):
+   flex-basis 12rem базового cp-pill в колонке панели — высотный размер. */
+.lpp-side__group .cp-pill {
   flex-basis: auto;
-}
-
-.cp-vac-side__label {
-  font-size: var(--ui-fs-small);
-  font-weight: var(--ui-fw-small);
 }
 
 /* «Сбросить» — прижата к левому краю панели (оригинал .vac-side__reset
    align-self: flex-start, pages.css:101). Вид строки (fs 14/400, underline,
    muted, высота по строке, а не 52px) несёт сам компонент ui-button--text
    (T16.7; REPORT §8.2 №6/№8) — сайт-зона задаёт только положение. */
-.cp-vac-side > .ui-button--text {
+.lpp-side > .ui-button--text {
   box-sizing: border-box;
   align-self: flex-start;
 }
@@ -1781,13 +1690,9 @@ a.cp-intern-card {
     grid-template-columns: 1fr;
   }
 
-  .cp-vac-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .cp-vac-side {
-    position: static;
-  }
+  /* Лейаут/сайдбар вакансий — слой lpp-layout/lpp-side (T17.1): мобильная
+     база и ступени канона (одна колонка → md) вместо лестницы 1023 —
+     Implementation requirements T17.1 п.4. */
 
   /* галерея статьи в колонку (pages.css:914) */
   .cp-article-gallery {
@@ -1837,10 +1742,9 @@ a.cp-intern-card {
     grid-column: span 1;
   }
 
-  .cp-vac-row {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  /* Строка вакансии — слой lpp-row (T17.1): на узких экранах пилюля
+     переносится под текст flex-wrap'ом канона; лестничная колонка 767
+     копипасты снята (Implementation requirements T17.1 п.4). */
 
   .cp-company-stats,
   .cp-company-adv {

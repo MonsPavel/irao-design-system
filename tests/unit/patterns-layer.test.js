@@ -316,11 +316,12 @@ describe('пилот career-portal: слой подключён, ваканси�
 
   it('слой копируется в dist/ds/ и подключается в порядке токены → core → patterns → сайт', () => {
     expect(build, 'рантайм ДС копирует ui-patterns.css').toContain("'ui-patterns.css'");
-    const coreIdx = build.indexOf('ds/ui-core.min.css');
-    const patternsIdx = build.indexOf('ds/ui-patterns.css');
-    const siteIdx = build.indexOf('pilot.css"');
+    // Якоря — link-теги head (упоминания в комментариях раньше шаблона страницы).
+    const coreIdx = build.indexOf('<link rel="stylesheet" href="ds/ui-core.min.css">');
+    const patternsIdx = build.indexOf('<link rel="stylesheet" href="ds/ui-patterns.css">');
+    const siteIdx = build.indexOf('<link rel="stylesheet" href="pilot.css">');
     expect(coreIdx, 'core в head').toBeGreaterThan(-1);
-    expect(patternsIdx, 'слой в head после core').toBeGreaterThan(coreIdx);
+    expect(patternsIdx, 'слой в head после core (и после vi)').toBeGreaterThan(coreIdx);
     expect(siteIdx, 'сайт-зона после слоя').toBeGreaterThan(patternsIdx);
   });
 

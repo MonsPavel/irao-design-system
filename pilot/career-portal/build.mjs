@@ -232,7 +232,7 @@ function breadcrumbs(items) {
     </li>`;
     })
     .join('\n');
-  return `<nav class="ui-breadcrumbs cp-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
+  return `<nav class="ui-breadcrumbs lpp-breadcrumbs" aria-label="Хлебные крошки">\n  <ol class="ui-breadcrumbs__list" role="list" itemscope itemtype="https://schema.org/BreadcrumbList">\n${list}\n  </ol>\n</nav>`;
 }
 
 /** поднавигация разделов «школьникам и студентам» (T16.16) — вид nav.tabs-pill
@@ -309,12 +309,18 @@ function findBar({ action, placeholder, label, text, variant = 'accent' }) {
  *  слово титула — split по пробелу: в JS split() без аргумента отдаёт
  *  строку целиком, канон — .trim().split(/\s+/)[0], как Python str.split()), accessible «1»/«0», salary — только цифры, date yyyymmdd. */
 function vacancyRow(v) {
-  return `<article class="ui-card ui-card--hover cp-vac-row" data-region="${esc(v.region)}" data-city="${esc(v.city)}" data-spec="${esc(v.specialization)}" data-segment="${esc(v.segment)}" data-company="${esc(v.company)}" data-exp="${esc(v.experience)}" data-position="${esc(v.title.trim().split(/\s+/)[0])}" data-accessible="${v.accessible ? '1' : '0'}" data-salary="${esc(v.salary.replace(/\D/g, ''))}" data-date="${esc(v.date.split('.').reverse().join(''))}">
-  <div class="cp-vac-row__main">
-    <h2 class="ui-h6 cp-vac-row__title"><a href="vacancy.html">${esc(v.title)}</a></h2>
-    <span class="cp-vac-row__place ui-small">${PLACE_PIN}${esc(v.place)}</span>
-    <p class="cp-vac-row__short ui-small">${esc(v.short)}</p>
-    <time class="cp-vac-row__date ui-small" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
+  // Классы связки — ПАТТЕРН-СЛОЙ (T17.1): lpp-row/lpp-rows канона list-page
+  // из ds/ui-patterns.css (копипаста связки снята из pilot.css). Мета-
+  // строки place/short/date — muted ролью ui-text--muted в разметке (слой
+  // цвет не переобъявляет; в копипасте цвет нес pilot.css). Уровень тега
+  // заголовка (h2) — семантика страницы (h1 → h2 строки без пропусков), вид —
+  // роль ui-h6 (T16.12) — «классы, а не теги» (T3.3), как в каноне.
+  return `<article class="ui-card ui-card--hover lpp-row" data-region="${esc(v.region)}" data-city="${esc(v.city)}" data-spec="${esc(v.specialization)}" data-segment="${esc(v.segment)}" data-company="${esc(v.company)}" data-exp="${esc(v.experience)}" data-position="${esc(v.title.trim().split(/\s+/)[0])}" data-accessible="${v.accessible ? '1' : '0'}" data-salary="${esc(v.salary.replace(/\D/g, ''))}" data-date="${esc(v.date.split('.').reverse().join(''))}">
+  <div class="lpp-row__main">
+    <h2 class="ui-h6 lpp-row__title"><a href="vacancy.html">${esc(v.title)}</a></h2>
+    <span class="lpp-row__place ui-small ui-text--muted">${PLACE_PIN}${esc(v.place)}</span>
+    <p class="lpp-row__short ui-small ui-text--muted">${esc(v.short)}</p>
+    <time class="lpp-row__date ui-small ui-text--muted" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
   </div>
   ${pillButton('откликнуться', { target: 'cp-apply-dialog' })}
 </article>`;
@@ -677,6 +683,9 @@ function page({ title, main, staticHeader = true, bodyClass = '' }) {
   <link rel="preload" href="ds/fonts/golos-500-cyr.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="ds/ui-core.min.css">
   <link rel="stylesheet" href="ds/ui-vi.min.css">
+  <!-- Паттерн-слой (T17.1, опциональный): порядок в head — токены → core →
+       patterns → сайт (Implementation requirements T17.1 п.1). -->
+  <link rel="stylesheet" href="ds/ui-patterns.css">
   <link rel="stylesheet" href="pilot.css">
 </head>
 <body class="cp-page${bodyClass ? ` ${bodyClass}` : ''}">
@@ -1325,29 +1334,37 @@ function vacanciesMain() {
       <p class="ui-small ui-text--muted">На сайте ${VAC.total} вакансий</p>
     </div>
 
-    <div class="cp-vac-layout">
-      <aside class="cp-vac-side" aria-label="Фильтры вакансий">
-        <div class="cp-vac-side__group">
-          <span class="cp-vac-side__label">Регион</span>
+    <!-- Раскладка и сайдбар — канон ветки «сайдбар фильтров» (T14.10) из
+         паттерн-слоя T17.1 (lpp-layout/lpp-side/lpp-side__group): мобильная
+         база — одна колонка, от md — доли + sticky-панель, от lg — колонка
+         сайдбара 17.5rem = 280px оригинала (калибровка REPORT §11 против
+         20rem копипасты). Подписи групп — канон lpp-pill__name; хук пробы
+         side-promo (cp-vac-side__promo) — класс без CSS, как в T16.5.
+         main-колонка (cp-vac-main) остаётся сайт-зоной: композиция страницы
+         с findBar — канона в док-HTML нет (T17.12). -->
+    <div class="lpp-layout">
+      <aside class="lpp-side" aria-label="Фильтры вакансий">
+        <div class="lpp-side__group">
+          <span class="lpp-pill__name">Регион</span>
           ${selectField({ name: 'region', options: ['Все регионы', 'Москва', 'Омская область', 'Санкт-Петербург'], pill: true, ariaLabel: 'Регион' })}
         </div>
-        <div class="cp-vac-side__group">
-          <span class="cp-vac-side__label">Специализация</span>
+        <div class="lpp-side__group">
+          <span class="lpp-pill__name">Специализация</span>
           ${selectField({ name: 'direction', options: ['Все направления', 'Электроэнергетика', 'Теплоэнергетика', 'Информационные технологии', 'Экономика и управление', 'Машиностроение', 'Юриспруденция', 'Техносферная безопасность', 'Промышленное и гражданское строительство'], pill: true, ariaLabel: 'Направления' })}
         </div>
-        <div class="cp-vac-side__group">
-          <span class="cp-vac-side__label">Сегмент бизнеса</span>
+        <div class="lpp-side__group">
+          <span class="lpp-pill__name">Сегмент бизнеса</span>
           ${selectField({ name: 'segment', options: ['Все сервисы', 'Генерация', 'Инжиниринг', 'Розничный бизнес', 'Сервисы', 'Энергомашиностроение', 'Корпоративный центр'], pill: true, ariaLabel: 'Сервисы' })}
         </div>
-        <div class="cp-vac-side__group">
-          <span class="cp-vac-side__label">Компания</span>
+        <div class="lpp-side__group">
+          <span class="lpp-pill__name">Компания</span>
           ${selectField({ name: 'company', options: ['Все компании', 'ПАО «Интер РАО»', 'АО «Интер РАО – Электрогенерация»', 'АО «Мосэнергосбыт»', 'ООО «Интер РАО – ИТ»', 'ООО «Интер РАО – Цифровые решения»', 'АО «Интер РАО – Инжиниринг»', 'ПАО «Уральский турбинный завод»', 'АО «БашРТС»', 'АО «Интер РАО – ТГК-11»', 'ПАО «Саратовэнерго»', 'АО «Томская генерация»'], pill: true, ariaLabel: 'Компания' })}
         </div>
-        <div class="cp-vac-side__group">
-          <span class="cp-vac-side__label">Должность</span>
+        <div class="lpp-side__group">
+          <span class="lpp-pill__name">Должность</span>
           ${selectField({ name: 'position', options: ['Все должности', 'Ведущий', 'Инженер', 'Специалист', 'Менеджер', 'Аналитик', 'Оператор', 'Электромонтёр', 'Слесарь', 'Юрист'], pill: true, ariaLabel: 'Должность' })}
         </div>
-        <div class="cp-vac-side__group">
+        <div class="lpp-side__group">
           ${radioGroup({
             label: 'Опыт',
             name: 'exp',
@@ -1358,14 +1375,14 @@ function vacanciesMain() {
             ],
           })}
         </div>
-        <div class="cp-vac-side__group">
+        <div class="lpp-side__group">
           <label class="ui-checkbox">
             <input class="ui-checkbox__input" type="checkbox" name="accessible">
             <span>Доступно людям с инвалидностью</span>
           </label>
         </div>
-        <div class="cp-vac-side__group">
-          <span class="cp-vac-side__label">Сортировка</span>
+        <div class="lpp-side__group">
+          <span class="lpp-pill__name">Сортировка</span>
           ${selectField({ name: 'sort', options: ['По дате добавления', 'По зарплате'], pill: true, ariaLabel: 'Сортировка' })}
         </div>
         <!-- «Сбросить ×» — ui-button--text (T16.7; REPORT §8.2 №6/№8:
@@ -1399,7 +1416,7 @@ function vacanciesMain() {
           <a class="ui-chip__pill" href="vacancies.html">общие направления</a>
         </nav>
 
-        <div class="cp-vac-rows">
+        <div class="lpp-rows">
 ${rows}
         </div>
 
@@ -2419,12 +2436,13 @@ function articleMain(a = ART.items[0]) {
 
     <!-- «материалы по теме» — секции related оригинала (build.py:849–863:
          по 3 первых записи каждой сущности); строки вакансий — те же
-         cp-vac-rows, карточки — как на internships/education. Триггер
-         «откликнуться» остаётся без модалки — как в оригинале, где на
-         article.html диалога #vac-apply нет (modals.js:22 — молча выходит). -->
+         lpp-rows (паттерн-слой T17.1), карточки — как на
+         internships/education. Триггер «откликнуться» остаётся без модалки —
+         как в оригинале, где на article.html диалога #vac-apply нет
+         (modals.js:22 — молча выходит). -->
     <div class="cp-article-related">
       <h2 class="ui-h3">Связанные вакансии</h2>
-      <div class="cp-vac-rows">
+      <div class="lpp-rows">
 ${relatedVacancies}
       </div>
       <h2 class="ui-h3">Связанные практики</h2>
@@ -2769,8 +2787,8 @@ const PAGES = [
 rmSync(OUT, { recursive: true, force: true });
 mkdirSync(join(OUT, 'ds'), { recursive: true });
 
-// рантайм ДС
-for (const file of ['ui-core.min.css', 'ui-vi.min.css', 'ui.min.js']) {
+// рантайм ДС (ui-patterns.css — паттерн-слой T17.1, опциональный файл)
+for (const file of ['ui-core.min.css', 'ui-vi.min.css', 'ui-patterns.css', 'ui.min.js']) {
   cpSync(join(DIST, file), join(OUT, 'ds', file));
 }
 cpSync(join(DIST, 'fonts'), join(OUT, 'ds', 'fonts'), { recursive: true });

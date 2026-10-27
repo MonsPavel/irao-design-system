@@ -158,10 +158,11 @@ const SHELL_PROBES = [
   // заголовок первой строки списка (REPORT §8.2 №6): тег + типографика.
   // Селектор по РОЛИ (T16.5): строка несёт ui-h6 — канон «заголовок
   // карточки списков» T16.12 (20/500 color-text); ui-h4 давал 28px на lg.
+  // Класс связки — lpp-* с T17.1 (паттерн-слой dist/ui-patterns.css).
   {
     name: 'row-title',
     original: '.vac-row__title',
-    pilot: '.cp-vac-row .ui-h6',
+    pilot: '.lpp-row .ui-h6',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     tag: true,
   },
@@ -169,21 +170,21 @@ const SHELL_PROBES = [
   {
     name: 'row-item',
     original: '.vac-row',
-    pilot: '.cp-vac-row',
+    pilot: '.lpp-row',
     fields: { padding: 'padding', bg: 'background-color', radius: 'border-radius' },
   },
   // кружок стрелки CTA строки — ловит accent vs primary (REPORT §8.2 №6)
   {
     name: 'pill-icon',
     original: '.pill-btn__icon',
-    pilot: '.cp-vac-row .ui-button__icon',
+    pilot: '.lpp-row .ui-button__icon',
     fields: { bg: 'background-color' },
   },
-  // «Сбросить» сайдбара (REPORT §8.2 №6/№8)
+  // «Сбросить» сайдбара (REPORT §8.2 №6/№8); класс панели — lpp-side с T17.1
   {
     name: 'reset-control',
     original: '.vac-side__reset',
-    pilot: '.cp-vac-side .ui-button',
+    pilot: '.lpp-side .ui-button',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     tag: true,
     rect: true,
