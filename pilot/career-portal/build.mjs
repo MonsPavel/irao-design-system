@@ -343,27 +343,29 @@ function regTag(e) {
  *  события-search/каталог собираются с 'h2'. */
 const cardHeading = (headingTag) => (/^h[1-6]$/.test(headingTag ?? '') ? headingTag : 'h3');
 
-/** карточка события (оригинал .event-card): ui-card--link + теги.
- *  headingTag (T15.9, axe heading-order): дефолт h3 — на events.html
- *  карточки идут после секций h2 «Предстоящие/Прошедшие», выдача
- *  events-search собирается с 'h2' (карточка — сразу за h1 страницы). */
+/** карточка события (оригинал .event-card): ui-card--link + теги (T17.5:
+ *  каркас — ui-card--media, фото __media 3/2 + тег __media-tag, тело __body;
+ *  правила cp-event-card* сняты). headingTag (T15.9, axe heading-order):
+ *  дефолт h3 — на events.html карточки идут после секций h2 «Предстоящие/
+ *  Прошедшие», выдача events-search собирается с 'h2' (карточка — сразу за
+ *  h1 страницы). */
 function eventCard(e, headingTag) {
-  // Теги на фото — тинты вариантов 28px, как в оригинале (events.html:270/302;
-  // pages.css:573 только позиционирует). Модификатор ui-tag--on-photo (T16.10)
+  // Тег на фото — __media-tag (позиция каркаса) + тинт варианта, как в
+  // оригинале (events.html:270/302). Модификатор ui-tag--on-photo (T16.10)
   // остаётся API ДС без пилотного применения — «белый на primary, 40px»
   // оригинала относится к фильтр-тегам (реклассификация REPORT §3.3, ревью
   // T16.10); применение поверх фото — решение владельца.
   const reg = regTag(e);
-  return `<article class="ui-card ui-card--hover ui-card--link cp-event-card">
+  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media">
   <a class="ui-card__link" href="event.html">
-    <div class="cp-event-card__photo-wrap">
-      <img class="cp-event-card__photo" src="${esc(e.image)}" alt="" loading="lazy">
-      <span class="ui-tag ui-tag--${reg.variant}">${esc(reg.text)}</span>
+    <div class="ui-card__media">
+      <img src="${esc(e.image)}" alt="" loading="lazy">
+      <span class="ui-card__media-tag ui-tag ui-tag--${reg.variant}">${esc(reg.text)}</span>
     </div>
-    <div class="cp-event-card__body">
-      <time class="cp-event-card__date ui-small ui-text--muted" datetime="${esc(isoDate(e.date))}">${esc(e.date)}</time>
+    <div class="ui-card__body">
+      <time class="ui-small ui-text--muted" datetime="${esc(isoDate(e.date))}">${esc(e.date)}</time>
       <${cardHeading(headingTag)} class="ui-h6">${esc(e.title)}</${cardHeading(headingTag)}>
-      <p class="cp-event-card__meta">
+      <p class="ui-card__meta">
         <span class="ui-tag ui-tag--blue">${esc(e.city)}</span>
         <span class="ui-tag ui-tag--gray">${esc(e.format)}</span>
       </p>
@@ -373,6 +375,9 @@ function eventCard(e, headingTag) {
 }
 
 /** карточка статьи (оригинал .article-card): ui-card--link + точка-тег.
+ *  T17.5: каркас — ui-card--media (фото __media + тег __media-tag с точкой
+ *  ui-tag__icon, тело __body: мини-тайтл + дата; правила cp-article-card*
+ *  сняты, осталась специфика мета-строки — fw даты, см. pilot.css).
  *  Заголовок — мини-тайтл 14/500 (T16.12): .article-card__title оригинала —
  *  fs-small/fw-small (media.css/pages.css:608); роль ui-small на семантике
  *  заголовка — канон «визуал ≠ семантика» (typography-roles.md), один выбор
@@ -381,24 +386,26 @@ function eventCard(e, headingTag) {
  *  после секционного h2; 'h2' — выдача сразу за h1 страницы (media.html),
  *  прецедент eventCard/cardHeading. */
 function articleCard(a, headingTag = 'h3') {
-  // Тег на фото — тинт варианта + точка, как .media__tag оригинала
-  // (media.css:72–87); ui-tag--on-photo — API ДС без пилотного применения
-  // (реклассификация REPORT §3.3, ревью T16.10). Вариант рубрики —
-  // КОНСТАНТА blue (T15.1-бэклог): оригинал жёстко кодирует tag--blue
-  // для любого типа (src/pages/article.html:7); типовой маппинг кодировал
-  // поведение, которого у оригинала нет, и имя dot вводило в заблуждение
-  // (это класс чипа рубрики, не media__tag-dot).
+  // Тег на фото — __media-tag (позиция каркаса) + тинт варианта + точка,
+  // как .media__tag оригинала (media.css:72–87); ui-tag--on-photo — API ДС
+  // без пилотного применения (реклассификация REPORT §3.3, ревью T16.10).
+  // Вариант рубрики — КОНСТАНТА blue (T15.1-бэклог): оригинал жёстко кодирует
+  // tag--blue для любого типа (src/pages/article.html:7); типовой маппинг
+  // кодировал поведение, которого у оригинала нет, и имя dot вводило в
+  // заблуждение (это класс чипа рубрики, не media__tag-dot).
   const rubricVariant = 'ui-tag--blue';
   const heading = cardHeading(headingTag);
-  return `<article class="ui-card ui-card--hover ui-card--link cp-article-card">
+  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media">
   <a class="ui-card__link" href="article.html">
-    <div class="cp-article-card__photo-wrap">
-      <img class="cp-article-card__photo" src="${esc(a.image)}" alt="" loading="lazy">
-      <span class="ui-tag ${rubricVariant}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
+    <div class="ui-card__media">
+      <img src="${esc(a.image)}" alt="" loading="lazy">
+      <span class="ui-card__media-tag ui-tag ${rubricVariant}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(a.type)}</span>
     </div>
-    <${heading} class="ui-small cp-article-card__title">${esc(a.title)}</${heading}>
+    <div class="ui-card__body">
+      <${heading} class="ui-small">${esc(a.title)}</${heading}>
+      <time class="ui-small ui-text--muted cp-article-card__date">${esc(a.date)}</time>
+    </div>
   </a>
-  <time class="cp-article-card__date ui-small ui-text--muted">${esc(a.date)}</time>
 </article>`;
 }
 
@@ -423,12 +430,16 @@ function internLinkCard(i, href) {
 </a>`;
 }
 
-/** карточка стажёра (T16.12: имя — ui-h6 20/500, шорт — muted) */
+/** карточка стажёра (T16.12: имя — ui-h6 20/500, шорт — muted; T17.5:
+ *  каркас — ui-card--media, фото __media--square 1/1, тело __body; правила
+ *  cp-intern-person* сняты) */
 function internPerson(p, photo) {
   const tags = p.tags.map((tag) => `<span class="ui-tag ui-tag--blue">${esc(tag)}</span>`).join('');
-  return `<article class="ui-card ui-card--hover cp-intern-person">
-  <img class="cp-intern-person__photo" src="${esc(photo)}" alt="" loading="lazy">
-  <div class="cp-intern-person__body">
+  return `<article class="ui-card ui-card--hover ui-card--media">
+  <div class="ui-card__media ui-card__media--square">
+    <img src="${esc(photo)}" alt="" loading="lazy">
+  </div>
+  <div class="ui-card__body">
     <p class="ui-h6">${esc(p.name)}</p>
     <p>${tags}</p>
     <p class="ui-small ui-text--muted">${esc(p.short)}</p>
@@ -1031,20 +1042,25 @@ const MEDIA_HOME = [
 ];
 
 function mediaHomeCard(card, extraClass = '') {
-  // Тег на фото — тинт варианта + точка, как в articleCard (маркер
-  // реклассификации REPORT §3.3 — ревью T16.10: on-photo в пилоте не
-  // применяется). Заголовок (ветка с desc) — мини-тайтл 14/500, один выбор
-  // с articleCard (T16.12); дата — muted (.media__card-date оригинала).
+  // Тег на фото — __media-tag (позиция каркаса) + тинт варианта + точка,
+  // как в articleCard (маркер реклассификации REPORT §3.3 — ревью T16.10:
+  // on-photo в пилоте не применяется). Заголовок (ветка с desc) — мини-тайтл
+  // 14/500, один выбор с articleCard (T16.12); дата — muted (.media__card-date
+  // оригинала). T17.5: каркас — ui-card--media (правила cp-article-card*,
+  // которые занимала эта карточка-заёмщик, сняты); класс cp-article-card__date
+  // на дате — специфика fw 400 (см. pilot.css).
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
     card.type
   ];
-  return `<article class="ui-card ui-card--hover ui-card--link cp-media-card${extraClass}">
+  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media${extraClass}">
   <a class="ui-card__link" href="article.html">
-    <div class="cp-article-card__photo-wrap">
-      <img class="cp-article-card__photo" src="${esc(card.image)}" alt="" loading="lazy">
-      <span class="ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(card.type)}</span>
+    <div class="ui-card__media">
+      <img src="${esc(card.image)}" alt="" loading="lazy">
+      <span class="ui-card__media-tag ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(card.type)}</span>
     </div>
-    ${card.desc ? `<h3 class="ui-small cp-article-card__title">${esc(card.caption)}</h3>\n    <p class="ui-small ui-text--muted cp-article-card__date">${esc(card.date)}</p>` : `<p class="cp-article-card__title">${esc(card.caption)}</p>\n    <time class="cp-article-card__date ui-small ui-text--muted">${esc(card.date)}</time>`}
+    <div class="ui-card__body">
+    ${card.desc ? `<h3 class="ui-small">${esc(card.caption)}</h3>\n    <p class="ui-small ui-text--muted cp-article-card__date">${esc(card.date)}</p>` : `<p>${esc(card.caption)}</p>\n    <time class="ui-small ui-text--muted cp-article-card__date">${esc(card.date)}</time>`}
+    </div>
   </a>
 </article>`;
 }

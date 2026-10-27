@@ -1,10 +1,11 @@
 <p class="ui-showcase-stand__note">
   Стенд ui-card (T4.4): варианты одобренного дизайна career-portal (`.card`,
-  components.css:115–127), слоты `__media`/`__title`/`__body`/`__footer` и паттерн карточки-ссылки
-  (`.vac-card`, pages.css:38–83). Сценарии — <code>tests/e2e/ui-card.spec.js</code>:
-  computed-значения вариантов, Tab-порядок карточки-ссылки (ссылка → вложенная кнопка), фокус по
-  всей площади, hover-гвард hasTouch, axe, эталоны 375/768/1280/1440. Контентные карточки
-  (vac-card/event-card) — паттерны EPIC-8 (T8.1); изображение в `__media` — ui-image (T4.6).
+  components.css:115–127), слоты `__media`/`__title`/`__body`/`__footer`, паттерн карточки-ссылки
+  (`.vac-card`, pages.css:38–83), CTA-плашка `--cta` (T17.8) и медиа-карточка `--media` (T17.5).
+  Сценарии — <code>tests/e2e/ui-card.spec.js</code>: computed-значения вариантов, Tab-порядок
+  карточки-ссылки (ссылка → вложенная кнопка), фокус по всей площади, hover-гвард hasTouch, axe,
+  эталоны 375/768/1280/1440. Контентные карточки (vac-card/event-card) — паттерны EPIC-8 (T8.1);
+  изображение в `__media` — ui-image (T4.6).
 </p>
 
 <style>
@@ -167,3 +168,76 @@
     color: var(--ui-color-text-on-dark);
   }
 </style>
+
+<section aria-labelledby="ui-card-media-heading">
+  <h2 id="ui-card-media-heading">Медиа-карточка</h2>
+  <div class="ucd-grid">
+    <article class="ui-card ui-card--hover ui-card--link ui-card--media" id="ui-card-media-event">
+      <a class="ui-card__link" href="#ui-card-media-heading">
+        <div class="ui-card__media">
+          <img
+            src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27600%27%20height%3D%27400%27%3E%3Crect%20width%3D%27600%27%20height%3D%27400%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27200%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+            alt=""
+            width="600"
+            height="400"
+            loading="lazy"
+          />
+          <span class="ui-card__media-tag ui-tag ui-tag--green">Регистрация</span>
+        </div>
+        <div class="ui-card__body">
+          <time class="ui-small ui-text--muted" datetime="2026-09-28">28.09.2026</time>
+          <h3 class="ui-h6">День открытых дверей</h3>
+          <p class="ui-card__meta">
+            <span class="ui-tag ui-tag--blue">Москва</span>
+            <span class="ui-tag ui-tag--gray">очно</span>
+          </p>
+        </div>
+      </a>
+    </article>
+    <article class="ui-card ui-card--hover ui-card--link ui-card--media" id="ui-card-media-article">
+      <a class="ui-card__link" href="#ui-card-media-heading">
+        <div class="ui-card__media">
+          <img
+            src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27600%27%20height%3D%27400%27%3E%3Crect%20width%3D%27600%27%20height%3D%27400%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Crect%20x%3D%27200%27%20width%3D%27200%27%20height%3D%27400%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+            alt=""
+            width="600"
+            height="400"
+            loading="lazy"
+          />
+          <span class="ui-card__media-tag ui-tag ui-tag--blue"><span class="ui-tag__icon" aria-hidden="true"></span>статья</span>
+        </div>
+        <div class="ui-card__body">
+          <h3 class="ui-small">Модернизация Киришской ГРЭС</h3>
+          <time class="ui-small ui-text--muted" datetime="2026-02-18">18.02.2026</time>
+        </div>
+      </a>
+    </article>
+    <article class="ui-card ui-card--hover ui-card--media" id="ui-card-media-square">
+      <div class="ui-card__media ui-card__media--square">
+        <img
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27480%27%20height%3D%27480%27%3E%3Crect%20width%3D%27480%27%20height%3D%27480%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Ccircle%20cx%3D%27240%27%20cy%3D%27240%27%20r%3D%27140%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="480"
+          height="480"
+          loading="lazy"
+        />
+      </div>
+      <div class="ui-card__body">
+        <p class="ui-h6">Анна Смирнова</p>
+        <p class="ui-card__meta"><span class="ui-tag ui-tag--blue">аналитик</span></p>
+        <p class="ui-small ui-text--muted">Квадратное фото — __media--square (1/1).</p>
+      </div>
+    </article>
+  </div>
+  <p class="ui-small ui-text--muted">
+    Один каркас «фото + тег в углу + тело» (T17.5): пропорции фото — на слоте <code>__media</code>
+    (3/2; <code>--square</code> — 1/1), <code>object-fit: cover</code> и радиус md/md 0 0 —
+    каркас; тег — <code>__media-tag</code> (absolute top/left 8px), вид — готовый
+    <code>ui-tag</code>, тинт варианта выбирает сайт (не <code>--on-photo</code> — прецедент
+    T16.10). Типографику тела каркас не задаёт: дата <code>ui-small</code>+
+    <code>ui-text--muted</code>, заголовок <code>ui-h6</code>/<code>ui-small</code> (T16.12) —
+    роли разметки. Паддинг тела (12px = <code>--ui-space-3</code>) поверх базового паддинга
+    карточки (24px); <code>__meta</code> — лента тегов gap <code>--ui-space-1</code>. Источник —
+    карточки event/article/intern пилота career-portal.
+  </p>
+</section>

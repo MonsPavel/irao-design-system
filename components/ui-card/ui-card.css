@@ -47,6 +47,13 @@
  * pad 48/24 + gap space-3, радиус lg; --row — space-between со слотом
  * действия (плашка «Все 140 вакансий»). Источник — cp-cta-mail__card/
  * cp-vacancy-search__all пилота career-portal (adoption T17.8).
+ *
+ * Медиа-карточка (ui-card--media, T17.5): слот фото __media (aspect-ratio
+ * 3/2, --square 1/1; img — cover, радиус md/md 0 0), absolute-слот тега
+ * __media-tag (top/left 8px), тело __body (флекс-колонка gap 8, паддинг 12)
+ * и лента мета-тегов __meta. Типографику тела несёт разметка; вид тега —
+ * готовый ui-tag. Источник — каркас cp-event-card/cp-article-card/
+ * cp-intern-person пилота career-portal (adoption T17.5).
  */
 
 .ui-card {
@@ -127,6 +134,63 @@
   justify-content: space-between;
   padding: var(--ui-space-5);
   text-align: start;
+}
+
+/* ── Медиа-карточка (ui-card--media, T17.5): фото + тег в углу + тело.
+      Источник — каркас трёх копий пилота career-portal (adoption T17.5):
+      .cp-event-card/.cp-article-card (фото 3/2, тег тинта варианта на фото)
+      и .cp-intern-person (1/1 — --square). Пропорции фото — на СЛОТЕ
+      __media (3/2 база, --square 1/1 — Implementation requirements п.3):
+      смена img на ui-image (T4.6) их сохраняет; object-fit: cover и радиус
+      фото md/md 0 0 — каркасом; тег — absolute top/left space-2 (8px);
+      тело — флекс-колонка gap space-2, паддинг space-3 (канон, поверх
+      базового паддинга карточки space-5); __meta — лента мета-тегов
+      gap space-1. Типографику тела модификатор НЕ задаёт — роли разметки
+      (ui-h6/ui-small + ui-text--muted, канон T16.12); вид тега на фото —
+      готовый ui-tag, тинт варианта выбирает сайт (don't on-photo без
+      потребности — прецедент T16.10). ── */
+
+.ui-card--media .ui-card__media {
+  position: relative;
+  aspect-ratio: 3 / 2;
+}
+
+/* Квадратное фото — карточка стажёра (cp-intern-person). */
+.ui-card--media .ui-card__media--square {
+  aspect-ratio: 1 / 1;
+}
+
+/* Фото заполняет слот (cover — Implementation requirements п.3); display:
+   block приносит base/reset.css. Радиус md/md 0 0 — канон «фото сверху». */
+.ui-card--media .ui-card__media > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
+}
+
+/* Тег на фото — позиционирование каркаса; сам тег не интерактивен и под
+   растянутой ссылкой остаётся зоной карточки (как в пилоте career-portal). */
+.ui-card--media .ui-card__media-tag {
+  position: absolute;
+  top: var(--ui-space-2);
+  left: var(--ui-space-2);
+}
+
+/* Тело медиа-карточки: ритм канона (gap 8, паддинг 12) — состав слота несёт
+   разметка ролями base. */
+.ui-card--media .ui-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-3);
+}
+
+/* Мета-строка (теги города/формата события) — лента с переносом. */
+.ui-card--media .ui-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-1);
 }
 
 /* ── Слоты (Scope): __media — место под ui-image (T4.6) ── */

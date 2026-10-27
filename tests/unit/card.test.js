@@ -350,8 +350,9 @@ describe('канон медиа-карточки (components/ui-card/ui-card.htm
   });
 
   it('img канона — с width/height (irao/img-dimensions) и alt (wcag/h37)', () => {
-    expect(html).toMatch(/<img [^>]*width="[^"]+"[^>]*height="[^"]+"/);
-    expect(html).toMatch(/<img [^>]*alt=""/);
+    // prettier держит атрибуты img по одному на строку — [^>]* переносит.
+    expect(html).toMatch(/<img\s[^>]*width="[^"]+"[^>]*height="[^"]+"/);
+    expect(html).toMatch(/<img\s[^>]*alt=""/);
   });
 });
 
@@ -460,7 +461,7 @@ describe('пилот (T17.5): медиа-карточки на модифика�
     expect(build).toMatch(/<span class="ui-card__media-tag ui-tag [^"]*"><span class="ui-tag__icon"/);
     // Карточка стажёра: квадратное фото — __media--square, без --link (не ссылка).
     expect(build).toMatch(
-      /<article class="ui-card ui-card--hover ui-card--media">\n\s*<div class="ui-card__media ui-card__media--square">/,
+      /<article class="ui-card ui-card--hover ui-card--media">\r?\n\s*<div class="ui-card__media ui-card__media--square">/,
     );
   });
 

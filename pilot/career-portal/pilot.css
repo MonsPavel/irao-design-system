@@ -1276,89 +1276,19 @@ a.cp-intern-card {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* Карточки событий/статей: ui-card + фото-мета */
-.cp-event-card__photo-wrap {
-  position: relative;
-}
+/* Карточки событий/статей/стажёров — медиа-карточки ui-card--media (T17.5):
+   фото __media (3/2; --square 1/1), тег __media-tag (absolute 8/8), тело
+   __body (флекс-колонка gap 8, паддинг 12) и __meta — компонент; правила
+   cp-event-card*/cp-article-card*/cp-intern-person* сняты (~80 строк).
+   Специфика тела — мета-строки — на разметке сайта: дата статьи несёт
+   класс cp-article-card__date ради fw 400. */
 
-.cp-event-card__photo-wrap .ui-tag {
-  position: absolute;
-  top: var(--ui-space-2);
-  left: var(--ui-space-2);
-}
-
-.cp-event-card__photo {
-  object-fit: cover;
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
-}
-
-.cp-event-card__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-3);
-}
-
-.cp-event-card__date {
-  color: var(--ui-color-text-muted);
-}
-
-.cp-event-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-1);
-}
-
-/* Карточка статьи (медиа-каталог): ui-card--link */
-.cp-article-card__photo-wrap {
-  position: relative;
-}
-
-.cp-article-card__photo-wrap .ui-tag {
-  position: absolute;
-  top: var(--ui-space-2);
-  left: var(--ui-space-2);
-}
-
-.cp-article-card__photo {
-  object-fit: cover;
-  width: 100%;
-  aspect-ratio: 3 / 2;
-  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
-}
-
-.cp-article-card__title {
-  padding: var(--ui-space-2) var(--ui-space-3) 0;
-}
-
+/* Специфика мета-строки статьи (карточка на ui-card--media, T17.5): дата —
+   fw 400 — small-regular оригинала (pages.css:610, маппинг small-regular =
+   small × fw 400, semantic.css:317); роль ui-small тянет 500 (T15.1-бэклог)
+   — вес несёт разметка сайта этим классом, вид — существующий токен. */
 .cp-article-card__date {
-  display: block;
-  padding: 0 var(--ui-space-3) var(--ui-space-3);
-  color: var(--ui-color-text-muted);
-  /* fw 400 — .article-card__date оригинала (pages.css:610, маппинг
-     small-regular = small × fw 400, semantic.css:317; T15.1-бэклог:
-     роль ui-small тянет 500) */
   font-weight: var(--ui-fw-body);
-}
-
-/* Карточка стажёра */
-.cp-intern-person {
-  overflow: hidden;
-}
-
-.cp-intern-person__photo {
-  object-fit: cover;
-  width: 100%;
-  aspect-ratio: 1 / 1;
-}
-
-.cp-intern-person__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-3);
 }
 
 /* Тулбар медиа-каталога (T16.14: зазоры по канону .media-toolbar

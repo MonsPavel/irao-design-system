@@ -50,6 +50,9 @@ const CARD = {
   ctaPrimary: 'ui-card-cta-primary',
   ctaEmail: 'ui-card-cta-email',
   ctaAccentRow: 'ui-card-cta-accent-row',
+  mediaEvent: 'ui-card-media-event',
+  mediaArticle: 'ui-card-media-article',
+  mediaSquare: 'ui-card-media-square',
 };
 
 /** Вычисленное состояние карточки/ссылки. */
@@ -454,10 +457,114 @@ standTest.describe('ui-card (T4.4)', () => {
     },
   );
 
-  standTest('эталоны 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({ stand }) => {
+standTest('эталоны 375/768/1280/1440 — только из контейнера (ADR-0004)', async ({ stand }) => {
+  const page = await stand('ui-card');
+  for (const viewport of Object.keys(VIEWPORTS)) {
+    await shot(page, { name: 'ui-card', viewport });
+  }
+});
+
+standTest(
+  'медиа-карточка (T17.5): слоты фото/тега/тела/меты — computed-значения каркаса',
+  async ({ stand }) => {
     const page = await stand('ui-card');
-    for (const viewport of Object.keys(VIEWPORTS)) {
-      await shot(page, { name: 'ui-card', viewport });
-    }
-  });
+
+    // Слот фото: пропорции — на слоте (3/2), relative — точка тега; img —
+    // cover и радиус md/md 0 0 каркасом (Implementation requirements п.3).
+    const media = await page.locator(`#${CARD.mediaEvent} .ui-card__media`).evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { position: s.position, aspectRatio: s.aspectRatio };
+    });
+    expect(media.position, 'relative — точка позиционирования __media-tag').toBe('relative');
+    expect(media.aspectRatio, 'базовые пропорции фото — 3/2').toBe('3 / 2');
+
+    const img = await page.locator(`#${CARD.mediaEvent} .ui-card__media > img`).evaluate((el) => {
+      const s = getComputedStyle(el);
+      const box = el.getBoundingClientRect();
+      const slot = el.parentElement.getBoundingClientRect();
+      return {
+        objectFit: s.objectFit,
+        borderRadius: s.borderRadius,
+        width: s.width,
+        height: s.height,
+        fillsSlot: Math.abs(box.height - slot.height) < 0.5 && Math.abs(box.width - slot.width) < 0.5,
+      };
+    });
+    expect(img.objectFit, 'object-fit: cover — каркасом').toBe('cover');
+    expect(img.borderRadius, 'радиус фото — md/md 0 0 (канон «фото сверху»)').toBe('16px 16px 0px 0px');
+    expect(img.fillsSlot, 'img заполняет слот (width/height 100%)').toBe(true);
+
+    // Тег на фото: позиция каркаса (top/left 8px = --ui-space-2), вид —
+    // готовый ui-tag (тинт варианта).
+    const tag = await page.locator(`#${CARD.mediaEvent} .ui-card__media-tag`).evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { position: s.position, top: s.top, left: s.left, display: s.display };
+    });
+    expect(tag.position, 'тег — absolute-слот каркаса').toBe('absolute');
+    expect(tag.top, 'top 8px (--ui-space-2, канон)').toBe('8px');
+    expect(tag.left, 'left 8px (--ui-space-2, канон)').toBe('8px');
+    await expect(page.locator(`#${CARD.mediaEvent} .ui-card__media-tag`)).toHaveAccessibleName(
+      'Регистрация',
+    );
+
+    // Тело: флекс-колонка gap 8 / паддинг 12; типографику несёт разметка
+    // (дата ui-small+muted 14px, заголовок ui-h6 20px).
+    const body = await page.locator(`#${CARD.mediaEvent} .ui-card__body`).evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { display: s.display, flexDirection: s.flexDirection, gap: s.gap, padding: s.padding };
+    });
+    expect(body.display, 'тело — флекс-колонка (канон)').toBe('flex');
+    expect(body.flexDirection).toBe('column');
+    expect(body.gap, 'gap тела — --ui-space-2 (8px)').toBe('8px');
+    expect(body.padding, 'паддинг тела — --ui-space-3 (12px)').toBe('12px');
+
+    const date = await page
+      .locator(`#${CARD.mediaEvent} .ui-card__body time`)
+      .evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { fs: s.fontSize, fw: s.fontWeight, color: s.color };
+      });
+    expect(date.fs, 'дата — ui-small 14px (роль разметки, не каркас)').toBe('14px');
+    expect(date.fw, 'дата — fw 500 роли ui-small').toBe('500');
+    expect(date.color, 'дата — muted (ui-text--muted)').toBe('rgb(97, 97, 97)');
+
+    const meta = await page.locator(`#${CARD.mediaEvent} .ui-card__meta`).evaluate((el) => {
+      const s = getComputedStyle(el);
+      return { display: s.display, flexWrap: s.flexWrap, gap: s.gap };
+    });
+    expect(meta.display, 'мета-теги — лента').toBe('flex');
+    expect(meta.flexWrap, 'с переносом').toBe('wrap');
+    expect(meta.gap, 'gap ленты — --ui-space-1 (4px)').toBe('4px');
+  },
+);
+
+standTest(
+  'медиа-карточка: --square 1/1 (стажёр) и одна кликабельная зона --link (фото-зона внутри растянутой ссылки)',
+  async ({ stand }) => {
+    const page = await stand('ui-card');
+
+    const square = await page.locator(`#${CARD.mediaSquare} .ui-card__media`).evaluate((el) => {
+      const s = getComputedStyle(el);
+      const box = el.getBoundingClientRect();
+      return { aspectRatio: s.aspectRatio, square: Math.abs(box.width - box.height) < 0.5 };
+    });
+    expect(square.aspectRatio, '--square — 1/1 (карточка стажёра)').toBe('1 / 1');
+    expect(square.square, 'бокс слота квадратный').toBe(true);
+
+    // Событие: __media и __body внутри __link — вся карточка одна цель
+    // (клик по фото-зоне ведёт по ссылке, тег не интерактивен).
+    const linkHref = await page
+      .locator(`#${CARD.mediaEvent} .ui-card__link`)
+      .evaluate((el) => el.getAttribute('href'));
+    expect(linkHref, 'контент-ссылка оборачивает медиа-зону и тело').toBe(
+      '#ui-card-media-heading',
+    );
+    const covered = await page.locator(`#${CARD.mediaEvent} .ui-card__media`).evaluate((el) => {
+      const link = el.closest('.ui-card__link');
+      const linkAfter = getComputedStyle(link, '::after');
+      return linkAfter.content !== 'none' && linkAfter.position === 'absolute';
+    });
+    expect(covered, 'растянутая ссылка (::after inset 0) покрывает медиа-зону').toBe(true);
+  },
+);
 });

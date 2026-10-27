@@ -5,8 +5,8 @@
      остановка скринридера, имя = текст ссылки); вложенные интерактивы
      (кнопка ниже) компонент поднимает над растянутой ссылкой сам. Модификатор
      --hover — только для hover-устройств (гвард внутри CSS); --filled —
-     приглушённая «бесшовная» карточка. Контентные карточки (vacancy/event) —
-     паттерны EPIC-8 (T8.1) из этих слотов. -->
+     приглушённая «бесшовная» карточка. Медиа-карточка --media (T17.5) —
+     фото + тег в углу + тело (пример ниже); CTA-плашка --cta (T17.8). -->
 <article class="ui-card ui-card--hover ui-card--link">
   <div class="ui-card__media">
     <!-- изображение карточки — ui-image (T4.6) -->
@@ -52,3 +52,49 @@
     />
   </svg>
 </a>
+
+<!-- Медиа-карточка (T17.5): фото + тег в углу + тело. Пропорции фото — на
+     слоте __media (3/2; --square — 1/1), object-fit: cover и радиус md/md 0 0
+     — каркас; тег — __media-tag, вид — готовый ui-tag (тинт варианта выбирает
+     сайт); типографику тела несёт разметка (ui-small/ui-h6/ui-text--muted).
+     img — с width/height (гейт irao/img-dimensions): место дублирует
+     aspect-ratio слота на случай медленной сети. -->
+<article class="ui-card ui-card--hover ui-card--link ui-card--media">
+  <a class="ui-card__link" href="event.html">
+    <div class="ui-card__media">
+      <img
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27600%27%20height%3D%27400%27%3E%3Crect%20width%3D%27600%27%20height%3D%27400%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27200%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="600"
+        height="400"
+        loading="lazy"
+      />
+      <span class="ui-card__media-tag ui-tag ui-tag--green">Регистрация</span>
+    </div>
+    <div class="ui-card__body">
+      <time class="ui-small ui-text--muted" datetime="2026-09-28">28.09.2026</time>
+      <h3 class="ui-h6">День открытых дверей</h3>
+      <p class="ui-card__meta">
+        <span class="ui-tag ui-tag--blue">Москва</span>
+        <span class="ui-tag ui-tag--gray">очно</span>
+      </p>
+    </div>
+  </a>
+</article>
+
+<article class="ui-card ui-card--hover ui-card--media">
+  <div class="ui-card__media ui-card__media--square">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27480%27%20height%3D%27480%27%3E%3Crect%20width%3D%27480%27%20height%3D%27480%27%20fill%3D%27%23E8EEFE%27%2F%3E%3Ccircle%20cx%3D%27240%27%20cy%3D%27240%27%20r%3D%27140%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="480"
+      height="480"
+      loading="lazy"
+    />
+  </div>
+  <div class="ui-card__body">
+    <p class="ui-h6">Анна Смирнова</p>
+    <p class="ui-card__meta"><span class="ui-tag ui-tag--blue">аналитик</span></p>
+    <p class="ui-small ui-text--muted">Квадратное фото — __media--square (1/1): карточка стажёра.</p>
+  </div>
+</article>
