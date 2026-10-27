@@ -90,7 +90,9 @@ describe('build.mjs — старые страницы media/career-track без 
     expect(build).toMatch(/function articleCard\(a, headingTag = 'h3'\)/);
     // тег — через локальный heading (cardHeading), как eventCard/offerCard
     expect(build).toContain('const heading = cardHeading(headingTag);');
-    expect(build).toMatch(/<\$\{heading\} class="ui-small cp-article-card__title">/);
+    // T17.5: мини-тайтл внутри __body медиа-карточки — роль ui-small, класс
+    // cp-article-card__title снят вместе с правилом (паддинг тела — компонент)
+    expect(build).toMatch(/<\$\{heading\} class="ui-small">/);
     expect(build).toContain('ART.items.slice(0, 4).map(articleCard)');
   });
 });

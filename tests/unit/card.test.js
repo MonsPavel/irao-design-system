@@ -269,6 +269,92 @@ describe('components/ui-card/ui-card.css — CTA-карточка (T17.8: --cta 
   });
 });
 
+describe('components/ui-card/ui-card.css — медиа-карточка (T17.5: --media, __media(--square)/__media-tag/__meta)', () => {
+  const path = join(root, 'components', 'ui-card', 'ui-card.css');
+  const css = stripCssComments(readFileSync(path, 'utf8'));
+
+  it('--media × __media: слот фото — relative (точка __media-tag) + aspect-ratio 3/2 (Implementation requirements п.3: пропорции — модификатором __media)', () => {
+    const block = blockOf(css, '.ui-card--media .ui-card__media');
+    expect(block, 'правило .ui-card--media .ui-card__media найдено').toBeTruthy();
+    expect(block).toContain('position: relative;');
+    expect(block).toContain('aspect-ratio: 3 / 2;');
+  });
+
+  it('--square: 1/1 (квадратное фото карточки стажёра, cp-intern-person)', () => {
+    const block = blockOf(css, '.ui-card--media .ui-card__media--square');
+    expect(block, 'правило --square найдено').toBeTruthy();
+    expect(block).toContain('aspect-ratio: 1 / 1;');
+  });
+
+  it('img в __media: object-fit: cover — каркасом; радиус фото md/md 0 0 (канон); заполняет слот (width/height 100%)', () => {
+    const block = blockOf(css, '.ui-card--media .ui-card__media > img');
+    expect(block, 'правило img найдено').toBeTruthy();
+    expect(block).toContain('object-fit: cover;');
+    expect(block).toContain('width: 100%;');
+    expect(block).toContain('height: 100%;');
+    expect(block).toContain('border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;');
+  });
+
+  it('__media-tag: absolute-слот тега на фото — top/left --ui-space-2 (8px, канон); вид тега — готовый ui-tag (каркас не красит)', () => {
+    const block = blockOf(css, '.ui-card--media .ui-card__media-tag');
+    expect(block, 'правило __media-tag найдено').toBeTruthy();
+    expect(block).toContain('position: absolute;');
+    expect(block).toContain('top: var(--ui-space-2);');
+    expect(block).toContain('left: var(--ui-space-2);');
+    expect(block, 'каркас не задаёт вид тега (цвет/фон/шрифт — ui-tag)').not.toMatch(
+      /color|background|font/,
+    );
+  });
+
+  it('__body под --media: флекс-колонка gap space-2 (8px), паддинг space-3 (12px) — канон тела; типографики нет (Implementation requirements п.1: роли несёт разметка)', () => {
+    const block = blockOf(css, '.ui-card--media .ui-card__body');
+    expect(block, 'правило .ui-card--media .ui-card__body найдено').toBeTruthy();
+    expect(block).toContain('display: flex;');
+    expect(block).toContain('flex-direction: column;');
+    expect(block).toContain('gap: var(--ui-space-2);');
+    expect(block).toContain('padding: var(--ui-space-3);');
+    expect(block, 'модификатор не задаёт типографику тела').not.toMatch(/font|color/);
+  });
+
+  it('__meta под --media: лента мета-тегов — flex wrap gap space-1 (4px, cp-event-card__meta)', () => {
+    const block = blockOf(css, '.ui-card--media .ui-card__meta');
+    expect(block, 'правило __meta найдено').toBeTruthy();
+    expect(block).toContain('display: flex;');
+    expect(block).toContain('flex-wrap: wrap;');
+    expect(block).toContain('gap: var(--ui-space-1);');
+  });
+
+  it('инварианты медиа-секции: без !important и hex (vi-перекраска, ADR-0002)', () => {
+    const start = css.indexOf('.ui-card--media');
+    const end = css.indexOf('.ui-card__media {', start);
+    const section = css.slice(start, end);
+    expect(section, 'медиа-секция найдена').not.toBe('');
+    expect(section).not.toContain('!important');
+    expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  });
+});
+
+describe('канон медиа-карточки (components/ui-card/ui-card.html, T17.5)', () => {
+  const html = readFileSync(join(root, 'components', 'ui-card', 'ui-card.html'), 'utf8');
+
+  it('событие: --media + __media (img + __media-tag c тинтом варианта) + __body (дата ui-small+muted, заголовок ui-h6, __meta) — внутри __link (пример канона спеки)', () => {
+    expect(html).toContain('ui-card--media');
+    expect(html).toMatch(/class="ui-card__media-tag ui-tag ui-tag--green"/);
+    expect(html).toMatch(/<time class="ui-small ui-text--muted" datetime="[^"]+">/);
+    expect(html).toMatch(/class="ui-h6"/);
+    expect(html).toContain('ui-card__meta');
+  });
+
+  it('стажёр: --square на __media (1/1), тело — имя/теги/шорт ролями', () => {
+    expect(html).toContain('ui-card__media ui-card__media--square');
+  });
+
+  it('img канона — с width/height (irao/img-dimensions) и alt (wcag/h37)', () => {
+    expect(html).toMatch(/<img [^>]*width="[^"]+"[^>]*height="[^"]+"/);
+    expect(html).toMatch(/<img [^>]*alt=""/);
+  });
+});
+
 describe('канон CTA (components/ui-card/ui-card.html, T17.8)', () => {
   const html = readFileSync(join(root, 'components', 'ui-card', 'ui-card.html'), 'utf8');
 
@@ -291,6 +377,25 @@ describe('стенд — CTA-секция (showcase/pages/ui-card/index.html, T1
     for (const id of ['ui-card-cta-primary', 'ui-card-cta-accent-row']) {
       expect(html, id).toContain(`id="${id}"`);
     }
+  });
+
+  it('без data-ui-check-layout — гейт T3.6 не расширяется без записи в CHECK_STANDS', () => {
+    expect(html).not.toContain('data-ui-check-layout');
+  });
+});
+
+describe('стенд — секция «медиа-карточка» (showcase/pages/ui-card/index.html, T17.5)', () => {
+  const html = readFileSync(join(root, 'showcase', 'pages', 'ui-card', 'index.html'), 'utf8');
+
+  it('эталонные id трёх видов: событие (3/2), статья (мини-тайтл), стажёр (--square)', () => {
+    for (const id of ['ui-card-media-event', 'ui-card-media-article', 'ui-card-media-square']) {
+      expect(html, id).toContain(`id="${id}"`);
+    }
+  });
+
+  it('тег на фото — тинт варианта ui-tag (don\'t on-photo без потребности — прецедент T16.10)', () => {
+    expect(html).toMatch(/class="ui-card__media-tag ui-tag ui-tag--/);
+    expect(html).not.toContain('ui-tag--on-photo');
   });
 
   it('без data-ui-check-layout — гейт T3.6 не расширяется без записи в CHECK_STANDS', () => {
@@ -322,6 +427,52 @@ describe('пилот (T17.8): CTA-плашки на модификаторе, п
   it('compare-проба cta-mail ведёт на модификатор (прецедент video-block: селектор на компонент)', () => {
     const compare = readFileSync(join(root, 'pilot', 'career-portal', 'compare.mjs'), 'utf8');
     expect(compare).toMatch(/\['cta-mail', '\.cta-mail', '\.ui-card--cta--primary'\]/);
+  });
+});
+
+describe('пилот (T17.5): медиа-карточки на модификаторе, правила сняты', () => {
+  const pilotCss = readFileSync(join(root, 'pilot', 'career-portal', 'pilot.css'), 'utf8');
+  const build = readFileSync(join(root, 'pilot', 'career-portal', 'build.mjs'), 'utf8');
+
+  it('правила cp-event-card*/cp-article-card*/cp-intern-person* сняты (~80 строк pilot.css)', () => {
+    expect(pilotCss).not.toContain('.cp-event-card__photo');
+    expect(pilotCss).not.toContain('.cp-event-card__body');
+    expect(pilotCss).not.toContain('.cp-event-card__date');
+    expect(pilotCss).not.toContain('.cp-event-card__meta');
+    expect(pilotCss).not.toContain('.cp-article-card__photo');
+    expect(pilotCss).not.toContain('.cp-article-card__title');
+    expect(pilotCss).not.toContain('.cp-intern-person__photo');
+    expect(pilotCss).not.toContain('.cp-intern-person__body');
+    // Специфика тела остаётся на разметке сайта (Scope T17.5): дата статьи —
+    // fw 400 small-regular оригинала (pages.css:610; T15.1-бэклог: роль
+    // ui-small тянет 500) — на существующем токене --ui-fw-body.
+    expect(pilotCss).toMatch(
+      /\.cp-article-card__date\s*\{[^}]*font-weight:\s*var\(--ui-fw-body\);/,
+    );
+  });
+
+  it('eventCard/articleCard/mediaHomeCard — ui-card--media на карточке, фото — __media, тег — __media-tag, тело — __body', () => {
+    // Событие: канон спеки — карточка-ссылка с медиа-зоной.
+    expect(build).toMatch(/class="ui-card ui-card--hover ui-card--link ui-card--media">/);
+    // Тег на фото — absolute-слот каркаса + тинт варианта (ui-tag--green/blue).
+    expect(build).toMatch(/class="ui-card__media-tag ui-tag/);
+    // Статьи/медиа-каталог: тег с точкой (ui-tag__icon) — разметке, слот тот же.
+    expect(build).toMatch(/<span class="ui-card__media-tag ui-tag [^"]*"><span class="ui-tag__icon"/);
+    // Карточка стажёра: квадратное фото — __media--square, без --link (не ссылка).
+    expect(build).toMatch(
+      /<article class="ui-card ui-card--hover ui-card--media">\n\s*<div class="ui-card__media ui-card__media--square">/,
+    );
+  });
+
+  it('тело медиа-карточек: дата — ui-small+ui-text--muted, заголовок — роли (ui-h6/ui-small), мета-теги — __meta', () => {
+    expect(build).toMatch(/<time class="ui-small ui-text--muted" datetime=/);
+    expect(build).toMatch(/<p class="ui-card__meta">/);
+  });
+
+  it('compare-пробы card-title/article-title ведут на модификатор (прецедент T17.8: селектор на компонент)', () => {
+    const compare = readFileSync(join(root, 'pilot', 'career-portal', 'compare.mjs'), 'utf8');
+    expect(compare).toMatch(/pilot: '\.ui-card--media \.ui-card__body \.ui-h6'/);
+    expect(compare).toMatch(/pilot: '\.ui-card--media \.ui-card__body \.ui-small'/);
   });
 });
 
