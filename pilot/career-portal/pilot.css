@@ -1279,7 +1279,7 @@ a.cp-intern-card {
 /* Карточки событий/статей/стажёров — медиа-карточки ui-card--media (T17.5):
    фото __media (3/2; --square 1/1), тег __media-tag (absolute 8/8), тело
    __body (флекс-колонка gap 8, паддинг 12) и __meta — компонент; правила
-   cp-event-card*/cp-article-card*/cp-intern-person* сняты (~80 строк).
+   cp-event-card, cp-article-card и cp-intern-person сняты (~80 строк).
    Специфика тела — мета-строки — на разметке сайта: дата статьи несёт
    класс cp-article-card__date ради fw 400. */
 
