@@ -48,7 +48,7 @@ const contrastOfDarkSection = (page) =>
 
 standTest.describe('patterns/landing-section: эталонная сборка (Scope) — каркас', () => {
   standTest(
-    'собрана без нового CSS: подключены только файлы dist, связки — <style> стенда',
+    'собрана без нового CSS: подключены dist-файлы (включая паттерн-слой T17.9), связки ритма — <style> стенда',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
       const source = await page.request
@@ -58,11 +58,11 @@ standTest.describe('patterns/landing-section: эталонная сборка (S
       const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
       expect(
         stylesheets.length,
-        'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
-      ).toBe(3);
+        'внешних стилей четыре — ui-core и ui-vi из dist + ui-patterns (слой, T17.9) + showcase.css каркаса (нового CSS у паттерна нет)',
+      ).toBe(4);
       for (const link of stylesheets) {
         expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
-          /ui-(core|vi)\.min\.css|showcase\.css/,
+          /ui-(core|vi)\.min\.css|ui-patterns\.css|showcase\.css/,
         );
       }
       expect(
@@ -408,6 +408,138 @@ standTest.describe('patterns/landing-section: фото-фон секции (ui-s
       });
       expect(same.title, 'заголовок фото-секции — text-on-dark (связка lsp-photo)').toBe(true);
       expect(same.lead, 'lead фото-секции — on-dark-muted').toBe(true);
+    },
+  );
+});
+
+standTest.describe('patterns/landing-section: nav-карточки и лента логотипов (T17.9)', () => {
+  const SEL_NAV = { section: '#lsp-nav-cards', title: '#lsp-nav-cards-title' };
+  const SEL_LOGO = { section: '#lsp-logo-grid', title: '#lsp-logo-grid-title' };
+
+  standTest(
+    'nav-карточки: каркас связки lnk-card — сетка lnk-cards, карточки-ссылки с aria-label, стрелка декоративна',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const sec = page.locator(SEL_NAV.section);
+      await expect(sec).toBeVisible();
+      await expect(page.locator(SEL_NAV.title)).toBeVisible();
+
+      const cards = sec.locator('a.lnk-card');
+      expect(await cards.count(), 'три nav-карточки — тоны пилота (peach/navy/light)').toBe(3);
+      for (const card of await cards.all()) {
+        const info = await card.evaluate((el) => ({
+          label: el.getAttribute('aria-label'),
+          href: el.getAttribute('href'),
+          hasBody: Boolean(el.querySelector('.lnk-card__body')),
+          illuAlt: el.querySelector('.lnk-card__illu')?.getAttribute('alt'),
+          actionHidden: el
+            .querySelector('.ui-button--round.lnk-card__action')
+            ?.getAttribute('aria-hidden'),
+        }));
+        expect(info.label, 'имя карточки-ссылки — aria-label (прецедент пилота)').toBeTruthy();
+        expect(info.href, 'карточка ведёт на целевую страницу').toBeTruthy();
+        expect(info.hasBody, 'слот body на месте').toBe(true);
+        expect(info.illuAlt, 'иллюстрация декоративна (alt="")').toBe('');
+        expect(info.actionHidden, 'стрелка декоративна (aria-hidden)').toBe('true');
+      }
+    },
+  );
+
+  standTest(
+    'тон navy: фон/текст = парам хуков; заголовок h4 на заливке — on-dark (баг «невидимого h4» закрыт, прецедент ui-card--cta T17.8)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.addStyleTag({
+        content:
+          '.lsp-probe-navy-bg { background-color: var(--ui-color-primary); } ' +
+          '.lsp-probe-navy-fg { color: var(--ui-color-text-on-dark); }',
+      });
+      const card = page.locator(`${SEL_NAV.section} .lnk-card--navy`);
+      const style = await card.evaluate((el) => ({
+        bg: getComputedStyle(el).backgroundColor,
+        fg: getComputedStyle(el).color,
+        h4: getComputedStyle(el.querySelector('h3')).color,
+      }));
+      const pairOf = (cls) =>
+        page.evaluate((name) => {
+          const probe = document.createElement('div');
+          probe.className = name;
+          document.body.appendChild(probe);
+          const value = getComputedStyle(probe);
+          const result = { bg: value.backgroundColor, fg: value.color };
+          probe.remove();
+          return result;
+        }, cls);
+      const bgPair = await pairOf('lsp-probe-navy-bg');
+      const fgPair = await pairOf('lsp-probe-navy-fg');
+      expect(style.bg, 'фон navy-тона — --ui-color-primary (пара сайта на хуке)').toBe(bgPair.bg);
+      expect(style.fg, 'текст navy-тона — on-dark').toBe(fgPair.fg);
+      expect(style.h4, 'заголовочная роль на заливке — on-dark (не heading-primary)').toBe(
+        fgPair.fg,
+      );
+    },
+  );
+
+  standTest('сетка nav-карточек: 1 колонка (375) → 2 (768) → 3 (1280) — канон пилота', async ({
+    stand,
+  }) => {
+    const page = await stand('patterns/landing-section');
+    const columnsOf = () =>
+      page
+        .locator(`${SEL_NAV.section} .lnk-cards`)
+        .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+
+    await page.setViewportSize(VIEWPORTS.mobile);
+    expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
+    await page.setViewportSize(VIEWPORTS.tablet);
+    expect(await columnsOf(), 'md — 2 колонки').toBe(2);
+    await page.setViewportSize(VIEWPORTS.xl);
+    expect(await columnsOf(), 'lg+ — 3 колонки').toBe(3);
+  });
+
+  standTest(
+    'лента логотипов: сетка 1 (375) → 4 (768) → 6 (1280); плашка lgo-card — рамка border-muted, радиус md, img растянута',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const sec = page.locator(SEL_LOGO.section);
+      await expect(page.locator(SEL_LOGO.title)).toBeVisible();
+      expect(await sec.locator('img.lgo-card').count(), 'плашки-логотипы в сетке').toBeGreaterThan(
+        0,
+      );
+
+      const columnsOf = () =>
+        sec
+          .locator('.lgo-grid')
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
+      await page.setViewportSize(VIEWPORTS.tablet);
+      expect(await columnsOf(), 'md — 4 колонки').toBe(4);
+      await page.setViewportSize(VIEWPORTS.xl);
+      expect(await columnsOf(), 'lg+ — 6 колонок').toBe(6);
+
+      const plate = await sec.locator('img.lgo-card').first().evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return {
+          width: cs.width,
+          boxWidth: Math.round(el.getBoundingClientRect().width),
+          radius: cs.borderRadius,
+          border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}`,
+          natural: `${el.naturalWidth}x${el.naturalHeight}`,
+        };
+      });
+      await page.setViewportSize(VIEWPORTS.xl);
+      const cell = await sec
+        .locator('.lgo-grid')
+        .evaluate((el) => el.firstElementChild.getBoundingClientRect().width);
+      expect(
+        plate.boxWidth,
+        'плашка растянута на ячейку сетки (width: 100%)',
+      ).toBeGreaterThanOrEqual(Math.floor(cell) - 1);
+      expect(plate.radius, 'радиус md').toBe('16px');
+      expect(plate.border, 'рамка — 1px solid slate-100 (--ui-color-border-muted)').toBe(
+        '1px solid rgb(232, 238, 246)',
+      );
     },
   );
 });
