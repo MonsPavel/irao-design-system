@@ -1,7 +1,7 @@
 <!--
   Паттерн «Landing-секция» (T8.3): правила сборки лендинг-секций из
-  системных примитивов + mini-эталон из трёх секций — светлая, тёмная,
-  с-изображением full-bleed.
+  системных примитивов + mini-эталон из четырёх секций — светлая, тёмная,
+  с-изображением full-bleed, с-фото-фоном (T17.3).
 
   Формула секции (Scope): ui-section (вертикальный ритм, T3.4) + ui-container
   (центрируемый контейнер, T3.4) + заголовок-роль (ui-h2, «классы, а не
@@ -79,6 +79,23 @@
      текст наследует белый on-dark и невидим на белой карточке. */
   .lsp-dark .ui-card {
     color: var(--ui-color-text);
+  }
+
+  /* Фото-фон (T17.3): сам фон/оверлей несёт примитив ui-section--photo;
+     связка секции — только on-dark-пары текста (секция и роли цвет текста
+     не задают: заголовочные роли несут --ui-color-heading — первичный,
+     на фото нечитаем; тот же приём, что у lsp-dark). */
+  .lsp-photo {
+    box-sizing: border-box;
+    color: var(--ui-color-text-on-dark);
+  }
+
+  .lsp-photo .ui-container > :is(.ui-h1, .ui-h2) {
+    color: var(--ui-color-text-on-dark);
+  }
+
+  .lsp-photo .lsp-lead {
+    color: var(--ui-color-text-on-dark-muted);
   }
 
   /* Full-bleed внутри контейнера (Technical considerations T8.3): бокс
@@ -248,5 +265,41 @@
       height="900"
       loading="lazy"
        >
+  </div>
+</section>
+
+<!-- Вариант 4 — секция с фото-фоном (ui-section--photo, T17.3): фон __bg
+     (img, alt="" — декоративный) и оверлей --fade-bottom под контентом
+     (z-пара «контент над фоном», стекинг изолирован). Каноны оверлеев —
+     --fade-bottom/--glow (hero/production career-portal), цветовое затемнение
+     — --tint с хуком --ui-section-overlay-tint (ступень лестницы T14.7).
+     Высота — от контента; пропорции (min-height) и клип радиуса — сайту.
+     Текст — on-dark-пары связкой lsp-photo (выше). -->
+<section class="ui-section ui-section--photo lsp-photo" id="lsp-photo" aria-labelledby="lsp-photo-title">
+  <p class="ui-showcase-stand__note">
+    Вариант «фото-фон»: примитив <code>ui-section--photo</code> (T17.3) — фон
+    <code>ui-section__bg</code> и оверлей <code>ui-section__overlay--fade-bottom</code>
+    красятся под контентом (z-пара ДС, img <code>alt=""</code>). Градиентные
+    каноны — <code>--fade-bottom</code>/<code>--glow</code>, цветовое затемнение —
+    <code>--tint</code> с хуком <code>--ui-section-overlay-tint</code>.
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271240%27%20cy%3D%27340%27%20r%3D%27380%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27340%27%20cy%3D%27860%27%20r%3D%27260%27%20fill%3D%27%23F26722%27%20opacity%3D%270.7%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+       >
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-photo-title">Энергетика страны: надёжная работа для специалистов и выпускников</h2>
+    <p class="ui-lead lsp-lead">
+      Секция с фото-фоном: фон и оверлей — система (ui-section--photo, T17.3),
+      контент — сайт (on-dark-пары связкой lsp-photo, роль ui-h2).
+    </p>
   </div>
 </section>

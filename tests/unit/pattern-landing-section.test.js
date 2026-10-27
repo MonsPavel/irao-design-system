@@ -158,10 +158,7 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     expect(section.indexOf('ui-section__bg'), '__bg до контента').toBeLessThan(
       section.indexOf('ui-container'),
     );
-    expect(
-      section,
-      'оверлей --fade-bottom (канон hero) между фоном и контентом',
-    ).toContain(
+    expect(section, 'оверлей --fade-bottom (канон hero) между фоном и контентом').toContain(
       '<div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>',
     );
     expect(section.match(/aria-hidden="true"/g)?.length ?? 0, 'оба декоративных слоя скрыты').toBe(

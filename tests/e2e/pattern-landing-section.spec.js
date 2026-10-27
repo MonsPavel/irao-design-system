@@ -1,8 +1,8 @@
 /**
  * e2e паттерна «Landing-секция» (T8.3; Testing requirements + AC) — стенд
  * patterns/landing-section (stands/patterns/landing-section.html),
- * mini-эталон из трёх секций: светлая / тёмная (on-dark) / с-изображением
- * full-bleed.
+ * mini-эталон из четырёх секций: светлая / тёмная (on-dark) / с-изображением
+ * full-bleed / с-фото-фоном (ui-section--photo, T17.3).
  *
  * Ключевые сценарии спеки:
  *  1. каркас секции = ui-section + ui-container + заголовок-роль h2 + сетка
@@ -25,6 +25,8 @@ const SEL = {
   darkTitle: '#lsp-dark-title',
   image: '#lsp-image',
   imageTitle: '#lsp-image-title',
+  photo: '#lsp-photo',
+  photoTitle: '#lsp-photo-title',
 };
 
 /** Вычисленный контраст WCAG пары «цвет текста — фон секции» (≥ 4.5 — AA). */
@@ -71,7 +73,7 @@ standTest.describe('patterns/landing-section: эталонная сборка (S
   );
 
   standTest(
-    'три секции-варианта: светлая → тёмная → с-изображением; каждая — каркас формулы',
+    'четыре секции-варианта: светлая → тёмная → с-изображением → фото-фон; каждая — каркас формулы',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
 
@@ -79,6 +81,7 @@ standTest.describe('patterns/landing-section: эталонная сборка (S
         [SEL.light, SEL.lightTitle],
         [SEL.dark, SEL.darkTitle],
         [SEL.image, SEL.imageTitle],
+        [SEL.photo, SEL.photoTitle],
       ]) {
         const sec = page.locator(section);
         await expect(sec, `секция ${section} видима`).toBeVisible();
@@ -325,6 +328,77 @@ standTest.describe('patterns/landing-section: full-bleed и адаптив', () 
 
       await page.setViewportSize(VIEWPORTS.xl);
       expect(await columnsOf(), 'lg+ — 3 колонки (--3)').toBe(3);
+    },
+  );
+});
+
+standTest.describe('patterns/landing-section: фото-фон секции (ui-section--photo, T17.3)', () => {
+  standTest(
+    'фото-секция: слои __bg/__overlay от z-пары ДС (z-index:-1, изоляция на секции), фон растянут на секцию',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const geo = await page.locator(SEL.photo).evaluate((section) => {
+        const bg = section.querySelector('.ui-section__bg');
+        const overlay = section.querySelector('.ui-section__overlay');
+        const sectionRect = section.getBoundingClientRect();
+        const bgRect = bg.getBoundingClientRect();
+        return {
+          bgExists: Boolean(bg),
+          overlayExists: Boolean(overlay),
+          bgZ: getComputedStyle(bg).zIndex,
+          overlayZ: getComputedStyle(overlay).zIndex,
+          sectionPosition: getComputedStyle(section).position,
+          sectionIsolation: getComputedStyle(section).isolation,
+          bgCoversSection:
+            Math.abs(bgRect.top - sectionRect.top) < 1 &&
+            Math.abs(bgRect.height - sectionRect.height) < 1,
+          imgObjectFit: getComputedStyle(bg.querySelector('img')).objectFit,
+          bgHidden: bg.getAttribute('aria-hidden'),
+          imgDecorative: bg.querySelector('img').getAttribute('alt'),
+        };
+      });
+      expect(geo.bgExists, 'слой __bg на месте').toBe(true);
+      expect(geo.overlayExists, 'слой __overlay на месте').toBe(true);
+      expect(geo.bgZ, '__bg — z-index:-1 (z-пара, прецедент pilot.css)').toBe('-1');
+      expect(geo.overlayZ, '__overlay — z-index:-1 (поверх фото, под контентом)').toBe('-1');
+      expect(geo.sectionPosition, 'секция позиционирована').toBe('relative');
+      expect(geo.sectionIsolation, 'стекинг изолирован на секции').toBe('isolate');
+      expect(geo.bgCoversSection, 'фон растянут на секцию (inset: 0)').toBe(true);
+      expect(geo.imgObjectFit, 'img фона кадрируется cover').toBe('cover');
+      expect(geo.bgHidden, 'фон aria-hidden').toBe('true');
+      expect(geo.imgDecorative, 'img фона декоративный (alt="")').toBe('');
+    },
+  );
+
+  standTest(
+    'текст фото-секции — on-dark-пары: заголовок и lead совпадают с токенами (не наследуют heading-пару)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.addStyleTag({
+        content:
+          '.lsp-probe-ondark { color: var(--ui-color-text-on-dark); } ' +
+          '.lsp-probe-ondark-muted { color: var(--ui-color-text-on-dark-muted); }',
+      });
+      const same = await page.evaluate(() => {
+        const make = (name) => {
+          const probe = document.createElement('div');
+          probe.className = name;
+          document.body.appendChild(probe);
+          const color = getComputedStyle(probe).color;
+          probe.remove();
+          return color;
+        };
+        const onDark = make('lsp-probe-ondark');
+        const onDarkMuted = make('lsp-probe-ondark-muted');
+        const title = document.querySelector('#lsp-photo-title');
+        const lead = document.querySelector('#lsp-photo .ui-lead');
+        return {
+          title: getComputedStyle(title).color === onDark,
+          lead: getComputedStyle(lead).color === onDarkMuted,
+        };
+      });
+      expect(same.title, 'заголовок фото-секции — text-on-dark (связка lsp-photo)').toBe(true);
+      expect(same.lead, 'lead фото-секции — on-dark-muted').toBe(true);
     },
   );
 });
