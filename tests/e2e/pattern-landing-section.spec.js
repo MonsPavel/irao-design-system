@@ -340,8 +340,10 @@ standTest.describe('patterns/landing-section: фото-фон секции (ui-s
       const geo = await page.locator(SEL.photo).evaluate((section) => {
         const bg = section.querySelector('.ui-section__bg');
         const overlay = section.querySelector('.ui-section__overlay');
+        const img = bg.querySelector('img');
         const sectionRect = section.getBoundingClientRect();
         const bgRect = bg.getBoundingClientRect();
+        const imgRect = img.getBoundingClientRect();
         return {
           bgExists: Boolean(bg),
           overlayExists: Boolean(overlay),
@@ -352,9 +354,12 @@ standTest.describe('patterns/landing-section: фото-фон секции (ui-s
           bgCoversSection:
             Math.abs(bgRect.top - sectionRect.top) < 1 &&
             Math.abs(bgRect.height - sectionRect.height) < 1,
-          imgObjectFit: getComputedStyle(bg.querySelector('img')).objectFit,
+          imgFillsBg:
+            Math.abs(imgRect.width - bgRect.width) < 1 &&
+            Math.abs(imgRect.height - bgRect.height) < 1,
+          imgObjectFit: getComputedStyle(img).objectFit,
           bgHidden: bg.getAttribute('aria-hidden'),
-          imgDecorative: bg.querySelector('img').getAttribute('alt'),
+          imgDecorative: img.getAttribute('alt'),
         };
       });
       expect(geo.bgExists, 'слой __bg на месте').toBe(true);
@@ -364,6 +369,10 @@ standTest.describe('patterns/landing-section: фото-фон секции (ui-s
       expect(geo.sectionPosition, 'секция позиционирована').toBe('relative');
       expect(geo.sectionIsolation, 'стекинг изолирован на секции').toBe('isolate');
       expect(geo.bgCoversSection, 'фон растянут на секцию (inset: 0)').toBe(true);
+      expect(
+        geo.imgFillsBg,
+        'img заполняет бокс __bg ровно (replaced-элемент: absolute inset:0 сохранял бы внутреннее соотношение — кадр уезжал бы от канона width/height:100%)',
+      ).toBe(true);
       expect(geo.imgObjectFit, 'img фона кадрируется cover').toBe('cover');
       expect(geo.bgHidden, 'фон aria-hidden').toBe('true');
       expect(geo.imgDecorative, 'img фона декоративный (alt="")').toBe('');

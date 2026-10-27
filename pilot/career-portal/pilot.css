@@ -1529,13 +1529,13 @@ a.cp-intern-card {
 }
 
 /* CTA-баннер (banner-card оригинала, pages.css:656–674): min-height 320px,
-   низ 56px company-section-gap; фото-фон и тинт — фото-секция
-   ui-section--photo (T17.3): __bg-подложка ДС + оверлей --tint c хуком
-   --ui-section-overlay-tint (ступень лестницы T14.7 — primary-a55,
-   pages.css:666). Ритм ui-section погашен — высоту держит min-height +
-   тело; клип радиуса — overflow: hidden. */
+   низ 56px company-section-gap; фото-подложка — фото-секция
+   ui-section--photo (T17.3, слой __bg). Тинт primary-a55 остаётся НА ТЕЛЕ
+   (pages.css:666 «как есть»): заливка body-бокса со скруглением —
+   полосы фото видны сверху/снизу (full-bleed оверлей --tint ДС дал бы
+   сплошной тинт — другой вид, проба скрин-пар T17.3). Ритм ui-section
+   погашен — высоту держит min-height + тело; клип радиуса — overflow. */
 .cp-company-banner {
-  --ui-section-overlay-tint: var(--ui-color-primary-a55);
   display: flex;
   position: relative;
   align-items: center;
@@ -1547,14 +1547,13 @@ a.cp-intern-card {
 }
 
 /* тело — CTA-центр-композиция на модификаторе ui-card--cta (T17.8):
-   раскладку несёт компонент; фон гасится — тинт красит оверлей секции
-   (ui-section__overlay--tint за телом, T17.3), паддинг 40px «как есть»
-   (pages.css:667); border гасится — заливка-оверлей без рамки. */
+   раскладку несёт компонент; тинт/паддинг 40px «как есть» (pages.css:666–
+   667); border гасится — заливка-тинт без рамки. */
 .cp-company-banner .cp-company-banner__body {
   width: 100%;
   padding: 2.5rem;
   border: 0;
-  background-color: transparent;
+  background-color: var(--ui-color-primary-a55);
   color: var(--ui-color-text-on-dark);
 }
 

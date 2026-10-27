@@ -73,21 +73,25 @@ describe('build.mjs — пять фоновых секций на ui-section--ph
       ['why-us', indexHtml.slice(indexHtml.indexOf('cp-why-us'))],
     ]) {
       expect(section, `${name}: __bg на месте`).toContain('ui-section__bg');
-      expect(
-        section.slice(0, section.indexOf('</section>')),
-        `${name}: оверлея нет`,
-      ).not.toContain('ui-section__overlay');
+      expect(section.slice(0, section.indexOf('</section>')), `${name}: оверлея нет`).not.toContain(
+        'ui-section__overlay',
+      );
     }
     expect(indexHtml).not.toContain('cp-holding__bg');
     expect(indexHtml).not.toContain('cp-why-us__bg');
   });
 
-  it('company-banner: фото-секция на div-композиции, тинт — оверлей --tint (тело без заливки)', () => {
+  it('company-banner: фото-секция на div-композиции; тинт — на теле (оригинал pages.css:666), оверлея в разметке нет', () => {
+    const banner = companyHtml.slice(companyHtml.indexOf('cp-company-banner'));
     expect(companyHtml).toContain('<div class="ui-section ui-section--photo cp-company-banner">');
-    expect(companyHtml).toContain('<div class="ui-section__bg" aria-hidden="true">');
-    expect(companyHtml).toContain(
-      '<div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>',
-    );
+    expect(banner).toContain('<div class="ui-section__bg" aria-hidden="true">');
+    // Тинт остаётся на теле (заливка body-бокса со скруглением, полосы фото
+    // видны сверху/снизу — approved design): full-bleed --tint дал бы
+    // сплошной тинт — другой вид (проба скрин-пар T17.3).
+    expect(
+      banner.slice(0, banner.indexOf('<div class="cp-company-banner__body')),
+      'оверлея в баннере нет',
+    ).not.toContain('ui-section__overlay');
     expect(companyHtml).not.toContain('cp-company-banner__photo');
     // img фона — декоративный по умолчанию (Implementation requirements п.3)
     const bgImg = companyHtml.match(/<div class="ui-section__bg"[\s\S]*?<\/div>/)?.[0] ?? '';
@@ -128,7 +132,13 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
   });
 
   it('вертикальная геометрия пяти блоков не изменилась: ритм ui-section гашится (padding: 0) — паритет высот compare ±4px', () => {
-    for (const block of ['.cp-hero', '.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
+    for (const block of [
+      '.cp-hero',
+      '.cp-production',
+      '.cp-holding',
+      '.cp-why-us',
+      '.cp-company-banner',
+    ]) {
       expect(blockOf(pilotCss, block), `${block} найдено`).toBeTruthy();
       expect(blockOf(pilotCss, block), `${block}: ритм ui-section погашен`).toContain(
         'padding: 0;',
@@ -137,41 +147,51 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
   });
 
   it('позиционирование корней сохранено (якорь absolute-слоёв)', () => {
-    for (const block of ['.cp-hero', '.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
+    for (const block of [
+      '.cp-hero',
+      '.cp-production',
+      '.cp-holding',
+      '.cp-why-us',
+      '.cp-company-banner',
+    ]) {
       expect(blockOf(pilotCss, block), `${block}: position: relative`).toContain(
         'position: relative;',
       );
     }
   });
 
-  it('тинт баннера — токен-хук ДС со ступенью лестницы T14.7 (primary-a55), тело прозрачно', () => {
+  it('тинт баннера — на теле, как в оригинале (primary-a55 — ступень лестницы T14.7); тело не прозрачное', () => {
     const banner = blockOf(pilotCss, '.cp-company-banner');
-    expect(banner).toContain(
-      '--ui-section-overlay-tint: var(--ui-color-primary-a55);',
+    expect(banner, 'хук тинта на секции не остался (тинт — тело)').not.toContain(
+      '--ui-section-overlay-tint',
     );
     const body = blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body');
-    expect(body).toContain('background-color: transparent;');
-    expect(body, 'текст тела — on-dark-пара (контент несёт цвет, не секция)').toContain(
-      'color: var(--ui-color-text-on-dark);',
-    );
+    expect(body).toContain('background-color: var(--ui-color-primary-a55);');
+    expect(body, 'текст тела — on-dark-пара').toContain('color: var(--ui-color-text-on-dark);');
     expect(body, 'паддинг 40px «как есть» (pages.css:667)').toContain('padding: 2.5rem;');
     expect(body, 'рамка гасится (T17.8)').toContain('border: 0;');
   });
 
-  it('в правках нет hex и !important (инварианты)', () => {
-    expect(pilotCss).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+  it('в правках нет !important (инвариант); hex не добавлен — спец-тинты hero-тегов (violet/green/rose) остаются сайт-зоной до T17.15', () => {
     expect(pilotCss).not.toContain('!important');
+    // бывшие color-mix-градиенты __bg/__glow переехали в ДС на токенах —
+    // сырого primary в них больше нет (остаются только спец-тинты тегов)
+    const tagTintHexes = [...pilotCss.matchAll(/#([0-9a-f]{3,8})\b/gi)].map((m) => m[1]);
+    expect(
+      tagTintHexes.every((hex) => ['3142ff', '31ff76', 'ff3134'].includes(hex.toLowerCase())),
+      `сырые цвета в pilot.css — только спец-тинты hero-тегов (найдено: ${tagTintHexes.join(', ')})`,
+    ).toBe(true);
   });
 });
 
 describe('compare.mjs — блок баннера в BLOCK_PROBES (AC: паритет высот ±4px)', () => {
   it('company.html: пара company-banner (оригинал .banner-card → пилот .cp-company-banner)', () => {
-    const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\]/)?.[1] ?? '';
+    const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\n {2}\],/)?.[1] ?? '';
     expect(companyProbes).toContain("['company-banner', '.banner-card', '.cp-company-banner']");
   });
 
   it('index.html: четыре фоновых блока уже гейтятся (hero/production/holding/why-us)', () => {
-    const indexProbes = compare.match(/'index\.html': \[([\s\S]*?)\]/)?.[1] ?? '';
+    const indexProbes = compare.match(/'index\.html': \[([\s\S]*?)\n {2}\],/)?.[1] ?? '';
     for (const name of ['hero', 'production', 'holding', 'why-us']) {
       expect(indexProbes).toContain(`'${name}'`);
     }

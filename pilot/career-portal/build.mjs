@@ -2660,14 +2660,15 @@ function companyMain() {
 
     <!-- CTA-баннер (banner-card оригинала): фото-секция ui-section--photo
          (T17.3) — __bg-подложка (alt="", README ui-image: подписывать
-         декоративное нечего) и тинт primary-a55 оверлеем --tint (хук
-         --ui-section-overlay-tint на cp-классе); кнопка — ui-button на
+         декоративное нечего); тинт primary-a55 (pages.css:666) — на теле,
+         как в оригинале: заливка body-бокса со скруглением, полосы фото
+         видны сверху/снизу (паритет скрин-пар; полно-секционный оверлей
+         --tint дал бы сплошной тинт — другой вид). Кнопка — ui-button на
          vacancies.html (Scope T15.2). -->
     <div class="ui-section ui-section--photo cp-company-banner">
       <div class="ui-section__bg" aria-hidden="true">
         <img src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
       </div>
-      <div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>
       <div class="cp-company-banner__body ui-card ui-card--cta">
         <h2 class="ui-h2 cp-company-banner__title">Вакансии компании</h2>
         <p class="ui-small cp-company-banner__text">Посмотрите открытые вакансии именно в нашей компании.</p>

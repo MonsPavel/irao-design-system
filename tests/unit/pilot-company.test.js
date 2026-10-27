@@ -232,11 +232,9 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     expect(blockOf(stat, '.ui-stat--deep')).toContain('gap: var(--ui-space-3);');
   });
 
-  it('оверлей баннера — тинт primary-a55 токен-хуком фото-секции (rgba(0,40,86,.55) оригинала, pages.css:666 — ступень лестницы T14.7); раскладка тела — на модификаторе ui-card--cta (T17.8), тело прозрачно поверх тинта', () => {
-    const banner = blockOf(pilotCss, '.cp-company-banner');
-    expect(banner).toContain('--ui-section-overlay-tint: var(--ui-color-primary-a55);');
+  it('оверлей баннера — тинт primary-a55 на теле, как в оригинале (rgba(0,40,86,.55), pages.css:666 — ступень лестницы T14.7); фото-подложка — слой __bg фото-секции T17.3', () => {
     const body = blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body');
-    expect(body).toContain('background-color: transparent;');
+    expect(body).toContain('background-color: var(--ui-color-primary-a55);');
     expect(body).toContain('color: var(--ui-color-text-on-dark);');
     expect(blockOf(pilotCss, '.cp-company-banner__title')).toContain(
       'color: var(--ui-color-text-on-dark);',
