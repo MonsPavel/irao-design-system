@@ -8,6 +8,9 @@
  *  - ui-section — вертикальный ритм секций из spacing-шкалы §3.2;
  *    ui-section--muted — приглушённая секция (порт .section--gray:
  *    фон --ui-color-surface-muted + радиус --ui-radius-lg);
+ *    ui-section--photo — секция с фотографическим фоном (T17.3):
+ *    слой __bg (img cover) + оверлеи __overlay--fade-bottom/--glow/--tint
+ *    под контентом (z-пара, изоляция стекинга);
  *  - ui-grid (+ --2/--3/--4) — адаптивная сетка карточек: 1 колонка на
  *    mobile → 2 на md → N на lg; --4 — 3 на xl → 4 на 2xl.
  *
@@ -90,6 +93,85 @@
 .ui-section--muted {
   border-radius: var(--ui-radius-lg);
   background-color: var(--ui-color-surface-muted);
+}
+
+/* ── Фото-секция: T17.3 — приём «фон inset:0 под контентом + оверлей»
+   career-portal (hero/production/holding/why-us/company-banner) ──
+ *
+ * Слои (z-пара, прецедент pilot.css): __bg и __overlay — absolute inset:0
+ * с z-index:-1; контент секции остаётся в потоке и красится над ними.
+ * isolation: isolate на корне — стекинг-контекст секции: negative-z дети
+ * красятся после фона секции и не убегают под фон обёрток сайта (классика
+ * z-index:-1 — фото «пропадает» под непрозрачной обёрткой).
+ *
+ * img фона — сам слой (absolute inset:0): размер решается инсетами
+ * расширенной замены, object-fit: cover кадрирует файл любой пропорции.
+ * Прямые width/height:100% (приём pilot.css) не использованы — в
+ * layout.css действует инвариант T3.4 «без фиксированных высот», а
+ * результат рендера идентичен. img — декоративный по умолчанию: alt=""
+ * в каноне разметки, aria-hidden на обоих декоративных слоях.
+ *
+ * Высота секции — от контента (как в пилоте); декларативные пропорции
+ * (min-height) и клип/радиус (overflow/border-radius) — решения сайта.
+ * Модификатор типографику и цвет текста НЕ задаёт — on-dark-пары несёт
+ * контент (существующие роли). Пин формы — tests/unit/layout.test.js.
+ *
+ * Оверлеи — три канона одобренного дизайна:
+ *  - --fade-bottom (hero): градиент surface→transparent сверху + 
+ *    transparent→primary-a94 снизу (секция растворяется в страницу сверху
+ *    и в синь следующего блока снизу);
+ *  - --glow (production): горизонтальный градиент primary 88%→34%→
+ *    transparent слева; оверлей под контентом — перехват кликов карусели
+ *    (артефакт site-зоны, снятый pointer-events:none в пилоте) невозможен;
+ *  - --tint: цветовое затемнение токен-хуком --ui-section-overlay-tint;
+ *    дефолт хука — none (fallback transparent), сайт ставит ступень
+ *    лестницы тинтов T14.7 (--ui-color-primary-a55 у баннера компании).
+ * Градиентные варианты — фиксированные каноны; кастомизация — хуком
+ * (по прецеденту --ui-stat-surface). */
+.ui-section--photo {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+}
+
+.ui-section--photo .ui-section__bg {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.ui-section--photo .ui-section__bg img {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+}
+
+.ui-section--photo .ui-section__overlay {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+}
+
+.ui-section__overlay--fade-bottom {
+  background:
+    linear-gradient(180deg, var(--ui-color-surface) 0%, transparent 35%),
+    linear-gradient(180deg, transparent 60%, var(--ui-color-primary-a94) 100%);
+}
+
+.ui-section__overlay--glow {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--ui-color-primary) 88%, transparent) 0%,
+    color-mix(in srgb, var(--ui-color-primary) 34%, transparent) 62%,
+    transparent 100%
+  );
+}
+
+.ui-section__overlay--tint {
+  background-color: var(--ui-section-overlay-tint, transparent);
 }
 
 /* ── Сетка карточек: career-portal pages.css .cards-grid--2/3/4 ── */

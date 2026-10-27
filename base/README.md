@@ -128,6 +128,18 @@
   (`.section`: 40px) не на шкале — маппинг 32/48 (мобильный вид плотнее
   десктопного, рост по шкале); `ui-section--muted` — порт `.section--gray`:
   фон `--ui-color-surface-muted` + радиус `--ui-radius-lg` (big, 24px);
+  `ui-section--photo` (T17.3) — секция с фотографическим фоном: элемент
+  `__bg` (слот `img`, cover-слой `inset: 0`) и оверлей `__overlay` под
+  контентом (z-пара `-1`, стекинг изолирован на секции). Оверлеи —
+  `--fade-bottom`/`--glow` (фиксированные градиент-каноны hero/production
+  career-portal) и `--tint` — цветовое затемнение токен-хуком
+  `--ui-section-overlay-tint` (дефолт — none; сайт ставит ступень лестницы
+  тинтов T14.7, например `--ui-color-primary-a55`). Секция не задаёт
+  типографику/цвет текста — on-dark-пары несёт контент; высота — от
+  контента (пропорции/клип — сайту); декоративные слои — `aria-hidden`,
+  `img` фона — `alt=""`. Канон разметки — паттерн «Landing-секция»,
+  раздел «Фото-фон» (`patterns/landing-section/`); миграция пяти блоков
+  пилота — T17.3;
 - `ui-grid` (+ `--2/--3/--4`) — адаптивная сетка карточек: 1 колонка на
   mobile → 2 на md → N на lg; `--4` — 3 на xl → 4 на 2xl (лестница спеки
   T3.4 п.2, «4→3 на xl»; на макетном вьюпорте 1440 поведение career-portal —
@@ -154,4 +166,4 @@
 | `fonts.css` | T3.1 | @font-face Golos Text 400/500/600 × cyr/lat |
 | `focus.css` | T3.2 | глобальная политика `:focus-visible` (ADR-0001) |
 | `typography.css` | T3.3 | классы ролей ui-h1…ui-micro, ui-page-title (T14.2), body-дефолты, ui-list/ui-address |
-| `layout.css` | T3.4 | ui-container / ui-section (+ --muted) / ui-grid --2/--3/--4 |
+| `layout.css` | T3.4/T17.3 | ui-container / ui-section (+ --muted, + --photo) / ui-grid --2/--3/--4 |
