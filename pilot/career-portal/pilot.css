@@ -389,20 +389,8 @@
   list-style: none;
 }
 
-/* ── employers: лента логотипов (сайт-зона) ── */
-
-.cp-employers__grid {
-  display: grid;
-  gap: var(--ui-space-2);
-  grid-template-columns: repeat(6, 1fr);
-}
-
-.cp-employers__card {
-  width: 100%;
-  border: var(--ui-border-width) solid var(--ui-color-border);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface);
-}
+/* Лента логотипов «Работодатели Группы» — связка lgo-grid/lgo-card (T17.9):
+   правила cp-employers-семейства сняты, канон — паттерн-слой. */
 
 /* ── why-us: тёмная секция с карточками (сайт-зона) ── */
 
@@ -499,72 +487,37 @@
   width: 100%;
 }
 
-/* ── students: цветные карточки (сайт-зона) ── */
+/* ── students/employers: nav-карточки и лента логотипов — связки слоя
+   lnk-card/lgo-grid (T17.9); правила cp-students/cp-employers-семейства
+   сняты (~75 строк, гейт Adoption). Сайт-зона — только тоны: пары
+   одобренного дизайна на токен-хуках связки (Implementation requirements
+   п.1 T17.9); контраст пар — таблица в patterns/landing-section/README.md. ── */
 
-.cp-students__grid {
-  display: grid;
-  gap: var(--ui-space-3);
-  grid-template-columns: repeat(3, 1fr);
+/* Тон peach: color-mix accent-пары оригинала (спец-тинты — зона T17.15,
+   сюда не входит); кнопка — accent/on-dark (пара «orange»). */
+.lnk-card--peach {
+  --lnk-card-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));
+  --ui-button-bg: var(--ui-color-accent);
+  --ui-button-color: var(--ui-color-text-on-dark);
 }
 
-.cp-students__card {
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  gap: var(--ui-space-4);
-  justify-content: space-between;
-  overflow: hidden;
-  min-height: 22rem;
-  padding: var(--ui-space-5);
-  border-radius: var(--ui-radius-md);
+/* Тон navy: primary/on-dark; кнопка — surface/primary (пара «white»). */
+.lnk-card--navy {
+  --lnk-card-bg: var(--ui-color-primary);
+  --lnk-card-fg: var(--ui-color-text-on-dark);
+  --ui-button-bg: var(--ui-color-surface);
+  --ui-button-color: var(--ui-color-primary);
 }
 
-.cp-students__card--peach {
-  background-color: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));
-}
-
-.cp-students__card--navy {
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-text-on-dark);
-}
-
-.cp-students__card--light {
+/* Тон light: surface (дефолт пары связки), кнопка — primary/surface (пара
+   «navy»); рамка — исходник 1:1 (pilot.css:531): токен --ui-color-border в
+   ДС не существует, рамка вычислялась 0px — рендер без рамки сохранён
+   (починка значения меняла бы одобренный вид; решение владельца). */
+.lnk-card--light {
+  --lnk-card-bg: var(--ui-color-surface);
+  --ui-button-bg: var(--ui-color-primary);
+  --ui-button-color: var(--ui-color-surface);
   border: var(--ui-border-width) solid var(--ui-color-border);
-  background-color: var(--ui-color-surface);
-}
-
-.cp-students__card-illu {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  max-height: 70%;
-}
-
-.cp-students__card-btn {
-  display: inline-flex;
-  position: relative;
-  z-index: 1;
-  align-items: center;
-  align-self: flex-end;
-  justify-content: center;
-  width: var(--ui-control-size);
-  height: var(--ui-control-size);
-  border-radius: 50%;
-}
-
-.cp-students__card-btn--orange {
-  background-color: var(--ui-color-accent);
-  color: var(--ui-color-text-on-dark);
-}
-
-.cp-students__card-btn--white {
-  background-color: var(--ui-color-surface);
-  color: var(--ui-color-primary);
-}
-
-.cp-students__card-btn--navy {
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-surface);
 }
 
 /* ── media: сетка главной (сайт-зона; карточки — ui-card) ── */
@@ -1619,14 +1572,12 @@ a.cp-intern-card {
     grid-template-columns: 1fr;
   }
 
-  .cp-employers__grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  /* Лента логотипов — связка lgo-grid (T17.9): ступень 4 колонки — канон
+     слоя (min-width: 768px), лестница пилота снята. */
 
   .cp-why-us__top,
   .cp-why-us__row,
   .cp-holding__stats,
-  .cp-students__grid,
   .cp-adv-grid,
   .cp-events-feature,
   .cp-timeline,
@@ -1672,17 +1623,18 @@ a.cp-intern-card {
   }
 
   .cp-directions__grid,
-  .cp-employers__grid,
   .cp-why-us__top,
   .cp-why-us__row,
   .cp-holding__stats,
-  .cp-students__grid,
   .cp-adv-grid,
   .cp-events-feature,
   .cp-timeline,
   .cp-media__grid {
     grid-template-columns: 1fr;
   }
+
+  /* Nav-карточки и лента логотипов — связки lnk-cards/lgo-grid (T17.9):
+     мобильная база одна колонка — канон слоя, лестница снята. */
 
   .cp-media__card--big,
   .cp-media__lead {

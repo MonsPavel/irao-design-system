@@ -83,9 +83,25 @@ const layerHookSet = () => {
   return hooks;
 };
 
-/** Класс разметки связки без собственных правил (вид несут ui-button--round
- *  и роль заголовка; таксономия имён канона). */
-const MARKERS_WITHOUT_RULES = new Set(['lnk-card__body']);
+/** Тело media-ступени (min-width: Npx), содержащей селектор hook — поиск по
+ *  ВСЕМ ступеням слоя (первая @media файла — ветка lpp-layout, не T17.9). */
+const mediaBlockOf = (px, hook) => {
+  for (const match of layer.matchAll(
+    new RegExp(`@media \\(min-width: ${px}px\\)\\s*\\{([\\s\\S]*?)\\n\\}`, 'g'),
+  )) {
+    if (match[1].includes(`.${hook}`)) return match[1];
+  }
+  return null;
+};
+
+/** Класс разметки связки без собственных правил (вид несут модификаторы/
+ *  роли/хуки; таксономия имён канона). */
+const MARKERS_WITHOUT_RULES = new Set([
+  'lnk-card__body', // обёртка тела: шаг несёт карточка (gap), роли — разметка
+  'lnk-card--peach', // тон — параметр сайта: демо — <style> стенда, пилот — pilot.css
+  'lnk-card--navy',
+  'lnk-card--light',
+]);
 
 describe('components/ui-button — модификатор --round (T17.9 Scope)', () => {
   const round = blockOf(buttonCss, '.ui-button--round');
@@ -136,9 +152,9 @@ describe('components/ui-button — модификатор --round (T17.9 Scope)'
     );
   });
 
-  it("README: строка API + раздел модификатора (DoD «Documentation updated»)", () => {
+  it('README: строка API + раздел модификатора (DoD «Documentation updated»)', () => {
     const readme = readFileSync(join(root, 'components/ui-button/README.md'), 'utf8');
-    expect(readme, 'API-таблица несёт --round').toMatch(/\|\s*`--round`/);
+    expect(readme, 'API-таблица несёт --round').toContain('| Модификатор `.ui-button--round` |');
     expect(readme, 'раздел круглой кнопки с примером пар').toContain('ui-button--round');
   });
 });
@@ -197,12 +213,12 @@ describe('patterns/patterns.css — связка lnk-card (T17.9 Scope)', () => 
     const grid = blockOf(layer, '.lnk-cards');
     expect(grid, '.lnk-cards найдено').toBeTruthy();
     expect(grid, 'шаг 12px — .cp-students__grid').toContain('gap: var(--ui-space-3);');
-    const md = layer.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.lnk-cards\s*\{([^}]*)\}/);
+    const md = mediaBlockOf(768, 'lnk-cards');
     expect(md, 'ступень md есть').toBeTruthy();
-    expect(md[1], 'md — 2 колонки').toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
-    const lg = layer.match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\.lnk-cards\s*\{([^}]*)\}/);
+    expect(md, 'md — 2 колонки').toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
+    const lg = mediaBlockOf(1024, 'lnk-cards');
     expect(lg, 'ступень lg есть').toBeTruthy();
-    expect(lg[1], 'lg — 3 колонки').toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
+    expect(lg, 'lg — 3 колонки').toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
   });
 });
 
@@ -211,12 +227,12 @@ describe('patterns/patterns.css — связка lgo-grid/lgo-card (T17.9 Scope)
     const grid = blockOf(layer, '.lgo-grid');
     expect(grid, '.lgo-grid найдено').toBeTruthy();
     expect(grid, 'шаг 8px — .cp-employers__grid').toContain('gap: var(--ui-space-2);');
-    const md = layer.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.lgo-grid\s*\{([^}]*)\}/);
+    const md = mediaBlockOf(768, 'lgo-grid');
     expect(md, 'ступень md есть').toBeTruthy();
-    expect(md[1], 'md — 4 колонки').toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
-    const lg = layer.match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\.lgo-grid\s*\{([^}]*)\}/);
+    expect(md, 'md — 4 колонки').toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
+    const lg = mediaBlockOf(1024, 'lgo-grid');
     expect(lg, 'ступень lg есть').toBeTruthy();
-    expect(lg[1], 'lg — 6 колонок').toContain('grid-template-columns: repeat(6, minmax(0, 1fr));');
+    expect(lg, 'lg — 6 колонок').toContain('grid-template-columns: repeat(6, minmax(0, 1fr));');
   });
 
   it('рамочная плашка: растянута, радиус md, рамка border-muted (спека), поверхность surface', () => {
@@ -231,9 +247,7 @@ describe('patterns/patterns.css — связка lgo-grid/lgo-card (T17.9 Scope)
       'рамка — border-muted по спеке (в пилоте рамка несуществующим токеном --ui-color-border вычислялась 0px)',
     ).toContain('border: var(--ui-border-width) solid var(--ui-color-border-muted);');
     expect(card, 'радиус md').toContain('border-radius: var(--ui-radius-md);');
-    expect(card, 'поверхность — surface').toContain(
-      'background-color: var(--ui-color-surface);',
-    );
+    expect(card, 'поверхность — surface').toContain('background-color: var(--ui-color-surface);');
   });
 });
 
@@ -247,12 +261,29 @@ describe('гейт префиксов слоя расширен: lnk-|lgo- ка�
     expect(problems.length, 'чужой крючок пойман').toBeGreaterThan(0);
     expect(problems.join('; ')).toContain('.cp-evil');
   });
+
+  it('функциональные псевдоклассы с запятыми (:is) — группа не рвётся (канон восстановления ролей T17.9)', () => {
+    expect(
+      patternLayerProblems(
+        '.lnk-card :is(.ui-h1, .ui-h2, .ui-h3, .ui-h4, .ui-h5, .ui-page-title) { color: var(--lnk-card-fg, var(--ui-color-heading)); }',
+      ),
+      ':is() с запятыми внутри — один селектор с крючком слоя',
+    ).toEqual([]);
+  });
 });
 
 describe('синхронность док-паттерна landing-section и слоя (AC: одни классы)', () => {
   it('канон связок живёт в разметке дока (источник правды, как lpp-/dpp-/fpp-)', () => {
     const hooks = docHooks();
-    for (const name of ['lnk-cards', 'lnk-card', 'lnk-card__body', 'lnk-card__illu', 'lnk-card__action', 'lgo-grid', 'lgo-card']) {
+    for (const name of [
+      'lnk-cards',
+      'lnk-card',
+      'lnk-card__body',
+      'lnk-card__illu',
+      'lnk-card__action',
+      'lgo-grid',
+      'lgo-card',
+    ]) {
       expect(hooks.has(name), `${name} в разметке дока есть`).toBe(true);
     }
   });
@@ -275,7 +306,9 @@ describe('синхронность док-паттерна landing-section и с
   });
 
   it('иллюстрация канона декоративна, стрелка декоративна (Implementation requirements п.2)', () => {
-    const card = landingDoc.slice(landingDoc.indexOf('lnk-card lnk-card--'));
+    const card = landingDoc
+      .replace(/\s+/g, ' ')
+      .slice(landingDoc.replace(/\s+/g, ' ').indexOf('lnk-card lnk-card--'));
     expect(card, 'img иллюстрации alt=""').toMatch(/<img class="lnk-card__illu"[^>]*alt=""/);
     expect(card, 'стрелка — aria-hidden').toMatch(
       /class="ui-button ui-button--round lnk-card__action"[^>]*aria-hidden="true"/,
@@ -286,13 +319,19 @@ describe('синхронность док-паттерна landing-section и с
 describe('пилот career-portal: students/employers на связках (AC T17.9)', () => {
   it('students: сетка — ui-grid + lnk-cards, карточки — ссылки lnk-card с aria-label', () => {
     expect(pilotBuild).toContain('<div class="ui-grid lnk-cards">');
-    expect(pilotBuild).toContain('<a class="lnk-card lnk-card--${card.tone}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">');
+    expect(pilotBuild).toContain(
+      '<a class="lnk-card lnk-card--${card.tone}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">',
+    );
     expect(pilotBuild).toContain('<div class="lnk-card__body">');
-    expect(pilotBuild).toContain('<img class="lnk-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">');
+    expect(pilotBuild).toContain(
+      '<img class="lnk-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">',
+    );
     expect(
       pilotBuild,
       'стрелка — декоративный span ui-button--round (канон примера спеки: интерактив один — карточка)',
-    ).toContain('<span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">${ARROW}</span>');
+    ).toContain(
+      '<span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">${ARROW}</span>',
+    );
     expect(pilotBuild, 'cp-students* из разметки сняты').not.toContain('cp-students');
   });
 
@@ -319,18 +358,29 @@ describe('пилот career-portal: students/employers на связках (AC T
     ]) {
       expect(pilotCss, `дубликат ${gone} удалён`).not.toContain(gone);
     }
-    expect(pilotCss, 'тон peach — color-mix на хуке bg').toMatch(
-      /\.lnk-card--peach\s*\{[^}]*--lnk-card-bg: color-mix\([^)]*--ui-color-accent[^)]*\);/,
+    const peach = blockOf(pilotCss, '.lnk-card--peach');
+    expect(peach, 'тон peach — color-mix accent-пары на хуке bg').toContain(
+      '--lnk-card-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));',
     );
-    expect(pilotCss, 'тон navy — пара primary/on-dark').toMatch(
-      /\.lnk-card--navy\s*\{[^}]*--lnk-card-fg: var\(--ui-color-text-on-dark\);/,
+    expect(peach, 'кнопка тона peach — accent/on-dark («orange»)').toContain(
+      '--ui-button-bg: var(--ui-color-accent);',
     );
-    expect(pilotCss, 'кнопка тона navy — surface/primary («white»)').toMatch(
-      /\.lnk-card--navy\s*\{[^}]*--ui-button-bg: var\(--ui-color-surface\);/,
+    const navy = blockOf(pilotCss, '.lnk-card--navy');
+    expect(navy, 'тон navy — пара primary/on-dark').toContain(
+      '--lnk-card-fg: var(--ui-color-text-on-dark);',
     );
-    expect(pilotCss, 'кнопка тона light — primary/surface («navy»)').toMatch(
-      /\.lnk-card--light\s*\{[^}]*--ui-button-bg: var\(--ui-color-primary\);/,
+    expect(navy, 'кнопка тона navy — surface/primary («white»)').toContain(
+      '--ui-button-bg: var(--ui-color-surface);',
     );
+    const light = blockOf(pilotCss, '.lnk-card--light');
+    expect(light, 'кнопка тона light — primary/surface («navy»)').toContain(
+      '--ui-button-bg: var(--ui-color-primary);',
+    );
+    expect(
+      light,
+      'рамка light-тона — исходник 1:1 (токен --ui-color-border не существует,' +
+        ' рендер без рамки сохранён; починка — решение владельца)',
+    ).toContain('border: var(--ui-border-width) solid var(--ui-color-border);');
     // Медиа-лестницы пилота для двух сеток сняты вместе с правилами.
     expect(pilotCss).not.toMatch(/\.cp-students__grid/);
     expect(pilotCss).not.toMatch(/\.cp-employers__grid/);

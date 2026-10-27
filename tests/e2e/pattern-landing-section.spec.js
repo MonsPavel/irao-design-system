@@ -480,22 +480,23 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
     },
   );
 
-  standTest('сетка nav-карточек: 1 колонка (375) → 2 (768) → 3 (1280) — канон пилота', async ({
-    stand,
-  }) => {
-    const page = await stand('patterns/landing-section');
-    const columnsOf = () =>
-      page
-        .locator(`${SEL_NAV.section} .lnk-cards`)
-        .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+  standTest(
+    'сетка nav-карточек: 1 колонка (375) → 2 (768) → 3 (1280) — канон пилота',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const columnsOf = () =>
+        page
+          .locator(`${SEL_NAV.section} .lnk-cards`)
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
 
-    await page.setViewportSize(VIEWPORTS.mobile);
-    expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
-    await page.setViewportSize(VIEWPORTS.tablet);
-    expect(await columnsOf(), 'md — 2 колонки').toBe(2);
-    await page.setViewportSize(VIEWPORTS.xl);
-    expect(await columnsOf(), 'lg+ — 3 колонки').toBe(3);
-  });
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
+      await page.setViewportSize(VIEWPORTS.tablet);
+      expect(await columnsOf(), 'md — 2 колонки').toBe(2);
+      await page.setViewportSize(VIEWPORTS.xl);
+      expect(await columnsOf(), 'lg+ — 3 колонки').toBe(3);
+    },
+  );
 
   standTest(
     'лента логотипов: сетка 1 (375) → 4 (768) → 6 (1280); плашка lgo-card — рамка border-muted, радиус md, img растянута',
@@ -518,16 +519,19 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
       await page.setViewportSize(VIEWPORTS.xl);
       expect(await columnsOf(), 'lg+ — 6 колонок').toBe(6);
 
-      const plate = await sec.locator('img.lgo-card').first().evaluate((el) => {
-        const cs = getComputedStyle(el);
-        return {
-          width: cs.width,
-          boxWidth: Math.round(el.getBoundingClientRect().width),
-          radius: cs.borderRadius,
-          border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}`,
-          natural: `${el.naturalWidth}x${el.naturalHeight}`,
-        };
-      });
+      const plate = await sec
+        .locator('img.lgo-card')
+        .first()
+        .evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return {
+            width: cs.width,
+            boxWidth: Math.round(el.getBoundingClientRect().width),
+            radius: cs.borderRadius,
+            border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}`,
+            natural: `${el.naturalWidth}x${el.naturalHeight}`,
+          };
+        });
       await page.setViewportSize(VIEWPORTS.xl);
       const cell = await sec
         .locator('.lgo-grid')

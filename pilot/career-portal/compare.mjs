@@ -394,7 +394,9 @@ const BLOCK_PROBES = {
     ['production', '.production', '.cp-production'],
     ['directions', '.directions', '#directions'],
     ['holding', '.holding', '.cp-holding'],
-    ['employers', '.employers', '.cp-employers__grid'],
+    // Лента логотипов — связка lgo-grid (T17.9): проба на крючке слоя
+    // (прецедент video-block/cta-mail).
+    ['employers', '.employers', '.lgo-grid'],
     ['why-us', '.why-us', '.cp-why-us'],
     ['vacancy-search', '.vacancy-search', '#vacancies'],
     ['students', '.students--illustrated', '#students'],
