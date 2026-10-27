@@ -29,6 +29,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { patternLayerProblems } from '../../showcase/patterns-layer-gate.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 
@@ -387,5 +388,73 @@ describe('пилот career-portal: слой подключён, ваканси�
     );
     expect(pilotCss, 'find-bar — канон придёт с T17.12').toContain('.cp-find-bar');
     expect(build, 'cp-find-bar в разметке остаётся').toContain('cp-find-bar');
+  });
+});
+
+describe('гейт селекторов слоя — patternLayerProblems (функционально; ревью T17.1: матч всех правил, не первого)', () => {
+  /** Ревью T17.1 high: гейт в selfChecks матчил /([^{}]+)\{/ БЕЗ /g —
+   *  проверялось только первое правило, чужой префикс в любом другом
+   *  проходил сборку. Гейт вынесен в showcase/patterns-layer-gate.mjs
+   *  (matchAll по всем правилам) — здесь он тестируется КАК КОД: реальные
+   *  и отравленные входы, а не пины текста build.mjs. */
+
+  it('реальный patterns.css чист: ВСЕ правила проходят гейт (0 проблем)', () => {
+    expect(patternLayerProblems(layer), 'все правила слоя каноничны').toEqual([]);
+  });
+
+  it('чужой префикс в ЛЮБОМ правиле ловится — не только в первом', () => {
+    // Первое правило каноническое (пройдено бы и старым гейтом), чужое — в
+    // середине и в конце: старый код (match без /g) вернул бы 0 проблем.
+    const poisoned = [
+      '/* комментарий с .cp-обманом внутри — не селектор */',
+      '.lpp-row { display: flex; }',
+      '',
+      '.cp-evil .ui-button { overflow-wrap: anywhere; }',
+      '',
+      '.lpp-rows { display: flex; flex-direction: column; }',
+      '.tl-evil { gap: var(--ui-space-2); }',
+    ].join('\n');
+    const problems = patternLayerProblems(poisoned);
+    // Чужой селектор даёт ДВЕ диагностики: «нет канонического крючка» +
+    // «чужой крючок» (по одной на каждый нарушенный инвариант).
+    expect(problems.length, 'по две диагностики на каждый чужой селектор').toBe(4);
+    expect(problems.join('; '), 'первый чужой крючок пойман').toContain('.cp-evil');
+    expect(problems.join('; '), 'последний чужой крючок пойман').toContain('.tl-evil');
+  });
+
+  it('ID-селектор ловится в любом правиле (02-architecture §1)', () => {
+    const problems = patternLayerProblems(
+      '.lpp-row { display: flex; }\n\n#lpp-grid .ui-button { overflow-wrap: anywhere; }',
+    );
+    // Две диагностики: нет канонического КЛАССА-крючка + сам ID-селектор.
+    expect(problems.length, 'ID даёт «нет крючка» и «ID-селектор»').toBe(2);
+    expect(problems.join('; ')).toContain('ID');
+  });
+
+  it('правила ВНУТРИ @media проверяются, прелюдия селектором не считается', () => {
+    const css = [
+      '@media (min-width: 768px) {',
+      '  .cp-inside-media { position: sticky; }',
+      '}',
+    ].join('\n');
+    const problems = patternLayerProblems(css);
+    // Чужой селектор — две диагностики («нет крючка слоя» + «чужой крючок»);
+    // прелюдия @media в селекторы не попадает (иначе матч был бы один и
+    // мусорный, а .cp-inside-media не проверился бы вовсе).
+    expect(problems.length, 'правило из media поймано, прелюдия — не селектор').toBe(2);
+    expect(problems.join('; ')).toContain('.cp-inside-media');
+    expect(problems.join('; ')).not.toContain('@media');
+  });
+
+  it('потомки ui-* разрешены, пустой слой — проблема', () => {
+    expect(
+      patternLayerProblems(
+        '.lpp-rows .ui-button, .lpp-grid .ui-button { overflow-wrap: anywhere; }',
+      ),
+      'ui-потомок под крючком слоя каноничен',
+    ).toEqual([]);
+    expect(patternLayerProblems('/* только комментарии */').length, 'пустой слой — проблема').toBe(
+      1,
+    );
   });
 });

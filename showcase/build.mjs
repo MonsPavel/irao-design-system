@@ -61,6 +61,7 @@ import {
   renderGuidePage,
 } from './guides.mjs';
 import { parseTokensFile, renderTokensStand, TOKENS_SOURCES } from './tokens-stand.mjs';
+import { patternLayerProblems } from './patterns-layer-gate.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST = join(ROOT, 'dist');
@@ -1476,32 +1477,16 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
     assert(content.startsWith('/*! irao-ui v'), `баннер версии не в начале dist/${name}`);
   }
   // Гейт паттерн-слоя (T17.1, Implementation requirements п.2 — «проверка в
-  // сборке»): селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-
+  // сборке»): селекторы слоя — только канонические префиксы lpp-|dpp-|fpp-
   // (потомки — компоненты ui-*), ID и чужие namespace-крючки запрещены —
-  // защита от превращения слоя в свалку. Поверх юнит-пинов
-  // tests/unit/patterns-layer.test.js.
+  // защита от превращения слоя в свалку. Логика — showcase/patterns-layer-
+  // gate.mjs (чистая функция, импортируется и юнит-пинами — ревью T17.1:
+  // прежний инлайн-гейт с match без /g проверял только ПЕРВОЕ правило).
   {
-    const layerSource = readFileSync(join(ROOT, 'patterns/patterns.css'), 'utf8')
-      .replace(/\r\n/g, '\n')
-      .replace(/\/\*[\s\S]*?\*\//g, '');
-    const layerSelectors = (layerSource.match(/([^{}]+)\{/) ?? [])
-      .map((piece) => piece.trim())
-      .filter((selector) => selector !== '' && !selector.startsWith('@'));
-    assert(layerSelectors.length > 0, 'паттерн-слой пуст — связки не перенесены');
-    for (const selector of layerSelectors) {
-      const hooks = selector.match(/\.[a-z][a-z0-9_-]*/g) ?? [];
-      assert(
-        hooks.some((hook) => /^\.(lpp|dpp|fpp)-/.test(hook)),
-        `селектор слоя без крючка lpp-/ddp-/fpp-: «${selector}»`,
-      );
-      for (const hook of hooks) {
-        assert(
-          /^\.(ui|lpp|dpp|fpp)-/.test(hook),
-          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|ddp-|fpp- + ui-потомки)`,
-        );
-      }
-      assert(!/#[a-zA-Z]/.test(selector), `ID-селектор в слое: «${selector}» (02-architecture §1)`);
-    }
+    const layerProblems = patternLayerProblems(
+      readFileSync(join(ROOT, 'patterns/patterns.css'), 'utf8'),
+    );
+    assert(layerProblems.length === 0, `гейт селекторов слоя: ${layerProblems.join('; ')}`);
   }
   // Страницы используют собранный dist, не исходники (AC T1.3). Доки по
   // шаблону T10.1 — в том же обходе (ревью T10.1: сломанный rel каркаса

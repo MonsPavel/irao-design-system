@@ -11,7 +11,7 @@
  * (паддинг/bg/радиус), pill (рамка/высота) + pill-icon (кружок),
  * reset-control, side-promo, promo-btn; data-* ПЕРВОЙ строки — паритет
  * build.py:72–79 (селекторы строки — те же пер-сторонние, что у пары
- * row-item: '.vac-row' / '.cp-vac-row'; подстрочный [class*="vac-row"]
+ * row-item: '.vac-row' / '.lpp-row'; подстрочный [class*="vac-row"]
  * матчит контейнер .vac-rows раньше строк и даёт 10×null — холостая
  * сверка, замечание ревью T16.5); hover строки — перекраска ссылки в
  * primary (pages.css:178).
@@ -45,21 +45,26 @@ const PROPS = [
   'text-decoration-line',
 ];
 
-/** [имя, селектор оригинала, селектор клона] */
+/** [имя, селектор оригинала, селектор клона]
+ *  С T17.1 классы связки строки/сайдбара — паттерн-слой lpp-*
+ *  (dist/ui-patterns.css): cp-vac-* селекторы после перевода разметки
+ *  давали null на пилотной стороне — детерминированный exit 1 (ревью
+ *  T17.1). Промо — hook пробы cp-vac-side__promo без CSS (класс сохранён
+ *  в разметке, пара compare.mjs side-promo/promo-btn). */
 const PAIRS = [
-  ['row-title', '.vac-row__title', '.cp-vac-row .ui-h6'],
-  ['row-title-anchor', '.vac-row__title a', '.cp-vac-row__title a'],
-  ['row-item', '.vac-row', '.cp-vac-row'],
-  ['pill', '.vac-row .pill-btn', '.cp-vac-row .ui-button--pill'],
-  ['pill-icon', '.vac-row .pill-btn__icon', '.cp-vac-row .ui-button__icon'],
-  ['reset-control', '.vac-side__reset', '.cp-vac-side .ui-button--text'],
+  ['row-title', '.vac-row__title', '.lpp-row .ui-h6'],
+  ['row-title-anchor', '.vac-row__title a', '.lpp-row__title a'],
+  ['row-item', '.vac-row', '.lpp-row'],
+  ['pill', '.vac-row .pill-btn', '.lpp-row .ui-button--pill'],
+  ['pill-icon', '.vac-row .pill-btn__icon', '.lpp-row .ui-button__icon'],
+  ['reset-control', '.vac-side__reset', '.lpp-side .ui-button--text'],
   ['side-promo', '.vac-side__promo', '.cp-vac-side__promo'],
   ['promo-btn', '.vac-side__promo .btn--primary', '.cp-vac-side__promo .ui-button--primary'],
 ];
 
 /** data-* первой строки — селектор строки пер-сторонний (см. шапку). */
 const ROW_SELECTOR = { original: '.vac-row', pilot: '.lpp-row' };
-const TITLE_ANCHOR = { original: '.vac-row__title a', pilot: '.cp-vac-row__title a' };
+const TITLE_ANCHOR = { original: '.vac-row__title a', pilot: '.lpp-row__title a' };
 
 const DATA_ATTRS = [
   'data-region',

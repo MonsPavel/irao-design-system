@@ -219,4 +219,32 @@ describe('probe-vac-rows.mjs — закрывающая проба data-*/стр
   it('нулевые значения не проходят за MATCH: отсутствующая строка — ошибка пробы, а не null-список', () => {
     expect(probe).toMatch(/row is missing/i);
   });
+
+  it('PAIRS пробы — пилотные селекторы на слое lpp-* (ревью T17.1: cp-vac-* в PAIRS давали 6×null на пилотной стороне — детерминированный exit 1)', () => {
+    const pairs = probe.match(/const PAIRS = \[[\s\S]*?\];/)?.[0] ?? '';
+    expect(pairs, 'PAIRS найдены').not.toBe('');
+    for (const pilotSel of [
+      "'.lpp-row .ui-h6'",
+      "'.lpp-row__title a'",
+      "'.lpp-row'",
+      "'.lpp-row .ui-button--pill'",
+      "'.lpp-row .ui-button__icon'",
+      "'.lpp-side .ui-button--text'",
+    ]) {
+      expect(pairs, `пилотный селектор ${pilotSel} — на крючке слоя`).toContain(pilotSel);
+    }
+    // Промо — hook пробы без CSS (класс сохранён в разметке, пара compare.mjs).
+    expect(pairs, 'side-promo/promo-btn — на хуке cp-vac-side__promo').toContain(
+      "'.cp-vac-side__promo'",
+    );
+    expect(pairs, 'cp-vac-* селекторы из PAIRS сняты').not.toMatch(/\.cp-vac-row/);
+    expect(pairs).not.toContain('.cp-vac-side .ui-button--text');
+  });
+
+  it('TITLE_ANCHOR пробы — якорь hover на слое (ревью T17.1: cp-якорь давал null и ложный «row is missing»)', () => {
+    expect(probe).toContain(
+      "const TITLE_ANCHOR = { original: '.vac-row__title a', pilot: '.lpp-row__title a' };",
+    );
+    expect(probe).not.toContain("'.cp-vac-row__title a'");
+  });
 });
