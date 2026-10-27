@@ -160,17 +160,21 @@
   aspect-ratio: 1 / 1;
 }
 
-/* Фото заполняет слот (cover — Implementation requirements п.3); display:
-   block приносит base/reset.css. Радиус md/md 0 0 — канон «фото сверху».
-   Прямой ребёнок — bare img канона (класса нет) и ui-image (T4.6) в слоте —
-   одна геометрия; вложенные глубже img не тронуты. Элемент через :is() —
-   гейт БЭМ-паттерна не допускает голую элементную часть в компоненте
-   (прецедент .ui-card--link :is(a, button); в base/* — не компонент —
-   прецедент ui-section__bg img, base/layout.css). */
+/* Фото следует за пропорцией слота (aspect-ratio: inherit — слот единственный
+   источник геометрии: 3/2 база, --square 1/1); object-fit: cover — каркасом
+   (Implementation requirements п.3); радиус md/md 0 0 — канон «фото сверху»;
+   display: block приносит base/reset.css. height: auto перекрывает
+   presentational-hint атрибута height канона T4.6 (иначе атрибутная высота
+   побеждает aspect-ratio — бокс 480px вместо слота). Почему не height: 100%:
+   процентная высота против aspect-ratio-слота — цикл в интринсик-пассе
+   флекс/грид (карточка в растянутой сетке тянет слот до НАТУРАЛЬНОЙ высоты
+   портретного файла — +287px на internships.html до фикса; урок
+   ui-section__bg base/layout.css: replaced-элементу размеры задают явно). */
 .ui-card--media .ui-card__media > :is(img) {
+  aspect-ratio: inherit;
+  height: auto;
   object-fit: cover;
   width: 100%;
-  height: 100%;
   border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
 }
 

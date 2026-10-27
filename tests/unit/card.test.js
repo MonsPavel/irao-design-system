@@ -286,12 +286,18 @@ describe('components/ui-card/ui-card.css — медиа-карточка (T17.5:
     expect(block).toContain('aspect-ratio: 1 / 1;');
   });
 
-  it('img в __media: object-fit: cover — каркасом; радиус фото md/md 0 0 (канон); заполняет слот (width/height 100%)', () => {
-    const block = blockOf(css, '.ui-card--media .ui-card__media > img');
+  it('img в __media: пропорция — inherit от слота (без height:100% — цикл интринсика), object-fit: cover — каркасом; радиус фото md/md 0 0', () => {
+    // Элемент через :is() — БЭМ-гейт не допускает голую элементную часть
+    // в компоненте (прецедент .ui-card--link :is(a, button)).
+    const block = blockOf(css, '.ui-card--media .ui-card__media > :is(img)');
     expect(block, 'правило img найдено').toBeTruthy();
+    expect(block).toContain('aspect-ratio: inherit;');
     expect(block).toContain('object-fit: cover;');
     expect(block).toContain('width: 100%;');
-    expect(block).toContain('height: 100%;');
+    expect(
+      block,
+      'height:100% против aspect-слота — цикл в интринсик-пассе (669px на internships)',
+    ).not.toContain('height: 100%;');
     expect(block).toContain('border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;');
   });
 
@@ -394,7 +400,7 @@ describe('стенд — секция «медиа-карточка» (showcase/
     }
   });
 
-  it('тег на фото — тинт варианта ui-tag (don\'t on-photo без потребности — прецедент T16.10)', () => {
+  it("тег на фото — тинт варианта ui-tag (don't on-photo без потребности — прецедент T16.10)", () => {
     expect(html).toMatch(/class="ui-card__media-tag ui-tag ui-tag--/);
     expect(html).not.toContain('ui-tag--on-photo');
   });
@@ -458,7 +464,9 @@ describe('пилот (T17.5): медиа-карточки на модифика�
     // Тег на фото — absolute-слот каркаса + тинт варианта (ui-tag--green/blue).
     expect(build).toMatch(/class="ui-card__media-tag ui-tag/);
     // Статьи/медиа-каталог: тег с точкой (ui-tag__icon) — разметке, слот тот же.
-    expect(build).toMatch(/<span class="ui-card__media-tag ui-tag [^"]*"><span class="ui-tag__icon"/);
+    expect(build).toMatch(
+      /<span class="ui-card__media-tag ui-tag [^"]*"><span class="ui-tag__icon"/,
+    );
     // Карточка стажёра: квадратное фото — __media--square, без --link (не ссылка).
     expect(build).toMatch(
       /<article class="ui-card ui-card--hover ui-card--media">\r?\n\s*<div class="ui-card__media ui-card__media--square">/,
