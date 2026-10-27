@@ -161,11 +161,16 @@
 }
 
 /* Фото заполняет слот (cover — Implementation requirements п.3); display:
-   block приносит base/reset.css. Радиус md/md 0 0 — канон «фото сверху». */
-.ui-card--media .ui-card__media > img {
+   block приносит base/reset.css. Радиус md/md 0 0 — канон «фото сверху».
+   Прямой ребёнок — bare img канона (класса нет) и ui-image (T4.6) в слоте —
+   одна геометрия; вложенные глубже img не тронуты. Элемент через :is() —
+   гейт БЭМ-паттерна не допускает голую элементную часть в компоненте
+   (прецедент .ui-card--link :is(a, button); в base/* — не компонент —
+   прецедент ui-section__bg img, base/layout.css). */
+.ui-card--media .ui-card__media > :is(img) {
+  object-fit: cover;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
 }
 
