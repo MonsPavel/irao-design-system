@@ -197,3 +197,24 @@ describe('compare.mjs — блок баннера в BLOCK_PROBES (AC: пари�
     }
   });
 });
+
+describe('REPORT §3.4 синхронен с T17.3 (прецедент пина card.test.js/video.test.js)', () => {
+  const report = readFileSync(join(pilotDir, 'REPORT.md'), 'utf8');
+
+  it('строки пяти фоновых блоков несут пометку миграции T17.3 с нулевой дельтой', () => {
+    for (const [name, height] of [
+      ['hero', '808'],
+      ['production', '651'],
+      ['holding', '603'],
+      ['why-us', '1019'],
+    ]) {
+      const row = report.match(new RegExp(`\\| ${name} \\| \\d+ \\| ${height} \\| [^\\n]*\\|`));
+      expect(row, `строка ${name} в таблице высот`).toBeTruthy();
+      expect(row[0], `${name}: пометка T17.3`).toContain('T17.3');
+      expect(row[0], `${name}: дельта миграции 0`).toContain('дельта 0');
+    }
+    expect(report, 'баннер компании (вне таблицы) — строка о миграции T17.3').toContain(
+      'T17.3 перевёл подложку баннера на ui-section--photo',
+    );
+  });
+});
