@@ -203,6 +203,46 @@
   padding: calc((var(--ui-button-pill-icon-size-sm) - 1rem) / 2);
 }
 
+/* ── Модификатор round (T17.9): круглая icon-кнопка «кнопка-стрелка»
+      nav-карточек («Школьникам и студентам», .cp-students__card-btn
+      pilot.css:543), соц-кнопок шапки/подвала (T17.13) — общий знаменатель
+      круглых контролов (Notes спеки: прецеденты — стрелка пилюли T16.11,
+      play T17.6, соц-кнопки) ──
+ *
+ * Геометрия: диаметр --ui-control-size (20px, нативный контрол чекбокса/
+ * радио; в одобренном пилоте кнопка ровно 20×20 — before-проба T17.9;
+ * «48px» из прозы Context спеки противоречит и коду пилота, и значению
+ * токена — норма «--ui-control-size» исполнена), круг 50% (пилюля ≥ диаметра
+ * давала бы тот же круг — 50% честнее). Сбросы текстовой базы: min-height 0
+ * (прецедент --text: высота кнопки-строки не нужна — диаметр строгий) и
+ * padding 0 (паддинг 28px не входит в бокс 20px).
+ *
+ * Цветовая пара — токен-хуках --ui-button-bg/--ui-button-color (дефолт —
+ * canonical-пара primary/on-dark): пара — решение сайта/тона карточки
+ * (Implementation requirements п.1 T17.9 — «цветовые пары токенами»);
+ * одобренные пары пилота: accent/on-dark («orange»), surface/primary
+ * («white»), primary/surface («navy») — сайт-зона (pilot.css, тоны
+ * lnk-card--*). Прецедент хука с дефолтом — --ui-section-overlay-tint
+ * (base/layout.css, T17.3).
+ *
+ * hover/active пару НЕ меняют — защитное переобъявление против generic-
+ * правил базы (конвенция шапки: каждый вариант несёт собственную пару):
+ * одобренный дизайн круглой стрелки состояний не имеет (hover в pilot.css
+ * на .cp-students__card-btn не задан), а без закрепления generic-hover
+ * красил бы кнопку surface-hover'ом при наведении на карточку-ссылку.
+ * Фокус — глобальная политика ADR-0001 (в nav-карточке стрелка декоративна
+ * и не фокусируется; интерактивные применения — соц-кнопки T17.13).
+ */
+.ui-button--round {
+  width: var(--ui-control-size);
+  height: var(--ui-control-size);
+  min-height: 0;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--ui-button-bg, var(--ui-color-primary));
+  color: var(--ui-button-color, var(--ui-color-text-on-dark));
+}
+
 /* ── Размеры: md — база (--ui-button-height), sm (Scope) ── */
 
 /* sm: вертикальный паддинг уплотнён до --ui-space-1 (4px) — иначе контент
@@ -334,6 +374,13 @@
   .ui-button--pill:not(:disabled):hover .ui-button__icon {
     background-color: var(--ui-color-accent);
   }
+
+  /* T17.9: пара круглой кнопки не меняется (см. доку модификатора) —
+     закреплена против generic-.ui-button:hover. */
+  .ui-button--round:not(:disabled):hover {
+    background-color: var(--ui-button-bg, var(--ui-color-primary));
+    color: var(--ui-button-color, var(--ui-color-text-on-dark));
+  }
 }
 
 /* ── :active — color-mix 88% + black (одобренным дизайном active не задан) ── */
@@ -380,6 +427,12 @@
 .ui-button--pill:not(:disabled):active {
   background-color: color-mix(in srgb, var(--ui-color-surface-muted) 88%, black);
   color: var(--ui-color-primary);
+}
+
+/* T17.9: пара круглой кнопки не меняется и в active (см. доку модификатора). */
+.ui-button--round:not(:disabled):active {
+  background-color: var(--ui-button-bg, var(--ui-color-primary));
+  color: var(--ui-button-color, var(--ui-color-text-on-dark));
 }
 
 /* ── disabled: атрибут disabled (не фокусируется, не кликается нативно);

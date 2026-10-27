@@ -76,6 +76,21 @@
       ></path>
     </svg>
   </button>
+  <!-- round (T17.9): круглая icon-кнопка (--ui-control-size, пара — хуки
+       --ui-button-bg/--ui-button-color, дефолт primary/on-dark). Имя —
+       aria-label (icon-only); в nav-карточке стрелка декоративна (см. дока). -->
+  <button class="ui-button ui-button--round" type="button" aria-label="Подробнее">
+    <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16">
+      <path
+        d="M2 8h11M9 3l5 5-5 5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      ></path>
+    </svg>
+  </button>
   <button class="ui-button ui-button--light" type="button" disabled>
     <span class="ui-button__label">Отправка…</span>
   </button>

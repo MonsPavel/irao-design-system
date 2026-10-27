@@ -18,6 +18,7 @@
 | Модификатор `.ui-button--light` | действие на приглушённом фоне (pair `--ui-color-surface-muted` / `--ui-color-primary`) |
 | Модификатор `.ui-button--text` | **текстовая кнопка** (T16.7) — действующее слово в текстовом контексте («Сбросить» фильтров, отмена, «очистить форму»): fs 14/400 (`--ui-fs-small` × `--ui-fw-body`), подпись `--ui-color-text-muted`, подчёркивание — маркер действия; фона, рамки и своей высоты нет (min-height сброшен — размер по строке, не 52px); hover/active — подпись primary на прозрачном |
 | Модификатор `.ui-button--pill` | пилюля со стрелкой — CTA строки/карточки-ссылки (ниже — «Пилюля со стрелкой»); совместим с `.ui-button--sm` |
+| Модификатор `.ui-button--round` | **круглая icon-кнопка** (T17.9) — диаметр `--ui-control-size` (20px), круг 50%, паддинг/высота-минимум базы сброшены; цветовая пара — токен-хуках `--ui-button-bg`/`--ui-button-color` (дефолт — primary/on-dark), hover/active пару не меняют (ниже — «Круглая кнопка») |
 | Размер md | база: `min-height: var(--ui-button-height)` (52px) — модификатор не нужен |
 | Размер `.ui-button--sm` | `min-height: var(--ui-button-height-sm)` (32px, ступень шкалы §3.2) |
 | Паддинг | `12px 28px` — как `.btn` career-portal (components.css:71): вертикаль `--ui-space-3`, горизонталь `--ui-button-pad-inline` (28px вне шкалы отступов — перенос «как есть», прецедент `--ui-card-gap`; T14.3) |
@@ -29,7 +30,7 @@
 | Состояние disabled | **атрибут** `disabled` — не фокусируется и не кликается нативно |
 | Состояние loading | класс `is-loading` + `aria-busy="true"` (ставит управляющий код формы/приложения) |
 | JS | не требуется (CSS-компонент; переключение loading — за формой, T5.5) |
-| Токены | `--ui-button-height(-sm)`, `--ui-button-height-pill`, `--ui-button-pill-icon-size(-sm)`, `--ui-button-pill-pad-inline(-sm)`, `--ui-button-pill-label-fs`, `--ui-button-pill-letter-spacing`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-opacity-disabled`, `--ui-color-surface-hover`, `--ui-color-surface-muted` (hover пилюли), пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
+| Токены | `--ui-button-height(-sm)`, `--ui-button-height-pill`, `--ui-button-pill-icon-size(-sm)`, `--ui-button-pill-pad-inline(-sm)`, `--ui-button-pill-label-fs`, `--ui-button-pill-letter-spacing`, `--ui-button-pad-inline`, `--ui-button-border-width`, `--ui-control-size` (диаметр `--round`), `--ui-button-bg` / `--ui-button-color` (хуки пары `--round`), `--ui-opacity-disabled`, `--ui-color-surface-hover`, `--ui-color-surface-muted` (hover пилюли), пары `--ui-color-primary-hover` / `--ui-color-accent-hover`, focus-тройка ADR-0001 |
 
 ```html
 <button class="ui-button ui-button--primary" type="submit">Отправить отклик</button>
@@ -118,6 +119,40 @@
     <path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
   </svg>
 </button>
+```
+
+## Круглая кнопка (`.ui-button--round`)
+
+Круглая icon-кнопка — общий знаменатель круглых контролов (Notes T17.9:
+стрелка пилюли T16.11, play T17.6, соц-кнопки шапки/подвала T17.13):
+диаметр `--ui-control-size` (20px — как в одобренной nav-карточке
+career-portal), круг 50%, `min-height`/`padding` текстовой базы сброшены
+(прецедент `--text`).
+
+- **Когда**: декоративный слот действия внутри карточки-ссылки (стрелка
+  nav-карточки `lnk-card__action`, T17.9) или настоящий круглый контрол
+  (соц-кнопки — T17.13). Интерактив один на композицию: если вся карточка —
+  ссылка, стрелка — `aria-hidden`-span.
+- **Пара — на хуках**: `--ui-button-bg` / `--ui-button-color` (дефолт —
+  primary/on-dark); одобренные пары career-portal: accent/on-dark,
+  surface/primary, primary/surface — контраст пары на совести сайта
+  (do/don't — patterns/landing-section/README.md). Прецедент хука с
+  дефолтом — `--ui-section-overlay-tint` (T17.3).
+- **hover/active пару не меняют** (защитное переобъявление против
+  generic-правил базы): одобренный дизайн круглой стрелки состояний не
+  имеет; сайту с другой механикой — собственное правило поверх.
+- **A11y**: как icon-only — контент кнопки обязан быть доступным иначе
+  (имя несёт обёртка-ссылка с `aria-label` или сам контрол получает
+  `aria-label`); стрелка-иконка — svg с `aria-hidden="true"`.
+
+```html
+<!-- Карточка-ссылка: интерактив один, стрелка декоративна (T17.9) -->
+<a class="lnk-card lnk-card--navy" href="practices.html" aria-label="Подробнее: Стажировки и практики">
+  …
+  <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+    <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16"><path d="M2 8h11M9 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+  </span>
+</a>
 ```
 
 ## Клавиатура и a11y
