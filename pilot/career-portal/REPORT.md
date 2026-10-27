@@ -128,6 +128,7 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 | holding stat value (ui-stat) | lh 1.1 (holding.css:66) | lh 1.1 (роль ui-h2) | **закрыто T17.4** (adoption: статы холдинга/компании на ui-stat, 10 инстансов): до — lh 1.35 (случайное наследование body пилота; снято вместе с cp-правилом) → роль ui-h2 по Implementation requirements п.2/п.4: lh значения 1.35→1.1, строка 81→66px, блок holding 618→603 (−15px, вне порога ±4px — осознанно: lh 1.1 — канон оригинала), docHeight главной 8219→8204; company-блоки — дельта 0 (probe до/после `.zcode/accept-t174-*.json`, compare 20 страниц 25.10; блоки company-stats/company-adv — в BLOCK_PROBES compare) |
 | checkbox / pagination | — | — | probe MATCH (высоты 20px, страницы пагинации) |
 | production carousel (ui-carousel) | стрелки прозрачны on-dark (`button { background: none; border: none }` base.css), табы Golos | **закрыто T17.7** (adoption: карусель «Производство» на ui-carousel): до — UA-артефакты отсутствующего button-ресета пилота (стрелки — подложка ButtonFace rgb(240,240,240) + рамка 2px, табы — Arial); после — вид компонента (стрелки `border:0; background-color:transparent`, табы `--ui-font-family`), оба — приведение к одобренному оригиналу, воспроизведение артефактов запрещено инвариантом эпика; блок 649→651 (Δ2px в пороге ±4px), раскладка пары идентична — осознанная оговорка AC4 по errata файла задачи (эскалация dwfq-e2d04771-1, решение владельца 27.10; probe до/после `.zcode/accept-t177-prod-*.json`) |
+| медиа-карточки (событие/статья/стажёр/home) | каркас «фото + тег в углу + тело» ×4 копии: `.event-card*`/`.article-card*`/`.intern-person*` + home-карточки (media.css, заимствовали cp-article-card*) | `ui-card--media` (T17.5): слоты `__media` (3/2, `--square` 1/1; img — `aspect-ratio: inherit` + `height: auto`, cover, радиус md/md 0 0), `__media-tag` (8/8), `__body` (12/8), `__meta` (4) | **закрыто T17.5** (adoption: eventCard/articleCard/internPerson/mediaHomeCard на модификаторе; правила cp-event-card*/cp-article-card*/cp-intern-person* сняты ~80 строк, осталась специфика мета-строки — fw 400 даты статьи, small-regular оригинала pages.css:610, T15.1-бэклог). Скрин-пары до/после 1440/768/375 (`.zcode/t175-pixdiff.json`): events/events-search/article — 0 px; internships/practices — только AA-скругления углов фото стажёров (радиус md/md 0 0 по канону, ≤212 px, высоты Δ0); media-каталог −2px/карточку (8/14 → канон 12/8); home +12px/карточку (8/0 — дата приклеена к тайтлу блок-стеком → канон 12/8) — нормализация ритма «каркас один», вне порога ±4px осознанно. Пробы card-title/article-title/tag-blue — значения пилота до==после (`.zcode/t175-probes-before.json` vs compare 27.10). Фикс каркаса: `height: 100%` на img ломал интринсик-пасс растянутых сеток (слот тянулся до натуральной высоты портретного фото — +287px docHeight internships до фикса) → `aspect-ratio: inherit` |
 
 ### 3.4 Высоты блоков главной (px, оригинал → пилот)
 
@@ -142,7 +143,7 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 | vacancy-search | 310 | 267 | сайт-зона + ui-select-пилюли ниже (T17.8: плитка «Все вакансии» на ui-card--cta--accent — высота 267→267, дельта миграции 0) |
 | students | 926 | 514 | сайт-зона: карточки оригинала выше |
 | video-block | 966 | 775 | постер оригинала выше (T17.6: плеер на ui-video — высота 775→775, дельта миграции 0 в пороге ±4px) |
-| media | 823 | 1379 | пилот: спец-сетка оригинала (big+lead) грубее в 4-колоночной |
+| media | 823 | 1321 | пилот: спец-сетка оригинала (big+lead) грубее в 4-колоночной; T17.5 (карточки на ui-card--media): 1285→1321, +36 — ритм тела home-карточек канону (12/8 против блок-стека 8/0), см. §3.3 |
 | team | 716 | 530 | сайт-зона |
 | cta-mail | 364 | 286 | сайт-зона (T17.8: плашка на ui-card--cta--primary — 275→286, +11 вне порога — осознанный допуск по errata файла задачи: email-строка 81px была артефактом наследования lh 1.35 снятого правила; побочно закрыт a11y-баг: h2 был невидим — heading-цвет на заливке primary) |
 | footer | 227 | 227 | совпало (T16.4 22.10: было 263 при переносе 20.10, 290 в замере §8.2) |
@@ -159,7 +160,12 @@ education, events, media, career-track, companies (vacancy/vacancy-apply —
 до/после `.zcode/accept-t173-*.mjs`: дельта 0px в пороге ±4px; пиксельный
 паритет скрин-пар 5/5 блоков — 0 отличий; тинт primary-a55 остался на
 теле — заливка body-бокса оригинала, pages.css:666; блок company-banner
-добавлен в BLOCK_PROBES compare).
+добавлен в BLOCK_PROBES compare). T17.5 перевёл четыре копии
+медиа-карточек (событие/статья/стажёр/home) на ui-card--media — на
+главной блок media 1285→1321 (+36, см. §3.3/§3.4), docHeight главной
+8217→8253; на внутренних pages события/поиск/статья — дельта 0,
+internships — Δ0 высот (только скругления фото стажёров по канону),
+media-каталог −2px/карточку (probe до/после `.zcode/t175-*.json`).
 
 ## 4. Чего в ДС нет (собрано как зона сайта) — статус после EPIC-14
 
