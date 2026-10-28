@@ -11,7 +11,13 @@
  */
 import { expect } from '@playwright/test';
 
-import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helpers/harness.js';
+import {
+  a11y,
+  SNAPSHOTS_ENABLED,
+  test as standTest,
+  unexpectedViolations,
+  VIEWPORTS,
+} from '../helpers/harness.js';
 
 const SEL = {
   // Каркас подвала — связки ftp-* паттерн-слоя (T17.13); приглушённый тон —
@@ -48,47 +54,57 @@ standTest.describe('patterns/footer: ленмарки (AC — правила л�
     },
   );
 
-  standTest('колонка ссылок — навигация с aria-label (канон ftp — одна колонка, T17.13)', async ({
-    stand,
-  }) => {
-    const page = await stand('patterns/footer');
+  standTest(
+    'колонка ссылок — навигация с aria-label (канон ftp — одна колонка, T17.13)',
+    async ({ stand }) => {
+      const page = await stand('patterns/footer');
 
-    const navs = await page
-      .locator(`${SEL.footer} nav[aria-label]`)
-      .evaluateAll((nodes) => nodes.map((nav) => nav.getAttribute('aria-label')));
-    expect(navs.length, 'колонка ссылок — навигация с именем (канон ftp)').toBeGreaterThanOrEqual(
-      1,
-    );
-    // Имена навигаций сниппета уникальны (вторая — приглушённый вариант-демо
-    // на div, в contentinfo-лендмарку не входит).
-    const allNavs = await page
-      .locator('footer.ftp nav[aria-label], div.ftp nav[aria-label]')
-      .evaluateAll((nodes) => nodes.map((nav) => nav.getAttribute('aria-label')));
-    expect(new Set(allNavs).size, 'aria-label навигаций уникальны').toBe(allNavs.length);
+      const navs = await page
+        .locator(`${SEL.footer} nav[aria-label]`)
+        .evaluateAll((nodes) => nodes.map((nav) => nav.getAttribute('aria-label')));
+      expect(navs.length, 'колонка ссылок — навигация с именем (канон ftp)').toBeGreaterThanOrEqual(
+        1,
+      );
+      // Имена навигаций сниппета уникальны (вторая — приглушённый вариант-демо
+      // на div, в contentinfo-лендмарку не входит).
+      const allNavs = await page
+        .locator('footer.ftp nav[aria-label], div.ftp nav[aria-label]')
+        .evaluateAll((nodes) => nodes.map((nav) => nav.getAttribute('aria-label')));
+      expect(new Set(allNavs).size, 'aria-label навигаций уникальны').toBe(allNavs.length);
 
-    for (const label of navs) {
-      const list = page.getByRole('navigation', { name: label });
-      await expect(
-        list.locator('ul li a').first(),
-        `колонка «${label}»: список ссылок`,
-      ).toBeVisible();
-    }
-  });
+      for (const label of navs) {
+        const list = page.getByRole('navigation', { name: label });
+        await expect(
+          list.locator('ul li a').first(),
+          `колонка «${label}»: список ссылок`,
+        ).toBeVisible();
+      }
+    },
+  );
 });
 
 standTest.describe('patterns/footer: контакты в address (Technical considerations)', () => {
-  standTest('address с адресом, tel- и mailto-ссылками (работают без JS)', async ({ stand }) => {
-    const page = await stand('patterns/footer');
+  standTest(
+    'address с адресом; tel- и mailto-ссылки — рядом в группе контактов (канон ftp, T17.13)',
+    async ({ stand }) => {
+      const page = await stand('patterns/footer');
 
-    const address = page.locator(SEL.address);
-    await expect(address, 'контакты обёрнуты в <address>').toBeVisible();
-    await expect(address, 'адрес — текстом в address').toContainText('Москва');
-    await expect(address.locator(SEL.tel), 'телефон — ссылка tel:').toHaveCount(1);
-    await expect(address.locator(SEL.mail), 'почта — ссылка mailto:').toHaveCount(1);
+      // Канон ftp (как в career-portal): <address> несёт физический адрес,
+      // телефон/почта — группа .ftp__contact-group рядом (первый экземпляр —
+      // копируемый <footer>; второй, приглушённый, — тон-специмен на div).
+      const address = page.locator(SEL.address);
+      await expect(address, 'контакты обёрнуты в <address>').toBeVisible();
+      await expect(address, 'адрес — текстом в address').toContainText('Москва');
 
-    const telHref = await address.locator(SEL.tel).getAttribute('href');
-    expect(telHref, 'tel: — машиночитаемый номер без пробелов').toMatch(/^tel:\+?\d+$/);
-  });
+      const contacts = page.locator('footer.ftp .ftp__contact-group');
+      await expect(contacts, 'группа телефон/почта на месте').toBeVisible();
+      await expect(contacts.locator(SEL.tel), 'телефон — ссылка tel:').toHaveCount(1);
+      await expect(contacts.locator(SEL.mail), 'почта — ссылка mailto:').toHaveCount(1);
+
+      const telHref = await contacts.locator(SEL.tel).getAttribute('href');
+      expect(telHref, 'tel: — машиночитаемый номер без пробелов').toMatch(/^tel:\+?\d+$/);
+    },
+  );
 
   standTest('icon-only соцсети несут aria-label (T4.1; axe link-name)', async ({ stand }) => {
     const page = await stand('patterns/footer');
@@ -106,7 +122,9 @@ standTest.describe('patterns/footer: переход кверху (Scope)', () =>
   standTest('ссылка #top ведёт на якорь начала страницы, цель существует', async ({ stand }) => {
     const page = await stand('patterns/footer');
 
-    const top = page.locator(SEL.top);
+    // Скоуп — копируемый <footer>: у тон-специмена на div своя ссылка «Наверх»
+    // (дубль контента канона — см. исключение region в KNOWN_AXE_EXCEPTIONS).
+    const top = page.locator('footer.ftp a.ftp__top');
     await expect(top, 'ссылка «Наверх» на месте').toBeVisible();
     await expect(top).toHaveAttribute('href', '#top');
     // Цель якоря существует в каркасе (правило «цель существует» — пара T3.5).
@@ -121,12 +139,12 @@ standTest.describe('patterns/footer: переход кверху (Scope)', () =>
 });
 
 standTest.describe('patterns/footer: a11y страницы (AC)', () => {
-  standTest('axe чист', async ({ stand }) => {
+  standTest('axe чист (вне реестра KNOWN_AXE_EXCEPTIONS)', async ({ stand }) => {
     const page = await stand('patterns/footer');
     const results = await a11y(page).analyze();
     expect(
-      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
-      'axe: violations = []',
+      unexpectedViolations(results),
+      'axe: нарушений вне реестра нет (тон-специмен .ftp--muted — запись в реестре)',
     ).toEqual([]);
   });
 

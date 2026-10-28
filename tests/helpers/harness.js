@@ -51,6 +51,17 @@ export const DISABLED_AXE_RULES = Object.freeze({});
  */
 export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
   {
+    id: 'region',
+    // Тон-специмен дока footer (T17.13): второй экземпляр канона на <div> —
+    // contentinfo-лендмарка на странице одна (пара к рамке «banner одна»);
+    // контент экземпляра сознательно дублирует канон для сравнения тона.
+    match: /\.ftp--muted/,
+    reason:
+      'тон-специмен ftp--muted в доке patterns/footer вне лендмарков: contentinfo ' +
+      'должна быть одна — копировать следует <footer>-блок канона (README паттерна, ' +
+      'комментарий дока); содержимое экземпляра дублирует канон выше',
+  },
+  {
     id: 'color-contrast',
     match: /#ui-button-accent/,
     reason:
