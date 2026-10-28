@@ -75,3 +75,55 @@ describe('compare.mjs — проба блока таймлайна (AC: высо
     );
   });
 });
+
+describe('errata AC ±4px (T17.10, решение владельца 28.10 — ревью ветки task/T17.10)', () => {
+  const taskPath = join(
+    root,
+    'docs',
+    'ui-system',
+    'epics',
+    'EPIC-17-ds-full-coverage',
+    'T17.10-timeline-adoption.md',
+  );
+  let task = '';
+  try {
+    task = readFileSync(taskPath, 'utf8');
+  } catch {
+    task = '';
+  }
+
+  it('файл задачи несёт errata-примечание под AC compare: замеры 188→181/168→162 на принятых ролях', () => {
+    expect(task, 'errata-примечание под AC ±4px присутствует').toMatch(
+      /Errata[\s\S]*188→181[\s\S]*168→162/,
+    );
+    expect(
+      task,
+      'обоснование — ранее принятые роли ДС (REPORT §9.1 №1/№12/№13, T16.12): lh ui-h6 25 против 27, ui-small 18.9 против 20.3',
+    ).toMatch(/§9\.1 №1\/№12\/№13[\s\S]*T16\.12/);
+    expect(task, 'до adoption дрейф блока был +59px (адoption дрейф закрыл, не создал)').toMatch(
+      /\+59px/,
+    );
+  });
+
+  it('errata фиксирует осознанные различия вне 1440: колонка 1 против 2 и неприменимость education/career-track', () => {
+    expect(
+      task,
+      'мобильная колонка канона (1) против 2 колонок оригинала ≤1024 (pages.css:1252) — записана',
+    ).toMatch(/1 колонк[\s\S]*pages\.css:1252/);
+    expect(
+      task,
+      'education/career-track: таймлайна нет (build.py:484–493 — steps_html только в internships/practices) — записано',
+    ).toMatch(/education\/career-track[\s\S]*build\.py:484/);
+  });
+
+  it('REPORT §4 синхронен: строка таймлайна несёт замеры и ссылку на errata файла задачи', () => {
+    const report = readFileSync(join(root, 'pilot', 'career-portal', 'REPORT.md'), 'utf8');
+    const start = report.indexOf('- ~~**Таймлайн этапов**');
+    expect(start, 'строка таймлайна в §4 найдена').toBeGreaterThan(-1);
+    const nextBullet = report.indexOf('\n- ', start + 1);
+    const row = report.slice(start, nextBullet === -1 ? undefined : nextBullet);
+    expect(row, 'замеры compare в строке').toContain('188→181');
+    expect(row, 'замеры internships в строке').toContain('168→162');
+    expect(row, 'ссылка на errata файла задачи').toContain('errata');
+  });
+});
