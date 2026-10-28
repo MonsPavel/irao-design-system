@@ -433,6 +433,13 @@
   --ui-container-pad-md: 1.5rem;
   /* career-portal: base.css 1024–1439 — 32px; читает контейнер в @media (min-width: 1024px) */
   --ui-container-pad-lg: 2rem;
+
+  /* ── Флекс-примитивы (ui-row/ui-stack, T17.17): раскладка ── */
+
+  /* новый: gap флекс-строки ui-row; дефолт по спеке T17.17 — ступень шкалы §3.2 --ui-space-4 (16px); в career-portal примитива нет (замер 27.10: 53 display:flex сайт-зоны собираются вручную) */
+  --ui-row-gap: var(--ui-space-4);
+  /* новый: gap вертикальной стопки ui-stack (T17.17); дефолт — ступень шкалы --ui-space-4 (см. --ui-row-gap); решение «делать сейчас» по замеру пилота: 29 из 31 стопок column несут gap, 10 делят --ui-space-2, 6 — --ui-space-4 (критерий «≥ 3 инстансов с равным gap») */
+  --ui-stack-gap: var(--ui-space-4);
 }
 
 /* Mobile-first: базовые --ui-fs-* — мобильные (career-portal @media (max-width: 767px)),
