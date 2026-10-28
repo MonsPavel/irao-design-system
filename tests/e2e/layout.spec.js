@@ -19,7 +19,11 @@
  *     --muted — фон surface-muted + радиус big (--ui-radius-lg);
  *  5. сетки: gap из шкалы spacing (24; рост 32 на lg; --4 плотнее — 24,
  *     перенос career-portal .cards-grid--4);
- *  6. axe чист на стенде; эталоны на 4 вьюпортах шкалы харнесса
+ *  6. флекс-примитивы (T17.17): computed justify/align/wrap модификаторов
+ *     ui-row (--center/--between/--end/--no-wrap; база — wrap + align center),
+ *     gap ui-row/ui-stack от токенов --ui-row-gap/--ui-stack-gap, подмена
+ *     токена меняет расчётный gap (AC «gap от токена»);
+ *  7. axe чист на стенде; эталоны на 4 вьюпортах шкалы харнесса
  *     (375/768/1280/1440 — xl различает ступени 3/4 сетки --4; ADR-0004).
  */
 import { expect } from '@playwright/test';
@@ -65,6 +69,22 @@ const gridGaps = (page, selector) =>
   page.evaluate((sel) => {
     const s = getComputedStyle(document.querySelector(sel));
     return { row: parseFloat(s.rowGap), column: parseFloat(s.columnGap) };
+  }, selector);
+
+/** Computed флекс-геометрия узла (T17.17): justify/align/wrap/flex-direction + gap. */
+const flexState = (page, selector) =>
+  page.evaluate((sel) => {
+    const el = document.querySelector(sel);
+    if (!el) return null;
+    const s = getComputedStyle(el);
+    return {
+      justifyContent: s.justifyContent,
+      alignItems: s.alignItems,
+      flexWrap: s.flexWrap,
+      flexDirection: s.flexDirection,
+      rowGap: parseFloat(s.rowGap),
+      columnGap: parseFloat(s.columnGap),
+    };
   }, selector);
 
 /** Состояние первого контейнера на стенде. База ширины — body.clientWidth:
@@ -246,6 +266,87 @@ test.describe('layout-примитивы (T3.4)', () => {
       gap4.column,
       '--4: gap остаётся --ui-space-5 (24) на lg+ (перенос .cards-grid--4)',
     ).toBeCloseTo(space5, 6);
+  });
+
+  test('флекс-примитивы (T17.17): computed justify/align/wrap — база wrap+center, матрица модификаторов, стопка column', async ({
+    stand,
+  }) => {
+    const page = await stand('layout');
+    await page.setViewportSize({ width: 768, height: 900 });
+
+    // База .ui-row — первый в DOM: wrap по умолчанию (защита от hscroll,
+    // гейт T3.6), вертикальное выравнивание центр, justify не задан.
+    const base = await flexState(page, '.ui-row');
+    expect(base.flexWrap, 'база: wrap по умолчанию').toBe('wrap');
+    expect(base.alignItems, 'база: align-items center (доминирующий кейс пилота)').toBe('center');
+    expect(base.justifyContent, 'база: justify не задан (normal)').toBe('normal');
+    expect(base.columnGap, 'база: gap = --ui-row-gap').toBeCloseTo(
+      await tokenPx(page, '--ui-row-gap'),
+      6,
+    );
+
+    // Матрица модификаторов (Implementation requirements T17.17 п.1).
+    expect(
+      (await flexState(page, '.ui-row--center')).justifyContent,
+      '--center: центр строки',
+    ).toBe('center');
+    expect(
+      (await flexState(page, '.ui-row--between')).justifyContent,
+      '--between: space-between («слева/справа»)',
+    ).toBe('space-between');
+    expect((await flexState(page, '.ui-row--end')).justifyContent, '--end: прижать к концу').toBe(
+      'flex-end',
+    );
+    expect(
+      (await flexState(page, '.ui-row--no-wrap')).flexWrap,
+      '--no-wrap: перенос отключён осознанно',
+    ).toBe('nowrap');
+
+    // ui-stack: вертикальная стопка, gap от своего токена.
+    const stack = await flexState(page, '.ui-stack');
+    expect(stack.flexDirection, 'ui-stack: колонка').toBe('column');
+    expect(stack.columnGap, 'ui-stack: gap = --ui-stack-gap').toBeCloseTo(
+      await tokenPx(page, '--ui-stack-gap'),
+      6,
+    );
+    expect(stack.rowGap, 'ui-stack: row-gap = --ui-stack-gap').toBeCloseTo(
+      await tokenPx(page, '--ui-stack-gap'),
+      6,
+    );
+  });
+
+  test('T17.17 AC: подмена --ui-row-gap/--ui-stack-gap меняет расчётный gap (gap от токена)', async ({
+    stand,
+  }) => {
+    const page = await stand('layout');
+    await page.setViewportSize({ width: 768, height: 900 });
+
+    const before = (await flexState(page, '.ui-row')).columnGap;
+    const stackBefore = (await flexState(page, '.ui-stack')).columnGap;
+
+    await page.evaluate(() => document.documentElement.style.setProperty('--ui-row-gap', '3px'));
+    let after = await flexState(page, '.ui-row');
+    expect(after.columnGap, 'подмена --ui-row-gap изменила расчётный gap строки').toBeCloseTo(3, 6);
+
+    await page.evaluate(() => document.documentElement.style.setProperty('--ui-stack-gap', '5px'));
+    after = await flexState(page, '.ui-stack');
+    expect(after.columnGap, 'подмена --ui-stack-gap изменила расчётный gap стопки').toBeCloseTo(
+      5,
+      6,
+    );
+
+    await page.evaluate(() => {
+      document.documentElement.style.removeProperty('--ui-row-gap');
+      document.documentElement.style.removeProperty('--ui-stack-gap');
+    });
+    expect(
+      (await flexState(page, '.ui-row')).columnGap,
+      'снятие подмены возвращает дефолт токена',
+    ).toBeCloseTo(before, 6);
+    expect(
+      (await flexState(page, '.ui-stack')).columnGap,
+      'снятие подмены возвращает дефолт токена (стопка)',
+    ).toBeCloseTo(stackBefore, 6);
   });
 
   test('axe чист на стенде layout', async ({ stand }) => {

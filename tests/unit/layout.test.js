@@ -293,9 +293,8 @@ describe('base/layout.css — флекс-примитив ui-row (T17.17)', () =
   it('.ui-row: gap — только токен --ui-row-gap, без литеральных величин', () => {
     const block = blockOf(css, '.ui-row');
     expect(block).toContain('gap: var(--ui-row-gap);');
-    expect(block, 'gap объявлен ровно один раз, значением-токеном').toMatch(
-      /(?:^|;)\s*gap:\s*var\(--ui-row-gap\);\s*(?:$|;)/,
-    );
+    const gapDeclarations = block.match(/(?:^|;)\s*gap:\s*[^;]+;/g) ?? [];
+    expect(gapDeclarations, 'gap объявлен ровно один раз').toHaveLength(1);
   });
 
   it('матрица модификаторов: --center (центр), --between («слева/справа»), --end (конец), --no-wrap (перенос отключён осознанно)', () => {
@@ -338,7 +337,10 @@ describe('base/layout.css — флекс-примитив ui-stack (T17.17: ре
 
   it('критерий решения зафиксирован в доке слоя (README): замер пилота в живом тексте, а не в замороженном файле задачи', () => {
     const readme = readFileSync(join(root, 'base', 'README.md'), 'utf8');
-    expect(readme, 'README несёт замер решения «сейчас»').toMatch(/ui-stack[^\n]*замер|замер[^\n]*ui-stack/s);
+    expect(readme, 'README документирует ui-stack').toContain('ui-stack');
+    expect(readme, 'README несёт замер решения «сейчас» (29 из 31 стопок с gap)').toContain(
+      '29 из 31',
+    );
   });
 });
 
