@@ -273,32 +273,33 @@
   </p>
 </section>
 
+<!-- Демо-пары тона (зона сайта): пара круглой кнопки — хуки
+     --ui-button-bg/--ui-button-color (дефолт — primary/on-dark). -->
+<style>
+  .ubn-round-accent {
+    --ui-button-bg: var(--ui-color-accent);
+    --ui-button-color: var(--ui-color-text-on-dark);
+  }
+
+  /* Пара surface/primary (кнопка «white» navy-карточки) — на подложке
+     тона: вне тёмного контекста белая кнопка невидима (канон применения —
+     nav-карточка lnk-card--navy). */
+  .ubn-round-navy {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--ui-space-4);
+    border-radius: var(--ui-radius-md);
+    background-color: var(--ui-color-primary);
+  }
+
+  .ubn-round-navy .ui-button--round {
+    --ui-button-bg: var(--ui-color-surface);
+    --ui-button-color: var(--ui-color-primary);
+  }
+</style>
+
 <section aria-labelledby="ui-button-round-heading">
   <h2 id="ui-button-round-heading">Круглая кнопка (ui-button--round, T17.9)</h2>
-  <style>
-    /* Демо-пары тона (зона сайта): пара круглой кнопки — хуки
-       --ui-button-bg/--ui-button-color (дефолт — primary/on-dark). */
-    .ubn-round-accent {
-      --ui-button-bg: var(--ui-color-accent);
-      --ui-button-color: var(--ui-color-text-on-dark);
-    }
-
-    /* Пара surface/primary (кнопка «white» navy-карточки) — на подложке
-       тона: вне тёмного контекста белая кнопка невидима (канон применения —
-       nav-карточка lnk-card--navy). */
-    .ubn-round-navy {
-      display: inline-flex;
-      align-items: center;
-      padding: var(--ui-space-4);
-      border-radius: var(--ui-radius-md);
-      background-color: var(--ui-color-primary);
-    }
-
-    .ubn-round-navy .ui-button--round {
-      --ui-button-bg: var(--ui-color-surface);
-      --ui-button-color: var(--ui-color-primary);
-    }
-  </style>
   <p class="ubn-row">
     <button class="ui-button ui-button--round" id="ui-button-round" type="button" aria-label="Подробнее">
       <svg
