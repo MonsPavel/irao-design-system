@@ -43,7 +43,10 @@ describe('patterns/footer/footer.html — контракт эталонной с
 
   it('колонка ссылок — nav-лендмарка с aria-label; имена навигаций сниппета уникальны (Accessibility requirements)', () => {
     const navs = pattern.match(/<nav\b[^>]*aria-label="([^"]+)"[^>]*>/g) ?? [];
-    expect(navs.length, 'колонка ссылок — навигация (канон ftp — одна колонка, T17.13)').toBeGreaterThanOrEqual(1);
+    expect(
+      navs.length,
+      'колонка ссылок — навигация (канон ftp — одна колонка, T17.13)',
+    ).toBeGreaterThanOrEqual(1);
     const labels = navs.map((nav) => (nav.match(/aria-label="([^"]+)"/) ?? [])[1]);
     expect(new Set(labels).size, 'aria-label навигаций уникальны').toBe(labels.length);
   });
@@ -88,10 +91,9 @@ describe('patterns/footer/footer.html — контракт эталонной с
     for (const social of socials) {
       const label = (social.match(/aria-label="([^"]+)"/) ?? [])[1];
       expect(label, `icon-only ссылка ${social.slice(0, 60)}… несёт aria-label`).toBeTruthy();
-      expect(
-        social,
-        'вид контрола — модификатор ui-button--round (T17.9; T17.13 Scope)',
-      ).toContain('ui-button--round');
+      expect(social, 'вид контрола — модификатор ui-button--round (T17.9; T17.13 Scope)').toContain(
+        'ui-button--round',
+      );
     }
   });
 

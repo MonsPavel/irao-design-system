@@ -809,9 +809,9 @@
    mobile-first: включение от md — рендер тот же. */
 .hsp__menu--right {
   box-sizing: border-box;
+  display: none;
   justify-content: flex-end;
   justify-self: end;
-  display: none;
 }
 
 /* Пункты меню — строки с иконкой (gap 8 — header.css:33) и nowrap-режимом
@@ -965,9 +965,9 @@
   flex-direction: column;
   gap: var(--ui-space-1);
   font-size: var(--ui-fs-small);
+  font-style: normal;
   font-weight: var(--ui-fw-small);
   line-height: var(--ui-lh-small);
-  font-style: normal;
 }
 
 /* Межстрочное контактных ссылок — как у значений (1.35). */

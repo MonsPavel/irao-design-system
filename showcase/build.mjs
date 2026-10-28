@@ -1573,14 +1573,17 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
   }
   // Паттерн-слой на полигоне (T17.1): подключение адресно — стенды паттернов,
   // чьи связки живут в слое (list/detail/form — T17.1; landing-section —
-  // T17.9 lnk-card/lgo-grid; timeline — T17.10 tlp-*); остальные страницы
-  // (и каталог) слой не получают — опциональность воспроизводится на полигоне.
+  // T17.9 lnk-card/lgo-grid; timeline — T17.10 tlp-*; header/footer — T17.13
+  // hsp-*/ftp-*); остальные страницы (и каталог) слой не получают —
+  // опциональность воспроизводится на полигоне.
   const patternLayerStands = new Set([
     'stands/patterns/list-page.html',
     'stands/patterns/detail-page.html',
     'stands/patterns/form-page.html',
     'stands/patterns/landing-section.html',
     'stands/patterns/timeline.html',
+    'stands/patterns/header.html',
+    'stands/patterns/footer.html',
   ]);
   for (const rel of pages) {
     const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');

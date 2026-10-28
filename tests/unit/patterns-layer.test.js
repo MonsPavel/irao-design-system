@@ -354,9 +354,7 @@ describe('patterns/patterns.css — единый исходник паттерн
       'grid-template-columns: repeat(2, minmax(0, 1fr));',
     );
     expect(inner, 'зазор 40px «как есть» — footer.css:10').toContain('gap: 2.5rem;');
-    expect(inner, 'выравнивание по центру строки — footer.css:8').toContain(
-      'align-items: center;',
-    );
+    expect(inner, 'выравнивание по центру строки — footer.css:8').toContain('align-items: center;');
     expect(inner, 'паддинги 48 — --ui-space-7 (footer.css:3)').toContain(
       'padding-top: var(--ui-space-7);',
     );
@@ -385,7 +383,9 @@ describe('patterns/patterns.css — единый исходник паттерн
     const idx = code.indexOf('.ftp__links .ui-link');
     const md = code
       .slice(idx)
-      .match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.ftp__links \.ui-link,\s*\.ftp__right \.ui-small\s*\{([^}]*)\}/);
+      .match(
+        /@media \(min-width: 768px\)\s*\{[\s\S]*?\.ftp__links \.ui-link,\s*\.ftp__right \.ui-small\s*\{([^}]*)\}/,
+      );
     expect(md, 'ступень md nowrap-снятия найдена (ссылки + копирайт)').toBeTruthy();
     expect(md[1]).toContain('white-space: nowrap;');
   });

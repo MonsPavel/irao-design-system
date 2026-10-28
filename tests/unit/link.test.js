@@ -391,13 +391,10 @@ describe('adoption пилота — футер на ui-link--nav (T16.4; кар�
     const column = footerHtml.match(/<ul class="ftp__links">[\s\S]*?<\/ul>/)?.[0] ?? '';
     const footerLinks = column.match(/<a class="ui-link ui-link--nav"/g) ?? [];
     expect(footerLinks.length, 'пять ссылок колонки на nav-варианте').toBe(5);
-    const contactLinks = footerHtml.match(
-      /class="ui-link ui-link--nav" href="(?:tel:|mailto:)/g,
+    const contactLinks = footerHtml.match(/class="ui-link ui-link--nav" href="(?:tel:|mailto:)/g);
+    expect(contactLinks?.length, 'tel:/mailto: контактов — тоже ссылки футера (nav-вариант)').toBe(
+      2,
     );
-    expect(
-      contactLinks?.length,
-      'tel:/mailto: контактов — тоже ссылки футера (nav-вариант)',
-    ).toBe(2);
   });
 
   it('копирайт «© 1998–2026, ПАО …» — роль small (fs-small-regular 14/fw 500 — .footer__copyright footer.css:110-114)', () => {
