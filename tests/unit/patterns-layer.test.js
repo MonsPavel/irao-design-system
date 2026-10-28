@@ -42,6 +42,9 @@ const PATTERN_SOURCES = {
   'patterns/list-page/list-page.html': 'lpp-',
   'patterns/detail-page/detail-page.html': 'dpp-',
   'patterns/form-page/form-page.html': 'fpp-',
+  // Таймлайн — adoption T17.10: связки tlp-* переехали из <style> дока
+  // (T14.11) в слой, разметка дока и пилота — на классах канона.
+  'patterns/timeline/timeline.html': 'tlp-',
 };
 
 let layer = '';
@@ -113,17 +116,17 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo- (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp- (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
       expect(
-        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo)-/.test(hook)),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-`,
+        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp)-/.test(hook)),
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(ui|lpp|dpp|fpp|lnk|lgo)-/.test(hook),
+          /^\.(ui|lpp|dpp|fpp|lnk|lgo|tlp)-/.test(hook),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
         ).toBe(true);
       }
@@ -281,8 +284,8 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
     expect(build, 'self-check селекторов слоя в сборке').toContain('слоя');
   });
 
-  it('подключение опционально: слой получают стенды трёх паттернов + landing-section (T17.9)', () => {
-    for (const stand of ['list-page', 'detail-page', 'form-page', 'landing-section']) {
+  it('подключение опционально: слой получают стенды паттернов с связками в слое (list/detail/form, landing-section, timeline — T17.10)', () => {
+    for (const stand of ['list-page', 'detail-page', 'form-page', 'landing-section', 'timeline']) {
       // Якорь — title стенда: первое вхождение имени паттерна в build.mjs —
       // список навигации buildNav, до frame-вызова.
       const block = build.slice(build.indexOf(`title: 'patterns/${stand} — irao-ui showcase'`));
@@ -290,14 +293,15 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
         'withPatterns: true',
       );
     }
-    // Включение адресное: ровно четыре вызова frame() передают слой
+    // Включение адресное: ровно пять вызовов frame() передают слой
     // («withPatterns: true,»); остальные страницы полигона — нет.
     // Четвёртый — patterns/landing-section (T17.9): связки lnk-card/lgo-grid
-    // живут в слое, мини-стенд паттерна их рендерит.
+    // живут в слое, мини-стенд паттерна их рендерит; пятый — patterns/
+    // timeline (T17.10): связки tlp-* переехали из <style> дока в слой.
     expect(
       build.match(/withPatterns: true,/g)?.length,
-      'получателей слоя ровно четыре — стенды трёх паттернов + landing-section (T17.9)',
-    ).toBe(4);
+      'получателей слоя ровно пять — стенды паттернов с связками в слое',
+    ).toBe(5);
   });
 
   it('self-check: dist/ui-patterns.css существует и несёт баннер версии', () => {
