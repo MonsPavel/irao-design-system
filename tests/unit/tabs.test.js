@@ -661,6 +661,11 @@ describe('расхождение паддинга таба с ui-button (рев�
 describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal pages.css:969–1001)', () => {
   const path = join(root, 'components', 'ui-tabs', 'ui-tabs.css');
   const css = stripCssComments(readFileSync(path, 'utf8'));
+  // T17.11: селекторы активной пары и :not()-исключений длиннее printWidth —
+  // prettier переносит их в произвольных местах (в т.ч. внутри скобок).
+  // Нормализованная копия для пинов длинных селекторов; короткие пины ниже
+  // читают исходный css через blockOf.
+  const cssFlat = css.replace(/\s+/g, ' ');
 
   it('лента — трек-пилюля .tabs-pill: тинт surface-muted, паддинг/gap 4px (ступень шкалы --ui-space-1), радиус pill', () => {
     const block = blockOf(css, '.ui-tabs--pill .ui-tabs__list');
@@ -678,14 +683,19 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     // Подпись text (pages.css:989) — правило с :not(:is(...))-исключением
     // (T17.11: обе цели — aria-selected и aria-current): без исключения (0,2,0)
     // модификатора перебило бы (0,1,0) активное правило — тёмная подпись на
-    // заливке primary (ловилось axe на стенде). :is() из атрибутных селекторов
-    // равной силы — вклад (0,1,0), специфичность правила не выросла.
-    const color = blockOf(
-      css,
-      ".ui-tabs--pill .ui-tabs__tab:not(:is([aria-selected='true'], [aria-current='page']))",
+    // заливке primary (ловилось axe на стенде). Ветка current несёт тот же
+    // guard :not([aria-selected]), что активное правило (ревью T17.11 high):
+    // остаточный aria-current инициализированного инстанса остаётся в
+    // исключении — подпись text, как на main. Специфичность правила +0,1,0
+    // (0,4,0) — приемлемо, цели дизъюнктны активному правилу по построению.
+    const color = cssFlat.match(
+      /\.ui-tabs--pill \.ui-tabs__tab:not\(:is\(\[aria-selected='true'\], \[aria-current='page'\]:not\(\[aria-selected\]\)\)\) \{([^}]*)\}/,
     );
-    expect(color, ':not-правило подписи найдено').toBeTruthy();
-    expect(color).toContain('color: var(--ui-color-text);');
+    expect(
+      color,
+      ':not-правило подписи найдено (guard ветки current — как у активного)',
+    ).toBeTruthy();
+    expect(color[1]).toContain('color: var(--ui-color-text);');
     // fs-small-масштаб спеки и базовая min-height — общие с базой правилами:
     // модификатор меняет только вид (Technical considerations T14.9).
     for (const block of [border, color]) {
@@ -695,27 +705,28 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     }
   });
 
-  it('hover пилюли — только у НЕвыбранных, подпись primary БЕЗ заливки (pages.css:998); внутри (hover: hover)', () => {
-    const mediaIndex = css.indexOf('@media (hover: hover)');
-    expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
-    const media = css.slice(mediaIndex);
-    expect(media).toMatch(
-      /\.ui-tabs--pill \.ui-tabs__tab:not\(:is\(\[aria-selected='true'\], \[aria-current='page'\]\)\):hover\s*\{[^}]*background-color: transparent;/,
+  it('hover пилюли — только у НЕактивных, подпись primary БЕЗ заливки (pages.css:998); внутри (hover: hover)', () => {
+    // Guard ветки current — как у активного правила (ревью T17.11 high):
+    // остаточный aria-current инициализированного инстанса остаётся в
+    // исключении — hover невыбранного (transparent + подпись primary), а не
+    // полная заливка. Пин по cssFlat — prettier переносит длинный селектор
+    // в произвольных местах.
+    const hover = cssFlat.match(
+      /\.ui-tabs--pill \.ui-tabs__tab:not\(\s*:is\(\[aria-selected='true'\], \[aria-current='page'\]:not\(\[aria-selected\]\)\)\s*\):hover \{([^}]*)\}/,
     );
-    expect(media).toMatch(
-      /\.ui-tabs--pill \.ui-tabs__tab:not\(:is\(\[aria-selected='true'\], \[aria-current='page'\]\)\):hover\s*\{[^}]*color: var\(--ui-color-primary\);/,
-    );
+    expect(hover, 'hover-правило найдено (guard ветки current — как у активного)').toBeTruthy();
+    expect(hover[1]).toContain('background-color: transparent;');
+    expect(hover[1]).toContain('color: var(--ui-color-primary);');
   });
 
   it('активная пилюля — пара базы, расширенная aria-current="page" (T17.11): ветка current действует только до инициализации модуля', () => {
     // Активная пара в модификаторе (T17.11): навигационные наборы-ссылки без
     // панелей модуль не инициализирует (контракт T13.6) — активный раздел
     // несёт aria-current="page". :is() берёт максимум аргументов — селекторы
-    // атрибутные равной силы, специфичность существующих правил не растёт.
-    // Селектор длиннее printWidth — prettier переносит его по комбинатору:
-    // \s+ терпит перенос (прецедент устойчивых пинов).
-    const active = css.match(
-      /\.ui-tabs--pill\s+\.ui-tabs__tab:is\(\[aria-selected='true'\], \[aria-current='page'\]:not\(\[aria-selected\]\)\)\s*\{([^}]*)\}/,
+    // атрибутные равной силы. Пин по cssFlat — prettier переносит длинный
+    // селектор в произвольных местах.
+    const active = cssFlat.match(
+      /\.ui-tabs--pill \.ui-tabs__tab:is\(\[aria-selected='true'\], \[aria-current='page'\]:not\(\[aria-selected\]\)\) \{([^}]*)\}/,
     );
     expect(active, 'активная пара модификатора найдена').toBeTruthy();
     expect(active[1]).toContain('background-color: var(--ui-color-primary);');

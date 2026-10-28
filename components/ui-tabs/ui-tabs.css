@@ -68,9 +68,10 @@
  * активный раздел несёт семантика aria-current="page" (прецедент ui-chip
  * T14.8, ui-breadcrumbs); border: 0 делает заливку чистой пилюлей. Ветка
  * aria-current действует только ДО инициализации (:not([aria-selected]) —
- * модуль ставит атрибут ВСЕМ табам): в таб-инстансах активность задаёт один
- * aria-selected, оставшийся aria-current (T14.9: начальный выбор, модуль
- * атрибут не снимает) не рисует вторую активную пилюлю.
+ * модуль ставит атрибут ВСЕМ табам; guard стоит и в исключениях подписи/
+ * hover — ревью T17.11): в таб-инстансах активность задаёт один
+ * aria-selected, остаточный aria-current (T14.9: модуль атрибут не снимает)
+ * сохраняет вид невыбранного — подпись text, hover без заливки.
  */
 
 .ui-tabs {
@@ -176,12 +177,15 @@
    АКТИВНОЕ правило :where([aria-selected='true']) — и выбранная пилюля
    осталась бы с тёмной подписью на заливке primary (1.12:1, axe
    color-contrast). :not(:is(...))-исключение уводит конфликт и знает ОБЕ цели
-   активности (T17.11): пилюля по aria-selected и пилюля по aria-current
-   тёмной подписи не получают — их цвет несут активные правила (пара гейта
-   T2.3). :is() из атрибутных селекторов равной силы — вклад (0,1,0), как у
-   прежнего :not([aria-selected='true']): специфичность правила не выросла.
-   Прецедент :not-исключения ui-chip (T14.8) и __page пагинации. */
-.ui-tabs--pill .ui-tabs__tab:not(:is([aria-selected='true'], [aria-current='page'])) {
+   активности (T17.11), у ветки current тот же guard :not([aria-selected]),
+   что у активного правила (ревью T17.11 high): иначе остаточный
+   aria-current инициализированного инстанса выпадал бы из исключения — покой
+   получал подпись primary (вид hover), hover — полную заливку (вид активной).
+   Специфичность +0,1,0 (0,4,0) — приемлемо: цели дизъюнктны активному
+   правилу по построению (каскад стабилен). Прецедент :not-исключения ui-chip
+   (T14.8) и __page пагинации. */
+.ui-tabs--pill
+  .ui-tabs__tab:not(:is([aria-selected='true'], [aria-current='page']:not([aria-selected]))) {
   color: var(--ui-color-text);
 }
 
@@ -190,10 +194,17 @@
    primary — :not(:is(...))-исключение держит hover от перекраски и гашения
    заливки у ОБЕИХ целей активности (aria-selected и aria-current, T17.11 —
    кейс, ради которого сайт-зона несла hover-повтор заливки; пара 0,4,0
-   снята). transparent гасит базовый hover-филл (правило специфичнее базового
-   .ui-tabs__tab:hover); блок внутри media — после базового hover-блока. */
+   снята), у ветки current — с guard'ом активного правила (ревью T17.11
+   high: остаточный aria-current модульного инстанса в исключении остаётся —
+   hover невыбранного, не заливка). transparent гасит базовый hover-филл
+   (правило специфичнее базового .ui-tabs__tab:hover; +0,1,0 — приемлемо,
+   цели дизъюнктны активному); блок внутри media — после базового
+   hover-блока. */
 @media (hover: hover) {
-  .ui-tabs--pill .ui-tabs__tab:not(:is([aria-selected='true'], [aria-current='page'])):hover {
+  .ui-tabs--pill
+    .ui-tabs__tab:not(
+      :is([aria-selected='true'], [aria-current='page']:not([aria-selected]))
+    ):hover {
     background-color: transparent;
     color: var(--ui-color-primary);
   }
