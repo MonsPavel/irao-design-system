@@ -1,8 +1,9 @@
 /**
- * Юнит-пин layout-примитивов (задача T3.4; Testing requirements).
+ * Юнит-пин layout-примитивов (задачи T3.4, T17.17; Testing requirements).
  *
  * Поверхность браузера — overflow на 320/375/768/1024/1440, computed-колонки
- * по вьюпортам, токены контейнера/секции/сеток, axe, эталоны на 4 вьюпортах —
+ * по вьюпортам, токены контейнера/секции/сеток, computed-геометрия флекс-
+ * примитивов и подмена их gap-токена, axe, эталоны на 4 вьюпортах —
  * в tests/e2e/layout.spec.js; здесь — пины исполняемой формы решения:
  *  - base/layout.css: все размеры ТОЛЬКО из токенов (Implementation
  *    requirements T3.4 п.1); box-sizing на корнях блоков (ADR-0002);
@@ -12,12 +13,20 @@
  *    4 (2xl);
  *  - запрет фиксированных высот (Scope T3.4); порядок чтения = порядок DOM
  *    (свойство order не используется — Accessibility requirements);
+ *  - флекс-примитивы T17.17: ui-row (wrap по умолчанию — защита от hscroll
+ *    гейта T3.6; align-items: center — доминирующий кейс пилота, замер
+ *    9 из 13 явных align-items строк; модификаторы --center/--between/
+ *    --end/--no-wrap) и ui-stack (решение «делать сейчас» по замеру:
+ *    29 из 31 стопок column с gap, 10 делят --ui-space-2, 6 — --ui-space-4 —
+ *    критерий «≥ 3 инстансов с равным gap» закрыт с запасом); gap-токены
+ *    --ui-row-gap/--ui-stack-gap от --ui-space-4;
  *  - стенд layout в полигоне (Definition of Done: стенд layout-примитивов);
  *  - xl-вьюпорт харнесса — 4-й вьюпорт эталонов (AC 3).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it } from 'vitest';
+import { buildForUnitTests } from '../helpers/unit-build.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 
@@ -266,6 +275,115 @@ describe('base/layout.css — сетка (Scope T3.4)', () => {
   });
 });
 
+describe('base/layout.css — флекс-примитив ui-row (T17.17)', () => {
+  const css = stripCssComments(readFileSync(join(root, 'base', 'layout.css'), 'utf8'));
+
+  it('.ui-row: box-sizing (ADR-0002), flex-строка, перенос по умолчанию — защита от hscroll (гейт T3.6)', () => {
+    const block = blockOf(css, '.ui-row');
+    expect(block, 'правило .ui-row найдено').toBeTruthy();
+    expect(block).toContain('box-sizing: border-box;');
+    expect(block).toContain('display: flex;');
+    expect(block).toContain('flex-wrap: wrap;');
+  });
+
+  it('.ui-row: вертикальное выравнивание центр — доминирующий кейс пилота (замер T17.17: 9 из 13 явных align-items строк — center)', () => {
+    expect(blockOf(css, '.ui-row')).toContain('align-items: center;');
+  });
+
+  it('.ui-row: gap — только токен --ui-row-gap, без литеральных величин', () => {
+    const block = blockOf(css, '.ui-row');
+    expect(block).toContain('gap: var(--ui-row-gap);');
+    expect(block, 'gap объявлен ровно один раз, значением-токеном').toMatch(
+      /(?:^|;)\s*gap:\s*var\(--ui-row-gap\);\s*(?:$|;)/,
+    );
+  });
+
+  it('матрица модификаторов: --center (центр), --between («слева/справа»), --end (конец), --no-wrap (перенос отключён осознанно)', () => {
+    expect(blockOf(css, '.ui-row--center')).toContain('justify-content: center;');
+    expect(blockOf(css, '.ui-row--between')).toContain('justify-content: space-between;');
+    expect(blockOf(css, '.ui-row--end')).toContain('justify-content: flex-end;');
+    expect(blockOf(css, '.ui-row--no-wrap')).toContain('flex-wrap: nowrap;');
+  });
+
+  it('примитив чисто презентационный: цвет/фон/типографику/высоты не задаёт (доступность не меняется, Implementation requirements T17.17 п.2)', () => {
+    for (const selector of [
+      '.ui-row',
+      '.ui-row--center',
+      '.ui-row--between',
+      '.ui-row--end',
+      '.ui-row--no-wrap',
+      '.ui-stack',
+    ]) {
+      const block = blockOf(css, selector);
+      expect(block, `${selector}: без цветовых деклараций`).not.toMatch(
+        /(?:^|;)\s*(?:color|background|border)(?:-|\s*:)/,
+      );
+      expect(block, `${selector}: без типографики`).not.toMatch(/(?:^|;)\s*font-/);
+      expect(block, `${selector}: без высот`).not.toMatch(/(?:min-)?height:/);
+    }
+  });
+});
+
+describe('base/layout.css — флекс-примитив ui-stack (T17.17: решение «делать сейчас» по замеру пилота)', () => {
+  const css = stripCssComments(readFileSync(join(root, 'base', 'layout.css'), 'utf8'));
+
+  it('.ui-stack: box-sizing (ADR-0002), flex-колонка, gap — токен --ui-stack-gap', () => {
+    const block = blockOf(css, '.ui-stack');
+    expect(block, 'правило .ui-stack найдено').toBeTruthy();
+    expect(block).toContain('box-sizing: border-box;');
+    expect(block).toContain('display: flex;');
+    expect(block).toContain('flex-direction: column;');
+    expect(block).toContain('gap: var(--ui-stack-gap);');
+  });
+
+  it('критерий решения зафиксирован в доке слоя (README): замер пилота в живом тексте, а не в замороженном файле задачи', () => {
+    const readme = readFileSync(join(root, 'base', 'README.md'), 'utf8');
+    expect(readme, 'README несёт замер решения «сейчас»').toMatch(/ui-stack[^\n]*замер|замер[^\n]*ui-stack/s);
+  });
+});
+
+describe('токены флекс-примитивов (T17.17: Implementation requirements п.1)', () => {
+  const semantic = readFileSync(join(root, 'tokens', 'semantic.css'), 'utf8');
+
+  it('--ui-row-gap / --ui-stack-gap — дефолт --ui-space-4 (ступень шкалы §3.2, спека п.1)', () => {
+    expect(semantic).toContain('--ui-row-gap: var(--ui-space-4);');
+    expect(semantic).toContain('--ui-stack-gap: var(--ui-space-4);');
+  });
+
+  it('провенанс «новый» у обоих токенов (примитива в career-portal нет; контроль tokens-semantic.test.js)', () => {
+    const rowGap = semantic.indexOf('--ui-row-gap:');
+    const stackGap = semantic.indexOf('--ui-stack-gap:');
+    expect(rowGap, '--ui-row-gap определён').toBeGreaterThan(-1);
+    expect(stackGap, '--ui-stack-gap определён').toBeGreaterThan(-1);
+    for (const [name, at] of [
+      ['--ui-row-gap', rowGap],
+      ['--ui-stack-gap', stackGap],
+    ]) {
+      const before = semantic.slice(Math.max(0, at - 400), at);
+      expect(before, `провенанс над ${name}`).toMatch(/новый/);
+    }
+  });
+});
+
+describe('presence-пин dist (AC T17.17: base в ядре, ui-row доезжает до сайтов)', () => {
+  // presence-пин читает собранный dist: воркер дожидается билда прогона
+  // (tests/helpers/unit-build.mjs; прецедент stat.test.js) — в свежем
+  // CI-чекауте dist ещё нет, и параллельный билдер мог не успеть.
+  beforeAll(async () => {
+    await buildForUnitTests(root);
+  }, 60000);
+
+  it('.ui-row с модификаторами и .ui-stack в dist/ui-core.min.css (регресс сборки)', () => {
+    const core = readFileSync(join(root, 'dist', 'ui-core.min.css'), 'utf8');
+    expect(core).toContain('.ui-row');
+    expect(core).toContain('.ui-row--center');
+    expect(core).toContain('.ui-row--between');
+    expect(core).toContain('.ui-row--end');
+    expect(core).toContain('.ui-row--no-wrap');
+    expect(core).toContain('.ui-stack');
+  });
+});
+
 describe('base/layout.css — инварианты системы (Scope T3.4)', () => {
   const css = stripCssComments(readFileSync(join(root, 'base', 'layout.css'), 'utf8'));
 
@@ -317,6 +435,18 @@ describe('стенд layout (Definition of Done T3.4: стенд layout-прим
     expect(stand).toMatch(/сельскохозяйственный/i);
   });
 
+  it('матрица ui-row: база и все модификаторы --center/--between/--end/--no-wrap представлены образцами (T17.17)', () => {
+    // база — класс ui-row без продолжения-модификатора (lookahead на «--»)
+    expect(stand).toMatch(/class="[^"]*\bui-row(?!-)[^"]*"/);
+    for (const modifier of ['center', 'between', 'end', 'no-wrap']) {
+      expect(stand).toMatch(new RegExp(`class="[^"]*\\bui-row--${modifier}\\b[^"]*"`));
+    }
+  });
+
+  it('ui-stack представлен образцом (решение «делать сейчас» по замеру пилота, T17.17)', () => {
+    expect(stand).toMatch(/class="[^"]*\bui-stack(?!-)[^"]*"/);
+  });
+
   it('сборка: стенд layout в полигоне showcase', () => {
     const build = readFileSync(join(root, 'showcase', 'build.mjs'), 'utf8');
     expect(build).toContain("'layout'");
@@ -337,6 +467,11 @@ describe('e2e-сценарии записаны (Testing requirements T3.4)', ()
   it('tests/e2e/layout.spec.js проверяет overflow и computed-колонки', () => {
     expect(spec).toContain('scrollWidth');
     expect(spec).toContain('gridTemplateColumns');
+  });
+
+  it('tests/e2e/layout.spec.js проверяет computed-геометрию флекс-примитивов и подмену gap-токена (Testing requirements T17.17)', () => {
+    expect(spec, 'computed justify/align/wrap пины').toContain('justifyContent');
+    expect(spec, 'подмена --ui-row-gap меняет расчётный gap (AC)').toContain('--ui-row-gap');
   });
 });
 
