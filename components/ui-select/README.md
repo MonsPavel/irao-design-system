@@ -30,7 +30,7 @@ career-portal (класс B аудита); критический рефакто
 | Нативный select после init | класс `.ui-select__native` (opacity 0 + pointer-events none — custom-select-hidden career-portal) + `tabindex="-1"` (триггер заменяет его в Tab-порядке); форму не покидает, значение уходит |
 | JS | `IraoUI.select`: `init()`, `selector`, `closeAll()`, `destroy(selectOrRootOrId)`; чистые функции `viewOf(select)`, `typeaheadIndex(texts, from, char[, disabled])` |
 | Событие | нативный `change` (bubbles) на select — единственная точка расширения; собственных событий модуль не диспатчит |
-| Токены | `--ui-z-dropdown` (лестница T2.2), `--ui-color-{text, text-muted, surface, surface-muted, surface-hover, primary}`, `--ui-radius-{sm, pill}`, `--ui-border-width` (только forced-colors-граница триггера и списка, T9.2), `--ui-space-{1,2,3,4}`, `--ui-shadow-lg`, `--ui-fs-{small,micro}`, `--ui-fw-{body,small}`, `--ui-lh-{small,micro}`, `--ui-transition`, focus-тройка ADR-0001 |
+| Токены | `--ui-z-dropdown` (лестница T2.2), `--ui-color-{text, text-muted, surface, surface-muted, surface-hover, primary}`, `--ui-radius-{sm, pill}`, `--ui-border-width`, `--ui-color-border` (рамка пилюли `ui-select--pill` T17.12 + forced-colors-граница триггера и списка, T9.2), `--ui-space-{1,2,3,4}`, `--ui-shadow-lg`, `--ui-fs-{small,micro}`, `--ui-fw-{body,small}`, `--ui-lh-{small,micro}`, `--ui-transition`, focus-тройка ADR-0001 |
 
 ```html
 <!-- Авторская разметка: обычный select; всё остальное строит модуль -->
