@@ -21,8 +21,9 @@
  *    из двух страниц оригинала, где .pagination содержит pagination__arrow,
  *    events.html:358–367; vacancies без стрелок — REPORT §8.2 №7, там
  *    ui-pagination--bare); мок-пагинация ?page=N без бэкенда (Out of scope);
- *  - pilot.css: сайт-зона cp-find-bar/cp-events-nav на токенах --ui-*,
- *    box-sizing на корнях (ADR-0002); без hex и !important;
+ *  - pilot.css: сайт-зона cp-events-nav на токенах --ui-* (find-bar с T17.12
+ *    — канон lpp-find слоя), box-sizing на корнях (ADR-0002); без hex и
+ *    !important;
  *  - compare.mjs: events-search.html в PAGES (AC: compare.json содержит
  *    метрики страницы); probe pagination-page существует без изменений —
  *    44px пара на events появляется от ui-pagination в разметке (AC).
@@ -207,12 +208,16 @@ describe('build.mjs — пагинация events.html (T15.5 Scope)', () => {
 });
 
 describe('pilot.css — сайт-зона поиска и пагинации (T15.5, правила пилота: токены --ui-*)', () => {
-  it('cp-find-bar существует (переименование cp-vac-find — один класс на оба потребителя), box-sizing на корне (ADR-0002), flex-строка; поле растягивается', () => {
-    const bar = blockOf(pilotCss, '.cp-find-bar');
-    expect(bar, '.cp-find-bar найдено').toBeTruthy();
-    expect(bar, 'box-sizing первой строкой (ADR-0002)').toContain('box-sizing: border-box;');
-    expect(bar).toContain('display: flex;');
-    expect(blockOf(pilotCss, '.cp-find-bar .ui-field')).toContain('flex: 1 1 auto;');
+  it('find-bar — канон слоя lpp-find (T17.12): сайт-зонный cp-find-bar снят, значения (box-sizing, flex-строка, растяжка поля) — в patterns/patterns.css', () => {
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8')
+      .replace(/\r\n/g, '\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(pilotCss, 'cp-find-bar снят — вид строки в слое').not.toContain('.cp-find-bar');
+    const find = blockOf(layer, '.lpp-find');
+    expect(find, '.lpp-find в слое').toBeTruthy();
+    expect(find, 'box-sizing на корне (ADR-0002)').toContain('box-sizing: border-box;');
+    expect(find).toContain('display: flex;');
+    expect(blockOf(layer, '.lpp-find .ui-field')).toContain('flex: 1 1 auto;');
     expect(pilotCss, 'старое имя cp-vac-find не остаётся').not.toContain('cp-vac-find');
   });
 
@@ -226,7 +231,7 @@ describe('pilot.css — сайт-зона поиска и пагинации (T1
   });
 
   it('в новых блоках нет hex и !important (инварианты системы)', () => {
-    const start = pilotCss.indexOf('.cp-find-bar');
+    const start = pilotCss.indexOf('.cp-events-nav');
     const end = pilotCss.indexOf('}', pilotCss.indexOf('.cp-events-nav'));
     const section = pilotCss.slice(start, end);
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);

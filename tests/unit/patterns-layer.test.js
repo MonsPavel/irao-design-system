@@ -20,8 +20,8 @@
  *  - пилот подключает слой (ds/ui-patterns.css) и перевёл строки/сайдбар
  *    вакансий на lpp-*; дубликаты cp-vac-row-семейства, cp-vac-layout,
  *    cp-vac-side-семейства и cp-breadcrumbs сняты из pilot.css
- *    (cp-page-head с модификатором и cp-find-bar — полнота
- *    в adoption-задачах: нет канона в док-HTML, перевод по T17.12/T17.14).
+ *    (cp-page-head — полнота в adoption T17.14; find-bar переведён на
+ *    канон lpp-find в T17.12).
  *
  * Поверхность браузера (стенды, compare-пробы, визуальные эталоны) — e2e/
  * compare-прогон; здесь — пины исходников и сборки.
@@ -412,10 +412,11 @@ describe('пилот career-portal: слой подключён, ваканси�
     ]) {
       expect(pilotCss, `дубликат ${gone} удалён`).not.toContain(gone);
     }
-    expect(pilotCss, 'шим пилюли сайдбара — на крючке слоя (до T17.12)').toContain(
-      '.lpp-side__group .cp-pill',
-    );
     expect(pilotCss, 'шим «Сбросить» — на крючке слоя').toContain('.lpp-side > .ui-button--text');
+    expect(
+      pilotCss,
+      'шим пилюли сайдбара снят (T17.12: модификатор ui-select--pill не несёт flex-basis)',
+    ).not.toContain('.lpp-side__group .cp-pill');
     expect(pilotCss, 'cp-vac-main остаётся (нет в списке снятия — ритм main-колонки)').toContain(
       '.cp-vac-main',
     );
@@ -444,12 +445,16 @@ describe('пилот career-portal: слой подключён, ваканси�
     );
   });
 
-  it('cp-page-head*/cp-find-bar не снимаются (канона в док-HTML нет — T17.12/T17.14)', () => {
+  it('cp-page-head не снимается (канона в док-HTML нет — T17.14); find-bar снят на канон lpp-find (T17.12)', () => {
     expect(pilotCss, 'page-head — ритм страниц, полное снятие в adoption').toContain(
       '.cp-page-head',
     );
-    expect(pilotCss, 'find-bar — канон придёт с T17.12').toContain('.cp-find-bar');
-    expect(build, 'cp-find-bar в разметке остаётся').toContain('cp-find-bar');
+    expect(pilotCss, 'find-bar переведён на канон слоя (T17.12)').not.toContain('.cp-find-bar');
+    expect(
+      build,
+      'cp-find-bar из разметки снят — findBar на lpp-find (проза комментариев — история)',
+    ).not.toMatch(/class="[^"]*\bcp-find-bar\b/);
+    expect(build, 'findBar несёт канон слоя').toContain('class="lpp-find"');
   });
 });
 

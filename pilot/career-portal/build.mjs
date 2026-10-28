@@ -171,9 +171,13 @@ function selectField({
   const opts = buildOptions(options, selected);
   const select = `<select class="ui-field__select" id="${fieldId}" name="${name}"${required ? ' required' : ''}${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}${pill ? ' data-ui-select="wrap"' : ' data-ui-select'}>${opts}</select>`;
   if (pill) {
-    // пилюля фильтра: геометрию рисует сайт (cp-pill), триггер растягивается.
-    // compact здесь игнорируется осознанно: пилюля — сайт-зона (cp-pill),
-    // компактность — режим ui-field; pill-вызовы compact не передают.
+    // пилюля фильтра: геометрию несёт модификатор ДС ui-select--pill (T17.12 —
+    // перенос cp-pill из сайт-зоны; рамка/радиус/фон — компонент), триггер
+    // растягивается. Ширина пилюли — раскладка потребителя (hero 12rem —
+    // правило сайта; каталог 260px — канон lpp-filters слоя; сайдбар —
+    // растягивает flex-столб). compact здесь игнорируется осознанно: пилюля —
+    // не ui-field, компактность — режим ui-field; pill-вызовы compact не
+    // передают.
     // Подпись поля — label[for] РЯДОМ с обёрткой (канон ui-select после
     // ревью T7.3: имя получают и нативный select, и построенный триггер —
     // пара APG listbox-button); в оригинале видимых подписей нет —
@@ -181,7 +185,7 @@ function selectField({
     // приёма снята — один приём в одном месте).
     // Без label — прежний режим с aria-label (сайдбар вакансий, EPIC-14).
     const labelHtml = label ? `<label class="ui-vh" for="${fieldId}">${esc(label)}</label>\n` : '';
-    return `${labelHtml}<div class="cp-pill">${select}</div>`;
+    return `${labelHtml}<div class="ui-select--pill">${select}</div>`;
   }
   return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
   <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>` : ''}</label>
@@ -283,9 +287,11 @@ ${tabs}
  *  потребитель панели, дублирования не плодить); вариант кнопки —
  *  параметр: vacancies — accent «Найти», events-search — primary «найти»
  *  (оригинал). role="search" на обеих — канон поисковой формы WAI (в
- *  оригинале role стоит только на vacancies — их недосмотр). */
+ *  оригинале role стоит только на vacancies — их недосмотр).
+ *  T17.12: вид строки — канон lpp-find паттерн-слоя (dist/ds/
+ *  ui-patterns.css; сайт-зонный класс cp-find-bar снят). */
 function findBar({ action, placeholder, label, text, variant = 'accent' }) {
-  return `<form class="cp-find-bar" action="${esc(action)}" method="get" role="search">
+  return `<form class="lpp-find" action="${esc(action)}" method="get" role="search">
   <div class="ui-field">
     <input class="ui-field__input" type="search" name="q" placeholder="${esc(placeholder)}" aria-label="${esc(label)}">
   </div>
@@ -2167,7 +2173,8 @@ ${offers}
 
    Первый потребитель связки list-page «сайдбар/панель фильтров» за
    пределами vacancies. Фильтры — 6 нативных select wrap-режимом ui-select
-   (пилюли cp-pill, ширина — сайт-зона); подписи — label[for] рядом
+   (пилюли ui-select--pill, T17.12; ширина 260px — канон ленты lpp-filters
+   слоя); подписи — label[for] рядом
    (канон ui-select T7.3, Accessibility requirements). Список предложений —
    те же cp-offer-card, что на education.html (оригинал строит каталог
    тем же offer_card в cards-grid--3, build.py:803); данные educat.json
@@ -2232,7 +2239,7 @@ function educationCatalogMain() {
       <p class="cp-page-subtitle ui-lead">Выберите направление подготовки и компанию Группы «Интер РАО» — заявка оформляется на сайте «Работа России».</p>
     </div>
 
-    <div class="cp-catalog-filters">
+    <div class="lpp-filters">
 ${filters}
     </div>
 

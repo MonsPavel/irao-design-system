@@ -1,11 +1,13 @@
-<!-- Стенд ui-select (T7.3): четыре секции — базовый select в ui-field
+<!-- Стенд ui-select (T7.3): пять секций — базовый select в ui-field
      (#uiss-basic, с disabled-опцией «Казань» — сценарии пропуска), optgroup-
      группы (#uiss-optgroups), модификатор data-ui-select="wrap" в обёртке-
      «пилюле» сайта (#uiss-wrap — замена хака vacancy-search__select-wrap
      career-portal; подпись — label[for] РЯДОМ с пилюлей: имя поля получают
-     и нативный select, и триггер, а триггер не накрывает подпись) и форма
+     и нативный select, и триггер, а триггер не накрывает подпись), форма
      фильтра (#uiss-form, POST /submit, статус-регион #uiss-form-status —
-     приёмник change-событий модуля). В разметке select НИКАК не скрыт:
+     приёмник change-событий модуля) и фильтр-пилюля ui-select--pill
+     (#uiss-pill, T17.12 — геометрия пилюли в системе, ширина — раскладка
+     стенда). В разметке select НИКАК не скрыт:
      без JS это нативные контролы (e2e проверяет источник и no-JS контекст).
      Секция #uiss-disabled — disabled-состояние.
      Ссылка #uiss-after-basic — цель сценария Tab-выхода. -->
@@ -31,6 +33,21 @@
     font-size: var(--ui-fs-small);
     font-weight: var(--ui-fw-small);
     line-height: var(--ui-lh-small);
+  }
+
+  /* Лента фильтр-пилюль секции #uiss-pill (T17.12): раскладка СТЕНДА —
+     ширина пилюли flex-basis 12rem из ленты фильтров канона list-page
+     (перенос .cp-vacancy-search__fields career-portal: лента с переносом,
+     gap 8px). Геометрию пилюли несёт сам модификатор ui-select--pill. */
+  .uiss-pillrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2);
+    align-items: center;
+  }
+
+  .uiss-pillrow .ui-select--pill {
+    flex: 1 1 12rem;
   }
 </style>
 
@@ -113,6 +130,40 @@
     <select class="ui-field__select" id="uiss-locked" name="locked" disabled data-ui-select>
       <option value="">Недоступно</option>
     </select>
+  </div>
+</section>
+
+<section id="uiss-pill" aria-labelledby="uiss-pill-heading">
+  <h2 id="uiss-pill-heading">Фильтр-пилюля (ui-select--pill)</h2>
+  <p class="ui-showcase-stand__note">
+    Модификатор <code>ui-select--pill</code> (T17.12) на обёртке
+    <code>data-ui-select="wrap"</code>: рамка, радиус pill и фон surface-muted несёт система —
+    замена сайт-класса <code>cp-pill</code> career-portal. Ширина пилюли — раскладка сайта
+    (здесь flex-basis 12rem из ленты фильтров стендового стиля); открытый список
+    позиционируется от обёртки — обёртка его не ломает.
+  </p>
+  <!-- Канон имени (пример спеки T17.12): подпись — label[for] РЯДОМ с
+       обёрткой, скрыта утилитой ui-vh (T17.2) — как на страницах фильтров
+       career-portal, где видимых подписей пилюль нет. Ширина ленты —
+       раскладка стенда (uiss-pillrow), не компонента. -->
+  <div class="uiss-pillrow">
+    <label class="ui-vh" for="uiss-pill-city">Регион</label>
+    <div class="ui-select--pill">
+      <select class="ui-field__select" id="uiss-pill-city" name="pill-city" data-ui-select="wrap">
+        <option value="" selected>Все регионы</option>
+        <option value="msk">Москва</option>
+        <option value="omsk">Омская область</option>
+        <option value="spb">Санкт-Петербург</option>
+      </select>
+    </div>
+    <label class="ui-vh" for="uiss-pill-spec">Специализация</label>
+    <div class="ui-select--pill">
+      <select class="ui-field__select" id="uiss-pill-spec" name="pill-spec" data-ui-select="wrap">
+        <option value="" selected>Все специальности</option>
+        <option value="eng">Инженер</option>
+        <option value="elec">Электромонтёр</option>
+      </select>
+    </div>
   </div>
 </section>
 
