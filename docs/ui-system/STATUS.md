@@ -120,7 +120,7 @@
 | T17.9 | done | смержена |
 | T17.17 | done | смержена |
 | T17.10 | done | смержена |
-| T17.11 | todo | EPIC-17: ui-tabs активная пилюля по aria-current="page" (DS) + канон поднавигации nvp — снимает пару cp-subnav специфичности 0,4,0 |
+| T17.11 | done | смержена |
 | T17.12 | todo | EPIC-17: пилюля select-фильтра ui-select--pill + find-bar в паттерн-слой — 4 контекста cp-pill |
 | T17.13 | todo | EPIC-17: каркасы шапки/подвала hsp/ftp в паттерн-слой (режимы absolute/static, светлый 4-колоночный футер, соц-кнопки — остаток §8.3) |
 | T17.14 | todo | EPIC-17: детальные страницы на ddp-канон — vacancy/event/internship/article/company, ~350 строк pilot.css |
