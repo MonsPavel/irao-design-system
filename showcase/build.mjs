@@ -1419,7 +1419,7 @@ async function generateShowcase({ themes }) {
       '      <ul class="ui-showcase-dist-list">',
       '        <li><code>ui-core.min.css</code> — tokens → base → компоненты;</li>',
       '        <li><code>ui-vi.min.css</code> — VI-модуль ГОСТ Р 52872, подключение осознанное;</li>',
-      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1; лендинг-связки lnk-/lgo-, T17.9; таймлайн tlp-, T17.10), подключение опционально;</li>',
+      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1; лендинг-связки lnk-/lgo-, T17.9; таймлайн tlp-, T17.10; поднавигация nvp, T17.11), подключение опционально;</li>',
       '        <li><code>ui.min.js</code> — все JS-модули (IIFE).</li>',
       '      </ul>',
       '    </section>',

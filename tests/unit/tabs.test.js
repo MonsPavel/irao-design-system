@@ -35,12 +35,18 @@
  *    диспатчится — это событие смены выбора, а не декларация стартового;
  *  - T14.9: начальный выбор из разметки — таб с aria-current="page"
  *    выбирается вместо первого (silent); дубли — первый + console.warn;
- *    без aria-current — поведение как раньше; модуль aria-current не снимает,
- *    CSS на aria-current не реагирует (не стилевой крючок — деградация без JS
- *    не меняется); модификатор ui-tabs--pill — прозрачные пилюли .tabs-pill
+ *    без aria-current — поведение как раньше; модуль aria-current не снимает;
+ *    модификатор ui-tabs--pill — прозрачные пилюли .tabs-pill
  *    (pages.css:969–1001) на токенах: трек surface-muted, паддинг/gap 4px,
  *    радиус pill; таб без рамки, hover — подпись primary без заливки и только
- *    у невыбранных; активная — базовая заливка primary/text-on-dark.
+ *    у невыбранных; активная — заливка primary/text-on-dark;
+ *  - T17.11: активная пилюля модификатора --pill красится и по
+ *    aria-current="page" (межстраничные наборы-ссылки без панелей модуль не
+ *    инициализирует — контракт T13.6): ветка aria-current действует только
+ *    ДО инициализации (:not([aria-selected]) — модуль ставит атрибут всем
+ *    табам), в таб-инстансах активность по-прежнему один aria-selected.
+ *    Расширение — :is() с атрибутными аргументами равной силы: специфичность
+ *    существующих правил не растёт (Implementation requirements п.1 T17.11).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -669,10 +675,15 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     const border = blockOf(css, '.ui-tabs--pill .ui-tabs__tab');
     expect(border, 'правило модификатора таба найдено').toBeTruthy();
     expect(border).toContain('border: 0;'); // рамка outline-кнопки не входит в вид пилюли
-    // Подпись text (pages.css:989) — правило с :not([aria-selected='true']):
-    // без исключения (0,2,0) модификатора перебили бы (0,1,0) активное правило
-    // базы — тёмная подпись на заливке primary (ловилось axe на стенде).
-    const color = blockOf(css, ".ui-tabs--pill .ui-tabs__tab:not([aria-selected='true'])");
+    // Подпись text (pages.css:989) — правило с :not(:is(...))-исключением
+    // (T17.11: обе цели — aria-selected и aria-current): без исключения (0,2,0)
+    // модификатора перебило бы (0,1,0) активное правило — тёмная подпись на
+    // заливке primary (ловилось axe на стенде). :is() из атрибутных селекторов
+    // равной силы — вклад (0,1,0), специфичность правила не выросла.
+    const color = blockOf(
+      css,
+      ".ui-tabs--pill .ui-tabs__tab:not(:is([aria-selected='true'], [aria-current='page']))",
+    );
     expect(color, ':not-правило подписи найдено').toBeTruthy();
     expect(color).toContain('color: var(--ui-color-text);');
     // fs-small-масштаб спеки и базовая min-height — общие с базой правилами:
@@ -689,26 +700,43 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     expect(mediaIndex, 'media-обёртка hover присутствует').toBeGreaterThan(-1);
     const media = css.slice(mediaIndex);
     expect(media).toMatch(
-      /\.ui-tabs--pill \.ui-tabs__tab:not\(\[aria-selected='true'\]\):hover\s*\{[^}]*background-color: transparent;/,
+      /\.ui-tabs--pill \.ui-tabs__tab:not\(:is\(\[aria-selected='true'\], \[aria-current='page'\]\)\):hover\s*\{[^}]*background-color: transparent;/,
     );
     expect(media).toMatch(
-      /\.ui-tabs--pill \.ui-tabs__tab:not\(\[aria-selected='true'\]\):hover\s*\{[^}]*color: var\(--ui-color-primary\);/,
+      /\.ui-tabs--pill \.ui-tabs__tab:not\(:is\(\[aria-selected='true'\], \[aria-current='page'\]\)\):hover\s*\{[^}]*color: var\(--ui-color-primary\);/,
     );
   });
 
-  it('активная пилюля — базовое правило :where([aria-selected]) без дубля в модификаторе; aria-current — не стилевой крючок', () => {
-    // Дубль активного правила искал бы заливку text-on-dark в блоках
-    // модификатора (aria-selected в :not()-исключении hover — защита выбранной
-    // пилюли от перекраски, не дубль; прецедент ui-chip T14.8).
-    for (const [, block] of css.matchAll(/(?:^|\n)\s*\.ui-tabs--pill[^{]*\{([^}]*)\}/g)) {
-      expect(block, 'модификатор не повторяет активную заливку (общее правило базы)').not.toContain(
-        'text-on-dark',
+  it('активная пилюля — пара базы, расширенная aria-current="page" (T17.11): ветка current действует только до инициализации модуля', () => {
+    // Активная пара в модификаторе (T17.11): навигационные наборы-ссылки без
+    // панелей модуль не инициализирует (контракт T13.6) — активный раздел
+    // несёт aria-current="page". :is() берёт максимум аргументов — селекторы
+    // атрибутные равной силы, специфичность существующих правил не растёт.
+    const active = blockOf(
+      css,
+      ".ui-tabs--pill .ui-tabs__tab:is([aria-selected='true'], [aria-current='page']:not([aria-selected]))",
+    );
+    expect(active, 'активная пара модификатора найдена').toBeTruthy();
+    expect(active).toContain('background-color: var(--ui-color-primary);');
+    expect(active).toContain('color: var(--ui-color-text-on-dark);');
+    // Ветка aria-current гасится :not([aria-selected]): модуль при init ставит
+    // атрибут ВСЕМ табам (ui-tabs.js) — после инициализации активность задаёт
+    // один aria-selected, оставшийся aria-current (модуль его не снимает,
+    // T14.9) не рисует вторую активную пилюлю. В nav-наборах без панелей
+    // aria-selected нет — активный раздел красится по aria-current.
+    expect(css).toMatch(/\[aria-current='page'\]:not\(\[aria-selected\]\)/);
+    // База не менялась (Scope T17.11 — только модификатор --pill): активный
+    // таб панельных инстансов — прежнее :where()-правило с нулевым вкладом.
+    const base = blockOf(css, ".ui-tabs__tab:where([aria-selected='true'])");
+    expect(base, 'базовое активное правило на месте').toBeTruthy();
+    expect(base).toContain('background-color: var(--ui-color-primary);');
+    // aria-current — стилевой крючок ТОЛЬКО модификатора --pill: базовые
+    // табы с панелями на атрибут не реагируют (деградация без JS прежняя).
+    for (const selector of css.match(/[^{}\n]*aria-current[^{}\n]*\{/g) ?? []) {
+      expect(selector.trim(), 'aria-current — только в правилах модификатора --pill').toMatch(
+        /^\.ui-tabs--pill\b/,
       );
     }
-    // aria-current="page" — подсказка модулю (начальный выбор), не CSS-крючок:
-    // без JS активного таба нет, и вид разметки от атрибута не меняется
-    // (деградация «все панели видимы» не искажается).
-    expect(css).not.toContain('aria-current');
   });
 });
 
@@ -726,7 +754,18 @@ describe('доки T14.9 (README): модификатор --pill и правил
     expect(readme).toMatch(/дубл[а-я]*/i);
   });
 
-  it('README: no-JS-деградация не меняется — CSS не реагирует на aria-current (все панели видимы)', () => {
-    expect(readme).toMatch(/aria-current[\s\S]{0,300}(не стилевой|CSS не реагирует)/i);
+  it('README: граница стилевой реакции на aria-current — модификатор --pill красит активную пилюлю (T17.11), база не реагирует', () => {
+    // База (табы с панелями): aria-current — подсказка модулю, вид активного
+    // таба определяет aria-selected (деградация без JS прежняя).
+    expect(readme).toMatch(/aria-current[\s\S]{0,400}не реагирует/i);
+    // Модификатор --pill / навигационный набор: активная пилюля по
+    // aria-current="page" (покой и hover).
+    expect(readme).toMatch(/aria-current="page"[\s\S]{0,600}активн[а-яё]* пилюл[а-яё]*/i);
+  });
+
+  it('README: навигационный набор — ссылки без панелей, модуль не подключается, канон nvp паттерн-слоя (T17.11)', () => {
+    expect(readme).toMatch(/навигационн/i);
+    expect(readme).toMatch(/nvp/);
+    expect(readme).toMatch(/(не подключается|без панелей)/i);
   });
 });

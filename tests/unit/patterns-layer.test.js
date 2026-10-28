@@ -48,6 +48,14 @@ const PATTERN_SOURCES = {
   'patterns/timeline/timeline.html': 'tlp',
 };
 
+/** Поднавигация разделов (T17.11): канон nvp — тот же док-источник list-page
+ *  (страницы разделов — списки), отдельная пара для синхронности «разметка ↔
+ *  слой» (блок-класс — голый `nvp`, пример спеки T17.11). */
+const PATTERN_SOURCE_EXTRA = [['patterns/list-page/list-page.html', 'nvp']];
+
+/** Все пары «док → префикс» для пинов синхронности. */
+const PATTERN_SOURCE_ENTRIES = [...Object.entries(PATTERN_SOURCES), ...PATTERN_SOURCE_EXTRA];
+
 let layer = '';
 try {
   layer = readFileSync(LAYER_PATH, 'utf8');
@@ -119,19 +127,20 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp- (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
-      // Блок-класс таймлайна — голый `tlp` (пример спеки T17.10): префикс
-      // продолжается дефисом, модификатором __ или заканчивается на нём.
+      // Блок-классы таймлайна (tlp, T17.10) и поднавигации (nvp, T17.11) —
+      // голые, без суффикса: префикс продолжается дефисом, модификатором __
+      // или заканчивается на нём.
       expect(
-        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp)(?:-|__|$)/.test(hook)),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-`,
+        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp)(?:-|__|$)/.test(hook)),
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp)(?:-|__|$))/.test(hook),
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp)(?:-|__|$))/.test(hook),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
         ).toBe(true);
       }
@@ -230,10 +239,30 @@ describe('patterns/patterns.css — единый исходник паттерн
       'grid-template-columns: minmax(0, 1fr) var(--ui-form-aside-width);',
     );
   });
+
+  it('значения канона 1:1 — поднавигация nvp (T17.11): сетка 5×1fr «сетка 264», маргины 24/48 (pages.css:969–1001)', () => {
+    // Вид пилюль несёт модификатор ui-tabs--pill (T14.9) — слой его не
+    // дублирует: nvp переносит только раскладку страницы (сетка трека и
+    // nav-маргины — зона страницы по README ui-tabs «Модификатор --pill»).
+    const nav = code.match(/(?:^|\n)\.nvp\s*\{([^}]*)\}/);
+    expect(nav, '.nvp найдено').toBeTruthy();
+    expect(nav[1], 'маргины nav.tabs-pill 24/48 — pages.css:969').toContain(
+      'margin: var(--ui-space-5) 0 var(--ui-space-7);',
+    );
+    const list = code.match(/(?:^|\n)\.nvp \.ui-tabs__list\s*\{([^}]*)\}/);
+    expect(list, '.nvp .ui-tabs__list найдено').toBeTruthy();
+    expect(list[1], 'сетка repeat(5, 1fr) трека — pages.css:975 («сетка 264»)').toContain(
+      'grid-template-columns: repeat(5, 1fr);',
+    );
+    expect(list[1], 'DS-маргин __list (32px под панелями) сброшен').toContain('margin: 0;');
+    // Компонентные свойства (трек/пилюли) слой не повторяет.
+    expect(list[1]).not.toContain('background');
+    expect(list[1]).not.toContain('padding');
+  });
 });
 
 describe('синхронность док-HTML паттернов и слоя (AC: одни классы)', () => {
-  for (const [docPath, prefix] of Object.entries(PATTERN_SOURCES)) {
+  for (const [docPath, prefix] of PATTERN_SOURCE_ENTRIES) {
     describe(docPath, () => {
       const html = readFileSync(join(root, docPath), 'utf8');
       const markup = markupClasses(html, prefix);
@@ -391,6 +420,21 @@ describe('пилот career-portal: слой подключён, ваканси�
     expect(compare, 'side-promo — hook пробы сохранён').toContain("pilot: '.cp-vac-side__promo'");
     expect(compare).toContain("pilot: '.cp-vac-side__promo .ui-button--primary'");
     expect(probe).toContain("const ROW_SELECTOR = { original: '.vac-row', pilot: '.lpp-row' };");
+  });
+
+  it('поднавигация — канон nvp (T17.11): cp-subnav снят из разметки и pilot.css, пробы compare на крючке слоя', () => {
+    expect(build, 'subnav() на каноне: nav = ui-tabs--pill + nvp').toContain(
+      'class="ui-tabs ui-tabs--pill nvp"',
+    );
+    expect(build, 'сайт-зонный класс снят из разметки').not.toContain('cp-subnav');
+    expect(pilotCss, 'пара 0,4,0 удалена из pilot.css (REPORT §9.1 №8)').not.toContain(
+      'cp-subnav',
+    );
+    expect(compare, 'проба трека — на крючке слоя').toContain("pilot: '.nvp .ui-tabs__list'");
+    expect(compare, 'проба таба — на крючке слоя').toContain("pilot: '.nvp .ui-tabs__tab'");
+    expect(compare, 'проба активного таба — на крючке слоя').toContain(
+      "pilot: \".nvp .ui-tabs__tab[aria-current='page']\"",
+    );
   });
 
   it('cp-page-head*/cp-find-bar не снимаются (канона в док-HTML нет — T17.12/T17.14)', () => {
