@@ -40,11 +40,27 @@
 }
 
 .lpp-filters {
+  box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ui-space-3);
+  gap: var(--ui-space-4);
   align-items: center;
-  margin: var(--ui-space-5) 0;
+  /* Ритм ленты: верх 24px — ритм дока T8.1 (space-5; с mb .cp-page-head 32px
+     каталога коллапсирует в те же 32 — рендер не меняет); низ 2.5rem «как
+     есть» — .vac-filters pages.css:19 (40px вне шкалы §3.2, прецедент
+     --ui-card-gap; калибровка T17.12: T8.1 нёс 24px). */
+  margin: var(--ui-space-5) 0 2.5rem;
+}
+
+/* Ширина пилюли фильтра в ленте (T17.12): flex-basis 260px оригинала
+   (vacancy-search.css:41, .intern-filters pages.css:467 — каталог унаследовал
+   базу .vacancy-search__select-wrap) — без неё бокс нативного select
+   сжимается до самой длинной опции и подпись триггера подрезается. Геометрия
+   пилюли — модификатор ui-select--pill (компонент, T17.12); ширину несёт
+   раскладка (Implementation requirements T17.12) — в ленте канона это 260px.
+   Прямые дети: подписи/кнопки дока канона не пилюли — правило их не трогает. */
+.lpp-filters > .ui-select--pill {
+  flex: 0 0 260px;
 }
 
 /* «Пилюля» фильтра (замена .vacancy-search__select-wrap career-portal):
@@ -80,6 +96,25 @@
 .lpp-pill select {
   width: 12rem;
   max-width: 100%;
+}
+
+/* ── Find-bar «найти по списку» (T17.12): строка «поле + кнопка» ──
+   Порт принятого findBar пилота (T15.5 — общий класс панели vacancies и
+   events-search): оригинал .vac-find pages.css:120 (gap 12px, mb 24px) и
+   .events-search-bar pages.css:585–589 (gap 16px, mb 40px) — приняты метрики
+   вакансий gap 8 (space-2) и ритм снизу 8 (space-2) («принято ДС», REPORT
+   T15.9; расхождения events-search — материал отчёта). Поле растягивается,
+   кнопка рядом; разметку несёт док-канон list-page (синхронность — пин
+   patterns-layer.test.js). */
+.lpp-find {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-2);
+  margin-bottom: var(--ui-space-2);
+}
+
+.lpp-find .ui-field {
+  flex: 1 1 auto;
 }
 
 /* Вертикальный ритм page-head (reset системы обнуляет margin p/h). */

@@ -79,25 +79,38 @@ describe('ДС: модификатор ui-select--pill (компонент, Impl
     expect(block).toContain('align-items: center;');
   });
 
-  it('триггер растягивается: нативный select в пилюле на всю ширину обёртки', () => {
-    const fill = blockOf(componentCss, '.ui-select--pill > select');
-    expect(fill, '.ui-select--pill > select найдено').toBeTruthy();
-    expect(fill).toContain('width: 100%;');
+  it('растяжка пилюли — от поля: select несёт ui-field__select (width: 100% и высота поля — компонент ui-field), голых элементных правил в модификаторе нет (гейт БЭМ §2)', () => {
+    const fieldCss = readFileSync(join(root, 'components/ui-field/ui-field.css'), 'utf8')
+      .replace(/\r\n/g, '\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(
+      fieldCss,
+      'поле даёт ширину 100% (заполнение пилюли, было .cp-pill select) — общее правило коробки контролов',
+    ).toMatch(/\.ui-field__input,\s*\.ui-field__select,[\s\S]{0,200}width: 100%;/);
+    expect(
+      (componentCss.match(/\.ui-select--pill[^{]*\{/g) ?? []).map((piece) =>
+        piece.replace(/\s+/g, ' ').trim(),
+      ),
+    ).toEqual(['.ui-select--pill {']);
   });
 
   it('ширину (flex-basis) и позицию модификатор НЕ задаёт — раскладка сайта, позиция — гарантия модуля (контракт wrap)', () => {
     const block = blockOf(componentCss, '.ui-select--pill');
-    expect(block, 'без flex-basis (ширина — сайт)').not.toContain('flex');
+    expect(
+      block,
+      'без flex-basis (ширина — сайт; inline-flex — компоновка, не ширина)',
+    ).not.toContain('flex-');
     expect(block, 'без position (модуль ставит relative статичной обёртке)').not.toContain(
       'position',
     );
   });
 
   it('внутренности триггера/listbox модификатор не трогает: новых правил на .ui-select--pill .ui-select__* нет', () => {
-    expect(componentCss.match(/\.ui-select--pill[^{]*\{/g) ?? []).toEqual([
-      '.ui-select--pill{',
-      '.ui-select--pill > select{',
-    ]);
+    expect(
+      (componentCss.match(/\.ui-select--pill[^{]*\{/g) ?? []).map((piece) =>
+        piece.replace(/\s+/g, ' ').trim(),
+      ),
+    ).toEqual(['.ui-select--pill {']);
   });
 
   it('инварианты системы: без hex и !important (hex — tokens/primitives.css, !important — a11y/vi.css)', () => {
@@ -115,9 +128,7 @@ describe('README ui-select (AC: строка API + пример фильтр-п�
   });
 
   it('пример фильтр-панели: label[for] рядом, ширина — раскладка сайта', () => {
-    expect(readme).toMatch(
-      /<div class="ui-select--pill">[\s\S]{0,200}data-ui-select="wrap"/,
-    );
+    expect(readme).toMatch(/<div class="ui-select--pill">[\s\S]{0,200}data-ui-select="wrap"/);
     expect(readme).toContain('ui-vh');
   });
 });
@@ -179,10 +190,12 @@ describe('пилот career-portal: cp-* сняты (AC «~30 строк»)', ()
     expect(pilotBuild, 'лента каталога — канон слоя').toContain('class="lpp-filters"');
   });
 
-  it('build.mjs: сайт-зонные классы сняты из разметки', () => {
-    expect(pilotBuild).not.toContain('cp-pill');
-    expect(pilotBuild).not.toContain('cp-find-bar');
-    expect(pilotBuild).not.toContain('cp-catalog-filters');
+  it('build.mjs: сайт-зонные классы сняты из РАЗМЕТКИ (в прозе комментариев упоминания истории — не пин)', () => {
+    expect(pilotBuild, 'cp-pill в разметке снят').not.toMatch(/class="[^"]*\bcp-pill\b/);
+    expect(pilotBuild, 'cp-find-bar в разметке снят').not.toMatch(/class="[^"]*\bcp-find-bar\b/);
+    expect(pilotBuild, 'cp-catalog-filters в разметке снят').not.toMatch(
+      /class="[^"]*\bcp-catalog-filters\b/,
+    );
   });
 
   it('pilot.css: правила cp-pill/cp-catalog-filters/cp-find-bar сняты', () => {

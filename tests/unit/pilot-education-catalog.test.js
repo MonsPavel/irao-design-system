@@ -14,8 +14,9 @@
  *    пагинация — ui-pagination СО стрелками (education-catalog — одна из
  *    двух страниц оригинала с pagination__arrow; vacancies без стрелок —
  *    REPORT §8.2 №7, там ui-pagination--bare);
- *  - pilot.css: сайт-зона cp-catalog-* на токенах, box-sizing на корнях
- *    (ADR-0002); без hex и !important;
+ *  - pilot.css: сайт-зона каталога на токенах, box-sizing на корнях
+ *    (ADR-0002); лента фильтров с T17.12 — канон lpp-filters слоя
+ *    (patterns/patterns.css), cp-catalog-filters снят; без hex и !important;
  *  - compare.mjs: education-catalog.html в PAGES (AC: compare.json содержит
  *    метрики страницы).
  */
@@ -40,6 +41,8 @@ const pilotDir = join(root, 'pilot', 'career-portal');
 const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8');
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8');
 const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
+// Слой паттернов (T17.12: лента фильтров каталога — канон lpp-filters слоя).
+const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 const educat = JSON.parse(readFileSync(join(pilotDir, 'data', 'educat.json'), 'utf8'));
 
 /** Исполняемая копия чистой функции buildOptions из исходника build.mjs
@@ -114,7 +117,7 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
         `label: '${label}'`,
       );
     }
-    expect(catalogHtml).toContain('<div class="cp-catalog-filters">');
+    expect(catalogHtml).toContain('<div class="lpp-filters">');
   });
 
   it('опции фильтров — байт-в-байт оригинала (в т.ч. крайние значения каждой группы)', () => {
@@ -213,26 +216,27 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
 });
 
 describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 Scope, правила пилота: токены --ui-*)', () => {
-  it('блоки существуют: cp-catalog-filters, cp-catalog-nav — и несут box-sizing на корне (ADR-0002)', () => {
-    for (const selector of ['.cp-catalog-filters', '.cp-catalog-nav']) {
-      const block = blockOf(pilotCss, selector);
-      expect(block, `${selector} найдено`).toBeTruthy();
-      expect(block, `${selector}: box-sizing первой строкой (ADR-0002)`).toContain(
-        'box-sizing: border-box;',
-      );
-    }
+  it('лента фильтров — канон слоя lpp-filters (T17.12): сайт-зонный cp-catalog-filters снят; пагинация остаётся сайтом и несёт box-sizing (ADR-0002)', () => {
+    expect(pilotCss, 'cp-catalog-filters снят — вид ленты в patterns/patterns.css').not.toContain(
+      '.cp-catalog-filters',
+    );
+    const nav = blockOf(pilotCss, '.cp-catalog-nav');
+    expect(nav, '.cp-catalog-nav найдено').toBeTruthy();
+    expect(nav, '.cp-catalog-nav: box-sizing первой строкой (ADR-0002)').toContain(
+      'box-sizing: border-box;',
+    );
   });
 
-  it('панель фильтров — flex-лента: gap 16px (--ui-space-4) и отступ снизу 2.5rem «как есть» (pages.css:14–20; 40px вне шкалы §3.2 — прецедент --ui-card-gap)', () => {
-    const filters = blockOf(pilotCss, '.cp-catalog-filters');
+  it('лента фильтров — значения канона в слое: gap 16px (--ui-space-4), отступ снизу 2.5rem «как есть» (pages.css:19; 40px вне шкалы §3.2 — прецедент --ui-card-gap)', () => {
+    const filters = blockOf(layerCss, '.lpp-filters');
     expect(filters).toContain('display: flex;');
     expect(filters).toContain('flex-wrap: wrap;');
     expect(filters).toContain('gap: var(--ui-space-4);');
-    expect(filters).toContain('margin-bottom: 2.5rem;');
+    expect(filters).toContain('margin: var(--ui-space-5) 0 2.5rem;');
   });
 
-  it('ширину пилюли задаёт сайт: flex 0 0 260px оригинала (pages.css:467 «как есть»; канон list-page — без basis бокс select сжимается)', () => {
-    expect(blockOf(pilotCss, '.cp-catalog-filters .cp-pill')).toContain('flex: 0 0 260px;');
+  it('ширину пилюли несёт слой: flex 0 0 260px оригинала (vacancy-search.css:41; канон list-page — без basis бокс select сжимается)', () => {
+    expect(blockOf(layerCss, '.lpp-filters > .ui-select--pill')).toContain('flex: 0 0 260px;');
   });
 
   it('cp-vh удалён (T17.2): приём visually-hidden перенесён в ДС — подписи пилюлей скрывает утилита .ui-vh из ui-core, пилот не хранит копию приёма', () => {
@@ -248,7 +252,7 @@ describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 S
   });
 
   it('в блоках каталога нет hex и !important (инварианты системы)', () => {
-    const start = pilotCss.indexOf('.cp-catalog-filters');
+    const start = pilotCss.indexOf('.cp-catalog-nav');
     const end =
       pilotCss.indexOf('.cp-catalog-nav') +
       pilotCss.indexOf('}', pilotCss.indexOf('.cp-catalog-nav'));

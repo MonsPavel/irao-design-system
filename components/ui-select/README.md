@@ -17,6 +17,7 @@ career-portal (класс B аудита); критический рефакто
 |---|---|
 | Хук | `data-ui-select` на `<select>` — только на нём (иначе `console.warn`) |
 | Модификатор `data-ui-select="wrap"` | select живёт в обёртке сайта («пилюля» фильтра): обёртка даёт позиционный контекст и геометрию, триггер растягивается на неё (замена хака `vacancy-search__select-wrap`) |
+| Модификатор `ui-select--pill` (T17.12) | класс-обёртка ПОВЕРХ `data-ui-select="wrap"`: рамка `--ui-border-*`, радиус pill и фон surface-muted несёт система (замена сайт-класса `cp-pill`); ширину пилюли задаёт раскладка сайта (flex-basis 12rem лента / 260px каталог — канон list-page), позиционный контекст гарантирует модуль; внутренности триггера/listbox не меняет |
 | Построенный корень | `.ui-select` (или `.ui-select--wrap`) — создаёт модуль |
 | Построенный `.ui-select__trigger` | `<button type="button">` — абсолютный слой `inset: 0` поверх select; `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls` (id генерируется от id select) |
 | Построенный `.ui-select__label` | текст выбранного — **имя триггера отражает выбор** |
@@ -43,6 +44,24 @@ career-portal (класс B аудита); критический рефакто
     </optgroup>
   </select>
 </div>
+```
+
+Пример фильтр-панели (канон T17.12): пилюли `ui-select--pill` в ленте
+`lpp-filters` паттерн-слоя (dist/ui-patterns.css); ширина пилюли — раскладка
+ленты, подпись — скрытая `ui-vh`:
+
+```html
+<form class="lpp-filters" method="get" action="/vacancies/" aria-label="Фильтры вакансий">
+  <label class="ui-vh" for="f-city">Город</label>
+  <!-- ширина пилюли — flex-basis раскладки сайта -->
+  <div class="ui-select--pill">
+    <select class="ui-field__select" id="f-city" name="city" data-ui-select="wrap">
+      <option value="" selected>Все регионы</option>
+      <option value="msk">Москва</option>
+    </select>
+  </div>
+  <button class="ui-button ui-button--primary" type="submit">Применить</button>
+</form>
 ```
 
 ## Деградация без JS
@@ -146,9 +165,8 @@ career-portal (класс B аудита); критический рефакто
 - **Do**: select в ui-field — просто оставьте `ui-field__select` на select;
   триггер накроет его той же поверхностью (surface-muted + radius-sm — визуал
   поля сохраняется).
-- **Do**: для «пилюли» фильтра (замена vacancy-search-хака) — обёртка сайта с
-  геометрией + `data-ui-select="wrap"`; имя поля — `label[for]` на id select
-  **рядом с обёрткой** (как на стенде `#uiss-wrap`): имя получают и нативный
+- **Do**: для «пилюли» фильтра — модификатор `ui-select--pill` на обёртке + `data-ui-select="wrap"` (геометрия пилюли — в системе, T17.12; ширина — раскладка сайта/слоя); имя поля — `label[for]` на id select
+  **рядом с обёрткой** (как на стенде `#uiss-wrap`/`#uiss-pill`): имя получают и нативный
   select, и триггер (`aria-labelledby`), а подпись не накрывается триггером.
 - **Don't**: текст внутри wrap-обёртки запрещён — в том числе label-обёртка
   вокруг select в «пилюле»: триггер накрывает обёртку целиком (`inset: 0`),

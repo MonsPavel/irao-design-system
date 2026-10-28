@@ -24,7 +24,13 @@
  */
 import { expect } from '@playwright/test';
 
-import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helpers/harness.js';
+import {
+  a11y,
+  SNAPSHOTS_ENABLED,
+  test as standTest,
+  unexpectedViolations,
+  VIEWPORTS,
+} from '../helpers/harness.js';
 
 const SEL = {
   breadcrumbs: '#lpp-breadcrumbs', // крошки T4.7 в начале ветки «с данными» (T14.5)
@@ -584,13 +590,14 @@ standTest.describe(
 );
 
 standTest.describe('patterns/list-page: a11y страницы (AC)', () => {
-  standTest('axe страницы чист', async ({ stand }) => {
+  standTest('axe страницы чист (вне реестра KNOWN_AXE_EXCEPTIONS)', async ({ stand }) => {
     const page = await stand('patterns/list-page');
     const results = await a11y(page).analyze();
-    expect(
-      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
-      'axe: violations = []',
-    ).toEqual([]);
+    // T17.12: find-bar канона несёт кнопку «Найти» ui-button--accent (пример
+    // спеки; пара оригинала vacancies) — та же одобренная пара 3.12:1, узнанная
+    // реестром харнесса (T15.9: «кнопки „Найти“ find-бара»); гейт остаётся
+    // строгим ко всему вне реестра.
+    expect(unexpectedViolations(results), 'axe: violations вне реестра = []').toEqual([]);
   });
 
   standTest('иерархия h1→h2 зелёная: один h1, уровни без пропусков', async ({ stand }) => {

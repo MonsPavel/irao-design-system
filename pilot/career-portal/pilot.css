@@ -22,7 +22,7 @@
 .cp-page {
   /* Фон страницы — белый оригинала (--color-surface); blue-50
      (--ui-color-surface-muted) — токен «фон карточек», он остаётся
-     точечным внутри (герой-поиск, cp-pill), не на всей странице. */
+     точечным внутри (герой-поиск, пилюли фильтров), не на всей странице. */
   background-color: var(--ui-color-surface);
   color: var(--ui-color-text);
 }
@@ -472,19 +472,13 @@
   gap: var(--ui-space-2);
 }
 
-/* Пилюля селекта — геометрия сайт-зоны (триггер ui-select растягивается) */
-.cp-pill {
-  box-sizing: border-box;
-  display: inline-flex;
+/* Пилюли селектов панели — модификатор ДС ui-select--pill (T17.12: геометрия
+   пилюли — рамка/радиус/фон — переехала из сайт-зоны в компонент ui-select,
+   сайт-класс cp-pill снят). Ширина — раскладка сайта (Implementation
+   requirements T17.12): flex-basis 12rem ленты фильтров панели — канон
+   list-page, запинен пробой против оригинала. */
+.cp-vacancy-search__fields > .ui-select--pill {
   flex: 1 1 12rem;
-  align-items: center;
-  border: var(--ui-border-width) solid var(--ui-color-border);
-  border-radius: var(--ui-radius-pill);
-  background-color: var(--ui-color-surface-muted);
-}
-
-.cp-pill select {
-  width: 100%;
 }
 
 /* ── students/employers: nav-карточки и лента логотипов — связки слоя
@@ -756,34 +750,13 @@
   margin: var(--ui-space-4) 0;
 }
 
-/* Панель фильтров каталога обучения (T15.3; оригинал .vac-filters,
-   pages.css:14–20): flex-лента пилюль ui-select wrap; gap 16px —
-   --ui-space-4, отступ снизу 2.5rem «как есть» (40px вне шкалы §3.2 —
-   прецедент --ui-card-gap). */
-.cp-catalog-filters {
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-4);
-  margin-bottom: 2.5rem;
-}
-
-/* Ширину пилюли задаёт сайт (канон list-page): flex-basis 260px оригинала
-   (pages.css:467, «как есть»; vacancy-search.css:41 из прежней цитаты
-   не существует ни в одном зеркале) — без неё бокс нативного select
-   сжимается до самой длинной опции и подпись триггера подрезается.
-   6 фильтров переносятся лентой (Technical considerations T15.3:
-   прецедент вакансий был 3–4). */
-.cp-catalog-filters .cp-pill {
-  flex: 0 0 260px;
-}
-
-/* Скрытая подпись select-пилюли (label[for] канона ui-select T7.3):
-   в оригинале видимых подписей нет — имя доступно ассистивным технологиям,
-   визуал не меняет. Скрытие — утилитой ДС .ui-vh из ui-core (T17.2):
-   локальная копия приёма .cp-vh снята — один приём в одном месте. */
-
-/* Пагинация каталога по центру (T15.3; оригинал — inline-обёртка
+/* Панель фильтров каталога обучения (T15.3) — ПАТТЕРН-СЛОЙ (T17.12):
+   сайт-зонный cp-catalog-filters снят, разметка несёт канон lpp-filters
+   (ds/ui-patterns.css): лента пилюль gap 16 (--ui-space-4) с отступом снизу
+   2.5rem «как есть» (pages.css:19) и шириной пилюль 260px (оригинал
+   vacancy-search.css:41; правила слоя, канон list-page). Скрытая подпись
+   select-пилюли (label[for] канона ui-select T7.3) — утилита ДС .ui-vh
+   (T17.2). Пагинация каталога по центру (T15.3; оригинал — inline-обёртка
    education-catalog.html:57: flex + margin-top 48px = --ui-space-7). */
 .cp-catalog-nav {
   box-sizing: border-box;
@@ -814,19 +787,13 @@
    Дубликаты канона list-page (cp-breadcrumbs, cp-vac-rows, cp-vac-row*,
    cp-vac-layout, cp-vac-side*) сняты: разметка build.mjs несёт классы
    lpp-* из ds/ui-patterns.css (единый исходник patterns/patterns.css —
-   «канон исполняем», урок T16.5 о дрейфе копипасты). Остались ТОЛЬКО шимы
-   сайт-зоны для сущностей, которых в слое пока нет: пилюля фильтра cp-pill
-   (T17.12 переведёт на канон ДС) и положение текстовой кнопки «Сбросить».
-   cp-page-head/cp-find-bar — ритм страниц без канона в док-HTML (полное
-   снятие — adoption T17.12/T17.14). Раскладка страницы: cp-vac-main —
-   main-колонка с findBar/chips/пагинацией (нет в списке снятия T17.1). */
-
-/* Сайдбар-вариант пилюли селекта: вертикальная, на всю ширину колонки.
-   Шим на крючке канона lpp-side__group, пока пилюля — cp-pill (T17.12):
-   flex-basis 12rem базового cp-pill в колонке панели — высотный размер. */
-.lpp-side__group .cp-pill {
-  flex-basis: auto;
-}
+   «канон исполняем», урок T16.5 о дрейфе копипасты). Остался шим сайт-зоны
+   для положения текстовой кнопки «Сбросить»; пилюля фильтра — модификатор
+   ДС ui-select--pill (T17.12, шим .lpp-side__group .cp-pill снят —
+   flex-basis в модификаторе нет, колонка панели растягивает сама).
+   cp-page-head — ритм страниц без канона в док-HTML (полное снятие —
+   adoption T17.14). Раскладка страницы: cp-vac-main — main-колонка с
+   findBar/chips/пагинацией (нет в списке снятия T17.1). */
 
 /* «Сбросить» — прижата к левому краю панели (оригинал .vac-side__reset
    align-self: flex-start, pages.css:101). Вид строки (fs 14/400, underline,
@@ -856,24 +823,12 @@
 }
 
 /* Строка «найти по списку» (бывшая cp-vac-find; T15.5 — общий класс панели
-   vacancies и events-search, разметка из helper findBar build.mjs):
-   flex-строка поле+кнопка (оригинал .vac-find pages.css:120 и
-   .events-search-bar pages.css:585). Метрики events-search оригинала
-   расходятся с принятыми (материал для REPORT T15.9): поле — пилюля
-   border-radius: var(--radius-pill) против --ui-radius-sm 0.5rem и высота
-   56 против 52 (events-search.html:154); общий findBar наследует метрики
-   vacancies — gap 8px и margin-bottom 8px против .events-search-bar
-   gap 16px / margin-bottom 40px (pages.css:586–589). */
-.cp-find-bar {
-  box-sizing: border-box;
-  display: flex;
-  gap: var(--ui-space-2);
-  margin-bottom: var(--ui-space-2);
-}
-
-.cp-find-bar .ui-field {
-  flex: 1 1 auto;
-}
+   vacancies и events-search, разметка из helper findBar build.mjs) —
+   ПАТТЕРН-СЛОЙ (T17.12): сайт-зонный cp-find-bar снят, вид строки несёт
+   канон lpp-find (ds/ui-patterns.css): flex-строка поле+кнопка, gap 8px и
+   margin-bottom 8px — метрики принятого findBar (оригинал .vac-find
+   pages.css:120 и .events-search-bar pages.css:585–589; расхождения
+   events-search оригинала — материал REPORT T15.9). */
 
 /* Детальная вакансия */
 .cp-vacancy-page {

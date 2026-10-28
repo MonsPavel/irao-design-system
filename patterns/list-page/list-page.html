@@ -625,6 +625,27 @@
            выдачи → h3 строк); tabindex="-1" — цель фокуса гварда ветки. -->
       <h2 class="ui-h3" id="lpp-side-results" tabindex="-1">Открытые вакансии</h2>
 
+      <!-- Find-bar «найти по списку» (T17.12): связка lpp-find — строка
+           «поле + кнопка» над выдачей (канон композиции vacancies: findBar →
+           чипы → строки). GET-форма работает без JS (action — якорь выдачи
+           стенда; в бою — URL страницы); role="search" — канон поисковой
+           формы WAI; имя поля — aria-label (видимой подписи в каноне нет,
+           как у пилюль фильтров). Поле растягивается (слой), кнопка —
+           ui-button--accent (пара принятого findBar vacancies). -->
+      <form class="lpp-find" method="get" action="#lpp-side-results" role="search">
+        <div class="ui-field">
+          <!-- prettier-ignore -->
+          <input
+            class="ui-field__input"
+            type="search"
+            name="q"
+            placeholder="Поиск по списку"
+            aria-label="Найти вакансию"
+          >
+        </div>
+        <button class="ui-button ui-button--accent" type="submit">Найти</button>
+      </form>
+
       <!-- Чипы направлений (T14.8, ссылочная форма): GET-фильтр — ссылки с
            полным набором параметров (работают без JS); активная —
            aria-current="page" и ОСТАЁТСЯ ссылкой (повторный клик

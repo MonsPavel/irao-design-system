@@ -38,7 +38,10 @@
  * обёртка сайта («пилюля»): корень static (контекст позиционирования —
  * обёртка, перенос dd--in-wrap components.css:404), триггер — паддинг
  * 4px/20px career-portal (20px → 1.25rem, вне шкалы, «как есть»), радиус
- * pill, placeholder читается как значение (components.css:414). VI-режим:
+ * pill, placeholder читается как значение (components.css:414). Модификатор
+ * --pill (T17.12) — пилюля select-фильтра НА КЛАССЕ-ОБЁРТКЕ автора: геометрия
+ * (рамка/радиус/фон) переехала из сайт-зоны (cp-pill) в систему, ширина —
+ * раскладка сайта/слоя. VI-режим:
  * цветов вне токенов нет (§5) — перекраска vi.css накрывает компонент.
  */
 
@@ -231,6 +234,41 @@
   .ui-select--wrap .ui-select__trigger:where(:not([disabled])):hover {
     background-color: var(--ui-color-surface-hover);
   }
+}
+
+/* ── Модификатор --pill: пилюля select-фильтра (T17.12) ──
+   Класс-обёртка автора ПОВЕРХ data-ui-select="wrap" (пример спеки:
+   <div class="ui-select--pill"><select class="ui-field__select"
+   data-ui-select="wrap">…</select></div>; шапка файла: в wrap-режиме
+   геометрию рисует обёртка — до T17.12 её рисовал сайт классом cp-pill
+   career-portal, теперь геометрия в системе, прецедент ui-button--pill
+   T14.4 «рамку/кружок несёт компонент»). Перенос «как есть» cp-pill
+   (pilot.css:476–488): компоновка обёртки inline-flex по центру —
+   нативный select остаётся в потоке и держит высоту пилюли, триггер
+   (ui-select--wrap) растягивается на неё. Рамка — пара T16.11-канона пилюли
+   (токены --ui-border-width/--ui-color-border, cp-pill вёл те же), радиус
+   pill, фон пилюли — surface-muted (blue-50 канона; фон триггера тот же —
+   пара торчит единым полем). Внутренности listbox/триггера модификатор НЕ
+   меняет (Implementation requirements п.1): только геометрия обёртки.
+
+   Ширина — раскладка сайта/слоя (flex-basis 12rem в ленте фильтров /
+   260px в каталоге — канон list-page; в колонке сайдбара обёртку
+   растягивает flex-столб), модификатор flex-basis не задаёт. Позиционный
+   контекст — гарантия модуля (wrap-режим ставит position: relative
+   статичной обёртке, ui-select.js) — модификатор position не дублирует:
+   без JS разметка остаётся нативной (принцип «select не прячется»).
+
+   Select пилюли несёт класс ui-field__select (пример спеки): ширину 100%
+   (растяжка на обёртку — заполнение пилюли, было .cp-pill select) и высоту
+   поля даёт сам ui-field (ui-field.css, width: 100% + min-height поля);
+   голый select поля не получит — пилюля сожмётся до его интенсы. */
+.ui-select--pill {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  border: var(--ui-border-width) solid var(--ui-color-border);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-surface-muted);
 }
 
 /* ── forced-colors (Windows High Contrast, T9.2): граница кастомного

@@ -54,11 +54,14 @@ const SEL = {
   wrapOptions: '#uiss-wrap .ui-select__option',
   wrapSelect: '#uiss-wrap-city',
   // T17.12: секция «фильтр-пилюля» — модификатор ui-select--pill на обёртке.
+  // Селекторы — по id инстанса «Регион» (id триггера/списка генерирует модуль
+  // от id select): в секции ДВЕ пилюли — секционный селектор давал бы strict-
+  // mode violation.
   pillSection: '#uiss-pill',
   pillSelect: '#uiss-pill-city',
-  pillTrigger: '#uiss-pill .ui-select__trigger',
-  pillList: '#uiss-pill .ui-select__list',
-  pillOptions: '#uiss-pill .ui-select__option',
+  pillTrigger: '#uiss-pill-city-trigger',
+  pillList: '#uiss-pill-city-listbox',
+  pillOptions: '#uiss-pill-city-listbox .ui-select__option',
   pillPill: '#uiss-pill .ui-select--pill',
   disabledTrigger: '#uiss-disabled .ui-select__trigger',
   form: '#uiss-form',
@@ -88,10 +91,13 @@ test.describe('ui-select: деградация без JS и мобильная �
     const source = await page.request
       .get('/showcase/dist/stands/ui-select.html')
       .then((r) => r.text());
-    // Селекты КОМПОНЕНТА (с хуком): шестой select на странице — переключатель
+    // Селекты КОМПОНЕНТА (с хуком): восьмой select на странице — переключатель
     // темы каркаса, не часть стенда.
     const selectTags = source.match(/<select[^>]*data-ui-select[^>]*>/g) ?? [];
-    expect(selectTags.length, 'на стенде шесть select компонента (T17.12: + пилюля)').toBe(6);
+    expect(
+      selectTags.length,
+      'на стенде семь select компонента (T17.12: + две пилюли секции #uiss-pill)',
+    ).toBe(7);
     for (const tag of selectTags) {
       expect(tag, `select не скрыт в разметке (AC): ${tag}`).not.toMatch(/ui-select__native/);
     }
@@ -481,7 +487,7 @@ test.describe('ui-select: фильтр-пилюля ui-select--pill (T17.12)', (
           docScrollWidth: document.documentElement.scrollWidth,
         };
       },
-      { pillSel: SEL.pillPill, listSel: SEL.pillList },
+      { pillSel: `${SEL.pillPill}`, listSel: SEL.pillList },
     );
   }
 
@@ -496,9 +502,10 @@ test.describe('ui-select: фильтр-пилюля ui-select--pill (T17.12)', (
     await expectOpen(page, trigger, list);
 
     const geom = await pillGeometry(page);
-    expect(geom.list.top, 'список открывается ниже низа пилюли (зазор wrap-режима)').toBeGreaterThanOrEqual(
-      geom.pill.bottom,
-    );
+    expect(
+      geom.list.top,
+      'список открывается ниже низа пилюли (зазор wrap-режима)',
+    ).toBeGreaterThanOrEqual(geom.pill.bottom);
     expect(geom.list.width, 'список не уже обёртки (min-width: 100%)').toBeGreaterThanOrEqual(
       geom.pill.width,
     );
@@ -524,8 +531,12 @@ test.describe('ui-select: фильтр-пилюля ui-select--pill (T17.12)', (
     await page.emulateMedia({ reducedMotion: 'reduce' });
 
     const trigger = page.locator(SEL.pillTrigger);
-    // Имя триггера = подпись поля + выбранное (пара APG; label[for] рядом).
-    await expect(trigger).toContainText('Регион');
+    // Имя триггера = подпись поля (ui-vh label[for] РЯДОМ с обёрткой — модуль
+    // переносит её в aria-labelledby) + выбранное: пара APG. Текст триггера —
+    // только выбор (подпись скрыта и вне триггера), имя — доступное.
+    await expect(trigger, 'в доступном имени — подпись поля').toHaveAccessibleName(
+      /Регион\s+Все регионы/,
+    );
     await expect(trigger).toContainText('Все регионы');
 
     await trigger.click();
@@ -537,7 +548,8 @@ test.describe('ui-select: фильтр-пилюля ui-select--pill (T17.12)', (
   });
 });
 
-test.describe('ui-select: форма фильтра (AC)', () => {  test('выбранное значение уходит на сервер: change диспатчится, value синхронизован, POST содержит city=spb', async ({
+test.describe('ui-select: форма фильтра (AC)', () => {
+  test('выбранное значение уходит на сервер: change диспатчится, value синхронизован, POST содержит city=spb', async ({
     stand,
   }) => {
     const page = await stand('ui-select');
