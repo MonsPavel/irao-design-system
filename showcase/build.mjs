@@ -1032,10 +1032,11 @@ async function generateShowcase({ themes }) {
 
   // Стенд «patterns/timeline» (T14.11) — паттерн «таймлайн этапов»: правила
   // сборки композиции «этапы процесса» + mini-эталон из четырёх этапов (ol:
-  // нумерованная точка, заголовок h3, текст) БЕЗ нового CSS; связки паттерна
-  // (tl-*) — <style> в нём (зона сайта, в dist не попадает). Каркас СО
-  // СЛУЖЕБНЫМ <h1> (как landing-section): таймлайн — фрагмент секции, h1 у
-  // него нет по определению, а стенд — демо-страница полигона; axe
+  // нумерованная точка, заголовок h3, текст). Связки паттерна (tlp-*) —
+  // паттерн-слой dist/ui-patterns.css (adoption T17.10 — 5-й получатель
+  // слоя: перенесены из <style> дока, значения 1:1). Каркас СО СЛУЖЕБНЫМ
+  // <h1> (как landing-section): таймлайн — фрагмент секции, h1 у него нет
+  // по определению, а стенд — демо-страница полигона; axe
   // page-has-heading-one требует h1, заголовок секции эталона — h2 с ролью
   // ui-h2 (иерархия h1 → h2 → h3 без пропусков).
   const timelineStandSource = join(ROOT, 'patterns', 'timeline', 'timeline.html');
@@ -1050,6 +1051,7 @@ async function generateShowcase({ themes }) {
       themes,
       navCurrent: { kind: 'stand', name: 'patterns/timeline' },
       navMode: 'strip',
+      withPatterns: true,
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'timeline.html'), page);
     stands.push({ name: 'patterns/timeline', source: 'patterns/timeline/timeline.html' });
@@ -1417,7 +1419,7 @@ async function generateShowcase({ themes }) {
       '      <ul class="ui-showcase-dist-list">',
       '        <li><code>ui-core.min.css</code> — tokens → base → компоненты;</li>',
       '        <li><code>ui-vi.min.css</code> — VI-модуль ГОСТ Р 52872, подключение осознанное;</li>',
-      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1; лендинг-связки lnk-/lgo-, T17.9), подключение опционально;</li>',
+      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1; лендинг-связки lnk-/lgo-, T17.9; таймлайн tlp-, T17.10), подключение опционально;</li>',
       '        <li><code>ui.min.js</code> — все JS-модули (IIFE).</li>',
       '      </ul>',
       '    </section>',
@@ -1572,22 +1574,23 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
       );
     }
   }
-  // Паттерн-слой на полигоне (T17.1): подключение адресно — стенды трёх
-  // паттернов и landing-section, чьи связки живут в слое (T17.9 — lnk-card/
-  // lgo-grid); остальные страницы (и каталог) слой не получают —
-  // опциональность воспроизводится на полигоне.
+  // Паттерн-слой на полигоне (T17.1): подключение адресно — стенды паттернов,
+  // чьи связки живут в слое (list/detail/form — T17.1; landing-section —
+  // T17.9 lnk-card/lgo-grid; timeline — T17.10 tlp-*); остальные страницы
+  // (и каталог) слой не получают — опциональность воспроизводится на полигоне.
   const patternLayerStands = new Set([
     'stands/patterns/list-page.html',
     'stands/patterns/detail-page.html',
     'stands/patterns/form-page.html',
     'stands/patterns/landing-section.html',
+    'stands/patterns/timeline.html',
   ]);
   for (const rel of pages) {
     const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');
     const hasLayerLink = html.includes('ui-patterns.css">');
     assert(
       hasLayerLink === patternLayerStands.has(rel),
-      `${rel}: подключение ui-patterns.css ${patternLayerStands.has(rel) ? 'ожидается' : 'не ожидается'} (слой опционален, получатели — стенды трёх паттернов + landing-section T17.9)`,
+      `${rel}: подключение ui-patterns.css ${patternLayerStands.has(rel) ? 'ожидается' : 'не ожидается'} (слой опционален, получатели — стенды паттернов с связками в слое)`,
     );
   }
   // Идемпотентность баннера: ни дат, ни меток времени.

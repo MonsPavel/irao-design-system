@@ -129,7 +129,8 @@ describe('patterns/timeline/timeline.html — mini-эталон (Scope T14.11)',
       .flatMap(([, value]) => value.split(/\s+/))
       .filter(Boolean);
     const foreign = classes.filter(
-      (cls) => cls !== 'ui-showcase-stand__note' && !cls.startsWith('ui-') && !cls.startsWith('tlp'),
+      (cls) =>
+        cls !== 'ui-showcase-stand__note' && !cls.startsWith('ui-') && !cls.startsWith('tlp'),
     );
     expect(
       foreign,
@@ -151,10 +152,9 @@ describe('связки tlp-* — в паттерн-слое (adoption T17.10, в
       pattern.replace(/<!--[\s\S]*?-->/g, ''),
       '<style> перенесён в patterns/patterns.css (упоминания в комментариях — история переноса)',
     ).not.toContain('<style>');
-    expect(
-      pattern,
-      'док называет слой-носитель связок (ui-patterns.css)',
-    ).toContain('ui-patterns.css');
+    expect(pattern, 'док называет слой-носитель связок (ui-patterns.css)').toContain(
+      'ui-patterns.css',
+    );
   });
 
   it('.tlp — колонка-база: box-sizing (ADR-0002), flex-колонка, шаг этапов space-5 (24px .timeline)', () => {
@@ -186,9 +186,10 @@ describe('связки tlp-* — в паттерн-слое (adoption T17.10, в
     expect(block, '.tlp__dot найдено').toBeTruthy();
     expect(block, 'box-sizing: border-box (ADR-0002)').toContain('box-sizing: border-box;');
     expect(block, 'z-index 1 — точка НАД линией').toContain('z-index: 1;');
-    expect(block, '56px круг оригинала — «как есть» вне шкалы (прецедент --ui-button-pad-inline)').toContain(
-      'width: 3.5rem;',
-    );
+    expect(
+      block,
+      '56px круг оригинала — «как есть» вне шкалы (прецедент --ui-button-pad-inline)',
+    ).toContain('width: 3.5rem;');
     expect(block).toContain('height: 3.5rem;');
     expect(block, 'форма — круг').toContain('border-radius: 50%;');
     expect(
@@ -209,7 +210,7 @@ describe('связки tlp-* — в паттерн-слое (adoption T17.10, в
     const tlpIndex = layerCode.indexOf('.tlp');
     expect(tlpIndex, 'связки tlp- в слое есть').toBeGreaterThan(-1);
     const tlpCode = layerCode.slice(tlpIndex);
-    const media = tlpCode.match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/);
+    const media = tlpCode.match(/@media \(min-width: 1024px\)\s*\{([\s\S]*?)\n\}/);
     expect(media, 'ступень lg в слое есть').toBeTruthy();
     const tlpInMedia = media[1].match(/\.tlp\s*\{([^}]*)\}/);
     expect(
@@ -222,10 +223,9 @@ describe('связки tlp-* — в паттерн-слое (adoption T17.10, в
     expect(line?.[1] ?? '', 'толщина линии — 2px track оригинала').toContain('height: 2px;');
     expect(line?.[1] ?? '', 'центр точки: 3.5rem / 2').toContain('top: 1.75rem;');
     expect(line?.[1] ?? '', 'от центра точки — край круга').toContain('left: 1.75rem;');
-    expect(
-      line?.[1] ?? '',
-      'через зазор сетки до следующей точки (right = -gap)',
-    ).toContain('right: calc(-1 * var(--ui-space-5));');
+    expect(line?.[1] ?? '', 'через зазор сетки до следующей точки (right = -gap)').toContain(
+      'right: calc(-1 * var(--ui-space-5));',
+    );
     expect(line?.[1] ?? '', 'цвет линии — как track оригинала (surface-hover)').toContain(
       'background-color: var(--ui-color-surface-hover);',
     );

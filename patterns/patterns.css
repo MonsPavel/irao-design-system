@@ -11,9 +11,10 @@
  * готовых ui-компонентов и ролей base. Компонентные стили (кнопки/карточки/
  * поля) слой не дублирует — гейт селекторов: только канонические префиксы
  * lpp- (list-page), ddp- (detail-page), fpp- (form-page), lnk-/lgo-
- * (лендинг-связки nav-карточек и ленты логотипов, T17.9); потомки —
- * компоненты ui-*. Список пополняют задачи эпика (лендинг-связки, find-bar,
- * каркасы шапки/подвала — T17.9/T17.12/T17.13), не руками сайтов.
+ * (лендинг-связки nav-карточек и ленты логотипов, T17.9), tlp- (таймлайн,
+ * T17.10); потомки — компоненты ui-*. Список пополняют задачи эпика
+ * (лендинг-связки, find-bar, каркасы шапки/подвала — T17.9/T17.12/T17.13),
+ * не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
  * несёт те же классы, значения перенесены 1:1 (включая «как есть»-литералы
@@ -574,4 +575,78 @@
   border: var(--ui-border-width) solid var(--ui-color-border-muted);
   border-radius: var(--ui-radius-md);
   background-color: var(--ui-color-surface);
+}
+
+/* ══════════════════════ Паттерн «Таймлайн этапов» (T14.11) — связки tlp- ══════════════════════
+ *
+ * Adoption T17.10: связки переехали из style-блока дока timeline.html
+ * (T14.11 — тогда «зона сайта») в слой, разметка дока и пилота — на классах
+ * канона. Значения — 1:1 из прежнего style-блока (комментарии-источники
+ * сохранены, прецедент list/detail/form T17.1). Источник композиции —
+ * steps_html + .timeline career-portal (build.py:484, css/pages.css:1096–1132):
+ * переносится КОМПОЗИЦИЯ, не стили; контент этапов (номера, заголовки,
+ * тексты) — зона сайта, каркас (секция, контейнер, роли типографики, сетка
+ * ряда, точки, линия) — система. Компонент dist/ui-timeline не создаётся —
+ * второго потребителя нет; при появлении — решение о компоненте отдельно. */
+
+/* Таймлайн: база — колонка (мобильная деградация, порядок чтения = DOM). */
+.tlp {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5); /* 24px между этапами (.timeline gap) */
+}
+
+/* Этап: якорь линии (::after), колонка «точка → заголовок → текст». */
+.tlp__stage {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: var(--ui-space-3); /* 12px внутри этапа (.timeline__stage gap) */
+}
+
+/* Точка с номером: 56px круг оригинала (вне шкалы отступов — перенос
+   «как есть», прецедент --ui-button-pad-inline T14.3); фон = пара
+   --color-surface-blue-100 оригинала (семантика surface-hover), номер —
+   primary (контраст ≈12.6:1, гейт AA). z-index держит точку НАД линией. */
+.tlp__dot {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  z-index: 1;
+  align-items: center;
+  justify-content: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: var(--ui-color-surface-hover);
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-fw-body-bold);
+}
+
+/* Горизонтальный ряд — от lg (1024): в оригинале ряд деградировал на той
+   же границе (max-width: 1024). Колонка на каждый этап — grid-auto-flow:
+   column: число колонок задаёт разметка ol (без inline-стилей и счётчиков). */
+@media (min-width: 1024px) {
+  .tlp {
+    display: grid;
+    gap: var(--ui-space-5);
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+  }
+
+  /* Соединительная линия — декоративная, ::after связки этапа (см. шапку):
+     от центра точки до левого края следующей; под точками (z-index точки)
+     линия визуально непрерывна, как track оригинала. Псевдоэлемент без
+     текста в a11y-дерево не попадает — aria-hidden не требуется. */
+  .tlp__stage:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 1.75rem; /* центр точки: 3.5rem / 2 */
+    right: calc(-1 * var(--ui-space-5)); /* через зазор сетки до следующей точки */
+    left: 1.75rem; /* от центра точки — край круга */
+    height: 2px; /* толщина track оригинала */
+    background-color: var(--ui-color-surface-hover);
+  }
 }

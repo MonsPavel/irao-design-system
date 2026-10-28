@@ -43,8 +43,9 @@ const PATTERN_SOURCES = {
   'patterns/detail-page/detail-page.html': 'dpp-',
   'patterns/form-page/form-page.html': 'fpp-',
   // Таймлайн — adoption T17.10: связки tlp-* переехали из <style> дока
-  // (T14.11) в слой, разметка дока и пилота — на классах канона.
-  'patterns/timeline/timeline.html': 'tlp-',
+  // (T14.11) в слой, разметка дока и пилота — на классах канона. Значение
+  // БЕЗ дефиса: блок-класс таймлайна — голый `tlp` (пример спеки T17.10).
+  'patterns/timeline/timeline.html': 'tlp',
 };
 
 let layer = '';
@@ -87,7 +88,9 @@ const markupClasses = (html, prefix) => {
   return found;
 };
 
-/** Крючки слоя по префиксам из селекторов (классы lpp-, ddp-, fpp-). */
+/** Крючки слоя по префиксам из селекторов (классы lpp-, ddp-, fpp-). Блок
+ *  таймлайна — голый `tlp` (пример спеки T17.10, без дефиса) — значение без
+ *  дефиса матчит префикс и его BEM-потомков. */
 const layerHooks = (prefix) => {
   const hooks = new Set();
   for (const selector of selectors) {
@@ -120,13 +123,15 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
+      // Блок-класс таймлайна — голый `tlp` (пример спеки T17.10): префикс
+      // продолжается дефисом, модификатором __ или заканчивается на нём.
       expect(
-        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp)-/.test(hook)),
+        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp)(?:-|__|$)/.test(hook)),
         `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(ui|lpp|dpp|fpp|lnk|lgo|tlp)-/.test(hook),
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp)(?:-|__|$))/.test(hook),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
         ).toBe(true);
       }
