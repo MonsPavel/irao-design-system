@@ -391,3 +391,23 @@ describe('пилот career-portal: students/employers на связках (AC T
     expect(compare, 'старый крючок из пробы снят').not.toContain("'.cp-employers__grid'");
   });
 });
+
+describe('REPORT §3.4 синхронен: миграция students/employers без изменения высот (AC ±4px)', () => {
+  it('строки students/employers несут Δ0 миграции T17.9 и оба осознанных видимых отличия пары до/после', () => {
+    const report = readFileSync(join(root, 'pilot', 'career-portal', 'REPORT.md'), 'utf8');
+    const studentsRow = report.match(/\| students \| 926 \| [^\n]*\|/);
+    expect(studentsRow, 'строка students в таблице высот блоков').toBeTruthy();
+    expect(studentsRow[0], 'дельта миграции — 0 (высота до и после 514)').toContain('514→514');
+    expect(
+      studentsRow[0],
+      'видимое отличие пары: h4 navy-карточки стал видимым (закрытый баг, не регрессия)',
+    ).toContain('невидимого h4');
+    const employersRow = report.match(/\| employers \| 583 \| [^\n]*\|/);
+    expect(employersRow, 'строка employers в таблице высот блоков').toBeTruthy();
+    expect(employersRow[0], 'дельта миграции — 0 (высота до и после 224)').toContain('224→224');
+    expect(
+      employersRow[0],
+      'видимое отличие пары: рамка border-muted по спеке (в пилоте вычислялась 0px)',
+    ).toContain('border-muted');
+  });
+});
