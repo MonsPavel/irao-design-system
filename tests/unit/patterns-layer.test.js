@@ -12,9 +12,10 @@
  *    с баннером версии, как ui-core) и подключает его стендам трёх паттернов;
  *  - подключение ОПЦИОНАЛЬНО: ui-core.min.css не меняется; порядок в <head>:
  *    токены → core → patterns → сайт;
- *  - селекторы слоя — только канонические префиксы lpp-|ddp-|fpp- (гейт
- *    «защита от превращения слоя в свалку»); док-HTML паттернов и слой
- *    синхронны (одни классы);
+ *  - селекторы слоя — только канонические префиксы
+ *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp- (гейт «защита от
+ *    превращения слоя в свалку»); док-HTML паттернов и слой синхронны
+ *    (одни классы);
  *  - слой не содержит @media-ступеней, кроме канонических ступеней паттернов
  *    (mobile-first ДС; лестницы пилота 1023/767 не переносятся);
  *  - пилот подключает слой (ds/ui-patterns.css) и перевёл строки/сайдбар
@@ -46,6 +47,12 @@ const PATTERN_SOURCES = {
   // (T14.11) в слой, разметка дока и пилота — на классах канона. Значение
   // БЕЗ дефиса: блок-класс таймлайна — голый `tlp` (пример спеки T17.10).
   'patterns/timeline/timeline.html': 'tlp',
+  // Каркасы шапки/подвала — T17.13: связки hsp-/ftp-* переехали из
+  // <style> доков (T7.6) в слой, разметка доков и пилота — на классах
+  // канона (один источник правды; светлый футер — база ftp, тон —
+  // модификатор ftp--muted).
+  'patterns/header/header.html': 'hsp',
+  'patterns/footer/footer.html': 'ftp',
 };
 
 /** Поднавигация разделов (T17.11): канон nvp — тот же док-источник list-page
@@ -66,6 +73,14 @@ try {
 
 /** CSS без комментариев: гейты смотрят на исполняемый код, не на прозу. */
 const code = layer.replace(/\r\n/g, '\n').replace(/\/\*[\s\S]*?\*\//g, '');
+
+/** Тело правила по селектору (первое вхождение; для ступеней — срез от
+ *  индекса крючка, прецедент пина nvp). */
+const blockOf = (selector) => {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = code.match(new RegExp(`(?:^|\\n)${escaped}\\s*\\{([^}]*)\\}`));
+  return match ? match[1] : null;
+};
 
 /** Селекторы исполняемого кода: прелюдии @media/at-rule пропускаются. */
 const selectors =
@@ -117,6 +132,9 @@ const MARKERS_WITHOUT_RULES = new Set([
   'dpp-article', // semantic-обёртка article (JobPosting), стилей не требует
   'dpp-aside__title', // вид несёт роль ui-h4 разметки
   'dpp-aside__note', // цвет несёт роль ui-text--muted разметки
+  'ftp__logo', // размеры логотипа — сайт-зона (T17.13 п.1); слот каркаса
+  'ftp__contact-label', // цвет muted несёт роль ui-text--muted разметки
+  'ftp__top', // переход кверху — вид несёт роль ui-link разметки
 ]);
 
 describe('patterns/patterns.css — единый исходник паттерн-слоя (Scope T17.1)', () => {
@@ -127,7 +145,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp- (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
@@ -135,12 +153,12 @@ describe('patterns/patterns.css — единый исходник паттерн
       // голые, без суффикса: префикс продолжается дефисом, модификатором __
       // или заканчивается на нём.
       expect(
-        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp)(?:-|__|$)/.test(hook)),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp`,
+        hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp)(?:-|__|$)/.test(hook)),
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp)(?:-|__|$))/.test(hook),
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp)(?:-|__|$))/.test(hook),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
         ).toBe(true);
       }
@@ -268,6 +286,153 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(list[1]).not.toContain('background');
     expect(list[1]).not.toContain('padding');
   });
+
+  it('значения канона 1:1 — каркас шапки hsp (T17.13): сетка 1fr auto 1fr, паддинги 16/8, меню gap 16 + nowrap-пункты', () => {
+    const inner = blockOf('.hsp__inner');
+    expect(inner, '.hsp__inner найдено').toBeTruthy();
+    expect(inner, 'сетка 1fr auto 1fr — .cp-header__inner (pilot.css:52)').toContain(
+      'grid-template-columns: 1fr auto 1fr;',
+    );
+    expect(inner, 'gap 16 — --ui-space-4').toContain('gap: var(--ui-space-4);');
+    expect(inner, 'паддинг верх 16 — --ui-space-4 (спека T17.13 «паддинги 16/8»)').toContain(
+      'padding-top: var(--ui-space-4);',
+    );
+    expect(inner, 'паддинг низ 8 — --ui-space-2').toContain('padding-bottom: var(--ui-space-2);');
+    const menu = blockOf('.hsp__menu');
+    expect(menu, '.hsp__menu найдено').toBeTruthy();
+    expect(menu, 'gap 16 — меню шапки').toContain('gap: var(--ui-space-4);');
+    expect(menu, 'padding-top 8 — ритм строки пунктов').toContain(
+      'padding-top: var(--ui-space-2);',
+    );
+    const link = blockOf('.hsp__menu .ui-link');
+    expect(link, 'nowrap-пункты меню').toContain('white-space: nowrap;');
+  });
+
+  it('значения канона 1:1 — режимы шапки: базовый static (border muted) поверх — hsp--overlay (absolute, z-40)', () => {
+    const hsp = blockOf('.hsp');
+    expect(hsp, '.hsp найдено').toBeTruthy();
+    expect(hsp, 'базовый static несёт border-bottom muted — .cp-header--static').toContain(
+      'border-bottom: var(--ui-border-width) solid var(--ui-color-border-muted);',
+    );
+    expect(hsp, 'surface-пара основы (Implementation requirements п.1)').toContain(
+      'background-color: var(--ui-color-surface);',
+    );
+    const overlay = blockOf('.hsp--overlay');
+    expect(overlay, '.hsp--overlay найдено').toBeTruthy();
+    expect(overlay, 'absolute поверх контента главной — .cp-header (pilot.css:43)').toContain(
+      'position: absolute;',
+    );
+    expect(overlay, 'z-40 — слой шапки оригинала (header.css:6)').toContain('z-index: 40;');
+  });
+
+  it('ступень 767 — в каркасе mobile-first: меню-право скрыто в базе, включается от md (канон header.css:131)', () => {
+    const right = blockOf('.hsp__menu--right');
+    expect(right, '.hsp__menu--right найдено').toBeTruthy();
+    expect(right, 'мобильная база — скрыто (≤767 канона)').toContain('display: none;');
+    const idx = code.indexOf('.hsp__menu--right');
+    const md = code
+      .slice(idx)
+      .match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.hsp__menu--right\s*\{([^}]*)\}/);
+    expect(md, 'ступень md для меню-право найдена').toBeTruthy();
+    expect(md[1], 'от 768 — flex (тот же рендер, что max-width: 767 оригинала)').toContain(
+      'display: flex;',
+    );
+  });
+
+  it('значения канона 1:1 — каркас подвала ftp (T17.13): сетка auto 2fr 2fr 1fr от 1024, база 2 колонки, паддинги 48', () => {
+    const inner = blockOf('.ftp__inner');
+    expect(inner, '.ftp__inner найдено').toBeTruthy();
+    expect(inner, 'база — 2 колонки (ступень ≤1023 пилота, mobile-first)').toContain(
+      'grid-template-columns: repeat(2, minmax(0, 1fr));',
+    );
+    expect(inner, 'зазор 40px «как есть» — footer.css:10').toContain('gap: 2.5rem;');
+    expect(inner, 'выравнивание по центру строки — footer.css:8').toContain(
+      'align-items: center;',
+    );
+    expect(inner, 'паддинги 48 — --ui-space-7 (footer.css:3)').toContain(
+      'padding-top: var(--ui-space-7);',
+    );
+    const idx = code.indexOf('.ftp__inner');
+    const lg = code
+      .slice(idx)
+      .match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\.ftp__inner\s*\{([^}]*)\}/);
+    expect(lg, 'ступень lg для подвала найдена').toBeTruthy();
+    expect(lg[1], 'десктоп — auto 2fr 2fr 1fr (.cp-footer__inner pilot.css:605)').toContain(
+      'grid-template-columns: auto 2fr 2fr 1fr;',
+    );
+  });
+
+  it('значения канона 1:1 — колонка ссылок (шаг 9px, 14/1.35) и ступень 767: nowrap — от md (канон footer.css:150)', () => {
+    const links = blockOf('.ftp__links');
+    expect(links, '.ftp__links найдено').toBeTruthy();
+    expect(links, 'шаг строк 9px «как есть» — footer.css:26').toContain('gap: 0.5625rem;');
+    expect(links, 'строки 14/1.35 — fs-small/lh-small (footer.css:29-32)').toContain(
+      'font-size: var(--ui-fs-small);',
+    );
+    expect(links).toContain('line-height: var(--ui-lh-small);');
+    // База (mobile-first) — перенос; nowrap включается от md: тот же рендер,
+    // что «nowrap в базе + снятие @media (max-width: 767px)» пилота.
+    const base = blockOf('.ftp__links .ui-link');
+    expect(base, 'база ссылки — без nowrap').not.toContain('white-space');
+    const idx = code.indexOf('.ftp__links .ui-link');
+    const md = code
+      .slice(idx)
+      .match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.ftp__links \.ui-link,\s*\.ftp__right \.ui-small\s*\{([^}]*)\}/);
+    expect(md, 'ступень md nowrap-снятия найдена (ссылки + копирайт)').toBeTruthy();
+    expect(md[1]).toContain('white-space: nowrap;');
+  });
+
+  it('значения канона 1:1 — контакты (шаг 28/4, 14/500/1.35) и правая колонка (24, space-between)', () => {
+    const contacts = blockOf('.ftp__contacts');
+    expect(contacts, 'шаг блоков 28px «как есть» — footer.css:48').toContain('gap: 1.75rem;');
+    const contact = blockOf('.ftp__contact');
+    expect(contact, 'шаг label/значение 4px — --ui-space-1 (footer.css:54)').toContain(
+      'gap: var(--ui-space-1);',
+    );
+    expect(contact, 'строки 14/500/1.35 — footer.css:62-74').toContain(
+      'font-size: var(--ui-fs-small);',
+    );
+    expect(contact).toContain('font-weight: var(--ui-fw-small);');
+    expect(contact).toContain('line-height: var(--ui-lh-small);');
+    const right = blockOf('.ftp__right');
+    expect(right, 'шаг 24 — --ui-space-5 (footer.css:85)').toContain('gap: var(--ui-space-5);');
+    expect(right, 'соцсети сверху, копирайт снизу — footer.css:79-86').toContain(
+      'justify-content: space-between;',
+    );
+    const group = blockOf('.ftp__contact-group');
+    expect(group, 'зазор группы 40px «как есть» — footer.css:59').toContain('gap: 2.5rem;');
+  });
+
+  it('соц-кнопки подвала — ui-button--round на токен-хуках: 36px blue-50 r12, hover primary (остаток §8.3, footer.css:93-108)', () => {
+    const social = blockOf('.ftp__social');
+    expect(social, '.ftp__social найдено').toBeTruthy();
+    expect(social, 'пара покоя — на хуке bg модификатора (blue-50 = surface-muted)').toContain(
+      '--ui-button-bg: var(--ui-color-surface-muted);',
+    );
+    expect(social, 'пара покоя — на хуке цвета (text оригинала, footer.css:101)').toContain(
+      '--ui-button-color: var(--ui-color-text);',
+    );
+    expect(social, '36px «как есть» — footer.css:97-98 (вне шкалы)').toContain('width: 2.25rem;');
+    expect(social).toContain('height: 2.25rem;');
+    expect(social, 'r12 «как есть» — footer.css:100 (не круг --round)').toContain(
+      'border-radius: 0.75rem;',
+    );
+    const idx = code.indexOf('.ftp__social');
+    const hover = code
+      .slice(idx)
+      .match(/@media \(hover: hover\)\s*\{[\s\S]*?\.ftp__social:hover\s*\{([^}]*)\}/);
+    expect(hover, 'hover-пара на хуках — под (hover: hover)').toBeTruthy();
+    expect(hover[1], 'hover bg primary — footer.css:106').toContain(
+      '--ui-button-bg: var(--ui-color-primary);',
+    );
+    expect(hover[1], 'hover подпись on-dark — footer.css:107').toContain(
+      '--ui-button-color: var(--ui-color-text-on-dark);',
+    );
+    // hover/active-пару модификатор закрепляет сам (T17.9) — слой меняет
+    // только значения хуков, защищённые правила --round переразрешают пару.
+    expect(social).not.toContain('background-color');
+    expect(social).not.toContain('color:');
+  });
 });
 
 describe('синхронность док-HTML паттернов и слоя (AC: одни классы)', () => {
@@ -327,8 +492,16 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
     expect(build, 'self-check селекторов слоя в сборке').toContain('слоя');
   });
 
-  it('подключение опционально: слой получают стенды паттернов с связками в слое (list/detail/form, landing-section, timeline — T17.10)', () => {
-    for (const stand of ['list-page', 'detail-page', 'form-page', 'landing-section', 'timeline']) {
+  it('подключение опционально: слой получают стенды паттернов с связками в слое (list/detail/form, landing-section, timeline — T17.10, header/footer — T17.13)', () => {
+    for (const stand of [
+      'list-page',
+      'detail-page',
+      'form-page',
+      'landing-section',
+      'timeline',
+      'header',
+      'footer',
+    ]) {
       // Якорь — title стенда: первое вхождение имени паттерна в build.mjs —
       // список навигации buildNav, до frame-вызова.
       const block = build.slice(build.indexOf(`title: 'patterns/${stand} — irao-ui showcase'`));
@@ -336,15 +509,17 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
         'withPatterns: true',
       );
     }
-    // Включение адресное: ровно пять вызовов frame() передают слой
+    // Включение адресное: ровно семь вызовов frame() передают слой
     // («withPatterns: true,»); остальные страницы полигона — нет.
     // Четвёртый — patterns/landing-section (T17.9): связки lnk-card/lgo-grid
     // живут в слое, мини-стенд паттерна их рендерит; пятый — patterns/
-    // timeline (T17.10): связки tlp-* переехали из <style> дока в слой.
+    // timeline (T17.10): связки tlp-* переехали из <style> дока в слой;
+    // шестой/седьмой — patterns/header и patterns/footer (T17.13): связки
+    // hsp-*/ftp-* — в слое (один источник правды).
     expect(
       build.match(/withPatterns: true,/g)?.length,
-      'получателей слоя ровно пять — стенды паттернов с связками в слое',
-    ).toBe(5);
+      'получателей слоя ровно семь — стенды паттернов с связками в слое',
+    ).toBe(7);
   });
 
   it('self-check: dist/ui-patterns.css существует и несёт баннер версии', () => {
@@ -455,6 +630,62 @@ describe('пилот career-portal: слой подключён, ваканси�
       'cp-find-bar из разметки снят — findBar на lpp-find (проза комментариев — история)',
     ).not.toMatch(/class="[^"]*\bcp-find-bar\b/);
     expect(build, 'findBar несёт канон слоя').toContain('class="lpp-find"');
+  });
+
+  it('шапка/подвал — каркасы hsp/ftp (T17.13): разметка на классах слоя, cp-дубликаты сняты', () => {
+    expect(build, 'шапка — блок hsp').toContain('<header class="hsp');
+    expect(build, 'overlay-режим главной — модификатор канона').toContain('hsp hsp--overlay');
+    expect(build).toContain('class="ui-container hsp__inner"');
+    expect(build).toContain('class="hsp__menu hsp__menu--left"');
+    expect(build).toContain('class="hsp__menu hsp__menu--right"');
+    expect(build, 'слот логотипа').toContain('class="hsp__logo"');
+    expect(build, 'слот действия (VI) — канон спеки T17.13 п.3').toContain('class="hsp__action"');
+    expect(build, 'cp-header из разметки снят').not.toMatch(/class="[^"]*\bcp-header/);
+    expect(build, 'подвал — блок ftp').toContain('<footer class="ftp"');
+    expect(build).toContain('class="ui-container ftp__inner"');
+    expect(build).toContain('class="ftp__links"');
+    expect(build).toContain('class="ftp__contacts"');
+    expect(build).toContain('class="ftp__right"');
+    expect(build).toContain('class="ftp__socials"');
+    expect(
+      build,
+      'соц-кнопки — вид на модификаторе ui-button--round (T17.9), пара — хуками слоя',
+    ).toContain('ui-button ui-button--round ftp__social');
+    expect(build, 'cp-footer из разметки снят').not.toMatch(/class="[^"]*\bcp-footer/);
+  });
+
+  it('pilot.css: каркасы сняты (~150 строк), бренд-строки сайт-зоны остались (Implementation requirements п.1 T17.13)', () => {
+    for (const gone of [
+      '.cp-header',
+      '.cp-header__inner',
+      '.cp-header__menu',
+      '.cp-header__logo',
+      '.cp-footer__inner',
+      '.cp-footer__links',
+      '.cp-footer__contact',
+      '.cp-footer__right',
+      '.cp-footer__socials',
+      '.cp-footer__social',
+    ]) {
+      expect(pilotCss, `каркас ${gone} перенесён в слой`).not.toContain(gone);
+    }
+    expect(pilotCss, 'цвет ссылок футера — сайт-зона (п.1)').toContain('.ftp .ui-link');
+    expect(pilotCss, 'hover-accent футера — сайт-зона (п.1)').toContain('.ftp .ui-link:hover');
+    expect(pilotCss, 'VI-пилюля — бренд-строка на слоте слоя (п.2)').toContain('.hsp__action');
+    expect(pilotCss, 'логотип-размеры — сайт-зона').toContain('.hsp__logo img');
+  });
+
+  it('compare: shell-пробы шапки/подвала — на крючках слоя (прецедент lpp-/nvp-)', () => {
+    expect(compare, 'проба пункта меню — на крючке слоя').toContain(
+      "pilot: '.hsp__menu--left .ui-link--nav'",
+    );
+    expect(compare, 'проба ссылки футера — на крючке слоя').toContain(
+      "pilot: '.ftp__links .ui-link'",
+    );
+    expect(compare, 'проба футера (bg/высота) — на крючке слоя').toContain("pilot: '.ftp'");
+    expect(compare, 'блок футера (высоты) — на крючке слоя').toContain(
+      "['footer', '.footer', '.ftp']",
+    );
   });
 });
 

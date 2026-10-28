@@ -14,12 +14,15 @@ import { expect } from '@playwright/test';
 import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helpers/harness.js';
 
 const SEL = {
-  footer: 'body > footer.fdp-footer',
-  address: 'body > footer.fdp-footer address',
+  // Каркас подвала — связки ftp-* паттерн-слоя (T17.13); приглушённый тон —
+  // модификатор ftp--muted (второй экземпляр дока — на div, contentinfo
+  // один).
+  footer: 'body > footer.ftp',
+  address: 'body > footer.ftp address',
   tel: 'a[href^="tel:"]',
   mail: 'a[href^="mailto:"]',
-  socials: 'a.fdp-footer__social',
-  top: 'a.fdp-footer__top',
+  socials: 'a.ftp__social',
+  top: 'a.ftp__top',
 };
 
 standTest.describe('patterns/footer: ленмарки (AC — правила ленмарк)', () => {
@@ -31,7 +34,7 @@ standTest.describe('patterns/footer: ленмарки (AC — правила л�
       // Единственный подвал уровня body — паттерн; стоит после main.
       const footers = page.locator('body > footer');
       await expect(footers, 'ровно один подвал уровня body').toHaveCount(1);
-      await expect(footers).toHaveClass(/fdp-footer/);
+      await expect(footers).toHaveClass(/ftp/);
 
       const order = await page.evaluate(() => {
         const main = document.querySelector('body > main');
@@ -41,18 +44,27 @@ standTest.describe('patterns/footer: ленмарки (AC — правила л�
       expect(order, 'подвал после main (чтение: контент → подвал)').toBe(true);
 
       // Contentinfo-лендмарка резолвится ролью (не только тегом).
-      await expect(page.getByRole('contentinfo')).toHaveClass(/fdp-footer/);
+      await expect(page.getByRole('contentinfo')).toHaveClass(/ftp/);
     },
   );
 
-  standTest('колонки ссылок — навигации с уникальными aria-label', async ({ stand }) => {
+  standTest('колонка ссылок — навигация с aria-label (канон ftp — одна колонка, T17.13)', async ({
+    stand,
+  }) => {
     const page = await stand('patterns/footer');
 
     const navs = await page
       .locator(`${SEL.footer} nav[aria-label]`)
       .evaluateAll((nodes) => nodes.map((nav) => nav.getAttribute('aria-label')));
-    expect(navs.length, 'колонок-навигаций минимум две').toBeGreaterThanOrEqual(2);
-    expect(new Set(navs).size, 'aria-label навигаций уникальны').toBe(navs.length);
+    expect(navs.length, 'колонка ссылок — навигация с именем (канон ftp)').toBeGreaterThanOrEqual(
+      1,
+    );
+    // Имена навигаций сниппета уникальны (вторая — приглушённый вариант-демо
+    // на div, в contentinfo-лендмарку не входит).
+    const allNavs = await page
+      .locator('footer.ftp nav[aria-label], div.ftp nav[aria-label]')
+      .evaluateAll((nodes) => nodes.map((nav) => nav.getAttribute('aria-label')));
+    expect(new Set(allNavs).size, 'aria-label навигаций уникальны').toBe(allNavs.length);
 
     for (const label of navs) {
       const list = page.getByRole('navigation', { name: label });

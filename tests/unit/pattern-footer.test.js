@@ -2,13 +2,17 @@
  * Юнит-пины T7.6 — паттерн «Footer» (patterns/footer/): контракт копируемой
  * разметки подвала сайта, которую собирает интегратор.
  *
- * Исполняемая форма решения (спека T7.6, Scope + Implementation requirements):
- *  - patterns/footer/footer.html — <footer> (contentinfo) + колонки ссылок
- *    (nav-лендмарки с уникальными aria-label) + контакты в <address>
+ * Исполняемая форма решения (спека T7.6, Scope + Implementation requirements;
+ * связки каркаса — паттерн-слой с T17.13):
+ *  - patterns/footer/footer.html — <footer> (contentinfo) + колонка ссылок
+ *    (nav-лендмарка с aria-label) + контакты в <address>
  *    (Technical considerations: address-семантика) + переход кверху;
- *  - icon-only ссылки соцсетей — с aria-label (T4.1);
- *  - связующие стили паттерна живут <style>'ом стенда, НЕ в dist;
- *    значения — только токены --ui-*.
+ *  - icon-only ссылки соцсетей — с aria-label (T4.1); вид —
+ *    ui-button--round + пара хуками слоя (T17.13, остаток §8.3 REPORT);
+ *  - каркас подвала — связки ftp-* в паттерн-слое (T17.13): <style> в
+ *    док-HTML больше нет (пин синхронности patterns-layer.test.js);
+ *    светлая база ftp, приглушённый тон — модификатор ftp--muted; бренд-вид
+ *    (hover-accent, цвета ссылок) — сайт-зона.
  * Поверхность браузера (лендмарки, address, axe, эталоны) —
  * tests/e2e/pattern-footer.spec.js.
  */
@@ -37,9 +41,9 @@ describe('patterns/footer/footer.html — контракт эталонной с
     expect(footers.length, 'ровно один подвал в сниппете').toBe(1);
   });
 
-  it('колонки ссылок — nav-лендмарки с уникальными aria-label (Accessibility requirements)', () => {
+  it('колонка ссылок — nav-лендмарка с aria-label; имена навигаций сниппета уникальны (Accessibility requirements)', () => {
     const navs = pattern.match(/<nav\b[^>]*aria-label="([^"]+)"[^>]*>/g) ?? [];
-    expect(navs.length, 'колонки ссылок — навигации (минимум две)').toBeGreaterThanOrEqual(2);
+    expect(navs.length, 'колонка ссылок — навигация (канон ftp — одна колонка, T17.13)').toBeGreaterThanOrEqual(1);
     const labels = navs.map((nav) => (nav.match(/aria-label="([^"]+)"/) ?? [])[1]);
     expect(new Set(labels).size, 'aria-label навигаций уникальны').toBe(labels.length);
   });
@@ -58,11 +62,11 @@ describe('patterns/footer/footer.html — контракт эталонной с
     expect(mail[0], 'e-mail — ссылка mailto:').not.toBe('');
   });
 
-  it('логотип — ссылка на главную с доступным именем (T4.6): классы только своего паттерна fdp-logo (T13.7)', () => {
+  it('логотип — ссылка на главную с доступным именем (T4.6): слот ftp__logo каркаса (T17.13)', () => {
     // По образцу header-пина (pattern-header.test.js): копируемый фрагмент
-    // несёт классы ТОЛЬКО своей связки — чужие классы (hdp-* из header) в
-    // footer-сниппете были бы мёртвыми хуками (ни правил, ни поведения).
-    const logo = pattern.match(/<a\b[^>]*class="[^"]*fdp-logo[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
+    // несёт классы ТОЛЬКО своей связки — чужие классы (hdp-*/fdp-* из прежних
+    // ревизий паттерна) были бы мёртвыми хуками (ни правил, ни поведения).
+    const logo = pattern.match(/<a\b[^>]*class="[^"]*ftp__logo[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
     expect(logo[0], 'логотип-ссылка на месте').not.toBe('');
     expect(logo[0], 'href — главная страница').toMatch(/href="(?:\/|index\.html)"/);
     const name =
@@ -72,37 +76,41 @@ describe('patterns/footer/footer.html — контракт эталонной с
         .replace(/\s+/g, ' ')
         .trim();
     expect(name.length, 'у ссылки-логотипа есть доступное имя').toBeGreaterThan(0);
-    // Элементы логотипа — fdp-logo__mark/__text (паттерн footer), не hdp-*
-    // (копипаст из header — T13.7: дубли паттерна тиражируются на сайты).
-    expect(logo[0], 'знак логотипа — fdp-logo__mark').toContain('class="fdp-logo__mark"');
-    expect(logo[0], 'текст логотипа — fdp-logo__text').toContain('class="fdp-logo__text"');
-    // Чужих классов header-паттерна в сниппете footer нет вообще.
-    expect(markup, 'в footer нет классов чужого паттерна hdp-*').not.toMatch(/\bhdp-[a-z]/);
+    // Чужих классов прежних ревизий паттерна в сниппете нет вообще (T13.7).
+    expect(markup, 'в footer нет классов прежних ревизий hdp-*/fdp-*').not.toMatch(
+      /\b(?:hdp|fdp)-[a-z]/,
+    );
   });
 
-  it('icon-only ссылки соцсетей — с aria-label (T4.1, гейт irao/link-accessible-name)', () => {
-    const socials = pattern.match(/<a\b[^>]*class="[^"]*fdp-footer__social[^"]*"[^>]*>/g) ?? [];
+  it('icon-only ссылки соцсетей — с aria-label (T4.1); вид — ui-button--round + пара хуками слоя (T17.13)', () => {
+    const socials = pattern.match(/<a\b[^>]*class="[^"]*ftp__social[^"]*"[^>]*>/g) ?? [];
     expect(socials.length, 'соцсети на месте').toBeGreaterThanOrEqual(2);
     for (const social of socials) {
       const label = (social.match(/aria-label="([^"]+)"/) ?? [])[1];
       expect(label, `icon-only ссылка ${social.slice(0, 60)}… несёт aria-label`).toBeTruthy();
+      expect(
+        social,
+        'вид контрола — модификатор ui-button--round (T17.9; T17.13 Scope)',
+      ).toContain('ui-button--round');
     }
   });
 
   it('переход кверху — ссылка на якорь начала страницы (Scope)', () => {
-    const top = pattern.match(/<a\b[^>]*class="[^"]*fdp-footer__top[^"]*"[^>]*>/) ?? [''];
+    const top = pattern.match(/<a\b[^>]*class="[^"]*ftp__top[^"]*"[^>]*>/) ?? [''];
     expect(top[0], 'ссылка «наверх» на месте').not.toBe('');
     expect(top[0], 'href — якорь начала страницы').toMatch(/href="#top"/);
   });
 
-  it('связующие стили паттерна — только токены, без hex и !important (граница «showcase, не dist»)', () => {
-    expect(pattern, 'связки живут <style> стенда, не в dist').toContain('<style>');
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(
-      /#[0-9a-fA-F]{3,8}\b/,
+  it('связки каркаса — в паттерн-слое (T17.13): <style> в док-HTML больше нет, светлый вариант и тон — классами ftp', () => {
+    expect(
+      pattern,
+      '<style> перенесён в patterns/patterns.css (пин синхронности слоя)',
+    ).not.toContain('<style>');
+    expect(pattern, 'база — светлая (surface-пара) несёт слой; разметка — класс ftp').toMatch(
+      /class="ftp[" ]/,
     );
-    expect(style[1], '!important в связках запрещён (инвариант системы)').not.toContain(
-      '!important',
+    expect(pattern, 'приглушённый тон — модификатор ftp--muted (AC: светлый вариант в доке)').toContain(
+      'ftp ftp--muted',
     );
   });
 
