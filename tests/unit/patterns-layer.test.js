@@ -641,7 +641,10 @@ describe('пилот career-portal: слой подключён, ваканси�
 
   it('шапка/подвал — каркасы hsp/ftp (T17.13): разметка на классах слоя, cp-дубликаты сняты', () => {
     expect(build, 'шапка — блок hsp').toContain('<header class="hsp');
-    expect(build, 'overlay-режим главной — модификатор канона').toContain('hsp hsp--overlay');
+    expect(
+      build,
+      'overlay-режим главной — модификатор канона (собирается в headerHtml: mode)',
+    ).toContain("' hsp--overlay'");
     expect(build).toContain('class="ui-container hsp__inner"');
     expect(build).toContain('class="hsp__menu hsp__menu--left"');
     expect(build).toContain('class="hsp__menu hsp__menu--right"');

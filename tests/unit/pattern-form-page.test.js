@@ -228,16 +228,19 @@ describe('patterns/form-page/form-page.html — контракт эталонн�
     expect(layer, '!important в связках запрещён (инвариант системы)').not.toContain('!important');
   });
 
-  it('media в связках — только min-width из шкалы брейкпоинтов T2.5', () => {
+  it('media в связках — только min-width из шкалы брейкпоинтов T2.5 и (hover: hover)', () => {
     // Связки fpp-* — паттерн-слой (T17.1): секция fpp patterns/patterns.css.
+    // Срез до конца файла захватывает и секции ПОЗЖЕ fpp (T17.9–T17.13) —
+    // дисциплина ступеней у них общая (гейт patterns-layer.test.js): канон —
+    // min-width из шкалы и hover-гвард (T17.13 — hover соц-кнопок ftp).
     const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8')
       .replace(/\r\n/g, '\n')
       .replace(/\/\*[\s\S]*?\*\//g, '');
     const style = layer.slice(layer.indexOf('.fpp-breadcrumbs'));
     const media = (style.match(/@media[^{]+/g) ?? []).map((m) => m.trim());
     for (const query of media) {
-      expect(query, `media-запрос «${query}» — mobile-first min-width`).toMatch(
-        /^@media \(min-width: (?:480|768|1024|1280|1440)px\)$/,
+      expect(query, `media-запрос «${query}» — mobile-first min-width или hover-гвард`).toMatch(
+        /^@media \((?:min-width: (?:480|768|1024|1280|1440)px|hover: hover)\)$/,
       );
     }
     expect(media.length, 'плейсмент aside — единственный media-запрос связок').toBeGreaterThan(0);

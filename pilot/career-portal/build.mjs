@@ -525,13 +525,20 @@ function timeline(steps) {
 
 /* ── каркас страницы ── */
 
+/* Шапка/подвал — каркасы ПАТТЕРН-СЛОЯ (T17.13): разметка несёт классы
+   hsp-/ftp- из ds/ui-patterns.css (единый исходник patterns/patterns.css —
+   «канон исполняем», урок T16.5 о дрейфе копипасты); бренд-специфика —
+   тонкие строки сайт-зоны в pilot.css (hover-accent футера, VI-пилюля,
+   логотип-размеры, letter-spacing оговорка). Режимы шапки: базовый hsp —
+   static (внутренние страницы), hsp--overlay — главная (absolute z-40). */
 function headerHtml({ staticHeader = false }) {
-  const modifier = staticHeader ? ' cp-header--static' : '';
-  return `<header class="cp-header${modifier}">
-  <div class="ui-container cp-header__inner">
-    <nav class="cp-header__menu cp-header__menu--left" aria-label="Основное меню">
+  const mode = staticHeader ? '' : ' hsp--overlay';
+  return `<header class="hsp${mode}">
+  <div class="ui-container hsp__inner">
+    <nav class="hsp__menu hsp__menu--left" aria-label="Основное меню">
       <!-- Пункты навигации — ui-link--nav (T16.3): fs-small/fw-small, без
-           подчёркивания, hover opacity — пара .header__link оригинала. -->
+           подчёркивания, hover opacity — пара .header__link оригинала;
+           inline-flex/nowrap строк несёт каркас (.hsp__menu .ui-link). -->
       <a class="ui-link ui-link--nav" href="vacancies.html">Вакансии</a>
       <div class="ui-dropdown" data-ui-dropdown>
         <button class="ui-dropdown__trigger" type="button" id="cp-sections-trigger">
@@ -550,17 +557,19 @@ function headerHtml({ staticHeader = false }) {
       <a class="ui-link ui-link--nav" href="media.html">Медиа</a>
     </nav>
 
-    <a class="cp-header__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
+    <a class="hsp__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
       <img src="assets/icons/logo-header.svg" alt="Интер РАО ЕЭС — энергии для успеха" width="105" height="100">
     </a>
 
-    <nav class="cp-header__menu cp-header__menu--right" aria-label="Дополнительное меню">
-      <button class="cp-header__vi" type="button" data-ui-vi-toggle aria-pressed="false">
+    <nav class="hsp__menu hsp__menu--right" aria-label="Дополнительное меню">
+      <!-- VI-пилюля — бренд-строка сайт-зоны на слоте hsp__action (общий
+           вид кнопки несёт слой, Implementation requirements п.2 T17.13). -->
+      <button class="hsp__action" type="button" data-ui-vi-toggle aria-pressed="false">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="2"/></svg>
         <span>Версия для слабовидящих</span>
       </button>
       <a class="ui-link ui-link--nav" href="index.html#contacts">Контакты</a>
-      <a class="cp-header__search ui-link ui-link--nav" href="vacancies.html" data-ui-modal-target="cp-search-dialog">
+      <a class="ui-link ui-link--nav" href="vacancies.html" data-ui-modal-target="cp-search-dialog">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="2"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Поиск
       </a>
@@ -611,9 +620,9 @@ function viPanelHtml() {
 }
 
 function footerHtml() {
-  return `<footer class="cp-footer" id="contacts">
-  <div class="ui-container cp-footer__inner">
-    <a class="cp-footer__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
+  return `<footer class="ftp" id="contacts">
+  <div class="ui-container ftp__inner">
+    <a class="ftp__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
       <img src="assets/icons/logo-footer.svg" alt="Интер РАО ЕЭС" width="137" height="131">
     </a>
 
@@ -621,39 +630,42 @@ function footerHtml() {
          без подчёркивания (пункты навигации в nav-структуре, WCAG 1.4.1);
          цвет в покое и :visited фиксирует сайт-зона pilot.css (visited
          оригинал не задаёт — потемнения нет), hover — accent оригинала
-         (footer.css:43,76) -->
+         (footer.css:43,76); шаг колонки/nowrap — каркас ftp__links слоя. -->
     <nav aria-label="Меню подвала">
-      <ul class="cp-footer__links">
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="vacancies.html">Вакансии</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="internships.html">Школьникам и студентам</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="media.html">Медиа</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="#">Политика конфиденциальности</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="#">Правила обработки персональных данных</a></li>
+      <ul class="ftp__links">
+        <li><a class="ui-link ui-link--nav" href="vacancies.html">Вакансии</a></li>
+        <li><a class="ui-link ui-link--nav" href="internships.html">Школьникам и студентам</a></li>
+        <li><a class="ui-link ui-link--nav" href="media.html">Медиа</a></li>
+        <li><a class="ui-link ui-link--nav" href="#">Политика конфиденциальности</a></li>
+        <li><a class="ui-link ui-link--nav" href="#">Правила обработки персональных данных</a></li>
       </ul>
     </nav>
 
-    <div class="cp-footer__contacts">
-      <address class="cp-footer__contact">
-        <span class="cp-footer__contact-label">Адрес</span>
+    <div class="ftp__contacts">
+      <address class="ftp__contact">
+        <span class="ftp__contact-label ui-text--muted">Адрес</span>
         <span>ул. Большая Пироговская, д. 27, стр. 1, г. Москва, Россия, 119435</span>
       </address>
-      <div class="cp-footer__contact-group">
-        <div class="cp-footer__contact">
-          <span class="cp-footer__contact-label">Телефон</span>
-          <a class="cp-footer__contact-link ui-link ui-link--nav" href="tel:+74956648840">+7 495 664-88-40</a>
+      <div class="ftp__contact-group">
+        <div class="ftp__contact">
+          <span class="ftp__contact-label ui-text--muted">Телефон</span>
+          <a class="ui-link ui-link--nav" href="tel:+74956648840">+7 495 664-88-40</a>
         </div>
-        <div class="cp-footer__contact">
-          <span class="cp-footer__contact-label">Email</span>
-          <a class="cp-footer__contact-link ui-link ui-link--nav" href="mailto:career@interrao.ru">career@interrao.ru</a>
+        <div class="ftp__contact">
+          <span class="ftp__contact-label ui-text--muted">Email</span>
+          <a class="ui-link ui-link--nav" href="mailto:career@interrao.ru">career@interrao.ru</a>
         </div>
       </div>
     </div>
 
-    <div class="cp-footer__right">
-      <ul class="cp-footer__socials">
-        <li><a class="cp-footer__social" href="#" aria-label="ВКонтакте"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.7 17.4c-4.9 0-7.7-3.4-7.8-9h2.5c.1 4.2 1.9 5.9 3.4 6.3V8.4h2.3v3.6c1.4-.2 2.9-1.8 3.4-3.6h2.3c-.4 2.2-2 3.9-3.1 4.5 1.1.6 2.9 2 3.6 4.5h-2.6c-.5-1.7-1.9-3-3.7-3.2v3.2h-.3z"/></svg></a></li>
-        <li><a class="cp-footer__social" href="#" aria-label="Одноклассники"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.8a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zM6.4 7.2a5.6 5.6 0 1111.2 0 5.6 5.6 0 01-11.2 0zm1.2 7.3c1.3.5 2.8.8 4.4.8 1.6 0 3-.3 4.4-.8l.8 1.8c-1 .4-2 .7-3.2.8l2.9 4.2-1.8 1.2-3.1-4.5-3.1 4.5-1.8-1.2 2.9-4.2c-1.2-.1-2.2-.4-3.2-.8l.8-1.8z"/></svg></a></li>
-        <li><a class="cp-footer__social" href="#" aria-label="Rutube"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h10.5A5.5 5.5 0 0120 9.5c0 2.6-1.8 4.8-4.2 5.4L20 20h-4l-3.8-4.8H8V20H4V4zm4 3.6v4h6.3a2 2 0 000-4H8z"/></svg></a></li>
+    <div class="ftp__right">
+      <!-- Соц-кнопки — «по оригиналу» (T17.13, остаток §8.3 REPORT): вид
+           контрола — ui-button--round (T17.9), пара 36px blue-50 → hover
+           primary — хуками слоя (ftp__social). -->
+      <ul class="ftp__socials">
+        <li><a class="ui-button ui-button--round ftp__social" href="#" aria-label="ВКонтакте"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.7 17.4c-4.9 0-7.7-3.4-7.8-9h2.5c.1 4.2 1.9 5.9 3.4 6.3V8.4h2.3v3.6c1.4-.2 2.9-1.8 3.4-3.6h2.3c-.4 2.2-2 3.9-3.1 4.5 1.1.6 2.9 2 3.6 4.5h-2.6c-.5-1.7-1.9-3-3.7-3.2v3.2h-.3z"/></svg></a></li>
+        <li><a class="ui-button ui-button--round ftp__social" href="#" aria-label="Одноклассники"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.8a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zM6.4 7.2a5.6 5.6 0 1111.2 0 5.6 5.6 0 01-11.2 0zm1.2 7.3c1.3.5 2.8.8 4.4.8 1.6 0 3-.3 4.4-.8l.8 1.8c-1 .4-2 .7-3.2.8l2.9 4.2-1.8 1.2-3.1-4.5-3.1 4.5-1.8-1.2 2.9-4.2c-1.2-.1-2.2-.4-3.2-.8l.8-1.8z"/></svg></a></li>
+        <li><a class="ui-button ui-button--round ftp__social" href="#" aria-label="Rutube"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h10.5A5.5 5.5 0 0120 9.5c0 2.6-1.8 4.8-4.2 5.4L20 20h-4l-3.8-4.8H8V20H4V4zm4 3.6v4h6.3a2 2 0 000-4H8z"/></svg></a></li>
       </ul>
       <p class="ui-small">© 1998–2026, ПАО «Интер РАО»</p>
     </div>

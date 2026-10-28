@@ -27,107 +27,48 @@
   color: var(--ui-color-text);
 }
 
-/* Статичный хедер внутренних страниц (главная несёт абсолютный).
-   Селектор заквайлифицирован (.cp-header.cp-header--static): при равной
-   специфичности с более нижним .cp-header { position: absolute }
-   статика перебивалась — шапка накрывала полосу крошек (T16.1). */
-.cp-header.cp-header--static {
-  position: static;
-  border-bottom: var(--ui-border-width) solid var(--ui-color-border-muted);
-  background-color: var(--ui-color-surface);
-}
+/* ── шапка сайта — ПАТТЕРН-СЛОЙ (T17.13) ──
+   Каркас (сетка 1fr auto 1fr, режимы static/--overlay, меню с nowrap-
+   строками, шрифт триггера dropdown, слоты) — канон hsp (ds/ui-patterns.css):
+   сайт-зонные cp-header* сняты, разметка build.mjs несёт классы канона
+   (единый исходник patterns/patterns.css — «канон исполняем»). Сайт-зоне
+   остаются тонкие бренд-строки:
 
-/* ── шапка сайта (сайт-зона: каркас паттерна header — зона сайта) ── */
+   1. VI-пилюля — вид слота hsp__action оригинала (.header__link--vi —
+      собственные переопределения поверх .header__link, header.css:143-149):
+      font-size 15px, паддинг 10px 18px, gap 10px (вес 500 и lh 1.1 — от
+      базы .header__link). 15px вне тройки ролей T3.3 — перенос «как есть»
+      в rem (прецедент 0.9375rem — левый паддинг пункта dropdown); паддинг/gap
+      вне шкалы отступов §3.2 — «как есть» (прецедент --ui-card-gap);
+      пересмотр — design-decision владельца. Исправление приёмки T16.3:
+      контекст-таблица спеки ошибочно считала fs унаследованным 14px —
+      фактически оригинал несёт явные 15px. Шрифт (семейство) теперь несёт
+      слот слоя (font-family var(--ui-font-family)) — UA-дефолт кнопки
+      раньше давал системный шрифт, рассинхрон с оригиналом (Golos) снят.
+   2. Логотип-размеры: 105px оригинала (header.css:55; ступень 84px ≤1023
+      оригинала пилотом не переносилась — остаётся бренд-строкой).
+   3. letter-spacing оговорка: пункты меню оригинала несут 0.01em
+      (header.css:37) — сознательно не переносится (принят интерфейсный
+      вид ui-link--nav; 0.01em@14px ≈ 0.14px на знак — за гранью
+      скрин-сравнения; проба header-link T16.3 letter-spacing не меряет). */
 
-.cp-header {
-  position: absolute;
-  inset: 0 0 auto;
-  z-index: 40;
-}
-
-.cp-header__inner {
-  display: grid;
-  gap: var(--ui-space-4);
-  align-items: start;
-  grid-template-columns: 1fr auto 1fr;
-  padding-top: var(--ui-space-4);
-  padding-bottom: var(--ui-space-2);
-}
-
-.cp-header__menu {
-  display: flex;
-  gap: var(--ui-space-4);
-  align-items: center;
-  padding-top: var(--ui-space-2);
-}
-
-.cp-header__menu--right {
-  justify-content: flex-end;
-  justify-self: end;
-}
-
-.cp-header__menu--left {
-  justify-self: start;
-}
-
-/* Пункты меню — ui-link--nav (T16.3): размер, вес и межстрочное несёт
-   модификатор ДС; сайт-зона — аффорданс строки .header__link оригинала
-   (header.css:30-35): inline-flex с центром и gap 8px (--ui-space-2 — точная
-   пара шкалы §3.2; у текстовых пунктов без иконок на картинку не влияет),
-   nowrap-режим строки */
-.cp-header__menu .ui-link {
-  display: inline-flex;
-  gap: var(--ui-space-2);
-  align-items: center;
-  white-space: nowrap;
-}
-
-/* Триггер dropdown «Школьникам и студентам» — шрифт пункта меню одобренного
-   дизайна: .header__link--toggle оригинала расширяет .header__link
-   (fs 14 / lh 1.1, header.css:30-43) — доводка AC4 (полный computed-матч
-   шапки, приёмка T16.3). Компонентный триггер остаётся ролью body (растёт
-   по брейкпоинтам) — шрифт конкретной шапки сайт несёт сам (README
-   ui-dropdown: «сайт стилизует аффорданс сам»); вес 500 — компонентный
-   --ui-fw-small, совпадает. */
-.cp-header__menu .ui-dropdown__trigger {
-  font-size: var(--ui-fs-small);
-  line-height: 1.1;
-}
-
-.cp-header__logo img {
-  width: 105px;
-  height: auto;
-}
-
-/* Кнопка VI — заметная пилюля. Оригинал .header__link--vi — собственные
-   переопределения поверх .header__link (header.css:143-149): font-size 15px,
-   паддинг 10px 18px, gap 10px (вес 500 и lh 1.1 — от базы .header__link).
-   15px вне тройки ролей T3.3 — перенос «как есть» в rem (прецедент 0.9375rem
-   — левый паддинг пункта dropdown); паддинг/gap вне шкалы отступов §3.2 —
-   «как есть» (прецедент --ui-card-gap); пересмотр — design-decision владельца.
-   Исправление приёмки T16.3: контекст-таблица спеки ошибочно считала fs
-   унаследованным 14px — фактически оригинал несёт явные 15px. */
-.cp-header__vi {
-  display: inline-flex;
+/* VI-пилюля — бренд-строка на слоте слоя hsp__action (общий вид кнопки —
+   каркас: inline-flex/gap/паддинг/пилюля/шрифт; ниже — переопределения
+   оригинала). */
+.hsp__action {
   gap: 0.625rem;
-  align-items: center;
   padding: 0.625rem 1.125rem;
   border: 2px solid var(--ui-color-primary);
-  border-radius: var(--ui-radius-pill);
   background-color: var(--ui-color-glass-light);
   color: var(--ui-color-primary);
   font-size: 0.9375rem;
-  font-weight: var(--ui-fw-small);
   line-height: 1.1;
 }
 
-/* Триггер поиска шапки (.header__link--search оригинала — .header__link с
-   иконкой: gap 8px, как у всех пунктов меню) */
-.cp-header__search {
-  display: inline-flex;
-  gap: var(--ui-space-2);
-  align-items: center;
-  color: var(--ui-color-primary);
+/* Логотип-размеры — сайт-зона (Implementation requirements п.1 T17.13). */
+.hsp__logo img {
+  width: 105px;
+  height: auto;
 }
 
 /* ── hero (сайт-зона) ── */
@@ -550,30 +491,30 @@
    компонент; содержимое карточки — ролями (ui-h2/ui-lead/ui-h4) и
    контролами (ui-link--on-dark). */
 
-/* ── подвал сайта (сайт-зона: каркас паттерна footer) ──
-   T16.4: тон и типографика — по оригиналу src/blocks/footer/footer.css
-   (REPORT §8.2 №5). Паттерн footer ДС здесь не применяется и не
-   перестраивается: он переносит композицию, визуал подвала бренд-специфичен
-   (patterns/footer/README, don't), его on-dark-стилистика остаётся у ДС.
-   Для сайта career-portal применяется сайт-тема оригинала: белый фон,
-   тёмные ссылки 14/500 без подчёркивания; mapping — комментарии у правил
-   ниже, источник значений — footer.css (строки в каждом правиле). */
+/* ── подвал сайта — ПАТТЕРН-СЛОЙ (T17.13) ──
+   Каркас (сетка auto 2fr 2fr 1fr, колонка ссылок 9px/1.35, контакты 28/4,
+   правая колонка, лента соц-кнопок 36px на ui-button--round, ступени
+   2 колонки/nowrap) — канон ftp (ds/ui-patterns.css): сайт-зонные
+   cp-footer* сняты, разметка build.mjs несёт классы канона. Формулировка
+   T16.4 «паттерн footer не применяется и не перестраивается» пересмотрена
+   T17.13: каркас — в слой (светлая surface-пара — база ftp), визуал —
+   сайт. Сайт-зоне остаются тонкие бренд-строки (Implementation requirements
+   п.1 T17.13): цвет ссылок в покое/:visited и hover-accent ниже, источник
+   значений — footer.css (строки в каждом правиле). Соц-кнопки — «по
+   оригиналу» на хуках слоя (36px blue-50, r12, hover primary, footer.css:
+   93-108) — остаток §8.3 REPORT снят (прежде — on-dark-стекло на белом,
+   невидимо). */
 
-.cp-footer {
-  background-color: var(--ui-color-surface);
-  color: var(--ui-color-text);
-}
-
-/* Ссылки футера — ui-link--nav (T16.3): fs-small/fw-small 14/500 и снятое
-   подчёркивание несёт модификатор (Implementation requirements п.2 T16.4 —
-   свойства ui-link через .cp-footer__link не переопределяются). Цвет
-   фиксирует сайт-зона (Technical considerations T16.4 — одна строка против
-   primary базы .ui-link): :visited оригинал не задаёт — «потемнения»
-   посещённых нет (Implementation requirements п.3); hover оригинала,
-   напротив, меняет цвет на accent (footer.css:43, 76) — см. media-правило
-   ниже. Каскад: pilot.css позднее ui-core.min.css в <head> — при равной
-   специфичности (0,2,0) с .ui-link:visited побеждает это правило. */
-.cp-footer .ui-link {
+/* Цвет ссылок футера — ui-link--nav (T16.3): fs-small/fw-small 14/500 и
+   снятое подчёркивание несёт модификатор (Implementation requirements п.2
+   T16.4 — свойства ui-link не переопределяются). Цвет фиксирует сайт-зона
+   (Technical considerations T16.4 — одна строка против primary базы
+   .ui-link): :visited оригинал не задаёт — «потемнения» посещённых нет
+   (Implementation requirements п.3); hover оригинала, напротив, меняет цвет
+   на accent (footer.css:43, 76) — см. правило ниже. Каскад: pilot.css
+   позднее ds/ui-patterns.css в <head> — при равной специфичности (0,2,0) с
+   .ui-link:visited побеждает это правило. */
+.ftp .ui-link {
   color: var(--ui-color-text);
 }
 
@@ -587,134 +528,10 @@
    Исправление ревью T16.4 (7c26ebd подавал дивергенцию как «как в
    оригинале»). */
 @media (hover: hover) {
-  .cp-footer .ui-link:hover {
+  .ftp .ui-link:hover {
     color: var(--ui-color-accent);
     opacity: 1;
   }
-}
-
-/* Каркас grid клона не перестраивается (Out of scope T16.4). Зазор колонок
-   — 40px .footer__inner (footer.css:10; вне шкалы §3.2 — «как есть»,
-   прецедент --ui-button-pad-inline); вертикальный ритм 48px — padding
-   .footer (footer.css:3, --ui-space-7); выравнивание по центру строки —
-   как во flex-каркасе оригинала (footer.css:8). */
-.cp-footer__inner {
-  display: grid;
-  gap: 2.5rem;
-  align-items: center;
-  grid-template-columns: auto 2fr 2fr 1fr;
-  padding-top: var(--ui-space-7);
-  padding-bottom: var(--ui-space-7);
-}
-
-/* Колонка ссылок: шаг строк 9px (footer.css:26; вне шкалы §3.2 — «как
-   есть»); строки 14px/1.35 — .footer__links li (footer.css:29-32): двойной
-   межстрочный базис li (роль body 27px) делал бы строки колонки выше
-   оригинала. */
-.cp-footer__links {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5625rem;
-  margin: 0;
-  padding: 0;
-  font-size: var(--ui-fs-small);
-  line-height: var(--ui-lh-small);
-  list-style: none;
-}
-
-/* nowrap и межстрочное 1.35 пунктов — .footer__link (footer.css:35-38);
-   у nav-варианта 1.1 — компакт строки шапки, колонке футера не подходит. */
-.cp-footer__links .ui-link {
-  line-height: var(--ui-lh-small);
-  white-space: nowrap;
-}
-
-/* Контакты: шаг блоков 28px (footer.css:48; вне шкалы §3.2 — «как есть»). */
-.cp-footer__contacts {
-  display: flex;
-  flex-direction: column;
-  gap: 1.75rem;
-}
-
-/* Пара label/значение: шаг 4px (--ui-space-1, footer.css:54); строки
-   14/500/1.35 — .footer__contact-label и .footer__contact-value
-   (footer.css:62-74): наследуется в label и адрес (tel:/mailto:-ссылки
-   несут те же 14/500 сами — модификатор --nav; их 1.35 — правилом ниже). */
-.cp-footer__contact {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-1);
-  font-size: var(--ui-fs-small);
-  font-weight: var(--ui-fw-small);
-  line-height: var(--ui-lh-small);
-}
-
-/* Label — muted оригинала (footer.css:66): #808080 → gray-700 — AA-замена
-   T2.3 («принято ДС», прецедент крошек T14.5); полупрозрачность on-dark
-   снята — цвет несёт токен. */
-.cp-footer__contact-label {
-  color: var(--ui-color-text-muted);
-}
-
-/* Межстрочное контактных ссылок — как у значений (1.35). */
-.cp-footer__contact .ui-link {
-  line-height: var(--ui-lh-small);
-}
-
-.cp-footer__contact-group {
-  display: flex;
-  /* 40px .footer__contact-group (footer.css:59; вне шкалы §3.2 — «как есть»). */
-  gap: 2.5rem;
-}
-
-/* Правая колонка: соцсети сверху, копирайт снизу (footer.css:79-86);
-   шаг 24px — --ui-space-5 (в шкале). */
-.cp-footer__right {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-5);
-  align-items: flex-end;
-  align-self: stretch;
-  justify-content: space-between;
-}
-
-/* Копирайт — одна строка, как в оригинале: у оригинала flex-колонка
-   .footer__right ширится по содержимому; grid-колонка 1fr клона уже —
-   строка переносилась. Сетка не перестраивается (Out of scope) —
-   однострочный вид держит nowrap. */
-.cp-footer__right .ui-small {
-  white-space: nowrap;
-}
-
-/* T16.4-бэклог: nowrap колонки ссылок и копирайта на ≤767px снимается
-   (оригинал footer.css:150 возвращает перенос в этой же ступени) — иначе
-   min-content самого длинного пункта («Правила обработки персональных
-   данных») даёт горизонтальный скролл W400 (scrollWidth 579 > 400). */
-/* stylelint-disable-next-line media-feature-name-disallowed-list -- сайт-зона пилота: брейкпоинт оригинала (footer.css:121-151) */
-@media (max-width: 767px) {
-  .cp-footer__links .ui-link,
-  .cp-footer__right .ui-small {
-    white-space: normal;
-  }
-}
-
-.cp-footer__socials {
-  display: flex;
-  gap: var(--ui-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cp-footer__social {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--ui-control-size);
-  height: var(--ui-control-size);
-  border-radius: 50%;
-  background-color: var(--ui-color-glass-dark);
-  color: var(--ui-color-text-on-dark);
 }
 
 /* ── внутренние страницы ── */
@@ -1513,16 +1330,17 @@ a.cp-intern-card {
     display: none;
   }
 
-  .cp-footer__inner {
-    grid-template-columns: 1fr 1fr;
-  }
+  /* Подвал — каркас ftp (T17.13): ступень 1023 копипасты снята — база
+     канона 2 колонки, 4 колонки от 1024 (mobile-first, Implementation
+     requirements T17.1 п.4). */
 }
 
 /* 767 → */
 @media (max-width: 767px) {
-  .cp-header__menu--right {
-    display: none;
-  }
+  /* Шапка/подвал — каркасы hsp/ftp (T17.13): ступени 767 сняты —
+     меню-право скрыто в мобильной базе канона (включение от md) и nowrap
+     ссылок/копирайта включается от md (mobile-first, Implementation
+     requirements T17.1 п.4). */
 
   .cp-hero {
     min-height: 35rem;
