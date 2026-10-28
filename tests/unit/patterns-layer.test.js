@@ -240,7 +240,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
   });
 
-  it('значения канона 1:1 — поднавигация nvp (T17.11): сетка 5×1fr «сетка 264», маргины 24/48 (pages.css:969–1001)', () => {
+  it('значения канона 1:1 — поднавигация nvp (T17.11): сетка 5×1fr «сетка 264» от md, маргины 24/48 (pages.css:969–1001)', () => {
     // Вид пилюль несёт модификатор ui-tabs--pill (T14.9) — слой его не
     // дублирует: nvp переносит только раскладку страницы (сетка трека и
     // nav-маргины — зона страницы по README ui-tabs «Модификатор --pill»).
@@ -251,10 +251,19 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     const list = code.match(/(?:^|\n)\.nvp \.ui-tabs__list\s*\{([^}]*)\}/);
     expect(list, '.nvp .ui-tabs__list найдено').toBeTruthy();
-    expect(list[1], 'сетка repeat(5, 1fr) трека — pages.css:975 («сетка 264»)').toContain(
-      'grid-template-columns: repeat(5, 1fr);',
-    );
     expect(list[1], 'DS-маргин __list (32px под панелями) сброшен').toContain('margin: 0;');
+    // Сетка 5×1fr — от md (768, шкала T2.5): mobile-first база — лента ДС
+    // (flex с переносом; оригинал держит сетку и на узких — осознанное
+    // отклонение, прецедент таймлайна T17.10). 32px-гейт T3.6: min-content
+    // пяти пилюль ≈760px — на 640 (zoom 200%) сетка даёт hscroll. Поиск — от
+    // начала блока nvp (в файле есть другие @media 768 — lpp-/lgo-/lnk-).
+    const nvpIdx = code.indexOf('.nvp .ui-tabs__list');
+    expect(nvpIdx, 'базовое правило ленты nvp найдено').toBeGreaterThan(-1);
+    const grid = code
+      .slice(nvpIdx)
+      .match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.nvp \.ui-tabs__list\s*\{([^}]*)\}/);
+    expect(grid, 'сетка repeat(5, 1fr) трека — pages.css:975 («сетка 264»), от md').toBeTruthy();
+    expect(grid[1]).toContain('grid-template-columns: repeat(5, 1fr);');
     // Компонентные свойства (трек/пилюли) слой не повторяет.
     expect(list[1]).not.toContain('background');
     expect(list[1]).not.toContain('padding');
