@@ -40,6 +40,10 @@ const SEL = {
   emptySection: '#lpp-empty',
   emptyTitle: '#lpp-empty-title',
   emptyReset: '#lpp-empty-reset',
+  subnav: '#lpp-subnav', // поднавигация разделов (T17.11): ui-tabs--pill + nvp
+  subnavNav: '#lpp-subnav .nvp',
+  subnavList: '#lpp-subnav .ui-tabs__list',
+  subnavTabs: '#lpp-subnav .ui-tabs__tab',
 };
 
 const submitBtn = `${SEL.filter} button[type="submit"]`;
@@ -622,6 +626,72 @@ standTest.describe('patterns/list-page: a11y страницы (AC)', () => {
   );
 });
 
+standTest.describe('patterns/list-page: поднавигация разделов — канон nvp (T17.11)', () => {
+  standTest(
+    'раскладка: маргины 24/48, сетка 5×1fr от md, flex-перенос на мобиле',
+    async ({ stand }) => {
+      const page = await stand('patterns/list-page');
+      const nav = page.locator(SEL.subnavNav);
+      const list = page.locator(SEL.subnavList);
+
+      // Модуль набор не инициализировал (панелей нет — контракт T13.6):
+      // ролей, roving tabindex и aria-selected в DOM нет; активный раздел
+      // помечен aria-current="page" (ровно один).
+      await expect(list, 'tablist на навигационном наборе не ставится').not.toHaveAttribute(
+        'role',
+        'tablist',
+      );
+      await expect(page.locator(SEL.subnavTabs).first()).not.toHaveAttribute('aria-selected');
+      await expect(page.locator(`${SEL.subnavTabs}[aria-current="page"]`)).toHaveCount(1);
+
+      // Маргины nav.tabs-pill 24/48 (pages.css:969) — связка .nvp слоя.
+      const margins = await nav.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { top: s.marginTop, bottom: s.marginBottom };
+      });
+      expect(margins, 'маргины канона 24/48').toEqual({ top: '24px', bottom: '48px' });
+
+      // Мобильная база (375): лента ДС — flex с переносом (сетка от md —
+      // 32px-гейт T3.6; осознанное отклонение от оригинала, прецедент T17.10).
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await list.evaluate((el) => getComputedStyle(el).display), '375: flex-база').toBe(
+        'flex',
+      );
+
+      // md (768, шкала T2.5): сетка 5×1fr «сетка 264» (pages.css:975).
+      await page.setViewportSize(VIEWPORTS.tablet);
+      const grid = await list.evaluate((el) => {
+        const s = getComputedStyle(el);
+        return { display: s.display, columns: s.gridTemplateColumns.split(' ').length };
+      });
+      expect(grid.display, '768: сетка канона включается').toBe('grid');
+      expect(grid.columns, 'пять равных колонок «сетка 264»').toBe(5);
+    },
+  );
+
+  standTest(
+    'активная пилюля по aria-current (покой): primary/text-on-dark, соседняя — прозрачная',
+    async ({ stand }) => {
+      const page = await stand('patterns/list-page');
+      const tabs = page.locator(SEL.subnavTabs);
+      const styleOf = (tab) =>
+        tab.evaluate((el) => {
+          const s = getComputedStyle(el);
+          return { bg: s.backgroundColor, color: s.color };
+        });
+
+      // Пары гейта T2.3: активную пилюлю по aria-current красит модификатор
+      // --pill (T17.11) — сайт-зонная реплика 0,4,0 в пилоте снята.
+      await expect
+        .poll(() => styleOf(tabs.nth(1)), 'активная (aria-current="page"): primary + text-on-dark')
+        .toEqual({ bg: 'rgb(0, 40, 86)', color: 'rgb(255, 255, 255)' });
+      await expect
+        .poll(() => styleOf(tabs.nth(0)), 'соседняя: прозрачная, подпись text')
+        .toEqual({ bg: 'rgba(0, 0, 0, 0)', color: 'rgb(31, 31, 31)' });
+    },
+  );
+});
+
 standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 вьюпорта)', () => {
   standTest(
     'эталоны веток «с данными»/«пустая выдача» на шкале вьюпортов — element-снимки, только из контейнера/CI',
@@ -633,6 +703,7 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
         ['lpp-branch-empty', page.locator(SEL.emptySection)],
         ['lpp-branch-rows', page.locator(ROWS.section)], // T14.10 — выдача строками
         ['lpp-branch-side', page.locator(SIDE.section)], // T14.10 — сайдбар фильтров
+        ['lpp-branch-subnav', page.locator(SEL.subnav)], // T17.11 — поднавигация nvp
       ];
 
       for (const viewport of Object.keys(VIEWPORTS)) {
