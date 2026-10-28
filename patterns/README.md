@@ -10,8 +10,9 @@
 
 Слой = связки, которых НЕТ в компонентах: канонические композиции страниц
 поверх готовых ui-компонентов. Каноны list/detail/form-страниц (классы
-`lpp-*` list-page, `dpp-*` detail-page, `fpp-*` form-page) и лендинг-связок
-(`lnk-*` nav-карточки, `lgo-*` лента логотипов — T17.9) живут единым
+`lpp-*` list-page, `dpp-*` detail-page, `fpp-*` form-page), лендинг-связок
+(`lnk-*` nav-карточки, `lgo-*` лента логотипов — T17.9) и таймлайна
+(`tlp-*` — T17.10) живут единым
 исходником [`patterns.css`](patterns.css) и собираются в **опциональный**
 `dist/ui-patterns.css` (порядок в head: токены → core → patterns → сайт;
 `ui-core.min.css` не меняется). Доки-паттерны остаются источником правды:
@@ -40,7 +41,8 @@
   `stands/patterns/landing-section.html`.
 - [`timeline/`](timeline/README.md) — «Таймлайн этапов» (T14.11): композиция
   «этапы процесса» — ol нумерованных точек с заголовками и текстами, ряд от
-  1024, мобильная колонка; стенд — `stands/patterns/timeline.html`.
+  1024, мобильная колонка; связки `tlp-*` — в паттерн-слое (adoption T17.10);
+  стенд — `stands/patterns/timeline.html`.
 - [`search-overlay/`](search-overlay/README.md) — «Поисковый оверлей» (T7.6):
   полноэкранный поиск на ui-modal--full (T7.2): фокус в поле при открытии,
   полный диалог-чек, GET-форма (без JS — переход); стенд —
