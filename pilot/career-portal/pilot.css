@@ -1187,33 +1187,9 @@ a.cp-intern-card {
   border-radius: var(--ui-radius-md);
 }
 
-/* Таймлайн этапов (сайт-зона — GAP: нет компонента) */
-.cp-timeline {
-  display: grid;
-  position: relative;
-  gap: var(--ui-space-3);
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.cp-timeline__stage {
-  display: flex;
-  position: relative;
-  z-index: 1;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
-
-.cp-timeline__dot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--ui-control-size);
-  height: var(--ui-control-size);
-  border-radius: 50%;
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-text-on-dark);
-  font-weight: var(--ui-fw-h4);
-}
+/* Таймлайн этапов — связки tlp-* паттерн-слоя (T17.10): правила копии
+   cp-timeline сняты, канон приходит dist/ui-patterns.css (точки 56px
+   surface-hover/primary, ряд от 1024). */
 
 /* Сетка преимуществ — карточки ui-card--filled */
 .cp-adv-grid {
@@ -1580,10 +1556,13 @@ a.cp-intern-card {
   .cp-holding__stats,
   .cp-adv-grid,
   .cp-events-feature,
-  .cp-timeline,
   .cp-media__grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Таймлайн — канон слоя tlp- (T17.10): ступень 1023 копипасты снята
+     (ряд от 1024, до — колонка; mobile-first Implementation requirements
+     T17.1 п.4). */
 
   .cp-vacancy-search__wrap {
     grid-template-columns: 1fr;
@@ -1628,10 +1607,12 @@ a.cp-intern-card {
   .cp-holding__stats,
   .cp-adv-grid,
   .cp-events-feature,
-  .cp-timeline,
   .cp-media__grid {
     grid-template-columns: 1fr;
   }
+
+  /* Таймлайн — канон слоя tlp- (T17.10): ступень 767 копипасты снята —
+     мобильная база канона и так колонка. */
 
   /* Nav-карточки и лента логотипов — связки lnk-cards/lgo-grid (T17.9):
      мобильная база одна колонка — канон слоя, лестница снята. */

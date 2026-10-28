@@ -416,6 +416,12 @@ const BLOCK_PROBES = {
     // оригинала, pages.css:656–674) — высота миграции на модификатор ДС.
     ['company-banner', '.banner-card', '.cp-company-banner'],
   ],
+  // Таймлайн «Как попасть» (T17.10): adoption на связки tlp-* паттерн-слоя;
+  // блок гейтит высоту миграции (AC: порог ±4px). Оригинал — .timeline
+  // (pages.css:1096); education/career-track таймлайна не несут (career-track
+  // строит steps-bar — другая композиция, канона в ДС нет).
+  'internships.html': [['timeline', '.timeline', '.tlp']],
+  'practices.html': [['timeline', '.timeline', '.tlp']],
 };
 
 const STYLES = [

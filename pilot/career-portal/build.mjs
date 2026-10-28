@@ -500,16 +500,20 @@ function faq(items) {
   return `<h2 class="ui-h2">Вопросы и ответы</h2>\n<div class="ui-accordion ui-accordion--faq">\n${html}\n</div>`;
 }
 
-/** таймлайн этапов (сайт-зона — в ДС нет; T16.12: заголовок — ui-h6 20/500
- *  color-text (.timeline__title), текст — muted (.timeline__text)) */
+/** таймлайн этапов — канон паттерна patterns/timeline, связки tlp-* слоя
+ *  (T17.10): li.tlp__stage → span.tlp__dot (номер — видимый текст, WCAG 1.3.1)
+ *  → h3.ui-h6 (T16.12: заголовок 20/500 color-text (.timeline__title)) →
+ *  ui-small muted (.timeline__text). role="list" на обёртке ol — reset
+ *  снимает list-style, Safari/VoiceOver теряет роль списка (конвенция
+ *  ui-breadcrumbs; html-validate пилотский dist не валидирует). */
 function timeline(steps) {
   return steps
     .map(
-      (step, index) => `<div class="cp-timeline__stage">
-  <div class="cp-timeline__dot">${index + 1}</div>
-  <div class="ui-h6">${esc(step.title)}</div>
+      (step, index) => `<li class="tlp__stage">
+  <span class="tlp__dot">${index + 1}</span>
+  <h3 class="ui-h6">${esc(step.title)}</h3>
   <p class="ui-small ui-text--muted">${esc(step.text)}</p>
-</div>`,
+</li>`,
     )
     .join('\n');
 }
@@ -2073,9 +2077,9 @@ ${advantages}
 <section class="ui-section">
   <div class="ui-container">
     <h2 class="ui-h2">Как попасть на ${titleAcc}</h2>
-    <div class="cp-timeline">
+    <ol class="tlp" role="list">
 ${steps}
-    </div>
+    </ol>
   </div>
 </section>
 
