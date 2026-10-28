@@ -712,13 +712,14 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     // панелей модуль не инициализирует (контракт T13.6) — активный раздел
     // несёт aria-current="page". :is() берёт максимум аргументов — селекторы
     // атрибутные равной силы, специфичность существующих правил не растёт.
-    const active = blockOf(
-      css,
-      ".ui-tabs--pill .ui-tabs__tab:is([aria-selected='true'], [aria-current='page']:not([aria-selected]))",
+    // Селектор длиннее printWidth — prettier переносит его по комбинатору:
+    // \s+ терпит перенос (прецедент устойчивых пинов).
+    const active = css.match(
+      /\.ui-tabs--pill\s+\.ui-tabs__tab:is\(\[aria-selected='true'\], \[aria-current='page'\]:not\(\[aria-selected\]\)\)\s*\{([^}]*)\}/,
     );
     expect(active, 'активная пара модификатора найдена').toBeTruthy();
-    expect(active).toContain('background-color: var(--ui-color-primary);');
-    expect(active).toContain('color: var(--ui-color-text-on-dark);');
+    expect(active[1]).toContain('background-color: var(--ui-color-primary);');
+    expect(active[1]).toContain('color: var(--ui-color-text-on-dark);');
     // Ветка aria-current гасится :not([aria-selected]): модуль при init ставит
     // атрибут ВСЕМ табам (ui-tabs.js) — после инициализации активность задаёт
     // один aria-selected, оставшийся aria-current (модуль его не снимает,
@@ -732,10 +733,16 @@ describe('модификатор ui-tabs--pill (T14.9; .tabs-pill career-portal 
     expect(base).toContain('background-color: var(--ui-color-primary);');
     // aria-current — стилевой крючок ТОЛЬКО модификатора --pill: базовые
     // табы с панелями на атрибут не реагируют (деградация без JS прежняя).
-    for (const selector of css.match(/[^{}\n]*aria-current[^{}\n]*\{/g) ?? []) {
-      expect(selector.trim(), 'aria-current — только в правилах модификатора --pill').toMatch(
-        /^\.ui-tabs--pill\b/,
-      );
+    // Разбор правил как в гейте слоя (patterns-layer-gate.mjs: прелюдии @media
+    // срезаются — правила внутри media проверяются); селектор длиннее
+    // printWidth перенесён prettier'ом — нормализуем пробелы.
+    const flat = css.replace(/@[^{}]*\{/g, '{');
+    for (const [, selector] of flat.matchAll(/([^{}]+)\{[^}]*\}/g)) {
+      if (!selector.includes('aria-current')) continue;
+      expect(
+        selector.replace(/\s+/g, ' ').trim(),
+        'aria-current — только в правилах --pill',
+      ).toMatch(/^\.ui-tabs--pill\b/);
     }
   });
 });

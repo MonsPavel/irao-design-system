@@ -739,6 +739,34 @@
   </div>
 </section>
 
+<section class="ui-section" id="lpp-subnav" aria-labelledby="lpp-subnav-title">
+  <h2 class="ui-h3" id="lpp-subnav-title">Поднавигация разделов (T17.11)</h2>
+  <p class="ui-showcase-stand__note">
+    Навигационный набор на <code>ui-tabs--pill</code>: межстраничные ссылки без панелей —
+    <code>data-ui-tabs</code> не ставится, модуль такие наборы не инициализирует (контракт T13.6:
+    табы = панели). Ролей <code>tablist/tab</code> и roving tabindex нет — это навигация. Активный
+    раздел — <code>aria-current="page"</code> (ровно один): активную пилюлю красит модификатор
+    (заливка primary + text-on-dark, hover заливку не гасит — T17.11). Вид пилюль — модификатор
+    <code>ui-tabs--pill</code> (T14.9), раскладка страницы — связки <code>nvp</code> паттерн-слоя:
+    сетка 5×1fr «сетка 264» (pages.css:975) и маргины 24/48 (pages.css:969). Без слоя лента остаётся
+    flex с переносом (мобильная деградация).
+  </p>
+
+  <!-- nav[aria-label] > лента ui-tabs__list со ссылками-разделами; активный
+       раздел — ровно один aria-current="page" (семантика «текущая страница»,
+       прецедент ui-chip T14.8 / ui-breadcrumbs). href — страницы-разделы
+       канонического примера (спека T17.11); в бою — реальные URL сайта. -->
+  <nav class="ui-tabs ui-tabs--pill nvp" aria-label="Разделы школьникам и студентам">
+    <div class="ui-tabs__list">
+      <a class="ui-tabs__tab" href="practices.html">Практики</a>
+      <a class="ui-tabs__tab" href="internships.html" aria-current="page">Стажировки</a>
+      <a class="ui-tabs__tab" href="education.html">Целевое обучение</a>
+      <a class="ui-tabs__tab" href="career-track.html">Карьерный трек</a>
+      <a class="ui-tabs__tab" href="events.html">Мероприятия</a>
+    </div>
+  </nav>
+</section>
+
 <script>
   // T8.1, Technical considerations: после применения фильтра (перезагрузка
   // GET-формы) фокус — на заголовок результатов: скринридер объявляет

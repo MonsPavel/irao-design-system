@@ -247,11 +247,10 @@ function breadcrumbs(items) {
  *  Межстраничные ССЫЛКИ, не табы: модуль ui-tabs.js НЕ подключается —
  *  data-ui-tabs требует панели у каждого таба (контракт T13.6), а ссылки
  *  ведут на страницы; активный раздел — семантика aria-current="page"
- *  (прецедент ui-chip T14.8/ui-breadcrumbs). CSS ДС рисует активную пилюлю
- *  по aria-selected — пару активного состояния несёт сайт-зона .cp-subnav
- *  (реплика :where([aria-selected='true']) на токенах). Сетка repeat(5,1fr)
- *  («сетка 264») и nav-маргины 24/48 — зона страницы (README ui-tabs
- *  «Модификатор --pill»): тоже сайт-зона .cp-subnav.
+ *  (прецедент ui-chip T14.8/ui-breadcrumbs). T17.11: активную пилюлю по
+ *  aria-current красит сам модификатор --pill (покой + hover) — сайт-зонная
+ *  реплика 0,4,0 снята. Сетка repeat(5,1fr) («сетка 264») и nav-маргины
+ *  24/48 — канон nvp паттерн-слоя (dist/ds/ui-patterns.css, T17.11).
  *
  *  Параметр current — href текущей страницы (aria-current="page", ровно
  *  один). Потребители: educationMain/eventsMain/careerTrackMain. */
@@ -269,7 +268,7 @@ function subnav(current) {
         `      <a class="ui-tabs__tab" href="${href}"${href === current ? ' aria-current="page"' : ''}>${label}</a>`,
     )
     .join('\n');
-  return `<nav class="ui-tabs ui-tabs--pill cp-subnav" aria-label="Разделы школьникам и студентам">
+  return `<nav class="ui-tabs ui-tabs--pill nvp" aria-label="Разделы школьникам и студентам">
   <div class="ui-tabs__list">
 ${tabs}
   </div>

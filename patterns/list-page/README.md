@@ -7,7 +7,7 @@
 `/showcase/dist/stands/patterns/list-page.html` (генерируется
 `showcase/build.mjs`). Ветки стенда: «с данными» (сетка карточек), «ничего не
 найдено», плюс ветки T14.10 — «строки» и «сайдбар фильтров» (раскладки
-оригинала, REPORT §4 / PLAN P1-3/P1-4).
+оригинала, REPORT §4 / PLAN P1-3/P1-4) и поднавигация разделов (T17.11).
 
 Собирается **без нового CSS системы**: только компоненты
 (`ui-breadcrumbs`, `ui-select`, `ui-button`, `ui-card`, `ui-tag`, `ui-empty`,
@@ -29,6 +29,7 @@
 | Выдача | `ui-grid--3` + `ui-card--hover ui-card--link` + `ui-tag` | карточка-ссылка T4.4, теги T4.3; вариант «строками» — ниже (T14.10) |
 | Выдача строками (T14.10) | `ui-card--hover` + связка `lpp-row` + CTA `ui-button--pill` (T14.4) | заголовок выдачи — h2, строки — article с h3-ссылкой; демо-модалка отклика — `ui-modal` |
 | Сайдбар фильтров (T14.10) | select-пилюли, `ui-radio-group`, `ui-checkbox`, `ui-button`, промо `ui-card--filled`, чипы `ui-chip` (T14.8) | grid «aside \| выдача»; aside sticky от md + scrollable-focusable |
+| Поднавигация разделов (T17.11) | `ui-tabs--pill` + связка `nvp` | межстраничные ссылки без панелей: `data-ui-tabs` не ставится (контракт T13.6), активный раздел — `aria-current="page"` (активную пилюлю красит модификатор, покой + hover); раскладка (сетка 5×1fr, маргины 24/48) — связки `nvp` паттерн-слоя |
 | Пагинация | `ui-pagination` | T6.3; сохраняет GET-параметры фильтров |
 | Empty-ветка | `ui-empty` | заголовок-роль h2; сброс — ссылка на чистый URL |
 

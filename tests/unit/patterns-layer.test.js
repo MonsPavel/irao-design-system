@@ -427,13 +427,11 @@ describe('пилот career-portal: слой подключён, ваканси�
       'class="ui-tabs ui-tabs--pill nvp"',
     );
     expect(build, 'сайт-зонный класс снят из разметки').not.toContain('cp-subnav');
-    expect(pilotCss, 'пара 0,4,0 удалена из pilot.css (REPORT §9.1 №8)').not.toContain(
-      'cp-subnav',
-    );
+    expect(pilotCss, 'пара 0,4,0 удалена из pilot.css (REPORT §9.1 №8)').not.toContain('cp-subnav');
     expect(compare, 'проба трека — на крючке слоя').toContain("pilot: '.nvp .ui-tabs__list'");
     expect(compare, 'проба таба — на крючке слоя').toContain("pilot: '.nvp .ui-tabs__tab'");
     expect(compare, 'проба активного таба — на крючке слоя').toContain(
-      "pilot: \".nvp .ui-tabs__tab[aria-current='page']\"",
+      'pilot: ".nvp .ui-tabs__tab[aria-current=\'page\']"',
     );
   });
 
