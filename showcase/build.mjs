@@ -1101,6 +1101,9 @@ async function generateShowcase({ themes }) {
   // уровня body — нарушение axe landmark-no-duplicate-banner; вместе с ней
   // уходят skip-link (его приносит сам паттерн) и переключатель темы
   // (withSwitcher: false — THEME_SCRIPT ссылается на select каркаса).
+  // Каркас шапки — связки hsp-* в паттерн-слое (T17.13): стенд подключает
+  // dist/ui-patterns.css (withPatterns: true — шестой получатель слоя);
+  // <style> в доке больше нет — директива element-permitted-content снята.
   const headerStandSource = join(ROOT, 'patterns', 'header', 'header.html');
   if (existsSync(headerStandSource)) {
     mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
@@ -1110,18 +1113,12 @@ async function generateShowcase({ themes }) {
       title: 'patterns/header — irao-ui showcase',
       frameHeader: false,
       withSwitcher: false,
+      withPatterns: true,
       // Сайдбар каркаса остаётся: nav-лендмарки не уникальны (в отличие от
       // banner), у навигаций паттерна и каркаса разные aria-label.
       // Паттерн несёт свой skip-link (первый элемент сниппета) — гейт
       // selfChecks «skip-link до <header>» исполняет разметка паттерна.
-      // Директива html-validate — ЗДЕСЬ, не в источнике паттерна: во
-      // фрагменте без <body> правило element-permitted-content не срабатывает
-      // (no-unused-disable), а на стенде <style> паттерна встаёт прямым
-      // ребёнком body (подставка связок зоны сайта; в бою —
-      // template_styles.css, README паттерна).
-      preMain:
-        '<!-- html-validate-disable element-permitted-content -->\n' +
-        readFileSync(headerStandSource, 'utf8'),
+      preMain: readFileSync(headerStandSource, 'utf8'),
       // Служебный h1 в main: шапка — каркас без заголовков; axe
       // page-has-heading-one требует h1, ссылка ведёт в каталог стендов.
       main: [
@@ -1147,6 +1144,10 @@ async function generateShowcase({ themes }) {
   // ставится НА УРОВНЕ body ПОСЛЕ main (pageFooter) — у копируемого
   // <footer> честная роль contentinfo (правила ленмарк — README паттерна).
   // Служебная шапка каркаса остаётся (подвал не спорит с banner).
+  // Каркас подвала — связки ftp-* в паттерн-слое (T17.13): стенд подключает
+  // dist/ui-patterns.css (withPatterns: true — седьмой получатель слоя);
+  // <style> в доке больше нет — директива element-permitted-content снята
+  // (второй экземпляр дока — приглушённый тон — на div: contentinfo одна).
   const footerStandSource = join(ROOT, 'patterns', 'footer', 'footer.html');
   if (existsSync(footerStandSource)) {
     mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
@@ -1154,6 +1155,7 @@ async function generateShowcase({ themes }) {
       rel: '../..', // stands/patterns/footer.html → SHOWCASE_DIST (на два уровня выше)
       home: '../../index.html', // → index.html каталога стендов
       title: 'patterns/footer — irao-ui showcase',
+      withPatterns: true,
       // Подвал каркаса выключен: contentinfo-лендмарка уровня body — одна,
       // её несёт паттерн (пара к frameHeader: false стенда шапки).
       withFooter: false,
@@ -1169,12 +1171,7 @@ async function generateShowcase({ themes }) {
         '      Bitrix-заметки — patterns/footer/README.md.',
         '    </p>',
       ].join('\n'),
-      // Директива html-validate — здесь, не в источнике паттерна (причина —
-      // в блоке стенда header выше): <style> подвала встаёт прямым ребёнком
-      // body (подставка связок зоны сайта; в бою — template_styles.css).
-      pageFooter:
-        '<!-- html-validate-disable element-permitted-content -->\n' +
-        readFileSync(footerStandSource, 'utf8'),
+      pageFooter: readFileSync(footerStandSource, 'utf8'),
       themes,
       navCurrent: { kind: 'stand', name: 'patterns/footer' },
       navMode: 'strip',

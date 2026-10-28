@@ -12,7 +12,8 @@
 поверх готовых ui-компонентов. Каноны list/detail/form-страниц (классы
 `lpp-*` list-page, `dpp-*` detail-page, `fpp-*` form-page), лендинг-связок
 (`lnk-*` nav-карточки, `lgo-*` лента логотипов — T17.9), таймлайна
-(`tlp-*` — T17.10) и поднавигации разделов (`nvp` — T17.11) живут единым
+(`tlp-*` — T17.10), поднавигации разделов (`nvp` — T17.11) и каркасов
+шапки/подвала (`hsp-*`/`ftp-*` — T17.13) живут единым
 исходником [`patterns.css`](patterns.css) и собираются в **опциональный**
 `dist/ui-patterns.css` (порядок в head: токены → core → patterns → сайт;
 `ui-core.min.css` не меняется). Доки-паттерны остаются источником правды:
@@ -50,7 +51,9 @@
   `stands/patterns/search-overlay.html`.
 - [`header/`](header/README.md) — «Шапка» (T7.6): skip-link + header (banner)
   + навигации с уникальными aria-label + dropdown (T6.1) + логотип (T4.6) +
-  кнопка VI (T9.1) + поиск; стенд — `stands/patterns/header.html`.
+  кнопка VI (T9.1) + поиск; каркас `hsp-*` — в паттерн-слое (T17.13), режимы
+  `hsp`/`hsp--overlay`; стенд — `stands/patterns/header.html`.
 - [`footer/`](footer/README.md) — «Подвал» (T7.6): footer (contentinfo) +
-  колонки ссылок + контакты в address + переход кверху; стенд —
-  `stands/patterns/footer.html`.
+  колонка ссылок + контакты в address + соц-кнопки на `ui-button--round` +
+  переход кверху; каркас `ftp-*` — в паттерн-слое (T17.13), светлый база /
+  `ftp--muted`; стенд — `stands/patterns/footer.html`.

@@ -102,16 +102,18 @@ describe('patterns/footer/footer.html — контракт эталонной с
   });
 
   it('связки каркаса — в паттерн-слое (T17.13): <style> в док-HTML больше нет, светлый вариант и тон — классами ftp', () => {
+    const markup = pattern.replace(/<!--[\s\S]*?-->/g, '');
     expect(
-      pattern,
-      '<style> перенесён в patterns/patterns.css (пин синхронности слоя)',
+      markup,
+      '<style> перенесён в patterns/patterns.css (пин синхронности слоя; упоминания в комментариях — история)',
     ).not.toContain('<style>');
-    expect(pattern, 'база — светлая (surface-пара) несёт слой; разметка — класс ftp').toMatch(
+    expect(markup, 'база — светлая (surface-пара) несёт слой; разметка — класс ftp').toMatch(
       /class="ftp[" ]/,
     );
-    expect(pattern, 'приглушённый тон — модификатор ftp--muted (AC: светлый вариант в доке)').toContain(
-      'ftp ftp--muted',
-    );
+    expect(
+      markup,
+      'приглушённый тон — модификатор ftp--muted (AC: светлый вариант в доке)',
+    ).toContain('ftp ftp--muted');
   });
 
   it('без inline-стилей (инвариант системы: перекраска vi.css накрывает всё)', () => {

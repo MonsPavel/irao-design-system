@@ -60,6 +60,14 @@ const PATTERN_SOURCES = {
  *  слой» (блок-класс — голый `nvp`, пример спеки T17.11). */
 const PATTERN_SOURCE_EXTRA = [['patterns/list-page/list-page.html', 'nvp']];
 
+/** Крючки слоя без разметки в доке (осознанные, с обоснованием — по образцу
+ *  MARKERS_WITHOUT_RULES, обратное направление: правило слоя без класса в
+ *  док-HTML). hsp--overlay — режим ГЛАВНОЙ (absolute поверх hero, спека
+ *  T17.13 п.3): на стенде шапки он накрыл бы контент и встал в пару к
+ *  banner-лендмарке. Крючок исполнен разметкой ПИЛОТА (index.html — пин
+ *  «overlay-режим главной» ниже) — слой не изобретает имён. */
+const LAYER_HOOKS_WITHOUT_DOC_MARKUP = new Set(['hsp--overlay']);
+
 /** Все пары «док → префикс» для пинов синхронности. */
 const PATTERN_SOURCE_ENTRIES = [...Object.entries(PATTERN_SOURCES), ...PATTERN_SOURCE_EXTRA];
 
@@ -430,8 +438,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     // hover/active-пару модификатор закрепляет сам (T17.9) — слой меняет
     // только значения хуков, защищённые правила --round переразрешают пару.
-    expect(social).not.toContain('background-color');
-    expect(social).not.toContain('color:');
+    expect(social, 'пару несёт хук, не свойство').not.toMatch(/(^|\n)\s*(background-)?color:/);
   });
 });
 
@@ -453,7 +460,7 @@ describe('синхронность док-HTML паттернов и слоя (A
         expect(hooks.size, `${prefix}-крючки в слое есть`).toBeGreaterThan(0);
         for (const hook of hooks) {
           expect(
-            markup.has(hook),
+            markup.has(hook) || LAYER_HOOKS_WITHOUT_DOC_MARKUP.has(hook),
             `${prefix}-крючок «${hook}» из слоя отсутствует в разметке ${docPath}`,
           ).toBe(true);
         }

@@ -134,11 +134,12 @@ describe('patterns/header/header.html — контракт эталонной с
   });
 
   it('связки каркаса — в паттерн-слое (T17.13): <style> в док-HTML больше нет, разметка несёт классы hsp-*', () => {
+    const markup = pattern.replace(/<!--[\s\S]*?-->/g, '');
     expect(
-      pattern,
-      '<style> перенесён в patterns/patterns.css (пин синхронности слоя)',
+      markup,
+      '<style> перенесён в patterns/patterns.css (пин синхронности слоя; упоминания в комментариях — история)',
     ).not.toContain('<style>');
-    expect(pattern, 'шапка несёт блок-класс каркаса').toMatch(/<header class="hsp[" ]/);
+    expect(markup, 'шапка несёт блок-класс каркаса').toMatch(/<header class="hsp[" ]/);
   });
 
   it('без inline-стилей (инвариант системы: перекраска vi.css накрывает всё)', () => {
