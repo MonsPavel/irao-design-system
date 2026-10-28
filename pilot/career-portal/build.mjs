@@ -948,7 +948,6 @@ const WHY_US = [
 const STUDENTS = [
   {
     tone: 'peach',
-    btn: 'orange',
     title: 'Стажировки и практики',
     text: 'Стажировки и практики — уникальный шанс получить опыт в энергетике!',
     illu: 'assets/images/students-illu-boy.png',
@@ -956,7 +955,6 @@ const STUDENTS = [
   },
   {
     tone: 'navy',
-    btn: 'white',
     title: 'Целевое обучение',
     text: 'Проходи целевое обучение, чтобы влиться в профессию, и получай поддержку на старте своей карьеры',
     illu: 'assets/images/students-illu-teacher2.png',
@@ -964,7 +962,6 @@ const STUDENTS = [
   },
   {
     tone: 'light',
-    btn: 'navy',
     title: 'Карьерный трек',
     text: 'Найди лучшие возможности для профессионального роста вместе с нами!',
     illu: 'assets/images/students-illu-career2.png',
@@ -1077,20 +1074,22 @@ function indexMain() {
   );
 
   const studentCards = STUDENTS.map(
-    (card) => `      <article class="cp-students__card cp-students__card--${card.tone}">
-        <div>
+    (
+      card,
+    ) => `      <a class="lnk-card lnk-card--${card.tone}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">
+        <div class="lnk-card__body">
           <h3 class="ui-h4">${esc(card.title)}</h3>
           <p class="ui-small">${esc(card.text)}</p>
         </div>
-        <img class="cp-students__card-illu" src="${esc(card.illu)}" alt="" loading="lazy">
-        <a class="cp-students__card-btn cp-students__card-btn--${card.btn}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">${ARROW}</a>
-      </article>`,
+        <img class="lnk-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">${ARROW}</span>
+      </a>`,
   ).join('\n');
 
   const employerLogos = Array.from(
     { length: 11 },
     (_, index) =>
-      `      <img class="cp-employers__card" src="assets/logos/employer-2086-${1830 + index}.png" alt="Работодатель Группы" width="197" height="108" loading="lazy">`,
+      `      <img class="lgo-card" src="assets/logos/employer-2086-${1830 + index}.png" alt="Работодатель Группы" width="197" height="108" loading="lazy">`,
   ).join('\n');
 
   const mediaCards = [
@@ -1229,7 +1228,7 @@ ${directionsGrid}
 <section class="ui-section">
   <div class="ui-container">
     <h2 class="ui-h2">Популярные работодатели Группы</h2>
-    <div class="cp-employers__grid">
+    <div class="ui-grid lgo-grid">
 ${employerLogos}
     </div>
   </div>
@@ -1274,7 +1273,7 @@ ${whyCards.slice(1).join('\n')}
 <section class="ui-section" id="students">
   <div class="ui-container">
     <h2 class="ui-h2">Школьникам и студентам</h2>
-    <div class="cp-students__grid">
+    <div class="ui-grid lnk-cards">
 ${studentCards}
     </div>
   </div>

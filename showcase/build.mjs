@@ -987,9 +987,12 @@ async function generateShowcase({ themes }) {
   }
 
   // Стенд «patterns/landing-section» (T8.3) — паттерн «Landing-секция»:
-  // правила сборки лендинг-секций + mini-эталон из трёх секций (светлая /
-  // тёмная on-dark / с-изображением full-bleed) БЕЗ нового CSS; связки
-  // паттерна (lsp-*) — <style> в нём (зона сайта, в dist не попадает).
+  // правила сборки лендинг-секций + mini-эталон из шести секций (светлая /
+  // тёмная on-dark / с-изображением full-bleed / с-фото-фоном T17.3 /
+  // nav-карточки и лента логотипов T17.9); связки ритма (lsp-*) — <style>
+  // в нём (зона сайта, в dist не попадает), связки lnk-card/lgo-grid —
+  // паттерн-слой dist/ui-patterns.css (T17.9, withPatterns: true ниже —
+  // четвёртый получатель слоя).
   // Каркас СО СЛУЖЕБНЫМ <h1> (как base/typography/layout/integration):
   // лендинг-секция — не страница, h1 у неё нет по определению, а стенд —
   // демо-страница полигона; axe page-has-heading-one требует h1, заголовки
@@ -1009,6 +1012,9 @@ async function generateShowcase({ themes }) {
       // Служебный h1: лендинг-секция — фрагмент, h1 несёт каркас демо-страницы.
       main: `    <h1 class="ui-showcase-title">patterns/landing-section</h1>\n${readFileSync(landingSectionStandSource, 'utf8').trim()}`,
       themes,
+      // Связки lnk-card/lgo-grid — паттерн-слой (T17.9): стенд подключает
+      // dist/ui-patterns.css.
+      withPatterns: true,
       navCurrent: { kind: 'stand', name: 'patterns/landing-section' },
       navMode: 'strip',
     });
@@ -1411,7 +1417,7 @@ async function generateShowcase({ themes }) {
       '      <ul class="ui-showcase-dist-list">',
       '        <li><code>ui-core.min.css</code> — tokens → base → компоненты;</li>',
       '        <li><code>ui-vi.min.css</code> — VI-модуль ГОСТ Р 52872, подключение осознанное;</li>',
-      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1), подключение опционально;</li>',
+      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1; лендинг-связки lnk-/lgo-, T17.9), подключение опционально;</li>',
       '        <li><code>ui.min.js</code> — все JS-модули (IIFE).</li>',
       '      </ul>',
       '    </section>',
@@ -1566,20 +1572,22 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
       );
     }
   }
-  // Паттерн-слой на полигоне (T17.1): подключение адресно — только стенды
-  // трёх паттернов, чьи связки живут в слое; остальные страницы (и каталог)
-  // слой не получают — опциональность воспроизводится на полигоне.
+  // Паттерн-слой на полигоне (T17.1): подключение адресно — стенды трёх
+  // паттернов и landing-section, чьи связки живут в слое (T17.9 — lnk-card/
+  // lgo-grid); остальные страницы (и каталог) слой не получают —
+  // опциональность воспроизводится на полигоне.
   const patternLayerStands = new Set([
     'stands/patterns/list-page.html',
     'stands/patterns/detail-page.html',
     'stands/patterns/form-page.html',
+    'stands/patterns/landing-section.html',
   ]);
   for (const rel of pages) {
     const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');
     const hasLayerLink = html.includes('ui-patterns.css">');
     assert(
       hasLayerLink === patternLayerStands.has(rel),
-      `${rel}: подключение ui-patterns.css ${patternLayerStands.has(rel) ? 'ожидается' : 'не ожидается'} (слой опционален, получатели — стенды трёх паттернов)`,
+      `${rel}: подключение ui-patterns.css ${patternLayerStands.has(rel) ? 'ожидается' : 'не ожидается'} (слой опционален, получатели — стенды трёх паттернов + landing-section T17.9)`,
     );
   }
   // Идемпотентность баннера: ни дат, ни меток времени.

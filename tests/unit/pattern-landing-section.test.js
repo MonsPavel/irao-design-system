@@ -206,18 +206,23 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     expect(markup, 'атрибут style= в разметке паттерна не используется').not.toContain('style="');
   });
 
-  it('уникальный дизайн секций НЕ тащится в систему: декоративные приёмы — связки lsp-*', () => {
-    // Никаких новых компонентов: только классы ui-* и связки lsp-* (зона сайта).
+  it('уникальный дизайн секций НЕ тащится в систему: декоративные приёмы — связки lsp-*, паттерн-связки слоя lnk-/lgo- (T17.9)', () => {
+    // Никаких новых компонентов: классы ui-*, связки lsp-* (зона сайта) и
+    // паттерн-связки слоя lnk-/lgo- (nav-карточки/лента логотипов, T17.9).
     const classes = [...markupOf(pattern).matchAll(/class="([^"]+)"/g)]
       .flatMap(([, value]) => value.split(/\s+/))
       .filter(Boolean);
     const foreign = classes.filter(
       (cls) =>
-        cls !== 'ui-showcase-stand__note' && !cls.startsWith('ui-') && !cls.startsWith('lsp-'),
+        cls !== 'ui-showcase-stand__note' &&
+        !cls.startsWith('ui-') &&
+        !cls.startsWith('lsp-') &&
+        !cls.startsWith('lnk-') &&
+        !cls.startsWith('lgo-'),
     );
     expect(
       foreign,
-      `все классы эталона — ui-* либо связки lsp-* (найдено: ${foreign.join(', ')})`,
+      `все классы эталона — ui-*, lsp-* либо lnk-/lgo- слоя (найдено: ${foreign.join(', ')})`,
     ).toEqual([]);
   });
 });
