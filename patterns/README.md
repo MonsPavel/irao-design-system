@@ -10,7 +10,8 @@
 
 Слой = связки, которых НЕТ в компонентах: канонические композиции страниц
 поверх готовых ui-компонентов. Каноны list/detail/form-страниц (классы
-`lpp-*` list-page, `dpp-*` detail-page, `fpp-*` form-page) живут единым
+`lpp-*` list-page, `dpp-*` detail-page, `fpp-*` form-page) и лендинг-связок
+(`lnk-*` nav-карточки, `lgo-*` лента логотипов — T17.9) живут единым
 исходником [`patterns.css`](patterns.css) и собираются в **опциональный**
 `dist/ui-patterns.css` (порядок в head: токены → core → patterns → сайт;
 `ui-core.min.css` не меняется). Доки-паттерны остаются источником правды:
@@ -34,7 +35,8 @@
   `stands/patterns/form-page.html`.
 - [`landing-section/`](landing-section/README.md) — «Landing-секция» (T8.3):
   формула секции, тёмные секции (on-dark-пары), full-bleed в контейнере,
-  правило границы «система / сайт»; mini-эталон из 3 секций; стенд —
+  nav-карточки `lnk-*` и лента логотипов `lgo-*` (T17.9 — паттерн-слой),
+  правило границы «система / сайт»; mini-эталон из 6 секций; стенд —
   `stands/patterns/landing-section.html`.
 - [`timeline/`](timeline/README.md) — «Таймлайн этапов» (T14.11): композиция
   «этапы процесса» — ol нумерованных точек с заголовками и текстами, ряд от

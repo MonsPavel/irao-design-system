@@ -273,6 +273,110 @@
   </p>
 </section>
 
+<section aria-labelledby="ui-button-round-heading">
+  <h2 id="ui-button-round-heading">Круглая кнопка (ui-button--round, T17.9)</h2>
+  <style>
+    /* Демо-пары тона (зона сайта): пара круглой кнопки — хуки
+       --ui-button-bg/--ui-button-color (дефолт — primary/on-dark). */
+    .ubn-round-accent {
+      --ui-button-bg: var(--ui-color-accent);
+      --ui-button-color: var(--ui-color-text-on-dark);
+    }
+
+    /* Пара surface/primary (кнопка «white» navy-карточки) — на подложке
+       тона: вне тёмного контекста белая кнопка невидима (канон применения —
+       nav-карточка lnk-card--navy). */
+    .ubn-round-navy {
+      display: inline-flex;
+      align-items: center;
+      padding: var(--ui-space-4);
+      border-radius: var(--ui-radius-md);
+      background-color: var(--ui-color-primary);
+    }
+
+    .ubn-round-navy .ui-button--round {
+      --ui-button-bg: var(--ui-color-surface);
+      --ui-button-color: var(--ui-color-primary);
+    }
+  </style>
+  <p class="ubn-row">
+    <button class="ui-button ui-button--round" id="ui-button-round" type="button" aria-label="Подробнее">
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M2 8h11M9 3l5 5-5 5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </button>
+    <button
+      class="ui-button ui-button--round ubn-round-accent"
+      id="ui-button-round-accent"
+      type="button"
+      aria-label="Подробнее"
+    >
+      <svg
+        aria-hidden="true"
+        focusable="false"
+        width="16"
+        height="16"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M2 8h11M9 3l5 5-5 5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        ></path>
+      </svg>
+    </button>
+    <span class="ubn-round-navy">
+      <button
+        class="ui-button ui-button--round"
+        id="ui-button-round-white"
+        type="button"
+        aria-label="Подробнее"
+      >
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+        >
+          <path
+            d="M2 8h11M9 3l5 5-5 5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          ></path>
+        </svg>
+      </button>
+    </span>
+  </p>
+  <p class="ubn-row ui-small ui-text--muted">
+    Круглая icon-кнопка «кнопка-стрелка» nav-карточек и соц-кнопок (T17.9): диаметр
+    <code>--ui-control-size</code> (20px), круг 50%, паддинг/высота базы сброшены; пара — хуки
+    <code>--ui-button-bg</code>/<code>--ui-button-color</code> (дефолт — primary/on-dark, демо-пары —
+    одобренные пары career-portal: accent/on-dark и surface/primary на подложке navy-тона). hover/active
+    пару не меняют (одобренный дизайн состояний не несёт); icon-only — <code>aria-label</code>
+    обязателен.
+  </p>
+</section>
+
 <section aria-labelledby="ui-button-action-heading">
   <h2 id="ui-button-action-heading">Do / Don't: действие против перехода</h2>
   <p class="ubn-row">
