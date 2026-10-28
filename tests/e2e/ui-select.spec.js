@@ -53,6 +53,13 @@ const SEL = {
   wrapList: '#uiss-wrap .ui-select__list',
   wrapOptions: '#uiss-wrap .ui-select__option',
   wrapSelect: '#uiss-wrap-city',
+  // T17.12: секция «фильтр-пилюля» — модификатор ui-select--pill на обёртке.
+  pillSection: '#uiss-pill',
+  pillSelect: '#uiss-pill-city',
+  pillTrigger: '#uiss-pill .ui-select__trigger',
+  pillList: '#uiss-pill .ui-select__list',
+  pillOptions: '#uiss-pill .ui-select__option',
+  pillPill: '#uiss-pill .ui-select--pill',
   disabledTrigger: '#uiss-disabled .ui-select__trigger',
   form: '#uiss-form',
   formSelect: '#uiss-form-city',
@@ -84,7 +91,7 @@ test.describe('ui-select: деградация без JS и мобильная �
     // Селекты КОМПОНЕНТА (с хуком): шестой select на странице — переключатель
     // темы каркаса, не часть стенда.
     const selectTags = source.match(/<select[^>]*data-ui-select[^>]*>/g) ?? [];
-    expect(selectTags.length, 'на стенде пять select компонента').toBe(5);
+    expect(selectTags.length, 'на стенде шесть select компонента (T17.12: + пилюля)').toBe(6);
     for (const tag of selectTags) {
       expect(tag, `select не скрыт в разметке (AC): ${tag}`).not.toMatch(/ui-select__native/);
     }
@@ -457,8 +464,80 @@ test.describe('ui-select: выбор и синхронизация (AC)', () => 
   });
 });
 
-test.describe('ui-select: форма фильтра (AC)', () => {
-  test('выбранное значение уходит на сервер: change диспатчится, value синхронизован, POST содержит city=spb', async ({
+test.describe('ui-select: фильтр-пилюля ui-select--pill (T17.12)', () => {
+  /** Геометрия пары «обёртка-пилюля → открытый список»: список ПОД обёрткой
+   *  (позиционирование top: calc(100% + gap) считается от обёртки — модуль
+   *  ставит ей relative, обёртка его не ломает), без обрезки и вылета за
+   *  вьюпорт (Testing requirements: открытый listbox в пилюле — chromium). */
+  async function pillGeometry(page) {
+    return page.evaluate(
+      ({ pillSel, listSel }) => {
+        const pill = document.querySelector(pillSel).getBoundingClientRect();
+        const list = document.querySelector(listSel).getBoundingClientRect();
+        return {
+          pill: { top: pill.top, bottom: pill.bottom, left: pill.left, width: pill.width },
+          list: { top: list.top, bottom: list.bottom, left: list.left, width: list.width },
+          viewport: { w: innerWidth, h: innerHeight },
+          docScrollWidth: document.documentElement.scrollWidth,
+        };
+      },
+      { pillSel: SEL.pillPill, listSel: SEL.pillList },
+    );
+  }
+
+  test('открытый listbox в пилюле: список виден ПОД обёрткой, не уже обёртки, без обрезки и hscroll', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-select');
+    const trigger = page.locator(SEL.pillTrigger);
+    const list = page.locator(SEL.pillList);
+
+    await trigger.click();
+    await expectOpen(page, trigger, list);
+
+    const geom = await pillGeometry(page);
+    expect(geom.list.top, 'список открывается ниже низа пилюли (зазор wrap-режима)').toBeGreaterThanOrEqual(
+      geom.pill.bottom,
+    );
+    expect(geom.list.width, 'список не уже обёртки (min-width: 100%)').toBeGreaterThanOrEqual(
+      geom.pill.width,
+    );
+    expect(
+      geom.list.bottom,
+      'список не вылетает за нижний край вьюпорта (не обрезан обёрткой)',
+    ).toBeLessThanOrEqual(geom.viewport.h);
+    expect(
+      geom.docScrollWidth,
+      'открытие не создаёт горизонтальный скролл страницы',
+    ).toBeLessThanOrEqual(geom.viewport.w);
+
+    // Выбор из открытого в пилюле списка — полный цикл модуля не сломан.
+    await page.locator(SEL.pillOptions).nth(1).click();
+    await expectClosed(page, trigger, list);
+    await expect(page.locator(SEL.pillSelect), 'value синхронизован').toHaveValue('msk');
+  });
+
+  test('axe чист с открытой пилюлей; имя поля собирается с label[for] рядом с обёрткой', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-select');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
+    const trigger = page.locator(SEL.pillTrigger);
+    // Имя триггера = подпись поля + выбранное (пара APG; label[for] рядом).
+    await expect(trigger).toContainText('Регион');
+    await expect(trigger).toContainText('Все регионы');
+
+    await trigger.click();
+    await expectOpen(page, trigger, page.locator(SEL.pillList));
+    const violations = (await a11y(page).analyze()).violations.map(
+      (violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`,
+    );
+    expect(violations, 'axe: violations = [] (пилюля открыта)').toEqual([]);
+  });
+});
+
+test.describe('ui-select: форма фильтра (AC)', () => {  test('выбранное значение уходит на сервер: change диспатчится, value синхронизован, POST содержит city=spb', async ({
     stand,
   }) => {
     const page = await stand('ui-select');
@@ -536,5 +615,10 @@ test.describe('ui-select: эталоны (AC; ADR-0004 — только конт
 
     await page.locator(SEL.wrapTrigger).click();
     await shot(page, { name: 'ui-select-open-wrap', viewport: 'desktop' });
+    await page.keyboard.press('Escape');
+
+    // T17.12: открытый listbox в фильтр-пилюле (AC — эталон секции).
+    await page.locator(SEL.pillTrigger).click();
+    await shot(page, { name: 'ui-select-open-pill', viewport: 'desktop' });
   });
 });
