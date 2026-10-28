@@ -355,14 +355,15 @@ const SHELL_PROBES = [
     },
     rect: true,
   },
-  // Трек поднавигации разделов (T16.16, REPORT §9.1 №8): blue-50, pad 4,
-  // radius pill — модификатор ui-tabs--pill (T14.9-adoption); ширина трека
-  // следует контейнеру (shell 1345↔1361 — «принято»), высота 56↔60 —
-  // порог ≤4px (52 против 48 — решение T14.9).
+  // Трек поднавигации разделов (T16.16, REPORT §9.1 №8; T17.11): blue-50,
+  // pad 4, radius pill — модификатор ui-tabs--pill (T14.9-adoption); сетка
+  // 5×1fr и маргины — канон nvp паттерн-слоя (T17.11); ширина трека следует
+  // контейнеру (shell 1345↔1361 — «принято»), высота 56↔60 — порог ≤4px
+  // (52 против 48 — решение T14.9).
   {
     name: 'subnav-track',
     original: '.tabs-pill',
-    pilot: '.cp-subnav .ui-tabs__list',
+    pilot: '.nvp .ui-tabs__list',
     fields: { bg: 'background-color', padding: 'padding', radius: 'border-radius' },
     rect: true,
   },
@@ -372,16 +373,17 @@ const SHELL_PROBES = [
   {
     name: 'subnav-tab',
     original: '.tabs-pill__tab',
-    pilot: '.cp-subnav .ui-tabs__tab',
+    pilot: '.nvp .ui-tabs__tab',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color', bg: 'background-color' },
     rect: true,
   },
-  // Активный таб поднавигации: заливка primary + text-on-dark (ARIA
-  // aria-current="page" вместо класса is-active — прецедент ui-chip T14.8).
+  // Активный таб поднавигации: заливка primary + text-on-dark. T17.11: пару
+  // красит сам модификатор --pill по aria-current="page" (покой + hover) —
+  // сайт-зонная реплика 0,4,0 снята из pilot.css.
   {
     name: 'subnav-tab-active',
     original: '.tabs-pill__tab.is-active',
-    pilot: ".cp-subnav .ui-tabs__tab[aria-current='page']",
+    pilot: ".nvp .ui-tabs__tab[aria-current='page']",
     fields: { bg: 'background-color', color: 'color' },
     rect: true,
   },

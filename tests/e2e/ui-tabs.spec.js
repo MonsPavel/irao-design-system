@@ -31,7 +31,13 @@
  *  8. эталоны: исходное состояние на 4 вьюпортах; выбранный второй таб
  *     статических табов, выбранный таб JSON-кейса и выбранный pill-таб —
  *     desktop (ADR-0004: создаются только в контейнере/CI, локально — no-op
- *     с аннотацией).
+ *     с аннотацией);
+ *  9. T17.11: навигационный набор (#uitab-nav) — межстраничные ссылки без
+ *     панелей, модуль их не инициализирует (контракт T13.6); активная пилюля
+ *     красится по aria-current="page" (покой) — computed-пины активной и
+ *     соседней пилюли; hover-гашение: hover невыбранной не заливает (transparent
+ *     + подпись primary), hover активной не гасит заливку (кейс, ради которого
+ *     pilot.css таскал повтор заливки в паре 0,4,0 — снята).
  */
 import { expect } from '@playwright/test';
 
@@ -51,6 +57,8 @@ const SEL = {
   pillSection: '#uitab-pill',
   pillTabs: '#uitab-pill .ui-tabs__tab',
   pillPanels: '#uitab-pill .ui-tabs__panel',
+  navList: '#uitab-nav .ui-tabs__list',
+  navTabs: '#uitab-nav .ui-tabs__tab',
 };
 
 /** Состояние одного инстанса: ровно один выбранный таб, панель выбранного видима. */
@@ -342,6 +350,103 @@ test.describe('ui-tabs--pill и начальный выбор (aria-current="pag
     // roving tabindex переехал за выбором.
     await expect(tabs.nth(1)).toHaveAttribute('tabindex', '0');
     await expect(tabs.nth(2)).toHaveAttribute('tabindex', '-1');
+  });
+});
+
+test.describe('ui-tabs--pill: навигационный набор по aria-current="page" (T17.11)', () => {
+  /** Computed-пара «фон/подпись» одного таба навигационного набора. */
+  const styleOf = (tab) =>
+    tab.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { bg: style.backgroundColor, color: style.color };
+    });
+
+  test('набор без панелей модуль не инициализирует; активная пилюля красится по aria-current (покой)', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-tabs');
+    const tabs = page.locator(SEL.navTabs);
+
+    // Модуль набор не трогал (панелей нет — контракт T13.6): нет ролей,
+    // roving tabindex и aria-selected — их ставит только инициализация.
+    await expect(page.locator(SEL.navList), 'tablist на наборе-навигации нет').not.toHaveAttribute(
+      'role',
+      'tablist',
+    );
+    await expect(tabs, 'поднавигация — пять ссылок-разделов').toHaveCount(5);
+    for (let i = 0; i < 5; i += 1) {
+      await expect(tabs.nth(i), `таб-ссылка ${i} без tabindex`).not.toHaveAttribute('tabindex');
+      await expect(tabs.nth(i), `таб-ссылка ${i} без aria-selected`).not.toHaveAttribute(
+        'aria-selected',
+      );
+    }
+    await expect(tabs.nth(2), 'активный раздел помечен aria-current="page"').toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+
+    // Computed-пины покоя (пары гейта T2.3): активная — заливка primary +
+    // text-on-dark; соседняя — прозрачная пилюля с подписью text. До T17.11
+    // активную пару по aria-current несли только сайт-зонные реплики
+    // (pilot.css 0,4,0 — сняты).
+    await expect
+      .poll(() => styleOf(tabs.nth(2)), 'активная пилюля: primary + text-on-dark')
+      .toEqual({ bg: 'rgb(0, 40, 86)', color: 'rgb(255, 255, 255)' });
+    await expect
+      .poll(() => styleOf(tabs.nth(0)), 'соседняя пилюля: прозрачная, подпись text')
+      .toEqual({ bg: 'rgba(0, 0, 0, 0)', color: 'rgb(31, 31, 31)' });
+  });
+
+  test('hover-гашение: hover невыбранной не заливает пилюлю, hover активной не гасит заливку', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-tabs');
+    const tabs = page.locator(SEL.navTabs);
+
+    // Hover невыбранной (pages.css:998): базовый hover-филл погашен —
+    // transparent + подпись primary, заливки нет.
+    await tabs.nth(0).hover();
+    await expect
+      .poll(() => styleOf(tabs.nth(0)), 'hover невыбранной: без заливки, подпись primary')
+      .toEqual({ bg: 'rgba(0, 0, 0, 0)', color: 'rgb(0, 40, 86)' });
+
+    // Hover АКТИВНОЙ (кейс, ради которого pilot.css таскал hover-повтор
+    // заливки в паре 0,4,0): hover-исключение знает обе цели — заливка
+    // primary и подпись text-on-dark сохраняются.
+    await tabs.nth(2).hover();
+    await expect
+      .poll(() => styleOf(tabs.nth(2)), 'hover активной: заливка не погашена')
+      .toEqual({ bg: 'rgb(0, 40, 86)', color: 'rgb(255, 255, 255)' });
+  });
+
+  test('остаточный aria-current в модульном инстансе: вид невыбранного — подпись text, hover без заливки', async ({
+    stand,
+  }) => {
+    const page = await stand('ui-tabs');
+    const tabs = page.locator(SEL.pillTabs);
+
+    // Штатный поток T14.9: init выбрал aria-current-таб (третий), клик по
+    // первому переносит выбор — aria-selected уходит, атрибут остаётся
+    // (модуль его не снимает). Ревью T17.11 high: без guard'а ветки current
+    // в :not()-цепочках подписи/hover остаточный таб выпадал из исключений —
+    // покой выглядел как hover (подпись primary), hover — как активная
+    // пилюля (полная заливка). Вид обязан вернуться к невыбранному.
+    await tabs.nth(0).click();
+    await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+    await expect(tabs.nth(2), 'aria-current остался (модуль атрибут не снимает)').toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await expect(tabs.nth(2)).toHaveAttribute('aria-selected', 'false');
+
+    await expect
+      .poll(() => styleOf(tabs.nth(2)), 'остаточный aria-current в покое: прозрачная, подпись text')
+      .toEqual({ bg: 'rgba(0, 0, 0, 0)', color: 'rgb(31, 31, 31)' });
+
+    await tabs.nth(2).hover();
+    await expect
+      .poll(() => styleOf(tabs.nth(2)), 'hover остаточного: без заливки, подпись primary')
+      .toEqual({ bg: 'rgba(0, 0, 0, 0)', color: 'rgb(0, 40, 86)' });
   });
 });
 

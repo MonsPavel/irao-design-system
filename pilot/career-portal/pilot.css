@@ -802,41 +802,13 @@
   margin-top: var(--ui-space-7);
 }
 
-/* Поднавигация разделов (T16.16): вид трека и пилюль несёт модификатор
-   ui-tabs--pill (T14.9); сайт-зоне остаётся раскладка страницы — сетка
-   repeat(5, 1fr) трека (pages.css:975, «сетка 264»; README ui-tabs
-   «Модификатор --pill»: раскладка конкретной страницы, не вида) и
-   вертикальные отступы nav.tabs-pill (pages.css:969: 24/48 =
-   --ui-space-5/--ui-space-7). DS-маргин __list (32px под панелями)
-   сбрасывается: под лентой панелей нет — ритм блока ведёт nav. */
-.cp-subnav {
-  box-sizing: border-box;
-  margin: var(--ui-space-5) 0 var(--ui-space-7);
-}
-
-.cp-subnav .ui-tabs__list {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  margin: 0;
-}
-
-/* Активный раздел — aria-current="page" (семантика «текущая страница»,
-   прецедент ui-chip T14.8): CSS ДС активную пилюлю рисует только по
-   aria-selected — его ставит модуль ui-tabs.js, а межстраничные ссылки
-   без панелей он не инициализирует (контракт T13.6). Пара — реплика
-   правила ДС :where([aria-selected='true']) на токенах; :hover-вариант
-   держит заливку при наведении (hover пилюли ДС специфичнее и гасит фон
-   у невыбранных — его :not-исключение знает только aria-selected). */
-/* Специфичность 0,4,0/0,5,0 — заведомо выше модификатора ДС
-   (.ui-tabs--pill .ui-tabs__tab:not([aria-selected='true']) — 0,3,0,
-   ui-tabs.css:161/172), порядок загрузки бандлов больше не влияет
-   (T16.16-бэклог: раньше пара держалась только тем, что pilot.css
-   грузится последним). */
-.ui-tabs--pill.cp-subnav .ui-tabs__tab[aria-current='page'],
-.ui-tabs--pill.cp-subnav .ui-tabs__tab[aria-current='page']:hover {
-  background-color: var(--ui-color-primary);
-  color: var(--ui-color-text-on-dark);
-}
+/* Поднавигация разделов — ПАТТЕРН-СЛОЙ (T17.11): раскладка (сетка 5×1fr
+   «сетка 264», маргины 24/48) — канон nvp (ds/ui-patterns.css), вид трека
+   и пилюль — модификатор ui-tabs--pill (T14.9), активная пилюля по
+   aria-current="page" (покой + hover) — сам модификатор (T17.11). Сайт-зонная
+   пара .cp-subnav (реплика 0,4,0/0,5,0 + сетка/маргины) снята — последний
+   «специфичностный» хак пилота: в pilot.css не осталось селекторов сильнее
+   0,2,0 кроме бренд-строк футера (осознанные, с комментарием каскада). */
 
 /* ── Строки/сайдбар вакансий — ПАТТЕРН-СЛОЙ (T17.1) ──
    Дубликаты канона list-page (cp-breadcrumbs, cp-vac-rows, cp-vac-row*,
