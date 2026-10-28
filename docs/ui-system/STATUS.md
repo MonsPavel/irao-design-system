@@ -121,7 +121,7 @@
 | T17.17 | done | смержена |
 | T17.10 | done | смержена |
 | T17.11 | done | смержена |
-| T17.12 | todo | EPIC-17: пилюля select-фильтра ui-select--pill + find-bar в паттерн-слой — 4 контекста cp-pill |
+| T17.12 | done | смержена |
 | T17.13 | todo | EPIC-17: каркасы шапки/подвала hsp/ftp в паттерн-слой (режимы absolute/static, светлый 4-колоночный футер, соц-кнопки — остаток §8.3) |
 | T17.14 | todo | EPIC-17: детальные страницы на ddp-канон — vacancy/event/internship/article/company, ~350 строк pilot.css |
 | T17.15 | todo | EPIC-17: лендинг-композиции hro/mrq/mdl/cvh + решение по спец-тинтам violet/green/rose (тон-хук сайт-зоны) |
