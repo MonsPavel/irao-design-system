@@ -605,4 +605,29 @@ describe('пилот career-portal: лендинг-композиции на к�
     expect(compare, 'блок hero — на крючке слоя').toContain("['hero', '.hero', '.hro']");
     expect(compare).not.toContain("['hero', '.hero', '.cp-hero']");
   });
+
+  it('mapping-док синхронен миграции: строка adv-marquee указывает на канон mrq слоя, не на снятую сайт-зону (ревью T17.15; прецедент salary→dpp__salary T17.14)', () => {
+    const mapping = readFileSync(
+      join(root, 'docs', 'ui-system', 'architecture', 'tokens-career-portal-mapping.md'),
+      'utf8',
+    ).replace(/\r\n/g, '\n');
+    const row = mapping.split('\n').find((line) => line.includes('промо-блок «бегущие строки»'));
+    expect(row, 'строка mapping-таблицы adv-marquee найдена').toBeTruthy();
+    expect(
+      row,
+      'значения — канон mrq паттерн-слоя (после миграции сайт-зонных правил нет)',
+    ).toMatch(/канон `mrq` паттерн-слоя/);
+    expect(row, 'источник канона назван').toContain('patterns/patterns.css');
+    expect(row, 'док-канон назван (patterns/landing-section/README.md)').toContain(
+      'patterns/landing-section/README.md',
+    );
+    expect(
+      row,
+      'снятая сайт-зона не подаётся как живое место значений (present-tense claim снят)',
+    ).not.toContain('сайт-зона пилота `.cp-adv-marquee*`');
+    expect(
+      mapping,
+      'история переноса T17.15 записана в третьей колонке (строка adv-marquee)',
+    ).toMatch(/T17\.15: правила `\.cp-adv-marquee\*` сняты из pilot\.css/);
+  });
 });
