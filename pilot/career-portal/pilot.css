@@ -9,12 +9,14 @@
  * Различия между ui-компонентом и оригинальным классом — предмет отчёта
  * о сравнении (pilot/career-portal/REPORT.md), а не правки здесь.
  *
- * Блоки без аналога в ДС (hero, production, directions, holding, employers,
- * why-us, students, video, media, team, шапка/подвал сайта,
- * timeline, page-head, vac-row) — честная сайт-зона: кандидаты в
+ * Блоки без аналога в ДС (production, directions, holding, why-us, video,
+ * team, шапка/подвал сайта, page-head) — честная сайт-зона: кандидаты в
  * новые паттерны/компоненты ДС, до решения — живут здесь. Чипы с T14.8 —
  * компонент ui-chip: сайт-зоне остаётся только ритм раскладок вокруг них.
  * CTA-плашки (cta-mail, «Все вакансии») с T17.8 — компонент ui-card--cta.
+ * Лендинг-композиции (hero, adv-marquee, спец-сетка media, cover-hero,
+ * лендинги стажировок) с T17.15 — паттерн-слой hro/mrq/mdl/cvh: сайт-зоне
+ * остаются тон-строки тегов hero (хук --hro-tag-bg).
  */
 
 /* ── страница ── */
@@ -71,114 +73,43 @@
   height: auto;
 }
 
-/* ── hero (сайт-зона) ── */
+/* ── hero — ПАТТЕРН-СЛОЙ (T17.15) ──
+   Связка hero — канон hro (ds/ui-patterns.css): блок (min-height 50.5rem,
+   мобильная база 35rem — канон оригинала @max-767, mobile-first), контент
+   (центр, паддинги 136/container-pad/24), заголовок (56rem, primary),
+   стеклянная пилюля поиска (glass-light, blur 12, прозрачный ui-field,
+   плита «Все вакансии» 72px) и лента тегов (1:1:1:1, min-height 56, стекло
+   blur 10) — правила cp-hero* сняты, разметка build.mjs несёт классы
+   канона. Сайт-зоне остаются ТОЛЬКО тон-строки тегов: спец-тинты —
+   решение владельца (вариант (а) спеки T17.15): тон — бренд-слой, НЕ
+   система; значение живёт классом сайт-зоны на хуке канона --hro-tag-bg
+   (дефолт хука — sand: --ui-color-primary-a26, T14.7); hex в ДС не едет
+   (гейт слоя). Источники значений — оригинал src/blocks/hero/hero.css
+   (violet: rgba(49,66,255,0.2) → color-mix 20%; green: rgba(49,255,118,0.2);
+   rose: rgba(255,49,52,0.2) — hero.css:152–155; sand: rgba(234,125,29,0.26)
+   — mapping T14.7). */
 
-/* Фото-фон/оверлей — ui-section--photo (T17.3, канон --fade-bottom);
-   ритм ui-section погашен: вертикальную геометрию несёт min-height +
-   паддинги __content (паритет высот compare ±4px). */
-.cp-hero {
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 50.5rem;
-  padding: 0;
-}
-
-.cp-hero__content {
-  display: flex;
-  flex: 1 1 auto;
-  flex-direction: column;
-  gap: var(--ui-space-7);
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  padding: 8.5rem var(--ui-container-pad) var(--ui-space-5);
-}
-
-.cp-hero__title {
-  max-width: 56rem;
-  color: var(--ui-color-primary);
-  text-align: center;
-}
-
-/* Стеклянная строка поиска: input — ui-field__input, геометрия — сайт */
-.cp-hero__search {
-  display: flex;
-  gap: var(--ui-space-3);
-  align-items: center;
-  width: 50rem;
-  max-width: 100%;
-  padding: 4px 4px 4px var(--ui-space-5);
-  border-radius: var(--ui-radius-pill);
-  background-color: var(--ui-color-glass-light);
-  backdrop-filter: blur(12px);
-}
-
-.cp-hero__search-icon {
-  flex: 0 0 auto;
-  color: var(--ui-color-primary);
-}
-
-.cp-hero__search .ui-field {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.cp-hero__search .ui-field__input {
-  border-color: transparent;
-  background-color: transparent;
-}
-
-.cp-hero__search-all {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  height: 4.5rem;
-  padding: var(--ui-space-3) var(--ui-space-5);
-  border-radius: var(--ui-radius-pill);
-  background-color: var(--ui-color-surface-muted);
-  color: var(--ui-color-primary-deep);
-  font-size: var(--ui-fs-small);
-  font-weight: var(--ui-fw-small);
-}
-
-/* Стеклянные теги hero: ui-tag + сай-зона растягивает и стеклит */
-.cp-hero__tags {
-  display: flex;
-  gap: var(--ui-space-4);
-  width: 100%;
-  max-width: var(--ui-container-max);
-  margin: 0 auto;
-  padding: 0 var(--ui-container-pad) var(--ui-space-6);
-}
-
-.cp-hero__tag {
-  flex: 1 1 0;
-  justify-content: center;
-  min-height: 3.5rem;
-  color: var(--ui-color-text-on-dark);
-  font-size: var(--ui-fs-lead);
-  backdrop-filter: blur(10px);
-}
-
+/* Тон violet: color-mix спец-тинта оригинала (hero.css:152). */
 .cp-hero__tag--violet {
-  background-color: color-mix(in srgb, #3142ff 20%, transparent);
+  --hro-tag-bg: color-mix(in srgb, #3142ff 20%, transparent);
 }
 
-/* hero__tag--sand: ступень 26% лестницы тинтов T14.7 (в оригинале плашка
-   акцентная rgba(234,125,29,0.26) — mapping-решение T14.7: --ui-color-primary-a26) */
+/* Тон sand: ступень 26% лестницы тинтов T14.7 (в оригинале плашка
+   акцентная rgba(234,125,29,0.26) — mapping-решение T14.7:
+   --ui-color-primary-a26); значение совпадает с дефолтом хука — строка
+   оставлена для явности тона в разметке (активация не зависит от дефолта). */
 .cp-hero__tag--sand {
-  background-color: var(--ui-color-primary-a26);
+  --hro-tag-bg: var(--ui-color-primary-a26);
 }
 
+/* Тон green: color-mix спец-тинта оригинала (hero.css:154). */
 .cp-hero__tag--green {
-  background-color: color-mix(in srgb, #31ff76 20%, transparent);
+  --hro-tag-bg: color-mix(in srgb, #31ff76 20%, transparent);
 }
 
+/* Тон rose: color-mix спец-тинта оригинала (hero.css:155). */
 .cp-hero__tag--rose {
-  background-color: color-mix(in srgb, #ff3134 20%, transparent);
+  --hro-tag-bg: color-mix(in srgb, #ff3134 20%, transparent);
 }
 
 /* ── production: карусель (T17.7 — компонент ui-carousel) ──
@@ -455,29 +386,16 @@
   border: var(--ui-border-width) solid var(--ui-color-border);
 }
 
-/* ── media: сетка главной (сайт-зона; карточки — ui-card) ── */
-
-.cp-media__grid {
-  display: grid;
-  gap: var(--ui-space-3);
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.cp-media__card--big {
-  grid-row: span 2;
-  grid-column: span 2;
-}
-
-.cp-media__lead {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-  grid-column: span 2;
-  padding: var(--ui-space-4);
-  border: var(--ui-border-width) solid var(--ui-color-border);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface);
-}
+/* ── media: сетка главной — ПАТТЕРН-СЛОЙ (T17.15) ──
+   Спец-сетка «Медиа» — канон mdl (ds/ui-patterns.css): 4 колонки от lg,
+   2 от md, 1 в мобильной базе; mdl__lead — сводка 2 колонки (от md);
+   правила cp-media__grid/cp-media__card--big/cp-media__lead сняты.
+   big-карточка рендерится БЕЗ span 2×2: правило .cp-media__card--big
+   не применялось с клона (в разметке был опечаточный класс
+   cp-media-card--big мимо селектора) — одобренные высоты/скрин-пары
+   сняты без span (замер 27.10: активация +214px docHeight index, +3.1% >
+   порога compare ±1%); канон mdl__big в слое есть (док-стенд рендерит
+   2×2), активация в пилоте — design-decision владельца. */
 
 /* ── team / cta-mail (сайт-зона) ── */
 
@@ -691,77 +609,18 @@ a.cp-intern-card {
   -webkit-line-clamp: 3;
 }
 
-/* Лендинг стажировок: обложка */
-.cp-cover-hero {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-4);
-  align-items: flex-start;
-}
+/* Лендинг стажировок: обложка — ПАТТЕРН-СЛОЙ (T17.15): колонка «заголовок
+   + lead + CTA» — канон cvh (ds/ui-patterns.css, gap 16 start; оригинал
+   .cover-hero pages.css:953 — gap 20, принято ДС), правило cp-cover-hero
+   снято; роли/кнопка — разметка. */
 
-/* Бегущая «типографская» полоса преимуществ (сайт-зона). T16.15 — канон
-   .adv-marquee (pages.css:1058–1081): строки 40/18/13 fw 500 uppercase
-   ls 0.02em color primary на светлом blue-50. 40/18/13 вне шкалы ДС —
-   литералы «как есть» (токены ДС не требуются, Implementation requirements
-   п.1); отступы/радиус/фон — на токенах ДС (space-7 = 48, radius-md = 16 =
-   --radius-card оригинала, surface-muted = blue-50). */
-.cp-adv-marquee {
-  box-sizing: border-box;
-  display: grid;
-  gap: var(--ui-space-7);
-  align-items: center;
-  grid-template-columns: 1.2fr 1fr;
-  padding: var(--ui-space-7);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface-muted);
-}
-
-.cp-adv-marquee__type {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-3);
-  min-width: 0;
-}
-
-/* Строка-база (pages.css:1070): fw 500, uppercase через CSS (контент
-   строчный — a11y), ls 0.02em, color primary; межстрочное наследует 1.35 */
-.cp-adv-marquee__line {
-  color: var(--ui-color-primary);
-  font-weight: var(--ui-fw-body-bold);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-}
-
-/* Подписи «Группа «Интер РАО»» / «опыт · наставники…» (pages.css:1077) */
-.cp-adv-marquee__line--bar {
-  font-size: 1.125rem;
-}
-
-/* Мелкая подпись «оплачиваемые программы…» (pages.css:1079) */
-.cp-adv-marquee__line--sm {
-  font-size: 0.8125rem;
-  font-weight: var(--ui-fw-small);
-}
-
-/* Базовая крупная строка «НАЧНИ КАРЬЕРУ…» (pages.css:1081) */
-.cp-adv-marquee__line--xl {
-  font-size: 2.5rem;
-  line-height: 1.15;
-  letter-spacing: 0;
-  white-space: normal;
-}
-
-.cp-adv-marquee__body {
-  display: flex;
-  gap: var(--ui-space-4);
-  align-items: center;
-}
-
-.cp-adv-marquee__photo {
-  object-fit: cover;
-  width: 16rem;
-  border-radius: var(--ui-radius-md);
-}
+/* Бегущая «типографская» полоса преимуществ — ПАТТЕРН-СЛОЙ (T17.15):
+   канон .adv-marquee (T16.15, pages.css:1058–1081) — связка mrq
+   (ds/ui-patterns.css): сетка 1.2fr/1fr от lg (база — колонка, mobile-first),
+   строки 40/18/13 fw 500 uppercase ls 0.02em primary (литералы «как есть»,
+   вне шкалы ДС — Implementation requirements п.1 T16.15), лента __type
+   (гэп 12, min-width: 0), тело/фото. Правила cp-adv-marquee* сняты,
+   разметка build.mjs несёт классы канона. Сайт-зоны в блоке нет. */
 
 /* Таймлайн этапов — связки tlp-* паттерн-слоя (T17.10): правила копии
    cp-timeline сняты, канон приходит dist/ui-patterns.css (точки 56px
@@ -1083,10 +942,13 @@ a.cp-intern-card {
   .cp-why-us__row,
   .cp-holding__stats,
   .cp-adv-grid,
-  .cp-events-feature,
-  .cp-media__grid {
+  .cp-events-feature {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Спец-сетка «Медиа» — канон mdl (T17.15): 2 колонки от md, 4 от lg —
+     ступень 1023 копипасты снята (mobile-first, Implementation
+     requirements T17.1 п.4). */
 
   /* Таймлайн — канон слоя tlp- (T17.10): ступень 1023 копипасты снята
      (ряд от 1024, до — колонка; mobile-first Implementation requirements
@@ -1103,7 +965,9 @@ a.cp-intern-card {
   /* Галерея статьи — канон dpp__gallery (T17.14): мобильная база колонкой,
      2fr/1fr от lg — ступень 1023 снята (pages.css:914). */
 
-  .cp-adv-marquee,
+  /* Adv-marquee — канон mrq (T17.15): база — колонка, 1.2fr/1fr от lg —
+     ступень 1023 копипасты снята (mobile-first). */
+
   .cp-dir-modal {
     grid-template-columns: 1fr;
   }
@@ -1124,31 +988,27 @@ a.cp-intern-card {
      ссылок/копирайта включается от md (mobile-first, Implementation
      requirements T17.1 п.4). */
 
-  .cp-hero {
-    min-height: 35rem;
-  }
+  /* Hero — канон hro (T17.15): мобильная база min-height 35rem, 50.5rem
+     от md — ступень 767 копипасты снята (mobile-first). */
 
   .cp-directions__grid,
   .cp-why-us__top,
   .cp-why-us__row,
   .cp-holding__stats,
   .cp-adv-grid,
-  .cp-events-feature,
-  .cp-media__grid {
+  .cp-events-feature {
     grid-template-columns: 1fr;
   }
+
+  /* Спец-сетка «Медиа» — канон mdl (T17.15): мобильная база 1 колонка без
+     span (span big/lead включается от md) — ступень 767 копипасты снята
+     (mobile-first). */
 
   /* Таймлайн — канон слоя tlp- (T17.10): ступень 767 копипасты снята —
      мобильная база канона и так колонка. */
 
   /* Nav-карточки и лента логотипов — связки lnk-cards/lgo-grid (T17.9):
      мобильная база одна колонка — канон слоя, лестница снята. */
-
-  .cp-media__card--big,
-  .cp-media__lead {
-    grid-row: span 1;
-    grid-column: span 1;
-  }
 
   /* Строка вакансии — слой lpp-row (T17.1): на узких экранах пилюля
      переносится под текст flex-wrap'ом канона; лестничная колонка 767

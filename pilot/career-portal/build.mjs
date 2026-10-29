@@ -1056,7 +1056,7 @@ function mediaHomeCard(card, extraClass = '') {
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
     card.type
   ];
-  return `<article class="ui-card ui-card--hover ui-card--link cp-media-card${extraClass}">
+  return `<article class="ui-card ui-card--hover ui-card--link${extraClass}">
   <a class="ui-card__link" href="article.html">
     <div class="cp-article-card__photo-wrap">
       <img class="cp-article-card__photo" src="${esc(card.image)}" alt="" loading="lazy">
@@ -1114,8 +1114,15 @@ function indexMain() {
   ).join('\n');
 
   const mediaCards = [
-    mediaHomeCard(MEDIA_HOME[0], ' cp-media-card--big'),
-    `      <div class="cp-media__lead">
+    // Сетка «Медиа» — канон mdl (T17.15): mdl__lead — сводка 2 колонки.
+    // big-карточка БЕЗ mdl__big: правило span 2×2 не применялось с клона
+    // (в разметке был опечаточный cp-media-card--big мимо селектора
+    // cp-media__card--big) — одобренные высоты/скрин-пары сняты без span
+    // (замер 27.10: активация +214px docHeight index, +3.1% > порога
+    // compare ±1%); канон mdl__big в слое есть, активация —
+    // design-decision владельца.
+    mediaHomeCard(MEDIA_HOME[0]),
+    `      <div class="mdl__lead">
         <h3 class="ui-h4">${esc(MEDIA_HOME[0].caption)}</h3>
         <time class="ui-small ui-text--muted">19.02.26</time>
         <p class="ui-small">Молодые люди приобретают опыт по основным для компании направлениям: электро-, теплоэнергетика и техника; энергетическое машиностроение; электрические станции, сети и системы; тепловые электрические станции.</p>
@@ -1137,28 +1144,31 @@ function indexMain() {
     </button></li>`,
   ).join('\n');
 
-  return `<section class="ui-section ui-section--photo cp-hero">
+  return `<section class="ui-section ui-section--photo hro">
   <!-- фото-фон — ui-section--photo (T17.3): слои __bg/__overlay ДС
-       (z-пара «контент над фоном»), оверлей — канон --fade-bottom -->
+       (z-пара «контент над фоном»), оверлей — канон --fade-bottom.
+       Связка hero — канон hro паттерн-слоя (T17.15): контент/заголовок/
+       пилюля поиска/лента тегов; тон тега — класс сайт-зоны на хуке
+       --hro-tag-bg (спец-тинты, решение владельца — вариант (а)). -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/hero-city-1.png" alt="" loading="eager">
   </div>
   <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
-  <div class="cp-hero__content">
-    <h1 class="cp-hero__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>
-    <form class="cp-hero__search" action="vacancies.html" method="get" role="search">
-      <svg class="cp-hero__search-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M26 26l8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+  <div class="hro__content">
+    <h1 class="hro__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>
+    <form class="hro__search" action="vacancies.html" method="get" role="search">
+      <svg class="hro__search-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M26 26l8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       <div class="ui-field">
         <input class="ui-field__input" type="search" name="q" placeholder="Введите название вакансии" aria-label="Поиск вакансий">
       </div>
-      <a class="cp-hero__search-all" href="vacancies.html">Все вакансии</a>
+      <a class="hro__search-all" href="vacancies.html">Все вакансии</a>
     </form>
   </div>
-  <div class="cp-hero__tags">
-    <span class="ui-tag cp-hero__tag cp-hero__tag--violet">Стабильная компания</span>
-    <span class="ui-tag cp-hero__tag cp-hero__tag--sand">Масштаб задач</span>
-    <span class="ui-tag cp-hero__tag cp-hero__tag--green">Работа со смыслом</span>
-    <span class="ui-tag cp-hero__tag cp-hero__tag--rose">Сильная команда</span>
+  <div class="hro__tags">
+    <span class="ui-tag hro__tag cp-hero__tag--violet">Стабильная компания</span>
+    <span class="ui-tag hro__tag cp-hero__tag--sand">Масштаб задач</span>
+    <span class="ui-tag hro__tag cp-hero__tag--green">Работа со смыслом</span>
+    <span class="ui-tag hro__tag cp-hero__tag--rose">Сильная команда</span>
   </div>
 </section>
 
@@ -1317,7 +1327,7 @@ ${studentCards}
 <section class="ui-section" id="media">
   <div class="ui-container">
     <h2 class="ui-h2">Медиа о работе в компании</h2>
-    <div class="cp-media__grid">
+    <div class="mdl">
 ${mediaCards}
     </div>
   </div>
@@ -2005,7 +2015,7 @@ function internshipsMain(set) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-cover-hero">
+    <div class="cvh">
       <h1 class="ui-page-title">${title}</h1>
       <p class="cp-page-subtitle ui-lead">${esc(data.subtitle)}</p>
       <a class="ui-button ui-button--primary" href="#directions">смотреть ${titleLower}</a>
@@ -2072,17 +2082,18 @@ ${applyDialogHtml()}
 
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-adv-marquee">
-      <div class="cp-adv-marquee__type" aria-hidden="true">
-        <!-- T16.15: бирки строк — по ролям оригинала (internships.html:247–250):
-             подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px) -->
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--bar">Группа «Интер РАО»</span>
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--xl">НАЧНИ КАРЬЕРУ В ЭНЕРГЕТИКЕ ЕЩЁ ВО ВРЕМЯ УЧЁБЫ</span>
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--bar">опыт · наставники · трудоустройство</span>
+    <div class="mrq">
+      <!-- Канон adv-marquee (T16.15) — связка mrq паттерн-слоя (T17.15):
+           бирки строк — по ролям оригинала (internships.html:247–250):
+           подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px) -->
+      <div class="mrq__type" aria-hidden="true">
+        <span class="mrq__line mrq__line--bar">Группа «Интер РАО»</span>
+        <span class="mrq__line mrq__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
+        <span class="mrq__line mrq__line--xl">НАЧНИ КАРЬЕРУ В ЭНЕРГЕТИКЕ ЕЩЁ ВО ВРЕМЯ УЧЁБЫ</span>
+        <span class="mrq__line mrq__line--bar">опыт · наставники · трудоустройство</span>
       </div>
-      <div class="cp-adv-marquee__body">
-        <img class="cp-adv-marquee__photo" src="${esc(data.advantages_companies.image)}" alt="">
+      <div class="mrq__body">
+        <img class="mrq__photo" src="${esc(data.advantages_companies.image)}" alt="">
         <p class="ui-body">${esc(data.advantages_companies.text)}</p>
       </div>
     </div>

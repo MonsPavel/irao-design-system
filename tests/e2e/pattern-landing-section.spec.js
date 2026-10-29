@@ -551,6 +551,180 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
   );
 });
 
+standTest.describe('patterns/landing-section: лендинг-композиции (hro/mrq/mdl/cvh, T17.15)', () => {
+  const SEL_HRO = { section: '#lsp-hero', title: '#lsp-hero-title' };
+  const SEL_MRQ = { section: '#lsp-marquee', title: '#lsp-marquee-title' };
+  const SEL_MDL = { section: '#lsp-media-grid', title: '#lsp-media-grid-title' };
+  const SEL_CVH = { section: '#lsp-cover-hero', title: '#lsp-cover-hero-title' };
+
+  standTest(
+    'hero: блок hro на фото-секции, пилюля 800px стекло blur(12), плита 72px, лента 4 тегов min-height 56',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await expect(page.locator(SEL_HRO.title)).toBeVisible();
+
+      await page.setViewportSize(VIEWPORTS.xl);
+      const hero = await page.locator(SEL_HRO.section).evaluate((el) => {
+        const search = el.querySelector('.hro__search');
+        const plate = el.querySelector('.hro__search-all');
+        const tags = [...el.querySelectorAll('.hro__tag')];
+        return {
+          minHeight: getComputedStyle(el).minHeight,
+          overflow: getComputedStyle(el).overflow,
+          searchW: Math.round(search.getBoundingClientRect().width),
+          searchBlur: getComputedStyle(search).backdropFilter,
+          inputBg: getComputedStyle(el.querySelector('.hro__search .ui-field__input'))
+            .backgroundColor,
+          plateH: Math.round(plate.getBoundingClientRect().height),
+          tagCount: tags.length,
+          tagMinH: getComputedStyle(tags[0]).minHeight,
+          tagBlur: getComputedStyle(tags[0]).backdropFilter,
+        };
+      });
+      expect(hero.minHeight, 'min-height 50.5rem = 808px оригинала от md').toBe('808px');
+      expect(hero.overflow, 'клип фото-фона').toBe('hidden');
+      expect(hero.searchW, 'пилюля 50rem = 800px (hero.css:72)').toBe(800);
+      expect(hero.searchBlur, 'стекло пилюли blur(12px)').toBe('blur(12px)');
+      expect(hero.inputBg, 'внутреннее поле прозрачное').toBe('rgba(0, 0, 0, 0)');
+      expect(hero.plateH, 'плита «Все вакансии» 72px').toBe(72);
+      expect(hero.tagCount, 'лента — 4 тега').toBe(4);
+      expect(hero.tagMinH, 'теги min-height 56px').toBe('56px');
+      expect(hero.tagBlur, 'стекло тега blur(10px)').toBe('blur(10px)');
+    },
+  );
+
+  standTest(
+    'тон тега hero — дефолт хука sand: computed bg = --ui-color-primary-a26 (спец-тоны — сайт-зона)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.addStyleTag({
+        content: '.lsp-probe-sand { background-color: var(--ui-color-primary-a26); }',
+      });
+      const same = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.className = 'lsp-probe-sand';
+        document.body.appendChild(probe);
+        const tag = document.querySelector('#lsp-hero .hro__tag');
+        const result =
+          getComputedStyle(tag).backgroundColor === getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return result;
+      });
+      expect(same, 'тег без тон-класса рендерит дефолт sand (T14.7)').toBe(true);
+    },
+  );
+
+  standTest(
+    'mrq: сетка колонка → 1.2fr/1fr от lg; строка --xl 40px/1.15/ls 0; лента aria-hidden',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await expect(page.locator(SEL_MRQ.title)).toBeVisible();
+      const columnsOf = () =>
+        page
+          .locator(`${SEL_MRQ.section} .mrq`)
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await columnsOf(), 'мобильная база — колонка (оригинал ≤1023)').toBe(1);
+      await page.setViewportSize({ width: 1024, height: 900 });
+      expect(await columnsOf(), 'от lg — 1.2fr/1fr (pages.css:1060)').toBe(2);
+
+      await page.setViewportSize(VIEWPORTS.xl);
+      const xl = await page.locator(`${SEL_MRQ.section} .mrq__line--xl`).evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return {
+          fs: cs.fontSize,
+          lh: cs.lineHeight,
+          ls: cs.letterSpacing,
+          hidden: el.parentElement.getAttribute('aria-hidden'),
+        };
+      });
+      expect(xl.fs, 'литерал 40px — pages.css:1081').toBe('40px');
+      expect(xl.lh, '1.15 — pages.css:1081').toBe('46px');
+      expect(xl.ls, 'ls 0 — pages.css:1081 (0 вычисляется в normal)').toBe('normal');
+      expect(xl.hidden, 'лента aria-hidden (дубликат смысла)').toBe('true');
+    },
+  );
+
+  standTest(
+    'mdl: 1 колонка (375) → 2 с span big 2×2 / lead 2 (768) → 4 (1280)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await expect(page.locator(SEL_MDL.title)).toBeVisible();
+      const grid = page.locator(`${SEL_MDL.section} .mdl`);
+      const state = () =>
+        grid.evaluate((el) => {
+          const big = el.querySelector('.mdl__big');
+          const lead = el.querySelector('.mdl__lead');
+          return {
+            cols: getComputedStyle(el).gridTemplateColumns.split(' ').length,
+            bigRow: big ? getComputedStyle(big).gridRow : null,
+            bigCol: big ? getComputedStyle(big).gridColumn : null,
+            leadCol: lead ? getComputedStyle(lead).gridColumn : null,
+          };
+        });
+
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect((await state()).cols, 'мобильная база — 1 колонка').toBe(1);
+      expect(
+        (await state()).bigRow,
+        'span в базе не активен (1 колонка — span 2 порвал бы сетку)',
+      ).toBe('auto');
+
+      await page.setViewportSize(VIEWPORTS.tablet);
+      const md = await state();
+      expect(md.cols, 'md — 2 колонки (оригинал ≤1023)').toBe(2);
+      expect(md.bigRow, 'big — row span 2 от md').toBe('span 2');
+      expect(md.bigCol, 'big — col span 2 от md').toBe('span 2');
+      expect(md.leadCol, 'lead — col span 2 от md').toBe('span 2');
+
+      await page.setViewportSize(VIEWPORTS.xl);
+      expect((await state()).cols, 'lg — 4 колонки').toBe(4);
+    },
+  );
+
+  standTest('cvh: колонка gap 16 start', async ({ stand }) => {
+    const page = await stand('patterns/landing-section');
+    await expect(page.locator(SEL_CVH.title)).toBeVisible();
+    const cvh = await page.locator(`${SEL_CVH.section} .cvh`).evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { dir: cs.flexDirection, gap: cs.gap, align: cs.alignItems };
+    });
+    expect(cvh.dir, 'колонка').toBe('column');
+    expect(cvh.gap, 'зазор 16px — space-4').toBe('16px');
+    expect(cvh.align, 'прижато влево (pages.css:957)').toBe('flex-start');
+  });
+
+  standTest(
+    'VI-инвариант стекла (Implementation requirements п.1): в img:off backdrop-filter отключён правилом a11y/vi.css',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.evaluate(() => {
+        document.body.classList.add('vi', 'vi-img--off');
+      });
+      const state = await page.locator('#lsp-hero').evaluate((el) => {
+        const search = el.querySelector('.hro__search');
+        const tag = el.querySelector('.hro__tag');
+        return {
+          searchBlur: getComputedStyle(search).backdropFilter,
+          tagBlur: getComputedStyle(tag).backdropFilter,
+          // Пре-существующее поведение vi.css (T9.1): [class*='-photo']
+          // матчит и саму ui-section--photo — фото-секция в img:off скрыта
+          // ЦЕЛИКОМ (пилюля/теги не рендерятся). Пин задокументированного
+          // поведения: инвариант blur проверяется computed-значением.
+          sectionDisplay: getComputedStyle(el).display,
+        };
+      });
+      expect(state.searchBlur, 'blur пилюли отключён в img:off (фото скрыто)').toBe('none');
+      expect(state.tagBlur, 'blur тега отключён в img:off').toBe('none');
+      expect(
+        state.sectionDisplay,
+        'фото-секция скрыта в img:off (пре-существующее правило vi.css [class*=-photo])',
+      ).toBe('none');
+    },
+  );
+});
+
 standTest.describe('patterns/landing-section: a11y страницы (AC)', () => {
   standTest('axe страницы чист', async ({ stand }) => {
     const page = await stand('patterns/landing-section');

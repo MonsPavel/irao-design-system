@@ -12,10 +12,10 @@
  * поля) слой не дублирует — гейт селекторов: только канонические префиксы
  * lpp- (list-page), ddp- (detail-page), fpp- (form-page), lnk-/lgo-
  * (лендинг-связки nav-карточек и ленты логотипов, T17.9), tlp- (таймлайн,
- * T17.10), nvp (поднавигация разделов, T17.11), hsp-/ftp- (каркасы шапки/
- * подвала, T17.13); потомки — компоненты ui-*. Список пополняют задачи
- * эпика (лендинг-связки, find-bar, каркасы шапки/подвала —
- * T17.9/T17.12/T17.13), не руками сайтов.
+ * T17.10), nvp (поднавигация, T17.11), hsp-/ftp- (каркасы шапки/подвала,
+ * T17.13), hro/mrq/mdl/cvh (лендинг-композиции hero/adv-marquee/медиа-сетки/
+ * cover-hero, T17.15); потомки — компоненты ui-*. Список пополняют задачи
+ * эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
  * несёт те же классы, значения перенесены 1:1 (включая «как есть»-литералы
@@ -1343,4 +1343,354 @@
   .ftp__inner {
     grid-template-columns: auto 2fr 2fr 1fr;
   }
+}
+
+/* ════════════════ Лендинг-композиции (T17.15) — связки hro/mrq/mdl/cvh ════════════════
+ *
+ * Порты лендинг-блоков career-portal: hero (самый фирменный блок, PLAN §P2-1),
+ * бегущая «типографская» полоса преимуществ (канон T16.15), спец-сетка «Медиа»
+ * и cover-hero лендингов стажировок. Источник значений — принятые связки
+ * пилота (pilot.css до миграции, строки в комментариях) и оригинала
+ * (src/blocks/hero/hero.css, css/pages.css, src/blocks/media/media.css);
+ * перенос механический, лестницы оригинала переформулированы mobile-first
+ * по шкале T2.5 (Implementation requirements T17.1 п.4). Разметка канона —
+ * patterns/landing-section/landing-section.html (док — источник правды,
+ * пин синхронности tests/unit/landing-compositions.test.js).
+ *
+ * Спец-тинты hero-тегов — РЕШЕНИЕ ВЛАДЕЛЬЦА, вариант (а) спеки T17.15: тон —
+ * бренд-слой, НЕ система. Слой несёт ТОЛЬКО хук --hro-tag-bg с каноническим
+ * дефолтом sand (--ui-color-primary-a26 — токен лестницы тинтов T14.7);
+ * спец-тоны violet/green/rose — цветовые строки САЙТ-ЗОНЫ на том же хуке
+ * (color-mix 20%, hex в ДС не едет — гейт слоя; примеры с source-
+ * комментариями — блок «тон тега» дока и pilot.css).
+ *
+ * Стеклянные поверхности (пилюля поиска, теги) несут backdrop-filter в
+ * каноне (Implementation requirements п.1); в VI-режиме img:off blur
+ * отключается правилом a11y/vi.css — фото скрыто, blur нечему размывать.
+ *
+ * Мобильная база ДС: ступени — min-width 768/1024 из шкалы T2.5; сетки —
+ * minmax(0, 1fr) (rem-стресс 32px-базы T3.6, прецедент lpp-layout/dpp-hero).
+ */
+
+/* ── Hero (hro): фото-фон — примитив ui-section--photo (T17.3, оверлей
+   --fade-bottom — канон hero), вертикальную геометрию несёт связка ── */
+
+/* Блок hero: flex-колонка с клипом фото-фона; ритм ui-section погашен
+   (padding: 0 — вертикальную геометрию несут min-height и паддинги
+   __content, паритет высот compare ±4px). min-height: 808px оригинала
+   (hero.css:3) = 50.5rem «как есть»; мобильная база 35rem = 560px —
+   ступень @max-767 оригинала (hero.css:211), переформулирована
+   mobile-first (включение от md, шкала T2.5) — рендер тот же. */
+.hro {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 35rem;
+  padding: 0;
+}
+
+@media (min-width: 768px) {
+  .hro {
+    min-height: 50.5rem;
+  }
+}
+
+/* Контент hero: центр строки, шаг блоков 48px (--ui-space-7; оригинал
+   gap 64px hero.css:53 — принято ДС в калибровке клона), паддинги
+   136px/container-pad/24px (8.5rem «как есть» — hero.css:54; низ 24px —
+   space-5 против 40px оригинала — принято ДС). */
+.hro__content {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--ui-space-7);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 8.5rem var(--ui-container-pad) var(--ui-space-5);
+}
+
+/* Заголовок hero: 56rem = 896px («как есть» пилота против 900px оригинала,
+   hero.css:59 — принято ДС), центр строки. Цвет — явная пара одобренного
+   дизайна на фото (прецедент lsp-photo: заголовочная роль несёт
+   --ui-color-heading, пара hero на фото-фоне фиксируется связкой). */
+.hro__title {
+  box-sizing: border-box;
+  max-width: 56rem;
+  color: var(--ui-color-primary);
+  text-align: center;
+}
+
+/* Стеклянная пилюля поиска (Implementation requirements п.1): стекло —
+   токен glass-light + blur(12px) (hero.css:75-77); ширина 50rem = 800px
+   «как есть» (hero.css:72); паддинг 4px «как есть» (hero.css:74), левый
+   24px — space-5 (принято ДС против 28px оригинала); радиус — пилюля.
+   Поведение поиска — канон search-overlay/find-bar (Out of scope T17.15):
+   GET-форма разметки. */
+.hro__search {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: center;
+  width: 50rem;
+  max-width: 100%;
+  padding: 4px 4px 4px var(--ui-space-5);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-glass-light);
+  backdrop-filter: blur(12px);
+}
+
+/* Иконка поиска — декоративный svg разметки (aria-hidden). */
+.hro__search-icon {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  color: var(--ui-color-primary);
+}
+
+/* Внутреннее поле: растягивается на пилюлю; рамка/фон гасятся — стекло
+   несёт поверхность (порт hero__search-input hero.css:83-93; вид поля —
+   сам компонент ui-field). */
+.hro__search .ui-field {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.hro__search .ui-field__input {
+  border-color: transparent;
+  background-color: transparent;
+}
+
+/* Плита «Все вакансии» (слот действия): 72px высота «как есть»
+   (hero.css:114 = 4.5rem), поверхность blue-50/текст primary-deep —
+   пара одобренного дизайна (hero.css:116/120), строки fs-small/fw-small.
+   Не кнопка в оригинале — ссылка-плита; интерактив несёт разметка. */
+.hro__search-all {
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  height: 4.5rem;
+  padding: var(--ui-space-3) var(--ui-space-5);
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-surface-muted);
+  color: var(--ui-color-primary-deep);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+}
+
+/* Лента тегов под контентом: 4 тега на всю ленту контейнера
+   (hero.css:127-135); низ 32px — space-6 (принято ДС против 48px
+   оригинала). Выйти за ленту контента тегам нельзя (max-width
+   контейнера + авто-маргины — как у ui-container). */
+.hro__tags {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-4);
+  width: 100%;
+  max-width: var(--ui-container-max);
+  margin: 0 auto;
+  padding: 0 var(--ui-container-pad) var(--ui-space-6);
+}
+
+/* Тег hero: стекло на фото (blur(10px) — hero.css:148), 1:1:1:1 ленты
+   (flex 1 1 0), min-height 56px «как есть» (hero.css:142 = 3.5rem),
+   строка 18px — fs-lead, текст on-dark (hero.css:147). ТОН — параметр
+   сайта: хук --hro-tag-bg, дефолт — sand (ступень 26% лестницы тинтов
+   T14.7 --ui-color-primary-a26; спец-тоны violet/green/rose — сайт-зона,
+   решение владельца T17.15 вариант (а): тон — бренд-слой, не система).
+   Вид тега (радиус/паддинг) — сам компонент ui-tag. */
+.hro__tag {
+  box-sizing: border-box;
+  flex: 1 1 0;
+  justify-content: center;
+  min-height: 3.5rem;
+  background-color: var(--hro-tag-bg, var(--ui-color-primary-a26));
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-lead);
+  backdrop-filter: blur(10px);
+}
+
+/* ── Adv-marquee (mrq): бегущая «типографская» полоса преимуществ ──
+   Канон .adv-marquee оригинала (pages.css:1058–1081, T16.15): светлый
+   блок blue-50 с радиусом карточки, строки 40/18/13 fw 500 uppercase
+   ls 0.02em color primary. 40/18/13 — литералы «как есть» (вне шкалы
+   ДС — Implementation requirements п.1 T16.15, токены не требуются);
+   uppercase через CSS — контент строчный (a11y: скринридер читает
+   исходный регистр). */
+.mrq {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: grid;
+  gap: var(--ui-space-7);
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  padding: var(--ui-space-7);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Сетка 1.2fr/1fr «как есть» (pages.css:1060) — от lg (1024; оригинал
+   держал её с десктопа, колонка ≤1023 — pages.css:915; mobile-first:
+   база — колонка, включение от 1024 — рендер тот же). minmax(0, 1fr) —
+   rem-стресс T3.6 (прецедент dpp-hero). */
+@media (min-width: 1024px) {
+  .mrq {
+    grid-template-columns: 1.2fr minmax(0, 1fr);
+  }
+}
+
+/* Лента строк: гэп 12px (pages.css:1068 — space-3), min-width: 0 —
+   длинные uppercase-строки переносятся, не распирают трек. */
+.mrq__type {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+  min-width: 0;
+}
+
+/* Строка-база (pages.css:1070–1076): fw 500 (--ui-fw-body-bold), ls
+   0.02em, uppercase через CSS, color primary; межстрочное наследует 1.35. */
+.mrq__line {
+  box-sizing: border-box;
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-fw-body-bold);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Подписи «Группа «Интер РАО»» / «опыт · наставники…» — 18px «как есть»
+   (pages.css:1077 = 1.125rem). */
+.mrq__line--bar {
+  font-size: 1.125rem;
+}
+
+/* Мелкая подпись «оплачиваемые программы…» — 13px «как есть»
+   (pages.css:1079 = 0.8125rem), вес 500 — fw-small. */
+.mrq__line--sm {
+  font-size: 0.8125rem;
+  font-weight: var(--ui-fw-small);
+}
+
+/* Базовая крупная строка «НАЧНИ КАРЬЕРУ…» — 40px/1.15 «как есть»
+   (pages.css:1081 = 2.5rem); межбуквица строки-базы гасится (0),
+   перенос строк разрешён (длинная строка ломается, а не уезжает).
+   Текст строки в разметке уже прописан CAPS'ом (оригинал) — CSS не
+   меняет регистр, скринридер читает как обычно. */
+.mrq__line--xl {
+  font-size: 2.5rem;
+  line-height: 1.15;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
+/* Тело: фото + абзац (pages.css:1086-1089 — flex-строка gap 16; принятая
+   композиция клона — строка, оригинал нёс колонку — расхождение записано
+   пробой T16.15). Гранула узких экранов: база — перенос (фото на своей
+   строке, текст во всю ширину — в пилоте ≤ ~550px текст выталкивался за
+   блок в hscroll страницы); с 480 (шкала T2.5) — строка, как в одобренном
+   рендере (там она помещается). Гранулы стресса 32px-базы T3.6 — на
+   детях: anywhere на тексте и max-width на фото (ниже). */
+.mrq__body {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-4);
+  align-items: center;
+}
+
+@media (min-width: 480px) {
+  .mrq__body {
+    flex-wrap: nowrap;
+  }
+}
+
+/* Текст тела: anywhere — не break-word, только он снижает min-content
+   (прецедент .lpp-rows .ui-button): под стрессом 32px-базы/в узкой полосе
+   480–550px (колонка текста = ширина мин фото 16rem и зазор) слово
+   переносится вместо выталкивания страницы в горизонтальный скролл; на
+   нормальной базе (колонка ≫ слова) рендер прежний байт-в-байт. */
+.mrq__body .ui-body {
+  overflow-wrap: anywhere;
+}
+
+/* Фото тела: 256px ширина «как есть» (pages.css:1090-1092 = 16rem),
+   кадрирование cover, радиус md. max-width: 100% — reflow-гранула
+   32px-гейта T3.6 (прецедент .lpp-pill): 16rem × 32px-базы = 512px не
+   помещается в колонку контейнера @375 — фото клампится к колонке; на
+   нормальной базе (256px ≪ колонки) рендер прежний. */
+.mrq__photo {
+  box-sizing: border-box;
+  object-fit: cover;
+  width: 16rem;
+  max-width: 100%;
+  border-radius: var(--ui-radius-md);
+}
+
+/* ── Спец-сетка «Медиа» (mdl): big 2×2 + lead 2 колонки + мелкие ──
+   Порт принятой раскладки index (pilot.css 460–480; оригинал — вариант
+   --wide .media__grid media.css:130–153: 4 колонки, big 2×2, lead 2
+   колонки). Карточки — компонент ui-card, сетка — связка (не ui-grid:
+   span-геометрия big/lead — часть канона). Ступени мобильные: 1 колонка
+   (база, оригинал ≤767), 2 — от md (оригинал ≤1023), 4 — от lg. */
+.mdl {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: grid;
+  gap: var(--ui-space-3);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Lead-карточка «статья + дата + анонс + ссылка»: колонка с шагом 8px,
+   паддинг 16, рамка/радиус/поверхность карточки (порт cp-media__lead
+   пилота — сводка рядом с big-фото; исходник .media__lead
+   media.css:151–160 без рамки — принятый вид клона, калибровка). */
+.mdl__lead {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+  padding: var(--ui-space-4);
+  border: var(--ui-border-width) solid var(--ui-color-border);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
+}
+
+/* Span-геометрия — от md: на мобильной базе (1 колонка) span 2 порвал бы
+   сетку implicit-колонкой (оригинал гасил span ступенью ≤767 —
+   pages.css-лестница; mobile-first: включение от md, рендер тот же). */
+@media (min-width: 768px) {
+  .mdl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mdl__big {
+    grid-row: span 2;
+    grid-column: span 2;
+  }
+
+  .mdl__lead {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mdl {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ── Cover-hero (cvh): колонка «заголовок + lead + CTA» обложки лендингов ──
+   Порт .cover-hero оригинала (pages.css:953–959) в принятой форме клона:
+   зазор 16px (--ui-space-4 против 20px оригинала — принято ДС), прижато
+   влево. Карточную форму (фон blue-50/паддинг/радиус оригинала) клон не
+   переносил — обложка рендерится на странице без плашки. */
+.cvh {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  align-items: flex-start;
 }
