@@ -309,7 +309,12 @@ export function renderMarkdown(markdown, { doDont = false } = {}) {
   return out.join('\n');
 }
 
-/** Таблица | a | b | со строкой-разделителем → thead/tbody, th scope="col". */
+/** Таблица | a | b | со строкой-разделителем → thead/tbody, th scope="col".
+ *  Обёртка .ui-docs-table-scroll (аудит 29.10): min-content широких таблиц
+ *  (клавиатура/ARIA/скринридер) распирал страницу на мобильном — горизонтальный
+ *  скролл страницы; таблица скроллится в своём регионе. tabindex="0" —
+ *  прокручиваемый регион доступен с клавиатуры (WCAG 2.1.1, гейт axe
+ *  scrollable-region-focusable; прецедент — скролл-зона ui-table). */
 function renderTable(rows) {
   const cells = (row) =>
     row
@@ -330,7 +335,8 @@ function renderTable(rows) {
         .join('')}</tr>\n</thead>`
     : '';
   const tbody = `<tbody>\n${bodyRows.map((row) => renderRow(row, 'td')).join('\n')}\n</tbody>`;
-  return `<table>\n${[thead, tbody].filter(Boolean).join('\n')}\n</table>`;
+  const table = `<table>\n${[thead, tbody].filter(Boolean).join('\n')}\n</table>`;
+  return `<div class="ui-docs-table-scroll" tabindex="0">${table}</div>`;
 }
 
 /* ── каркас страницы ── */
@@ -416,32 +422,39 @@ const DOCS_STYLE = `<style>
   .ui-docs-copybar pre {
     padding-block-start: var(--ui-space-6);
   }
-  [data-ui-docs-section] > table {
-    width: 100%;
+  [data-ui-docs-section] .ui-docs-table-scroll {
+    max-width: 100%;
     margin-block: var(--ui-space-3) var(--ui-space-5);
+    overflow-x: auto;
+    /* Прокручиваемая область обязана быть доступна с клавиатуры (WCAG 2.1.1;
+       гейт axe scrollable-region-focusable): таблицы клавиатуры/ARИА шире
+       мобильной колонки. */
+  }
+  .ui-docs-table-scroll > table {
+    width: 100%;
     border-collapse: collapse;
     font-size: var(--ui-fs-small);
     line-height: var(--ui-lh-small);
   }
-  [data-ui-docs-section] > table th,
-  [data-ui-docs-section] > table td {
+  .ui-docs-table-scroll > table th,
+  .ui-docs-table-scroll > table td {
     padding: var(--ui-space-2) var(--ui-space-3);
     border: none;
     border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
     text-align: left;
     vertical-align: top;
   }
-  [data-ui-docs-section] > table thead th {
+  .ui-docs-table-scroll > table thead th {
     color: var(--ui-color-text-muted);
     font-weight: var(--ui-fw-caption);
     letter-spacing: 0.02em;
     text-transform: uppercase;
     font-size: var(--ui-fs-micro);
   }
-  [data-ui-docs-section] > table tbody tr:nth-child(2n) {
+  .ui-docs-table-scroll > table tbody tr:nth-child(2n) {
     background-color: var(--ui-color-surface-muted);
   }
-  [data-ui-docs-section] > table kbd {
+  .ui-docs-table-scroll > table kbd {
     display: inline-block;
     padding: 0 var(--ui-space-2);
     border: var(--ui-border-width) solid var(--ui-color-divider);
@@ -469,6 +482,17 @@ const DOCS_STYLE = `<style>
     border-inline-start: 0.1875rem solid var(--ui-color-accent);
     background-color: var(--ui-color-surface-muted);
     border-radius: 0 var(--ui-radius-sm) var(--ui-radius-sm) 0;
+  }
+  .ui-docs-examples {
+    /* Ритм живых примеров (аудит 29.10: соседние инстансы канона — алерты,
+       пагинации — слипались вплотную, компоненты внешних отступов не несут
+       по архитектуре): расстояние между демо-блоками несёт КАРКАС — как
+       ui-stack системы (gap --ui-stack-gap), сами компоненты не стилизуются.
+       Flex-колонка вместо margin'ов: не создаёт двойных отступов в композициях
+       и не выпадает из потока при пустых детях. */
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-stack-gap);
   }
   .ui-docs-frames {
     display: flex;
@@ -547,29 +571,33 @@ export const GUIDE_STYLE = `<style>
     font-weight: var(--ui-fw-h6);
     line-height: var(--ui-lh-h6);
   }
-  .ui-docs-body > table {
-    width: 100%;
+  .ui-docs-body .ui-docs-table-scroll {
+    max-width: 100%;
     margin-block: var(--ui-space-3) var(--ui-space-5);
+    overflow-x: auto;
+  }
+  .ui-docs-body .ui-docs-table-scroll > table {
+    width: 100%;
     border-collapse: collapse;
     font-size: var(--ui-fs-small);
     line-height: var(--ui-lh-small);
   }
-  .ui-docs-body > table th,
-  .ui-docs-body > table td {
+  .ui-docs-body .ui-docs-table-scroll > table th,
+  .ui-docs-body .ui-docs-table-scroll > table td {
     padding: var(--ui-space-2) var(--ui-space-3);
     border: none;
     border-bottom: var(--ui-border-width) solid var(--ui-color-divider);
     text-align: left;
     vertical-align: top;
   }
-  .ui-docs-body > table thead th {
+  .ui-docs-body .ui-docs-table-scroll > table thead th {
     color: var(--ui-color-text-muted);
     font-weight: var(--ui-fw-caption);
     letter-spacing: 0.02em;
     text-transform: uppercase;
     font-size: var(--ui-fs-micro);
   }
-  .ui-docs-body > table tbody tr:nth-child(2n) {
+  .ui-docs-body .ui-docs-table-scroll > table tbody tr:nth-child(2n) {
     background-color: var(--ui-color-surface-muted);
   }
   .ui-docs-body kbd {
@@ -671,7 +699,9 @@ function renderToc({ pageHeading, extraHeadings }) {
 const STAND_NOTE = 'ui-showcase-stand__note';
 
 /** Responsive-секция: реальные iframe-вьюпорты (не картинки) — один и тот же
- *  стенд компонента в трёх ширинах (Implementation requirements T10.1 п.2). */
+ *  стенд компонента в трёх ширинах (Implementation requirements T10.1 п.2).
+ *  ?embed=1 — чистое демо без каркаса (FRAME_SCRIPT скрывает шапку/навигацию/
+ *  подвал): фрейм показывает компонент, а не повторяет навигацию полигона. */
 function renderResponsive(name) {
   const widths = [
     { width: 375, label: '375 — мобильный' },
@@ -682,7 +712,7 @@ function renderResponsive(name) {
     .map(
       ({ width, label }) =>
         `  <figure class="ui-docs-frame" tabindex="0">\n` +
-        `    <iframe src="../stands/${name}.html" title="Стенд ${name}, ширина ${width} пикселей" width="${width}" height="480"></iframe>\n` +
+        `    <iframe src="../stands/${name}.html?embed=1" title="Стенд ${name}, ширина ${width} пикселей" width="${width}" height="480"></iframe>\n` +
         `    <figcaption>${label}</figcaption>\n` +
         `  </figure>`,
     )
@@ -734,7 +764,10 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
     секция примеров БЕЗ своего h2: любой заголовок перед разметкой делал бы
     страницу «начинающейся с h2» (гейт иерархии заголовков полигона — красный
     на всех движках матрицы до исправления, приёмка T12.1). Порядок секций
-    шаблона и все остальные пины (verifyDocPageHtml, e2e) не меняются. */
+    шаблона и все остальные пины (verifyDocPageHtml, e2e) не меняются.
+    metadata.examplesNote — необязательное пояснение контекста примеров
+    (например, on-dark-компоненты без композиции сайта: стрелки/текст слотов
+    рассчитаны на тёмную фото-секцию, полный вид — стенд ниже). */
   doc.push(
     section(
       'examples',
@@ -743,6 +776,9 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
         `<p class="${STAND_NOTE}">Канонический паттерн ` +
           `<code>components/${name}/${name}.html</code> вживую. Полный набор вариантов ` +
           `и состояний — на стенде <a href="../stands/${name}.html">${name}</a>.</p>`,
+        ...(metadata.examplesNote
+          ? [`<p class="${STAND_NOTE}">${renderInline(metadata.examplesNote)}</p>`]
+          : []),
         '<div class="ui-docs-examples" data-ui-docs-examples>',
         '<!-- ui-docs-examples:start -->',
         markup,
@@ -812,19 +848,23 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
       'Доступность (a11y)',
       [
         '<h3>Клавиатура</h3>',
+        '<div class="ui-docs-table-scroll" tabindex="0">',
         '<table>',
         '<thead>',
         '<tr><th scope="col">Клавиши</th><th scope="col">Поведение</th></tr>',
         '</thead>',
         `<tbody>\n${keyboardRows}\n</tbody>`,
         '</table>',
+        '</div>',
         '<h3>ARIA-атрибуты и семантика</h3>',
+        '<div class="ui-docs-table-scroll" tabindex="0">',
         '<table>',
         '<thead>',
         '<tr><th scope="col">Атрибут / семантика</th><th scope="col">Зачем</th></tr>',
         '</thead>',
         `<tbody>\n${ariaRows}\n</tbody>`,
         '</table>',
+        '</div>',
         metadata.readme.a11y
           .map((heading) => renderMarkdown(readmeSection(parsed, name, heading, 'readme.a11y')))
           .join('\n'),
@@ -834,12 +874,14 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
           (metadata.screenReader.note ? ` (${escapeHtml(metadata.screenReader.note)})` : '') +
           ': ручной прогон с NVDA/VoiceOver — релизный гейт T12.1; авто-пины контракта — ' +
           'ниже.</p>',
+        '<div class="ui-docs-table-scroll" tabindex="0">',
         '<table>',
         '<thead>',
         '<tr><th scope="col">Сценарий</th><th scope="col">Ожидаемое объявление</th><th scope="col">Пин (авто)</th></tr>',
         '</thead>',
         `<tbody>\n${srRows}\n</tbody>`,
         '</table>',
+        '</div>',
       ]
         .filter(Boolean)
         .join('\n'),
@@ -919,12 +961,14 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
           `(задача <code>${escapeHtml(metadata.version.task)}</code>). Изменение классов, ` +
           `data-атрибутов или канонического HTML — только мажорной версией (semver, ` +
           `02-architecture §11); обратная совместимость HTML-паттернов важнее удобства кода.</p>`,
+        '<div class="ui-docs-table-scroll" tabindex="0">',
         '<table>',
         '<thead>',
         '<tr><th scope="col">Версия</th><th scope="col">Изменение</th></tr>',
         '</thead>',
         `<tbody>\n${changelogRows}\n</tbody>`,
         '</table>',
+        '</div>',
       ].join('\n'),
     ),
   );
