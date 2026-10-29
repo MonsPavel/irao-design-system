@@ -18,15 +18,19 @@
  *
  * Запуск: node showcase/serve.mjs & node pilot/career-portal/compare.mjs
  *
- * Перед прогоном compare выполняет гейт мёртвых внутренних ссылок dist
- * (check-links.mjs, T15.9): есть DEAD — прогон падает до браузеров.
- * Отдельный запуск гейта: node pilot/career-portal/check-links.mjs
+ * Перед прогоном compare выполняет два гейта до браузеров: мёртвые
+ * внутренние ссылки dist (check-links.mjs, T15.9) и ценз сайт-зоны
+ * (census.mjs, T17.16 — пороги строк/cp-семейств, новые cp-визуальные
+ * блоки запрещены). Есть DEAD или деградация — прогон падает.
+ * Отдельный запуск гейтов: node pilot/career-portal/check-links.mjs |
+ * node pilot/career-portal/census.mjs
  */
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { collectDeadLinks } from './check-links.mjs';
+import { censusMetrics, runCensusGate } from './census.mjs';
 
 const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 const OUT = join(PILOT_DIR, 'compare-output');
@@ -56,6 +60,35 @@ if (linkGate.dead.length > 0) {
 }
 console.log(
   `Гейт ссылок: ${linkGate.checked.length} страниц, ${linkGate.links} внутренних ссылок, 0 DEAD`,
+);
+
+// Гейт ценза сайт-зоны (T17.16) — в том же запуске, до браузеров, сразу
+// после гейта ссылок: фиксирует состояние сайт-зоны на закрытие EPIC-17
+// числами (строки/код/cp-семейства, пороги — census.mjs) и падает при
+// деградации или новом cp-визуальном блоке (правило «новые блоки — через
+// ДС», CONTRIBUTING). Исходники pilot.css/pilot.js — файлы репозитория,
+// существуют всегда; отсутствие — сломанный чекаут, сообщаем по CLI.
+const censusSources = { css: join(PILOT_DIR, 'pilot.css'), js: join(PILOT_DIR, 'pilot.js') };
+for (const [name, path] of Object.entries(censusSources)) {
+  if (!existsSync(path)) {
+    console.error(
+      `Гейт ценза: исходник ${name} не найден: ${path} — ценз считается по исходникам пилота`,
+    );
+    process.exit(1);
+  }
+}
+const censusGate = runCensusGate(
+  censusMetrics(readFileSync(censusSources.css, 'utf8'), readFileSync(censusSources.js, 'utf8')),
+);
+if (censusGate.problems.length > 0) {
+  console.error(
+    `Гейт ценза: ${censusGate.problems.length} проблем — compare остановлен:\n` +
+      censusGate.problems.map((problem) => `  ${problem}`).join('\n'),
+  );
+  process.exit(1);
+}
+console.log(
+  `Гейт ценза: новых cp-визуальных блоков 0, пороги строк/семейств в норме (census.mjs, T17.16)`,
 );
 
 const PAGES = [
@@ -390,6 +423,35 @@ const SHELL_PROBES = [
     original: '.tabs-pill__tab.is-active',
     pilot: ".nvp .ui-tabs__tab[aria-current='page']",
     fields: { bg: 'background-color', color: 'color' },
+    rect: true,
+  },
+  // Стеклянная пилюля поиска hero (T17.16: probe-пара «блок на каноне» —
+  // по факту исполнения; канон hro — слой T17.15). Стекло glass-light,
+  // blur 12, пилюля — пара одобренного дизайна; левый паддинг 24 против
+  // 28 оригинала — «принято ДС» (hero.css:74, канон hro__search). Первое
+  // вхождение — index.html; на остальных страницах сущности нет — null.
+  {
+    name: 'hero-search',
+    original: '.hero__search',
+    pilot: '.hro__search',
+    fields: {
+      bg: 'background-color',
+      radius: 'border-radius',
+      bf: 'backdrop-filter',
+      padding: 'padding',
+    },
+    rect: true,
+  },
+  // Шапка-тройка детальной вакансии (T17.16: probe-пара «блок на каноне»;
+  // канон dpp__head — слой T17.14). Колонка с шагом 8 против 12 оригинала —
+  // «принято ДС» калибровкой T17.14 (gap в коротких полях). Первое
+  // вхождение — vacancy.html; event/internship несут dpp__head без
+  // vacancy-page__head оригинала — null-сима оригинальной стороны.
+  {
+    name: 'detail-head',
+    original: '.vacancy-page__head',
+    pilot: '.dpp__head',
+    fields: { display: 'display', fd: 'flex-direction', gap: 'gap' },
     rect: true,
   },
 ];
