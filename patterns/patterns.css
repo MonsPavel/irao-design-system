@@ -324,28 +324,147 @@
   padding-block: 1.25rem var(--ui-space-5);
 }
 
-/* page-head: вертикальный ритм (reset системы обнуляет margin p/h). */
-.dpp-head {
+/* ── Контентная колонка dpp (T17.14): канон композиции детальной страницы ──
+ *
+ * Порт связок детальных страниц пилота (cp-vacancy-page*, cp-detail-*,
+ * cp-article-* — калибровка раундов 2–4, перенос механический; спека
+ * T17.14 «ddp-канон» — spelling слоя dpp, гейт префиксов T17.1). Канон
+ * забирает только композицию, типографика — ролями T3.3; исключение —
+ * зарплата: литерал 18px остаётся каноном (T16.13-mapping), не ролью.
+ * Источники значений — страницы career-portal (vacancy/event/internship/
+ * article/company), строки pages.css в комментариях. Лестницы оригинала
+ * переформулированы mobile-first по шкале T2.5 (Implementation
+ * requirements T17.1 п.4): база — мобильная ступень оригинала, рост от
+ * 768/1024/1280 (страницы event/internship/article/company рендерятся
+ * 1:1 с оригиналом на всех ширинах). */
+
+/* Контентная колонка: шаг блоков 32px (.internship__main pages.css:544;
+   cp-detail-main/cp-vacancy-page пилота — space-6). ADR-0002: box-sizing
+   на корне блока. */
+.dpp {
   box-sizing: border-box;
-  margin-top: var(--ui-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-6);
 }
 
-.dpp-salary {
+/* Карточная форма колонки (порт cp-vacancy-page пилота: паддинг/радиус/
+   поверхность — принято ДС в калибровке T15.1; оригинал .vacancy-page
+   рендерит колонку без карточки). Исполнение — разметка пилота
+   (vacancy.html), док канона несёт базовую колонку. */
+.dpp--card {
   box-sizing: border-box;
-  margin-top: var(--ui-space-3);
+  padding: var(--ui-space-6);
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface);
 }
 
-.dpp-tags {
+/* Шапка-тройка «заголовок — зарплата/теги — мета»: шаг 8px
+   (cp-vacancy-page__head/cp-detail-head пилота; оригинал .vacancy-page__head
+   gap 12px — принято 8px, калибровка раундов 2–4). */
+.dpp__head {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+/* Лента тегов шапки: шаг 8px, перенос (cp-detail-tags; оригинал —
+   inline-поток .tag в div). */
+.dpp__tags {
   box-sizing: border-box;
   display: flex;
   flex-wrap: wrap;
   gap: var(--ui-space-2);
-  margin-top: var(--ui-space-3);
+  align-items: center;
 }
 
-.dpp-meta {
+/* Фото детальной страницы: 420px от md (26.25rem «как есть» —
+   .internship__photo pages.css:542), 260px в мобильной базе (оригинал
+   @max-767 → 260px, pages.css:933; канон принимает значение оригинала —
+   расхождение пилота 1023 снято, полоса 768–1023 рендерится как в
+   оригинале). Скругление — радиус карточки; кадрирование —
+   ui-image--cover в разметке. */
+.dpp__photo {
   box-sizing: border-box;
-  margin-top: var(--ui-space-3);
+  width: 100%;
+  height: 16.25rem;
+  border-radius: var(--ui-radius-md);
+}
+
+@media (min-width: 768px) {
+  .dpp__photo {
+    height: 26.25rem;
+  }
+}
+
+/* Зарплата детальной вакансии (T16.13): канон — литерал 18px
+   (pages.css:271 `.vacancy-page__salary { font-size: 18px }`; fw 400 и
+   lh 1.35 наследует body — совпадают с ДС). 18px вне десктоп-шкалы ДС:
+   роль ui-lead лестницей ≥1024 даёт 24px и меняла бы одобренное значение —
+   литерал, НЕ роль (прецедент 0.9375rem VI-кнопки). Цвет — роль
+   ui-text--muted в разметке (AA-пара T2.3). */
+.dpp__salary {
+  box-sizing: border-box;
+  font-size: 1.125rem;
+}
+
+/* Строки «место»/«дата» с декоративной иконкой: шаг 4px (cp-vacancy-page__
+   place/__date пилота, space-1; оригинал 6px — принято 4px, калибровка).
+   Цвет muted несёт роль ui-text--muted разметки (слой цвет не
+   переобъявляет — дисциплина lpp-row__place). */
+.dpp__place,
+.dpp__date {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-1);
+  align-items: center;
+}
+
+/* Контент-секция «h2 + содержимое»: шаг 8px (cp-vacancy-page__section/
+   cp-detail-section; оригинал .internship__section h2 margin-bottom 16px,
+   абзацы вплотную — приближение каноном, калибровка T15.1). */
+.dpp__section {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-2);
+}
+
+/* Слот медиа (карта-заглушка вакансии): высота 288px и muted-поверхность —
+   порт cp-vacancy-page__map пилота (заглушка; оригинал .vacancy-page__map
+   320px с фотоподложкой и подписью — контент САЙТА, канон несёт только
+   слот). Скругление слота — радиус карточки. */
+.dpp__media {
+  box-sizing: border-box;
+  height: 18rem;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Foot вакансии: разделитель сверху (border muted, padding 16) + пары
+   «дата — CTA» по краям (space-between, gap 16) — порт cp-vacancy-page__
+   foot пилота («разделитель + space-between», спека T17.14; оригинал
+   .vacancy-page__foot без разделителя, gap 24 — принято ДС). Мобильная
+   база — колонка с прижатием влево (оригинал @max-760 → column, pages.css:359;
+   канон принимает значение оригинала — расхождение пилота снято), от md —
+   строка. */
+.dpp__foot {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-top: var(--ui-space-4);
+  border-top: var(--ui-border-width) solid var(--ui-color-border-muted);
+}
+
+@media (min-width: 768px) {
+  .dpp__foot {
+    flex-direction: row;
+    align-items: center;
+  }
 }
 
 /* Лейаут «контент + aside»: мобильная база — одна колонка, aside в конце
@@ -432,6 +551,189 @@
 @media (min-width: 1024px) {
   .dpp-layout {
     grid-template-columns: minmax(0, 1fr) var(--ui-form-aside-width);
+  }
+}
+
+/* ── Article-связки (T17.14): мета-лента с точкой-типом, галерея, related ── */
+
+/* Колонка статьи: шаг 24px (.article-page pages.css:614 «как есть») —
+   модификатор базовой колонки (шапка/контент той же формы, что и dpp). */
+.dpp--article {
+  box-sizing: border-box;
+  gap: var(--ui-space-5);
+}
+
+/* Мета-строка «тип — дата — рубрика»: лента с шагом 12px и отступом 8px
+   до галереи (pages.css:618–622). Дети одной высоты — «текст на одной
+   линии» (pages.css:626–630 height: 28px): min-height вместо height —
+   под rem-стрессом 32px-базы текст растёт внутри бокса, а не выпадает
+   (прецедент ui-tag T4.2); на нормальной базе рендер тот же. */
+.dpp__meta {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3);
+  align-items: center;
+  margin-bottom: var(--ui-space-2);
+}
+
+.dpp__meta > * {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+}
+
+/* Тип статьи: точка 8px + uppercase 14/500 ls 0.02em (порт .media__tag:
+   pages.css:632–637 фон/паддинг снимает, трансформ/letter-spacing —
+   media.css:85; fw 500 — --fw-caption оригинала; 6px gap и 8px точка
+   «как есть»). */
+.dpp__type {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: 0.375rem;
+  align-items: center;
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.dpp__type::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--ui-color-primary);
+}
+
+/* Галерея статьи 2fr/1fr (pages.css:644): мобильная база — колонка
+   (оригинал @max-1023 → 1fr, pages.css:914), от lg — две доли. */
+.dpp__gallery {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-4);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Фото галереи растянуто на ячейку; высоту ряда несёт более крупное фото
+   (height: 100% + cover — pages.css:646; --radius-card 16px =
+   --ui-radius-md). */
+.dpp__gallery img {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--ui-radius-md);
+}
+
+@media (min-width: 1024px) {
+  .dpp__gallery {
+    grid-template-columns: 2fr minmax(0, 1fr);
+  }
+}
+
+/* Текст статьи: шаг абзацев 16px (pages.css:648). */
+.dpp__text {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+}
+
+/* «Материалы по теме» — related-секции статьи: отступ сверху 40px «как
+   есть» (pages.css:650); заголовки-шаги 56px/32px «как есть» (inline
+   margin-top фрагмента article.html:31; section__title margin-bottom 32px,
+   components.css:340); первый — без верхнего шага. */
+.dpp-related {
+  box-sizing: border-box;
+  margin-top: 2.5rem;
+}
+
+.dpp-related .ui-h3 {
+  box-sizing: border-box;
+  margin-top: 3.5rem;
+  margin-bottom: var(--ui-space-6);
+}
+
+.dpp-related .ui-h3:first-child {
+  margin-top: 0;
+}
+
+/* ── Company-связки (T17.14): hero-2кол и where-пары ── */
+
+/* Hero компании: 2 колонки «фото 400px — текст» от 1280 (оригинал
+   .company-hero pages.css:796 — 400px 1fr, @max-1279 → колонка; канон
+   принимает значение оригинала — расхождение пилота 1024 снято, полоса
+   1024–1279 рендерится как в оригинале); зазор 48px, центр строки, низ
+   40px «как есть» (pages.css:796). minmax(0, 1fr) — rem-стресс T3.6
+   (прецедент lpp-layout). */
+.dpp-hero {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-7);
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 2.5rem;
+}
+
+/* Фото hero: 260px в мобильной базе (оригинал @max-1279 → 260px,
+   pages.css:903), 320px от 1280 (pages.css:799). */
+.dpp-hero__photo {
+  box-sizing: border-box;
+  width: 100%;
+  height: 16.25rem;
+  border-radius: var(--ui-radius-md);
+}
+
+/* Шаг имя/описание 16px (pages.css:801). */
+.dpp-hero__body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+}
+
+/* Шаг абзацев 12px (pages.css:803). */
+.dpp-hero__text {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+}
+
+@media (min-width: 1280px) {
+  .dpp-hero {
+    grid-template-columns: 25rem minmax(0, 1fr);
+  }
+
+  .dpp-hero__photo {
+    height: 20rem;
+  }
+}
+
+/* «Где мы работаем»: пары фото+подпись, шаг 24px (pages.css:821); низ 56px
+   «как есть» — company-section-gap (pages.css:884). Мобильная база —
+   колонка (оригинал @max-1023 → 1fr, pages.css:911), пары — от lg. */
+.dpp-where {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 3.5rem;
+}
+
+/* Высота фото 280px «как есть» (pages.css:823); подпись несёт
+   ui-figure__caption (шаг 8px = pages.css:825). */
+.dpp-where__photo {
+  box-sizing: border-box;
+  width: 100%;
+  height: 17.5rem;
+  border-radius: var(--ui-radius-md);
+}
+
+@media (min-width: 1024px) {
+  .dpp-where {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 

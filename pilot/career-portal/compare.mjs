@@ -246,19 +246,20 @@ const SHELL_PROBES = [
   },
   // ── Деталка вакансии и aside анкеты (T16.13, REPORT §9.1 №3/№4) ──
   // Зарплата (vacancy.html): канон — литерал 18px muted (pages.css:271);
-  // клон — литерал 1.125rem сайт-зоны + ui-text--muted (AA gray-700).
+  // клон — литерал канона dpp__salary (T17.14, слой) + ui-text--muted
+  // (AA gray-700). Класс — крючок паттерн-слоя (прецедент lpp-/nvp-).
   {
     name: 'salary',
     original: '.vacancy-page__salary',
-    pilot: '.cp-vacancy-page__salary',
+    pilot: '.dpp__salary',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
   },
   // Подзаголовок секции детальной (vacancy.html): канон fs-h4-тройка 28/500 —
-  // роль ui-h4 (было ui-h3 42/500)
+  // роль ui-h4 (было ui-h3 42/500); секция — канон dpp__section (T17.14)
   {
     name: 'section-h2',
     original: '.vacancy-page__section h2',
-    pilot: '.cp-vacancy-page__section h2',
+    pilot: '.dpp__section h2',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
   },
   // Aside анкеты (vacancy-apply.html): титул primary (28/500 — роль ui-h4),

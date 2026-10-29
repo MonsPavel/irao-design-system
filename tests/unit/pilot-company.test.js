@@ -12,15 +12,17 @@
  *    breadcrumbs с ровно одним aria-current, «Компании группы» — ссылка;
  *    h1 — ui-page-title (канон детальной, T14.2);
  *  - разметка по композиции спеки: company-hero (фото ui-image + имя +
- *    описание), company-stats (семантичный список, числа на ui-роли),
- *    преимущества (список/сетка сайт-зоны), where-we-work (ui-figure с
- *    подписями — приближение, карта-иллюстрация не переносится),
- *    banner-card (CTA «смотреть вакансии» → vacancies.html, фото ui-image +
- *    ui-button); классы оригинала не копируются (Implementation
- *    requirements п.1); фото несут alt (Accessibility requirements);
- *  - pilot.css: сайт-зона cp-company-* на токенах (статы — primary,
+ *    описание — канон dpp-hero, T17.14), company-stats (семантичный список,
+ *    числа на ui-роли), преимущества (список/сетка сайт-зоны), where-we-work
+ *    (ui-figure с подписями — приближение, карта-иллюстрация не переносится;
+ *    сетка пар — канон dpp-where, T17.14), banner-card (CTA «смотреть
+ *    вакансии» → vacancies.html, фото ui-image + ui-button); классы
+ *    оригинала не копируются (Implementation requirements п.1); фото несут
+ *    alt (Accessibility requirements);
+ *  - pilot.css: сайт-зона компании на токенах (статы — primary,
  *    преимущества — surface-blue-deep = маппинг --color-blue-700, оверлей
- *    баннера — тинт primary-a55); без hex и !important;
+ *    баннера — тинт primary-a55); без hex и !important; hero/where —
+ *    канон dpp (T17.14), из pilot.css сняты;
  *  - compare.mjs: company.html в PAGES (AC: compare.json содержит метрики).
  */
 import { readFileSync } from 'node:fs';
@@ -51,8 +53,10 @@ const companies = JSON.parse(readFileSync(join(pilotDir, 'data', 'companies.json
  *  хвост без `\n}` — рабочая копия Windows отдаёт CRLF, см. link.test.js). */
 const companyHtml = build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
 
-/** Кусок pilot.css от блоков компании до общего адаптива сайт-зоны. */
-const companyCssStart = pilotCss.indexOf('.cp-company-hero');
+/** Кусок pilot.css от блоков компании (сайт-зонные раскладки) до общего
+ *  адаптива сайт-зоны. Hero-2кол и where-пары — канон dpp-hero/dpp-where
+ *  (T17.14, паттерн-слой) — в pilot.css их больше нет. */
+const companyCssStart = pilotCss.indexOf('.cp-company-stats');
 const companyCss = pilotCss.slice(
   companyCssStart,
   pilotCss.indexOf('/* Сайт-зона пилота: адаптив'),
@@ -84,8 +88,9 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     expect(companyHtml).toMatch(/<h1 class="ui-page-title">\$\{esc\(company\.name\)\}<\/h1>/);
   });
 
-  it('company-hero: фото — ui-image (Scope), описание — два абзаца контента оригинала (src/pages/company.html:8–9, без выдумывания)', () => {
-    expect(companyHtml).toMatch(/class="ui-image ui-image--cover cp-company-hero__photo"/);
+  it('company-hero: фото — ui-image, описание — два абзаца контента оригинала (src/pages/company.html:8–9, без выдумывания); hero-2кол — канон dpp-hero (T17.14, слой)', () => {
+    expect(companyHtml).toMatch(/class="ui-image ui-image--cover dpp-hero__photo"/);
+    expect(companyHtml, 'hero — канон dpp-hero (T17.14)').toContain('<div class="dpp-hero">');
     expect(companyHtml).toContain('Генерирующая компания Группы «Интер РАО»');
     expect(companyHtml, 'второй абзац описания оригинала').toContain(
       'Мы производим электрическую и тепловую энергию, развиваем современные технологии генерации',
@@ -117,14 +122,15 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     }
   });
 
-  it('где мы работаем: две фигуры ui-figure с подписями оригинала (приближение вместо карты-иллюстрации — Out of scope T15.2)', () => {
-    expect(
-      companyHtml.match(/<figure class="ui-figure cp-company-where__item">/g)?.length ?? 0,
-    ).toBe(2);
+  it('где мы работаем: две фигуры ui-figure с подписями оригинала (приближение вместо карты-иллюстрации — Out of scope T15.2); сетка пар — канон dpp-where (T17.14, слой)', () => {
+    expect(companyHtml, 'where-пары — канон dpp-where (T17.14)').toContain(
+      '<div class="dpp-where">',
+    );
+    expect(companyHtml.match(/<figure class="ui-figure">/g)?.length ?? 0).toBe(2);
     expect(companyHtml).toContain('Головной офис компании');
     expect(companyHtml).toContain('Производственные площадки и станции');
     expect(
-      companyHtml.match(/class="ui-image ui-image--cover cp-company-where__photo"/g)?.length ?? 0,
+      companyHtml.match(/class="ui-image ui-image--cover dpp-where__photo"/g)?.length ?? 0,
     ).toBe(2);
     expect(companyHtml, 'подпись связана с фото семантически').toContain(
       '<figcaption class="ui-figure__caption',
@@ -165,14 +171,11 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   });
 });
 
-describe('pilot.css — сайт-зона компании cp-company-* (T15.2 Scope, правила пилота: токены --ui-*)', () => {
-  it('блоки страницы существуют: hero, stats/adv (сетки — плашки сняты в ui-stat T17.4), where, banner (+body/title; фото-подложка/оверлей — ui-section--photo T17.3)', () => {
+describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14: hero/where — канон dpp)', () => {
+  it('блоки страницы существуют: stats/adv (сетки — плашки сняты в ui-stat T17.4), banner (+body/title; фото-подложка/оверлей — ui-section--photo T17.3); hero/where — в каноне dpp (T17.14)', () => {
     for (const selector of [
-      '.cp-company-hero',
-      '.cp-company-hero__photo',
       '.cp-company-stats',
       '.cp-company-adv',
-      '.cp-company-where',
       '.cp-company-banner',
       // T17.3: фото-подложка (__photo) и тинт сняты — слои несёт
       // ui-section--photo; сайт держит только хук тинта и раскладку.
@@ -180,6 +183,17 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
       '.cp-company-banner__title',
     ]) {
       expect(blockOf(pilotCss, selector), `${selector} найдено`).toBeTruthy();
+    }
+    // T17.14: hero/where — связки канона dpp-hero/dpp-where, из pilot.css сняты.
+    for (const removed of [
+      '.cp-company-hero',
+      '.cp-company-hero__photo',
+      '.cp-company-hero__body',
+      '.cp-company-hero__text',
+      '.cp-company-where',
+      '.cp-company-where__photo',
+    ]) {
+      expect(blockOf(pilotCss, removed), `${removed} снято (канон dpp, T17.14)`).toBeFalsy();
     }
     // T17.4: плашки стат/преимуществ — компонент ui-stat (--filled/--deep):
     // правила сайт-zones сняты, у сеток остались только раскладки.
@@ -256,12 +270,13 @@ describe('pilot.css — сайт-зона компании cp-company-* (T15.2 S
     expect(companyCss).not.toContain('!important');
   });
 
-  it('адаптив сайт-зоны: 1023 — hero в колонку, преимущества 2×2, где-мы-работаем в колонку (у оригинала hero/adv сворачиваются на 1279 — pages.css:896–906; конвенция пилота — две ступени, 1279 поглощена в 1023: полоса 1024–1279 просторнее оригинала); 767 — статы и преимущества в колонку (pages.css:929)', () => {
+  it('адаптив сайт-зоны: 1023 — преимущества 2×2 (hero/where — канон dpp-hero/dpp-where, T17.14: мобильные базы колонкой, ступени 1280/lg в слое — лестница 1023 снята); 767 — статы и преимущества в колонку (pages.css:929)', () => {
     const m1023 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 1023px)'));
     const m767 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 767px)'));
-    for (const selector of ['.cp-company-hero', '.cp-company-adv', '.cp-company-where']) {
-      expect(m1023, `${selector} в ступени 1023`).toContain(selector);
+    for (const selector of ['.cp-company-hero', '.cp-company-where']) {
+      expect(m1023, `${selector} снят из ступени 1023 (канон dpp, T17.14)`).not.toContain(selector);
     }
+    expect(m1023, 'преимущества в ступени 1023 (сайт-зона)').toContain('.cp-company-adv');
     expect(m767).toContain('.cp-company-stats');
     expect(m767).toContain('.cp-company-adv');
   });

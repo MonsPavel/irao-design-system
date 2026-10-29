@@ -1492,39 +1492,44 @@ function vacancyMain(v = VAC.items[0]) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <article class="cp-vacancy-page">
-      <header class="cp-vacancy-page__head">
+    <!-- Контентная колонка — канон dpp (T17.14): карточная форма --card
+         (порт cp-vacancy-page), шапка-тройка/секции/foot — связки слоя
+         ds/ui-patterns.css. -->
+    <article class="dpp dpp--card">
+      <header class="dpp__head">
         <h1 class="ui-page-title">${esc(v.title)}</h1>
-        <!-- зарплата (T16.13): канон — литерал 18px muted (pages.css:271);
-             размер — литерал 1.125rem сайт-зоны (18px вне десктоп-шкалы ДС:
-             роль ui-lead лестницей ≥1024 даёт 24px и меняла бы одобренное
-             значение), цвет — ui-text--muted (AA gray-700, T2.3) -->
-        <p class="cp-vacancy-page__salary ui-text--muted">${esc(v.salary)} до вычета налога</p>
-        <p class="cp-vacancy-page__place">${PLACE_PIN} ${esc(v.place)}</p>
+        <!-- зарплата (T16.13): канон — литерал 18px (pages.css:271);
+             размер — литерал канона dpp__salary (T17.14; 18px вне
+             десктоп-шкалы ДС: роль ui-lead лестницей ≥1024 даёт 24px и
+             менял бы одобренное значение), цвет — ui-text--muted
+             (AA gray-700, T2.3) -->
+        <p class="dpp__salary ui-text--muted">${esc(v.salary)} до вычета налога</p>
+        <p class="dpp__place ui-text--muted">${PLACE_PIN} ${esc(v.place)}</p>
       </header>
 
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <!-- подзаголовки секций (T16.13): канон fs-h4-тройка 28/500
              (pages.css, --fs-h4) — роль ui-h4 вместо ui-h3 (42/500) -->
         <h2 class="ui-h4">Что предстоит</h2>
         <p class="ui-body">${esc(v.short)} Работа ведётся на объекте ${esc(v.place)} в составе оперативной команды подразделения, с наставником на период адаптации.</p>
       </div>
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <h2 class="ui-h4">Требования</h2>
         ${list(requirements)}
       </div>
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <h2 class="ui-h4">Условия</h2>
         ${list(conditions)}
       </div>
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <h2 class="ui-h4">Где предстоит работать</h2>
-        <div class="cp-vacancy-page__map" role="img" aria-label="Карта: ${esc(v.place)}"></div>
+        <!-- карта — слот dpp__media (T17.14): содержимое (карта) — сайт -->
+        <div class="dpp__media" role="img" aria-label="Карта: ${esc(v.place)}"></div>
         <p class="ui-body"><b>Адрес:</b> ${PLACE_PIN} ${esc(v.address)}</p>
       </div>
 
-      <footer class="cp-vacancy-page__foot">
-        <time class="cp-vacancy-page__date ui-small" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
+      <footer class="dpp__foot">
+        <time class="dpp__date ui-small ui-text--muted" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
         ${pillButton('откликнуться', { target: 'cp-apply-dialog' })}
       </footer>
     </article>
@@ -1818,7 +1823,7 @@ function internshipDetail({ crumbs, title, tags, meta, salary, company, photo, s
   ].join('');
   const sectionsHtml = sections
     .map(
-      (section) => `<div class="cp-detail-section">
+      (section) => `<div class="dpp__section">
   <h2 class="ui-h4">${esc(section.title)}</h2>
   ${section.html}
 </div>`,
@@ -1837,12 +1842,14 @@ function internshipDetail({ crumbs, title, tags, meta, salary, company, photo, s
 <section class="ui-section">
   <div class="ui-container">
     <div class="ui-form__layout">
-      <div class="cp-detail-main">
-        <header class="cp-detail-head">
+      <!-- Контентная колонка — канон dpp (T17.14): шапка-тройка/теги/фото/
+           секции — связки слоя ds/ui-patterns.css (порт cp-detail-*). -->
+      <div class="dpp">
+        <header class="dpp__head">
           <h1 class="ui-page-title">${esc(title)}</h1>
-          <p class="cp-detail-tags">${tagsHtml}</p>${headExtra}
+          <p class="dpp__tags">${tagsHtml}</p>${headExtra}
         </header>
-        <img class="ui-image ui-image--cover cp-detail-photo" src="${esc(photo.src)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}">
+        <img class="ui-image ui-image--cover dpp__photo" src="${esc(photo.src)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}">
         ${sectionsHtml}
       </div>
       <aside class="ui-form__aside" aria-labelledby="${asideId}">
@@ -2443,22 +2450,25 @@ function articleMain(a = ART.items[0]) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <article class="cp-article-page">
+    <!-- Колонка статьи — канон dpp--article (T17.14): мета-лента/тип с
+         точкой/галерея/текст — связки слоя ds/ui-patterns.css (порт
+         cp-article-*). -->
+    <article class="dpp dpp--article">
       <h1 class="ui-page-title">${esc(a.title)}</h1>
-      <p class="cp-article-meta">
-        <span class="cp-article-type">${esc(a.type)}</span>
+      <p class="dpp__meta">
+        <span class="dpp__type">${esc(a.type)}</span>
         <time class="ui-small ui-text--muted" datetime="${esc(isoDate(a.date))}">${esc(a.date)}</time>
         <span class="ui-tag ${dot}">${esc(a.rubric)}</span>
       </p>
-      <div class="cp-article-gallery">
+      <div class="dpp__gallery">
         <figure class="ui-figure">
-          <img class="ui-image ui-image--cover cp-article-gallery__photo" src="${esc(a.image)}" alt="${esc(a.title)}" width="1447" height="824">
+          <img class="ui-image ui-image--cover" src="${esc(a.image)}" alt="${esc(a.title)}" width="1447" height="824">
         </figure>
         <figure class="ui-figure">
-          <img class="ui-image ui-image--cover cp-article-gallery__photo" src="assets/images/students-photo-2.jpg" alt="Студенты на практике в компаниях Группы «Интер РАО»" width="431" height="431">
+          <img class="ui-image ui-image--cover" src="assets/images/students-photo-2.jpg" alt="Студенты на практике в компаниях Группы «Интер РАО»" width="431" height="431">
         </figure>
       </div>
-      <div class="cp-article-text">
+      <div class="dpp__text">
         <p class="ui-body">Сотни студентов технических специальностей приступили к производственной практике в компаниях Группы «Интер РАО». Молодые люди приобретают опыт по основным для компании направлениям: энергетика, тепловая автоматика, техническая диагностика, водоподготовка и экологическая станция, сети и подстанции, тепловые сети.</p>
         <p class="ui-body">Каждому практиканту закреплён наставник из числа опытных сотрудников: он помогает разобраться в производственных процессах, поставить первую задачу и подготовить отчёт по требованиям учебного заведения.</p>
         <p class="ui-body">Практика в Группе «Интер РАО» — это возможность увидеть, как теория из учебной программы превращается в реальные производственные результаты, и получить приглашение на работу ещё до выпуска.</p>
@@ -2466,13 +2476,13 @@ function articleMain(a = ART.items[0]) {
       </div>
     </article>
 
-    <!-- «материалы по теме» — секции related оригинала (build.py:849–863:
-         по 3 первых записи каждой сущности); строки вакансий — те же
+    <!-- «материалы по теме» — related-канона dpp-related (T17.14: отступ
+         40px и шаги заголовков 56/32 — связки слоя): строки вакансий — те же
          lpp-rows (паттерн-слой T17.1), карточки — как на
          internships/education. Триггер «откликнуться» остаётся без модалки —
          как в оригинале, где на article.html диалога #vac-apply нет
          (modals.js:22 — молча выходит). -->
-    <div class="cp-article-related">
+    <div class="dpp-related">
       <h2 class="ui-h3">Связанные вакансии</h2>
       <div class="lpp-rows">
 ${relatedVacancies}
@@ -2614,11 +2624,13 @@ function companyMain() {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-company-hero">
-      <img class="ui-image ui-image--cover cp-company-hero__photo" src="assets/images/internship-1.png" alt="Производство компании ${esc(company.name)}" width="431" height="431" loading="lazy">
-      <div class="cp-company-hero__body">
+    <!-- hero — канон dpp-hero (T17.14): 2кол 400px/1fr от 1280, фото 260/320
+         — связки слоя ds/ui-patterns.css (порт cp-company-hero). -->
+    <div class="dpp-hero">
+      <img class="ui-image ui-image--cover dpp-hero__photo" src="assets/images/internship-1.png" alt="Производство компании ${esc(company.name)}" width="431" height="431" loading="lazy">
+      <div class="dpp-hero__body">
         <h1 class="ui-page-title">${esc(company.name)}</h1>
-        <div class="cp-company-hero__text">
+        <div class="dpp-hero__text">
           <p class="ui-body">Генерирующая компания Группы «Интер РАО»: электростанции в Санкт-Петербурге и Ленинградской области общей мощностью более 2,5 ГВт.</p>
           <p class="ui-body">Мы производим электрическую и тепловую энергию, развиваем современные технологии генерации и создаём условия для профессионального роста инженеров и специалистов.</p>
         </div>
@@ -2666,15 +2678,15 @@ function companyMain() {
     <!-- «Где мы работаем»: приближение подписями (Out of scope T15.2 —
          карта-иллюстрация); пара фото+подпись — ui-figure (подпись
          связана семантически), alt дублирует подпись (подпись не заменяет
-         alt — README ui-figure). -->
+         alt — README ui-figure). Сетка пар — канон dpp-where (T17.14). -->
     <h2 class="ui-h3 cp-company-title">Где мы работаем</h2>
-    <div class="cp-company-where">
-      <figure class="ui-figure cp-company-where__item">
-        <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
+    <div class="dpp-where">
+      <figure class="ui-figure">
+        <img class="ui-image ui-image--cover dpp-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
         <figcaption class="ui-figure__caption ui-small ui-text--muted">Головной офис компании</figcaption>
       </figure>
-      <figure class="ui-figure cp-company-where__item">
-        <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-4.jpg" alt="Производственные площадки и станции" width="313" height="208" loading="lazy">
+      <figure class="ui-figure">
+        <img class="ui-image ui-image--cover dpp-where__photo" src="assets/images/media-4.jpg" alt="Производственные площадки и станции" width="313" height="208" loading="lazy">
         <figcaption class="ui-figure__caption ui-small ui-text--muted">Производственные площадки и станции</figcaption>
       </figure>
     </div>
