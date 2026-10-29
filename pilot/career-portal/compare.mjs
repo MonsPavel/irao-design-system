@@ -332,7 +332,8 @@ const SHELL_PROBES = [
   {
     name: 'marquee-line',
     original: '.adv-marquee__line--xl',
-    pilot: '.cp-adv-marquee__line--xl',
+    // Крючок слоя mrq (T17.15): канон adv-marquee — паттерн-слой.
+    pilot: '.mrq__line--xl',
     fields: {
       fs: 'font-size',
       fw: 'font-weight',
@@ -396,7 +397,8 @@ const SHELL_PROBES = [
 /** Пары блоков главной (высота секций). */
 const BLOCK_PROBES = {
   'index.html': [
-    ['hero', '.hero', '.cp-hero'],
+    // Крючок слоя hro (T17.15): связка hero — паттерн-слой.
+    ['hero', '.hero', '.hro'],
     ['production', '.production', '.cp-production'],
     ['directions', '.directions', '#directions'],
     ['holding', '.holding', '.cp-holding'],
