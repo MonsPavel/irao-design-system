@@ -1,10 +1,11 @@
 /**
  * Гейт селекторов паттерн-слоя (T17.1, Implementation requirements п.2 —
  * «stylelint-правило/проверка в сборке»): селекторы слоя — только
- * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp (lnk-/lgo- — лендинг-связки
- * nav-карточек и ленты логотипов, T17.9; tlp- — таймлайн, T17.10; nvp —
- * поднавигация разделов, T17.11; потомки — компоненты ui-*), ID и чужие
- * namespace-крючки запрещены — защита от превращения слоя в свалку.
+ * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp- (lnk-/lgo- —
+ * лендинг-связки nav-карточек и ленты логотипов, T17.9; tlp- — таймлайн,
+ * T17.10; nvp — поднавигация разделов, T17.11; hsp-/ftp- — каркасы шапки/
+ * подвала, T17.13; потомки — компоненты ui-*), ID и чужие namespace-крючки
+ * запрещены — защита от превращения слоя в свалку.
  *
  * Ревью T17.1 (high): прежний инлайн-гейт в selfChecks матчил /([^{}]+)\{/
  * БЕЗ флага /g — проверялось только ПЕРВОЕ правило слоя, чужой префикс в
@@ -71,13 +72,15 @@ export function patternLayerProblems(css) {
     // голые `tlp`/`nvp` (примеры спек T17.10/T17.11), у остальных паттернов
     // блок несёт суффикс (lpp-row): префикс обязан продолжаться дефисом,
     // модификатором __ или закончиться на нём.
-    if (!hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp)(?:-|__|$)/.test(hook))) {
-      problems.push(`селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp: «${selector}»`);
+    if (!hooks.some((hook) => /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp)(?:-|__|$)/.test(hook))) {
+      problems.push(
+        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-: «${selector}»`,
+      );
     }
     for (const hook of hooks) {
-      if (!/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp)(?:-|__|$))/.test(hook)) {
+      if (!/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp)(?:-|__|$))/.test(hook)) {
         problems.push(
-          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp + ui-потомки)`,
+          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp- + ui-потомки)`,
         );
       }
     }

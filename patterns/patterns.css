@@ -12,9 +12,10 @@
  * поля) слой не дублирует — гейт селекторов: только канонические префиксы
  * lpp- (list-page), ddp- (detail-page), fpp- (form-page), lnk-/lgo-
  * (лендинг-связки nav-карточек и ленты логотипов, T17.9), tlp- (таймлайн,
- * T17.10), nvp (поднавигация разделов, T17.11); потомки — компоненты ui-*.
- * Список пополняют задачи эпика (лендинг-связки, find-bar, каркасы шапки/
- * подвала — T17.9/T17.12/T17.13), не руками сайтов.
+ * T17.10), nvp (поднавигация разделов, T17.11), hsp-/ftp- (каркасы шапки/
+ * подвала, T17.13); потомки — компоненты ui-*. Список пополняют задачи
+ * эпика (лендинг-связки, find-bar, каркасы шапки/подвала —
+ * T17.9/T17.12/T17.13), не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
  * несёт те же классы, значения перенесены 1:1 (включая «как есть»-литералы
@@ -735,4 +736,309 @@
    колонка не влезает. */
 .nvp .ui-tabs__tab {
   overflow-wrap: anywhere;
+}
+
+/* ════════════════ Каркас шапки сайта (T17.13) — связки hsp ════════════════
+ *
+ * Порт каркасных связок шапки career-portal (pilot.css 30–131; источник
+ * значений — header.css оригинала, строки в комментариях): сетка
+ * «меню — логотип — меню» 1fr auto 1fr, nowrap-пункты, режимы static
+ * (внутренние страницы) / --overlay (главная поверх hero). Каркас НЕ несёт
+ * цветов текста/ссылок (Implementation requirements п.1): hover-пара пунктов
+ * — роль ui-link--nav, бренд-вид (VI-пилюля 15px, логотип-размеры,
+ * letter-spacing 0.01em оговорка) — сайт-зона. VI-пилюля — слот __action:
+ * в доке — общий вид кнопки (п.2), бренд-вид пилота — сайт-зона поверх.
+ * Меню-право скрыто ≤767 (канон оригинала, header.css:131) — ступень
+ * переформулирована mobile-first: скрыто в базе, включение от md (768,
+ * шкала T2.5); рендер тот же. Соц-кнопки шапки (если сайт решит) — пара
+ * ftp__social ниже; канон оригинала их в шапке не несёт — правила нет
+ * (мёртвый крючок в слое не заводится).
+ */
+
+/* Базовый режим — static для внутренних страниц: рамка низа muted и
+   surface-пара основы — единственные цвета каркаса (Implementation
+   requirements п.1). */
+.hsp {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  border-bottom: var(--ui-border-width) solid var(--ui-color-border-muted);
+  background-color: var(--ui-color-surface);
+}
+
+/* Режим главной: absolute поверх hero без рамки/фона (фон несёт фото
+   секции). z-40 — слой шапки оригинала (header.css:2-6). */
+.hsp--overlay {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 40;
+  border-bottom: 0;
+  background-color: transparent;
+}
+
+/* Сетка «меню — логотип — меню»: равные 1fr-треки центрируют auto-логотип.
+   gap 16 и паддинги 16/8 — .cp-header__inner пилота (спека T17.13 «паддинги
+   16/8»); max-width и горизонтальный паддинг несёт ui-container (композиция
+   разметки «ui-container hsp__inner»). */
+.hsp__inner {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-4);
+  align-items: start;
+  grid-template-columns: 1fr auto 1fr;
+  padding-top: var(--ui-space-4);
+  padding-bottom: var(--ui-space-2);
+}
+
+/* Меню шапки: лента пунктов; padding-top 8 — ритм строки пунктов
+   (header.css:23). */
+.hsp__menu {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-4);
+  align-items: center;
+  padding-top: var(--ui-space-2);
+}
+
+.hsp__menu--left {
+  box-sizing: border-box;
+  justify-self: start;
+}
+
+/* Правое меню — прижато вправо (grid-трек 1fr); в мобильной базе скрыто —
+   канон оригинала (header.css:131, ≤767), ступень переформулирована
+   mobile-first: включение от md — рендер тот же. */
+.hsp__menu--right {
+  box-sizing: border-box;
+  display: none;
+  justify-content: flex-end;
+  justify-self: end;
+}
+
+/* Пункты меню — строки с иконкой (gap 8 — header.css:33) и nowrap-режимом
+   (header.css:39): аффорданс несёт каркас, цвет — роли ui-link--nav
+   разметки (Implementation requirements п.1). */
+.hsp__menu .ui-link {
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  white-space: nowrap;
+}
+
+/* Триггер dropdown — шрифт пункта меню (fs 14 / lh 1.1 — .header__link,
+   header.css:34-36): без правила триггер растёт по брейкпоинтам роли body
+   и рвёт строку меню (доводка T16.3; «шрифт конкретной шапки сайт несёт
+   сам», README ui-dropdown — равенство пунктов меню несёт каркас). */
+.hsp__menu .ui-dropdown__trigger {
+  font-size: var(--ui-fs-small);
+  line-height: 1.1;
+}
+
+/* Слот логотипа: inline-flex держит знак и текст-логотип на одной строке
+   (у img-логотипов не участвует); вес текста — fw-h3 дока. Размеры img —
+   сайт-зона (Implementation requirements п.1; у пилота 105px — бренд-строка
+   pilot.css). */
+.hsp__logo {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  font-weight: var(--ui-fw-h3);
+}
+
+/* Слот действия (кнопка VI — T9.1): общий вид кнопки для дока-канона
+   (Implementation requirements п.2) — аффорданс пилюли на токенах.
+   Бренд-вид (VI-пилюля 15px, рамка primary, glass-light у career-portal) —
+   сайт-зона поверх. font-family явно: UA-дефолт кнопки шрифт сайта не
+   наследует. */
+.hsp__action {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-2);
+  align-items: center;
+  padding: var(--ui-space-2) var(--ui-space-3);
+  border: var(--ui-border-width) solid var(--ui-color-border);
+  border-radius: var(--ui-radius-pill);
+  background-color: transparent;
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+  cursor: pointer;
+}
+
+/* Меню-право включается от md (767-ступень канона, mobile-first). */
+@media (min-width: 768px) {
+  .hsp__menu--right {
+    display: flex;
+  }
+}
+
+/* ════════════════ Каркас подвала сайта (T17.13) — связки ftp ════════════════
+ *
+ * Порт каркасных связок подвала career-portal (pilot.css 562–718; источник
+ * значений — footer.css оригинала, строки в комментариях): 4-колоночная
+ * сетка «логотип — ссылки — контакты — правая колонка» (от 1024), колонка
+ * ссылок 14/1.35 с шагом 9px, контакты label/значение 14/500/1.35, правая
+ * колонка «соцсети сверху — копирайт снизу», лента круглых 36px соц-кнопок.
+ * Каркас НЕ несёт цветов текста/ссылок (Implementation requirements п.1):
+ * цвет ссылок, hover-accent, :visited-политика — сайт-зона (комментарии-
+ * источники сохранены в pilot.css); muted-подписи контактов — роль
+ * ui-text--muted в разметке. Мобильные ступени переформулированы
+ * mobile-first (лестница пилота 1023/767 не переносится, Implementation
+ * requirements T17.1 п.4): база — 2 колонки (ступень ≤1023), nowrap
+ * ссылок/копирайта — от md (снятие ≤767 канона, footer.css:150), 4 колонки —
+ * от 1024; рендер тот же.
+ *
+ * Соц-кнопки — остаток §8.3 REPORT («on-dark-стиль на белом не видны»):
+ * вид контрола — модификатор ui-button--round (T17.9), пара — токен-хуку.
+ */
+
+/* База — светлая (surface-пара основы, Implementation requirements п.1):
+   белый фон и тёмный текст одобренного дизайна career-portal. */
+.ftp {
+  box-sizing: border-box;
+  background-color: var(--ui-color-surface);
+  color: var(--ui-color-text);
+}
+
+/* Приглушённый тон (вариант дока T7.6 — фон синей пятидесятки): surface-
+   пара поверх базы; на каркасной геометрии не сказывается. */
+.ftp--muted {
+  box-sizing: border-box;
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Сетка подвала: база — 2 колонки (ступень ≤1023 пилота), от 1024 — доли
+   «auto 2fr 2fr 1fr» (.cp-footer__inner). Зазор 40px и вертикальный ритм
+   48px — footer.css:10/3 («как есть», прецедент --ui-button-pad-inline);
+   горизонтальный паддинг несёт ui-container. */
+.ftp__inner {
+  box-sizing: border-box;
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: var(--ui-space-7);
+  padding-bottom: var(--ui-space-7);
+}
+
+/* Колонка ссылок: шаг строк 9px «как есть» (footer.css:26, вне шкалы §3.2);
+   строки 14/1.35 — .footer__links li (footer.css:29-32): межстрочная роль
+   body делала бы строки колонки выше оригинала. Цвет ссылок — сайт-зона
+   (Implementation requirements п.1). */
+.ftp__links {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5625rem;
+  margin: 0;
+  padding: 0;
+  font-size: var(--ui-fs-small);
+  line-height: var(--ui-lh-small);
+  list-style: none;
+}
+
+/* nowrap пунктов — .footer__link (footer.css:35-38): перенос канона — от md
+   (767-ступень footer.css:150 переформулирована mobile-first — рендер тот
+   же: в базе пункты переносятся, от 768 держат строку). */
+.ftp__links .ui-link {
+  line-height: var(--ui-lh-small);
+}
+
+/* Контакты: шаг блоков 28px «как есть» (footer.css:48). UA-курсив address
+   гасится — адрес контактной строки читается обычным текстом (прецедент
+   роли ui-address и dpp-aside: UA-дефолты обнуляет связка). */
+.ftp__contacts {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* Пара label/значение: шаг 4px (--ui-space-1, footer.css:54); строки
+   14/500/1.35 — .footer__contact-label/-value (footer.css:62-74) —
+   наследуется в label, адрес и ссылки; курсив address гасится здесь же. */
+.ftp__contact {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-1);
+  font-size: var(--ui-fs-small);
+  font-style: normal;
+  font-weight: var(--ui-fw-small);
+  line-height: var(--ui-lh-small);
+}
+
+/* Межстрочное контактных ссылок — как у значений (1.35). */
+.ftp__contact .ui-link {
+  line-height: var(--ui-lh-small);
+}
+
+/* Группа телефон/e-mail: зазор 40px «как есть» (footer.css:59). */
+.ftp__contact-group {
+  box-sizing: border-box;
+  display: flex;
+  gap: 2.5rem;
+}
+
+/* Правая колонка: соцсети сверху, копирайт снизу (footer.css:79-86);
+   шаг 24px — --ui-space-5 (в шкале). */
+.ftp__right {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5);
+  align-items: flex-end;
+  align-self: stretch;
+  justify-content: space-between;
+}
+
+/* Лента соц-кнопок: зазор 20px «как есть» (footer.css:90 — «по оригиналу»;
+   прежние 8px пилота шли от on-dark-стиля, §8.3). */
+.ftp__socials {
+  box-sizing: border-box;
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Соц-кнопка — вид контрола на модификаторе ui-button--round (T17.9):
+   пара — ТОКЕН-ХУКАМИ (модификатор переобъявляет их защитно в hover/active
+   и разрешает через них же — свойств-дублей слой не заводит): покой
+   blue-50/text («по оригиналу», footer.css:99-101 — на белом видны),
+   hover primary/on-dark (footer.css:105-108) — под (hover: hover).
+   Геометрия — 36px r12 «как есть» (footer.css:97-100, вне шкалы —
+   прецедент --ui-button-pad-inline): радиус НЕ круг базового --round. */
+.ftp__social {
+  box-sizing: border-box;
+  --ui-button-bg: var(--ui-color-surface-muted);
+  --ui-button-color: var(--ui-color-text);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+}
+
+@media (hover: hover) {
+  .ftp__social:hover {
+    --ui-button-bg: var(--ui-color-primary);
+    --ui-button-color: var(--ui-color-text-on-dark);
+  }
+}
+
+/* Ступени канона, mobile-first: nowrap ссылок/копирайта — от md (768);
+   4 колонки сетки — от lg (1024). */
+@media (min-width: 768px) {
+  .ftp__links .ui-link,
+  .ftp__right .ui-small {
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ftp__inner {
+    grid-template-columns: auto 2fr 2fr 1fr;
+  }
 }

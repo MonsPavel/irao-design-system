@@ -2,7 +2,8 @@
  * Юнит-пины T7.6 — паттерн «Header» (patterns/header/): контракт копируемой
  * разметки шапки сайта, которую собирает интегратор.
  *
- * Исполняемая форма решения (спека T7.6, Scope + Implementation requirements):
+ * Исполняемая форма решения (спека T7.6, Scope + Implementation requirements;
+ * связки каркаса — паттерн-слой с T17.13):
  *  - patterns/header/header.html — skip-link (T3.5) + <header> (banner) +
  *    nav-лендмарки с УНИКАЛЬНЫМИ aria-label + dropdown (T6.1, навигационное
  *    назначение — nav/ul/li/a, без menu-роли) + логотип (T4.6: alt/имя,
@@ -10,8 +11,10 @@
  *    странице) + поиск (триггер-ссылка к диалогу search-overlay, T7.6);
  *  - паттерн самодостаточен: диалог поиска включён в сниппет (пара
  *    «триггер в шапке — диалог в конце body»);
- *  - связующие стили паттерна живут <style>'ом стенда, НЕ в dist;
- *    значения — только токены --ui-*.
+ *  - каркас шапки — связки hsp-* в паттерн-слое (T17.13: сетка, режимы
+ *    static/overlay, меню, слоты logo/action; <style> в док-HTML больше
+ *    нет — пин синхронности patterns-layer.test.js); бренд-вид (VI-пилюля,
+ *    логотип-размеры) — сайт-зона.
  * Поверхность браузера (лендмарки, dropdown, VI, axe, эталоны) —
  * tests/e2e/pattern-header.spec.js.
  */
@@ -91,8 +94,8 @@ describe('patterns/header/header.html — контракт эталонной с
     }
   });
 
-  it('логотип — ссылка на главную с доступным именем (T4.6: alt/имя, размеры — README)', () => {
-    const logo = pattern.match(/<a\b[^>]*class="[^"]*hdp-logo[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
+  it('логотип — ссылка на главную с доступным именем (T4.6): слот hsp__logo каркаса (T17.13)', () => {
+    const logo = pattern.match(/<a\b[^>]*class="[^"]*hsp__logo[^"]*"[^>]*>[\s\S]*?<\/a>/) ?? [''];
     expect(logo[0], 'логотип-ссылка на месте').not.toBe('');
     expect(logo[0], 'href — главная страница').toMatch(/href="(?:\/|index\.html)"/);
     const name =
@@ -104,9 +107,10 @@ describe('patterns/header/header.html — контракт эталонной с
     expect(name.length, 'у ссылки-логотипа есть доступное имя').toBeGreaterThan(0);
   });
 
-  it('кнопка VI (T9.1) — data-ui-vi-toggle в дополнительной навигации, aria-pressed', () => {
-    const vi = pattern.match(/<button\b[^>]*data-ui-vi-toggle[^>]*>/) ?? [''];
-    expect(vi[0], 'кнопка VI в шапке (README ui-vi: кнопка живёт в шапке)').not.toBe('');
+  it('кнопка VI (T9.1) — слот hsp__action с data-ui-vi-toggle, aria-pressed', () => {
+    const vi = pattern.match(/<button\b[^>]*class="[^"]*hsp__action[^"]*"[^>]*>/) ?? [''];
+    expect(vi[0], 'кнопка VI в шапке на слоте каркаса (T17.13 п.2)').not.toBe('');
+    expect(vi[0], 'хук модуля VI').toContain('data-ui-vi-toggle');
     expect(vi[0], 'type="button" — не сабмит чужой формы').toContain('type="button"');
     expect(vi[0], 'состояние режима — aria-pressed (синхронизирует модуль)').toContain(
       'aria-pressed="false"',
@@ -129,15 +133,13 @@ describe('patterns/header/header.html — контракт эталонной с
     expect(dialog[0], 'в разметке открыт (деградация без JS, К9 ADR-0011)').toMatch(/\bopen\b/);
   });
 
-  it('связующие стили паттерна — только токены, без hex и !important (граница «showcase, не dist»)', () => {
-    expect(pattern, 'связки живут <style> стенда, не в dist').toContain('<style>');
-    const style = pattern.match(/<style>([\s\S]*?)<\/style>/) ?? ['', ''];
-    expect(style[1], 'hex в связках запрещён (инвариант системы)').not.toMatch(
-      /#[0-9a-fA-F]{3,8}\b/,
-    );
-    expect(style[1], '!important в связках запрещён (инвариант системы)').not.toContain(
-      '!important',
-    );
+  it('связки каркаса — в паттерн-слое (T17.13): <style> в док-HTML больше нет, разметка несёт классы hsp-*', () => {
+    const markup = pattern.replace(/<!--[\s\S]*?-->/g, '');
+    expect(
+      markup,
+      '<style> перенесён в patterns/patterns.css (пин синхронности слоя; упоминания в комментариях — история)',
+    ).not.toContain('<style>');
+    expect(markup, 'шапка несёт блок-класс каркаса').toMatch(/<header class="hsp[" ]/);
   });
 
   it('без inline-стилей (инвариант системы: перекраска vi.css накрывает всё)', () => {

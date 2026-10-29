@@ -15,7 +15,8 @@ import { expect } from '@playwright/test';
 import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helpers/harness.js';
 
 const SEL = {
-  header: 'body > header.hdp-header',
+  // Каркас шапки — связки hsp-* паттерн-слоя (T17.13).
+  header: 'body > header.hsp',
   dropdownTrigger: '#hdp-sections-trigger',
   dropdownMenu: '#hdp-sections-menu',
   vi: 'button[data-ui-vi-toggle]',
@@ -35,7 +36,7 @@ standTest.describe('patterns/header: ленмарки (AC — правила л�
       // landmark-no-duplicate-banner).
       const banners = page.locator('body > header');
       await expect(banners, 'ровно одна шапка уровня body').toHaveCount(1);
-      await expect(banners).toHaveClass(/hdp-header/);
+      await expect(banners).toHaveClass(/hsp/);
 
       // Порядок каркаса: skip-link → header → main (правила ленмарк, README).
       const order = await page.evaluate(() => {

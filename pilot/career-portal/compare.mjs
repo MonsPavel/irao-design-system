@@ -126,11 +126,12 @@ const SHELL_PROBES = [
     fields: { bg: 'background-color' },
     text: false,
   },
-  // первый пункт меню шапки (REPORT §8.2 №4): высота строки — rect
+  // первый пункт меню шапки (REPORT §8.2 №4): высота строки — rect.
+  // Класс меню — крючок слоя hsp__menu--left (T17.13, каркас шапки в слое).
   {
     name: 'header-link',
     original: '.header__menu--left .header__link',
-    pilot: '.cp-header__menu--left .ui-link--nav',
+    pilot: '.hsp__menu--left .ui-link--nav',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     rect: true,
   },
@@ -142,15 +143,17 @@ const SHELL_PROBES = [
     pilot: '.ui-dropdown__item',
     fields: { fs: 'font-size', lh: 'line-height', padding: 'padding', tdl: 'text-decoration-line' },
   },
-  // первая ссылка футера (REPORT §8.2 №5) + bg/высота самого футера
+  // первая ссылка футера (REPORT §8.2 №5) + bg/высота самого футера.
+  // Классы — крючки слоя ftp (T17.13: каркас подвала в слое, цвет ссылок —
+  // сайт-строка .ftp .ui-link).
   {
     name: 'footer-link',
     original: '.footer__link',
-    pilot: '.cp-footer__link',
+    pilot: '.ftp__links .ui-link',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     extra: {
       original: '.footer',
-      pilot: '.cp-footer',
+      pilot: '.ftp',
       fields: { footerBg: 'background-color' },
       rectName: 'footerHeight',
     },
@@ -406,7 +409,8 @@ const BLOCK_PROBES = {
     ['media', '.media', '#media'],
     ['team', '.team', '.cp-team__photo'],
     ['cta-mail', '.cta-mail', '.ui-card--cta--primary'],
-    ['footer', '.footer', '.cp-footer'],
+    // Подвал — крючок слоя ftp (T17.13, прецедент video-block/cta-mail).
+    ['footer', '.footer', '.ftp'],
   ],
   // Статы компании на ui-stat (T17.4): сетки — сайт-зона, плашки — компонент;
   // блоки гейтят высоты миграции (AC: порог ±4px). Оригинал несёт те же

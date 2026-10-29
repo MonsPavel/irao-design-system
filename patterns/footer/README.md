@@ -8,19 +8,26 @@
 стили — визуал подвала бренд-специфичен (Out of scope).
 
 Подвалы/шапки сайтов слишком различаются, чтобы быть компонентами системы
-(02-architecture §4) — паттерн это документированный HTML-скелет; CSS-минимум
-(`fdp-*`) — зона сайта (в бою — `template_styles.css`; на стенде — `<style>`
-рядом, не в `dist`).
+(02-architecture §4) — паттерн это документированный HTML-скелет. Каркас
+подвала — связки `ftp-*` в **паттерн-слое** (T17.13, прецедент таймлайна
+T17.10): единый исходник [`../patterns.css`](../patterns.css) →
+опциональный `dist/ui-patterns.css` (порядок в head: токены → core →
+patterns → сайт). Тон — surface-пара каркаса: база `ftp` **светлая** (белый
+фон — одобренный дизайн career-portal), приглушённый вариант — модификатор
+`ftp--muted` (в доке — второй экземпляр на `div`: contentinfo одна).
+Бренд-вид — сайт-зона (в бою — `template_styles.css`): цвет ссылок,
+hover-accent, `:visited`-политика, размеры логотипа.
 
 ## Состав
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
-| `<footer>` | каркас страницы (не компонент) | прямому ребёнку `body` — роль contentinfo |
-| Логотип | ссылка на главную (T4.6) | доступное имя; в бою — `img` с `alt` + `width`/`height` |
-| Колонки ссылок | `nav[aria-label]` × 2 + `ui-link` | у каждой колонки своё имя навигации |
-| Контакты | `<address>` + `ui-link` | `tel:`/`mailto:` — работают без JS |
-| Соцсети | icon-only ссылки + `aria-label` | svg декоративен (`aria-hidden`) |
+| `<footer class="ftp">` | каркас страницы + связка слоя | прямому ребёнку `body` — роль contentinfo; тон — `ftp` (светлый) / `ftp--muted` |
+| `ftp__inner` | `ui-container` + сетка слоя | «логотип — ссылки — контакты — правая колонка»: 2 колонки в базе, 4 — от 1024 |
+| Логотип | `ftp__logo` (T4.6) | доступное имя; в бою — `img` с `alt` + `width`/`height`; размеры — сайт-зона |
+| Колонка ссылок | `nav[aria-label]` + `ftp__links` + `ui-link` **`--nav`** (T16.3) | канон — одна колонка (список); шаг строк и 14/1.35 — слой; цвет — сайт-зона |
+| Контакты | `ftp__contacts`/`ftp__contact` + `<address>` + `ui-link` | подпись — `ui-text--muted` в разметке; `tel:`/`mailto:` — работают без JS |
+| Соцсети | `ui-button` **`--round`** (T17.9) + `ftp__social` | icon-only — `aria-label`; пара 36px blue-50 → hover primary — хуками слоя («по оригиналу», T17.13) |
 | Переход кверху | `ui-link` на `#top` | цель — якорь в начале страницы |
 
 ## Разметка
@@ -35,7 +42,7 @@
   <a class="ui-skip-link" href="#main">…</a>
   <header>…</header>
   <main id="main" tabindex="-1">…</main>
-  <footer class="fdp-footer">…</footer>   <!-- contentinfo -->
+  <footer class="ftp">…</footer>   <!-- contentinfo -->
 </body>
 ```
 
@@ -43,64 +50,67 @@
 внутри `<main>` (или `<article>`) подвал роли contentinfo не получит —
 держите его на уровне `body`, после `main` (чтение: контент → подвал).
 
-### Колонки ссылок: nav-лендмарки с уникальными aria-label
+### Колонка ссылок: nav-лендмарка с aria-label
 
 ```html
-<nav class="fdp-footer__nav" aria-label="Навигация по сайту">
-  <ul class="fdp-footer__links">
-    <li><a class="ui-link" href="/vacancies/">Вакансии</a></li>
+<nav aria-label="Меню подвала">
+  <ul class="ftp__links">
+    <li><a class="ui-link ui-link--nav" href="/vacancies/">Вакансии</a></li>
     …
   </ul>
 </nav>
-<nav class="fdp-footer__nav" aria-label="Документы">
-  <ul class="fdp-footer__links">…</ul>
-</nav>
 ```
 
-Списки — нативные `ul/li` (семантика списка скринридеру); каждая колонка —
-отдельная навигация со **своим** именем (правило то же, что в шапке).
+Список — нативные `ul/li` (семантика списка скринридеру); канон `ftp` —
+одна колонка ссылок (несколько колонок — сайт-зона поверх сетки слоя).
+Навигация с именем — лендмарк различим скринридеру.
 
 ### Контакты: address-семантика (Technical considerations)
 
 ```html
-<address class="fdp-footer__contacts">
-  <p class="fdp-footer__contact">
-    <span class="fdp-footer__label">Адрес</span>
+<div class="ftp__contacts">
+  <address class="ftp__contact">
+    <span class="ftp__contact-label ui-text--muted">Адрес</span>
     ул. Большая Пироговская, д.&nbsp;27, …
-  </p>
-  <p class="fdp-footer__contact">
-    <span class="fdp-footer__label">Телефон</span>
-    <a class="ui-link" href="tel:+74956648840">+7 495 664-88-40</a>
-  </p>
-  <p class="fdp-footer__contact">
-    <span class="fdp-footer__label">E-mail</span>
-    <a class="ui-link" href="mailto:career@interrao.ru">career@interrao.ru</a>
-  </p>
-</address>
+  </address>
+  <div class="ftp__contact-group">
+    <div class="ftp__contact">
+      <span class="ftp__contact-label ui-text--muted">Телефон</span>
+      <a class="ui-link ui-link--nav" href="tel:+74956648840">+7 495 664-88-40</a>
+    </div>
+    <div class="ftp__contact">
+      <span class="ftp__contact-label ui-text--muted">E-mail</span>
+      <a class="ui-link ui-link--nav" href="mailto:career@interrao.ru">career@interrao.ru</a>
+    </div>
+  </div>
+</div>
 ```
 
 `<address>` — нативная семантика «контактная информация организации/автора»
 (Technical considerations спеки T7.6): скринридер и поисковики получают
 контакты без ARIA. Телефон и почта — ссылки `tel:`/`mailto:` — работают без
-JS. UA-курсив address гасится в связке `fdp-footer__contacts`
-(`font-style: normal`).
+JS. UA-курсив address гасит связка слоя (`ftp__contact`,
+`font-style: normal` — прецедент роли `ui-address`).
 
-### Соцсети: icon-only ссылки — aria-label обязателен
+### Соцсети: ui-button--round + пара хуками слоя (T17.13)
 
 ```html
-<a class="fdp-footer__social" href="https://vk.com/" aria-label="ВКонтакте">
+<a class="ui-button ui-button--round ftp__social" href="https://vk.com/" aria-label="ВКонтакте">
   <svg aria-hidden="true" …>…</svg>
 </a>
 ```
 
 Иконка — единственный контент ссылки: без `aria-label` ссылка безымянная
-(T4.1, предупреждение `irao/link-accessible-name`). Touch-цель ≥ 44px —
-связка `fdp-footer__social` (правило T6.3).
+(T4.1, предупреждение `irao/link-accessible-name`). Вид контрола —
+модификатор `ui-button--round` (T17.9); пару несёт слой хуками
+`--ui-button-bg`/`--ui-button-color`: покой — blue-50/текст (видны на белом,
+«по оригиналу»), hover — primary/on-dark. Другая пара — своя у сайта
+(do/don't — patterns/landing-section/README.md).
 
 ### Переход кверху
 
 ```html
-<a class="fdp-footer__top ui-link" href="#top">Наверх</a>
+<a class="ui-link ftp__top" href="#top">Наверх</a>
 ```
 
 Цель — якорь в начале страницы: `<body id="top">` или `id="top"` на первом
@@ -127,20 +137,22 @@ JS. UA-курсив address гасится в связке `fdp-footer__contacts
 - Контакты/соцсети — include-области или свойства сайта; `tel:`/`mailto:` —
   из настроек инфоблока «Контакты».
 - Логотип — `img` из `/upload/` с `alt` и `width`/`height` (T4.6).
-- Связующие стили (`fdp-*`) перенесите в `template_styles.css` — источник:
-  `<style>` в [`footer.html`](footer.html), значения — только токены `--ui-*`.
+- Каркас (сетки/ритмы/соц-кнопки) несёт слой `ftp-*`; бренд-вид (цвет
+  ссылок, hover-accent, `:visited`, размеры логотипа) — в
+  `template_styles.css` сайта из токенов `--ui-*`.
 
 ## Do / Don't
 
-- **Do**: `<address>` для контактов; `tel:`/`mailto:`-ссылки; у каждой
-  колонки ссылок — своя навигация с именем; icon-only ссылки — с
-  `aria-label`.
+- **Do**: `<address>` для контактов; `tel:`/`mailto:`-ссылки; у навигации
+  подвала — своё имя; icon-only ссылки — с `aria-label`.
 - **Don't**: не вкладывайте `<footer>` в `<main>`/`<article>` (теряется
   contentinfo; футер статьи — другой случай, там роль и не нужна); не
   оставляйте соцссылки безымянными; не делайте «наверх» кнопкой с JS-скроллом
-  — якорь работает без JS.
+  — якорь работает без JS; не ставьте второй `<footer class="ftp">` для
+  варианта тона — contentinfo одна (в доке приглушённый экземпляр на `div`).
 - **Don't**: не переносите визуал career-portal (подвал бренд-специфичен,
-  Out of scope) — связки `fdp-*` сайты рисуют под себя из токенов `--ui-*`.
+  Out of scope) — бренд-строки сайты рисуют под себя из токенов `--ui-*`
+  поверх каркаса слоя.
 
 ## Тесты
 
