@@ -959,8 +959,7 @@ a.cp-intern-card {
    Hero-2кол и where-пары — ПАТТЕРН-СЛОЙ (T17.14): канон dpp-hero
    (400px/1fr от 1280, фото 260/320) и dpp-where (пары от lg, фото 280px)
    — patterns/patterns.css; разметка companyMain несёт классы
-   dpp-hero*/
-dpp-where*. */
+   dpp-hero и dpp-where с элементами __photo/__body/__text/__item. */
 
 /* Факты компании: сетка 3 колонки, шаг 24px, низ 40px «как есть»
    (pages.css:805). Плашки — ui-stat--filled (T17.4): primary-поверхность,
