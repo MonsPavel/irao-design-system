@@ -303,6 +303,20 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(tags, '.dpp__tags найдено').toBeTruthy();
     expect(tags, 'лента gap 8 — cp-detail-tags').toContain('gap: var(--ui-space-2);');
     expect(tags, 'перенос строк ленты').toContain('flex-wrap: wrap;');
+    const photo = blockOf('.dpp__photo');
+    expect(photo, '.dpp__photo найдено').toBeTruthy();
+    expect(photo, 'мобильная база 260px — оригинал @max-767 (pages.css:933)').toContain(
+      'height: 16.25rem;',
+    );
+    expect(photo, 'радиус фото').toContain('border-radius: var(--ui-radius-md);');
+    const photoIdx = code.indexOf('.dpp__photo');
+    const photoMd = code
+      .slice(photoIdx)
+      .match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\.dpp__photo\s*\{([^}]*)\}/);
+    expect(photoMd, 'ступень md для фото найдена').toBeTruthy();
+    expect(photoMd[1], 'фото 420px от md — pages.css:542 «как есть»').toContain(
+      'height: 26.25rem;',
+    );
     const section = blockOf('.dpp__section');
     expect(section, '.dpp__section найдено').toBeTruthy();
     expect(section, 'секция gap 8 — cp-vacancy-page__section/cp-detail-section').toContain(
