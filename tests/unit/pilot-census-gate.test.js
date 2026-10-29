@@ -20,7 +20,15 @@
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
  *  - compare.mjs: гейт подключен в тот же запуск до браузерного прогона
  *    (Scope: «подключение — в запуск compare, как гейт ссылок T15.9»).
+ *  - Базлайн ценза §11.4 REPORT — пре-эпик дерево 922b505 (последняя
+ *    пре-эпик правка 24.10 23:56, содержимое = 6b92906~1): числа §11.2
+ *    воспроизводятся этим методом (2022 строки, js 243), кроме «228
+ *    селекторов» (census-метод: 276 вхождений / 233 уникальных) — пин
+ *    синхронности REPORT (ревью T17.16: якорь базлайна fd27e46 был
+ *    неверен, Δ занижали эффект эпика; практика пинов синхронности —
+ *    T17.10 errata).
  */
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
@@ -173,5 +181,54 @@ describe('compare.mjs — гейт ценза подключен в тот же 
     expect(censusCall).toBeGreaterThan(-1);
     expect(browserLaunch).toBeGreaterThan(-1);
     expect(censusCall).toBeLessThan(browserLaunch);
+  });
+});
+
+describe('базлайн ценза §11.4 — пре-эпик дерево 922b505 (ревью T17.16)', () => {
+  /** Содержимое файла пилота на коммите (рабочая копия Windows — CRLF
+   *  нормализуется, как в readSource). */
+  const showPilot = (ref, name) =>
+    execFileSync('git', ['show', `${ref}:pilot/career-portal/${name}`], {
+      encoding: 'utf8',
+      maxBuffer: 16 * 1024 * 1024,
+    }).replace(/\r\n/g, '\n');
+
+  const uniqueSelectors = (css) => {
+    const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    const selectors = [];
+    for (const [, prelude] of withoutComments.matchAll(/([^{}]+)\{/g)) {
+      for (const raw of prelude.split(',')) {
+        const selector = raw.trim();
+        if (selector.includes('.cp-')) selectors.push(selector);
+      }
+    }
+    return new Set(selectors).size;
+  };
+
+  it('числа §11.2 воспроизводятся census-методом на 922b505: 2022 строки, js 243 (кроме «228 селекторов»)', () => {
+    const css = showPilot('922b505', 'pilot.css');
+    const m = censusMetrics(css, showPilot('922b505', 'pilot.js'));
+    expect(m.css.lines).toBe(2022);
+    expect(m.css.codeLines).toBe(1402);
+    // census-метод: 276 вхождений / 233 уникальных селекторов; «228» §11.2 —
+    // иная (не записанная) методика раунда 5
+    expect(m.css.selectors).toBe(276);
+    expect(uniqueSelectors(css)).toBe(233);
+    expect(m.css.families).toHaveLength(64);
+    expect(m.js.lines).toBe(243);
+  });
+
+  it('REPORT §11.4 синхронен: якорь базлайна — 922b505, ложные утверждения о базлайне сняты', () => {
+    const report = readSource('REPORT.md');
+    expect(report).toContain('922b505');
+    // пересчитанные дельты от пре-эпик дерева (2022/1402/276/64/243 → 1040/519/106/30/187)
+    expect(report).toContain('−49%');
+    expect(report).toContain('−63%');
+    expect(report).toContain('−62%');
+    expect(report).toContain('−53%');
+    expect(report).toContain('−23%');
+    // ревью T17.16: оба утверждения о базлайне были ложными — сняты
+    expect(report).not.toContain('файл не менялся с 23.10 до старта эпика');
+    expect(report).not.toContain('не воспроизводятся ни на одном коммите');
   });
 });
