@@ -38,9 +38,7 @@ const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8');
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8');
 const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
 // Канон hero — паттерн-слой с T17.15 (связка hro): пины блока — по слою.
-const layerCss = stripCssComments(
-  readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'),
-);
+const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 
 const indexHtml = build.match(/function indexMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
 const companyHtml = build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
@@ -139,12 +137,7 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     // hero — канон hro (T17.15): блок перенесён в паттерн-слой, пин — по слою.
     expect(blockOf(layerCss, '.hro'), '.hro найдено (слой, T17.15)').toBeTruthy();
     expect(blockOf(layerCss, '.hro'), '.hro: ритм ui-section погашен').toContain('padding: 0;');
-    for (const block of [
-      '.cp-production',
-      '.cp-holding',
-      '.cp-why-us',
-      '.cp-company-banner',
-    ]) {
+    for (const block of ['.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block} найдено`).toBeTruthy();
       expect(blockOf(pilotCss, block), `${block}: ритм ui-section погашен`).toContain(
         'padding: 0;',
@@ -157,12 +150,7 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     expect(blockOf(layerCss, '.hro'), '.hro: position: relative (слой)').toContain(
       'position: relative;',
     );
-    for (const block of [
-      '.cp-production',
-      '.cp-holding',
-      '.cp-why-us',
-      '.cp-company-banner',
-    ]) {
+    for (const block of ['.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block}: position: relative`).toContain(
         'position: relative;',
       );

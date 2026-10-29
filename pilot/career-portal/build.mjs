@@ -1161,6 +1161,8 @@ function indexMain() {
       <div class="ui-field">
         <input class="ui-field__input" type="search" name="q" placeholder="Введите название вакансии" aria-label="Поиск вакансий">
       </div>
+      <!-- submit — wcag/h32 (канон дока T17.15): вид не несёт (ui-vh, T17.2). -->
+      <button class="ui-button ui-vh" type="submit">Найти</button>
       <a class="hro__search-all" href="vacancies.html">Все вакансии</a>
     </form>
   </div>

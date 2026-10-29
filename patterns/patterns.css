@@ -1508,9 +1508,9 @@
   flex: 1 1 0;
   justify-content: center;
   min-height: 3.5rem;
+  background-color: var(--hro-tag-bg, var(--ui-color-primary-a26));
   color: var(--ui-color-text-on-dark);
   font-size: var(--ui-fs-lead);
-  background-color: var(--hro-tag-bg, var(--ui-color-primary-a26));
   backdrop-filter: blur(10px);
 }
 
@@ -1587,12 +1587,28 @@
   white-space: normal;
 }
 
-/* Тело: фото + абзац (pages.css:1086-1089 — flex-строка gap 16). */
+/* Тело: фото + абзац (pages.css:1086-1089 — flex-строка gap 16).
+   flex-wrap: wrap — гранула стресса/узких экранов (прецедент
+   overflow-wrap-anywhere T3.6): когда строка помещается (≥ ~500px, все
+   одобренные вьюпорты) рендер байт-равен строке; когда нет (мобильная
+   база ≤ ~500px — в пилоте текст выталкивался за пилюлю/в hscroll),
+   фото переносится на свою строку — выталкивания страницы нет. */
 .mrq__body {
   box-sizing: border-box;
   display: flex;
+  flex-wrap: wrap;
   gap: var(--ui-space-4);
   align-items: center;
+}
+
+/* Текст тела: при помещении в строку — обычный перенос слов; гранула
+   стресса 32px-базы T3.6 (прецедент .lpp-rows .ui-button): anywhere —
+   не break-word, только он снижает min-content — под стрессом (колонка
+   16rem-фото × 32px-базы не помещается в колонку контейнера) слово
+   переносится вместо выталкивания страницы в горизонтальный скролл; на
+   нормальной базе (колонка ≫ слова) рендер прежний байт-в-байт. */
+.mrq__body .ui-body {
+  overflow-wrap: anywhere;
 }
 
 /* Фото тела: 256px ширина «как есть» (pages.css:1090-1092 = 16rem),

@@ -107,9 +107,10 @@ describe('patterns/patterns.css — канон hero (связка hro, T17.15 Sc
     expect(hro, 'мобильная база 35rem — оригинал @max-767 (hero.css:211), mobile-first').toContain(
       'min-height: 35rem;',
     );
-    expect(hro, 'ритм ui-section погашен — геометрию несут min-height/паддинги __content').toContain(
-      'padding: 0;',
-    );
+    expect(
+      hro,
+      'ритм ui-section погашен — геометрию несут min-height/паддинги __content',
+    ).toContain('padding: 0;');
     const md = mediaBlockOf(layer, 768, 'hro');
     expect(md, 'ступень md есть').toBeTruthy();
     expect(md, 'min-height 50.5rem = 808px оригинала (hero.css:3) от md').toContain(
@@ -123,9 +124,10 @@ describe('patterns/patterns.css — канон hero (связка hro, T17.15 Sc
     expect(content).toContain('box-sizing: border-box;');
     expect(content, 'растёт на свободную высоту hero').toContain('flex: 1 1 auto;');
     expect(content).toContain('flex-direction: column;');
-    expect(content, 'шаг блоков 48px — пилот (space-7; оригинал 64px hero.css:53 — принято ДС)').toContain(
-      'gap: var(--ui-space-7);',
-    );
+    expect(
+      content,
+      'шаг блоков 48px — пилот (space-7; оригинал 64px hero.css:53 — принято ДС)',
+    ).toContain('gap: var(--ui-space-7);');
     expect(content).toContain('align-items: center;');
     expect(content).toContain('justify-content: center;');
     expect(content).toContain('width: 100%;');
@@ -164,9 +166,10 @@ describe('patterns/patterns.css — канон hero (связка hro, T17.15 Sc
     expect(search, 'стекло — токен glass-light').toContain(
       'background-color: var(--ui-color-glass-light);',
     );
-    expect(search, 'backdrop-filter в каноне (VI-инвариант: отключение в img:off — a11y/vi.css)').toContain(
-      'backdrop-filter: blur(12px);',
-    );
+    expect(
+      search,
+      'backdrop-filter в каноне (VI-инвариант: отключение в img:off — a11y/vi.css)',
+    ).toContain('backdrop-filter: blur(12px);');
   });
 
   it('внутреннее поле пилюли прозрачное, слот плиты-кнопки 72px на surface-muted/primary-deep', () => {
@@ -206,7 +209,9 @@ describe('patterns/patterns.css — канон hero (связка hro, T17.15 Sc
       'color: var(--ui-color-text-on-dark);',
     );
     expect(tag, '18px — fs-lead').toContain('font-size: var(--ui-fs-lead);');
-    expect(tag, 'стекло тега — blur(10px) (hero.css:148)').toContain('backdrop-filter: blur(10px);');
+    expect(tag, 'стекло тега — blur(10px) (hero.css:148)').toContain(
+      'backdrop-filter: blur(10px);',
+    );
     expect(
       tag,
       'тон — ТОЛЬКО хук: дефолт sand — --ui-color-primary-a26 (T14.7; спец-тоны — сайт-зона)',
@@ -275,12 +280,21 @@ describe('patterns/patterns.css — канон adv-marquee (связка mrq, л
     expect(xl, 'роль ui-h3 снята (T16.15: замер 42/500 — не канон)').not.toContain('--ui-fs-h3');
   });
 
-  it('тело и фото: flex-строка gap 16, фото 16rem cover radius md', () => {
+  it('тело и фото: flex-строка gap 16 с wrap-гранулой (узкие экраны — фото на своей строке), текст — anywhere (32px-стресс), фото 16rem cover radius md', () => {
     const body = blockOf(layer, '.mrq__body');
     expect(body, '.mrq__body найдено').toBeTruthy();
     expect(body).toContain('display: flex;');
+    expect(
+      body,
+      'flex-wrap: wrap — при помещении строки рендер байт-равен одобренному; на узких экранах фото переносится (пилот выталкивал текст в hscroll @375)',
+    ).toContain('flex-wrap: wrap;');
     expect(body).toContain('gap: var(--ui-space-4);');
     expect(body).toContain('align-items: center;');
+    const text = blockOf(layer, '.mrq__body .ui-body');
+    expect(
+      text,
+      'гранула стресса 32px-базы T3.6 — anywhere (прецедент .lpp-rows .ui-button)',
+    ).toContain('overflow-wrap: anywhere;');
     const photo = blockOf(layer, '.mrq__photo');
     expect(photo, '.mrq__photo найдено').toBeTruthy();
     expect(photo).toContain('object-fit: cover;');
@@ -313,9 +327,7 @@ describe('patterns/patterns.css — канон спец-сетки media (mdl) �
     expect(lead[1], 'lead — col span 2 (pilot.css:471)').toContain('grid-column: span 2;');
     const lg = mediaBlockOf(layer, 1024, 'mdl');
     expect(lg, 'ступень lg есть').toBeTruthy();
-    expect(lg, 'lg — 4 колонки').toContain(
-      'grid-template-columns: repeat(4, minmax(0, 1fr));',
-    );
+    expect(lg, 'lg — 4 колонки').toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
   });
 
   it('mdl__lead: карточка-сводка — колонка gap 8, паддинг 16, рамка/радиус/поверхность (1:1 порт cp-media__lead)', () => {
@@ -344,9 +356,10 @@ describe('patterns/patterns.css — канон спец-сетки media (mdl) �
 
 describe('гейт префиксов слоя расширен: hro|mrq|mdl|cvh каноничны (Implementation requirements T17.1 п.2 + T17.15)', () => {
   it('реальный слой чист — все правила проходят расширенный гейт', () => {
-    expect(patternLayerProblems(layerFile), 'hro-/mrq-/mdl-/cvh- — канонические крючки слоя').toEqual(
-      [],
-    );
+    expect(
+      patternLayerProblems(layerFile),
+      'hro-/mrq-/mdl-/cvh- — канонические крючки слоя',
+    ).toEqual([]);
   });
 
   it('чужие префиксы по-прежнему ловятся', () => {
@@ -358,9 +371,7 @@ describe('гейт префиксов слоя расширен: hro|mrq|mdl|cvh
   it('инварианты слоя: без hex, без !important, без ID-селекторов', () => {
     expect(layer, 'hex только в tokens/primitives.css').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(layer, '!important только в a11y/vi.css').not.toContain('!important');
-    expect(layer, 'ID в CSS системы запрещены (02-architecture §1)').not.toMatch(
-      /^\s*#[a-zA-Z]/m,
-    );
+    expect(layer, 'ID в CSS системы запрещены (02-architecture §1)').not.toMatch(/^\s*#[a-zA-Z]/m);
   });
 });
 
@@ -420,9 +431,10 @@ describe('док-паттерн landing-section — источник правд�
     expect(docHtml, 'спец-тоны названы (violet/green/rose)').toMatch(
       /violet[\s\S]{0,400}green[\s\S]{0,400}rose/,
     );
-    expect(docHtml, 'hex в доке не приводится (инвариант: hex только в tokens/primitives.css)').not.toMatch(
-      /#[0-9a-fA-F]{6}\b/,
-    );
+    expect(
+      docHtml,
+      'hex в доке не приводится (инвариант: hex только в tokens/primitives.css)',
+    ).not.toMatch(/#[0-9a-fA-F]{6}\b/);
   });
 
   it('эталон hero: фото-фон ui-section--photo, декоративные слои aria-hidden, поиск role="search", input с aria-label', () => {
@@ -562,18 +574,20 @@ describe('пилот career-portal: лендинг-композиции на к�
   it('лестницы 1023/767: портированные селекторы из групп сняты (ступени — канон слоя mobile-first)', () => {
     const max1023 = pilotCss.match(/@media \(max-width: 1023px\)\s*\{[\s\S]*?\n\}\n/)?.[0] ?? '';
     const max767 = pilotCss.match(/@media \(max-width: 767px\)\s*\{[\s\S]*?\n\}\n/)?.[0] ?? '';
-    expect(max1023, 'marquee в ступени 1023 снят (канон mrq: база-колонка, 1.2fr/1fr от lg)').not.toContain(
-      '.cp-adv-marquee',
-    );
+    expect(
+      max1023,
+      'marquee в ступени 1023 снят (канон mrq: база-колонка, 1.2fr/1fr от lg)',
+    ).not.toContain('.cp-adv-marquee');
     expect(max1023, 'media-сетка в ступени 1023 снята (канон mdl: 2 от md)').not.toContain(
       '.cp-media__grid',
     );
     expect(max767, 'hero в ступени 767 снят (канон hro: 35rem база, 50.5rem от md)').not.toContain(
       '.cp-hero',
     );
-    expect(max767, 'media-сетка/lead в ступени 767 сняты (канон mdl: без span в базе)').not.toContain(
-      '.cp-media__',
-    );
+    expect(
+      max767,
+      'media-сетка/lead в ступени 767 сняты (канон mdl: без span в базе)',
+    ).not.toContain('.cp-media__');
   });
 
   it('compare: пробы marquee/hero — на крючках канона (прецедент lpp-/nvp-/tlp-)', () => {
