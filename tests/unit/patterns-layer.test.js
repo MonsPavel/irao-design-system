@@ -291,9 +291,7 @@ describe('patterns/patterns.css — единый исходник паттерн
       'padding: var(--ui-space-6);',
     );
     expect(card, 'радиус карточки').toContain('border-radius: var(--ui-radius-md);');
-    expect(card, 'поверхность карточки').toContain(
-      'background-color: var(--ui-color-surface);',
-    );
+    expect(card, 'поверхность карточки').toContain('background-color: var(--ui-color-surface);');
     const head = blockOf('.dpp__head');
     expect(head, '.dpp__head найдено').toBeTruthy();
     expect(head, 'шапка-тройка gap 8 — cp-vacancy-page__head/cp-detail-head').toContain(
@@ -362,9 +360,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     // Мобильная база — колонка (оригинал .vacancy-page__foot @max-760 →
     // column; канон принимает значение оригинала, ступень md из шкалы T2.5).
-    expect(foot, 'мобильная база — колонка (оригинал ≤760)').toContain(
-      'flex-direction: column;',
-    );
+    expect(foot, 'мобильная база — колонка (оригинал ≤760)').toContain('flex-direction: column;');
     expect(foot, 'мобильная база — прижато влево').toContain('align-items: flex-start;');
     const idx = code.indexOf('.dpp__foot');
     const md = code
@@ -374,7 +370,9 @@ describe('patterns/patterns.css — единый исходник паттерн
     // space-between остаётся из базы — ступень меняет только направление/ось.
     expect(md[1], 'от md — строка (как в оригинале ≥761)').toContain('flex-direction: row;');
     expect(md[1]).toContain('align-items: center;');
-    expect(md[1], 'space-between не переобъявляется (база)').not.toContain('flex-direction: column');
+    expect(md[1], 'space-between не переобъявляется (база)').not.toContain(
+      'flex-direction: column',
+    );
   });
 
   it('значения канона 1:1 — article-связки: колонка 24, мета-лента 12 (дети 28px), тип с точкой', () => {
@@ -393,9 +391,10 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(metaChild, 'дети мета-ленты — «текст на одной линии» (pages.css:626)').toContain(
       'min-height: 1.75rem;',
     );
-    expect(metaChild, 'inline-flex с центром — тот же вид, min-height вместо height (rem-стресс, прецедент ui-tag T4.2)').toContain(
-      'align-items: center;',
-    );
+    expect(
+      metaChild,
+      'inline-flex с центром — тот же вид, min-height вместо height (rem-стресс, прецедент ui-tag T4.2)',
+    ).toContain('align-items: center;');
     const type = blockOf('.dpp__type');
     expect(type, '.dpp__type найдено').toBeTruthy();
     expect(type, 'строка 14 — fs-small').toContain('font-size: var(--ui-fs-small);');
@@ -966,7 +965,10 @@ describe('пилот career-portal: детальные страницы на dpp
     expect(main, 'дата — канон + роль muted').toContain(
       '<time class="dpp__date ui-small ui-text--muted"',
     );
-    expect(build, 'cp-vacancy-page* из разметки сняты').not.toContain('cp-vacancy-page');
+    expect(
+      build,
+      'cp-vacancy-page* из разметки сняты (упоминания в комментариях — история переноса)',
+    ).not.toMatch(/class="[^"]*\bcp-vacancy-page/);
   });
 
   it('событие/стажировка (internshipDetail): main-колонка dpp, шапка-тройка, теги, фото, секции; cp-detail-* сняты', () => {
@@ -978,7 +980,9 @@ describe('пилот career-portal: детальные страницы на dpp
       '<img class="ui-image ui-image--cover dpp__photo"',
     );
     expect(main, 'секции контента').toContain('<div class="dpp__section">');
-    expect(build, 'cp-detail-* из разметки сняты').not.toMatch(/cp-detail-(main|head|tags|photo|section)/);
+    expect(build, 'cp-detail-* из разметки сняты').not.toMatch(
+      /cp-detail-(main|head|tags|photo|section)/,
+    );
   });
 
   it('статья (article.html): колонка dpp--article, мета-лента, тип с точкой, галерея, текст, related; cp-article-* сняты', () => {
@@ -999,18 +1003,15 @@ describe('пилот career-portal: детальные страницы на dpp
   it('компания (company.html): hero-2кол и where-пары на каноне; статы/преимущества/заголовки/баннер — сайт-зона (ui-stat/фото-секция — свои задачи)', () => {
     const main = mainOf('companyMain');
     expect(main, 'hero-2кол (400px/1fr, ступени)').toContain('<div class="dpp-hero">');
-    expect(main, 'фото hero').toContain(
-      '<img class="ui-image ui-image--cover dpp-hero__photo"',
-    );
+    expect(main, 'фото hero').toContain('<img class="ui-image ui-image--cover dpp-hero__photo"');
     expect(main, 'тело hero').toContain('<div class="dpp-hero__body">');
     expect(main, 'текст hero').toContain('<div class="dpp-hero__text">');
     expect(main, 'where-пары').toContain('<div class="dpp-where">');
-    expect(main, 'фото where').toContain(
-      '<img class="ui-image ui-image--cover dpp-where__photo"',
-    );
-    expect(build, 'cp-company-hero/where из разметки сняты').not.toMatch(
-      /cp-company-(hero|where)/,
-    );
+    expect(main, 'фото where').toContain('<img class="ui-image ui-image--cover dpp-where__photo"');
+    expect(
+      build,
+      'cp-company-hero/where из разметки сняты (упоминания в комментариях — история переноса)',
+    ).not.toMatch(/class="[^"]*\bcp-company-(hero|where)/);
     expect(main, 'статы — сайт-зона (ui-stat--filled, T17.4)').toContain(
       '<ul class="cp-company-stats">',
     );
