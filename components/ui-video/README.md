@@ -27,12 +27,15 @@ accent и временем в правом нижнем углу. Потреби
 
 ```html
 <button class="ui-video" type="button" aria-label="Смотреть видео о работе в компании">
-  <img class="ui-video__poster" src="poster.jpg" alt="" width="960" height="540" loading="lazy">
+  <img class="ui-video__poster" src="../img/video-poster.svg" alt="" width="960" height="540" loading="lazy">
   <span class="ui-video__overlay" aria-hidden="true"></span>
   <span class="ui-video__play" aria-hidden="true">▶</span>
   <span class="ui-video__time">24:23</span>
 </button>
 ```
+
+Путь `../img/…` — демо-постер полигона (`assets/demo/`); на сайте src — ваш
+кадр `/upload/…` (Bitrix).
 
 ## Геометрия и значения
 

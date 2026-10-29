@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Демо-изображение: сцена награждения">
+  <!-- Демо-фото живых примеров полигона (ui-image): топикальная векторная
+       сцена в палитре системы. Полигон не раздаёт фотографии — абстрактная
+       иллюстрация честнее стоковой заглушки; интегратор на сайте заменяет
+       src своим файлом /upload/… (Bitrix). -->
+  <rect width="640" height="360" fill="#F1F5FE"/>
+  <!-- софиты -->
+  <path d="M0 0 120 360 40 360Z" fill="#E8EEFE" opacity="0.7"/>
+  <path d="M640 0 520 360 600 360Z" fill="#E8EEFE" opacity="0.7"/>
+  <circle cx="80" cy="34" r="26" fill="#C4CDDC"/>
+  <circle cx="560" cy="34" r="26" fill="#C4CDDC"/>
+  <!-- сцена -->
+  <rect x="120" y="252" width="400" height="108" rx="6" fill="#002856"/>
+  <!-- подиум -->
+  <rect x="248" y="196" width="48" height="56" rx="4" fill="#164B89"/>
+  <rect x="300" y="168" width="48" height="84" rx="4" fill="#002856"/>
+  <rect x="352" y="212" width="48" height="40" rx="4" fill="#164B89"/>
+  <!-- победитель на 1 месте -->
+  <circle cx="324" cy="140" r="16" fill="#F26722"/>
+  <path d="M310 156h28l6 12h-40Z" fill="#F26722"/>
+  <!-- соседи по подиуму -->
+  <circle cx="272" cy="168" r="13" fill="#C4CDDC"/>
+  <path d="M261 182h22l5 12h-32Z" fill="#C4CDDC"/>
+  <circle cx="376" cy="184" r="13" fill="#C4CDDC"/>
+  <path d="M365 198h22l5 12h-32Z" fill="#C4CDDC"/>
+  <!-- конфетти -->
+  <circle cx="180" cy="120" r="5" fill="#F26722" opacity="0.8"/>
+  <circle cx="470" cy="96" r="4" fill="#164B89" opacity="0.8"/>
+  <rect x="220" y="70" width="14" height="5" rx="2.5" fill="#F26722" opacity="0.6"/>
+  <rect x="420" y="150" width="14" height="5" rx="2.5" fill="#164B89" opacity="0.6"/>
+  <rect x="320" y="52" width="14" height="5" rx="2.5" fill="#C4CDDC"/>
+</svg>

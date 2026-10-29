@@ -184,7 +184,9 @@ describe('сгенерированная страница несёт все се
       const frames = Array.from(html.matchAll(/<iframe[^>]*>/g), (match) => match[0]);
       expect(frames.length).toBe(3);
       for (const frame of frames) {
-        expect(frame).toContain(`src="../stands/${name}.html"`);
+        // ?embed=1 — чистое демо в iframe (аудит 29.10): каркас стенда
+        // скрывает FRAME_SCRIPT, фрейм показывает компонент, а не навигацию.
+        expect(frame).toContain(`src="../stands/${name}.html?embed=1"`);
         expect(frame).toContain('title=');
       }
       expect(frames.join(' ')).toContain('width="375"');
