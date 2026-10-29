@@ -48,9 +48,9 @@
 <section class="ui-section" id="dpp-page">
   <p class="ui-showcase-stand__note">
     Эталон детальной страницы: крошки, контентная колонка <code>dpp</code> — шапка-тройка
-    (заголовок, зарплата, теги, мета), фото, секции h2, слот медиа и foot с разделителем; sticky-aside
-    (справочная панель + CTA). На мобиле aside идёт после контента; от md — вторая колонка с
-    <code>position: sticky</code>. Разметка копируется в шаблон сайта целиком; связки
+    (заголовок, зарплата, теги, мета), фото, секции h2, слот медиа и foot с разделителем;
+    sticky-aside (справочная панель + CTA). На мобиле aside идёт после контента; от md — вторая
+    колонка с <code>position: sticky</code>. Разметка копируется в шаблон сайта целиком; связки
     <code>dpp-*</code> — зона сайта (см. README паттерна).
   </p>
 
@@ -127,7 +127,21 @@
              роль ui-text--muted (слой цвет не дублирует). Иконка —
              декоративный SVG (aria-hidden, README ui-image). -->
         <p class="dpp__place ui-text--muted">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path
+              d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z"
+              stroke="currentColor"
+              stroke-width="1.5"
+            ></path>
+            <circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle>
+          </svg>
           Москва, ул. Энергетическая, д. 10
         </p>
         <p class="dpp__tags">
@@ -158,7 +172,13 @@
       <div class="dpp-layout" id="dpp-layout">
         <div class="dpp-main" id="dpp-main" data-ui-check-layout>
           <!-- Фото 420px (260px в мобильной базе; ступень md): фиксированное
-               место кадрируется ui-image--cover (README ui-image). -->
+               место кадрируется ui-image--cover (README ui-image).
+               prettier-ignore на img-блоках стенда: многострочный <img> с
+               закрывающей скобкой без слэша — под гейт void-style
+               (html-validate), автоформат prettier свёл бы его к
+               самозакрытому <img/>; игнор-директива держит оба гейта
+               зелёными (прецедент meta itemprop выше). -->
+          <!-- prettier-ignore -->
           <img
             class="ui-image ui-image--cover dpp__photo"
             src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271447%27%20height%3D%27824%27%3E%3Crect%20width%3D%271447%27%20height%3D%27824%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%271200%27%20cy%3D%27160%27%20r%3D%27280%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27700%27%20r%3D%27220%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
@@ -166,7 +186,7 @@
             width="1447"
             height="824"
             loading="lazy"
-          >
+             >
 
           <!-- Контент: секции dpp__section (шаг 8px) с ролями типографики
                T3.3 («классы, а не теги»: уровень тега — семантика страницы,
@@ -239,7 +259,9 @@
               <dd class="ui-small dpp-aside__value">Москва</dd>
             </div>
           </dl>
-          <a class="ui-button ui-button--primary" id="dpp-cta" href="/vacancy-apply/">Откликнуться</a>
+          <a class="ui-button ui-button--primary" id="dpp-cta" href="/vacancy-apply/"
+            >Откликнуться</a
+          >
           <p class="ui-small ui-text--muted dpp-aside__note">
             Отправляя отклик, вы соглашаетесь на обработку персональных данных согласно
             <a class="ui-link" href="/privacy/">Политике конфиденциальности</a>.
@@ -328,9 +350,10 @@
 <section class="ui-section" id="dpp-article-demo" aria-labelledby="dpp-article-demo-title">
   <p class="ui-showcase-stand__note">
     Article-связки: колонка <code>dpp--article</code> (шаг 24px), мета-лента
-    <code>dpp__meta</code> с типом-точкой <code>dpp__type</code>, галерея <code>dpp__gallery</code>
-    (2fr/1fr от lg), текст <code>dpp__text</code> и related <code>dpp-related</code> (отступ 40px,
-    шаги заголовков 56/32px). Разметка страницы статьи — h1 + мета + галерея + текст + related.
+    <code>dpp__meta</code> с типом-точкой <code>dpp__type</code>, галерея
+    <code>dpp__gallery</code> (2fr/1fr от lg), текст <code>dpp__text</code> и related
+    <code>dpp-related</code> (отступ 40px, шаги заголовков 56/32px). Разметка страницы статьи — h1 +
+    мета + галерея + текст + related.
   </p>
 
   <h2 class="ui-h3" id="dpp-article-demo-title">Связки статьи</h2>
@@ -344,6 +367,7 @@
     </p>
     <div class="dpp__gallery">
       <figure class="ui-figure">
+        <!-- prettier-ignore -->
         <img
           class="ui-image ui-image--cover"
           src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271447%27%20height%3D%27824%27%3E%3Crect%20width%3D%271447%27%20height%3D%27824%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27200%27%20r%3D%27260%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271100%27%20cy%3D%27650%27%20r%3D%27240%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
@@ -351,9 +375,10 @@
           width="1447"
           height="824"
           loading="lazy"
-        >
+           >
       </figure>
       <figure class="ui-figure">
+        <!-- prettier-ignore -->
         <img
           class="ui-image ui-image--cover"
           src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27431%27%20height%3D%27431%27%3E%3Crect%20width%3D%27431%27%20height%3D%27431%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27215%27%20cy%3D%27215%27%20r%3D%27140%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
@@ -361,7 +386,7 @@
           width="431"
           height="431"
           loading="lazy"
-        >
+           >
       </figure>
     </div>
     <div class="dpp__text">
@@ -392,7 +417,9 @@
       </article>
       <article class="ui-card ui-card--hover ui-card--link">
         <h4 class="ui-h6 ui-card__title">
-          <a class="ui-card__link" href="/vacancies/ekonomist/">Экономист планово-экономического отдела</a>
+          <a class="ui-card__link" href="/vacancies/ekonomist/"
+            >Экономист планово-экономического отдела</a
+          >
         </h4>
         <p class="ui-body ui-card__body">Планирование себестоимости и анализ отклонений.</p>
       </article>
@@ -413,6 +440,7 @@
   <h2 class="ui-h3" id="dpp-company-demo-title">Связки компании</h2>
 
   <div class="dpp-hero">
+    <!-- prettier-ignore -->
     <img
       class="ui-image ui-image--cover dpp-hero__photo"
       src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27431%27%20height%3D%27431%27%3E%3Crect%20width%3D%27431%27%20height%3D%27431%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%27120%27%20r%3D%2790%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27310%27%20cy%3D%27310%27%20r%3D%2780%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
@@ -420,7 +448,7 @@
       width="431"
       height="431"
       loading="lazy"
-    >
+       >
     <div class="dpp-hero__body">
       <h3 class="ui-page-title">АО «Интер РАО – Электрогенерация»</h3>
       <div class="dpp-hero__text">
@@ -438,6 +466,7 @@
 
   <div class="dpp-where">
     <figure class="ui-figure">
+      <!-- prettier-ignore -->
       <img
         class="ui-image ui-image--cover dpp-where__photo"
         src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271447%27%20height%3D%27824%27%3E%3Crect%20width%3D%271447%27%20height%3D%27824%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27700%27%20cy%3D%27300%27%20r%3D%27220%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E"
@@ -445,10 +474,13 @@
         width="1447"
         height="824"
         loading="lazy"
-      >
-      <figcaption class="ui-figure__caption ui-small ui-text--muted">Головной офис компании</figcaption>
+         >
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        Головной офис компании
+      </figcaption>
     </figure>
     <figure class="ui-figure">
+      <!-- prettier-ignore -->
       <img
         class="ui-image ui-image--cover dpp-where__photo"
         src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27313%27%20height%3D%27208%27%3E%3Crect%20width%3D%27313%27%20height%3D%27208%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27100%27%20r%3D%2770%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
@@ -456,7 +488,7 @@
         width="313"
         height="208"
         loading="lazy"
-      >
+         >
       <figcaption class="ui-figure__caption ui-small ui-text--muted">
         Производственные площадки и станции
       </figcaption>
