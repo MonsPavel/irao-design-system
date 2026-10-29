@@ -647,200 +647,32 @@
    pages.css:120 и .events-search-bar pages.css:585–589; расхождения
    events-search оригинала — материал REPORT T15.9). */
 
-/* Детальная вакансия */
-.cp-vacancy-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-6);
-  padding: var(--ui-space-6);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface);
-}
+/* Детальная вакансия — ПАТТЕРН-СЛОЙ (T17.14): связки колонки/шапки-тройки/
+   salary/place/секций/слота медиа/foot перенесены в канон dpp
+   (patterns/patterns.css → ds/ui-patterns.css); разметка vacancyMain несёт
+   классы dpp/dpp--card/dpp__*. Карточная форма колонки (паддинг/радиус/
+   поверхность) — модификатор dpp--card (исполнение пилота, оригинал
+   .vacancy-page без карточки — принято ДС T15.1). */
 
-.cp-vacancy-page__head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
-
-/* Зарплата детальной вакансии (T16.13): канон — литерал 18px
-   (pages.css:271 `.vacancy-page__salary { font-size: 18px }`; fw 400 и
-   lh 1.35 наследует body — совпадают с ДС). 18px вне десктоп-шкалы ДС:
-   ступень --ui-fs-lead = 18px живёт только в мобильной базе — лестница роли
-   ui-lead на ≥1024 даёт 24px и меняла бы одобренное значение; поэтому
-   «как есть» литерал сайт-зоны (прецедент 0.9375rem VI-кнопки), а не роль.
-   Цвет — ui-text--muted в разметке (AA-пара T2.3: gray-700 против #808080
-   канона — «принято ДС» §9.1 №11). Спека T16.13 предлагала разметку
-   ui-lead ui-text--muted с удалением правила — отклонено по замеру probe
-   (24 ≠ 18 на 1440); перевод на роль при согласии владельца на 24px@≥1024 —
-   один класс + удаление этого правила (design-decision). */
-.cp-vacancy-page__salary {
-  font-size: 1.125rem;
-}
-
-.cp-vacancy-page__place {
-  display: inline-flex;
-  gap: var(--ui-space-1);
-  align-items: center;
-  color: var(--ui-color-text-muted);
-}
-
-.cp-vacancy-page__section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
-
-.cp-vacancy-page__map {
-  height: 18rem;
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface-muted);
-}
-
-.cp-vacancy-page__foot {
-  display: flex;
-  gap: var(--ui-space-4);
-  align-items: center;
-  justify-content: space-between;
-  padding-top: var(--ui-space-4);
-  border-top: var(--ui-border-width) solid var(--ui-color-border-muted);
-}
-
-.cp-vacancy-page__date {
-  display: inline-flex;
-  gap: var(--ui-space-1);
-  align-items: center;
-  color: var(--ui-color-text-muted);
-}
-
-/* Детальные «internship__*» (T15.1: event.html; internship.html — T15.4
-   переиспользует общий шаблон build.mjs). Двухколоночный лейаут —
+/* Детальные «internship__*» — ПАТТЕРН-СЛОЙ (T17.14): main-колонка (gap 32,
+   pages.css:544), шапка-тройка, лента тегов, фото 420/260 (ступень md —
+   канон принимает значение оригинала @max-767, pages.css:933) и секции —
+   канон dpp (patterns/patterns.css); разметка internshipDetail несёт
+   dpp/dpp__head/dpp__tags/dpp__photo/dpp__section. Двухколоночный лейаут —
    ui-form__layout ДС (aside 400px/шаг 48px/sticky ≥1024 — порт form-page;
    internship-page оригинала — та же геометрия, pages.css:572, но
    схлопывается в колонку от 1279 (pages.css:891) против 1024 у ДС —
-   различие брейкпоинта порта не подгоняется, см. шапку ui-form.css).
-   Сайт-зоне остаются ритм main-колонки (gap 32px, pages.css:544),
-   шапка-тройка (в оригинале internship__head без отступов — приближение
-   каноном cp-vacancy-page__head) и фото (высота 420px «как есть»,
-   pages.css:542; --radius-card 16px = --ui-radius-md). */
-.cp-detail-main {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-6);
-}
+   различие брейкпоинта порта не подгоняется, см. шапку ui-form.css). */
 
-.cp-detail-head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
-
-/* строка тегов: flex-лента с шагом 8px (оригинал — inline-поток .tag в div) */
-.cp-detail-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-2);
-  align-items: center;
-}
-
-.cp-detail-photo {
-  width: 100%;
-  height: 26.25rem;
-  border-radius: var(--ui-radius-md);
-}
-
-/* контент-секция internship__section: шаг 8px (оригинал — h2 margin-bottom
-   16px, абзацы вплотную, base.css:73; приближение каноном
-   cp-vacancy-page__section) */
-.cp-detail-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
-
-/* Детальная статьи (T15.1): article-page/article-related
-   (pages.css:614–652) */
-.cp-article-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-5);
-}
-
-/* мета-строка: тип с точкой + дата + рубрика; шаг 12px, высота детей 28px —
-   «текст на одной линии» (pages.css:618–630). Тип на мета — БЕЗ заливки:
-   media__tag static, fs-small, точка 8px --color-primary (pages.css:632–637,
-   media.css:72–95; 6px gap и 8px точка «как есть»). */
-.cp-article-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-3);
-  align-items: center;
-  margin-bottom: var(--ui-space-2);
-}
-
-.cp-article-type {
-  display: inline-flex;
-  gap: 0.375rem;
-  align-items: center;
-  font-size: var(--ui-fs-small);
-  /* fw 500 — .media__tag оригинала несёт --fw-caption=500 (media.css:85;
-     T15.1-бэклог: наследуемые 400 расходились с оригиналом) */
-  font-weight: var(--ui-fw-small);
-  letter-spacing: 0.02em;
-  /* верхний регистр наследуется от .media__tag оригинала (media.css:85),
-     pages.css:632 фон/паддинг снимает, трансформ не трогает */
-  text-transform: uppercase;
-}
-
-.cp-article-type::before {
-  content: '';
-  width: 0.5rem;
-  height: 0.5rem;
-  border-radius: 50%;
-  background-color: var(--ui-color-primary);
-}
-
-/* галерея 2fr/1fr (pages.css:644); высоту ряда несёт более крупное фото —
-   height:100% + cover, как в оригинале (pages.css:646); --radius-card
-   16px = --ui-radius-md */
-.cp-article-gallery {
-  display: grid;
-  gap: var(--ui-space-4);
-  grid-template-columns: 2fr 1fr;
-}
-
-.cp-article-gallery__photo {
-  width: 100%;
-  height: 100%;
-  border-radius: var(--ui-radius-md);
-}
-
-.cp-article-text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-4);
-}
-
-/* «материалы по теме» — секции related: отступ сверху 40px «как есть»
-   (pages.css:650); заголовки fs-h3 → роль ui-h3, шаги 56px/32px «как есть»
-   (inline margin-top фрагмента article.html:31; section__title
-   margin-bottom 32px, components.css:340) */
-.cp-article-related {
-  margin-top: 2.5rem;
-}
-
-.cp-article-related .ui-h3 {
-  margin-top: 3.5rem;
-  margin-bottom: var(--ui-space-6);
-}
-
-.cp-article-related .ui-h3:first-child {
-  margin-top: 0;
-}
-
-/* карточка-ссылка related (практика/стажировка в статье): цвет — текст
-   карточки, без «документного» подчёркивания — оригинал гасит его
-   inline (build.py:114 style="text-decoration: none"); пара прецедента
+/* Детальная статьи — ПАТТЕРН-СЛОЙ (T17.14): колонка 24px (dpp--article),
+   мета-лента 12px с детьми 28px (dpp__meta), тип с точкой (dpp__type),
+   галерея 2fr/1fr от lg (dpp__gallery), текст 16px (dpp__text), related
+   40/56/32 (dpp-related) — канон (patterns/patterns.css, источники
+   pages.css:614–652 в комментариях слоя); разметка articleMain несёт
+   классы dpp--article/dpp__meta/dpp__type/dpp__gallery/dpp__text/
+   dpp-related. Карточка-ссылка related (практика/стажировка в статье):
+   цвет — текст карточки, без «документного» подчёркивания — оригинал гасит
+   его inline (build.py:114 style="text-decoration: none"); пара прецедента
    cp-company-card. Кнопочная версия (internships/practices) не задета. */
 a.cp-intern-card {
   color: var(--ui-color-text);
@@ -1123,36 +955,12 @@ a.cp-intern-card {
    T15.2): cp-holding — glass-dark карточки с рамкой и сносками на
    фото-фоне, здесь — сплошной primary на светлой странице; унификация
    дороже двух вариаций. Значения оригинала вне шкалы отступов — rem
-   «как есть» с источником в комментарии (прецедент cp-breadcrumbs). */
-
-.cp-company-hero {
-  display: grid;
-  gap: var(--ui-space-7);
-  align-items: center;
-  grid-template-columns: 25rem minmax(0, 1fr);
-  margin-bottom: 2.5rem;
-}
-
-/* 40px «как есть» (pages.css:796); 400px колонки — pages.css:796 */
-.cp-company-hero__photo {
-  width: 100%;
-  height: 20rem;
-  border-radius: var(--ui-radius-md);
-}
-
-/* шаг имя/описание 16px (pages.css:801) */
-.cp-company-hero__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-4);
-}
-
-/* шаг абзацев 12px (pages.css:803) */
-.cp-company-hero__text {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-3);
-}
+   «как есть» с источником в комментарии (прецедент cp-breadcrumbs).
+   Hero-2кол и where-пары — ПАТТЕРН-СЛОЙ (T17.14): канон dpp-hero
+   (400px/1fr от 1280, фото 260/320) и dpp-where (пары от lg, фото 280px)
+   — patterns/patterns.css; разметка companyMain несёт классы
+   dpp-hero*/
+dpp-where*. */
 
 /* Факты компании: сетка 3 колонки, шаг 24px, низ 40px «как есть»
    (pages.css:805). Плашки — ui-stat--filled (T17.4): primary-поверхность,
@@ -1185,21 +993,9 @@ a.cp-intern-card {
   list-style: none;
 }
 
-/* «Где мы работаем»: пара фото+подпись, шаг 24px (pages.css:821);
-   подпись несёт ui-figure__caption (шаг 8px = pages.css:825) */
-.cp-company-where {
-  display: grid;
-  gap: var(--ui-space-5);
-  grid-template-columns: repeat(2, 1fr);
-  margin-bottom: 3.5rem;
-}
-
-/* высота фото 280px «как есть» (pages.css:823) */
-.cp-company-where__photo {
-  width: 100%;
-  height: 17.5rem;
-  border-radius: var(--ui-radius-md);
-}
+/* «Где мы работаем»: пары фото+подпись — канон dpp-where (T17.14): сетка
+   от lg и высота фото 280px «как есть» (pages.css:821–823) — в слое;
+   подпись несёт ui-figure__caption (шаг 8px = pages.css:825). */
 
 /* CTA-баннер (banner-card оригинала, pages.css:656–674): min-height 320px,
    низ 56px company-section-gap; фото-подложка — фото-секция
@@ -1269,28 +1065,17 @@ a.cp-intern-card {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .cp-company-hero {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .cp-company-hero__photo {
-    height: 16.25rem;
-  }
-
   /* T15.1-бэклог: детальное фото event на ≤1023 — 260px оригинала
-     (.internship__photo, pages.css:933 внутри @media max-width:1023px);
-     фикс 26.25rem (420px) — только десктопная половина правила. */
-  .cp-detail-photo {
-    height: 16.25rem;
-  }
+     (.internship__photo, pages.css:933); ступень снята в каноне dpp__photo
+     (T17.14): мобильная база 260px, 420px от md — канон принимает значение
+     оригинала (полоса 768–1023 рендерится как в оригинале). */
 
   .cp-company-adv {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .cp-company-where {
-    grid-template-columns: 1fr;
-  }
+  /* Hero компании и where-пары — канон dpp-hero/dpp-where (T17.14):
+     мобильные базы колонкой, ступени 1280/lg — лестница 1023 снята. */
 
   /* Лента логотипов — связка lgo-grid (T17.9): ступень 4 колонки — канон
      слоя (min-width: 768px), лестница пилота снята. */
@@ -1316,10 +1101,8 @@ a.cp-intern-card {
      база и ступени канона (одна колонка → md) вместо лестницы 1023 —
      Implementation requirements T17.1 п.4. */
 
-  /* галерея статьи в колонку (pages.css:914) */
-  .cp-article-gallery {
-    grid-template-columns: 1fr;
-  }
+  /* Галерея статьи — канон dpp__gallery (T17.14): мобильная база колонкой,
+     2fr/1fr от lg — ступень 1023 снята (pages.css:914). */
 
   .cp-adv-marquee,
   .cp-dir-modal {

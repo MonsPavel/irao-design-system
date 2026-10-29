@@ -26,15 +26,27 @@
 | Токены | `--ui-stat-surface`, `--ui-color-primary`, `--ui-color-glass-dark`, `--ui-color-surface-blue-deep`, `--ui-color-text-on-dark(-muted)`, `--ui-space-2/3/4/5`, `--ui-radius-md`, `--ui-border-width`, `--ui-fs-micro` |
 
 ```html
-<ul class="ui-grid ui-grid--3">
-  <li class="ui-stat ui-stat--glass">
-    <span class="ui-stat__value ui-h2">50%</span>
-    <span class="ui-stat__label">молодых специалистов получают карьерное продвижение</span>
-    <span class="ui-stat__note">* по данным мониторинга</span>
-  </li>
-  …
-</ul>
+<!-- --glass живёт на фото-секции: канон несёт контекст системным
+     примитивом ui-section--photo (белый текст стекла на светлой странице
+     нечитаем — находка аудита 29.10) -->
+<section class="ui-section ui-section--photo">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="../img/holding-photo.svg" alt="" width="960" height="480" loading="lazy">
+  </div>
+  <ul class="ui-grid ui-grid--3">
+    <li class="ui-stat ui-stat--glass">
+      <span class="ui-stat__value ui-h2">50%</span>
+      <span class="ui-stat__label">молодых специалистов получают карьерное продвижение</span>
+      <span class="ui-stat__note">* по данным мониторинга</span>
+    </li>
+    …
+  </ul>
+</section>
 ```
+
+Демо-фон `../img/holding-photo.svg` — файл полигона (`assets/demo/`); на сайте
+слой `__bg` несёт ваше фото (T17.3). `--filled`/`--deep` самодостаточны на
+светлой странице — им фото-секция не нужна.
 
 ## Геометрия и значения
 

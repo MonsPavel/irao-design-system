@@ -1,12 +1,14 @@
 <!--
-  Паттерн «Детальная страница» (T8.2): эталонная сборка детальной страницы
-  (вакансия) из готовых компонентов системы — крошки (T4.7) → page-head
-  (h1 + зарплата + теги T4.3 + мета с <time datetime>) → двухколоночный
-  лейаут «контент + aside» (типографика T3.3; aside — sticky ≥md: CTA-кнопка,
-  справочная панель — перенос form-aside-структуры, дисклеймер «обработка
-  ПД») → related (h2 + сетка карточек T4.4). Вакансия размечена
-  schema.org/JobPosting (title, hiringOrganization, jobLocation, datePosted)
-  как пример «когда уместно» (ТЗ №7); для статей — Article (README паттерна).
+  Паттерн «Детальная страница» (T8.2 + T17.14): эталонная сборка детальной
+  страницы (вакансия) из готовых компонентов системы — крошки (T4.7) →
+  контентная колонка dpp (шапка-тройка: h1 + зарплата + теги T4.3 + мета с
+  <time datetime>; фото; секции h2; слот медиа; foot с разделителем) →
+  двухколоночный лейаут «контент + aside» (типографика T3.3; aside —
+  sticky ≥md: CTA-кнопка, справочная панель — перенос form-aside-структуры,
+  дисклеймер «обработка ПД») → related (h2 + сетка карточек T4.4). Вакансия
+  размечена schema.org/JobPosting (title, hiringOrganization, jobLocation,
+  datePosted) как пример «когда уместно» (ТЗ №7); для статей — Article
+  (README паттерна).
 
   Границы (patterns/README.md, 02-architecture §7): подключены только
   компоненты; связки паттерна (dpp-*) живут в ПАТТЕРН-СЛОЕ (T17.1, вариант A):
@@ -23,23 +25,33 @@
   aside). Осторожно с wrapper'ами: sticky не работает внутри предков с
   overflow: hidden/auto и у flex-родителей без align-items: start
   (Технические considerations — README паттерна).
+
+  Контентная колонка dpp (T17.14) — порт связок детальных страниц пилота
+  (cp-vacancy-page*/cp-detail-*/cp-article-*): колонка gap 32 (карточная
+  форма — модификатор --card, исполнение пилота vacancy.html), шапка-тройка
+  gap 8, лента тегов, фото 420/260, секции gap 8, слот медиа, foot.
+  Article-связки (колонка 24, мета-лента с точкой-типом, галерея 2fr/1fr,
+  related 40/56/32) и company-связки (hero-2кол 400px/1fr от 1280,
+  where-пары) — демонстрация ниже; значения и источники — patterns.css.
 -->
+
 <!--
   Связки паттерна (dpp-*) — ПАТТЕРН-СЛОЙ (T17.1, вариант A — решение
-  владельца 25.10): единый исходник patterns/patterns.css собирается в
-  опциональный dist/ui-patterns.css (порядок в head: токены → core →
-  patterns → сайт; на стенде подключает сборка). Значения перенесены сюда
-  1:1 из прежнего style-блока (комментарии-источники «как есть»-литералов —
-  в исходнике слоя); разметка ниже несёт те же классы — док остаётся
-  источником правды (02-architecture §7, patterns/README.md).
+  владельца 25.10; контентная колонка — T17.14): единый исходник
+  patterns/patterns.css собирается в опциональный dist/ui-patterns.css
+  (порядок в head: токены → core → patterns → сайт; на стенде подключает
+  сборка). Значения перенесены сюда 1:1 (комментарии-источники «как
+  есть»-литералов — в исходнике слоя); разметка ниже несёт те же классы —
+  док остаётся источником правды (02-architecture §7, patterns/README.md).
 -->
 
 <section class="ui-section" id="dpp-page">
   <p class="ui-showcase-stand__note">
-    Эталон детальной страницы: крошки, page-head (заголовок, зарплата, теги, мета), контент с
-    секциями h2 и sticky-aside (справочная панель + CTA). На мобиле aside идёт после контента; от md
-    — вторая колонка с <code>position: sticky</code>. Разметка копируется в шаблон сайта целиком;
-    связки <code>dpp-*</code> — зона сайта (см. README паттерна).
+    Эталон детальной страницы: крошки, контентная колонка <code>dpp</code> — шапка-тройка
+    (заголовок, зарплата, теги, мета), фото, секции h2, слот медиа и foot с разделителем; sticky-aside
+    (справочная панель + CTA). На мобиле aside идёт после контента; от md — вторая колонка с
+    <code>position: sticky</code>. Разметка копируется в шаблон сайта целиком; связки
+    <code>dpp-*</code> — зона сайта (см. README паттерна).
   </p>
 
   <!-- Крошки (T4.7): nav[aria-label] > ol[role="list"], микроразметка
@@ -94,129 +106,155 @@
     </ol>
   </nav>
 
-  <!-- page-head + контент + aside: JobPosting-микроразметка (ТЗ №7 — «когда
+  <!-- Контентная колонка + aside: JobPosting-микроразметка (ТЗ №7 — «когда
        уместно»: у страницы есть машиночитаемые поля). Поля — title (h1),
        hiringOrganization, jobLocation, datePosted (<time datetime> —
        Technical considerations). Крошки вне article: самостоятельная
        top-level разметка BreadcrumbList. -->
   <article class="dpp-article" itemscope itemtype="https://schema.org/JobPosting">
-    <!-- page-head: h1 (роль ui-page-title — T14.2: шкала h2 при теге h1,
-         как .page-title career-portal) → зарплата → теги (T4.3) → мета.
-         Порядок чтения начинается с заголовка (Accessibility requirements). -->
-    <header class="dpp-head">
-      <h1 class="ui-page-title" id="dpp-title" itemprop="title">
-        Ведущий инженер по эксплуатации энергоблоков
-      </h1>
-      <p class="dpp-salary ui-h3">от 120 000 ₽ до вычета налога</p>
-      <p class="dpp-tags">
-        <span class="ui-tag ui-tag--blue">Электроэнергетика</span>
-        <span class="ui-tag ui-tag--gray">От 3 лет</span>
-        <span class="ui-tag ui-tag--orange">Горячая вакансия</span>
-      </p>
-      <p class="dpp-meta ui-small ui-text--muted" id="dpp-meta">
-        <span itemprop="hiringOrganization" itemscope itemtype="https://schema.org/Organization">
-          <span itemprop="name">АО «Интер РАО – Электрогенерация»</span>
-        </span>
-        <span aria-hidden="true">·</span>
-        <span itemprop="jobLocation" itemscope itemtype="https://schema.org/Place">
-          <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
-            <span itemprop="addressLocality">Москва</span>,
-            <span itemprop="streetAddress">ул. Энергетическая, д. 10</span>
+    <div class="dpp">
+      <!-- Шапка-тройка dpp__head (T17.14): h1 (роль ui-page-title — T14.2:
+           шкала h2 при теге h1, как .page-title career-portal) → зарплата
+           (литерал 18px канона dpp__salary — T16.13-mapping, НЕ роль; цвет —
+           роль ui-text--muted) → теги (T4.3) → мета. Порядок чтения
+           начинается с заголовка (Accessibility requirements). -->
+      <header class="dpp__head">
+        <h1 class="ui-page-title" id="dpp-title" itemprop="title">
+          Ведущий инженер по эксплуатации энергоблоков
+        </h1>
+        <p class="dpp__salary ui-text--muted">от 120 000 ₽ до вычета налога</p>
+        <!-- Строка «место» dpp__place (T17.14): шаг иконки — канон; цвет —
+             роль ui-text--muted (слой цвет не дублирует). Иконка —
+             декоративный SVG (aria-hidden, README ui-image). -->
+        <p class="dpp__place ui-text--muted">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M8 14.5s5-4.12 5-8a5 5 0 1 0-10 0c0 3.88 5 8 5 8Z" stroke="currentColor" stroke-width="1.5"></path><circle cx="8" cy="6.3" r="1.8" stroke="currentColor" stroke-width="1.5"></circle></svg>
+          Москва, ул. Энергетическая, д. 10
+        </p>
+        <p class="dpp__tags">
+          <span class="ui-tag ui-tag--blue">Электроэнергетика</span>
+          <span class="ui-tag ui-tag--gray">От 3 лет</span>
+          <span class="ui-tag ui-tag--orange">Горячая вакансия</span>
+        </p>
+        <p class="ui-small ui-text--muted" id="dpp-meta">
+          <span itemprop="hiringOrganization" itemscope itemtype="https://schema.org/Organization">
+            <span itemprop="name">АО «Интер РАО – Электрогенерация»</span>
           </span>
-        </span>
-        <span aria-hidden="true">·</span>
-        Опубликовано
-        <time itemprop="datePosted" datetime="2026-09-12">12 сентября 2026</time>
-      </p>
-    </header>
+          <span aria-hidden="true">·</span>
+          <span itemprop="jobLocation" itemscope itemtype="https://schema.org/Place">
+            <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress">
+              <span itemprop="addressLocality">Москва</span>,
+              <span itemprop="streetAddress">ул. Энергетическая, д. 10</span>
+            </span>
+          </span>
+          <span aria-hidden="true">·</span>
+          Опубликовано
+          <time itemprop="datePosted" datetime="2026-09-12">12 сентября 2026</time>
+        </p>
+      </header>
 
-    <!-- Лейаут «контент + aside»: мобильная база — одна колонка (aside после
-         контента), от md — две (aside sticky). align-items: start — sticky
-         внутри grid-элемента имеет пространство, чтобы прилипать. -->
-    <div class="dpp-layout" id="dpp-layout">
-      <div class="dpp-main" id="dpp-main" data-ui-check-layout>
-        <!-- Контент: секции h2 с ролями типографики T3.3 («классы, а не
-             теги»: уровень тега — семантика страницы, роль — вид). -->
-        <section>
-          <h2 class="ui-h4">Что предстоит</h2>
-          <p class="ui-body">
-            Контроль режимов работы основного и вспомогательного оборудования энергоблоков ТЭЦ,
-            планирование ремонтов и координация оперативного персонала. Работа ведётся на объекте
-            «Московская ТЭЦ» в составе оперативной команды подразделения, с наставником на период
-            адаптации.
+      <!-- Лейаут «контент + aside»: мобильная база — одна колонка (aside после
+           контента), от md — две (aside sticky). align-items: start — sticky
+           внутри grid-элемента имеет пространство, чтобы прилипать. -->
+      <div class="dpp-layout" id="dpp-layout">
+        <div class="dpp-main" id="dpp-main" data-ui-check-layout>
+          <!-- Фото 420px (260px в мобильной базе; ступень md): фиксированное
+               место кадрируется ui-image--cover (README ui-image). -->
+          <img
+            class="ui-image ui-image--cover dpp__photo"
+            src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271447%27%20height%3D%27824%27%3E%3Crect%20width%3D%271447%27%20height%3D%27824%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%271200%27%20cy%3D%27160%27%20r%3D%27280%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27700%27%20r%3D%27220%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+            alt="Машинный зал ТЭЦ: турбинное оборудование энергоблока"
+            width="1447"
+            height="824"
+            loading="lazy"
+          >
+
+          <!-- Контент: секции dpp__section (шаг 8px) с ролями типографики
+               T3.3 («классы, а не теги»: уровень тега — семантика страницы,
+               роль — вид). -->
+          <section class="dpp__section">
+            <h2 class="ui-h4">Что предстоит</h2>
+            <p class="ui-body">
+              Контроль режимов работы основного и вспомогательного оборудования энергоблоков ТЭЦ,
+              планирование ремонтов и координация оперативного персонала. Работа ведётся на объекте
+              «Московская ТЭЦ» в составе оперативной команды подразделения, с наставником на период
+              адаптации.
+            </p>
+            <ul class="ui-list">
+              <li>
+                Ведение режимов работы энергооборудования в соответствии с диспетчерскими графиками;
+              </li>
+              <li>Анализ технического состояния оборудования и подготовка заявок на ремонт;</li>
+              <li>Участие в испытаниях и вводе оборудования после ремонтов;</li>
+              <li>Ведение технической документации и отчётности.</li>
+            </ul>
+          </section>
+
+          <section class="dpp__section">
+            <h2 class="ui-h4">Требования</h2>
+            <ul class="ui-list">
+              <li>Высшее техническое образование (энергетика, электроэнергетика);</li>
+              <li>Опыт работы в эксплуатации энергообъектов от 3 лет;</li>
+              <li>Знание правил технической эксплуатации и охраны труда в энергетике;</li>
+              <li>Уверенный пользователь MS Office, желательно знание 1С.</li>
+            </ul>
+          </section>
+
+          <section class="dpp__section">
+            <h2 class="ui-h4">Где предстоит работать</h2>
+            <!-- Слот медиа dpp__media (карта-заглушка): содержимое — сайт
+                 (интерактивная карта/фото); канон несёт слот с местом и
+                 радиусом. role="img" + aria-label — имя для карты-заглушки. -->
+            <div class="dpp__media" role="img" aria-label="Карта: Московская ТЭЦ"></div>
+            <p class="ui-body"><b>Адрес:</b> г. Москва, ул. Энергетическая, д. 10</p>
+          </section>
+        </div>
+
+        <!-- Aside (перенос form-aside career-portal): справочная панель
+             (dl «метка — значение») + CTA-кнопка (ссылка на страницу отклика —
+             работает без JS) + дисклеймер переноса паттерна «согласие на
+             обработку ПД». CTA доступен с клавиатуры в sticky-зоне (обычная
+             ссылка в DOM-порядке). -->
+        <aside
+          class="dpp-aside"
+          id="dpp-aside"
+          data-ui-check-layout
+          aria-labelledby="dpp-aside-title"
+        >
+          <h2 class="ui-h4 dpp-aside__title" id="dpp-aside-title">Детали вакансии</h2>
+          <dl class="dpp-aside__list">
+            <div class="dpp-aside__row">
+              <dt class="ui-micro ui-text--muted dpp-aside__label">Опыт работы</dt>
+              <dd class="ui-small dpp-aside__value">От 3 лет</dd>
+            </div>
+            <div class="dpp-aside__row">
+              <dt class="ui-micro ui-text--muted dpp-aside__label">Направление</dt>
+              <dd class="ui-small dpp-aside__value">Электроэнергетика</dd>
+            </div>
+            <div class="dpp-aside__row">
+              <dt class="ui-micro ui-text--muted dpp-aside__label">Занятость</dt>
+              <dd class="ui-small dpp-aside__value">Полный день</dd>
+            </div>
+            <div class="dpp-aside__row">
+              <dt class="ui-micro ui-text--muted dpp-aside__label">Город</dt>
+              <dd class="ui-small dpp-aside__value">Москва</dd>
+            </div>
+          </dl>
+          <a class="ui-button ui-button--primary" id="dpp-cta" href="/vacancy-apply/">Откликнуться</a>
+          <p class="ui-small ui-text--muted dpp-aside__note">
+            Отправляя отклик, вы соглашаетесь на обработку персональных данных согласно
+            <a class="ui-link" href="/privacy/">Политике конфиденциальности</a>.
           </p>
-          <ul class="ui-list">
-            <li>
-              Ведение режимов работы энергооборудования в соответствии с диспетчерскими графиками;
-            </li>
-            <li>Анализ технического состояния оборудования и подготовка заявок на ремонт;</li>
-            <li>Участие в испытаниях и вводе оборудования после ремонтов;</li>
-            <li>Ведение технической документации и отчётности.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="ui-h4">Требования</h2>
-          <ul class="ui-list">
-            <li>Высшее техническое образование (энергетика, электроэнергетика);</li>
-            <li>Опыт работы в эксплуатации энергообъектов от 3 лет;</li>
-            <li>Знание правил технической эксплуатации и охраны труда в энергетике;</li>
-            <li>Уверенный пользователь MS Office, желательно знание 1С.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="ui-h4">Условия</h2>
-          <ul class="ui-list">
-            <li>оформление по ТК РФ, белая заработная плата, годовая премия;</li>
-            <li>ДМС с расширенным покрытием и программа телемедицины;</li>
-            <li>корпоративное обучение и программы повышения квалификации;</li>
-            <li>компенсация питания и занятий спортом.</li>
-          </ul>
-        </section>
-
-        <section>
-          <h2 class="ui-h4">Где предстоит работать</h2>
-          <p class="ui-body"><b>Адрес:</b> г. Москва, ул. Энергетическая, д. 10</p>
-        </section>
+        </aside>
       </div>
 
-      <!-- Aside (перенос form-aside career-portal): справочная панель
-           (dl «метка — значение») + CTA-кнопка (ссылка на страницу отклика —
-           работает без JS) + дисклеймер переноса паттерна «согласие на
-           обработку ПД». CTA доступен с клавиатуры в sticky-зоне (обычная
-           ссылка в DOM-порядке). -->
-      <aside
-        class="dpp-aside"
-        id="dpp-aside"
-        data-ui-check-layout
-        aria-labelledby="dpp-aside-title"
-      >
-        <h2 class="ui-h4 dpp-aside__title" id="dpp-aside-title">Детали вакансии</h2>
-        <dl class="dpp-aside__list">
-          <div class="dpp-aside__row">
-            <dt class="ui-micro ui-text--muted dpp-aside__label">Опыт работы</dt>
-            <dd class="ui-small dpp-aside__value">От 3 лет</dd>
-          </div>
-          <div class="dpp-aside__row">
-            <dt class="ui-micro ui-text--muted dpp-aside__label">Направление</dt>
-            <dd class="ui-small dpp-aside__value">Электроэнергетика</dd>
-          </div>
-          <div class="dpp-aside__row">
-            <dt class="ui-micro ui-text--muted dpp-aside__label">Занятость</dt>
-            <dd class="ui-small dpp-aside__value">Полный день</dd>
-          </div>
-          <div class="dpp-aside__row">
-            <dt class="ui-micro ui-text--muted dpp-aside__label">Город</dt>
-            <dd class="ui-small dpp-aside__value">Москва</dd>
-          </div>
-        </dl>
-        <a class="ui-button ui-button--primary" id="dpp-cta" href="/vacancy-apply/">Откликнуться</a>
-        <p class="ui-small ui-text--muted dpp-aside__note">
-          Отправляя отклик, вы соглашаетесь на обработку персональных данных согласно
-          <a class="ui-link" href="/privacy/">Политике конфиденциальности</a>.
-        </p>
-      </aside>
+      <!-- Foot вакансии (T17.14): разделитель сверху + пары «дата — CTA»
+           по краям (space-between); мобильная база — колонка, строка от md. -->
+      <footer class="dpp__foot">
+        <time class="dpp__date ui-small ui-text--muted" datetime="2026-09-12"
+          >Опубликовано 12 сентября 2026</time
+        >
+        <a class="ui-button ui-button--primary" href="/vacancy-apply/">Откликнуться</a>
+      </footer>
     </div>
   </article>
 </section>
@@ -281,5 +319,147 @@
         <button class="ui-button ui-button--outline" type="button">Откликнуться</button>
       </div>
     </article>
+  </div>
+</section>
+
+<!-- Article-связки (T17.14): колонка 24px, мета-лента с точкой-типом,
+     галерея 2fr/1fr (от lg), текст, related с шагами заголовков. Уровень
+     тега — семантика стенда (h3 под секционным h2), роль — вид. -->
+<section class="ui-section" id="dpp-article-demo" aria-labelledby="dpp-article-demo-title">
+  <p class="ui-showcase-stand__note">
+    Article-связки: колонка <code>dpp--article</code> (шаг 24px), мета-лента
+    <code>dpp__meta</code> с типом-точкой <code>dpp__type</code>, галерея <code>dpp__gallery</code>
+    (2fr/1fr от lg), текст <code>dpp__text</code> и related <code>dpp-related</code> (отступ 40px,
+    шаги заголовков 56/32px). Разметка страницы статьи — h1 + мета + галерея + текст + related.
+  </p>
+
+  <h2 class="ui-h3" id="dpp-article-demo-title">Связки статьи</h2>
+
+  <div class="dpp dpp--article">
+    <h3 class="ui-page-title">Студенты приступили к практике</h3>
+    <p class="dpp__meta">
+      <span class="dpp__type">Статья</span>
+      <time class="ui-small ui-text--muted" datetime="2026-09-15">15 сентября 2026</time>
+      <span class="ui-tag ui-tag--blue">Практика</span>
+    </p>
+    <div class="dpp__gallery">
+      <figure class="ui-figure">
+        <img
+          class="ui-image ui-image--cover"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271447%27%20height%3D%27824%27%3E%3Crect%20width%3D%271447%27%20height%3D%27824%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27200%27%20r%3D%27260%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271100%27%20cy%3D%27650%27%20r%3D%27240%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+          alt="Студенты на производственной практике в цехе компании"
+          width="1447"
+          height="824"
+          loading="lazy"
+        >
+      </figure>
+      <figure class="ui-figure">
+        <img
+          class="ui-image ui-image--cover"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27431%27%20height%3D%27431%27%3E%3Crect%20width%3D%27431%27%20height%3D%27431%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27215%27%20cy%3D%27215%27%20r%3D%27140%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+          alt="Практиканты в лаборатории энергообъекта"
+          width="431"
+          height="431"
+          loading="lazy"
+        >
+      </figure>
+    </div>
+    <div class="dpp__text">
+      <p class="ui-body">
+        Сотни студентов технических специальностей приступили к производственной практике в
+        компаниях Группы «Интер РАО». Молодые люди приобретают опыт по основным для компании
+        направлениям: энергетика, тепловая автоматика, техническая диагностика.
+      </p>
+      <p class="ui-body">
+        Каждому практиканту закреплён наставник из числа опытных сотрудников: он помогает
+        разобраться в производственных процессах, поставить первую задачу и подготовить отчёт по
+        требованиям учебного заведения.
+      </p>
+    </div>
+  </div>
+
+  <!-- Related статьи (T17.14): отступ 40px «как есть», шаги заголовков
+       56/32px; содержимое групп — страницы списков (lpp-*), здесь —
+       демонстрационная сетка. -->
+  <div class="dpp-related">
+    <h3 class="ui-h3">Связанные вакансии</h3>
+    <div class="ui-grid ui-grid--2">
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h4 class="ui-h6 ui-card__title">
+          <a class="ui-card__link" href="/vacancies/kotelnaya/">Оператор котельной</a>
+        </h4>
+        <p class="ui-body ui-card__body">Ведение режима работы котельного оборудования.</p>
+      </article>
+      <article class="ui-card ui-card--hover ui-card--link">
+        <h4 class="ui-h6 ui-card__title">
+          <a class="ui-card__link" href="/vacancies/ekonomist/">Экономист планово-экономического отдела</a>
+        </h4>
+        <p class="ui-body ui-card__body">Планирование себестоимости и анализ отклонений.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Company-связки (T17.14): hero-2кол «фото 400px — текст» от 1280 и
+     where-пары «фото + подпись» (от lg). Уровень тега — семантика стенда. -->
+<section class="ui-section" id="dpp-company-demo" aria-labelledby="dpp-company-demo-title">
+  <p class="ui-showcase-stand__note">
+    Company-связки: hero <code>dpp-hero</code> (400px/1fr от 1280, фото 260/320 по ступеням) и
+    where-пары <code>dpp-where</code> (2 колонки от lg, фото 280px). Статы/преимущества страницы
+    компании — компонент <code>ui-stat</code> (T17.4), CTA-баннер — фото-секция + CTA-карточка
+    (T17.3/T17.8).
+  </p>
+
+  <h2 class="ui-h3" id="dpp-company-demo-title">Связки компании</h2>
+
+  <div class="dpp-hero">
+    <img
+      class="ui-image ui-image--cover dpp-hero__photo"
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27431%27%20height%3D%27431%27%3E%3Crect%20width%3D%27431%27%20height%3D%27431%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%27120%27%20r%3D%2790%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27310%27%20cy%3D%27310%27%20r%3D%2780%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+      alt="Производственная площадка генерирующей компании"
+      width="431"
+      height="431"
+      loading="lazy"
+    >
+    <div class="dpp-hero__body">
+      <h3 class="ui-page-title">АО «Интер РАО – Электрогенерация»</h3>
+      <div class="dpp-hero__text">
+        <p class="ui-body">
+          Генерирующая компания Группы «Интер РАО»: электростанции в Санкт-Петербурге и
+          Ленинградской области общей мощностью более 2,5 ГВт.
+        </p>
+        <p class="ui-body">
+          Мы производим электрическую и тепловую энергию, развиваем современные технологии генерации
+          и создаём условия для профессионального роста инженеров и специалистов.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="dpp-where">
+    <figure class="ui-figure">
+      <img
+        class="ui-image ui-image--cover dpp-where__photo"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271447%27%20height%3D%27824%27%3E%3Crect%20width%3D%271447%27%20height%3D%27824%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27700%27%20cy%3D%27300%27%20r%3D%27220%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E"
+        alt="Головной офис компании"
+        width="1447"
+        height="824"
+        loading="lazy"
+      >
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">Головной офис компании</figcaption>
+    </figure>
+    <figure class="ui-figure">
+      <img
+        class="ui-image ui-image--cover dpp-where__photo"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27313%27%20height%3D%27208%27%3E%3Crect%20width%3D%27313%27%20height%3D%27208%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27100%27%20r%3D%2770%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+        alt="Производственные площадки и станции"
+        width="313"
+        height="208"
+        loading="lazy"
+      >
+      <figcaption class="ui-figure__caption ui-small ui-text--muted">
+        Производственные площадки и станции
+      </figcaption>
+    </figure>
   </div>
 </section>

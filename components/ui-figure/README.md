@@ -19,13 +19,16 @@ career-portal подписи собирались контентной вёрс�
 ```html
 <figure class="ui-figure">
   <!-- prettier-ignore -->
-  <img class="ui-image" src="/upload/reports/internship-2025.svg"
+  <img class="ui-image" src="../img/internship-report.svg"
        alt="Динамика заявок на стажировку за 2025 год" width="640" height="360">
   <figcaption class="ui-figure__caption ui-small ui-text--muted">
     Рис. 1. Число заявок по месяцам: пики — март и сентябрь.
   </figcaption>
 </figure>
 ```
+
+Путь `../img/…` — демо-файл полигона (`assets/demo/`): живой пример доки
+загружается без 404; на сайте src — ваш файл `/upload/…` (Bitrix).
 
 ## Семантика подписи
 

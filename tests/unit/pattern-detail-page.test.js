@@ -172,8 +172,11 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
     const base = style.slice(0, style.indexOf('@media'));
     expect(base, 'база mobile-first: без position: sticky').not.toContain('position: sticky');
     // Sticky — внутри min-width: 768px (шкала T2.5). Блок media в слое
-    // закрывается на отступе 0 (правила внутри — на 2).
-    const md = style.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\n\}/) ?? [''];
+    // закрывается на отступе 0 (правила внутри — на 2). T17.14: секция dpp
+    // несёт и ступени колонки канона (foot/md, photo/md) — пин скоупится на
+    // связки лейаута (от .dpp-layout), sticky-правило — их md-ступень.
+    const layoutStyle = style.slice(style.indexOf('.dpp-layout'));
+    const md = layoutStyle.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\n\}/) ?? [''];
     expect(md[0], 'sticky-правило в min-width: 768px (md)').toContain('position: sticky');
     expect(md[0]).toContain('.dpp-aside');
   });

@@ -24,16 +24,20 @@ retina ограничивалась PNG @2x логотипами; медиа с�
 
 ```html
 <!-- Информативное изображение -->
-<img class="ui-image" src="/upload/news/ceremony.jpg"
+<img class="ui-image" src="../img/ceremony.svg"
      alt="Церемония награждения победителей программы стажировок"
      width="640" height="360" loading="lazy">
 
 <!-- Media-паттерн (слот ui-card__media): место из шкалы + кадрирование -->
 <img class="ui-image ui-image--cover ui-image--ratio-16-9"
-     src="/upload/vacancy/cover.jpg"
+     src="../img/vacancy-cover.svg"
      alt="Команда разработки за совместной работой над проектом"
      width="640" height="480" loading="lazy">
 ```
+
+Пути `../img/…` — демо-файлы полигона (`assets/demo/`, копируются сборкой в
+`showcase/dist/img/`): живые примеры доки обязаны загружаться без 404. На
+реальном сайте файлы живут в `/upload/…` Bitrix — src всегда ваш.
 
 Модификаторы ортогональны: `--ratio-*` фиксирует место, `--cover`/`--contain`
 кадрируют поверх бокса. Без зафиксированного бокса object-fit — no-op.

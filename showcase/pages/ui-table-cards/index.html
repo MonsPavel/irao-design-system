@@ -19,6 +19,8 @@
     потеря table-семантики в карточном режиме допустима; для сравнения по колонкам берите
     скролл-зону (матрица ниже).
   </p>
+  <!-- html-validate-disable-next prefer-native-element: div, а не section — роль региона задаёт явная role="region" (контракт T7.4, как стенд ui-table-scroll) -->
+  <div class="ui-table__scroll" tabindex="0" role="region" aria-label="Направления подготовки">
   <table class="ui-table ui-table--cards">
     <caption class="ui-table__caption">
       Направления подготовки
@@ -54,6 +56,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 </section>
 
 <section id="uitable-matrix" aria-labelledby="uitable-matrix-heading">
@@ -64,6 +67,8 @@
     версия с условиями допустимости потери table-семантики — README компонента
     (<code>components/ui-table/README.md</code>).
   </p>
+  <!-- html-validate-disable-next prefer-native-element: div, а не section — роль региона задаёт явная role="region" (контракт T7.4, как стенд ui-table-scroll) -->
+  <div class="ui-table__scroll" tabindex="0" role="region" aria-label="Матрица выбора паттерна">
   <table class="ui-table">
     <caption class="ui-table__caption">
       Матрица выбора паттерна
@@ -104,4 +109,5 @@
       </tr>
     </tbody>
   </table>
+  </div>
 </section>
