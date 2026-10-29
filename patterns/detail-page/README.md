@@ -13,16 +13,23 @@
 `ui-grid--3`) + роли типографики T3.3. Связки `dpp-*` — в паттерн-слое
 (T17.1, вариант A): [`patterns.css`](../patterns.css) → опциональный
 `dist/ui-patterns.css`; в бою возможен и собственный CSS сайт-зоны
-(`template_styles.css`). Если какой-то связке понадобится место в системе —
-поднимается вопрос о компоненте (Scope T8.2), а не о расширении паттерна.
+(`template_styles.css`). Контентная колонка канона — `dpp` с BEM-элементами
+`dpp__*` (T17.14: порт связок детальных страниц пилота — колонка, шапка-
+тройка, теги, фото, секции, слот медиа, foot + article/company-связки).
+Если какой-то связке понадобится место в системе — поднимается вопрос о
+компоненте (Scope T8.2), а не о расширении паттерна.
 
 ## Состав
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
 | Крошки | `ui-breadcrumbs` | T4.7; микроразметка BreadcrumbList, текущая — `span` + `aria-current="page"`; вертикальный ритм — обвязка `dpp-breadcrumbs` (T14.5, ниже) |
-| page-head | h1 (`ui-page-title`) + зарплата (`ui-h3`) + теги (`ui-tag`) + мета | мета — `ui-small ui-text--muted`; дата — `<time datetime>` |
-| Контент | роли T3.3 (`ui-body`, `ui-list`), секции h2 | уровень тега — семантика страницы, роль — вид |
+| Контентная колонка | `dpp` (+ `dpp--card`) | T17.14: flex-колонка gap 32; карточная форма вакансии — модификатор `--card` (паддинг/радиус/поверхность) |
+| Шапка-тройка | h1 (`ui-page-title`) + зарплата (`dpp__salary`) + место (`dpp__place`) + теги (`ui-tag`) + мета | T17.14: колонка gap 8 (`dpp__head`); зарплата — литерал 18px канона (T16.13-mapping, НЕ роль); мета — `ui-small ui-text--muted`; дата — `<time datetime>` |
+| Фото/медиа | `dpp__photo` / `dpp__media` | T17.14: фото 420/260 по ступеням md (кадрирует `ui-image--cover`); слот медиа (карта-заглушка) — 288px, содержимое — сайт |
+| Секции | h2 (`ui-h4`) + `dpp__section` | уровень тега — семантика страницы, роль — вид; шаг 8px |
+| Foot | `dpp__foot` | T17.14: разделитель сверху + «дата — CTA» по краям (space-between); мобильная база — колонка, строка от md |
+| Контент | роли T3.3 (`ui-body`, `ui-list`) | |
 | Aside | справочная панель `dl` + CTA `ui-button` + дисклеймер `ui-link` | перенос `form-aside` career-portal; **sticky только ≥ md (768)** |
 | Related | h2 + `ui-grid--3` + `ui-card--hover ui-card--link` | после main; заголовки карточек — h3 |
 
@@ -59,6 +66,67 @@ DOM-порядок = смысловой (Accessibility requirements): крошк
 
 Крошки — в DOM раньше page-head (см. «Порядок чтения» ниже); то же правило
 ритма в сборках списка (T8.1) и формы (T8.3) — копируется вместе с ними.
+
+### Контентная колонка dpp (T17.14)
+
+Композиция детальной страницы — колонка `dpp` (flex, шаг 32px) из связок
+слоя: шапка-тройка `dpp__head` (заголовок → зарплата/место/теги → мета,
+шаг 8px), лента тегов `dpp__tags`, фото `dpp__photo` (420px от md, 260px в
+мобильной базе — «как есть» оригинала, pages.css:542/933), секции контента
+`dpp__section` (шаг 8px), слот медиа `dpp__media` (карта-заглушка вакансии:
+место 288px и muted-поверхность, содержимое — сайт) и foot `dpp__foot`
+(разделитель сверху + «дата — CTA» по краям; в мобильной базе колонкой,
+строка от md — значение оригинала, pages.css:359). Вакансия пилота несёт
+карточную форму колонки — модификатор `dpp--card` (паддинг/радиус/
+поверхность; оригинал `.vacancy-page` рендерит колонку без карточки —
+принято ДС в калибровке пилота):
+
+```html
+<article class="dpp dpp--card">
+  <header class="dpp__head">
+    <h1 class="ui-page-title">Ведущий инженер…</h1>
+    <p class="dpp__salary ui-text--muted">от 120 000 ₽ до вычета налога</p>
+    <p class="dpp__place ui-text--muted">…Москва…</p>
+    <div class="dpp__tags">…<span class="ui-tag ui-tag--blue">…</span></div>
+  </header>
+  <img class="ui-image ui-image--cover dpp__photo" src="…" alt="…" width="1447" height="824">
+  <section class="dpp__section">
+    <h2 class="ui-h4">Что предстоит</h2>
+    <p class="ui-body">…</p>
+  </section>
+  <div class="dpp__media" role="img" aria-label="Карта: …"></div>
+  <footer class="dpp__foot">
+    <time class="dpp__date ui-small ui-text--muted" datetime="2026-09-12">12 сентября 2026</time>
+    <a class="ui-button ui-button--primary" href="/vacancy-apply/">Откликнуться</a>
+  </footer>
+</article>
+```
+
+- **Типографика — ролями T3.3**; исключение — зарплата: литерал 18px
+  канона `dpp__salary` (T16.13-mapping: 18px вне десктоп-шкалы ДС, роль
+  `ui-lead` лестницей ≥1024 даёт 24px и меняла бы одобренное значение).
+  Цвет muted — роль `ui-text--muted` в разметке (слой цвет не дублирует).
+- **Лестницы** — mobile-first по шкале T2.5: база = мобильная ступень
+  оригинала, рост от 768/1024/1280 (страницы event/internship/article/
+  company рендерятся 1:1 с оригиналом на всех ширинах).
+
+#### Article-связки
+
+Статья — та же колонка с модификатором `dpp--article` (шаг 24px,
+pages.css:614) и своими связками: мета-лента `dpp__meta` (шаг 12px, дети
+одной высоты 28px — «текст на одной линии», pages.css:618–630), тип с
+точкой `dpp__type` (точка 8px + uppercase 14/500 ls 0.02em — порт
+`.media__tag`), галерея `dpp__gallery` (2fr/1fr от lg), текст `dpp__text`
+(шаг абзацев 16px) и related `dpp-related` (отступ 40px, шаги заголовков
+56/32px — pages.css:650; содержимое групп — страницы списков `lpp-*`).
+
+#### Company-связки
+
+Детальная компании — hero `dpp-hero` (2 колонки «фото 400px — текст» от
+1280; в мобильной базе колонкой, фото 260/320 по ступеням) и where-пары
+`dpp-where` (2 колонки от lg, фото 280px «как есть»). Статы/преимущества
+страницы — компонент `ui-stat` (T17.4), CTA-баннер — фото-секция +
+CTA-карточка (T17.3/T17.8) — связок слоя не требуют.
 
 ### Лейаут «контент + aside»: sticky только ≥ md
 
@@ -247,31 +315,44 @@ $sDateTs = $sDate === '' ? false : strtotime($sDate);
      // несёт вертикальный ритм страницы (T14.5). ?>
 </nav>
 <article itemscope itemtype="https://schema.org/JobPosting">
-  <h1 class="ui-page-title" itemprop="title"><?= htmlspecialcharsbx($arResult['NAME']) ?></h1>
-  <p class="dpp-tags">
-    <?php foreach ($arResult['DISPLAY_PROPERTIES'] as $code => $prop):
-      if (empty($prop['DISPLAY_VALUE'])) continue; ?>
-      <span class="ui-tag ui-tag--blue"><?= htmlspecialcharsbx(is_array($prop['DISPLAY_VALUE']) ? implode(', ', $prop['DISPLAY_VALUE']) : $prop['DISPLAY_VALUE']) ?></span>
-    <?php endforeach; ?>
-  </p>
-  <?php if ($sDateTs !== false): ?>
-  <p class="dpp-meta ui-small ui-text--muted">
-    <?php // hiringOrganization/jobLocation — из свойств ИБ (COMPANY, CITY):
-     // те же itemprop, что в эталоне; datePosted — ACTIVE_FROM.
-     // NAME и дата — данные ИБ (недоверенный вывод): экранируются
-     // htmlspecialcharsbx (API Битрикса, как и вывод свойств выше). ?>
-    <time itemprop="datePosted" datetime="<?= date('Y-m-d', $sDateTs) ?>"><?= htmlspecialcharsbx(FormatDate('j F Y', $sDateTs)) ?></time>
-  </p>
-  <?php endif; ?>
+  <div class="dpp">
+    <header class="dpp__head">
+      <h1 class="ui-page-title" itemprop="title"><?= htmlspecialcharsbx($arResult['NAME']) ?></h1>
+      <?php // зарплата — литерал канона dpp__salary (T16.13-mapping), цвет —
+         // роль ui-text--muted разметки. ?>
+      <p class="dpp__salary ui-text--muted"><?= htmlspecialcharsbx($arResult['DISPLAY_PROPERTIES']['SALARY']['VALUE']) ?></p>
+      <p class="dpp__tags">
+        <?php foreach ($arResult['DISPLAY_PROPERTIES'] as $code => $prop):
+          if (empty($prop['DISPLAY_VALUE'])) continue; ?>
+          <span class="ui-tag ui-tag--blue"><?= htmlspecialcharsbx(is_array($prop['DISPLAY_VALUE']) ? implode(', ', $prop['DISPLAY_VALUE']) : $prop['DISPLAY_VALUE']) ?></span>
+        <?php endforeach; ?>
+      </p>
+      <?php if ($sDateTs !== false): ?>
+      <p class="ui-small ui-text--muted">
+        <?php // hiringOrganization/jobLocation — из свойств ИБ (COMPANY, CITY):
+         // те же itemprop, что в эталоне; datePosted — ACTIVE_FROM.
+         // NAME и дата — данные ИБ (недоверенный вывод): экранируются
+         // htmlspecialcharsbx (API Битрикса, как и вывод свойств выше). ?>
+        <time itemprop="datePosted" datetime="<?= date('Y-m-d', $sDateTs) ?>"><?= htmlspecialcharsbx(FormatDate('j F Y', $sDateTs)) ?></time>
+      </p>
+      <?php endif; ?>
+    </header>
 
-  <div class="dpp-layout">
-    <div class="dpp-main">
-      <?php // секции h2 + ui-body/ui-list: DETAIL_TEXT или свойства-таблицы ?>
+    <div class="dpp-layout">
+      <div class="dpp-main">
+        <?php // секции dpp__section (h2 + ui-body/ui-list): DETAIL_TEXT или
+           // свойства-таблицы; медиа/карта — слот dpp__media (контент сайта) ?>
+      </div>
+      <aside class="dpp-aside">
+        <?php // dl «метка — значение» из DISPLAY_PROPERTIES + CTA-ссылка
+           // на страницу отклика (T8.3) + дисклеймер ПД ?>
+      </aside>
     </div>
-    <aside class="dpp-aside">
-      <?php // dl «метка — значение» из DISPLAY_PROPERTIES + CTA-ссылка
-         // на страницу отклика (T8.3) + дисклеймер ПД ?>
-    </aside>
+
+    <footer class="dpp__foot">
+      <?php // «дата — CTA» по краям (T17.14): <time class="dpp__date …"> +
+         // ссылка ui-button на страницу отклика (T8.3) ?>
+    </footer>
   </div>
 </article>
 
@@ -293,9 +374,10 @@ $sDateTs = $sDate === '' ? false : strtotime($sDate);
   даёт только название месяца в именительном падеже («Сентябрь»).
   Оба вывода — данные ИБ (недоверенные), экранируются `htmlspecialcharsbx`
   (как и NAME).
-- Связующие стили (`dpp-*`) перенесите в `template_styles.css` сайта —
-  источник: `<style>` в [`detail-page.html`](detail-page.html), значения —
-  только токены `--ui-*`.
+- Связующие стили (`dpp-*`/`dpp__*`) — ПАТТЕРН-СЛОЙ (T17.1/T17.14):
+  [`patterns.css`](../patterns.css) → опциональный `dist/ui-patterns.css`;
+  в бою возможен и собственный CSS сайт-зоны (`template_styles.css`) —
+  значения только токенами `--ui-*`.
 
 ## Do / Don't
 
