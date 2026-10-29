@@ -182,6 +182,34 @@ requirements T2.1 п.4): каждое значение career-portal перен�
 | font-size `.header__dropdown-link` 16px (header.css, fs 16 / lh 20) | `--ui-dropdown-item-fs: 1rem` (межстрочное — безразмерное 1.25 = 20px при 16, оригинал `line-height: 1.25`) | T16.3: 16px вне тройки ролей T3.3 (роль body растёт 16→18→20 по брейкпоинтам) — фикс-размер пункта dropdown «как есть» (прецедент `--ui-button-pad-inline` 28px), пересмотр — design-decision владельца; до T16.3 пункт нёс `--ui-fs-body` (20px на десктопе — REPORT §8.2 №4) |
 | line-height `.header__link` 1.1 (header.css:36) | `line-height: 1.1` в модификаторе `.ui-link--nav` (безразмерное — компактная строка пункта навигации, токена нет: роль small несёт 1.35 для контентных ролей) | T16.3 (доводка приёмки AC4 — полный computed-матч шапки клона): 14 × 1.1 = 15.4px против 18.9px на роли small |
 
+### EPIC-17 — новые сущности ДС (адоптация сайт-зоны пилота, итог T17.16)
+
+Строки сущностей, выведенных из сайт-зоны пилота эпиком полноты (ценз —
+REPORT §11.2/§11.4; судьба каждого семейства — таблица §11.4, гейт —
+`pilot/career-portal/census.mjs`). Компоненты — `components/`, каноны
+связок — паттерн-слой `patterns/patterns.css` → `dist/ui-patterns.css`
+(решение владельца — вариант A, README EPIC-17).
+
+| Источник (career-portal / cp-*) | Сущность ДС | Примечание |
+| --- | --- | --- |
+| фото-секции ×5 (hero/production/holding/why-us/banner-card — приём «фон inset:0 + оверлей», pages.css) | `ui-section--photo` (+`--fade-bottom/--glow/--tint`; хук тинта = `--ui-color-primary-a55`, T14.7) | T17.3: тинт баннера остался на теле — одобренный вид (проба скрин-пар, решение T17.3) |
+| статы holding/company-stats/company-adv (три заливки) | `ui-stat` (`--glass/--filled/--deep`) | T17.4: сетки-раскладки — сайт-зона; holding 618→603 (−15px, lh 1.1 — канон оригинала, §3.4); company-дельты −15/+14 стабильны с 25.10 (accept2-t174) |
+| медиа-карточка event/article/intern-person/mediaHome (фото + тег на фото + тело) | модификатор `ui-card--media` — **НЕ поставлена**: T17.5 blocked (заблокирована конвейером 28.10, мердж не выполнялся, наработки в ветке task/T17.5 — STATUS); карточки остаются сайт-зоной (cp-event-card/cp-article-card/cp-intern-person на базе ui-card) | explicit-строка ценза T17.16 (Notes: задача в бэклоге не блокирует ценз); кандидат возобновления — ветка task/T17.5 |
+| видео-блок главной | `ui-video` (`--ui-video-play-size` 5.5rem «как есть») | T17.6: доступное имя кнопки — a11y-улучшение |
+| карусель production со степпером; фото-галерея prev/next | `ui-carousel` + JS-модуль в `dist/ui.min.js` | T17.7: карусель/галерея-поведение — в dist (цель эпика); композиция секции (позиции стрелок/степпера) — сайт-зона |
+| CTA-плашки cta-mail/«Все вакансии»/тело баннера | `ui-card--cta` (`--primary/--accent`/bare) | T17.8: on-dark-пара — компонент; axe-строка `on-dark-on-accent` |
+| цветные nav-карточки students | связка слоя `lnk-card`; тоны peach/navy/light — сайт-строки на хуках `--lnk-card-bg/--lnk-card-fg` + пары кнопок | T17.9: пары одобренного дизайна — таблица patterns/landing-section/README.md |
+| лента логотипов employers | связка слоя `lgo-grid`/`lgo-card` | T17.9 |
+| поднавигация разделов (сетка 5×1fr, маргины 24/48) | канон `nvp` слоя + активная пилюля `ui-tabs--pill` по `aria-current="page"` (T17.11) | строка «поднавигация разделов» ниже |
+| пилюля select-фильтра (4 контекста cp-pill) | модификатор `ui-select--pill` | T17.12: геометрия пилюли — в компоненте |
+| find-bar вакансий/поиска мероприятий; фильтры каталогов | каноны `lpp-find`/`lpp-filters` слоя | T17.12 |
+| шапка/подвал (каркасы: сетки, режимы --overlay/static, VI-слот, соц-кнопки 36px) | каноны `hsp`/`ftp` слоя | T17.13: бренд-строки (VI-пилюля 15px, лого 105, hover-accent футера) — сайт-зона |
+| детальные страницы vacancy/event/internship/article/company | канон `dpp` (+`--card/--article`, `dpp-hero/dpp-where`, `__head/__salary/__place/__section/__photo/__foot/__meta/__type/__gallery`) | T17.14: строка «зарплата» выше; лестницы 1023 — мобильные базы канона |
+| hero (стеклянная пилюля поиска, лента тегов 1:1:1:1) | канон `hro` слоя; спец-тинты violet/green/rose — color-mix на хуке `--hro-tag-bg` (дефолт sand = a26) | T17.15: тон — бренд-слой, НЕ система (решение владельца — вариант (а); hex в ДС не едет) |
+| adv-marquee / cover-hero / спец-сетка media (big+lead) | каноны `mrq`/`cvh`/`mdl` слоя | T17.15: строки «промо-блок бегущие строки» выше; big-span mdl — канон есть, активация в пилоте — design-decision |
+| строковые композиции (59 голых `display: flex` сайт-зоны до эпика) | флекс-примитивы `ui-row`/`ui-stack` (`--ui-row-gap/--ui-stack-gap`, `--center/--between/--end/--no-wrap`) | T17.17 |
+| скрытые подписи полей/фильтров (cp-vh и локальные sr-only) | утилита `ui-vh` | T17.2: унификация visually-hidden |
+
 ### Принято значение ДС (микрорасхождения сверки пилота — REPORT §3.3, T14.6)
 
 Расхождения clone-сверки 20.10, решённые в пользу значений ДС: осознанные
