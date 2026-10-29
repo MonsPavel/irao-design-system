@@ -296,10 +296,13 @@ standTest.describe('ui-card (T4.4)', () => {
 
       // Клик в верхний правый угол карточки — зона паддинга, далеко от текста
       // ссылки: растянутая ::after-ссылка покрывает ВСЮ карточку.
+      // Клик по позиции ЭЛЕМЕНТА (не сырые координаты мыши): в сайдбар-каркасе
+      // полигона карточка выше вьюпорта — boundingBox.y может уйти в минус
+      // после scrollIntoViewIfNeeded, и mouse.click мимо элемента (аудит
+      // каркаса 29.10); locator.click сам держит точку в зоне видимости.
       const card = page.locator(`#${CARD.link}`);
-      await card.scrollIntoViewIfNeeded();
       const box = await card.boundingBox();
-      await page.mouse.click(box.x + box.width - 10, box.y + 10);
+      await card.click({ position: { x: box.width - 10, y: 10 } });
       await expect.poll(() => page.url()).toContain('#ui-card-link');
 
       // Вложенная кнопка выше растянутой ссылки (nested-interactive): клик

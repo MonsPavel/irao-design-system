@@ -4,6 +4,10 @@
      --zebra (полосы --ui-color-surface-muted по чётным строкам тела),
      #uitable-compact — --compact + --zebra (плотный режим больших списков).
      hover строк — пара --ui-color-surface-hover только под (hover: hover).
+     Таблицы стенда несут скролл-зону компонента (.ui-table__scroll):
+     демо-данные четырёх колонок шире мобильной колонки контента, а базовый
+     table без зоны не перестраивается под контейнер (min-content) — зона и
+     есть предписанный состав для широких таблиц (канон, «другие паттерны»).
      Другие паттерны компонента — стенды ui-table-scroll (скролл-зона,
      sticky) и ui-table-cards (карточная трансформация, матрица выбора). -->
 <section id="uitable-basic" aria-labelledby="uitable-basic-heading">
@@ -13,8 +17,12 @@
     <code>&lt;caption&gt;</code>; заголовки связаны нативно: <code>th scope="col"</code> в шапке,
     <code>th scope="row"</code> на первой колонке тела. Разделители строк —
     <code>--ui-color-divider</code>; при наведении строка подсвечивается парой
-    <code>--ui-color-surface-hover</code> (только под <code>(hover: hover)</code>).
+    <code>--ui-color-surface-hover</code> (только под <code>(hover: hover)</code>). На узком экране
+    демо-данные шире колонки — таблица в скролл-зоне компонента
+    (<code>.ui-table__scroll</code>, прецедент канона).
   </p>
+  <!-- html-validate-disable-next prefer-native-element: div, а не section — роль региона задаёт явная role="region" (контракт T7.4, как стенд ui-table-scroll) -->
+  <div class="ui-table__scroll" tabindex="0" role="region" aria-label="Направления подготовки">
   <table class="ui-table">
     <caption class="ui-table__caption">
       Направления подготовки
@@ -54,6 +62,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 </section>
 
 <section id="uitable-zebra" aria-labelledby="uitable-zebra-heading">
@@ -62,6 +71,8 @@
     Чётные строки тела приглушены <code>--ui-color-surface-muted</code> — глаз ведёт по строке
     wide-таблицы. Полосы — только оформление: смысл полосам не вкладывайте (Don't в README).
   </p>
+  <!-- html-validate-disable-next prefer-native-element: div, а не section — роль региона задаёт явная role="region" (контракт T7.4, как стенд ui-table-scroll) -->
+  <div class="ui-table__scroll" tabindex="0" role="region" aria-label="График приёма заявок">
   <table class="ui-table ui-table--zebra">
     <caption class="ui-table__caption">
       График приёма заявок
@@ -96,6 +107,7 @@
       </tr>
     </tbody>
   </table>
+  </div>
 </section>
 
 <section id="uitable-compact" aria-labelledby="uitable-compact-heading">
@@ -103,6 +115,8 @@
   <p class="ui-showcase-stand__note">
     Отступы ячеек 8/12 вместо 12/16 — реестры на десятки строк. Сочетается с <code>--zebra</code>.
   </p>
+  <!-- html-validate-disable-next prefer-native-element: div, а не section — роль региона задаёт явная role="region" (контракт T7.4, как стенд ui-table-scroll) -->
+  <div class="ui-table__scroll" tabindex="0" role="region" aria-label="Кодификатор рабочих профессий">
   <table class="ui-table ui-table--compact ui-table--zebra">
     <caption class="ui-table__caption">
       Кодификатор рабочих профессий
@@ -147,4 +161,5 @@
       </tr>
     </tbody>
   </table>
+  </div>
 </section>

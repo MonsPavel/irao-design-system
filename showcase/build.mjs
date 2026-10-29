@@ -276,6 +276,20 @@ function themeNames() {
     .sort();
 }
 
+/** Демо-изображения живых примеров док-страниц (канонические ui-image/
+ *  ui-figure/ui-video ссылаются на них относительными src="img/…"):
+ *  полигональная зона — копируются ТОЛЬКО в showcase/dist/img, в поставку
+ *  dist/ не попадают (ADR-0006: демо-контент — не рантайм сайтов). */
+const DEMO_IMG_SRC = join(ROOT, 'assets', 'demo');
+
+function copyDemoImages() {
+  if (!existsSync(DEMO_IMG_SRC)) {
+    warn('assets/demo/ отсутствует — showcase/dist/img не создан');
+    return;
+  }
+  cpSync(DEMO_IMG_SRC, join(SHOWCASE_DIST, 'img'), { recursive: true });
+}
+
 /* ── генерация showcase ── */
 
 function discoverComponents() {
@@ -333,6 +347,21 @@ function standBody(name) {
 }
 
 /* ── навигация полигона (редизайн 19.10): сайдбар на всех страницах ── */
+
+/**
+ * Стенды, остающиеся БЕЗ сайдбара (navMode: 'strip', лента чипов на любой
+ * ширине): демо-страницы, чей контент несёт собственную полноширинную
+ * композицию с viewport-media — паттерны страниц (sticky-aside, фото-секции
+ * T17.3, шапка/подвал уровня body), стенд layout (контейнеры/сетки —
+ * поверхность viewport-гейтов T3.4/T3.6: ширины меряются от body) и
+ * фото-композиция «Производство» стенда ui-carousel. Остальные стенды
+ * (токены, база, типографика, компонентные, интеграционные) — контентные
+ * страницы полигона: с md им положен тот же сайдбар, что докам и гайдам
+ * (единый механизм frame()). Ниже md ЛЮБАЯ страница сворачивает навигацию
+ * в компактную кнопку (FRAME_SCRIPT: без JS остаётся открытая лента —
+ * деградация консервативна).
+ */
+const FULL_WIDTH_STANDS = new Set(['ui-carousel', 'layout']);
 
 /**
  * Плоская модель сайдбара: группы «Начало / Токены / База / Компоненты /
@@ -430,11 +459,19 @@ function navHref(item, rel, home) {
  *  прокручиваемый регион обязан быть доступен с клавиатуры (WCAG 2.1.1,
  *  гейт axe scrollable-region-focusable). Активная страница — aria-current
  *  строго на ссылке на САМУ страницу (семантика WCAG); стенды компонентов
- *  своей записи в навигации не имеют — пометки нет. */
+ *  своей записи в навигации не имеют — пометки нет.
+ *  Кнопка «Разделы» (hidden) — прогрессивное улучшение FRAME_SCRIPT: до md
+ *  лента чипов длиннее экрана (47 ссылок), скрипт сворачивает её в кнопку;
+ *  без JS кнопка не появляется, лента открыта — ссылки доступны всегда. */
 function navHtml(rel, home, navCurrent) {
   const lines = [
     '  <nav class="ui-showcase-nav" aria-label="Разделы полигона" tabindex="0">',
-    '    <ul class="ui-showcase-nav__list">',
+    '    <button class="ui-showcase-nav__toggle" type="button" aria-expanded="true"',
+    '            aria-controls="ui-showcase-nav-list" hidden>',
+    '      <span>Разделы</span>',
+    '      <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M3 6l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    '    </button>',
+    '    <ul class="ui-showcase-nav__list" id="ui-showcase-nav-list">',
   ];
   for (const group of NAV) {
     lines.push(`      <li class="ui-showcase-nav__group-title">${group.title}</li>`);
@@ -486,11 +523,12 @@ function footerHtml() {
  *  - navCurrent — { kind, name } активной страницы для aria-current в
  *    сайдбаре (null — страница без своей записи: стенды компонентов);
  *  - navMode — 'sidebar' (умолчание: колонка слева) | 'strip' (компактная
- *    лента над контентом). Стенды — strip при ЛЮБОЙ ширине: демо-страницы
- *    паттернов несут собственные viewport-media (32px-сценарий T3.6,
- *    sticky-aside) и обязаны получить полную ширину вьюпорта, как до
- *    редизайна; навигация при этом никуда не пропадает (те же группы,
- *    свёрнутые в чипы) — меняется только подача;
+ *    лента над контентом). 'strip' — только полноширинным демо-страницам
+ *    (паттерны, фото-композиция ui-carousel: собственные viewport-media
+ *    32px-сценария T3.6, sticky-aside) — они обязаны получить полную ширину
+ *    вьюпорта; контентные стенды (токены/база/типографика/layout/компонентные)
+ *    используют сайдбар, как доки. До md ЛЮБОЙ режим — компактная свёртка
+ *    ленты в кнопку «Разделы» (FRAME_SCRIPT; без JS лента открыта);
  *  - withNav / withFooter / withFrameCss — отключение блоков каркаса
  *    (standalone.html — техническая страница «только ui-core.min.css»:
  *    без сайдбара, подвала и стилей каркаса). */
@@ -677,6 +715,23 @@ const THEME_SCRIPT = `  <script>
 const FRAME_SCRIPT = `  <script>
     (function () {
       'use strict';
+      // ?embed=1 — чистое демо для iframe responsive-секций док-страниц:
+      // каркасные шапка/навигация/подвал скрываются, сайдбар-раскладка
+      // снимается. Контентным стендам (был сайдбар) остаётся читабельная
+      // колонка main (класс ui-showcase-embed), полноширинные демо
+      // (ui-carousel) остаются без полей. Ссылка на полный стенд — на самой
+      // док-странице рядом с фреймом.
+      if (new URLSearchParams(window.location.search).get('embed') === '1') {
+        if (document.body.classList.contains('ui-showcase-body--sidebar')) {
+          document.body.classList.remove('ui-showcase-body--sidebar');
+          document.body.classList.add('ui-showcase-embed');
+        }
+        var chrome = ['ui-showcase-header', 'ui-showcase-nav', 'ui-showcase-footer'];
+        for (var c = 0; c < chrome.length; c++) {
+          var block = document.querySelector('.' + chrome[c]);
+          if (block) block.hidden = true;
+        }
+      }
       var copyButtons = document.querySelectorAll('[data-ui-showcase-copy]');
       for (var i = 0; i < copyButtons.length; i++) {
         copyButtons[i].addEventListener('click', function () {
@@ -736,11 +791,46 @@ const FRAME_SCRIPT = `  <script>
         };
         search.addEventListener('input', applyFilter);
       }
+      // Мобильная навигация: до md лента всех ссылок длиннее экрана —
+      // сворачивается в кнопку «Разделы» (aria-expanded + hidden списка).
+      // Кнопка живёт в DOM ТОЛЬКО до md: на широких экранах навигация видна
+      // целиком, элемент удаляется (инвариант Tab-обходов: DOM-список
+      // фокусируемых == последовательной навигации; display:none из DOM
+      // списка не исключает). Без JS кнопка не появляется (hidden в
+      // разметке), лента открыта — все ссылки в Tab-порядке.
+      var navToggle = document.querySelector('.ui-showcase-nav__toggle');
+      var navList = document.getElementById('ui-showcase-nav-list');
+      if (navToggle && navList) {
+        var setNav = function (collapsed) {
+          navToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+          navList.hidden = collapsed;
+        };
+        var applyNavMode = function (isCompact) {
+          if (isCompact) {
+            navToggle.hidden = false;
+            setNav(true);
+          } else {
+            setNav(false);
+            if (navToggle.parentNode) navToggle.remove();
+          }
+        };
+        var compact = window.matchMedia('(max-width: 767px)');
+        applyNavMode(compact.matches);
+        if (compact.addEventListener) {
+          compact.addEventListener('change', function (event) {
+            applyNavMode(event.matches);
+          });
+        }
+        navToggle.addEventListener('click', function () {
+          setNav(!navList.hidden);
+        });
+      }
     })();
   </script>`;
 
 async function generateShowcase({ themes }) {
   mkdirSync(join(SHOWCASE_DIST, 'stands'), { recursive: true });
+  copyDemoImages();
   // Навигация каркаса — до генерации страниц: frame() читает её для сайдбара.
   NAV = buildNav();
 
@@ -759,7 +849,6 @@ async function generateShowcase({ themes }) {
       main: renderTokensStand(parsedTokens),
       themes,
       navCurrent: { kind: 'stand', name: 'tokens' },
-      navMode: 'strip',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'tokens.html'), tokensPage);
     stands.push({
@@ -783,7 +872,6 @@ async function generateShowcase({ themes }) {
       main: `    <h1 class="ui-showcase-title">base</h1>\n${readFileSync(baseStandSource, 'utf8').trim()}`,
       themes,
       navCurrent: { kind: 'stand', name: 'base' },
-      navMode: 'strip',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'base.html'), page);
     stands.push({ name: 'base', source: 'showcase/pages/base/index.html' });
@@ -805,7 +893,6 @@ async function generateShowcase({ themes }) {
       main: `    <h1 class="ui-showcase-title">typography</h1>\n${readFileSync(typographyStandSource, 'utf8').trim()}`,
       themes,
       navCurrent: { kind: 'stand', name: 'typography' },
-      navMode: 'strip',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'typography.html'), page);
     stands.push({ name: 'typography', source: 'showcase/pages/typography/index.html' });
@@ -827,6 +914,8 @@ async function generateShowcase({ themes }) {
       main: `    <h1 class="ui-showcase-title">layout</h1>\n${readFileSync(layoutStandSource, 'utf8').trim()}`,
       themes,
       navCurrent: { kind: 'stand', name: 'layout' },
+      // Полноширинное демо (FULL_WIDTH_STANDS): контейнеры/сетки — поверхность
+      // viewport-гейтов T3.4/T3.6, ширины меряются от полной ширины body.
       navMode: 'strip',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'layout.html'), page);
@@ -882,7 +971,6 @@ async function generateShowcase({ themes }) {
       main: `    <h1 class="ui-showcase-title">integration/form-full-cycle</h1>\n${readFileSync(fullCycleStandSource, 'utf8').trim()}`,
       themes,
       navCurrent: { kind: 'stand', name: 'integration/form-full-cycle' },
-      navMode: 'strip',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'integration', 'form-full-cycle.html'), page);
     stands.push({
@@ -1201,7 +1289,6 @@ async function generateShowcase({ themes }) {
       main: `    <h1 class="ui-showcase-title">${name}</h1>\n${readFileSync(source, 'utf8').trim()}`,
       themes,
       navCurrent: { kind: 'stand', name },
-      navMode: 'strip',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', `${name}.html`), page);
     stands.push({ name, source: `showcase/pages/${name}/index.html` });
@@ -1226,7 +1313,9 @@ async function generateShowcase({ themes }) {
       title: `${name} — irao-ui showcase`,
       main: `    <h1 class="ui-showcase-title">${name}</h1>\n${body.html}`,
       themes,
-      navMode: 'strip',
+      // Полноширинные демо-композиции — лента чипов (FULL_WIDTH_STANDS),
+      // остальные компонентные стенды — сайдбар, как доки.
+      navMode: FULL_WIDTH_STANDS.has(name) ? 'strip' : 'sidebar',
     });
     writeFileSync(join(SHOWCASE_DIST, 'stands', `${name}.html`), page);
     stands.push({ name, source: body.source });
@@ -1380,7 +1469,17 @@ async function generateShowcase({ themes }) {
     navCurrent: { kind: 'index' },
     main: [
       '    <h1 class="ui-showcase-title">irao-ui showcase</h1>',
-      '    <p class="ui-showcase-lead">Единый источник правды UI-системы: по этим страницам работают Playwright-тесты и читают документацию интеграторы сайтов группы. Каркас, каталог и стили полигона генерируются <code>showcase/build.mjs</code>.</p>',
+      '    <p class="ui-showcase-lead">UI-система для сайтов группы на Bitrix: нативный CSS/JS без runtime-зависимостей, БЭМ-классы <code>ui-*</code> и токены <code>--ui-*</code>. Это живая документация — компоненты, паттерны страниц и гайды внедрения; по тем же страницам работают автотесты системы. Каркас и каталог генерируются <code>showcase/build.mjs</code>.</p>',
+      '    <section class="ui-showcase-start" aria-labelledby="start-heading">',
+      '      <h2 id="start-heading">Начало работы</h2>',
+      '      <p class="ui-showcase-section__note">Подключение — копирование файлов <code>dist/</code> и четыре строки в <code>header.php</code>; Node на сайте не нужен.</p>',
+      '      <div class="ui-showcase-start__row">',
+      '        <a class="ui-link ui-link--button" href="docs/quickstart.html">Подключение за 5 минут</a>',
+      '        <a class="ui-link ui-link--button" href="docs/integration-guide.html">Гайд по интеграции</a>',
+      '        <a class="ui-link ui-link--button" href="#docs-heading">Каталог компонентов</a>',
+      '        <a class="ui-link ui-link--button" href="stands/tokens.html">Дизайн-токены</a>',
+      '      </div>',
+      '    </section>',
       '    <section class="ui-showcase-search" aria-label="Поиск по полигону">',
       '      <label class="ui-showcase-search__label" for="ui-showcase-search">Поиск по названиям</label>',
       '      <div class="ui-showcase-search__field">',
@@ -1592,6 +1691,54 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
       hasLayerLink === patternLayerStands.has(rel),
       `${rel}: подключение ui-patterns.css ${patternLayerStands.has(rel) ? 'ожидается' : 'не ожидается'} (слой опционален, получатели — стенды паттернов с связками в слое)`,
     );
+  }
+  // Классификация каркаса: полноширинная лента чипов — только демо-страницы
+  // с собственной viewport-композицией (паттерны, error-404, ui-carousel);
+  // остальные страницы — сайдбар (единый механизм, фикс «навигация сверху
+  // вместо сайдбара» на контентных стендах). standalone — вне проверки (без
+  // каркаса).
+  const stripPages = new Set([
+    ...stands
+      .map((stand) => `stands/${stand.name}.html`)
+      .filter((rel) => rel.startsWith('stands/patterns/') || rel === 'stands/error-404.html')
+      .concat([...FULL_WIDTH_STANDS].map((name) => `stands/${name}.html`)),
+  ]);
+  for (const rel of pages) {
+    if (rel === 'standalone.html') continue;
+    const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');
+    // Точный тег body: имя класса встречается и в тексте FRAME_SCRIPT
+    // (ветка ?embed читает класс) — includes() по подстроке ложно-позитивен.
+    const hasSidebar = html.includes('<body class="ui-showcase-body--sidebar">');
+    assert(
+      hasSidebar !== stripPages.has(rel),
+      `${rel}: режим каркаса — ${stripPages.has(rel) ? 'лента (полноширинное демо)' : 'сайдбар'}, получено ${hasSidebar ? 'сайдбар' : 'лента'}`,
+    );
+  }
+  // Responsive-iframe док-страниц — чистое демо (?embed=1 скрывает каркас):
+  // прежние голые URL тянули шапку/навигацию/подвал в каждый из трёх фреймов.
+  for (const { name } of docs) {
+    const html = readFileSync(join(SHOWCASE_DIST, 'docs', `${name}.html`), 'utf8');
+    const embeds = [...html.matchAll(/<iframe[^>]*\ssrc="([^"]+)"/g)].map((match) => match[1]);
+    assert(
+      embeds.length === 3 && embeds.every((src) => src.endsWith('?embed=1')),
+      `дока ${name}: responsive-iframe обязаны вести на стенд с ?embed=1 (получено: ${embeds.join(', ')})`,
+    );
+  }
+  // Демо-изображения док-страниц обязаны резолвиться в полигоне (находка
+  // аудита: канонические ui-image/ui-figure/ui-video ссылались на
+  // /upload/… сайта Bitrix — на Pages это 404, живые примеры без картинок;
+  // brokenDocLinks регион примеров не сканирует — этот гейт закрывает дыру).
+  for (const rel of pages.filter((page) => page.startsWith('docs/'))) {
+    const html = readFileSync(join(SHOWCASE_DIST, rel), 'utf8');
+    for (const match of html.matchAll(/<img[^>]*\ssrc="([^"]+)"/g)) {
+      const src = match[1];
+      if (/^(?:data:|https?:)/.test(src)) continue;
+      const clean = src.split('#')[0].split('?')[0];
+      assert(
+        clean !== '' && existsSync(join(SHOWCASE_DIST, clean.replaceAll('../', ''))),
+        `${rel}: демо-изображение ${src} не резолвится в полигоне (404 в живых примерах)`,
+      );
+    }
   }
   // Идемпотентность баннера: ни дат, ни меток времени.
   assert(
