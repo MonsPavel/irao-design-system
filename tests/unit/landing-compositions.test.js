@@ -280,16 +280,21 @@ describe('patterns/patterns.css — канон adv-marquee (связка mrq, л
     expect(xl, 'роль ui-h3 снята (T16.15: замер 42/500 — не канон)').not.toContain('--ui-fs-h3');
   });
 
-  it('тело и фото: flex-строка gap 16 с wrap-гранулой (узкие экраны — фото на своей строке), текст — anywhere (32px-стресс), фото 16rem cover radius md', () => {
+  it('тело и фото: строка с 480 (база — перенос, фото на своей строке); гранулы стресса — anywhere на тексте, max-width на фото', () => {
     const body = blockOf(layer, '.mrq__body');
     expect(body, '.mrq__body найдено').toBeTruthy();
     expect(body).toContain('display: flex;');
     expect(
       body,
-      'flex-wrap: wrap — при помещении строки рендер байт-равен одобренному; на узких экранах фото переносится (пилот выталкивал текст в hscroll @375)',
+      'база — flex-wrap: wrap: ≤ ~550px в пилоте текст выталкивался за блок в hscroll страницы; фото переносится на свою строку',
     ).toContain('flex-wrap: wrap;');
     expect(body).toContain('gap: var(--ui-space-4);');
     expect(body).toContain('align-items: center;');
+    const nowrap = mediaBlockOf(layer, 480, 'mrq__body');
+    expect(nowrap, 'ступень 480 есть (шкала T2.5)').toBeTruthy();
+    expect(nowrap, 'с 480 — строка, как в одобренном рендере (помещается)').toContain(
+      'flex-wrap: nowrap;',
+    );
     const text = blockOf(layer, '.mrq__body .ui-body');
     expect(
       text,
@@ -299,6 +304,10 @@ describe('patterns/patterns.css — канон adv-marquee (связка mrq, л
     expect(photo, '.mrq__photo найдено').toBeTruthy();
     expect(photo).toContain('object-fit: cover;');
     expect(photo).toContain('width: 16rem;');
+    expect(
+      photo,
+      'reflow-гранула 32px-гейта (прецедент .lpp-pill): 16rem × 32px-базы клампится к колонке',
+    ).toContain('max-width: 100%;');
     expect(photo).toContain('border-radius: var(--ui-radius-md);');
   });
 });

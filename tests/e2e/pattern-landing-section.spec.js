@@ -702,16 +702,25 @@ standTest.describe('patterns/landing-section: лендинг-композици�
       await page.evaluate(() => {
         document.body.classList.add('vi', 'vi-img--off');
       });
-      const blurred = await page.locator('#lsp-hero').evaluate((el) => {
+      const state = await page.locator('#lsp-hero').evaluate((el) => {
         const search = el.querySelector('.hro__search');
         const tag = el.querySelector('.hro__tag');
         return {
-          search: getComputedStyle(search).backdropFilter,
-          tag: getComputedStyle(tag).backdropFilter,
+          searchBlur: getComputedStyle(search).backdropFilter,
+          tagBlur: getComputedStyle(tag).backdropFilter,
+          // Пре-существующее поведение vi.css (T9.1): [class*='-photo']
+          // матчит и саму ui-section--photo — фото-секция в img:off скрыта
+          // ЦЕЛИКОМ (пилюля/теги не рендерятся). Пин задокументированного
+          // поведения: инвариант blur проверяется computed-значением.
+          sectionDisplay: getComputedStyle(el).display,
         };
       });
-      expect(blurred.search, 'blur пилюли отключён в img:off (фото скрыто)').toBe('none');
-      expect(blurred.tag, 'blur тега отключён в img:off').toBe('none');
+      expect(state.searchBlur, 'blur пилюли отключён в img:off (фото скрыто)').toBe('none');
+      expect(state.tagBlur, 'blur тега отключён в img:off').toBe('none');
+      expect(
+        state.sectionDisplay,
+        'фото-секция скрыта в img:off (пре-существующее правило vi.css [class*=-photo])',
+      ).toBe('none');
     },
   );
 });

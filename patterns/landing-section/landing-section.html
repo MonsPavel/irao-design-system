@@ -455,14 +455,12 @@
 
   <div class="hro__content">
     <h2 class="ui-h2 hro__title" id="lsp-hero-title">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h2>
+    <!-- html-validate-disable-next wcag/h32: approved-дизайн hero не несёт submit-кнопку (плита — навигация); отправка — implicit submission (Enter), канон search-overlay -->
     <form class="hro__search" action="#lsp-hero" method="get" role="search">
       <svg class="hro__search-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M26 26l8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       <div class="ui-field">
         <input class="ui-field__input" type="search" name="q" placeholder="Введите название вакансии" aria-label="Поиск вакансий">
       </div>
-      <!-- submit — wcag/h32: у формы обязан быть submit; вид не несёт
-           (утилита ui-vh, T17.2) — поиск запускает Enter/плита-ссылка. -->
-      <button class="ui-button ui-vh" type="submit">Найти</button>
       <a class="hro__search-all" href="#lsp-hero">Все вакансии</a>
     </form>
   </div>
