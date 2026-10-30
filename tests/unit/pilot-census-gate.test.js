@@ -51,6 +51,21 @@ const readSource = (name) => readFileSync(join(pilotDir, name), 'utf8').replace(
 
 const compare = readSource('compare.mjs');
 
+/** Базлайн-коммит достижим в этом клоне? На CI actions/checkout по умолчанию
+ *  shallow (fetch-depth: 1) — история до 24.10 не выкачивается, `git show
+ *  922b505:…` падает («Command failed») и красит юнит на зелёном коде
+ *  (nightly 30.10 validate + CI Unit с 4402c92). Локальный клон полный —
+ *  пин исполняется; на shallow-чекоуте тест честно скипается (прецедент
+ *  пилотного пина T13.7 it.skipIf: поверхность недостижима — не имитируем). */
+const baselineReachable = (() => {
+  try {
+    execFileSync('git', ['cat-file', '-e', '922b505^{commit}'], { stdio: 'ignore' });
+    return true;
+  } catch {
+    return false;
+  }
+})();
+
 describe('ценз сайт-зоны — censusMetrics (T17.16 Implementation requirements п.1)', () => {
   it('модуль гейта — pilot/career-portal/census.mjs (по образцу check-links.mjs: логика — чистая функция)', () => {
     expect(existsSync(join(pilotDir, 'census.mjs'))).toBe(true);
@@ -209,18 +224,21 @@ describe('базлайн ценза §11.4 — пре-эпик дерево 922b
     return new Set(selectors).size;
   };
 
-  it('числа §11.2 воспроизводятся census-методом на 922b505: 2022 строки, js 243 (кроме «228 селекторов»)', () => {
-    const css = showPilot('922b505', 'pilot.css');
-    const m = censusMetrics(css, showPilot('922b505', 'pilot.js'));
-    expect(m.css.lines).toBe(2022);
-    expect(m.css.codeLines).toBe(1402);
-    // census-метод: 276 вхождений / 233 уникальных селекторов; «228» §11.2 —
-    // иная (не записанная) методика раунда 5
-    expect(m.css.selectors).toBe(276);
-    expect(uniqueSelectors(css)).toBe(233);
-    expect(m.css.families).toHaveLength(64);
-    expect(m.js.lines).toBe(243);
-  });
+  it.skipIf(!baselineReachable)(
+    'числа §11.2 воспроизводятся census-методом на 922b505: 2022 строки, js 243 (кроме «228 селекторов»)',
+    () => {
+      const css = showPilot('922b505', 'pilot.css');
+      const m = censusMetrics(css, showPilot('922b505', 'pilot.js'));
+      expect(m.css.lines).toBe(2022);
+      expect(m.css.codeLines).toBe(1402);
+      // census-метод: 276 вхождений / 233 уникальных селекторов; «228» §11.2 —
+      // иная (не записанная) методика раунда 5
+      expect(m.css.selectors).toBe(276);
+      expect(uniqueSelectors(css)).toBe(233);
+      expect(m.css.families).toHaveLength(64);
+      expect(m.js.lines).toBe(243);
+    },
+  );
 
   it('REPORT §11.4 синхронен: якорь базлайна — 922b505, ложные утверждения о базлайне сняты', () => {
     const report = readSource('REPORT.md');
