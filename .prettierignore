@@ -58,6 +58,10 @@ showcase/pages/ui-vi/index.html
 # тот же случай (prettier печатал бы самозакрытый void-элемент); гейт
 # разметки — lint:html (void-style).
 showcase/pages/ui-tag/index.html
+# T17.5: канон ui-card — img медиа-карточки (<img> без слэша): тот же
+# случай (prettier печатал бы самозакрытый void-элемент); гейт разметки —
+# lint:html (void-style).
+components/ui-card/ui-card.html
 # T7.6: паттерны с полями форм (<input> без слэша, гейт void-style) — тот же
 # случай, что ui-field/form-page: гейт разметки — lint:html, prettier печатал
 # бы только самозакрытые void-элементы.

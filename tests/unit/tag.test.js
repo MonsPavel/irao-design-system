@@ -252,9 +252,11 @@ describe('T16.10 — ревью: контраст и провенанс on-photo
       /class="ui-tag ui-tag--on-photo/,
     );
     // Тинт подставляется переменной из regTag() (T15.1 вынесла статус
-    // регистрации события в общую функцию — eventCard и детальная event.html)
+    // регистрации события в общую функцию — eventCard и детальная event.html).
+    // T17.5: тег на фото — в слоте __media-tag медиа-карточки (класс слота
+    // впереди: позицию несёт каркас, тинт — тот же ui-tag--<variant>).
     expect(build, 'тинты вариантов на фото на месте (events.html:270/302 оригинала)').toMatch(
-      /class="ui-tag ui-tag--\$\{reg\.variant\}"/,
+      /class="ui-card__media-tag ui-tag ui-tag--\$\{reg\.variant\}"/,
     );
   });
 });

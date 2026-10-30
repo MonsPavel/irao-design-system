@@ -1,7 +1,8 @@
 # ui-card
 
-Карточка-основа: базовый вид, `--hover`, `--filled` и CTA-плашка `--cta`, слоты
-`__media`/`__title`/`__body`/`__footer` и паттерн **карточка-ссылка** (stretched link):
+Карточка-основа: базовый вид, `--hover`, `--filled`, CTA-плашка `--cta`,
+медиа-карточка `--media` (фото + тег на фото + тело), слоты
+`__media`/`__title`/`__body`/`__meta`/`__footer` и паттерн **карточка-ссылка** (stretched link):
 контент-ссылка растягивается на карточку, фокус-обводка проходит по всей площади, вложенные
 интерактивы остаются достижимыми. Ключевой компонент списковых страниц — паттерн [«Страница
 списка»](stand:patterns/list-page).
@@ -18,13 +19,17 @@
 | Вариант `.ui-card--cta--accent` | заливка `--ui-color-accent`, on-dark-пара; контраст 3.12:1 — одобренное исключение (T2.6/ADR-0010, пара `on-dark-on-accent`; axe — строка реестра `KNOWN_AXE_EXCEPTIONS`) |
 | Вариант `.ui-card--cta--row` | горизонтальная плашка `space-between` со слотом действия (стрелка/кнопка); ритм плитки — pad `--ui-space-5`; применяется к `<a>`-карточке |
 | Модификатор `.ui-card--link` | включает паттерн карточки-ссылки (в паре с `.ui-card__link` на контент-ссылке) |
+| Модификатор `.ui-card--media` | медиа-карточка (T17.5): фото-зона + тег в углу + тело; типографику тела не задаёт — роли разметки |
 | Элемент `.ui-card__link` | контент-ссылка паттерна: растягивается на карточку (`::after` c `inset: 0`), доступное имя остановки — её текст |
-| Слот `.ui-card__media` | место под изображение — `ui-image` (T4.6) |
+| Слот `.ui-card__media` | место под изображение — `ui-image` (T4.6); под `--media` — фото-зона: `aspect-ratio: 3/2`, тег-слот, img растягивается (`cover`, радиус md/md 0 0) |
+| Модификатор `.ui-card__media--square` | квадратное фото `1/1` (карточка стажёра) — в паре с `--media` |
+| Элемент `.ui-card__media-tag` | тег на фото (только под `--media`): `absolute top/left 8px` (`--ui-space-2`); вид — готовый `ui-tag`, тинт варианта выбирает сайт |
 | Слот `.ui-card__title` | заголовок; типографику задаёт разметка ролями base (`ui-h3` и т.п.) — компонент шрифты не переобъявляет |
-| Слот `.ui-card__body` | основной контент |
+| Слот `.ui-card__body` | основной контент; под `--media` — флекс-колонка: gap 8px (`--ui-space-2`), паддинг 12px (`--ui-space-3`) |
+| Элемент `.ui-card__meta` | лента мета-тегов (город/формат события; под `--media`): flex wrap, gap 4px (`--ui-space-1`) |
 | Слот `.ui-card__footer` | действия/мета; прижат к низу (`margin-top: auto`) — в сетке списковых страниц действия выравниваются по нижней кромке |
 | JS | не требуется (CSS-компонент) |
-| Токены | `--ui-border-width`, `--ui-border-color`, `--ui-color-border-hover`, `--ui-radius-md`, `--ui-color-surface(-muted)`, `--ui-shadow-md`, `--ui-space-5` (паддинг 24px), `--ui-card-gap` (14px), `--ui-focus-*`, `--ui-transition`; CTA: `--ui-space-7`/`--ui-space-5`/`--ui-space-3`, `--ui-radius-lg`, `--ui-color-primary`, `--ui-color-accent`, `--ui-color-text-on-dark` |
+| Токены | `--ui-border-width`, `--ui-border-color`, `--ui-color-border-hover`, `--ui-radius-md`, `--ui-color-surface(-muted)`, `--ui-shadow-md`, `--ui-space-5` (паддинг 24px), `--ui-card-gap` (14px), `--ui-focus-*`, `--ui-transition`; CTA: `--ui-space-7`/`--ui-space-5`/`--ui-space-3`, `--ui-radius-lg`, `--ui-color-primary`, `--ui-color-accent`, `--ui-color-text-on-dark`; media: `--ui-space-1`/`--ui-space-2`/`--ui-space-3`, `--ui-radius-md` |
 
 ```html
 <article class="ui-card ui-card--hover ui-card--link">
@@ -72,6 +77,81 @@ Row-вариант — плитка-ссылка со слотом действ�
   (`tests/helpers/harness.js`).
 - **Босой `--cta`** (без варианта поверхности) — центр-композиция на базовой surface: так
   применяется к телу фото-баннера компании, чей оверлей несёт `ui-section--photo` (T17.3).
+
+## Медиа-карточка (`--media`, T17.5)
+
+Один каркас «фото + тег в углу + тело»: карточка события, карточка статьи/медиа-каталога,
+карточка стажёра career-portal (закрытые копии `cp-event-card`/`cp-article-card`/
+`cp-intern-person`). Каркас задаёт **геометрию и слоты**, содержимое — разметка:
+
+- фото-зона `__media` — `aspect-ratio: 3/2` (`__media--square` — 1/1), img внутри растягивается
+  каркасом: `object-fit: cover`, радиус `md`/`md 0 0` (канон «фото сверху»);
+- тег на фото `__media-tag` — позиционирование каркаса (`absolute`, top/left 8px); **вид тега —
+  готовый `ui-tag`**, тинт варианта выбирает сайт (`ui-tag--green` «Регистрация», `ui-tag--blue`
+  рубрика с точкой `ui-tag__icon` и т.д.);
+- тело `__body` — флекс-колонка: gap 8px, паддинг 12px; типографику не задаёт — дата `ui-small` +
+  `ui-text--muted`, заголовок `ui-h6` (канон карточки списков T16.12, 20/500) или мини-тайтл
+  `ui-small` — роли разметки;
+- мета-теги события — `__meta`: лента flex wrap с gap 4px.
+
+```html
+<article class="ui-card ui-card--hover ui-card--link ui-card--media">
+  <a class="ui-card__link" href="event.html">
+    <div class="ui-card__media">
+      <img src="event.jpg" alt="" width="600" height="400" loading="lazy">
+      <span class="ui-card__media-tag ui-tag ui-tag--green">Регистрация</span>
+    </div>
+    <div class="ui-card__body">
+      <time class="ui-small ui-text--muted" datetime="2026-09-28">28.09.2026</time>
+      <h2 class="ui-h6">День открытых дверей</h2>
+      <p class="ui-card__meta">
+        <span class="ui-tag ui-tag--blue">Москва</span>
+        <span class="ui-tag ui-tag--gray">очно</span>
+      </p>
+    </div>
+  </a>
+</article>
+```
+
+Мини-тайтл статьи (media-каталог) и квадратное фото стажёра — тот же каркас с другим набором
+тела и `__media--square`:
+
+```html
+<article class="ui-card ui-card--hover ui-card--link ui-card--media">
+  <a class="ui-card__link" href="article.html">
+    <div class="ui-card__media">
+      <img src="article.jpg" alt="" width="600" height="400" loading="lazy">
+      <span class="ui-card__media-tag ui-tag ui-tag--blue"><span class="ui-tag__icon" aria-hidden="true"></span>статья</span>
+    </div>
+    <div class="ui-card__body">
+      <h3 class="ui-small">Модернизация Киришской ГРЭС</h3>
+      <time class="ui-small ui-text--muted" datetime="2026-02-18">18.02.2026</time>
+    </div>
+  </a>
+</article>
+
+<article class="ui-card ui-card--hover ui-card--media">
+  <div class="ui-card__media ui-card__media--square">
+    <img src="intern.jpg" alt="" width="480" height="480" loading="lazy">
+  </div>
+  <div class="ui-card__body">
+    <p class="ui-h6">Анна Смирнова</p>
+    <p><span class="ui-tag ui-tag--blue">аналитик</span></p>
+    <p class="ui-small ui-text--muted">Стажировка в команде данных.</p>
+  </div>
+</article>
+```
+
+- **Пропорции — на слоте, не на img**: `aspect-ratio` живёт на `__media`, поэтому смена
+  `<img>` на `ui-image` (T4.6) сохраняет композицию; атрибуты `width`/`height` у img — гейт
+  `irao/img-dimensions` (CLS-страховка, CSS их перекрывает).
+- **Тег на фото — тинт варианта `ui-tag`, не `--on-photo`**: тинты — одобренные пары T16.10;
+  модификатор `ui-tag--on-photo` («белый на primary») остаётся API ДС без пилотного применения —
+  применение поверх фото без потребности не дублируйте (прецедент реклассификации T16.10).
+- **Ссылочная карточка**: `__media` и `__body` внутри `ui-card__link` — вся медиа-зона кликабельна
+  (паттерн выше); тег на фото не интерактивен и клик не перехватывает.
+- Паддинг тела (12px) — **поверх** базового паддинга карточки (24px): композиция канона
+  career-portal (тело плотнее коробки).
 
 ## Геометрия и значения
 
@@ -157,6 +237,17 @@ Row-вариант — плитка-ссылка со слотом действ�
   on-dark-пару компонент применяет к заголовочным ролям и наследованию; текст
   вне ролей/наследования (например, «серые» утилиты сайта) проверяйте на
   заливке отдельно.
+- **Do**: тег на фото медиа-карточки — тинт готового `ui-tag` (`--green`/
+  `--blue`/…); вид тега выбирает сайт, каркас даёт только слот-позицию.
+- **Don't**: типографику тела медиа-карточки задавать компонентом/модификатором
+  — дата `ui-small`+`ui-text--muted`, заголовок `ui-h6`/`ui-small` (T16.12)
+  несёт разметка; каркас фиксирует только ритм тела (gap 8, паддинг 12).
+- **Don't**: добавлять тегу на фото `ui-tag--on-photo` без потребности — тинты
+  вариантов уже одобренные пары (T16.10); белый на primary — отдельный случай
+  и решение владельца дизайна.
+- **Don't**: задавать пропорции фото inline-стилем или site-CSS — `aspect-ratio`
+  3/2 (`--square` 1/1) несёт слот `__media`; site-CSS поверх слота ломает
+  единственный источник геометрии.
 
 ## Bitrix (шаблоны)
 
@@ -172,7 +263,13 @@ Row-вариант — плитка-ссылка со слотом действ�
   не содержит (Out of scope T4.4).
 - `__media` — место под `ui-image` (T4.6): нейтральный слот; изображение и его
   атрибуты (alt/width/height/lazy, модификаторы `--cover`/`--ratio-*`)
-  добавляет интегратор — паттерн и чек-лист: README ui-image.
+  добавляет интегратор — паттерн и чек-лист: README ui-image. Под `--media`
+  слот сам несёт пропорции (3/2, `--square` 1/1), cover и радиус фото —
+  bare-img-канон T17.5; `ui-image` со своими `--ratio-*`/`--cover` в слоте
+  тоже легален (его геометрия совпадает со слотом).
+- Список видов медиа-карточки открыт: related-блоки детальных страниц и
+  лендинг-композиции эпика полноты ДС собираются из тех же слотов — новые
+  дубликаты каркаса не заводить.
 - Подъём вложенных интерактивов покрывает `a`/`button`; другой интерактивный
   элемент (например, `input`) поднимайте вручную (`position: relative;
   z-index: 1`) — кард-паттерны с полями форм — EPIC-5/EPIC-8.

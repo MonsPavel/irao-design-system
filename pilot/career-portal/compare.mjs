@@ -245,19 +245,25 @@ const SHELL_PROBES = [
   // Заголовок карточки события (T16.12, REPORT §9.1 №1): канон 20/500
   // color-text — probe-пара раунда 4, заводится при закрытии T16.12 (§9.2).
   // Селектор по РОЛИ, не по тегу: выдача events-search собирает карточки
-  // с h2 (T15.9), карточки событий — h3/h2 по месту страницы.
+  // с h2 (T15.9), карточки событий — h3/h2 по месту страницы. T17.5: классы
+  // cp-event-card* сняты — проба на медиа-карточке (прецедент cta-mail
+  // T17.8: селектор на компонент); событие среди медиа-карточек опознаётся
+  // по __meta в теле (на internships интерн-карточки раньше в DOM — их
+  // ui-h6-имя проба не должна chainять).
   {
     name: 'card-title',
     original: '.event-card__title',
-    pilot: '.cp-event-card__body .ui-h6',
+    pilot: '.ui-card--media .ui-card__body:has(.ui-card__meta) .ui-h6',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
     tag: true,
   },
-  // Мини-тайтл карточки статьи (T16.12): 14/500 color-text
+  // Мини-тайтл карточки статьи (T16.12): 14/500 color-text. T17.5: проба на
+  // ui-card--media, заголовочный тег (на events дата — time.ui-small — пробу
+  // не chainяет; статьи — h2/h3 по месту страницы).
   {
     name: 'article-title',
     original: '.article-card__title',
-    pilot: '.cp-article-card__title',
+    pilot: '.ui-card--media .ui-card__body :is(h2, h3, h4).ui-small',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
     tag: true,
   },
