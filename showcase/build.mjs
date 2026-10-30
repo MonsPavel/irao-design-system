@@ -93,6 +93,134 @@ const STAND_DESCRIPTIONS = {
   'patterns/search-overlay': 'Паттерн «Поисковый оверлей» на ui-modal--full',
   'patterns/header': 'Паттерн «Шапка сайта» с навигацией и оверлеем поиска',
   'patterns/footer': 'Паттерн «Подвал сайта»: contentinfo, контакты, «Наверх»',
+  // Спец-стенды ui-table (второй/третий паттерн компонента) — карточки
+  // в группе «Контент и медиа» каталога (30.10).
+  'ui-table-scroll': 'Вторая грань ui-table: длинная таблица в скролл-зоне со sticky-заголовком',
+  'ui-table-cards': 'Третья грань ui-table: карточная трансформация на мобильном (--cards)',
+};
+
+/**
+ * Группы каталога компонентов по назначению (редизайн 30.10): плоский
+ * алфавитный список не отвечает на вопрос «где формы» — группа отвечает.
+ * Полнота контролируется предупреждением сборки: каждая дока/компонентный
+ * стенд обязана попасть в одну группу.
+ */
+const COMPONENT_GROUPS = [
+  { title: 'Действия и ссылки', names: ['ui-button', 'ui-link', 'ui-chip'] },
+  {
+    title: 'Навигация',
+    names: ['ui-breadcrumbs', 'ui-pagination', 'ui-tabs', 'ui-dropdown', 'ui-accordion'],
+  },
+  {
+    title: 'Контент и медиа',
+    names: [
+      'ui-image',
+      'ui-figure',
+      'ui-video',
+      'ui-carousel',
+      'ui-card',
+      'ui-table',
+      'ui-table-scroll',
+      'ui-table-cards',
+      'ui-tag',
+      'ui-badge',
+      'ui-stat',
+    ],
+  },
+  {
+    title: 'Формы и ввод',
+    names: [
+      'ui-field',
+      'ui-checkbox',
+      'ui-radio',
+      'ui-radio-group',
+      'ui-select',
+      'ui-file',
+      'ui-form',
+    ],
+  },
+  {
+    title: 'Состояния и обратная связь',
+    names: ['ui-alert', 'ui-empty', 'ui-error', 'ui-loader', 'ui-modal'],
+  },
+  { title: 'Доступность', names: ['ui-skip-link', 'ui-vi'] },
+];
+
+/** Стенды, живущие в каталоге ВНЕ групп компонентов (слои, паттерны,
+ *  интеграция) — для проверки полноты групп (см. groupedMissing). */
+const EXTRA_STAND_SECTIONS = new Set([
+  'tokens',
+  'base',
+  'typography',
+  'layout',
+  'error-404',
+  'integration/form-full-cycle',
+  'patterns/list-page',
+  'patterns/detail-page',
+  'patterns/form-page',
+  'patterns/landing-section',
+  'patterns/timeline',
+  'patterns/search-overlay',
+  'patterns/header',
+  'patterns/footer',
+]);
+
+/**
+ * Описания карточек компонентов (редизайн 30.10): первое предложение README
+ * писалось для сопровождавших и несёт файлы/строки/номера задач («pages.css:137»
+ * ui-chip) — каталогу нужно назначение одним взглядом. Курируемые однострочники
+ * живут здесь, у генератора каталога (прецедент — STAND_DESCRIPTIONS); нет
+ * записи — fallback на firstSentence(intro) как раньше.
+ */
+const COMPONENT_SUMMARIES = {
+  'ui-button':
+    'Кнопка действия: primary/secondary/light/ghost, два размера, состояния disabled и loading',
+  'ui-link': 'Ссылка в трёх видах: текстовая, кнопка (--button) и on-dark для тёмных секций',
+  'ui-chip':
+    'Интерактивный фильтр-чип: кнопка (aria-pressed) или ссылка (aria-current); активное состояние задаёт разметка, JS не нужен',
+  'ui-breadcrumbs':
+    'Хлебные крошки «где я»: ol-навигация с микроразметкой BreadcrumbList, лента на мобильном',
+  'ui-pagination':
+    'Пагинация списка: touch-цели 44px, aria-current на текущей странице, недоступные страницы — disabled',
+  'ui-tabs': 'Табы по APG: roving tabindex, стрелки/Home/End; без JS все панели видимы',
+  'ui-dropdown':
+    'Выпадающее меню двух назначений (APG menu-button): клавиатура, вне-клик, Escape, деградация без JS',
+  'ui-accordion':
+    'Аккордеон на нативных details/summary: полностью работает без JS, варианты --faq и single-open',
+  'ui-image':
+    'Паттерн изображений: alt и размеры обязательны, lazy, --cover/--contain, шкала пропорций --ratio',
+  'ui-figure':
+    'Фигура с подписью: нативные figure/figcaption — подпись семантически связана с изображением',
+  'ui-video':
+    'Видео-постер: обёртка-кнопка или ссылка, круглая play-плашка, метка времени; воспроизведение — слот сайта',
+  'ui-carousel':
+    'Карусель «фото + заголовок + CTA» со степпером-таблистом и фото-галерея prev/next; данные — JSON в разметке',
+  'ui-card':
+    'Карточка-основа: базовая, --hover, --filled, CTA-плашка и медиа (--media); паттерн карточки-ссылки',
+  'ui-table':
+    'Таблицы: базовая, --zebra, --compact, скролл-зона со sticky-заголовком; на мобильном — карточки (--cards)',
+  'ui-tag': 'Тег-аннотация: 5 цветовых вариантов AA-парами + точка-маркер',
+  'ui-badge': 'Счётчик-кружок: число рядом со ссылкой или заголовком («99+», скрытие при 0)',
+  'ui-stat': 'Плашка факта «значение + подпись»: --glass на фото, --filled, --deep',
+  'ui-field':
+    'Поле формы: label, подсказка, ошибка, обязательность; input и textarea, состояния фокуса и ошибки',
+  'ui-checkbox': 'Чекбокс: label-обёртка нативного инпута — крупная зона клика, группы колонкой',
+  'ui-radio': 'Радио-ярлык: label-обёртка нативного инпута (элемент группы)',
+  'ui-radio-group': 'Группа радио: fieldset/legend + раскладка строкой или колонкой',
+  'ui-select':
+    'Кастомный select (APG listbox) поверх нативного: стрелки, typahead, optgroup; на touch остаётся нативным',
+  'ui-file':
+    'Файловый инпут: кнопка-лейбл + скрытый input, значение озвучивается (role=status), есть сброс',
+  'ui-form': 'Форма как целое: сетка полей, сводная ошибка (role=alert), состояние success',
+  'ui-alert':
+    'Статусные сообщения: info/success/warning/error, закрываемый вариант; роли status/alert',
+  'ui-empty': 'Пустое состояние: иллюстрация-слот, заголовок, пояснение и CTA — что делать дальше',
+  'ui-error': 'Состояние ошибки: inline в секции и полностраничное --page (404/500)',
+  'ui-loader':
+    'Индикация загрузки: спиннер + текст role=status (не голый спиннер); --sm/--block/--overlay',
+  'ui-modal': 'Модалка на нативном dialog: trap и Escape — платформа; без JS содержимое доступно',
+  'ui-skip-link': 'Skip-link: первый Tab — переход к основному содержимому (WCAG 2.4.1)',
+  'ui-vi': 'VI-модуль (ГОСТ Р 52872): версия для слабовидящих отдельным файлом ui-vi.min.css',
 };
 
 /** Первый абзац-предложение лида README — описание карточки компонента
@@ -1398,23 +1526,22 @@ async function generateShowcase({ themes }) {
     guides.push(guide);
   }
 
-  /* Каталог полигона (редизайн 19.10): карточная сетка + client-side поиск
-     (vanilla JS в FRAME_SCRIPT, новых зависимостей нет — ADR-0005). Секции
-     сохраняют aria-labelledby-якоря stands-/docs-/guides-heading — на
-     видимость ссылок гайдов пинится tests/e2e/guides.spec.js. Карточка
-     компонента несёт две цели: дока (основная) и стенд (доп. ссылка). */
+  /* Каталог полигона (редизайн 19.10; информационная архитектура 30.10):
+     карточная сетка + client-side поиск (vanilla JS в FRAME_SCRIPT, новых
+     зависимостей нет — ADR-0005). Порядок секций обслуживает сценарии:
+     компоненты (основной каталог) → основы системы → паттерны страниц →
+     гайды внедрения → проверка дистрибутива. Секции сохраняют
+     aria-labelledby-якоря stands-/docs-/guides-heading — на видимость ссылок
+     гайдов пинится tests/e2e/guides.spec.js. Карточка компонента несёт две
+     цели: дока (основная) и стенд (доп. ссылка). */
   const componentStandNames = new Set(discovered);
 
   const standCard = (name) => {
-    const isPattern = name.startsWith('patterns/') || name.startsWith('integration/');
-    const chip = name.startsWith('integration/') ? 'интеграция' : isPattern ? 'паттерн' : 'стенд';
-    const mod = isPattern ? 'pattern' : 'stand';
     const label = name.split('/').pop();
     const desc = STAND_DESCRIPTIONS[name] ?? `Стенд ${name}`;
     return [
       '      <li class="ui-showcase-card" data-ui-showcase-item>',
       `        <a class="ui-showcase-card__link" href="stands/${name}.html">`,
-      `          <span class="ui-showcase-card__chip ui-showcase-card__chip--${mod}">${chip}</span>`,
       `          <span class="ui-showcase-card__name">${label}</span>`,
       `          <span class="ui-showcase-card__desc">${escapeHtml(desc)}</span>`,
       '        </a>',
@@ -1426,11 +1553,12 @@ async function generateShowcase({ themes }) {
     [
       '      <li class="ui-showcase-card" data-ui-showcase-item>',
       `        <a class="ui-showcase-card__link" href="docs/${name}.html">`,
-      '          <span class="ui-showcase-card__chip ui-showcase-card__chip--doc">дока</span>',
       `          <span class="ui-showcase-card__name">${name}</span>`,
-      `          <span class="ui-showcase-card__desc">${escapeHtml(firstSentence(intro))}</span>`,
+      `          <span class="ui-showcase-card__desc">${escapeHtml(
+        COMPONENT_SUMMARIES[name] ?? firstSentence(intro),
+      )}</span>`,
       '        </a>',
-      `        <a class="ui-showcase-card__aside-link" href="stands/${name}.html">Стенд компонента →</a>`,
+      `        <a class="ui-showcase-card__aside-link" href="stands/${name}.html">Живой стенд →</a>`,
       '      </li>',
     ].join('\n');
 
@@ -1438,23 +1566,63 @@ async function generateShowcase({ themes }) {
     [
       '      <li class="ui-showcase-card" data-ui-showcase-item>',
       `        <a class="ui-showcase-card__link" href="docs/${name}.html">`,
-      '          <span class="ui-showcase-card__chip ui-showcase-card__chip--guide">гайд</span>',
       `          <span class="ui-showcase-card__name">${name}</span>`,
       `          <span class="ui-showcase-card__desc">${escapeHtml(title)}</span>`,
       '        </a>',
       '      </li>',
     ].join('\n');
 
-  // Секция «Стенды и паттерны»: всё, кроме стендов компонентов (их несёт
-  // карточка доки) и спец-стендов ui-table-* (живут в «Компонентах»).
-  const catalogStands = stands.filter(
-    (stand) =>
-      !componentStandNames.has(stand.name) &&
-      stand.name !== 'ui-table-scroll' &&
-      stand.name !== 'ui-table-cards',
+  // «Компоненты» группируются по назначению (30.10): плоский алфавитный список
+  // из 31 карточки не сканируется — разработчик ищет «где формы», а не букву.
+  // Группа — div[data-ui-showcase-group]: поиск скрывает пустые группы тем же
+  // механизмом FRAME_SCRIPT, что и секции. Спец-стенды ui-table-* (второй и
+  // третий паттерны одного компонента) живут в группе таблиц.
+  const componentGroupHtml = (group) => {
+    const cards = group.names
+      .map((name) => {
+        const doc = docs.find((entry) => entry.name === name);
+        if (doc) return docCard(doc);
+        if (stands.some((stand) => stand.name === name)) return standCard(name);
+        warn(`группа «${group.title}»: ${name} не имеет ни доки, ни стенда — карточка пропущена`);
+        return null;
+      })
+      .filter(Boolean)
+      .join('\n');
+    if (!cards) return null;
+    return [
+      `      <div class="ui-showcase-group" data-ui-showcase-group>`,
+      `        <h3 class="ui-showcase-group__title">${group.title}</h3>`,
+      '        <ul class="ui-showcase-cards">',
+      cards,
+      '        </ul>',
+      '      </div>',
+    ].join('\n');
+  };
+  const groupedMissing = [
+    ...docs.map((doc) => doc.name),
+    ...stands.map((stand) => stand.name).filter((name) => componentStandNames.has(name) === false),
+  ].filter(
+    (name) =>
+      !COMPONENT_GROUPS.some((group) => group.names.includes(name)) &&
+      !EXTRA_STAND_SECTIONS.has(name),
   );
-  const standCards = catalogStands.map(({ name }) => standCard(name)).join('\n');
-  const docCards = docs.map((doc) => docCard(doc)).join('\n');
+  for (const name of groupedMissing) {
+    warn(`каталог: ${name} не попал ни в одну группу COMPONENT_GROUPS — карточки в каталоге нет`);
+  }
+  const componentGroupsHtml = COMPONENT_GROUPS.map(componentGroupHtml).filter(Boolean).join('\n');
+
+  // «Основы системы» — стенды слоёв под компонентами; «Паттерны страниц» —
+  // эталонные сборки и интеграционные сценарии (30.10: бывшая смешанная секция
+  // «Стенды и паттерны» разделилась — у слоёв и у паттернов разные читатели).
+  const baseStands = stands.filter((stand) =>
+    ['tokens', 'base', 'typography', 'layout'].includes(stand.name),
+  );
+  const patternStands = stands.filter(
+    (stand) =>
+      !componentStandNames.has(stand.name) && !baseStands.some((base) => base.name === stand.name),
+  );
+  const baseStandCards = baseStands.map(({ name }) => standCard(name)).join('\n');
+  const patternStandCards = patternStands.map(({ name }) => standCard(name)).join('\n');
   const guideCards = guides.map((guide) => guideCard(guide)).join('\n');
 
   const cardsOrPlaceholder = (cards, placeholder) =>
@@ -1468,16 +1636,16 @@ async function generateShowcase({ themes }) {
     title: 'irao-ui showcase',
     navCurrent: { kind: 'index' },
     main: [
-      '    <h1 class="ui-showcase-title">irao-ui showcase</h1>',
-      '    <p class="ui-showcase-lead">UI-система для сайтов группы на Bitrix: нативный CSS/JS без runtime-зависимостей, БЭМ-классы <code>ui-*</code> и токены <code>--ui-*</code>. Это живая документация — компоненты, паттерны страниц и гайды внедрения; по тем же страницам работают автотесты системы. Каркас и каталог генерируются <code>showcase/build.mjs</code>.</p>',
+      '    <h1 class="ui-showcase-title">irao-ui — UI-система для сайтов группы на Bitrix</h1>',
+      '    <p class="ui-showcase-lead">Нативный CSS и JavaScript без runtime-зависимостей: БЭМ-компоненты <code>ui-*</code> на дизайн-токенах <code>--ui-*</code>, готовые паттерны страниц и гайды внедрения под Bitrix. Примеры в документации живые — та же разметка и те же файлы, что подключит ваш сайт.</p>',
       '    <section class="ui-showcase-start" aria-labelledby="start-heading">',
       '      <h2 id="start-heading">Начало работы</h2>',
-      '      <p class="ui-showcase-section__note">Подключение — копирование файлов <code>dist/</code> и четыре строки в <code>header.php</code>; Node на сайте не нужен.</p>',
+      '      <p class="ui-showcase-section__note">Подключение — файлы <code>dist/</code> и четыре строки в <code>header.php</code>; Node на сайте не нужен.</p>',
       '      <div class="ui-showcase-start__row">',
       '        <a class="ui-link ui-link--button" href="docs/quickstart.html">Подключение за 5 минут</a>',
       '        <a class="ui-link ui-link--button" href="docs/integration-guide.html">Гайд по интеграции</a>',
       '        <a class="ui-link ui-link--button" href="#docs-heading">Каталог компонентов</a>',
-      '        <a class="ui-link ui-link--button" href="stands/tokens.html">Дизайн-токены</a>',
+      '        <a class="ui-link ui-link--button" href="#patterns-heading">Готовые паттерны</a>',
       '      </div>',
       '    </section>',
       '    <section class="ui-showcase-search" aria-label="Поиск по полигону">',
@@ -1488,22 +1656,25 @@ async function generateShowcase({ themes }) {
       '      </div>',
       '      <p class="ui-showcase-search__status" id="ui-showcase-search-status" role="status"></p>',
       '    </section>',
-      '    <section class="ui-showcase-section" aria-labelledby="stands-heading" data-ui-showcase-group>',
-      '      <h2 id="stands-heading">Стенды и паттерны</h2>',
-      '      <p class="ui-showcase-section__note">Живые стенды базовых слоёв, паттерны страниц и интеграционные сценарии. Стенды компонентов — в карточках раздела «Компоненты».</p>',
-      cardsOrPlaceholder(standCards, 'Стенды появятся вместе с компонентами (EPIC-4+).'),
-      '    </section>',
       '    <section class="ui-showcase-section" aria-labelledby="docs-heading" data-ui-showcase-group>',
       '      <h2 id="docs-heading">Компоненты</h2>',
-      '      <p class="ui-showcase-section__note">Дока по единому шаблону T10.1: живые примеры, копируемый сниппет, состояния, responsive 375/768/1440, a11y, API, do/don’t, версия.</p>',
-      cardsOrPlaceholder(
-        docCards,
-        'Доки по шаблону появятся с T10.1 (эталонные три) и T10.2 (все компоненты).',
-      ),
+      '      <p class="ui-showcase-section__note">Сгруппированы по назначению. Страница компонента: живые примеры, копируемый сниппет, состояния, responsive 375/768/1440, доступность и API.</p>',
+      componentGroupsHtml ||
+        '      <p class="ui-showcase-section__note">Компоненты появятся вместе с EPIC-4+.</p>',
+      '    </section>',
+      '    <section class="ui-showcase-section" aria-labelledby="stands-heading" data-ui-showcase-group>',
+      '      <h2 id="stands-heading">Основы системы</h2>',
+      '      <p class="ui-showcase-section__note">Слои под компонентами: палитра и смысловые токены, база, типографика, layout-примитивы.</p>',
+      cardsOrPlaceholder(baseStandCards, 'Стенды слоёв появятся с T2.x/T3.x.'),
+      '    </section>',
+      '    <section class="ui-showcase-section" aria-labelledby="patterns-heading" data-ui-showcase-group>',
+      '      <h2 id="patterns-heading">Паттерны страниц</h2>',
+      '      <p class="ui-showcase-section__note">Эталонные сборки из готовых компонентов: списки, детальные страницы, формы, лендинг-секции, шапка, подвал и интеграционные сценарии.</p>',
+      cardsOrPlaceholder(patternStandCards, 'Паттерны появятся с EPIC-8.'),
       '    </section>',
       '    <section class="ui-showcase-section" aria-labelledby="guides-heading" data-ui-showcase-group>',
       '      <h2 id="guides-heading">Гайды внедрения (Bitrix)</h2>',
-      '      <p class="ui-showcase-section__note">Living-документы из <code>bitrix/*.md</code>: сниппеты в гайдах сверяются с файлами на билде («диф на билде»).</p>',
+      '      <p class="ui-showcase-section__note">Пошаговые документы для Bitrix-разработчиков; код в гайдах сверяется с файлами репозитория при сборке.</p>',
       cardsOrPlaceholder(
         guideCards,
         'Гайды внедрения появятся с T10.3: quickstart, integration guide, «Bitrix-разработчику за 30 минут».',
@@ -1511,13 +1682,7 @@ async function generateShowcase({ themes }) {
       '    </section>',
       '    <section class="ui-showcase-section" aria-labelledby="standalone-heading">',
       '      <h2 id="standalone-heading">Проверка дистрибутива</h2>',
-      '      <p><a href="standalone.html">standalone.html</a> — страница только с <code>ui-core.min.css</code>: сетевых ошибок быть не должно (валидные относительные url()).</p>',
-      '      <ul class="ui-showcase-dist-list">',
-      '        <li><code>ui-core.min.css</code> — tokens → base → компоненты;</li>',
-      '        <li><code>ui-vi.min.css</code> — VI-модуль ГОСТ Р 52872, подключение осознанное;</li>',
-      '        <li><code>ui-patterns.css</code> — паттерн-слой (связки страниц lpp-/ddp-/fpp-, T17.1; лендинг-связки lnk-/lgo-, T17.9; таймлайн tlp-, T17.10; поднавигация nvp, T17.11), подключение опционально;</li>',
-      '        <li><code>ui.min.js</code> — все JS-модули (IIFE).</li>',
-      '      </ul>',
+      '      <p class="ui-showcase-section__note"><a href="standalone.html">standalone.html</a> — страница только с <code>ui-core.min.css</code>: сетевых ошибок быть не должно (валидные относительные url()). Файлы поставки: <code>ui-core.min.css</code> (токены → база → компоненты), <code>ui-vi.min.css</code> (VI-модуль ГОСТ Р 52872), <code>ui-patterns.css</code> (связки страниц — опционально), <code>ui.min.js</code> (все JS-модули).</p>',
       '    </section>',
     ].join('\n'),
     themes,

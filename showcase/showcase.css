@@ -416,7 +416,23 @@ body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-stand__not
   margin-block: var(--ui-space-2) var(--ui-space-4);
 }
 
-/* Карточная сетка: авто-колонки от ширины, карточка — ссылка целиком. */
+/* Карточная сетка: авто-колонки от ширины, карточка — ссылка целиком.
+   Редизайн 30.10: чипы типов (дока/стенд/паттерн) убраны — секции каталога
+   однородны, тип несёт сама секция; карточка = имя + назначение. */
+
+.ui-showcase-group {
+  margin-block: var(--ui-space-5);
+}
+
+.ui-showcase-group__title {
+  color: var(--ui-color-text-muted);
+  font-size: var(--ui-fs-micro);
+  font-weight: var(--ui-fw-caption);
+  line-height: var(--ui-lh-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-block: 0 var(--ui-space-3);
+}
 
 .ui-showcase-cards {
   display: grid;
@@ -458,37 +474,6 @@ body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-stand__not
   margin-inline-start: var(--ui-space-4);
 }
 
-.ui-showcase-card__chip {
-  align-self: flex-start;
-  padding: var(--ui-space-1) var(--ui-space-2);
-  border-radius: var(--ui-radius-pill);
-  font-size: var(--ui-fs-micro);
-  font-weight: var(--ui-fw-caption);
-  line-height: var(--ui-lh-micro);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.ui-showcase-card__chip--stand {
-  background-color: var(--ui-color-tag-green-bg);
-  color: var(--ui-color-tag-green-text);
-}
-
-.ui-showcase-card__chip--doc {
-  background-color: var(--ui-color-tag-blue-bg);
-  color: var(--ui-color-primary);
-}
-
-.ui-showcase-card__chip--guide {
-  background-color: var(--ui-color-tag-orange-bg);
-  color: var(--ui-color-tag-orange-text);
-}
-
-.ui-showcase-card__chip--pattern {
-  background-color: var(--ui-color-tag-gray-bg);
-  color: var(--ui-color-text-muted);
-}
-
 .ui-showcase-card__name {
   color: var(--ui-color-primary);
   font-family: var(--ui-font-family-mono);
@@ -502,20 +487,6 @@ body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-stand__not
   color: var(--ui-color-text-muted);
   font-size: var(--ui-fs-small);
   line-height: var(--ui-lh-small);
-}
-
-/* ── Список файлов dist на каталоге ── */
-
-.ui-showcase-dist-list {
-  margin: var(--ui-space-3) 0;
-  color: var(--ui-color-text-muted);
-  font-size: var(--ui-fs-small);
-  line-height: var(--ui-lh-small);
-  padding-inline-start: var(--ui-space-5);
-}
-
-.ui-showcase-dist-list code {
-  font-family: var(--ui-font-family-mono);
 }
 
 /* ── Шкала T2.5: с md — сайдбар-колонка на страницах документации ── */

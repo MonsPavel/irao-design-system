@@ -343,32 +343,56 @@ function renderTable(rows) {
 
 /** CSS док-страницы — зона showcase (в dist не попадает), токены слоя 2.
  *  Полировка редизайна 19.10: оглавление, copy-кнопка сниппета, аккуратные
- *  таблицы/код-блоки markdown-секций. Селекторы контента — ТОЛЬКО прямые
- *  дети [data-ui-docs-section]: разметка живых примеров (глубже, внутри
- *  .ui-docs-examples и iframe-фигур) стилизуется исключительно ui-core —
- *  инвариант «дока показывает интегратору ровно то, что получит он». */
+ *  таблицы/код-блоки markdown-секций. Редизайн 30.10 (UX-проход): шапка
+ *  «лид + строка действий», оглавление-линейка вместо коробки, разделители
+ *  глав между секциями, потолок высоты сниппета, демо-контекст on-dark.
+ *  Селекторы контента — ТОЛЬКО прямые дети [data-ui-docs-section] (одно
+ *  осознанное исключение — on-dark-пары .ui-docs-stage, см. ниже): разметка
+ *  живых примеров (глубже, внутри .ui-docs-examples и iframe-фигур)
+ *  стилизуется исключительно ui-core — инвариант «дока показывает
+ *  интегратору ровно то, что получит он». */
 const DOCS_STYLE = `<style>
-  [data-ui-docs-section] {
-    margin-block: var(--ui-space-6);
+  /* ── Шапка страницы (30.10): лид назначением + компактная строка действий ── */
+  .ui-docs-lead {
+    max-width: 46rem;
+    margin-block: var(--ui-space-2) var(--ui-space-4);
   }
-  [data-ui-docs-section] > h2 {
-    margin-block: 0 var(--ui-space-4);
-    font-size: var(--ui-fs-h4);
-    font-weight: var(--ui-fw-h4);
-    line-height: var(--ui-lh-h4);
+  .ui-docs-lead p {
+    margin-block: 0 0 var(--ui-space-2);
+    font-size: var(--ui-fs-lead);
+    line-height: var(--ui-lh-lead);
   }
-  [data-ui-docs-section] > h3 {
-    margin-block: var(--ui-space-5) var(--ui-space-3);
-    font-size: var(--ui-fs-h6);
-    font-weight: var(--ui-fw-h6);
-    line-height: var(--ui-lh-h6);
+  .ui-docs-lead p:last-child {
+    margin-block-end: 0;
   }
+  .ui-docs-lead p code {
+    font-size: 1em;
+  }
+  .ui-docs-head {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-3) var(--ui-space-5);
+    align-items: center;
+    justify-content: space-between;
+    margin-block: var(--ui-space-3) 0;
+  }
+  .ui-docs-head__source {
+    margin: 0;
+    color: var(--ui-color-text-muted);
+    font-size: var(--ui-fs-small);
+    line-height: var(--ui-lh-small);
+  }
+  .ui-docs-head__source code {
+    font-family: var(--ui-font-family-mono);
+    font-size: 1em;
+  }
+
+  /* ── Оглавление (30.10): линейка слева вместо коробки — навигационный
+     инструмент, а не контент-блок; короче на две строки вертикали ── */
   .ui-docs-toc {
     margin-block: var(--ui-space-4);
-    padding: var(--ui-space-4) var(--ui-space-5);
-    border: var(--ui-border-width) solid var(--ui-color-divider);
-    border-radius: var(--ui-radius-sm);
-    background-color: var(--ui-color-surface);
+    padding: var(--ui-space-2) var(--ui-space-4);
+    border-inline-start: 0.1875rem solid var(--ui-color-divider);
   }
   .ui-docs-toc__title {
     margin-block-end: var(--ui-space-2);
@@ -391,6 +415,35 @@ const DOCS_STYLE = `<style>
     color: var(--ui-color-primary);
     font-size: var(--ui-fs-small);
     line-height: var(--ui-lh-small);
+  }
+
+  /* ── Главы (30.10): секция шаблона — глава страницы. Волосная линия сверху
+     отделяет главы друг от друга — структурное устройство (сканирование
+     длинной страницы), не декор; первая секция без линии — это продолжение
+     шапки. Ритм: граница встаёт на прежнем отступе секций (space-6), заголовок
+     отступает от неё на space-4 — прирост прокрутки против прошлого макета
+     ~16px на главу, не больше. ── */
+  [data-ui-docs-section] {
+    margin-block: var(--ui-space-6) 0;
+    padding-block-start: var(--ui-space-4);
+    border-block-start: var(--ui-border-width) solid var(--ui-color-divider);
+  }
+  [data-ui-docs-section]:first-of-type {
+    margin-block-start: var(--ui-space-6);
+    padding-block-start: 0;
+    border-block-start: none;
+  }
+  [data-ui-docs-section] > h2 {
+    margin-block: 0 var(--ui-space-4);
+    font-size: var(--ui-fs-h4);
+    font-weight: var(--ui-fw-h4);
+    line-height: var(--ui-lh-h4);
+  }
+  [data-ui-docs-section] > h3 {
+    margin-block: var(--ui-space-5) var(--ui-space-3);
+    font-size: var(--ui-fs-h6);
+    font-weight: var(--ui-fw-h6);
+    line-height: var(--ui-lh-h6);
   }
   .ui-docs-copybar {
     position: relative;
@@ -494,6 +547,30 @@ const DOCS_STYLE = `<style>
     flex-direction: column;
     gap: var(--ui-stack-gap);
   }
+  /* ── Демо-контекст on-dark (30.10, ui-carousel): канон on-dark-компонента
+     показывается на поверхности реального использования — тёмной фото-секции
+     (тёмные секции системы: bg = primary, текст = on-dark-пары). Строгое
+     исключение из правила «не стилизовать демо-область»: перекраска — та
+     САМАЯ пара, которую секции сайта обязаны задать по README (прецеденты
+     связок lsp-photo/ucar-production), каркас лишь представляет сайт.
+     Компонент не перестилизуется: ни рамок, ни отступов, ни типографики. */
+  .ui-docs-stage--photo {
+    padding: var(--ui-space-5);
+    border-radius: var(--ui-radius-md);
+    background-color: var(--ui-color-primary);
+    color: var(--ui-color-text-on-dark);
+  }
+  .ui-docs-stage--photo :is(.ui-h1, .ui-h2, .ui-h3) {
+    color: var(--ui-color-text-on-dark);
+  }
+  .ui-docs-stage__label {
+    margin: 0 0 var(--ui-space-3);
+    color: var(--ui-color-text-on-dark-muted);
+    font-size: var(--ui-fs-micro);
+    font-weight: var(--ui-fw-caption);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
   .ui-docs-frames {
     display: flex;
     flex-wrap: wrap;
@@ -524,7 +601,11 @@ const DOCS_STYLE = `<style>
     background: var(--ui-color-surface-muted);
     border-radius: var(--ui-radius-sm);
     padding: var(--ui-space-3) var(--ui-space-4);
-    overflow-x: auto;
+    overflow: auto;
+    /* Потолок высоты (30.10): длинный канон листается внутри блока, а не
+       толкает секции на тысячи пикселей вниз; копирование копирует весь
+       сниппет целиком. tabfocus ставит генератор (см. SNIPPET_SCROLL_LINES). */
+    max-height: 30rem;
     margin: 0;
   }
   .ui-docs-snippet code {
@@ -631,10 +712,8 @@ export const GUIDE_STYLE = `<style>
   }
   .ui-docs-toc {
     margin-block: var(--ui-space-4);
-    padding: var(--ui-space-4) var(--ui-space-5);
-    border: var(--ui-border-width) solid var(--ui-color-divider);
-    border-radius: var(--ui-radius-sm);
-    background-color: var(--ui-color-surface);
+    padding: var(--ui-space-2) var(--ui-space-4);
+    border-inline-start: 0.1875rem solid var(--ui-color-divider);
   }
   .ui-docs-toc__title {
     margin-block-end: var(--ui-space-2);
@@ -721,11 +800,9 @@ function renderResponsive(name) {
     'responsive',
     'Responsive-стенд (375/768/1440)',
     [
-      `<p class="${STAND_NOTE}">Реальные iframe-вьюпорты, не картинки: один и тот же стенд ` +
-        `<a href="../stands/${name}.html">${name}</a> в трёх ширинах — ` +
-        `мобильный 375, <code>md</code> 768 и <code>2xl</code> 1440 шкалы брейкпоинтов. ` +
-        `Внутри фрейма — живой компонент: поперечный скролл фрейма показывает поведение ` +
-        `компонента на узком вьюпорте.</p>`,
+      `<p class="${STAND_NOTE}">Живой <a href="../stands/${name}.html">стенд ${name}</a> ` +
+        `в трёх ширинах — 375 (мобильный), 768 (<code>md</code>) и 1440 (<code>2xl</code>). ` +
+        `Поперечный скролл внутри фрейма показывает поведение компонента на узком вьюпорте.</p>`,
       '<div class="ui-docs-frames">',
       frames,
       '</div>',
@@ -746,15 +823,21 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   const parsed = parseReadme(readme);
   const doc = [];
 
+  /* Шапка страницы (редизайн 30.10): лид README назначением компонента, под ним
+     компактная строка действий — «живой стенд» (системная ui-link--button) и
+     путь к источнику для сопровождавших. Прежняя служебная записка на ~100px
+     (номер шаблона, метаданные, каталог) — внутренние сведения, которые
+     читатель не использует для выбора компонента; номер задачи остаётся в
+     секции «Версия и changelog», где он уместен. */
   if (pageHeading) doc.push(`<h1 class="ui-showcase-title">${name}</h1>`);
-  if (parsed.intro) doc.push(renderMarkdown(parsed.intro));
+  if (parsed.intro) doc.push(`<div class="ui-docs-lead">${renderMarkdown(parsed.intro)}</div>`);
   doc.push(
-    `<p class="${STAND_NOTE}">Дока по единому шаблону (T10.1, 02-architecture §8). ` +
-      `Полная матрица вариантов и состояний — стенд ` +
-      `<a href="../stands/${name}.html">${name}</a>; каталог — ` +
-      `<a href="../index.html">irao-ui showcase</a>. Источник страницы — файлы ` +
-      `компонента: <code>components/${name}/</code> (разметка, README, метаданные ` +
-      `<code>showcase/docs/${name}.mjs</code>).</p>`,
+    [
+      '<div class="ui-docs-head">',
+      `  <a class="ui-link ui-link--button" href="../stands/${name}.html">Живой стенд</a>`,
+      `  <p class="ui-docs-head__source">Источник: <code>components/${name}/</code></p>`,
+      '</div>',
+    ].join('\n'),
   );
   doc.push(renderToc({ pageHeading, extraHeadings: metadata.readme.extra ?? [] }));
   doc.push(DOCS_STYLE);
@@ -765,25 +848,42 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
     страницу «начинающейся с h2» (гейт иерархии заголовков полигона — красный
     на всех движках матрицы до исправления, приёмка T12.1). Порядок секций
     шаблона и все остальные пины (verifyDocPageHtml, e2e) не меняются.
-    metadata.examplesNote — необязательное пояснение контекста примеров
-    (например, on-dark-компоненты без композиции сайта: стрелки/текст слотов
-    рассчитаны на тёмную фото-секцию, полный вид — стенд ниже). */
+    metadata.examplesContext: 'photo' (редизайн 30.10) — для on-dark-компонентов
+    (обе формы ui-carousel: цвет стрелок/активного таба — text-on-dark, на белой
+    странице контраст 1:1, контролы невидимы) область примеров ставится в
+    демо-контекст тёмной фото-секции: канон и сниппет остаются чистым API
+    (контракт «сниппет = разметка стенда» не тронут), контекст — зона сайта,
+    и здесь её представляет каркас: ровно те on-dark-пары, которые секции сайта
+    задают по правилу README (прецеденты связок lsp-photo/ucar-production).
+    metadata.examplesNote — необязательное пояснение контекста примеров. */
+  const contextStage = (body) =>
+    metadata.examplesContext === 'photo'
+      ? [
+          '<div class="ui-docs-stage ui-docs-stage--photo">',
+          '  <p class="ui-docs-stage__label">Контекст демонстрации: тёмная фото-секция (зона сайта)</p>',
+          body,
+          '</div>',
+        ].join('\n')
+      : body;
   doc.push(
     section(
       'examples',
       'Живые примеры',
       [
-        `<p class="${STAND_NOTE}">Канонический паттерн ` +
-          `<code>components/${name}/${name}.html</code> вживую. Полный набор вариантов ` +
-          `и состояний — на стенде <a href="../stands/${name}.html">${name}</a>.</p>`,
+        `<p class="${STAND_NOTE}">Каноническая разметка вживую. Полная матрица вариантов ` +
+          `и состояний — на <a href="../stands/${name}.html">стенде ${name}</a>.</p>`,
         ...(metadata.examplesNote
           ? [`<p class="${STAND_NOTE}">${renderInline(metadata.examplesNote)}</p>`]
           : []),
-        '<div class="ui-docs-examples" data-ui-docs-examples>',
-        '<!-- ui-docs-examples:start -->',
-        markup,
-        '<!-- ui-docs-examples:end -->',
-        '</div>',
+        contextStage(
+          [
+            '<div class="ui-docs-examples" data-ui-docs-examples>',
+            '<!-- ui-docs-examples:start -->',
+            markup,
+            '<!-- ui-docs-examples:end -->',
+            '</div>',
+          ].join('\n'),
+        ),
       ].join('\n'),
       { withHeading: pageHeading },
     ),
@@ -792,19 +892,22 @@ export function renderDocPage({ name, markup, readme, metadata, pageHeading = tr
   /* 2. Копируемый сниппет: та же строка, что примеры выше (экранирована).
      Обёртка ui-docs-copybar + кнопка (редизайн 19.10): обработчик — скрипт
      каркаса (data-ui-showcase-copy), без JS кнопка просто не копирует.
-     САМ <pre> не меняется: extractDocPageChecks пинит точную пару
+     Редизайн 30.10: длинные каноны (ui-alert — 3,5 тыс. px кода) не должны
+     стеной вставать между примерами и состояниями — <pre> получает потолок
+     высоты со скроллом (DOCS_STYLE). tabindex="0" — ВСЕГДА: блок скроллится
+     и по вертикали (потолок), и по горизонтали (overflow-x), порог строк
+     разошёлся бы с фактической скроллимостью на разных вьюпортах (гейт axe
+     scrollable-region-focusable; прецедент — фигуры .ui-docs-frame).
+     Атрибут data-ui-docs-snippet остаётся ПОСЛЕДНИМ перед ><code>:
+     extractDocPageChecks пинит пару
      data-ui-docs-snippet><code>…</code></pre> («диф на билде»). */
   doc.push(
     section(
       'snippet',
       'HTML-сниппет',
       [
-        `<p class="${STAND_NOTE}">Копируемая разметка — тот же источник, что живые примеры ` +
-          `выше: <code>components/${name}/${name}.html</code>. Синхронность ` +
-          `«сниппет = разметка стенда» проверяет сборка (selfChecks, диф на билде) и ` +
-          `<code>tests/e2e/docs-template.spec.js</code>.</p>`,
         '<div class="ui-docs-copybar">',
-        `  <pre class="ui-docs-snippet" data-ui-docs-snippet><code>${escapeHtml(markup)}</code></pre>`,
+        `  <pre class="ui-docs-snippet" tabindex="0" data-ui-docs-snippet><code>${escapeHtml(markup)}</code></pre>`,
         '  <button class="ui-docs-copy" type="button" data-ui-showcase-copy>Скопировать HTML</button>',
         '</div>',
       ].join('\n'),
