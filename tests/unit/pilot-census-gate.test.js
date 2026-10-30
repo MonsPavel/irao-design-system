@@ -162,11 +162,15 @@ describe('пороги ценза — числа зафиксированы по
       const gate = runCensusGate(metrics);
       expect(gate.problems).toEqual([]);
       expect(gate.newBlocks).toEqual([]);
-      // машиночитаемые факты ценза для REPORT §11.4 (ценз после):
-      expect(metrics.css.lines).toBe(1040);
-      expect(metrics.css.codeLines).toBe(519);
-      expect(metrics.css.selectors).toBe(106);
-      expect(metrics.css.families).toHaveLength(30);
+      // машиночитаемые факты ценза для REPORT §11.4 («ценз после»);
+      // обновлены интеграцией T17.5 (adoption ui-card--media, смержена
+      // 30.10): сырые 1040→970, код 519→457, селекторы 106→93,
+      // семейства 30→28 — ушли event-card/intern-person (движение
+      // зафиксировано дописью в REPORT §11.4, таблица T17.16 не менялась):
+      expect(metrics.css.lines).toBe(970);
+      expect(metrics.css.codeLines).toBe(457);
+      expect(metrics.css.selectors).toBe(93);
+      expect(metrics.css.families).toHaveLength(28);
       expect(metrics.js.lines).toBe(187);
     },
   );
