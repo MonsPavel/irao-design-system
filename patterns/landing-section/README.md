@@ -1,7 +1,9 @@
 # Паттерн «Landing-секция» (T8.3)
 
-Правила сборки лендинг-секций из системных примитивов + mini-эталон из четырёх
-секций (светлая / тёмная / с-изображением full-bleed / с-фото-фоном — T17.3).
+Правила сборки лендинг-секций из системных примитивов + mini-эталон из десяти
+секций (светлая / тёмная / с-изображением full-bleed / с-фото-фоном — T17.3 /
+nav-карточки и лента логотипов — T17.9 / hero, adv-marquee, спец-сетка
+«Медиа», cover-hero — T17.15).
 Эталон целиком: [`landing-section.html`](landing-section.html) — он же стенд
 `/showcase/dist/stands/patterns/landing-section.html` (генерируется
 `showcase/build.mjs`).
@@ -202,6 +204,268 @@ hero/production/holding/why-us/company-banner):
   снимаются, разметка переезжает на слои ДС (T17.3 — пять блоков:
   hero/production/holding/why-us/company-banner).
 
+## Nav-карточки (lnk-card, T17.9)
+
+Цветные карточки-ссылки «Школьникам и студентам» (порт `.cp-students__card`
+career-portal — типовой навигационный блок лендинга): тоновый фон, слот
+декоративной иллюстрации снизу-справа, круглая кнопка-стрелка
+(`ui-button--round`, T17.9). Связка живёт в паттерн-слое
+(`dist/ui-patterns.css`, префикс `lnk-`); сетка — каркас `ui-grid`
+(1 → 2 на md → 3 на lg, шаг 12px):
+
+```html
+<!-- тон .lnk-card--navy { --lnk-card-bg: var(--ui-color-primary);
+     --lnk-card-fg: var(--ui-color-text-on-dark); } — сайт-зона -->
+<a class="lnk-card lnk-card--navy" href="practices.html"
+   aria-label="Подробнее: Стажировки и практики">
+  <div class="lnk-card__body">
+    <h3 class="ui-h4">Стажировки и практики</h3>
+    <p class="ui-small">Уникальный шанс получить опыт в энергетике!</p>
+  </div>
+  <img class="lnk-card__illu" src="boy.png" alt="" loading="lazy">
+  <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">→</span>
+</a>
+```
+
+| Слой | Что | Откуда |
+|---|---|---|
+| Сетка | `ui-grid lnk-cards` — 1/2/3 колонки (md/lg), шаг 12px | паттерн-слой `lnk-cards`, порт `.cp-students__grid` |
+| Карточка-ссылка | `a.lnk-card` — flex-колонка, min-height 22rem (352px), паддинг 24, радиус md, клип `overflow: hidden` | паттерн-слой, порт `.cp-students__card` |
+| Тон | пара `--lnk-card-bg` / `--lnk-card-fg` — сайт-зона (класс тона) | хуки связки; дефолт — `surface`/`text` (тон light) |
+| Тело | `lnk-card__body` — заголовок-роль h3 + текст-роль (шаг несёт карточка) | разметка |
+| Иллюстрация | `lnk-card__illu` — absolute bottom/right, max-height 70%, **декоративна (`alt=""`)** | паттерн-слой, порт `.cp-students__card-illu` |
+| Действие | `ui-button ui-button--round lnk-card__action` — круг 20px (`--ui-control-size`), поверх иллюстрации, прижата вправо | компонент (T17.9) + связка (z-пара, align-self) |
+
+### Правило карточки-ссылки и именование
+
+Интерактив на карточке **один** — вся карточка `<a>` (прецедент
+`ui-card--link` T4.4, но с собственным каноном career-portal): доступное имя
+несёт `aria-label="Подробнее: …"` (axe: имена карточек-ссылок), стрелка —
+декоративный `span` с `aria-hidden="true"`. Держите внутреннюю ссылку-
+кнопку отдельным интерактивом — вложенные интерактивы недопустимы
+(инвариант `ui-card`).
+
+### Тон — параметр сайта (Implementation requirements п.1)
+
+Связка цвет тона НЕ задаёт: сайт ставит пару на хуках классом тона. Контраст
+пары — **обязанность сайта**; гейтите `npm run test:contrast` или таблицей
+ниже. Одобренные пары career-portal (оригинал; peach — color-mix-паттерн
+сайт-зоны, токенизация спец-тинтов — T17.15):
+
+| Тон | `--lnk-card-bg` | `--lnk-card-fg` | Контраст текста |
+|---|---|---|---|
+| navy | `var(--ui-color-primary)` | `var(--ui-color-text-on-dark)` | 14.6:1 (AA/AAA) — автомат |
+| light | `var(--ui-color-surface)` (дефолт) | `var(--ui-color-text)` (дефолт) | 16.5:1 — автомат |
+| peach | `color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface))` | `var(--ui-color-text)` (дефолт) | 12.7:1 — одобренная пара оригинала |
+
+- Заголовочные роли на заливке связка возвращает в пару карточки
+  (`color: var(--lnk-card-fg, …)` — прецедент `ui-card--cta` T17.8): роль
+  h4 несёт `--ui-color-heading` (= primary) и на navy-тоне невидима —
+  живой баг пилота «невидимый h4» закрыт связкой (после миграции заголовок
+  navy-карточки читается).
+- Круглая кнопка-стрелка красится хуками `--ui-button-bg` /
+  `--ui-button-color` того же класса тона (пары: peach → accent/on-dark,
+  navy → surface/primary, light → primary/surface; белая стрелка на accent —
+  одобренное исключение 3.12:1, графика ≥ 3:1 — WCAG 1.4.11).
+
+### Do / Don't
+
+- **Do**: держите контраст пары ≥ 4.5:1 (таблица выше — готовые значения);
+  новую пару проверяйте контраст-гейтом до публикации.
+- **Do**: иллюстрация — `alt=""`, `loading="lazy"` (декоративный слот);
+  осмысленное изображение — контент сайта и не слот `__illu`.
+- **Don't**: не задавайте тон inline-стилем (инвариант §5) — только классом
+  сайт-зоны на токенах; цвета вне токенов перекраска VI не поймает.
+- **Don't**: не тащите tone-пары в компонент/слой — тон карточки — параметр
+  сайта (Out of scope: peach как токен ДС — T17.15).
+- **Don't**: не добавляйте второй интерактив внутрь карточки (ссылка + 
+  кнопка) — имена и фокус дублируются; действие несёт сама карточка.
+
+### Миграция из пилота career-portal
+
+Разметка: `article.cp-students__card[--tone]` + внутренняя ссылка-кнопка →
+`a.lnk-card[--tone]` + декоративная стрелка (пример выше); сетка
+`.cp-students__grid` → `ui-grid lnk-cards`. Правила `cp-students*` сняты
+(~75 строк вместе с `cp-employers*`), сайт-зона — только тоны (пары на
+хуках; рамка light-тона сохранена исходником 1:1).
+
+## Лента логотипов (lgo-grid/lgo-card, T17.9)
+
+Сетка рамочных плашек «Популярные работодатели Группы» (порт
+`.cp-employers__*` career-portal — типовой блок «партнёры/клиенты»): каркас
+`ui-grid`, шаг 8px, ступени 4 (md) → 6 (lg), плашка — растянутый `img`
+(ширина 100%, размеры атрибутами — гейт T4.6), радиус md, рамка
+`--ui-color-border-muted`:
+
+```html
+<div class="ui-grid lgo-grid">
+  <img class="lgo-card" src="logo-1.png" alt="Логотип работодателя"
+       width="197" height="108" loading="lazy">
+  …
+</div>
+```
+
+- Плашка может быть `img` напрямую (канон пилота — логотипы с запечённой
+  подложкой) или обёрткой над `img` — геометрия та же. Паддинги «как есть» —
+  нулевые: плашка обнимает логотип.
+- Подбор логотипов/альтернативные подписи — контент сайта; в оригинале
+  marquee-анимации нет — статическая сетка (Out of scope T17.9).
+- Миграция: `.cp-employers__grid` → `ui-grid lgo-grid`,
+  `.cp-employers__card` → `lgo-card` (лестницы 1023/767 инвертированы в
+  канон 768/1024; сравнение высот — порог ±4px, AC T17.9).
+
+## Лендинг-композиции (hro / mrq / mdl / cvh, T17.15)
+
+Четыре канонические композиции лендингов живут в паттерн-слое
+(`dist/ui-patterns.css`, гейт префиксов `hro|mrq|mdl|cvh`); разметка канона —
+секции 7–10 эталона. Значения — принятые связки career-portal (пилот,
+калибровки compare-раундов) с source-комментариями; лестницы оригинала
+переформулированы mobile-first (768/1024 из шкалы T2.5). Слой подключается
+опционально; тон тега hero — единственный сайт-параметр (ниже).
+
+### Hero (hro)
+
+Самый фирменный блок главной (PLAN §P2-1): фото-фон — примитив
+`ui-section--photo` (T17.3, оверлей `--fade-bottom` — канон hero),
+вертикальную геометрию несёт связка (min-height 50.5rem = 808px оригинала
+от md, мобильная база 35rem; ритм `ui-section` погашен `padding: 0`):
+
+```html
+<section class="ui-section ui-section--photo hro" aria-labelledby="hero-title">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="hero.jpg" alt="" width="1600" height="900" loading="eager">
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
+  <div class="hro__content">
+    <h1 class="ui-h1 hro__title">Заголовок hero</h1>
+    <form class="hro__search" action="/vacancies" method="get" role="search">
+      <svg class="hro__search-icon" … aria-hidden="true">…</svg>
+      <div class="ui-field">
+        <input class="ui-field__input" type="search" name="q" aria-label="Поиск вакансий">
+      </div>
+      <a class="hro__search-all" href="/vacancies">Все вакансии</a>
+    </form>
+  </div>
+  <div class="hro__tags">
+    <span class="ui-tag hro__tag">Тег ленты</span> …
+  </div>
+</section>
+```
+
+| Слой | Что | Откуда |
+|---|---|---|
+| Блок | `.hro` — flex-колонка, клип фото (`overflow: hidden`), min-height 50.5rem (от md; 35rem — мобильная база канона) | паттерн-слой, порт `.hero` (hero.css:3, @max-767:211) |
+| Контент | `.hro__content` — центр, паддинги 136/container-pad/24, шаг 48 | паттерн-слой (hero.css:47–56; принято ДС) |
+| Заголовок | `.hro__title` — max-width 56rem, центр строки, primary | паттерн-слой (hero.css:58–66) |
+| Поиск | `.hro__search` — стекло `--ui-color-glass-light` + blur(12px), пилюля, ширина 50rem; поле прозрачное (`__search .ui-field__input`); плита `.hro__search-all` 72px | паттерн-слой (hero.css:68–124) |
+| Теги | `.hro__tags` — лента 4×`1:1:1:1`; `.hro__tag` — min-height 56, fs-lead, on-dark, стекло blur(10px) | паттерн-слой (hero.css:127–150) |
+| Тон тега | хук `--hro-tag-bg` — сайт-зона (таблица ниже) | решение владельца T17.15 |
+
+- **Поведение поиска** — не часть связки (Out of scope T17.15): GET-форма —
+  канон search-overlay/find-bar; самостоятельный сценарий поиска — своя задача.
+- **Стекло и VI**: пилюля/теги несут `backdrop-filter` в каноне; в режиме
+  img:off blur отключается правилом `a11y/vi.css` (фото скрыто — blur нечему
+  размывать) — VI-инвариант стекла (Implementation requirements п.1 T17.15).
+
+### Тон тега hero — параметр сайта (решение владельца, вариант (а))
+
+Тон hero-тега — **бренд-слой, не система**: связка несёт хук `--hro-tag-bg`
+с каноническим дефолтом; спец-тоны сайт задаёт СВОИМ классом на хуке
+(инлайн-стили запрещены — инвариант §5). Hex в ДС не едет (гейт слоя):
+значения color-mix живут в сайт-зоне.
+
+| Тон | Значение `--hro-tag-bg` | Где живёт |
+|---|---|---|
+| sand (дефолт) | `var(--ui-color-primary-a26)` — ступень 26% лестницы тинтов T14.7 | канон хука; пилот дублирует строкой тона для явности |
+| violet | `color-mix(in srgb, #3142ff 20%, transparent)` — оригинал rgba(49,66,255,0.2) (hero.css:152) | сайт-зона (pilot.css, класс `.cp-hero__tag--violet`) |
+| green | `color-mix(in srgb, #31ff76 20%, transparent)` — rgba(49,255,118,0.2) (hero.css:154) | сайт-зона |
+| rose | `color-mix(in srgb, #ff3134 20%, transparent)` — rgba(255,49,52,0.2) (hero.css:155) | сайт-зона |
+
+- Отвергнутая альтернатива (б) — расширять лестницу тинтов ДС
+  violet/green/rose: тон — бренд-слой конкретного сайта; T14.7 брал только
+  primary-лестницу. Статус-кво (в) — color-mix в сайт-зоне без хука —
+  не переносим: хук делает канон исполняемым (разметка — `ui-tag hro__tag`,
+  тон — строкой сайта).
+- Контраст текста тегов — пара on-dark поверх полупрозрачных плашек на
+  фото — обязанность сайта (do/don't пар на заливке — выше, lnk-card).
+
+### Adv-marquee (mrq)
+
+Типографская полоса преимуществ (канон T16.15, `.adv-marquee`
+pages.css:1058–1081): светлый блок blue-50, строки 40/18/13 fw 500
+uppercase ls 0.02em primary — литералы «как есть» (вне шкалы ДС), сетка
+1.2fr/1fr от lg (база — колонка):
+
+```html
+<div class="mrq">
+  <div class="mrq__type" aria-hidden="true">
+    <span class="mrq__line mrq__line--bar">Группа «Интер РАО»</span>
+    <span class="mrq__line mrq__line--sm">оплачиваемые программы…</span>
+    <span class="mrq__line mrq__line--xl">НАЧНИ КАРЬЕРУ…</span>
+    <span class="mrq__line mrq__line--bar">опыт · наставники · трудоустройство</span>
+  </div>
+  <div class="mrq__body">
+    <img class="mrq__photo" src="photo.jpg" alt="" width="256" height="360" loading="lazy">
+    <p class="ui-body">Расшифровка ленты — смысловой текст.</p>
+  </div>
+</div>
+```
+
+- Лента строк — **`aria-hidden`**: визуальная типографика дублирует смысл
+  абзаца тела; uppercase ставит CSS — контент строчный (a11y).
+- Бирки строк — по ролям оригинала: `--bar` (18px, подписи), `--sm`
+  (13px, мелкая), `--xl` (40px, базовая крупная).
+- Гранулы стресса (рендер при помещении строки — байт-равен одобренному):
+  в мобильной базе (до 480) тело переносится — фото на своей строке, текст
+  во всю ширину (в пилоте-оригинале этой зоны текст выталкивался за блок
+  в hscroll страницы); с 480 — строка; текст — `overflow-wrap: anywhere`,
+  фото — `max-width: 100%` (32px-база T3.6).
+
+### Спец-сетка «Медиа» (mdl)
+
+Раскладка блока «Медиа» на главной (порт принятой сетки пилота; оригинал —
+вариант `--wide` media.css:130–153): 4 колонки от lg, big-карточка 2×2,
+lead-сводка 2 колонки; ступени 2 (md) → 1 (база). Карточки — `ui-card`:
+
+```html
+<div class="mdl">
+  <article class="ui-card mdl__big">…</article>
+  <div class="mdl__lead">…заголовок/дата/анонс/ссылка…</div>
+  <article class="ui-card">…</article> …
+</div>
+```
+
+- Span-геометрия включается от md: на мобильной базе (1 колонка) span 2
+  порвал бы сетку implicit-колонкой.
+- **Кейс career-portal**: правило span 2×2 big-карточки не применялось с
+  клона (в разметке был опечаточный класс мимо селектора) — одобренные
+  высоты/скрин-пары сняты без span; активация +214px docHeight index
+  (+3.1% > порога compare ±1%) — design-decision владельца (канон
+  `mdl__big` в слое есть и рендерится на стенде паттерна).
+
+### Cover-hero (cvh)
+
+Колонка «заголовок + lead + CTA» обложек лендингов стажировок (порт
+`.cover-hero` pages.css:953–959 в принятой форме клона): зазор 16px,
+прижато влево. Карточную форму (фон/паддинг/радиус оригинала) клон не
+переносил — обложка рендерится на странице без плашки.
+
+```html
+<div class="cvh">
+  <h1 class="ui-page-title">Стажировки</h1>
+  <p class="ui-lead">Оплачиваемые программы…</p>
+  <a class="ui-button ui-button--primary" href="#directions">смотреть стажировки</a>
+</div>
+```
+
+### Миграция из пилота career-portal (T17.15)
+
+Разметка: `cp-hero*` → `hro`/`hro__*`, `cp-adv-marquee*` → `mrq`/`mrq__*`,
+`cp-media__grid`/`cp-media__lead` → `mdl`/`mdl__lead`,
+`cp-cover-hero` → `cvh`. Правила сняты из `pilot.css` (~180 строк);
+сайт-зона — тон-строки тегов hero на хуке `--hro-tag-bg` (таблица выше).
+Compare-пробы `hero`/`marquee-line` — на крючках слоя.
+
 ## A11y
 
 - Заголовок секции — h2 с ролью `ui-h2`; секция именована
@@ -246,5 +510,7 @@ hero/production/holding/why-us/company-banner):
 ## Тесты
 
 - Юнит-пины контракта: `tests/unit/pattern-landing-section.test.js`.
+- Юнит-пины лендинг-композиций (hro/mrq/mdl/cvh, тон-хук, синхронность
+  дока и слоя, миграция пилота): `tests/unit/landing-compositions.test.js`.
 - Поверхность браузера (4 секции, computed on-dark-цвета, bleed-геометрия по
   вьюпортам, axe, адаптив, эталоны): `tests/e2e/pattern-landing-section.spec.js`.

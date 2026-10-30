@@ -18,15 +18,19 @@
  *
  * Запуск: node showcase/serve.mjs & node pilot/career-portal/compare.mjs
  *
- * Перед прогоном compare выполняет гейт мёртвых внутренних ссылок dist
- * (check-links.mjs, T15.9): есть DEAD — прогон падает до браузеров.
- * Отдельный запуск гейта: node pilot/career-portal/check-links.mjs
+ * Перед прогоном compare выполняет два гейта до браузеров: мёртвые
+ * внутренние ссылки dist (check-links.mjs, T15.9) и ценз сайт-зоны
+ * (census.mjs, T17.16 — пороги строк/cp-семейств, новые cp-визуальные
+ * блоки запрещены). Есть DEAD или деградация — прогон падает.
+ * Отдельный запуск гейтов: node pilot/career-portal/check-links.mjs |
+ * node pilot/career-portal/census.mjs
  */
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
 import { collectDeadLinks } from './check-links.mjs';
+import { censusMetrics, runCensusGate } from './census.mjs';
 
 const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 const OUT = join(PILOT_DIR, 'compare-output');
@@ -56,6 +60,35 @@ if (linkGate.dead.length > 0) {
 }
 console.log(
   `Гейт ссылок: ${linkGate.checked.length} страниц, ${linkGate.links} внутренних ссылок, 0 DEAD`,
+);
+
+// Гейт ценза сайт-зоны (T17.16) — в том же запуске, до браузеров, сразу
+// после гейта ссылок: фиксирует состояние сайт-зоны на закрытие EPIC-17
+// числами (строки/код/cp-семейства, пороги — census.mjs) и падает при
+// деградации или новом cp-визуальном блоке (правило «новые блоки — через
+// ДС», CONTRIBUTING). Исходники pilot.css/pilot.js — файлы репозитория,
+// существуют всегда; отсутствие — сломанный чекаут, сообщаем по CLI.
+const censusSources = { css: join(PILOT_DIR, 'pilot.css'), js: join(PILOT_DIR, 'pilot.js') };
+for (const [name, path] of Object.entries(censusSources)) {
+  if (!existsSync(path)) {
+    console.error(
+      `Гейт ценза: исходник ${name} не найден: ${path} — ценз считается по исходникам пилота`,
+    );
+    process.exit(1);
+  }
+}
+const censusGate = runCensusGate(
+  censusMetrics(readFileSync(censusSources.css, 'utf8'), readFileSync(censusSources.js, 'utf8')),
+);
+if (censusGate.problems.length > 0) {
+  console.error(
+    `Гейт ценза: ${censusGate.problems.length} проблем — compare остановлен:\n` +
+      censusGate.problems.map((problem) => `  ${problem}`).join('\n'),
+  );
+  process.exit(1);
+}
+console.log(
+  `Гейт ценза: новых cp-визуальных блоков 0, пороги строк/семейств в норме (census.mjs, T17.16)`,
 );
 
 const PAGES = [
@@ -126,11 +159,12 @@ const SHELL_PROBES = [
     fields: { bg: 'background-color' },
     text: false,
   },
-  // первый пункт меню шапки (REPORT §8.2 №4): высота строки — rect
+  // первый пункт меню шапки (REPORT §8.2 №4): высота строки — rect.
+  // Класс меню — крючок слоя hsp__menu--left (T17.13, каркас шапки в слое).
   {
     name: 'header-link',
     original: '.header__menu--left .header__link',
-    pilot: '.cp-header__menu--left .ui-link--nav',
+    pilot: '.hsp__menu--left .ui-link--nav',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     rect: true,
   },
@@ -142,15 +176,17 @@ const SHELL_PROBES = [
     pilot: '.ui-dropdown__item',
     fields: { fs: 'font-size', lh: 'line-height', padding: 'padding', tdl: 'text-decoration-line' },
   },
-  // первая ссылка футера (REPORT §8.2 №5) + bg/высота самого футера
+  // первая ссылка футера (REPORT §8.2 №5) + bg/высота самого футера.
+  // Классы — крючки слоя ftp (T17.13: каркас подвала в слое, цвет ссылок —
+  // сайт-строка .ftp .ui-link).
   {
     name: 'footer-link',
     original: '.footer__link',
-    pilot: '.cp-footer__link',
+    pilot: '.ftp__links .ui-link',
     fields: { fs: 'font-size', fw: 'font-weight', tdl: 'text-decoration-line', color: 'color' },
     extra: {
       original: '.footer',
-      pilot: '.cp-footer',
+      pilot: '.ftp',
       fields: { footerBg: 'background-color' },
       rectName: 'footerHeight',
     },
@@ -249,19 +285,20 @@ const SHELL_PROBES = [
   },
   // ── Деталка вакансии и aside анкеты (T16.13, REPORT §9.1 №3/№4) ──
   // Зарплата (vacancy.html): канон — литерал 18px muted (pages.css:271);
-  // клон — литерал 1.125rem сайт-зоны + ui-text--muted (AA gray-700).
+  // клон — литерал канона dpp__salary (T17.14, слой) + ui-text--muted
+  // (AA gray-700). Класс — крючок паттерн-слоя (прецедент lpp-/nvp-).
   {
     name: 'salary',
     original: '.vacancy-page__salary',
-    pilot: '.cp-vacancy-page__salary',
+    pilot: '.dpp__salary',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
   },
   // Подзаголовок секции детальной (vacancy.html): канон fs-h4-тройка 28/500 —
-  // роль ui-h4 (было ui-h3 42/500)
+  // роль ui-h4 (было ui-h3 42/500); секция — канон dpp__section (T17.14)
   {
     name: 'section-h2',
     original: '.vacancy-page__section h2',
-    pilot: '.cp-vacancy-page__section h2',
+    pilot: '.dpp__section h2',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
   },
   // Aside анкеты (vacancy-apply.html): титул primary (28/500 — роль ui-h4),
@@ -334,7 +371,8 @@ const SHELL_PROBES = [
   {
     name: 'marquee-line',
     original: '.adv-marquee__line--xl',
-    pilot: '.cp-adv-marquee__line--xl',
+    // Крючок слоя mrq (T17.15): канон adv-marquee — паттерн-слой.
+    pilot: '.mrq__line--xl',
     fields: {
       fs: 'font-size',
       fw: 'font-weight',
@@ -361,14 +399,15 @@ const SHELL_PROBES = [
     },
     rect: true,
   },
-  // Трек поднавигации разделов (T16.16, REPORT §9.1 №8): blue-50, pad 4,
-  // radius pill — модификатор ui-tabs--pill (T14.9-adoption); ширина трека
-  // следует контейнеру (shell 1345↔1361 — «принято»), высота 56↔60 —
-  // порог ≤4px (52 против 48 — решение T14.9).
+  // Трек поднавигации разделов (T16.16, REPORT §9.1 №8; T17.11): blue-50,
+  // pad 4, radius pill — модификатор ui-tabs--pill (T14.9-adoption); сетка
+  // 5×1fr и маргины — канон nvp паттерн-слоя (T17.11); ширина трека следует
+  // контейнеру (shell 1345↔1361 — «принято»), высота 56↔60 — порог ≤4px
+  // (52 против 48 — решение T14.9).
   {
     name: 'subnav-track',
     original: '.tabs-pill',
-    pilot: '.cp-subnav .ui-tabs__list',
+    pilot: '.nvp .ui-tabs__list',
     fields: { bg: 'background-color', padding: 'padding', radius: 'border-radius' },
     rect: true,
   },
@@ -378,17 +417,47 @@ const SHELL_PROBES = [
   {
     name: 'subnav-tab',
     original: '.tabs-pill__tab',
-    pilot: '.cp-subnav .ui-tabs__tab',
+    pilot: '.nvp .ui-tabs__tab',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color', bg: 'background-color' },
     rect: true,
   },
-  // Активный таб поднавигации: заливка primary + text-on-dark (ARIA
-  // aria-current="page" вместо класса is-active — прецедент ui-chip T14.8).
+  // Активный таб поднавигации: заливка primary + text-on-dark. T17.11: пару
+  // красит сам модификатор --pill по aria-current="page" (покой + hover) —
+  // сайт-зонная реплика 0,4,0 снята из pilot.css.
   {
     name: 'subnav-tab-active',
     original: '.tabs-pill__tab.is-active',
-    pilot: ".cp-subnav .ui-tabs__tab[aria-current='page']",
+    pilot: ".nvp .ui-tabs__tab[aria-current='page']",
     fields: { bg: 'background-color', color: 'color' },
+    rect: true,
+  },
+  // Стеклянная пилюля поиска hero (T17.16: probe-пара «блок на каноне» —
+  // по факту исполнения; канон hro — слой T17.15). Стекло glass-light,
+  // blur 12, пилюля — пара одобренного дизайна; левый паддинг 24 против
+  // 28 оригинала — «принято ДС» (hero.css:74, канон hro__search). Первое
+  // вхождение — index.html; на остальных страницах сущности нет — null.
+  {
+    name: 'hero-search',
+    original: '.hero__search',
+    pilot: '.hro__search',
+    fields: {
+      bg: 'background-color',
+      radius: 'border-radius',
+      bf: 'backdrop-filter',
+      padding: 'padding',
+    },
+    rect: true,
+  },
+  // Шапка-тройка детальной вакансии (T17.16: probe-пара «блок на каноне»;
+  // канон dpp__head — слой T17.14). Колонка с шагом 8 против 12 оригинала —
+  // «принято ДС» калибровкой T17.14 (gap в коротких полях). Первое
+  // вхождение — vacancy.html; event/internship несут dpp__head без
+  // vacancy-page__head оригинала — null-сима оригинальной стороны.
+  {
+    name: 'detail-head',
+    original: '.vacancy-page__head',
+    pilot: '.dpp__head',
+    fields: { display: 'display', fd: 'flex-direction', gap: 'gap' },
     rect: true,
   },
 ];
@@ -396,11 +465,14 @@ const SHELL_PROBES = [
 /** Пары блоков главной (высота секций). */
 const BLOCK_PROBES = {
   'index.html': [
-    ['hero', '.hero', '.cp-hero'],
+    // Крючок слоя hro (T17.15): связка hero — паттерн-слой.
+    ['hero', '.hero', '.hro'],
     ['production', '.production', '.cp-production'],
     ['directions', '.directions', '#directions'],
     ['holding', '.holding', '.cp-holding'],
-    ['employers', '.employers', '.cp-employers__grid'],
+    // Лента логотипов — связка lgo-grid (T17.9): проба на крючке слоя
+    // (прецедент video-block/cta-mail).
+    ['employers', '.employers', '.lgo-grid'],
     ['why-us', '.why-us', '.cp-why-us'],
     ['vacancy-search', '.vacancy-search', '#vacancies'],
     ['students', '.students--illustrated', '#students'],
@@ -408,7 +480,8 @@ const BLOCK_PROBES = {
     ['media', '.media', '#media'],
     ['team', '.team', '.cp-team__photo'],
     ['cta-mail', '.cta-mail', '.ui-card--cta--primary'],
-    ['footer', '.footer', '.cp-footer'],
+    // Подвал — крючок слоя ftp (T17.13, прецедент video-block/cta-mail).
+    ['footer', '.footer', '.ftp'],
   ],
   // Статы компании на ui-stat (T17.4): сетки — сайт-зона, плашки — компонент;
   // блоки гейтят высоты миграции (AC: порог ±4px). Оригинал несёт те же
@@ -420,6 +493,12 @@ const BLOCK_PROBES = {
     // оригинала, pages.css:656–674) — высота миграции на модификатор ДС.
     ['company-banner', '.banner-card', '.cp-company-banner'],
   ],
+  // Таймлайн «Как попасть» (T17.10): adoption на связки tlp-* паттерн-слоя;
+  // блок гейтит высоту миграции (AC: порог ±4px). Оригинал — .timeline
+  // (pages.css:1096); education/career-track таймлайна не несут (career-track
+  // строит steps-bar — другая композиция, канона в ДС нет).
+  'internships.html': [['timeline', '.timeline', '.tlp']],
+  'practices.html': [['timeline', '.timeline', '.tlp']],
 };
 
 const STYLES = [

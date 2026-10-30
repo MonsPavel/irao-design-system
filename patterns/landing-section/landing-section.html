@@ -1,7 +1,9 @@
 <!--
   Паттерн «Landing-секция» (T8.3): правила сборки лендинг-секций из
-  системных примитивов + mini-эталон из четырёх секций — светлая, тёмная,
-  с-изображением full-bleed, с-фото-фоном (T17.3).
+  системных примитивов + mini-эталон из десяти секций — светлая, тёмная,
+  с-изображением full-bleed, с-фото-фоном (T17.3), nav-карточки и лента
+  логотипов (T17.9), лендинг-композиции hero / adv-marquee / спец-сетка
+  «Медиа» / cover-hero (T17.15 — связки паттерн-слоя hro/mrq/mdl/cvh).
 
   Формула секции (Scope): ui-section (вертикальный ритм, T3.4) + ui-container
   (центрируемый контейнер, T3.4) + заголовок-роль (ui-h2, «классы, а не
@@ -124,6 +126,29 @@
       width: calc(100% + 2 * var(--ui-container-pad-lg));
       margin-inline: calc(-1 * var(--ui-container-pad-lg));
     }
+  }
+
+  /* Тоны nav-карточек (T17.9) — ЗОНА САЙТА: пары одобренного дизайна
+     career-portal на токен-хуках связки (Implementation requirements п.1).
+     Демо-иллюстрации — svg-заглушки; контраст пар — таблица в README. */
+  .lnk-card--peach {
+    --lnk-card-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));
+    --ui-button-bg: var(--ui-color-accent);
+    --ui-button-color: var(--ui-color-text-on-dark);
+  }
+
+  .lnk-card--navy {
+    --lnk-card-bg: var(--ui-color-primary);
+    --lnk-card-fg: var(--ui-color-text-on-dark);
+    --ui-button-bg: var(--ui-color-surface);
+    --ui-button-color: var(--ui-color-primary);
+  }
+
+  .lnk-card--light {
+    --lnk-card-bg: var(--ui-color-surface);
+    --ui-button-bg: var(--ui-color-primary);
+    --ui-button-color: var(--ui-color-surface);
+    border: var(--ui-border-width) solid var(--ui-color-border);
   }
 </style>
 
@@ -301,5 +326,268 @@
       Секция с фото-фоном: фон и оверлей — система (ui-section--photo, T17.3),
       контент — сайт (on-dark-пары связкой lsp-photo, роль ui-h2).
     </p>
+  </div>
+</section>
+
+<!-- Вариант 5 — nav-карточки (lnk-card, T17.9): карточки-Ссылки «Школьникам
+     и студентам» (порт .cp-students__card career-portal). Тон — пара на
+     хуках --lnk-card-bg/--lnk-card-fg (зона сайта, классы выше), контраст
+     пары — обязанность сайта. Иллюстрация — декоративный слот (alt="");
+     круглая кнопка-стрелка — ui-button--round, aria-hidden: интерактив
+     один — вся карточка (доступное имя — aria-label, axe-имена ссылок). -->
+<section class="ui-section" id="lsp-nav-cards" aria-labelledby="lsp-nav-cards-title">
+  <p class="ui-showcase-stand__note">
+    Связка «nav-карточки» (<code>lnk-card</code>, T17.9): тон — пара на хуках
+    <code>--lnk-card-bg</code>/<code>--lnk-card-fg</code> (зона сайта, демо — одобренные пары
+    career-portal), иллюстрация — декоративный слот, стрелка —
+    <code>ui-button--round</code> (<code>aria-hidden</code>). Имя карточки-ссылки — <code>aria-label</code>.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-nav-cards-title">Школьникам и студентам</h2>
+    <div class="ui-grid lnk-cards lsp-grid" data-ui-check-layout>
+      <a class="lnk-card lnk-card--peach" href="list-page.html" aria-label="Подробнее: Стажировки и практики">
+        <div class="lnk-card__body">
+          <h3 class="ui-h4">Стажировки и практики</h3>
+          <p class="ui-small">Уникальный шанс получить опыт в&nbsp;энергетике!</p>
+        </div>
+        <img
+          class="lnk-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27240%27%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2758%27%20r%3D%2738%27%20fill%3D%27%23164B89%27%2F%3E%3Cpath%20d%3D%27M22%20240c0-52%2026-84%2058-84s58%2032%2058%2084z%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="160"
+          height="240"
+          loading="lazy"
+         >
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </a>
+
+      <a class="lnk-card lnk-card--navy" href="list-page.html" aria-label="Подробнее: Целевое обучение">
+        <div class="lnk-card__body">
+          <h3 class="ui-h4">Целевое обучение</h3>
+          <p class="ui-small">Поддержка на&nbsp;старте карьеры и&nbsp;гарантия трудоустройства</p>
+        </div>
+        <img
+          class="lnk-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27240%27%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2758%27%20r%3D%2738%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Cpath%20d%3D%27M22%20240c0-52%2026-84%2058-84s58%2032%2058%2084z%27%20fill%3D%27%23E8EEF6%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="160"
+          height="240"
+          loading="lazy"
+         >
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </a>
+
+      <a class="lnk-card lnk-card--light" href="list-page.html" aria-label="Подробнее: Карьерный трек">
+        <div class="lnk-card__body">
+          <h3 class="ui-h4">Карьерный трек</h3>
+          <p class="ui-small">Лучшие возможности для&nbsp;профессионального роста</p>
+        </div>
+        <img
+          class="lnk-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27160%27%20height%3D%27240%27%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%2758%27%20r%3D%2738%27%20fill%3D%27%23F26722%27%2F%3E%3Cpath%20d%3D%27M22%20240c0-52%2026-84%2058-84s58%2032%2058%2084z%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="160"
+          height="240"
+          loading="lazy"
+         >
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">
+          <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 6 — лента логотипов (lgo-grid/lgo-card, T17.9): сетка рамочных
+     плашек на ui-grid (порт .cp-employers career-portal — типовой блок
+     «партнёры/клиенты»). Плашка — img с растяжением (width 100%, размеры
+     атрибутами — гейт T4.6); логотипы — контент сайта. -->
+<section class="ui-section" id="lsp-logo-grid" aria-labelledby="lsp-logo-grid-title">
+  <p class="ui-showcase-stand__note">
+    Связка «лента логотипов» (<code>lgo-grid</code>/<code>lgo-card</code>, T17.9): сетка рамочных
+    плашек на <code>ui-grid</code> (шаг 8px, ступени 4/6 колонок), плашка — растянутый
+    <code>img</code> с радиусом md. Логотипы/подбор — контент сайта.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-logo-grid-title">Популярные работодатели Группы</h2>
+    <div class="ui-grid lgo-grid lsp-grid" data-ui-check-layout>
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2774%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2748%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2766%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2742%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Crect%20x%3D%2732%27%20y%3D%2734%27%20width%3D%2740%27%20height%3D%2740%27%20rx%3D%2710%27%20fill%3D%27%23164B89%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2770%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2744%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23F26722%27%2F%3E%3Ccircle%20cx%3D%2764%27%20cy%3D%2754%27%20r%3D%2720%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2796%27%20y%3D%2744%27%20width%3D%2762%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2796%27%20y%3D%2759%27%20width%3D%2740%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Crect%20x%3D%2732%27%20y%3D%2752%27%20width%3D%2740%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%2732%27%20y%3D%2736%27%20width%3D%2726%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2774%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+      <img class="lgo-card" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27197%27%20height%3D%27108%27%3E%3Crect%20width%3D%27197%27%20height%3D%27108%27%20rx%3D%2716%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2722%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2752%27%20cy%3D%2754%27%20r%3D%2714%27%20fill%3D%27%23F26722%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2744%27%20width%3D%2770%27%20height%3D%279%27%20rx%3D%274.5%27%20fill%3D%27%23002856%27%2F%3E%3Crect%20x%3D%2784%27%20y%3D%2759%27%20width%3D%2752%27%20height%3D%277%27%20rx%3D%273.5%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="Логотип работодателя" width="197" height="108" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 7 — hero (hro, T17.15): фото-фон — примитив ui-section--photo
+     (T17.3, оверлей --fade-bottom — канон hero), центрированный заголовок,
+     стеклянная пилюля поиска (glass-light + blur 12 + прозрачный ui-field +
+     плита-кнопка) и лента тегов — паттерн-слой. На реальной странице роль
+     заголовка hero — ui-h1 (первый заголовок страницы, пример пилота);
+     в эталоне-фрагменте — ui-h2 (h1 несёт каркас стенда, пин T8.3).
+     Тон тега — сайт-зона на хуке --hro-tag-bg (комментарий в разметке). -->
+<section class="ui-section ui-section--photo hro" id="lsp-hero" aria-labelledby="lsp-hero-title">
+  <p class="ui-showcase-stand__note">
+    Связка «hero» (<code>hro</code>, T17.15): фото-фон — <code>ui-section--photo</code> (T17.3,
+    оверлей <code>--fade-bottom</code>), центрированный заголовок, стеклянная пилюля поиска
+    (glass-light + blur, прозрачный <code>ui-field</code>, плита «Все вакансии») и лента тегов —
+    паттерн-слой. Тон тега — хук <code>--hro-tag-bg</code> (сайт-зона).
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271240%27%20cy%3D%27340%27%20r%3D%27380%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27340%27%20cy%3D%27860%27%20r%3D%27260%27%20fill%3D%27%23F26722%27%20opacity%3D%270.7%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+     >
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
+
+  <div class="hro__content">
+    <h2 class="ui-h2 hro__title" id="lsp-hero-title">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h2>
+    <!-- html-validate-disable-next wcag/h32: approved-дизайн hero не несёт submit-кнопку (плита — навигация); отправка — implicit submission (Enter), канон search-overlay -->
+    <form class="hro__search" action="#lsp-hero" method="get" role="search">
+      <svg class="hro__search-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M26 26l8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      <div class="ui-field">
+        <input class="ui-field__input" type="search" name="q" placeholder="Введите название вакансии" aria-label="Поиск вакансий">
+      </div>
+      <a class="hro__search-all" href="#lsp-hero">Все вакансии</a>
+    </form>
+  </div>
+
+  <!-- Тон тега — сайт-зона (спец-тинты, решение владельца T17.15 — вариант (а):
+       тон — бренд-слой, НЕ система). Дефолт — sand: хук не задан →
+       --ui-color-primary-a26 (токен лестницы тинтов T14.7). Спец-тоны
+       (violet/green/rose — source: src/blocks/hero/hero.css:152–155 оригинала,
+       color-mix 20%) сайт несёт СВОИМ классом на хуке; hex в ДС не едет
+       (гейт слоя), значение живёт в сайт-зоне:
+       .<сайт>__tag--violet { --hro-tag-bg: color-mix(in srgb, <фирменный hex> 20%, transparent); } -->
+  <div class="hro__tags">
+    <span class="ui-tag hro__tag">Стабильная компания</span>
+    <span class="ui-tag hro__tag">Масштаб задач</span>
+    <span class="ui-tag hro__tag">Работа со смыслом</span>
+    <span class="ui-tag hro__tag">Сильная команда</span>
+  </div>
+</section>
+
+<!-- Вариант 8 — adv-marquee (mrq, T17.15): типографская полоса преимуществ —
+     канон T16.15 (.adv-marquee pages.css:1058–1081): светлый блок blue-50,
+     строки 40/18/13 fw 500 uppercase ls 0.02em primary (литералы «как есть»,
+     вне шкалы ДС), сетка 1.2fr/1fr от lg. Лента строк — aria-hidden:
+     визуальная типографика дублирует смысл абзаца тела. -->
+<section class="ui-section" id="lsp-marquee" aria-labelledby="lsp-marquee-title">
+  <p class="ui-showcase-stand__note">
+    Связка «adv-marquee» (<code>mrq</code>, T17.15): строки 40/18/13 fw 500 uppercase ls 0.02em
+    primary (канон T16.15, литералы «как есть»), сетка 1.2fr/1fr от lg, колонка — мобильная база.
+    Лента <code>aria-hidden</code> — смысл несёт абзац тела.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-marquee-title">Полоса преимуществ</h2>
+    <div class="mrq">
+      <div class="mrq__type" aria-hidden="true">
+        <span class="mrq__line mrq__line--bar">Группа «Интер РАО»</span>
+        <span class="mrq__line mrq__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
+        <span class="mrq__line mrq__line--xl">НАЧНИ КАРЬЕРУ В ЭНЕРГЕТИКЕ ЕЩЁ ВО ВРЕМЯ УЧЁБЫ</span>
+        <span class="mrq__line mrq__line--bar">опыт · наставники · трудоустройство</span>
+      </div>
+      <div class="mrq__body">
+        <img
+          class="mrq__photo"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27256%27%20height%3D%27360%27%3E%3Crect%20width%3D%27256%27%20height%3D%27360%27%20rx%3D%2716%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27190%27%20cy%3D%2790%27%20r%3D%2760%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%2760%27%20cy%3D%27300%27%20r%3D%2748%27%20fill%3D%27%23F26722%27%20opacity%3D%270.7%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="256"
+          height="360"
+          loading="lazy"
+         >
+        <p class="ui-body">Стажировки и практики — оплачиваемые программы для студентов и выпускников по всей России: опыт, наставники и трудоустройство ещё во время учёбы.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 9 — спец-сетка «Медиа» (mdl, T17.15): 4 колонки от lg, big —
+     2×2, lead — 2 колонки (от md), ступени 2→1. Карточки — ui-card;
+     big-карточка несёт mdl__big (span-геометрия включается от md — на
+     мобильной базе сетка колонка). -->
+<section class="ui-section" id="lsp-media-grid" aria-labelledby="lsp-media-grid-title">
+  <p class="ui-showcase-stand__note">
+    Спец-сетка «Медиа» (<code>mdl</code>, T17.15): 4 колонки от lg, big-карточка — 2×2
+    (<code>mdl__big</code>), lead-сводка — 2 колонки (<code>mdl__lead</code>); ступени 2 (md) → 1.
+    Карточки — <code>ui-card</code>, содержимое — сайт.
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="lsp-media-grid-title">Медиа о работе в компании</h2>
+    <div class="mdl">
+      <article class="ui-card mdl__big">
+        <img
+          class="ui-image ui-image--cover ui-image--ratio-16-9"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27800%27%20height%3D%27450%27%3E%3Crect%20width%3D%27800%27%20height%3D%27450%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27640%27%20cy%3D%27120%27%20r%3D%27120%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27140%27%20cy%3D%27360%27%20r%3D%2790%27%20fill%3D%27%23F26722%27%20opacity%3D%270.7%27%2F%3E%3C%2Fsvg%3E"
+          alt="Репортаж с производственной площадки"
+          width="800"
+          height="450"
+          loading="lazy"
+         >
+        <p class="ui-body ui-card__body">Энергоблоки в работе: репортаж с площадки</p>
+      </article>
+      <div class="mdl__lead">
+        <h3 class="ui-h4">Студенты приступили к&nbsp;практике в&nbsp;компаниях Группы</h3>
+        <time class="ui-small ui-text--muted" datetime="2026-02-19">19.02.26</time>
+        <p class="ui-small">Молодые люди приобретают опыт по&nbsp;основным для&nbsp;компании направлениям: электро-, теплоэнергетика и&nbsp;техника; энергетическое машиностроение; электрические станции, сети и&nbsp;системы.</p>
+        <a class="ui-link" href="#lsp-media-grid">Подробнее <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      </div>
+      <article class="ui-card">
+        <img
+          class="ui-image ui-image--cover ui-image--ratio-16-9"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27400%27%20height%3D%27225%27%3E%3Crect%20width%3D%27400%27%20height%3D%27225%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27320%27%20cy%3D%2760%27%20r%3D%2750%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="400"
+          height="225"
+          loading="lazy"
+         >
+        <p class="ui-small ui-card__body">Тепло для городов: как работает ТЭЦ</p>
+      </article>
+      <article class="ui-card">
+        <img
+          class="ui-image ui-image--cover ui-image--ratio-16-9"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27400%27%20height%3D%27225%27%3E%3Crect%20width%3D%27400%27%20height%3D%27225%27%20fill%3D%27%23F1F5FE%27%2F%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%27160%27%20r%3D%2750%27%20fill%3D%27%23F26722%27%20opacity%3D%270.7%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="400"
+          height="225"
+          loading="lazy"
+         >
+        <p class="ui-small ui-card__body">Цифровые продукты для энергетики</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Вариант 10 — cover-hero (cvh, T17.15): колонка «заголовок + lead + CTA»
+     обложки лендингов (порт .cover-hero career-portal, gap 16, прижато
+     влево). На реальной странице заголовок — ui-page-title (h1 страницы);
+     в эталоне-фрагменте — ui-h2 (пин T8.3). -->
+<section class="ui-section" id="lsp-cover-hero" aria-labelledby="lsp-cover-hero-title">
+  <p class="ui-showcase-stand__note">
+    Связка «cover-hero» (<code>cvh</code>, T17.15): колонка обложки лендинга — заголовок, lead и
+    CTA-кнопка, зазор 16px, прижато влево. Содержимое — роли и компоненты.
+  </p>
+
+  <div class="ui-container">
+    <div class="cvh">
+      <h2 class="ui-h2" id="lsp-cover-hero-title">Стажировки</h2>
+      <p class="ui-lead">Оплачиваемые программы для студентов и выпускников по всей России.</p>
+      <a class="ui-button ui-button--primary" href="#lsp-cover-hero">смотреть стажировки</a>
+    </div>
   </div>
 </section>

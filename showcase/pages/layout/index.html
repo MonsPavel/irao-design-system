@@ -1,9 +1,10 @@
 <p class="ui-showcase-stand__note">
-  Стенд layout-примитивов (T3.4): <code>ui-container</code>, <code>ui-section</code>,
-  <code>ui-grid</code> — mobile-first пересборка <code>.container</code>/<code>.section</code>/
-  <code>.cards-grid</code> career-portal. Колонки сеток: 1 (mobile) → 2 (md) → N (lg); сетка
-  <code>--4</code> — 3 (xl) → 4 (2xl). Сценарии — <code>tests/e2e/layout.spec.js</code>. Ключевые
-  узлы размечены <code>data-ui-check-layout</code> — контракт гейта масштабирования T3.6
+  Стенд layout-примитивов (T3.4, T17.17): <code>ui-container</code>, <code>ui-section</code>,
+  <code>ui-grid</code>, флекс-примитивы <code>ui-row</code>/<code>ui-stack</code> — mobile-first
+  пересборка <code>.container</code>/<code>.section</code>/<code>.cards-grid</code> и флекс-строк
+  career-portal. Колонки сеток: 1 (mobile) → 2 (md) → N (lg); сетка <code>--4</code> — 3 (xl) → 4
+  (2xl). Сценарии — <code>tests/e2e/layout.spec.js</code>. Ключевые узлы размечены
+  <code>data-ui-check-layout</code> — контракт гейта масштабирования T3.6
   (<code>tests/e2e/scaling.spec.js</code>, пороги — tests/e2e/README.md).
 </p>
 
@@ -68,5 +69,62 @@
     <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">02</p></div>
     <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">03</p></div>
     <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">04</p></div>
+  </div>
+</section>
+
+<section class="ui-section" data-ui-check-layout aria-labelledby="layout-flex-heading">
+  <h2 id="layout-flex-heading">ui-row / ui-stack — флекс-примитивы (T17.17)</h2>
+  <p class="ui-body">
+    Флекс-композиция средствами ДС: строка <code>ui-row</code> — перенос по умолчанию (защита от
+    hscroll, гейт T3.6), вертикальное выравнивание центр (доминирующий кейс строк пилота), gap —
+    токен <code>--ui-row-gap</code>; стопка <code>ui-stack</code> — gap — токен
+    <code>--ui-stack-gap</code> (дефолты — <code>--ui-space-4</code>). Примитивы чисто
+    презентационные: цвет и типографику несёт контент. «Когда строка vs сетка» — do/don't в
+    <code>base/README.md</code>; отключение переноса <code>--no-wrap</code> — осознанное (тулбары/
+    пилюли, строка гарантированно влезает).
+  </p>
+
+  <h3>ui-row — база: перенос по умолчанию, выравнивание центр</h3>
+  <div class="ui-row" data-ui-check-layout>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">02</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">03</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">04</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">05</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">06</p></div>
+  </div>
+
+  <h3>ui-row--center — центрирование строки</h3>
+  <div class="ui-row ui-row--center" data-ui-check-layout>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">02</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">03</p></div>
+  </div>
+
+  <h3>ui-row--between — «слева заголовок, справа действие» (канон T17.17)</h3>
+  <div class="ui-row ui-row--between" data-ui-check-layout>
+    <h2 class="ui-h2">Вакансии</h2>
+    <a class="ui-button ui-button--pill" href="#layout-flex-heading">Все вакансии</a>
+  </div>
+
+  <h3>ui-row--end — прижать к концу</h3>
+  <div class="ui-row ui-row--end" data-ui-check-layout>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">02</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">03</p></div>
+  </div>
+
+  <h3>ui-row--no-wrap — перенос отключён осознанно (тулбары/пилюли)</h3>
+  <div class="ui-row ui-row--no-wrap" data-ui-check-layout>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-micro">Тулбар 01</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-micro">Тулбар 02</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-micro">Тулбар 03</p></div>
+  </div>
+
+  <h3>ui-stack — вертикальная стопка (решение «делать сейчас» по замеру пилота)</h3>
+  <div class="ui-stack" data-ui-check-layout>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">01</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">02</p></div>
+    <div class="ui-section ui-section--muted" data-ui-check-layout><p class="ui-body">03</p></div>
   </div>
 </section>

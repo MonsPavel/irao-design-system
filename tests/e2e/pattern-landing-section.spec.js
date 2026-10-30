@@ -1,8 +1,9 @@
 /**
  * e2e паттерна «Landing-секция» (T8.3; Testing requirements + AC) — стенд
  * patterns/landing-section (stands/patterns/landing-section.html),
- * mini-эталон из четырёх секций: светлая / тёмная (on-dark) / с-изображением
- * full-bleed / с-фото-фоном (ui-section--photo, T17.3).
+ * mini-эталон из шести секций: светлая / тёмная (on-dark) / с-изображением
+ * full-bleed / с-фото-фоном (ui-section--photo, T17.3) / nav-карточки и
+ * лента логотипов (связки слоя lnk-/lgo-, T17.9).
  *
  * Ключевые сценарии спеки:
  *  1. каркас секции = ui-section + ui-container + заголовок-роль h2 + сетка
@@ -12,7 +13,9 @@
  *  3. full-bleed внутри контейнера: изображение тянется до краёв секции на
  *     375/768/1280 (отрицательные margin от container-pad), без hscroll;
  *  4. адаптив: сетка 1 → 2 → 3 колонки (шкала T3.4);
- *  5. axe чист; иерархия h2 → h3 без пропусков; эталоны 375/768/1440.
+ *  5. nav-карточки: тон — пара на хуках, имя ссылки aria-label, стрелка
+ *     декоративна; лента логотипов 1 → 4 → 6 (T17.9);
+ *  6. axe чист; иерархия h2 → h3 без пропусков; эталоны 375/768/1440.
  */
 import { expect } from '@playwright/test';
 
@@ -48,7 +51,7 @@ const contrastOfDarkSection = (page) =>
 
 standTest.describe('patterns/landing-section: эталонная сборка (Scope) — каркас', () => {
   standTest(
-    'собрана без нового CSS: подключены только файлы dist, связки — <style> стенда',
+    'собрана без нового CSS: подключены dist-файлы (включая паттерн-слой T17.9), связки ритма — <style> стенда',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
       const source = await page.request
@@ -58,11 +61,11 @@ standTest.describe('patterns/landing-section: эталонная сборка (S
       const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
       expect(
         stylesheets.length,
-        'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
-      ).toBe(3);
+        'внешних стилей четыре — ui-core и ui-vi из dist + ui-patterns (слой, T17.9) + showcase.css каркаса (нового CSS у паттерна нет)',
+      ).toBe(4);
       for (const link of stylesheets) {
         expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
-          /ui-(core|vi)\.min\.css|showcase\.css/,
+          /ui-(core|vi)\.min\.css|ui-patterns\.css|showcase\.css/,
         );
       }
       expect(
@@ -408,6 +411,316 @@ standTest.describe('patterns/landing-section: фото-фон секции (ui-s
       });
       expect(same.title, 'заголовок фото-секции — text-on-dark (связка lsp-photo)').toBe(true);
       expect(same.lead, 'lead фото-секции — on-dark-muted').toBe(true);
+    },
+  );
+});
+
+standTest.describe('patterns/landing-section: nav-карточки и лента логотипов (T17.9)', () => {
+  const SEL_NAV = { section: '#lsp-nav-cards', title: '#lsp-nav-cards-title' };
+  const SEL_LOGO = { section: '#lsp-logo-grid', title: '#lsp-logo-grid-title' };
+
+  standTest(
+    'nav-карточки: каркас связки lnk-card — сетка lnk-cards, карточки-ссылки с aria-label, стрелка декоративна',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const sec = page.locator(SEL_NAV.section);
+      await expect(sec).toBeVisible();
+      await expect(page.locator(SEL_NAV.title)).toBeVisible();
+
+      const cards = sec.locator('a.lnk-card');
+      expect(await cards.count(), 'три nav-карточки — тоны пилота (peach/navy/light)').toBe(3);
+      for (const card of await cards.all()) {
+        const info = await card.evaluate((el) => ({
+          label: el.getAttribute('aria-label'),
+          href: el.getAttribute('href'),
+          hasBody: Boolean(el.querySelector('.lnk-card__body')),
+          illuAlt: el.querySelector('.lnk-card__illu')?.getAttribute('alt'),
+          actionHidden: el
+            .querySelector('.ui-button--round.lnk-card__action')
+            ?.getAttribute('aria-hidden'),
+        }));
+        expect(info.label, 'имя карточки-ссылки — aria-label (прецедент пилота)').toBeTruthy();
+        expect(info.href, 'карточка ведёт на целевую страницу').toBeTruthy();
+        expect(info.hasBody, 'слот body на месте').toBe(true);
+        expect(info.illuAlt, 'иллюстрация декоративна (alt="")').toBe('');
+        expect(info.actionHidden, 'стрелка декоративна (aria-hidden)').toBe('true');
+      }
+    },
+  );
+
+  standTest(
+    'тон navy: фон/текст = парам хуков; заголовок h4 на заливке — on-dark (баг «невидимого h4» закрыт, прецедент ui-card--cta T17.8)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.addStyleTag({
+        content:
+          '.lsp-probe-navy-bg { background-color: var(--ui-color-primary); } ' +
+          '.lsp-probe-navy-fg { color: var(--ui-color-text-on-dark); }',
+      });
+      const card = page.locator(`${SEL_NAV.section} .lnk-card--navy`);
+      const style = await card.evaluate((el) => ({
+        bg: getComputedStyle(el).backgroundColor,
+        fg: getComputedStyle(el).color,
+        h4: getComputedStyle(el.querySelector('h3')).color,
+      }));
+      const pairOf = (cls) =>
+        page.evaluate((name) => {
+          const probe = document.createElement('div');
+          probe.className = name;
+          document.body.appendChild(probe);
+          const value = getComputedStyle(probe);
+          const result = { bg: value.backgroundColor, fg: value.color };
+          probe.remove();
+          return result;
+        }, cls);
+      const bgPair = await pairOf('lsp-probe-navy-bg');
+      const fgPair = await pairOf('lsp-probe-navy-fg');
+      expect(style.bg, 'фон navy-тона — --ui-color-primary (пара сайта на хуке)').toBe(bgPair.bg);
+      expect(style.fg, 'текст navy-тона — on-dark').toBe(fgPair.fg);
+      expect(style.h4, 'заголовочная роль на заливке — on-dark (не heading-primary)').toBe(
+        fgPair.fg,
+      );
+    },
+  );
+
+  standTest(
+    'сетка nav-карточек: 1 колонка (375) → 2 (768) → 3 (1280) — канон пилота',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const columnsOf = () =>
+        page
+          .locator(`${SEL_NAV.section} .lnk-cards`)
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
+      await page.setViewportSize(VIEWPORTS.tablet);
+      expect(await columnsOf(), 'md — 2 колонки').toBe(2);
+      await page.setViewportSize(VIEWPORTS.xl);
+      expect(await columnsOf(), 'lg+ — 3 колонки').toBe(3);
+    },
+  );
+
+  standTest(
+    'лента логотипов: сетка 1 (375) → 4 (768) → 6 (1280); плашка lgo-card — рамка border-muted, радиус md, img растянута',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const sec = page.locator(SEL_LOGO.section);
+      await expect(page.locator(SEL_LOGO.title)).toBeVisible();
+      expect(await sec.locator('img.lgo-card').count(), 'плашки-логотипы в сетке').toBeGreaterThan(
+        0,
+      );
+
+      const columnsOf = () =>
+        sec
+          .locator('.lgo-grid')
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
+      await page.setViewportSize(VIEWPORTS.tablet);
+      expect(await columnsOf(), 'md — 4 колонки').toBe(4);
+      await page.setViewportSize(VIEWPORTS.xl);
+      expect(await columnsOf(), 'lg+ — 6 колонок').toBe(6);
+
+      const plate = await sec
+        .locator('img.lgo-card')
+        .first()
+        .evaluate((el) => {
+          const cs = getComputedStyle(el);
+          return {
+            width: cs.width,
+            boxWidth: Math.round(el.getBoundingClientRect().width),
+            radius: cs.borderRadius,
+            border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}`,
+            natural: `${el.naturalWidth}x${el.naturalHeight}`,
+          };
+        });
+      await page.setViewportSize(VIEWPORTS.xl);
+      const cell = await sec
+        .locator('.lgo-grid')
+        .evaluate((el) => el.firstElementChild.getBoundingClientRect().width);
+      expect(
+        plate.boxWidth,
+        'плашка растянута на ячейку сетки (width: 100%)',
+      ).toBeGreaterThanOrEqual(Math.floor(cell) - 1);
+      expect(plate.radius, 'радиус md').toBe('16px');
+      expect(plate.border, 'рамка — 1px solid slate-100 (--ui-color-border-muted)').toBe(
+        '1px solid rgb(232, 238, 246)',
+      );
+    },
+  );
+});
+
+standTest.describe('patterns/landing-section: лендинг-композиции (hro/mrq/mdl/cvh, T17.15)', () => {
+  const SEL_HRO = { section: '#lsp-hero', title: '#lsp-hero-title' };
+  const SEL_MRQ = { section: '#lsp-marquee', title: '#lsp-marquee-title' };
+  const SEL_MDL = { section: '#lsp-media-grid', title: '#lsp-media-grid-title' };
+  const SEL_CVH = { section: '#lsp-cover-hero', title: '#lsp-cover-hero-title' };
+
+  standTest(
+    'hero: блок hro на фото-секции, пилюля 800px стекло blur(12), плита 72px, лента 4 тегов min-height 56',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await expect(page.locator(SEL_HRO.title)).toBeVisible();
+
+      await page.setViewportSize(VIEWPORTS.xl);
+      const hero = await page.locator(SEL_HRO.section).evaluate((el) => {
+        const search = el.querySelector('.hro__search');
+        const plate = el.querySelector('.hro__search-all');
+        const tags = [...el.querySelectorAll('.hro__tag')];
+        return {
+          minHeight: getComputedStyle(el).minHeight,
+          overflow: getComputedStyle(el).overflow,
+          searchW: Math.round(search.getBoundingClientRect().width),
+          searchBlur: getComputedStyle(search).backdropFilter,
+          inputBg: getComputedStyle(el.querySelector('.hro__search .ui-field__input'))
+            .backgroundColor,
+          plateH: Math.round(plate.getBoundingClientRect().height),
+          tagCount: tags.length,
+          tagMinH: getComputedStyle(tags[0]).minHeight,
+          tagBlur: getComputedStyle(tags[0]).backdropFilter,
+        };
+      });
+      expect(hero.minHeight, 'min-height 50.5rem = 808px оригинала от md').toBe('808px');
+      expect(hero.overflow, 'клип фото-фона').toBe('hidden');
+      expect(hero.searchW, 'пилюля 50rem = 800px (hero.css:72)').toBe(800);
+      expect(hero.searchBlur, 'стекло пилюли blur(12px)').toBe('blur(12px)');
+      expect(hero.inputBg, 'внутреннее поле прозрачное').toBe('rgba(0, 0, 0, 0)');
+      expect(hero.plateH, 'плита «Все вакансии» 72px').toBe(72);
+      expect(hero.tagCount, 'лента — 4 тега').toBe(4);
+      expect(hero.tagMinH, 'теги min-height 56px').toBe('56px');
+      expect(hero.tagBlur, 'стекло тега blur(10px)').toBe('blur(10px)');
+    },
+  );
+
+  standTest(
+    'тон тега hero — дефолт хука sand: computed bg = --ui-color-primary-a26 (спец-тоны — сайт-зона)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.addStyleTag({
+        content: '.lsp-probe-sand { background-color: var(--ui-color-primary-a26); }',
+      });
+      const same = await page.evaluate(() => {
+        const probe = document.createElement('div');
+        probe.className = 'lsp-probe-sand';
+        document.body.appendChild(probe);
+        const tag = document.querySelector('#lsp-hero .hro__tag');
+        const result =
+          getComputedStyle(tag).backgroundColor === getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return result;
+      });
+      expect(same, 'тег без тон-класса рендерит дефолт sand (T14.7)').toBe(true);
+    },
+  );
+
+  standTest(
+    'mrq: сетка колонка → 1.2fr/1fr от lg; строка --xl 40px/1.15/ls 0; лента aria-hidden',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await expect(page.locator(SEL_MRQ.title)).toBeVisible();
+      const columnsOf = () =>
+        page
+          .locator(`${SEL_MRQ.section} .mrq`)
+          .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
+
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect(await columnsOf(), 'мобильная база — колонка (оригинал ≤1023)').toBe(1);
+      await page.setViewportSize({ width: 1024, height: 900 });
+      expect(await columnsOf(), 'от lg — 1.2fr/1fr (pages.css:1060)').toBe(2);
+
+      await page.setViewportSize(VIEWPORTS.xl);
+      const xl = await page.locator(`${SEL_MRQ.section} .mrq__line--xl`).evaluate((el) => {
+        const cs = getComputedStyle(el);
+        return {
+          fs: cs.fontSize,
+          lh: cs.lineHeight,
+          ls: cs.letterSpacing,
+          hidden: el.parentElement.getAttribute('aria-hidden'),
+        };
+      });
+      expect(xl.fs, 'литерал 40px — pages.css:1081').toBe('40px');
+      expect(xl.lh, '1.15 — pages.css:1081').toBe('46px');
+      expect(xl.ls, 'ls 0 — pages.css:1081 (0 вычисляется в normal)').toBe('normal');
+      expect(xl.hidden, 'лента aria-hidden (дубликат смысла)').toBe('true');
+    },
+  );
+
+  standTest(
+    'mdl: 1 колонка (375) → 2 с span big 2×2 / lead 2 (768) → 4 (1280)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await expect(page.locator(SEL_MDL.title)).toBeVisible();
+      const grid = page.locator(`${SEL_MDL.section} .mdl`);
+      const state = () =>
+        grid.evaluate((el) => {
+          const big = el.querySelector('.mdl__big');
+          const lead = el.querySelector('.mdl__lead');
+          return {
+            cols: getComputedStyle(el).gridTemplateColumns.split(' ').length,
+            bigRow: big ? getComputedStyle(big).gridRow : null,
+            bigCol: big ? getComputedStyle(big).gridColumn : null,
+            leadCol: lead ? getComputedStyle(lead).gridColumn : null,
+          };
+        });
+
+      await page.setViewportSize(VIEWPORTS.mobile);
+      expect((await state()).cols, 'мобильная база — 1 колонка').toBe(1);
+      expect(
+        (await state()).bigRow,
+        'span в базе не активен (1 колонка — span 2 порвал бы сетку)',
+      ).toBe('auto');
+
+      await page.setViewportSize(VIEWPORTS.tablet);
+      const md = await state();
+      expect(md.cols, 'md — 2 колонки (оригинал ≤1023)').toBe(2);
+      expect(md.bigRow, 'big — row span 2 от md').toBe('span 2');
+      expect(md.bigCol, 'big — col span 2 от md').toBe('span 2');
+      expect(md.leadCol, 'lead — col span 2 от md').toBe('span 2');
+
+      await page.setViewportSize(VIEWPORTS.xl);
+      expect((await state()).cols, 'lg — 4 колонки').toBe(4);
+    },
+  );
+
+  standTest('cvh: колонка gap 16 start', async ({ stand }) => {
+    const page = await stand('patterns/landing-section');
+    await expect(page.locator(SEL_CVH.title)).toBeVisible();
+    const cvh = await page.locator(`${SEL_CVH.section} .cvh`).evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { dir: cs.flexDirection, gap: cs.gap, align: cs.alignItems };
+    });
+    expect(cvh.dir, 'колонка').toBe('column');
+    expect(cvh.gap, 'зазор 16px — space-4').toBe('16px');
+    expect(cvh.align, 'прижато влево (pages.css:957)').toBe('flex-start');
+  });
+
+  standTest(
+    'VI-инвариант стекла (Implementation requirements п.1): в img:off backdrop-filter отключён правилом a11y/vi.css',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.evaluate(() => {
+        document.body.classList.add('vi', 'vi-img--off');
+      });
+      const state = await page.locator('#lsp-hero').evaluate((el) => {
+        const search = el.querySelector('.hro__search');
+        const tag = el.querySelector('.hro__tag');
+        return {
+          searchBlur: getComputedStyle(search).backdropFilter,
+          tagBlur: getComputedStyle(tag).backdropFilter,
+          // Пре-существующее поведение vi.css (T9.1): [class*='-photo']
+          // матчит и саму ui-section--photo — фото-секция в img:off скрыта
+          // ЦЕЛИКОМ (пилюля/теги не рендерятся). Пин задокументированного
+          // поведения: инвариант blur проверяется computed-значением.
+          sectionDisplay: getComputedStyle(el).display,
+        };
+      });
+      expect(state.searchBlur, 'blur пилюли отключён в img:off (фото скрыто)').toBe('none');
+      expect(state.tagBlur, 'blur тега отключён в img:off').toBe('none');
+      expect(
+        state.sectionDisplay,
+        'фото-секция скрыта в img:off (пре-существующее правило vi.css [class*=-photo])',
+      ).toBe('none');
     },
   );
 });

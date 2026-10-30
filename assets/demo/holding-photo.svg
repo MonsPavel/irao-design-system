@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" role="img" aria-label="Демо-фон фото-секции: производство Группы">
+  <!-- Демо-фон фото-секции (ui-section с модификатором photo) в каноне
+       ui-stat: тёмная производственная композиция в палитре системы (стекло
+       статов читается на тёмном), декоративен (alt="" и aria-hidden на слое
+       в каноне). -->
+  <rect width="960" height="480" fill="#002856"/>
+  <circle cx="820" cy="120" r="170" fill="#164B89" opacity="0.5"/>
+  <circle cx="120" cy="400" r="140" fill="#164B89" opacity="0.4"/>
+  <path d="M80 340c6-52 3-96-14-130h84c-17 34-20 78-14 130Z" fill="#8F9CBF" opacity="0.8"/>
+  <path d="M66 210h88" stroke="#8F9CBF" stroke-width="9" opacity="0.8"/>
+  <rect x="210" y="270" width="180" height="70" rx="6" fill="#F1F5FE" opacity="0.85"/>
+  <rect x="228" y="286" width="22" height="14" fill="#164B89"/>
+  <rect x="260" y="286" width="22" height="14" fill="#164B89"/>
+  <rect x="292" y="286" width="22" height="14" fill="#164B89"/>
+  <rect x="228" y="312" width="22" height="14" fill="#164B89"/>
+  <rect x="260" y="312" width="22" height="14" fill="#164B89"/>
+  <path d="M460 340V160" stroke="#F1F5FE" stroke-width="7" opacity="0.85"/>
+  <path d="M430 184h60" stroke="#F1F5FE" stroke-width="5" opacity="0.85"/>
+  <circle cx="460" cy="160" r="9" fill="#F26722"/>
+  <path d="M0 340h960" stroke="#F1F5FE" stroke-width="3" opacity="0.5"/>
+  <path d="M0 354h960" stroke="#164B89" stroke-width="20"/>
+  <circle cx="700" cy="300" r="6" fill="#F26722" opacity="0.85"/>
+  <circle cx="760" cy="250" r="4" fill="#F1F5FE" opacity="0.6"/>
+  <circle cx="660" cy="220" r="4" fill="#F1F5FE" opacity="0.6"/>
+</svg>

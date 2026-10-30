@@ -9,19 +9,35 @@
 
 Шапки/подвалы сайтов слишком различаются, чтобы быть компонентами системы
 (02-architecture §4, граница «компонент vs паттерн») — паттерн это
-документированный HTML-скелет; CSS-минимум (`hdp-*`) — зона сайта (в бою —
-`template_styles.css`; на стенде — `<style>` рядом, не в `dist`).
+документированный HTML-скелет. Каркас шапки — связки `hsp-*` в
+**паттерн-слое** (T17.13, прецедент таймлайна T17.10): единый исходник
+[`../patterns.css`](../patterns.css) → опциональный `dist/ui-patterns.css`
+(порядок в head: токены → core → patterns → сайт). Бренд-вид — сайт-зона
+(в бою — `template_styles.css`): VI-пилюля (у career-portal — 15px, рамка
+primary, glass-light — на слоте `hsp__action` поверх общего вида кнопки),
+размеры логотипа, letter-spacing пунктов.
+
+## Режимы каркаса (T17.13)
+
+- **`hsp` (базовый, static)** — внутренние страницы: рамка низа `muted`,
+  фон `surface` (surface-пара основы — единственные цвета каркаса).
+- **`hsp--overlay`** — главная: `absolute` поверх контента (`z-40`), без
+  рамки/фона — фон несёт hero-секция. Та же разметка, модификатор рядом
+  с `hsp` (пример спеки T17.13: `<header class="hsp hsp--overlay">`).
+- Меню-право скрыто в мобильной базе и включается от 768 (ступень канона
+  career-portal, header.css:131; mobile-first в слое).
 
 ## Состав
 
 | Блок | Компоненты | Примечания |
 |---|---|---|
 | Skip-link | `ui-skip-link` (T3.5) | первый элемент `body`, до шапки и контента |
-| `<header>` | каркас страницы (не компонент) | прямому ребёнку `body` — роль banner |
-| Основная навигация | `nav[aria-label]` + `ui-link` **`--nav`** (T16.3) + `ui-dropdown` (T6.1) | пункты — nav-вариант (fs-small, без подчёркивания); dropdown — навигационное назначение: `nav > ul > li > a`, без `role="menu"` |
-| Логотип | ссылка на главную (T4.6) | доступное имя; в бою — `img` с `alt` + `width`/`height` |
-| Дополнительная навигация | `nav[aria-label]` + кнопка VI (T9.1) + поиск | имя навигации отличается от основной |
-| Диалог поиска | копия паттерна [search-overlay](../search-overlay/README.md) (T7.6) | в бою — перед `</body>` |
+| `<header class="hsp">` | каркас страницы + связка слоя | прямому ребёнку `body` — роль banner; режимы `hsp` / `hsp--overlay` |
+| `hsp__inner` | `ui-container` + сетка слоя | «меню — логотип — меню» 1fr auto 1fr; max-width/паддинг-горизонталь несёт контейнер |
+| Основная навигация | `hsp__menu hsp__menu--left` + `ui-link` **`--nav`** (T16.3) + `ui-dropdown` (T6.1) | пункты — nav-вариант (fs-small, без подчёркивания); nowrap-строки с иконками — слой; dropdown — навигационное назначение: `nav > ul > li > a`, без `role="menu"` |
+| Логотип | `hsp__logo` (T4.6) | доступное имя; в бою — `img` с `alt` + `width`/`height`; размеры — сайт-зона |
+| Дополнительная навигация | `hsp__menu hsp__menu--right` + `hsp__action` (VI, T9.1) + поиск | имя навигации отличается от основной; слот действия — общий вид кнопки в слое, бренд-оболочка — сайт |
+| Диалог поиска | копия паттерна [search-overlay](../search-overlay/README.md) (T7.6) | в бою — перед `</body>`; вид формы `sop-*` — у паттерна search-overlay/сайта |
 
 ## Разметка
 
@@ -33,7 +49,7 @@
 ```html
 <body>
   <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>
-  <header class="hdp-header">…</header>   <!-- banner -->
+  <header class="hsp">…</header>          <!-- banner; главная — class="hsp hsp--overlay" -->
   <main id="main" tabindex="-1">…</main>
   <footer>…</footer>                       <!-- contentinfo, паттерн footer -->
 </body>
@@ -50,8 +66,8 @@
 ### Навигации: уникальные aria-label (Accessibility requirements)
 
 ```html
-<nav class="hdp-header__nav" aria-label="Основное меню">…</nav>
-<nav class="hdp-header__nav" aria-label="Дополнительное меню">…</nav>
+<nav class="hsp__menu hsp__menu--left" aria-label="Основное меню">…</nav>
+<nav class="hsp__menu hsp__menu--right" aria-label="Дополнительное меню">…</nav>
 ```
 
 Несколько навигаций на странице обязаны иметь **различимые имена** — иначе
@@ -61,7 +77,7 @@ dropdown'а (`aria-label="Школьникам и студентам"`) тоже
 ### Пункты навигаций: `ui-link ui-link--nav` (T16.3)
 
 ```html
-<nav class="hdp-header__nav" aria-label="Основное меню">
+<nav class="hsp__menu hsp__menu--left" aria-label="Основное меню">
   <a class="ui-link ui-link--nav" href="/vacancies/">Вакансии</a>
   …
 </nav>
@@ -99,7 +115,7 @@ README `ui-dropdown`). В разметке меню раскрыто (без `hi
 Демо — инлайновый svg + текст (без внешних файлов):
 
 ```html
-<a class="hdp-logo" href="/" aria-label="Интер РАО — на главную">…</a>
+<a class="hsp__logo" href="/" aria-label="Интер РАО — на главную">…</a>
 ```
 
 В бою — растровый/векторный файл по правилам T4.6 (`ui-image`): `alt`
@@ -114,11 +130,15 @@ README `ui-dropdown`). В разметке меню раскрыто (без `hi
 ### Кнопка VI (T9.1): в шапке на каждой странице
 
 ```html
-<button class="hdp-vi" type="button" data-ui-vi-toggle aria-pressed="false">
+<button class="hsp__action" type="button" data-ui-vi-toggle aria-pressed="false">
   …svg…
   <span>Версия для слабовидящих</span>
 </button>
 ```
+
+Слот `hsp__action` несёт общий вид кнопки (пилюля на токенах — слой,
+T17.13 п.2); бренд-оболочку (VI-пилюля career-portal: 15px, рамка primary,
+glass-light) сайт рисует поверх в `template_styles.css`.
 
 - Хук — `data-ui-vi-toggle`; модуль `IraoUI.vi` синхронизирует
   `aria-pressed` (состояние читается кнопками панели и этой кнопкой).
@@ -131,7 +151,7 @@ README `ui-dropdown`). В разметке меню раскрыто (без `hi
 ### Поиск: триггер — ссылка к диалогу search-overlay
 
 ```html
-<a class="hdp-search" href="/search/" data-ui-modal-target="sop-dialog">Поиск</a>
+<a class="ui-link ui-link--nav" href="/search/" data-ui-modal-target="sop-dialog">Поиск</a>
 ```
 
 Диалог — копия паттерна [search-overlay](../search-overlay/README.md)
@@ -164,9 +184,9 @@ id `data-ui-modal-target` откроет только первый диалог,
   интегратор
   вписывает её в `template.php` компонента меню; выпадающий раздел —
   шаблон с `data-ui-dropdown` (модуль уже в `ui.min.js`). Где стилизовать
-  меню: классы пунктов — из шаблона `bitrix:menu`, их внешний вид — в
-  `template_styles.css` сайта (связки `hdp-*` переносятся туда же); классы
-  `ui-*` не переопределяются.
+  меню: каркас (сетка/режимы/строки) несёт слой `hsp-*`; бренд-вид пунктов
+  (letter-spacing, hover-оттенки сверх `ui-link--nav`) — в
+  `template_styles.css` сайта; классы `ui-*` не переопределяются.
 - Кнопка VI — статичная часть `header.php`; подключение `ui-vi.min.css`
   последним и панель первым элементом `body` — README `ui-vi`
   (`bitrix/snippets/header-php.snippet.php`).
@@ -181,10 +201,12 @@ id `data-ui-modal-target` откроет только первый диалог,
   имя; dropdown — для навигации с подпунктами.
 - **Don't**: не оборачивайте `<header>` в `<main>`/секции (теряется banner);
   не ставьте `role="menu"` на навигационные меню; не дублируйте имена
-  навигаций; не прячьте кнопку VI на мобильных — ГОСТ Р 52872 предполагает
-  доступ на каждой странице.
+  навигаций. Каркас скрывает правое меню в мобильной базе (канон
+  career-portal, ≤767) — если VI живёт там, дайте на узких экранах другой
+  вход в панель (ГОСТ Р 52872 предполагает доступ на каждой странице).
 - **Don't**: не переносите визуал career-portal (шапка бренд-специфична,
-  Out of scope) — связки `hdp-*` сайты рисуют под себя из токенов `--ui-*`.
+  Out of scope) — бренд-строки (VI-пилюля, логотип-размеры) сайты рисуют
+  под себя из токенов `--ui-*` поверх каркаса слоя.
 - **Don't**: не оставляйте копию диалога поиска из шапки, если
   search-overlay уже на странице, — id `sop-dialog`/`sop-query` должны
   встречаться ровно один раз (см. «Поиск» выше).

@@ -37,13 +37,15 @@ const pilotDir = join(root, 'pilot', 'career-portal');
 const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8');
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8');
 const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
+// Канон hero — паттерн-слой с T17.15 (связка hro): пины блока — по слою.
+const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 
 const indexHtml = build.match(/function indexMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
 const companyHtml = build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
 
 describe('build.mjs — пять фоновых секций на ui-section--photo (T17.3 Scope)', () => {
-  it('hero: секция несёт модификатор, фон __bg + оверлей --fade-bottom (канон примера спеки)', () => {
-    expect(indexHtml).toContain('<section class="ui-section ui-section--photo cp-hero">');
+  it('hero: секция несёт модификатор и связку канона hro (T17.15), фон __bg + оверлей --fade-bottom (канон примера спеки)', () => {
+    expect(indexHtml).toContain('<section class="ui-section ui-section--photo hro">');
     expect(indexHtml).toContain('<div class="ui-section__bg" aria-hidden="true">');
     expect(indexHtml).toContain(
       '<div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>',
@@ -132,13 +134,10 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
   });
 
   it('вертикальная геометрия пяти блоков не изменилась: ритм ui-section гашится (padding: 0) — паритет высот compare ±4px', () => {
-    for (const block of [
-      '.cp-hero',
-      '.cp-production',
-      '.cp-holding',
-      '.cp-why-us',
-      '.cp-company-banner',
-    ]) {
+    // hero — канон hro (T17.15): блок перенесён в паттерн-слой, пин — по слою.
+    expect(blockOf(layerCss, '.hro'), '.hro найдено (слой, T17.15)').toBeTruthy();
+    expect(blockOf(layerCss, '.hro'), '.hro: ритм ui-section погашен').toContain('padding: 0;');
+    for (const block of ['.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block} найдено`).toBeTruthy();
       expect(blockOf(pilotCss, block), `${block}: ритм ui-section погашен`).toContain(
         'padding: 0;',
@@ -147,13 +146,11 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
   });
 
   it('позиционирование корней сохранено (якорь absolute-слоёв)', () => {
-    for (const block of [
-      '.cp-hero',
-      '.cp-production',
-      '.cp-holding',
-      '.cp-why-us',
-      '.cp-company-banner',
-    ]) {
+    // hero — канон hro (T17.15): пин position — по слою.
+    expect(blockOf(layerCss, '.hro'), '.hro: position: relative (слой)').toContain(
+      'position: relative;',
+    );
+    for (const block of ['.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block}: position: relative`).toContain(
         'position: relative;',
       );

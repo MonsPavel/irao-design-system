@@ -77,3 +77,10 @@ coverage-json/
 pilot/career-portal/data/
 pilot/career-portal/dist/
 pilot/career-portal/compare-output/
+# Одноразовый скретч корня репозитория (вставки-фрагменты задач, не исходники
+# проекта; живут вне git)
+tmp-*.html
+# T8.2: эталон паттерна «Детальная страница» (<img> без слэша) — тот же
+# случай, что form-page/landing-section: гейт разметки — lint:html (void-style),
+# prettier печатал бы самозакрытые void-элементы.
+patterns/detail-page/detail-page.html

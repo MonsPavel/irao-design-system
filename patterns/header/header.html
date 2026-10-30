@@ -1,16 +1,24 @@
 <!--
-  Паттерн «Header» (T7.6): референс-разметка шапки сайта — skip-link (T3.5)
-  + header-лендмарка (banner) + nav-лендмарки с уникальными aria-label + dropdown
-  (T6.1) + логотип (T4.6) + кнопка VI (T9.1) + поиск. Источник решений —
-  header.html career-portal: переносится КОМПОЗИЦИЯ, не стили (визуал —
-  зона сайта, Out of scope).
+  Паттерн «Header» (T7.6; каркас — паттерн-слой с T17.13): референс-разметка
+  шапки сайта — skip-link (T3.5) + header-лендмарка (banner) + nav-лендмарки
+  с уникальными aria-label + dropdown (T6.1) + логотип (T4.6) + кнопка VI
+  (T9.1) + поиск. Источник решений — header.html career-portal: переносится
+  КОМПОЗИЦИЯ, не бренд-визуал.
 
-  Границы (patterns/README.md, 02-architecture §7): НОВОГО CSS В СИСТЕМЕ НЕТ —
-  подключены только компоненты; связующие стили ниже (hdp-*) — зона сайта
-  (в бою — template_styles.css), на стенде они живут <style>'ом рядом
-  (style-under-body на стенде легален по inline-директиве перед style:
-  фрагмент — не полный документ; на стенде он идёт на уровень body,
-  чтобы дать шапке честную роль banner).
+  Границы (patterns/README.md, 02-architecture §7): каркас шапки — связки
+  hsp-* в ПАТТЕРН-СЛОЕ (patterns/patterns.css → опциональный
+  dist/ui-patterns.css, T17.13 — прецедент таймлайна T17.10): сетка
+  «меню — логотип — меню» 1fr auto 1fr, режимы static / --overlay, nowrap-
+  пункты, слоты логотипа и действия. <style> в док-HTML больше нет (пин
+  синхронности patterns-layer.test.js). Бренд-специфика — сайт-зона
+  (в бою — template_styles.css): VI-пилюля (15px, рамка primary, glass-light
+  career-portal — на слоте hsp__action поверх общего вида кнопки), размеры
+  логотипа, letter-spacing 0.01em пунктов (оговорка пилота).
+
+  Режимы (слой): базовый hsp — static с рамкой низа muted (внутренние
+  страницы); hsp--overlay — absolute поверх контента главной (z-40, без
+  рамки/фона — фон несёт hero). Здесь показан базовый; overlay — та же
+  разметка с классом hsp--overlay (пример — каркас главной career-portal).
 
   Разметка ставится НА УРОВНЕ body: skip-link → header → main → footer —
   тогда у шапки честная роль banner (внутри main роли banner нет).
@@ -23,97 +31,20 @@
   из паттерна search-overlay (T7.6, источник правды — он); в бою держите её
   перед </body> (README ui-modal, Bitrix).
 -->
-<!-- Связки hdp-* (зона сайта) живут <style> рядом — подставка стенда; в бою
-     переносите их в template_styles.css (README паттерна). На стенде
-     фрагмент идёт на уровень body (banner) — исключение «style прямо в body»
-     объявляет сборка стенда (showcase/build.mjs), не этот файл. -->
-<style>
-  /* Связующие стили паттерна — зона сайта (не dist): только токены --ui-*,
-     дисциплина системы (без hex, важных объявлений, inline-стилей) соблюдается и здесь. */
-  .hdp-header {
-    box-sizing: border-box; /* ADR-0002: корень связки объявляет сам */
-    border-bottom: var(--ui-border-width) solid var(--ui-color-border);
-    background-color: var(--ui-color-surface);
-  }
-
-  /* Мобильная база: колонки без позиционирования; рост — min-width из
-     шкалы брейкпоинтов T2.5 (медиазапрос ниже — от md). */
-  .hdp-header__inner {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ui-space-3);
-    padding-top: var(--ui-space-3);
-    padding-bottom: var(--ui-space-3);
-  }
-
-  .hdp-header__nav {
-    box-sizing: border-box;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--ui-space-2) var(--ui-space-4);
-  }
-
-  .hdp-logo {
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ui-space-2);
-    font-weight: var(--ui-fw-h3);
-  }
-
-  /* Кнопка VI и триггер поиска: ghost-кнопка сайта (замена
-     .header__link--vi/--search career-portal). Фокус рисует
-     base/focus.css (ADR-0001) — outline не переопределяется. */
-  .hdp-vi,
-  .hdp-search {
-    box-sizing: border-box;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--ui-space-2);
-    padding: var(--ui-space-2) var(--ui-space-3);
-    border: var(--ui-border-width) solid var(--ui-color-border);
-    border-radius: var(--ui-radius-pill);
-    color: var(--ui-color-text);
-  }
-
-  @media (min-width: 768px) {
-    .hdp-header__inner {
-      flex-direction: row;
-      justify-content: space-between;
-    }
-  }
-
-  /* Связка скопированного диалога search-overlay (источник правды —
-     patterns/search-overlay/search-overlay.html, стиль sop-form — там же). */
-  .sop-form {
-    box-sizing: border-box; /* ADR-0002: корень связки объявляет сам */
-    display: flex;
-    flex-wrap: wrap;
-    align-items: end;
-    gap: var(--ui-space-3);
-    max-width: 40rem;
-  }
-
-  .sop-form .ui-field {
-    flex: 1 1 16rem;
-  }
-</style>
-
 <!-- Skip-link (T3.5): первый элемент body, до шапки и любого контента;
      цель — <main id="main" tabindex="-1"> (ставит каркас страницы). -->
 <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>
 
-<header class="hdp-header">
-  <div class="ui-container hdp-header__inner">
+<header class="hsp">
+  <div class="ui-container hsp__inner">
     <!-- Основная навигация: nav-лендмарка с aria-label (лендмарк должен
          иметь имя, когда их несколько). Dropdown T6.1: nav > ul > li > a,
          без role="menu" (ссылки-переходы — не команды). -->
-    <nav class="hdp-header__nav" aria-label="Основное меню">
+    <nav class="hsp__menu hsp__menu--left" aria-label="Основное меню">
       <!-- Пункты навигации — ui-link--nav (T16.3): fs-small/fw-small, без
            подчёркивания (структурный контекст nav — WCAG 1.4.1 допускает);
-           inline-ссылки контента остаются на default ui-link. -->
+           inline-ссылки контента остаются на default ui-link. Строки с
+           иконкой и nowrap-режим несёт каркас (.hsp__menu .ui-link). -->
       <a class="ui-link ui-link--nav" href="/vacancies/">Вакансии</a>
 
       <div class="ui-dropdown" data-ui-dropdown>
@@ -151,10 +82,10 @@
 
     <!-- Логотип (T4.6): ссылка на главную с доступным именем. Демо —
          инлайновый svg + текст (без внешних файлов); в бою — img по правилам
-         T4.6: alt + width/height (см. README паттерна). -->
-    <a class="hdp-logo" href="/" aria-label="Интер РАО — на главную">
+         T4.6: alt + width/height (см. README паттерна). Размеры img —
+         сайт-зона (у career-portal 105px). -->
+    <a class="hsp__logo" href="/" aria-label="Интер РАО — на главную">
       <svg
-        class="hdp-logo__mark"
         aria-hidden="true"
         focusable="false"
         width="32"
@@ -177,14 +108,17 @@
           stroke-linecap="round"
         ></path>
       </svg>
-      <span class="hdp-logo__text">Интер РАО</span>
+      <span>Интер РАО</span>
     </a>
 
     <!-- Дополнительная навигация: aria-label отличается от основной —
          лендмарки navigation различимы скринридеру (Accessibility
-         requirements T7.6). Кнопка VI (T9.1) — на каждой странице. -->
-    <nav class="hdp-header__nav" aria-label="Дополнительное меню">
-      <button class="hdp-vi" type="button" data-ui-vi-toggle aria-pressed="false">
+         requirements T7.6). Кнопка VI (T9.1) — на каждой странице, вид —
+         слот hsp__action (общий вид кнопки несёт слой, бренд-оболочка —
+         сайт). В мобильной базе правое меню скрыто — канон оригинала
+         (≤767, ступень каркаса). -->
+    <nav class="hsp__menu hsp__menu--right" aria-label="Дополнительное меню">
+      <button class="hsp__action" type="button" data-ui-vi-toggle aria-pressed="false">
         <svg
           aria-hidden="true"
           focusable="false"
@@ -207,7 +141,7 @@
       <!-- Поиск: триггер-ссылка к диалогу search-overlay (T7.6) —
            без JS переход на страницу результатов, с JS модуль откроет
            диалог (он в конце сниппета). -->
-      <a class="hdp-search" href="/search/" data-ui-modal-target="sop-dialog">
+      <a class="ui-link ui-link--nav" href="/search/" data-ui-modal-target="sop-dialog">
         <svg
           aria-hidden="true"
           focusable="false"
@@ -228,7 +162,7 @@
 <!--
   Диалог поиска — копия паттерна search-overlay (T7.6): в бою держите перед
   </body>; здесь — рядом с шапкой для самодостаточности сниппета. Подробная
-  дока и связующие стили (sop-*) — patterns/search-overlay/.
+  дока и связки (sop-*) — patterns/search-overlay/.
 
   Don't (ловушка дублей id): на странице ровно ОДИН диалог sop-dialog/sop-query.
   Если паттерн search-overlay уже подключён (тот же id в include-файле/footer),

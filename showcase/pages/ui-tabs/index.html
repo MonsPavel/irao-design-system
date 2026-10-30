@@ -1,4 +1,4 @@
-<!-- Стенд ui-tabs (T6.2; T14.9): три секции. #uitab-static — статические табы
+<!-- Стенд ui-tabs (T6.2; T14.9; T17.11): четыре секции. #uitab-static — статические табы
      канонического паттерна (контент карьерных треков career-portal, .track-tabs
      js/tracks.js): табы — ссылки на панели, БЕЗ hidden/ролей/aria-selected в
      разметке — их ставит модуль (без JS все панели видимы, e2e проверяет
@@ -11,8 +11,13 @@
      #uitab-pill (T14.9) — модификатор ui-tabs--pill (вид nav.tabs-pill
      career-portal, education.html) + начальный выбор из разметки:
      aria-current="page" на третьем табе — модуль выбирает его при
-     инициализации (silent); атрибут — семантика автора разметки, CSS на него
-     не реагирует, без JS все панели видимы. Ссылки
+     инициализации (silent); атрибут — семантика автора разметки.
+     #uitab-nav (T17.11) — навигационный набор: межстраничные ССЫЛКИ без
+     панелей, data-ui-tabs НЕ ставится (контракт T13.6 — модуль не
+     инициализирует набор); активный раздел — aria-current="page": модификатор
+     --pill красит активную пилюлю по нему (покой и hover). Раскладка страницы
+     (сетка 5×1fr, маргины 24/48) — канон nvp паттерн-слоя (T17.11), на стенд
+     слоя нет — лента остаётся flex с переносом. Ссылки
      после секций — цели сценариев Tab-выхода. -->
 <section id="uitab-static" aria-labelledby="uitab-static-heading">
   <h2 id="uitab-static-heading">Статические табы (канонический паттерн)</h2>
@@ -63,8 +68,9 @@
     пилюли без рамки на тинт-треке, активная — заливка primary; hover — подпись primary без заливки.
     Клавиатура и ARIA — общие с базой. <code>aria-current="page"</code> на третьем табе — начальный
     выбор из разметки: модуль выбирает его при инициализации (silent), не первый таб; дубли атрибута
-    — первый + <code>console.warn</code>. Без JS все панели видимы — CSS на
-    <code>aria-current</code> не реагирует.
+    — первый + <code>console.warn</code>. Без JS все панели видимы; активная пилюля в этом
+    состоянии красится по <code>aria-current</code> (T17.11), после инициализации — по
+    <code>aria-selected</code> (модуль ставит его всем табам).
   </p>
   <div class="ui-tabs ui-tabs--pill" data-ui-tabs>
     <div class="ui-tabs__list">
@@ -108,6 +114,28 @@
       >Элемент после табов (цель Tab-выхода)</a
     >
   </p>
+</section>
+
+<section id="uitab-nav" aria-labelledby="uitab-nav-heading">
+  <h2 id="uitab-nav-heading">Навигационный набор — ссылки без панелей (T17.11)</h2>
+  <p class="ui-showcase-stand__note">
+    Межстраничная навигация разделов на <code>ui-tabs--pill</code>: ссылки на страницы, панелей нет
+    и <code>data-ui-tabs</code> не ставится — модуль такие наборы не инициализирует (контракт
+    T13.6: табы = панели). Ролей <code>tablist/tab</code> и <code>aria-selected</code> здесь нет;
+    активный раздел несёт <code>aria-current="page"</code> — модификатор красит активную пилюлю по
+    нему (заливка primary + подпись text-on-dark, hover заливку не гасит). Раскладка страницы
+    (сетка 5×1fr «сетка 264», маргины 24/48) — канон <code>nvp</code> паттерн-слоя; на стенде слой
+    не подключён — лента остаётся flex с переносом.
+  </p>
+  <nav class="ui-tabs ui-tabs--pill" aria-label="Разделы школьникам и студентам">
+    <div class="ui-tabs__list">
+      <a class="ui-tabs__tab" href="#uitab-nav">Практики</a>
+      <a class="ui-tabs__tab" href="#uitab-nav">Стажировки</a>
+      <a class="ui-tabs__tab" href="#uitab-nav" aria-current="page">Целевое обучение</a>
+      <a class="ui-tabs__tab" href="#uitab-nav">Карьерный трек</a>
+      <a class="ui-tabs__tab" href="#uitab-nav">Мероприятия</a>
+    </div>
+  </nav>
 </section>
 
 <section id="uitab-json" aria-labelledby="uitab-json-heading">

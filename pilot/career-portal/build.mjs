@@ -171,9 +171,13 @@ function selectField({
   const opts = buildOptions(options, selected);
   const select = `<select class="ui-field__select" id="${fieldId}" name="${name}"${required ? ' required' : ''}${ariaLabel ? ` aria-label="${esc(ariaLabel)}"` : ''}${pill ? ' data-ui-select="wrap"' : ' data-ui-select'}>${opts}</select>`;
   if (pill) {
-    // пилюля фильтра: геометрию рисует сайт (cp-pill), триггер растягивается.
-    // compact здесь игнорируется осознанно: пилюля — сайт-зона (cp-pill),
-    // компактность — режим ui-field; pill-вызовы compact не передают.
+    // пилюля фильтра: геометрию несёт модификатор ДС ui-select--pill (T17.12 —
+    // перенос cp-pill из сайт-зоны; рамка/радиус/фон — компонент), триггер
+    // растягивается. Ширина пилюли — раскладка потребителя (hero 12rem —
+    // правило сайта; каталог 260px — канон lpp-filters слоя; сайдбар —
+    // растягивает flex-столб). compact здесь игнорируется осознанно: пилюля —
+    // не ui-field, компактность — режим ui-field; pill-вызовы compact не
+    // передают.
     // Подпись поля — label[for] РЯДОМ с обёрткой (канон ui-select после
     // ревью T7.3: имя получают и нативный select, и построенный триггер —
     // пара APG listbox-button); в оригинале видимых подписей нет —
@@ -181,7 +185,7 @@ function selectField({
     // приёма снята — один приём в одном месте).
     // Без label — прежний режим с aria-label (сайдбар вакансий, EPIC-14).
     const labelHtml = label ? `<label class="ui-vh" for="${fieldId}">${esc(label)}</label>\n` : '';
-    return `${labelHtml}<div class="cp-pill">${select}</div>`;
+    return `${labelHtml}<div class="ui-select--pill">${select}</div>`;
   }
   return `<div class="ui-field${compact ? ' ui-field--compact' : ''}${required ? ' ui-field--required' : ''}">
   <label class="ui-field__label" for="${fieldId}">${esc(label)}${required ? ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>` : ''}</label>
@@ -247,11 +251,10 @@ function breadcrumbs(items) {
  *  Межстраничные ССЫЛКИ, не табы: модуль ui-tabs.js НЕ подключается —
  *  data-ui-tabs требует панели у каждого таба (контракт T13.6), а ссылки
  *  ведут на страницы; активный раздел — семантика aria-current="page"
- *  (прецедент ui-chip T14.8/ui-breadcrumbs). CSS ДС рисует активную пилюлю
- *  по aria-selected — пару активного состояния несёт сайт-зона .cp-subnav
- *  (реплика :where([aria-selected='true']) на токенах). Сетка repeat(5,1fr)
- *  («сетка 264») и nav-маргины 24/48 — зона страницы (README ui-tabs
- *  «Модификатор --pill»): тоже сайт-зона .cp-subnav.
+ *  (прецедент ui-chip T14.8/ui-breadcrumbs). T17.11: активную пилюлю по
+ *  aria-current красит сам модификатор --pill (покой + hover) — сайт-зонная
+ *  реплика 0,4,0 снята. Сетка repeat(5,1fr) («сетка 264») и nav-маргины
+ *  24/48 — канон nvp паттерн-слоя (dist/ds/ui-patterns.css, T17.11).
  *
  *  Параметр current — href текущей страницы (aria-current="page", ровно
  *  один). Потребители: educationMain/eventsMain/careerTrackMain. */
@@ -269,7 +272,7 @@ function subnav(current) {
         `      <a class="ui-tabs__tab" href="${href}"${href === current ? ' aria-current="page"' : ''}>${label}</a>`,
     )
     .join('\n');
-  return `<nav class="ui-tabs ui-tabs--pill cp-subnav" aria-label="Разделы школьникам и студентам">
+  return `<nav class="ui-tabs ui-tabs--pill nvp" aria-label="Разделы школьникам и студентам">
   <div class="ui-tabs__list">
 ${tabs}
   </div>
@@ -284,9 +287,11 @@ ${tabs}
  *  потребитель панели, дублирования не плодить); вариант кнопки —
  *  параметр: vacancies — accent «Найти», events-search — primary «найти»
  *  (оригинал). role="search" на обеих — канон поисковой формы WAI (в
- *  оригинале role стоит только на vacancies — их недосмотр). */
+ *  оригинале role стоит только на vacancies — их недосмотр).
+ *  T17.12: вид строки — канон lpp-find паттерн-слоя (dist/ds/
+ *  ui-patterns.css; сайт-зонный класс cp-find-bar снят). */
 function findBar({ action, placeholder, label, text, variant = 'accent' }) {
-  return `<form class="cp-find-bar" action="${esc(action)}" method="get" role="search">
+  return `<form class="lpp-find" action="${esc(action)}" method="get" role="search">
   <div class="ui-field">
     <input class="ui-field__input" type="search" name="q" placeholder="${esc(placeholder)}" aria-label="${esc(label)}">
   </div>
@@ -511,29 +516,40 @@ function faq(items) {
   return `<h2 class="ui-h2">Вопросы и ответы</h2>\n<div class="ui-accordion ui-accordion--faq">\n${html}\n</div>`;
 }
 
-/** таймлайн этапов (сайт-зона — в ДС нет; T16.12: заголовок — ui-h6 20/500
- *  color-text (.timeline__title), текст — muted (.timeline__text)) */
+/** таймлайн этапов — канон паттерна patterns/timeline, связки tlp-* слоя
+ *  (T17.10): li.tlp__stage → span.tlp__dot (номер — видимый текст, WCAG 1.3.1)
+ *  → h3.ui-h6 (T16.12: заголовок 20/500 color-text (.timeline__title)) →
+ *  ui-small muted (.timeline__text). role="list" на обёртке ol — reset
+ *  снимает list-style, Safari/VoiceOver теряет роль списка (конвенция
+ *  ui-breadcrumbs; html-validate пилотский dist не валидирует). */
 function timeline(steps) {
   return steps
     .map(
-      (step, index) => `<div class="cp-timeline__stage">
-  <div class="cp-timeline__dot">${index + 1}</div>
-  <div class="ui-h6">${esc(step.title)}</div>
+      (step, index) => `<li class="tlp__stage">
+  <span class="tlp__dot">${index + 1}</span>
+  <h3 class="ui-h6">${esc(step.title)}</h3>
   <p class="ui-small ui-text--muted">${esc(step.text)}</p>
-</div>`,
+</li>`,
     )
     .join('\n');
 }
 
 /* ── каркас страницы ── */
 
+/* Шапка/подвал — каркасы ПАТТЕРН-СЛОЯ (T17.13): разметка несёт классы
+   hsp-/ftp- из ds/ui-patterns.css (единый исходник patterns/patterns.css —
+   «канон исполняем», урок T16.5 о дрейфе копипасты); бренд-специфика —
+   тонкие строки сайт-зоны в pilot.css (hover-accent футера, VI-пилюля,
+   логотип-размеры, letter-spacing оговорка). Режимы шапки: базовый hsp —
+   static (внутренние страницы), hsp--overlay — главная (absolute z-40). */
 function headerHtml({ staticHeader = false }) {
-  const modifier = staticHeader ? ' cp-header--static' : '';
-  return `<header class="cp-header${modifier}">
-  <div class="ui-container cp-header__inner">
-    <nav class="cp-header__menu cp-header__menu--left" aria-label="Основное меню">
+  const mode = staticHeader ? '' : ' hsp--overlay';
+  return `<header class="hsp${mode}">
+  <div class="ui-container hsp__inner">
+    <nav class="hsp__menu hsp__menu--left" aria-label="Основное меню">
       <!-- Пункты навигации — ui-link--nav (T16.3): fs-small/fw-small, без
-           подчёркивания, hover opacity — пара .header__link оригинала. -->
+           подчёркивания, hover opacity — пара .header__link оригинала;
+           inline-flex/nowrap строк несёт каркас (.hsp__menu .ui-link). -->
       <a class="ui-link ui-link--nav" href="vacancies.html">Вакансии</a>
       <div class="ui-dropdown" data-ui-dropdown>
         <button class="ui-dropdown__trigger" type="button" id="cp-sections-trigger">
@@ -552,17 +568,19 @@ function headerHtml({ staticHeader = false }) {
       <a class="ui-link ui-link--nav" href="media.html">Медиа</a>
     </nav>
 
-    <a class="cp-header__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
+    <a class="hsp__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
       <img src="assets/icons/logo-header.svg" alt="Интер РАО ЕЭС — энергии для успеха" width="105" height="100">
     </a>
 
-    <nav class="cp-header__menu cp-header__menu--right" aria-label="Дополнительное меню">
-      <button class="cp-header__vi" type="button" data-ui-vi-toggle aria-pressed="false">
+    <nav class="hsp__menu hsp__menu--right" aria-label="Дополнительное меню">
+      <!-- VI-пилюля — бренд-строка сайт-зоны на слоте hsp__action (общий
+           вид кнопки несёт слой, Implementation requirements п.2 T17.13). -->
+      <button class="hsp__action" type="button" data-ui-vi-toggle aria-pressed="false">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3.4" stroke="currentColor" stroke-width="2"/></svg>
         <span>Версия для слабовидящих</span>
       </button>
       <a class="ui-link ui-link--nav" href="index.html#contacts">Контакты</a>
-      <a class="cp-header__search ui-link ui-link--nav" href="vacancies.html" data-ui-modal-target="cp-search-dialog">
+      <a class="ui-link ui-link--nav" href="vacancies.html" data-ui-modal-target="cp-search-dialog">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="2"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Поиск
       </a>
@@ -613,9 +631,9 @@ function viPanelHtml() {
 }
 
 function footerHtml() {
-  return `<footer class="cp-footer" id="contacts">
-  <div class="ui-container cp-footer__inner">
-    <a class="cp-footer__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
+  return `<footer class="ftp" id="contacts">
+  <div class="ui-container ftp__inner">
+    <a class="ftp__logo" href="index.html" aria-label="Интер РАО ЕЭС — на главную">
       <img src="assets/icons/logo-footer.svg" alt="Интер РАО ЕЭС" width="137" height="131">
     </a>
 
@@ -623,39 +641,42 @@ function footerHtml() {
          без подчёркивания (пункты навигации в nav-структуре, WCAG 1.4.1);
          цвет в покое и :visited фиксирует сайт-зона pilot.css (visited
          оригинал не задаёт — потемнения нет), hover — accent оригинала
-         (footer.css:43,76) -->
+         (footer.css:43,76); шаг колонки/nowrap — каркас ftp__links слоя. -->
     <nav aria-label="Меню подвала">
-      <ul class="cp-footer__links">
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="vacancies.html">Вакансии</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="internships.html">Школьникам и студентам</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="media.html">Медиа</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="#">Политика конфиденциальности</a></li>
-        <li><a class="cp-footer__link ui-link ui-link--nav" href="#">Правила обработки персональных данных</a></li>
+      <ul class="ftp__links">
+        <li><a class="ui-link ui-link--nav" href="vacancies.html">Вакансии</a></li>
+        <li><a class="ui-link ui-link--nav" href="internships.html">Школьникам и студентам</a></li>
+        <li><a class="ui-link ui-link--nav" href="media.html">Медиа</a></li>
+        <li><a class="ui-link ui-link--nav" href="#">Политика конфиденциальности</a></li>
+        <li><a class="ui-link ui-link--nav" href="#">Правила обработки персональных данных</a></li>
       </ul>
     </nav>
 
-    <div class="cp-footer__contacts">
-      <address class="cp-footer__contact">
-        <span class="cp-footer__contact-label">Адрес</span>
+    <div class="ftp__contacts">
+      <address class="ftp__contact">
+        <span class="ftp__contact-label ui-text--muted">Адрес</span>
         <span>ул. Большая Пироговская, д. 27, стр. 1, г. Москва, Россия, 119435</span>
       </address>
-      <div class="cp-footer__contact-group">
-        <div class="cp-footer__contact">
-          <span class="cp-footer__contact-label">Телефон</span>
-          <a class="cp-footer__contact-link ui-link ui-link--nav" href="tel:+74956648840">+7 495 664-88-40</a>
+      <div class="ftp__contact-group">
+        <div class="ftp__contact">
+          <span class="ftp__contact-label ui-text--muted">Телефон</span>
+          <a class="ui-link ui-link--nav" href="tel:+74956648840">+7 495 664-88-40</a>
         </div>
-        <div class="cp-footer__contact">
-          <span class="cp-footer__contact-label">Email</span>
-          <a class="cp-footer__contact-link ui-link ui-link--nav" href="mailto:career@interrao.ru">career@interrao.ru</a>
+        <div class="ftp__contact">
+          <span class="ftp__contact-label ui-text--muted">Email</span>
+          <a class="ui-link ui-link--nav" href="mailto:career@interrao.ru">career@interrao.ru</a>
         </div>
       </div>
     </div>
 
-    <div class="cp-footer__right">
-      <ul class="cp-footer__socials">
-        <li><a class="cp-footer__social" href="#" aria-label="ВКонтакте"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.7 17.4c-4.9 0-7.7-3.4-7.8-9h2.5c.1 4.2 1.9 5.9 3.4 6.3V8.4h2.3v3.6c1.4-.2 2.9-1.8 3.4-3.6h2.3c-.4 2.2-2 3.9-3.1 4.5 1.1.6 2.9 2 3.6 4.5h-2.6c-.5-1.7-1.9-3-3.7-3.2v3.2h-.3z"/></svg></a></li>
-        <li><a class="cp-footer__social" href="#" aria-label="Одноклассники"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.8a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zM6.4 7.2a5.6 5.6 0 1111.2 0 5.6 5.6 0 01-11.2 0zm1.2 7.3c1.3.5 2.8.8 4.4.8 1.6 0 3-.3 4.4-.8l.8 1.8c-1 .4-2 .7-3.2.8l2.9 4.2-1.8 1.2-3.1-4.5-3.1 4.5-1.8-1.2 2.9-4.2c-1.2-.1-2.2-.4-3.2-.8l.8-1.8z"/></svg></a></li>
-        <li><a class="cp-footer__social" href="#" aria-label="Rutube"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h10.5A5.5 5.5 0 0120 9.5c0 2.6-1.8 4.8-4.2 5.4L20 20h-4l-3.8-4.8H8V20H4V4zm4 3.6v4h6.3a2 2 0 000-4H8z"/></svg></a></li>
+    <div class="ftp__right">
+      <!-- Соц-кнопки — «по оригиналу» (T17.13, остаток §8.3 REPORT): вид
+           контрола — ui-button--round (T17.9), пара 36px blue-50 → hover
+           primary — хуками слоя (ftp__social). -->
+      <ul class="ftp__socials">
+        <li><a class="ui-button ui-button--round ftp__social" href="#" aria-label="ВКонтакте"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.7 17.4c-4.9 0-7.7-3.4-7.8-9h2.5c.1 4.2 1.9 5.9 3.4 6.3V8.4h2.3v3.6c1.4-.2 2.9-1.8 3.4-3.6h2.3c-.4 2.2-2 3.9-3.1 4.5 1.1.6 2.9 2 3.6 4.5h-2.6c-.5-1.7-1.9-3-3.7-3.2v3.2h-.3z"/></svg></a></li>
+        <li><a class="ui-button ui-button--round ftp__social" href="#" aria-label="Одноклассники"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3.8a3.4 3.4 0 100 6.8 3.4 3.4 0 000-6.8zM6.4 7.2a5.6 5.6 0 1111.2 0 5.6 5.6 0 01-11.2 0zm1.2 7.3c1.3.5 2.8.8 4.4.8 1.6 0 3-.3 4.4-.8l.8 1.8c-1 .4-2 .7-3.2.8l2.9 4.2-1.8 1.2-3.1-4.5-3.1 4.5-1.8-1.2 2.9-4.2c-1.2-.1-2.2-.4-3.2-.8l.8-1.8z"/></svg></a></li>
+        <li><a class="ui-button ui-button--round ftp__social" href="#" aria-label="Rutube"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 4h10.5A5.5 5.5 0 0120 9.5c0 2.6-1.8 4.8-4.2 5.4L20 20h-4l-3.8-4.8H8V20H4V4zm4 3.6v4h6.3a2 2 0 000-4H8z"/></svg></a></li>
       </ul>
       <p class="ui-small">© 1998–2026, ПАО «Интер РАО»</p>
     </div>
@@ -959,7 +980,6 @@ const WHY_US = [
 const STUDENTS = [
   {
     tone: 'peach',
-    btn: 'orange',
     title: 'Стажировки и практики',
     text: 'Стажировки и практики — уникальный шанс получить опыт в энергетике!',
     illu: 'assets/images/students-illu-boy.png',
@@ -967,7 +987,6 @@ const STUDENTS = [
   },
   {
     tone: 'navy',
-    btn: 'white',
     title: 'Целевое обучение',
     text: 'Проходи целевое обучение, чтобы влиться в профессию, и получай поддержку на старте своей карьеры',
     illu: 'assets/images/students-illu-teacher2.png',
@@ -975,7 +994,6 @@ const STUDENTS = [
   },
   {
     tone: 'light',
-    btn: 'navy',
     title: 'Карьерный трек',
     text: 'Найди лучшие возможности для профессионального роста вместе с нами!',
     illu: 'assets/images/students-illu-career2.png',
@@ -1093,25 +1111,34 @@ function indexMain() {
   );
 
   const studentCards = STUDENTS.map(
-    (card) => `      <article class="cp-students__card cp-students__card--${card.tone}">
-        <div>
+    (
+      card,
+    ) => `      <a class="lnk-card lnk-card--${card.tone}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">
+        <div class="lnk-card__body">
           <h3 class="ui-h4">${esc(card.title)}</h3>
           <p class="ui-small">${esc(card.text)}</p>
         </div>
-        <img class="cp-students__card-illu" src="${esc(card.illu)}" alt="" loading="lazy">
-        <a class="cp-students__card-btn cp-students__card-btn--${card.btn}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">${ARROW}</a>
-      </article>`,
+        <img class="lnk-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">
+        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">${ARROW}</span>
+      </a>`,
   ).join('\n');
 
   const employerLogos = Array.from(
     { length: 11 },
     (_, index) =>
-      `      <img class="cp-employers__card" src="assets/logos/employer-2086-${1830 + index}.png" alt="Работодатель Группы" width="197" height="108" loading="lazy">`,
+      `      <img class="lgo-card" src="assets/logos/employer-2086-${1830 + index}.png" alt="Работодатель Группы" width="197" height="108" loading="lazy">`,
   ).join('\n');
 
   const mediaCards = [
-    mediaHomeCard(MEDIA_HOME[0], ' cp-media-card--big'),
-    `      <div class="cp-media__lead">
+    // Сетка «Медиа» — канон mdl (T17.15): mdl__lead — сводка 2 колонки.
+    // big-карточка БЕЗ mdl__big: правило span 2×2 не применялось с клона
+    // (в разметке был опечаточный cp-media-card--big мимо селектора
+    // cp-media__card--big) — одобренные высоты/скрин-пары сняты без span
+    // (замер 27.10: активация +214px docHeight index, +3.1% > порога
+    // compare ±1%); канон mdl__big в слое есть, активация —
+    // design-decision владельца.
+    mediaHomeCard(MEDIA_HOME[0]),
+    `      <div class="mdl__lead">
         <h3 class="ui-h4">${esc(MEDIA_HOME[0].caption)}</h3>
         <time class="ui-small ui-text--muted">19.02.26</time>
         <p class="ui-small">Молодые люди приобретают опыт по основным для компании направлениям: электро-, теплоэнергетика и техника; энергетическое машиностроение; электрические станции, сети и системы; тепловые электрические станции.</p>
@@ -1133,28 +1160,31 @@ function indexMain() {
     </button></li>`,
   ).join('\n');
 
-  return `<section class="ui-section ui-section--photo cp-hero">
+  return `<section class="ui-section ui-section--photo hro">
   <!-- фото-фон — ui-section--photo (T17.3): слои __bg/__overlay ДС
-       (z-пара «контент над фоном»), оверлей — канон --fade-bottom -->
+       (z-пара «контент над фоном»), оверлей — канон --fade-bottom.
+       Связка hero — канон hro паттерн-слоя (T17.15): контент/заголовок/
+       пилюля поиска/лента тегов; тон тега — класс сайт-зоны на хуке
+       --hro-tag-bg (спец-тинты, решение владельца — вариант (а)). -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/hero-city-1.png" alt="" loading="eager">
   </div>
   <div class="ui-section__overlay ui-section__overlay--fade-bottom" aria-hidden="true"></div>
-  <div class="cp-hero__content">
-    <h1 class="cp-hero__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>
-    <form class="cp-hero__search" action="vacancies.html" method="get" role="search">
-      <svg class="cp-hero__search-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M26 26l8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+  <div class="hro__content">
+    <h1 class="hro__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>
+    <form class="hro__search" action="vacancies.html" method="get" role="search">
+      <svg class="hro__search-icon" width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="17" cy="17" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M26 26l8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
       <div class="ui-field">
         <input class="ui-field__input" type="search" name="q" placeholder="Введите название вакансии" aria-label="Поиск вакансий">
       </div>
-      <a class="cp-hero__search-all" href="vacancies.html">Все вакансии</a>
+      <a class="hro__search-all" href="vacancies.html">Все вакансии</a>
     </form>
   </div>
-  <div class="cp-hero__tags">
-    <span class="ui-tag cp-hero__tag cp-hero__tag--violet">Стабильная компания</span>
-    <span class="ui-tag cp-hero__tag cp-hero__tag--sand">Масштаб задач</span>
-    <span class="ui-tag cp-hero__tag cp-hero__tag--green">Работа со смыслом</span>
-    <span class="ui-tag cp-hero__tag cp-hero__tag--rose">Сильная команда</span>
+  <div class="hro__tags">
+    <span class="ui-tag hro__tag cp-hero__tag--violet">Стабильная компания</span>
+    <span class="ui-tag hro__tag cp-hero__tag--sand">Масштаб задач</span>
+    <span class="ui-tag hro__tag cp-hero__tag--green">Работа со смыслом</span>
+    <span class="ui-tag hro__tag cp-hero__tag--rose">Сильная команда</span>
   </div>
 </section>
 
@@ -1245,7 +1275,7 @@ ${directionsGrid}
 <section class="ui-section">
   <div class="ui-container">
     <h2 class="ui-h2">Популярные работодатели Группы</h2>
-    <div class="cp-employers__grid">
+    <div class="ui-grid lgo-grid">
 ${employerLogos}
     </div>
   </div>
@@ -1290,7 +1320,7 @@ ${whyCards.slice(1).join('\n')}
 <section class="ui-section" id="students">
   <div class="ui-container">
     <h2 class="ui-h2">Школьникам и студентам</h2>
-    <div class="cp-students__grid">
+    <div class="ui-grid lnk-cards">
 ${studentCards}
     </div>
   </div>
@@ -1313,7 +1343,7 @@ ${studentCards}
 <section class="ui-section" id="media">
   <div class="ui-container">
     <h2 class="ui-h2">Медиа о работе в компании</h2>
-    <div class="cp-media__grid">
+    <div class="mdl">
 ${mediaCards}
     </div>
   </div>
@@ -1488,39 +1518,44 @@ function vacancyMain(v = VAC.items[0]) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <article class="cp-vacancy-page">
-      <header class="cp-vacancy-page__head">
+    <!-- Контентная колонка — канон dpp (T17.14): карточная форма --card
+         (порт cp-vacancy-page), шапка-тройка/секции/foot — связки слоя
+         ds/ui-patterns.css. -->
+    <article class="dpp dpp--card">
+      <header class="dpp__head">
         <h1 class="ui-page-title">${esc(v.title)}</h1>
-        <!-- зарплата (T16.13): канон — литерал 18px muted (pages.css:271);
-             размер — литерал 1.125rem сайт-зоны (18px вне десктоп-шкалы ДС:
-             роль ui-lead лестницей ≥1024 даёт 24px и меняла бы одобренное
-             значение), цвет — ui-text--muted (AA gray-700, T2.3) -->
-        <p class="cp-vacancy-page__salary ui-text--muted">${esc(v.salary)} до вычета налога</p>
-        <p class="cp-vacancy-page__place">${PLACE_PIN} ${esc(v.place)}</p>
+        <!-- зарплата (T16.13): канон — литерал 18px (pages.css:271);
+             размер — литерал канона dpp__salary (T17.14; 18px вне
+             десктоп-шкалы ДС: роль ui-lead лестницей ≥1024 даёт 24px и
+             менял бы одобренное значение), цвет — ui-text--muted
+             (AA gray-700, T2.3) -->
+        <p class="dpp__salary ui-text--muted">${esc(v.salary)} до вычета налога</p>
+        <p class="dpp__place ui-text--muted">${PLACE_PIN} ${esc(v.place)}</p>
       </header>
 
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <!-- подзаголовки секций (T16.13): канон fs-h4-тройка 28/500
              (pages.css, --fs-h4) — роль ui-h4 вместо ui-h3 (42/500) -->
         <h2 class="ui-h4">Что предстоит</h2>
         <p class="ui-body">${esc(v.short)} Работа ведётся на объекте ${esc(v.place)} в составе оперативной команды подразделения, с наставником на период адаптации.</p>
       </div>
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <h2 class="ui-h4">Требования</h2>
         ${list(requirements)}
       </div>
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <h2 class="ui-h4">Условия</h2>
         ${list(conditions)}
       </div>
-      <div class="cp-vacancy-page__section">
+      <div class="dpp__section">
         <h2 class="ui-h4">Где предстоит работать</h2>
-        <div class="cp-vacancy-page__map" role="img" aria-label="Карта: ${esc(v.place)}"></div>
+        <!-- карта — слот dpp__media (T17.14): содержимое (карта) — сайт -->
+        <div class="dpp__media" role="img" aria-label="Карта: ${esc(v.place)}"></div>
         <p class="ui-body"><b>Адрес:</b> ${PLACE_PIN} ${esc(v.address)}</p>
       </div>
 
-      <footer class="cp-vacancy-page__foot">
-        <time class="cp-vacancy-page__date ui-small" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
+      <footer class="dpp__foot">
+        <time class="dpp__date ui-small ui-text--muted" datetime="${esc(v.date.split('.').reverse().join('-'))}">${CAL}${esc(v.date)}</time>
         ${pillButton('откликнуться', { target: 'cp-apply-dialog' })}
       </footer>
     </article>
@@ -1814,7 +1849,7 @@ function internshipDetail({ crumbs, title, tags, meta, salary, company, photo, s
   ].join('');
   const sectionsHtml = sections
     .map(
-      (section) => `<div class="cp-detail-section">
+      (section) => `<div class="dpp__section">
   <h2 class="ui-h4">${esc(section.title)}</h2>
   ${section.html}
 </div>`,
@@ -1833,12 +1868,14 @@ function internshipDetail({ crumbs, title, tags, meta, salary, company, photo, s
 <section class="ui-section">
   <div class="ui-container">
     <div class="ui-form__layout">
-      <div class="cp-detail-main">
-        <header class="cp-detail-head">
+      <!-- Контентная колонка — канон dpp (T17.14): шапка-тройка/теги/фото/
+           секции — связки слоя ds/ui-patterns.css (порт cp-detail-*). -->
+      <div class="dpp">
+        <header class="dpp__head">
           <h1 class="ui-page-title">${esc(title)}</h1>
-          <p class="cp-detail-tags">${tagsHtml}</p>${headExtra}
+          <p class="dpp__tags">${tagsHtml}</p>${headExtra}
         </header>
-        <img class="ui-image ui-image--cover cp-detail-photo" src="${esc(photo.src)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}">
+        <img class="ui-image ui-image--cover dpp__photo" src="${esc(photo.src)}" alt="${esc(photo.alt)}" width="${photo.width}" height="${photo.height}">
         ${sectionsHtml}
       </div>
       <aside class="ui-form__aside" aria-labelledby="${asideId}">
@@ -1994,7 +2031,7 @@ function internshipsMain(set) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-cover-hero">
+    <div class="cvh">
       <h1 class="ui-page-title">${title}</h1>
       <p class="cp-page-subtitle ui-lead">${esc(data.subtitle)}</p>
       <a class="ui-button ui-button--primary" href="#directions">смотреть ${titleLower}</a>
@@ -2061,17 +2098,18 @@ ${applyDialogHtml()}
 
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-adv-marquee">
-      <div class="cp-adv-marquee__type" aria-hidden="true">
-        <!-- T16.15: бирки строк — по ролям оригинала (internships.html:247–250):
-             подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px) -->
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--bar">Группа «Интер РАО»</span>
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--xl">НАЧНИ КАРЬЕРУ В ЭНЕРГЕТИКЕ ЕЩЁ ВО ВРЕМЯ УЧЁБЫ</span>
-        <span class="cp-adv-marquee__line cp-adv-marquee__line--bar">опыт · наставники · трудоустройство</span>
+    <div class="mrq">
+      <!-- Канон adv-marquee (T16.15) — связка mrq паттерн-слоя (T17.15):
+           бирки строк — по ролям оригинала (internships.html:247–250):
+           подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px) -->
+      <div class="mrq__type" aria-hidden="true">
+        <span class="mrq__line mrq__line--bar">Группа «Интер РАО»</span>
+        <span class="mrq__line mrq__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
+        <span class="mrq__line mrq__line--xl">НАЧНИ КАРЬЕРУ В ЭНЕРГЕТИКЕ ЕЩЁ ВО ВРЕМЯ УЧЁБЫ</span>
+        <span class="mrq__line mrq__line--bar">опыт · наставники · трудоустройство</span>
       </div>
-      <div class="cp-adv-marquee__body">
-        <img class="cp-adv-marquee__photo" src="${esc(data.advantages_companies.image)}" alt="">
+      <div class="mrq__body">
+        <img class="mrq__photo" src="${esc(data.advantages_companies.image)}" alt="">
         <p class="ui-body">${esc(data.advantages_companies.text)}</p>
       </div>
     </div>
@@ -2090,9 +2128,9 @@ ${advantages}
 <section class="ui-section">
   <div class="ui-container">
     <h2 class="ui-h2">Как попасть на ${titleAcc}</h2>
-    <div class="cp-timeline">
+    <ol class="tlp" role="list">
 ${steps}
-    </div>
+    </ol>
   </div>
 </section>
 
@@ -2181,7 +2219,8 @@ ${offers}
 
    Первый потребитель связки list-page «сайдбар/панель фильтров» за
    пределами vacancies. Фильтры — 6 нативных select wrap-режимом ui-select
-   (пилюли cp-pill, ширина — сайт-зона); подписи — label[for] рядом
+   (пилюли ui-select--pill, T17.12; ширина 260px — канон ленты lpp-filters
+   слоя); подписи — label[for] рядом
    (канон ui-select T7.3, Accessibility requirements). Список предложений —
    те же cp-offer-card, что на education.html (оригинал строит каталог
    тем же offer_card в cards-grid--3, build.py:803); данные educat.json
@@ -2246,7 +2285,7 @@ function educationCatalogMain() {
       <p class="cp-page-subtitle ui-lead">Выберите направление подготовки и компанию Группы «Интер РАО» — заявка оформляется на сайте «Работа России».</p>
     </div>
 
-    <div class="cp-catalog-filters">
+    <div class="lpp-filters">
 ${filters}
     </div>
 
@@ -2438,22 +2477,25 @@ function articleMain(a = ART.items[0]) {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <article class="cp-article-page">
+    <!-- Колонка статьи — канон dpp--article (T17.14): мета-лента/тип с
+         точкой/галерея/текст — связки слоя ds/ui-patterns.css (порт
+         cp-article-*). -->
+    <article class="dpp dpp--article">
       <h1 class="ui-page-title">${esc(a.title)}</h1>
-      <p class="cp-article-meta">
-        <span class="cp-article-type">${esc(a.type)}</span>
+      <p class="dpp__meta">
+        <span class="dpp__type">${esc(a.type)}</span>
         <time class="ui-small ui-text--muted" datetime="${esc(isoDate(a.date))}">${esc(a.date)}</time>
         <span class="ui-tag ${dot}">${esc(a.rubric)}</span>
       </p>
-      <div class="cp-article-gallery">
+      <div class="dpp__gallery">
         <figure class="ui-figure">
-          <img class="ui-image ui-image--cover cp-article-gallery__photo" src="${esc(a.image)}" alt="${esc(a.title)}" width="1447" height="824">
+          <img class="ui-image ui-image--cover" src="${esc(a.image)}" alt="${esc(a.title)}" width="1447" height="824">
         </figure>
         <figure class="ui-figure">
-          <img class="ui-image ui-image--cover cp-article-gallery__photo" src="assets/images/students-photo-2.jpg" alt="Студенты на практике в компаниях Группы «Интер РАО»" width="431" height="431">
+          <img class="ui-image ui-image--cover" src="assets/images/students-photo-2.jpg" alt="Студенты на практике в компаниях Группы «Интер РАО»" width="431" height="431">
         </figure>
       </div>
-      <div class="cp-article-text">
+      <div class="dpp__text">
         <p class="ui-body">Сотни студентов технических специальностей приступили к производственной практике в компаниях Группы «Интер РАО». Молодые люди приобретают опыт по основным для компании направлениям: энергетика, тепловая автоматика, техническая диагностика, водоподготовка и экологическая станция, сети и подстанции, тепловые сети.</p>
         <p class="ui-body">Каждому практиканту закреплён наставник из числа опытных сотрудников: он помогает разобраться в производственных процессах, поставить первую задачу и подготовить отчёт по требованиям учебного заведения.</p>
         <p class="ui-body">Практика в Группе «Интер РАО» — это возможность увидеть, как теория из учебной программы превращается в реальные производственные результаты, и получить приглашение на работу ещё до выпуска.</p>
@@ -2461,13 +2503,13 @@ function articleMain(a = ART.items[0]) {
       </div>
     </article>
 
-    <!-- «материалы по теме» — секции related оригинала (build.py:849–863:
-         по 3 первых записи каждой сущности); строки вакансий — те же
+    <!-- «материалы по теме» — related-канона dpp-related (T17.14: отступ
+         40px и шаги заголовков 56/32 — связки слоя): строки вакансий — те же
          lpp-rows (паттерн-слой T17.1), карточки — как на
          internships/education. Триггер «откликнуться» остаётся без модалки —
          как в оригинале, где на article.html диалога #vac-apply нет
          (modals.js:22 — молча выходит). -->
-    <div class="cp-article-related">
+    <div class="dpp-related">
       <h2 class="ui-h3">Связанные вакансии</h2>
       <div class="lpp-rows">
 ${relatedVacancies}
@@ -2609,11 +2651,13 @@ function companyMain() {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-company-hero">
-      <img class="ui-image ui-image--cover cp-company-hero__photo" src="assets/images/internship-1.png" alt="Производство компании ${esc(company.name)}" width="431" height="431" loading="lazy">
-      <div class="cp-company-hero__body">
+    <!-- hero — канон dpp-hero (T17.14): 2кол 400px/1fr от 1280, фото 260/320
+         — связки слоя ds/ui-patterns.css (порт cp-company-hero). -->
+    <div class="dpp-hero">
+      <img class="ui-image ui-image--cover dpp-hero__photo" src="assets/images/internship-1.png" alt="Производство компании ${esc(company.name)}" width="431" height="431" loading="lazy">
+      <div class="dpp-hero__body">
         <h1 class="ui-page-title">${esc(company.name)}</h1>
-        <div class="cp-company-hero__text">
+        <div class="dpp-hero__text">
           <p class="ui-body">Генерирующая компания Группы «Интер РАО»: электростанции в Санкт-Петербурге и Ленинградской области общей мощностью более 2,5 ГВт.</p>
           <p class="ui-body">Мы производим электрическую и тепловую энергию, развиваем современные технологии генерации и создаём условия для профессионального роста инженеров и специалистов.</p>
         </div>
@@ -2661,15 +2705,15 @@ function companyMain() {
     <!-- «Где мы работаем»: приближение подписями (Out of scope T15.2 —
          карта-иллюстрация); пара фото+подпись — ui-figure (подпись
          связана семантически), alt дублирует подпись (подпись не заменяет
-         alt — README ui-figure). -->
+         alt — README ui-figure). Сетка пар — канон dpp-where (T17.14). -->
     <h2 class="ui-h3 cp-company-title">Где мы работаем</h2>
-    <div class="cp-company-where">
-      <figure class="ui-figure cp-company-where__item">
-        <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
+    <div class="dpp-where">
+      <figure class="ui-figure">
+        <img class="ui-image ui-image--cover dpp-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
         <figcaption class="ui-figure__caption ui-small ui-text--muted">Головной офис компании</figcaption>
       </figure>
-      <figure class="ui-figure cp-company-where__item">
-        <img class="ui-image ui-image--cover cp-company-where__photo" src="assets/images/media-4.jpg" alt="Производственные площадки и станции" width="313" height="208" loading="lazy">
+      <figure class="ui-figure">
+        <img class="ui-image ui-image--cover dpp-where__photo" src="assets/images/media-4.jpg" alt="Производственные площадки и станции" width="313" height="208" loading="lazy">
         <figcaption class="ui-figure__caption ui-small ui-text--muted">Производственные площадки и станции</figcaption>
       </figure>
     </div>

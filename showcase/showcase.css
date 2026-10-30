@@ -140,6 +140,42 @@ body {
   background-color: var(--ui-color-surface);
 }
 
+/* Кнопка «Разделы» — свёртка ленты до md (появляется только при JS:
+   hidden в разметке снимает FRAME_SCRIPT; без скрипта лента открыта).
+   С md скрыта: сайдбар/ленту показываем целиком. */
+.ui-showcase-nav__toggle {
+  display: flex;
+  gap: var(--ui-space-3);
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: var(--ui-container-max);
+  min-height: 3rem;
+  padding: var(--ui-space-2) var(--ui-container-pad);
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--ui-color-text);
+  font-family: var(--ui-font-family);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-body-bold);
+  line-height: var(--ui-lh-body);
+  cursor: pointer;
+  margin-inline: auto;
+}
+
+.ui-showcase-nav__toggle svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--ui-color-text-muted);
+  fill: none;
+  transition: transform var(--ui-transition-fast);
+}
+
+.ui-showcase-nav__toggle[aria-expanded='false'] svg {
+  transform: rotate(180deg);
+}
+
 .ui-showcase-nav__list {
   display: flex;
   flex-wrap: wrap;
@@ -192,8 +228,11 @@ body {
   width: 100%;
 }
 
-/* Страницы документации (сайдбар-режим): читабельная колонка с потолком. */
-body.ui-showcase-body--sidebar .ui-showcase-main {
+/* Страницы документации (сайдбар-режим): читабельная колонка с потолком.
+   body.ui-showcase-embed — ?embed=1 (iframe responsive-секций): каркас
+   скрыт, сайдбара нет, но контентным стендам нужна та же колонка. */
+body.ui-showcase-body--sidebar .ui-showcase-main,
+body.ui-showcase-embed .ui-showcase-main {
   max-width: 75rem;
   padding: var(--ui-space-5) var(--ui-container-pad) var(--ui-space-7);
   margin-inline: auto;
@@ -207,6 +246,16 @@ body.ui-showcase-body--sidebar .ui-showcase-main {
   font-weight: var(--ui-fw-h1);
   line-height: var(--ui-lh-h1);
   margin-block: 0 var(--ui-space-4);
+}
+
+/* Полноширинные стенды (navMode: 'strip' — паттерны, фото-композиция
+   ui-carousel): main без каркасных полей (демо несёт собственные
+   ui-section/ui-container), но КАРКАСНЫЕ заголовок и приписка не должны
+   прилипать к краю вьюпорта — поле контейнера несёт только служебный
+   контент, демо остаётся полноширинным. */
+body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-title,
+body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-stand__note {
+  margin-inline: var(--ui-container-pad);
 }
 
 /* Секции каталога (index): заголовок h2 в размере роли ui-h4 — h2-масштаб
@@ -276,6 +325,25 @@ body.ui-showcase-body--sidebar .ui-showcase-main {
 }
 
 /* ── Каталог (index): герой с поиском и карточная сетка ── */
+
+/* «Начало работы» (аудит 29.10): путь первого захода — подключение, гайды,
+   каталог, токены; ссылки — системный ui-link--button, обвязка — каркас. */
+.ui-showcase-start {
+  margin-block: 0 var(--ui-space-5);
+}
+
+.ui-showcase-start > h2 {
+  font-size: var(--ui-fs-h4);
+  font-weight: var(--ui-fw-h4);
+  line-height: var(--ui-lh-h4);
+  margin-block: 0 var(--ui-space-3);
+}
+
+.ui-showcase-start__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3);
+}
 
 .ui-showcase-lead {
   max-width: 46rem;
@@ -459,6 +527,18 @@ body.ui-showcase-body--sidebar .ui-showcase-main {
     padding-inline: var(--ui-container-pad-md);
   }
 
+  /* С md навигация показана целиком (сайдбар или лента) — кнопка свёртки
+     не нужна; правило ДО сайдбар-блока, чтобы не влиять на него. */
+  .ui-showcase-nav__toggle {
+    display: none;
+  }
+
+  /* Поля служебного контента полноширинных стендов — ступени контейнера. */
+  body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-title,
+  body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-stand__note {
+    margin-inline: var(--ui-container-pad-md);
+  }
+
   body.ui-showcase-body--sidebar {
     display: grid;
     align-content: start;
@@ -509,7 +589,8 @@ body.ui-showcase-body--sidebar .ui-showcase-main {
     padding-inline: var(--ui-space-3);
   }
 
-  body.ui-showcase-body--sidebar .ui-showcase-main {
+  body.ui-showcase-body--sidebar .ui-showcase-main,
+  body.ui-showcase-embed .ui-showcase-main {
     padding-block: var(--ui-space-6) var(--ui-space-8);
   }
 }
@@ -521,7 +602,13 @@ body.ui-showcase-body--sidebar .ui-showcase-main {
     padding-inline: var(--ui-container-pad-lg);
   }
 
-  body.ui-showcase-body--sidebar .ui-showcase-main {
+  body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-title,
+  body:not(.ui-showcase-body--sidebar) .ui-showcase-main > .ui-showcase-stand__note {
+    margin-inline: var(--ui-container-pad-lg);
+  }
+
+  body.ui-showcase-body--sidebar .ui-showcase-main,
+  body.ui-showcase-embed .ui-showcase-main {
     padding-inline: var(--ui-space-7);
   }
 }

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Демо-постер: производственная площадка">
+  <!-- Демо-постер живых примеров полигона (ui-video): производственная тема
+       в палитре системы — как слайды карусели (данные JSON), декоративен
+       (alt="" в каноне: имя несёт обёртка-кнопка). -->
+  <rect width="960" height="540" fill="#002856"/>
+  <circle cx="740" cy="150" r="190" fill="#164B89" opacity="0.55"/>
+  <circle cx="180" cy="430" r="150" fill="#164B89" opacity="0.4"/>
+  <!-- градирня -->
+  <path d="M120 380c8-60 4-110-16-150h96c-20 40-24 90-16 150Z" fill="#8F9CBF" opacity="0.85"/>
+  <path d="M104 230h100" stroke="#8F9CBF" stroke-width="10" opacity="0.85"/>
+  <!-- корпус станции -->
+  <rect x="260" y="300" width="200" height="80" rx="6" fill="#F1F5FE" opacity="0.9"/>
+  <rect x="280" y="316" width="24" height="16" fill="#164B89"/>
+  <rect x="316" y="316" width="24" height="16" fill="#164B89"/>
+  <rect x="352" y="316" width="24" height="16" fill="#164B89"/>
+  <rect x="388" y="316" width="24" height="16" fill="#164B89"/>
+  <rect x="280" y="348" width="24" height="16" fill="#164B89"/>
+  <rect x="316" y="348" width="24" height="16" fill="#164B89"/>
+  <rect x="352" y="348" width="24" height="16" fill="#164B89"/>
+  <rect x="388" y="348" width="24" height="16" fill="#164B89"/>
+  <!-- ЛЭП -->
+  <path d="M520 380V180" stroke="#F1F5FE" stroke-width="8" opacity="0.9"/>
+  <path d="M486 208h68" stroke="#F1F5FE" stroke-width="6" opacity="0.9"/>
+  <path d="M498 232l44 44M542 232l-44 44" stroke="#F26722" stroke-width="5"/>
+  <circle cx="520" cy="180" r="10" fill="#F26722"/>
+  <!-- линия горизонта -->
+  <path d="M0 380h960" stroke="#F1F5FE" stroke-width="4" opacity="0.6"/>
+  <path d="M0 396h960" stroke="#164B89" stroke-width="24"/>
+</svg>

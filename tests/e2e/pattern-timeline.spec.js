@@ -3,9 +3,12 @@
  * patterns/timeline (stands/patterns/timeline.html), mini-эталон из четырёх
  * этапов («Как попасть на практику» career-portal).
  *
+ * Adoption T17.10: связки tlp-* — паттерн-слой dist/ui-patterns.css (5-й
+ * получатель слоя), <style> в доке больше нет.
+ *
  * Ключевые сценарии спеки:
- *  1. собран без нового CSS: внешние стили — dist + каркас полигона, связки
- *     tl-* — <style> стенда (зона сайта, в dist не попадает);
+ *  1. собран без нового КОМПОНЕНТНОГО CSS: внешние стили — dist (ui-core +
+ *     ui-vi + опциональный ui-patterns-слой) + каркас полигона;
  *  2. композиция: секция (ui-section + ui-container + h2) + ol[role="list"]
  *     из 4 этапов (точка с видимым номером → h3 → текст);
  *  3. адаптив: база — колонка, от 1024 — горизонтальный ряд 1fr-колонок
@@ -24,14 +27,14 @@ import { a11y, SNAPSHOTS_ENABLED, test as standTest, VIEWPORTS } from '../helper
 const SEL = {
   section: '#tl-demo',
   title: '#tl-demo-title',
-  timeline: '#tl-demo .tl',
-  stage: '.tl__stage',
-  dot: '.tl__dot',
+  timeline: '#tl-demo .tlp',
+  stage: '.tlp__stage',
+  dot: '.tlp__dot',
 };
 
 standTest.describe('patterns/timeline: эталонная сборка (Scope) — каркас', () => {
   standTest(
-    'собран без нового CSS: подключены только файлы dist, связки — <style> стенда',
+    'собран без нового CSS: внешние стили — dist (core + vi + слой patterns) и каркас полигона',
     async ({ stand }) => {
       const page = await stand('patterns/timeline');
       const source = await page.request
@@ -41,17 +44,21 @@ standTest.describe('patterns/timeline: эталонная сборка (Scope) �
       const stylesheets = source.match(/<link rel="stylesheet"[^>]*>/g) ?? [];
       expect(
         stylesheets.length,
-        'внешних стилей три — ui-core и ui-vi из dist + showcase.css каркаса (нового CSS у паттерна нет)',
-      ).toBe(3);
+        'внешних стилей четыре — ui-core и ui-vi из dist + ui-patterns.css (слой, T17.10) + showcase.css каркаса',
+      ).toBe(4);
       for (const link of stylesheets) {
         expect(link, 'стилевой файл — dist или стили каркаса полигона').toMatch(
-          /ui-(core|vi)\.min\.css|showcase\.css/,
+          /ui-(core|vi)\.min\.css|ui-patterns\.css|showcase\.css/,
         );
       }
       expect(
         source,
-        'связующие стили паттерна — inline <style> стенда (showcase, не dist)',
-      ).toContain('<style>');
+        'слой подключён ПОСЛЕ core (порядок в head: токены → core → patterns → сайт)',
+      ).toMatch(/ui-core\.min\.css[\s\S]*ui-patterns\.css/);
+      expect(
+        source,
+        'связующих <style> в стенде больше нет — канон живёт в слое (adoption T17.10)',
+      ).not.toContain('<style>');
     },
   );
 
@@ -88,8 +95,8 @@ standTest.describe('patterns/timeline: эталонная сборка (Scope) �
       for (let i = 0; i < 4; i += 1) {
         const stage = stages.nth(i);
         const part = await stage.evaluate((el) => ({
-          dot: el.querySelector('.tl__dot')?.textContent?.trim() ?? '',
-          dotHidden: el.querySelector('.tl__dot')?.getAttribute('aria-hidden') ?? null,
+          dot: el.querySelector('.tlp__dot')?.textContent?.trim() ?? '',
+          dotHidden: el.querySelector('.tlp__dot')?.getAttribute('aria-hidden') ?? null,
           heading: el.querySelector('h3')?.className ?? '',
           text: el.querySelector('p')?.className ?? '',
         }));
@@ -128,7 +135,7 @@ standTest.describe('patterns/timeline: адаптив — ряд и мобиль
       const mobile = await layoutOf();
       expect(mobile.display, 'база (375) — flex-колонка, не сетка').toBe('flex');
       const mobileGeo = await page.evaluate(() => {
-        const stages = [...document.querySelectorAll('.tl__stage')].map((el) =>
+        const stages = [...document.querySelectorAll('.tlp__stage')].map((el) =>
           el.getBoundingClientRect(),
         );
         const doc = document.documentElement;
@@ -153,7 +160,7 @@ standTest.describe('patterns/timeline: адаптив — ряд и мобиль
       expect(row.flow, 'колонка на каждый этап: grid-auto-flow: column').toContain('column');
       expect(row.columns, '1fr-колонок = числу этапов (4), без счётчика в CSS').toBe(4);
       const rowGeo = await page.evaluate(() => {
-        const boxes = [...document.querySelectorAll('.tl__stage')].map((el) =>
+        const boxes = [...document.querySelectorAll('.tlp__stage')].map((el) =>
           el.getBoundingClientRect(),
         );
         return {
@@ -191,7 +198,7 @@ standTest.describe('patterns/timeline: адаптив — ряд и мобиль
       // Пробы с эталонными парами токенов: computed-значения точки обязаны
       // совпасть с resolved-значениями --ui-color-surface-hover / --ui-color-primary.
       const pairs = await page.evaluate(() => {
-        const dot = document.querySelector('.tl__dot');
+        const dot = document.querySelector('.tlp__dot');
         const probeBg = document.createElement('div');
         probeBg.style.backgroundColor = 'var(--ui-color-surface-hover)';
         const probeFg = document.createElement('div');
@@ -241,7 +248,7 @@ standTest.describe('patterns/timeline: соединительная линия (
       const geo = await page.locator(SEL.stage).evaluateAll((els) =>
         els.map((el) => {
           const after = getComputedStyle(el, '::after');
-          const dot = el.querySelector('.tl__dot').getBoundingClientRect();
+          const dot = el.querySelector('.tlp__dot').getBoundingClientRect();
           const box = el.getBoundingClientRect();
           return {
             hasLine: after.content !== 'none' && after.height === '2px',

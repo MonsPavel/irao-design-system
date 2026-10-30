@@ -377,6 +377,16 @@ body.vi.vi-img--off video {
   display: none !important;
 }
 
+/* Стеклянные поверхности (backdrop-filter — канон hero-пилюли/тегов,
+   T17.15) в режиме без изображений: фото скрыто — blur нечему размывать;
+   отключение — VI-инвариант стекла (Implementation requirements п.1
+   T17.15; стекло остаётся читаемым фоном glass-light). */
+body.vi.vi-img--off *,
+body.vi.vi-img--off *::before,
+body.vi.vi-img--off *::after {
+  backdrop-filter: none !important;
+}
+
 /* Чёрно-белые изображения. */
 body.vi.vi-img--gray img {
   filter: grayscale(1);

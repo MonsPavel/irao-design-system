@@ -9,9 +9,10 @@
  * cp-vac-row-семейства, cp-vac-layout, cp-vac-side-семейства и
  * cp-breadcrumbs снята из pilot.css — урок T16.5: копипаста дрейфует, слой
  * делает канон исполняемым). Пины значений строки/сайдбара переведены с
- * pilot.css на слой; в pilot.css остались только шимы сайт-зоны (cp-pill до
- * T17.12, положение «Сбросить») и ритм страниц без канона в док-HTML
- * (cp-page-head, cp-find-bar).
+ * pilot.css на слой; в pilot.css остались только шимы сайт-зоны (положение
+ * «Сбросить») и ритм страниц без канона в док-HTML (cp-page-head);
+ * пилюля фильтра с T17.12 — модификатор ДС ui-select--pill, шим сайдбара
+ * снят.
  *
  * Канон — ветка «строки» паттерна list-page (T14.10, lpp-row): заголовок-
  * ссылка 20/500 без подчёркивания цветом ТЕКСТА (не heading-navy), паддинг
@@ -168,10 +169,13 @@ describe('pilot.css — шимы сайт-зоны на крючках слоя 
     expect(align, 'шим защищает бокс кнопки от усадки').toContain('flex-shrink: 0;');
   });
 
-  it('пилюля сайдбара — шим flex-basis: auto на крючке слоя (cp-pill до T17.12)', () => {
-    const shim = blockOf(pilotCss, '.lpp-side__group .cp-pill');
-    expect(shim, 'шим на крючке канона lpp-side__group').toBeTruthy();
-    expect(shim).toContain('flex-basis: auto;');
+  it('пилюля сайдбара — модификатор ДС ui-select--pill (T17.12): шим flex-basis снят (модификатор basis не несёт, колонка панели растягивает сама)', () => {
+    expect(pilotCss, 'cp-pill из pilot.css снят — геометрия в компоненте').not.toContain(
+      '.cp-pill',
+    );
+    expect(pilotCss, 'шим .lpp-side__group .cp-pill удалён').not.toContain(
+      '.lpp-side__group .cp-pill',
+    );
   });
 
   it('промо-карточка без геометрических override: ui-card--filled несёт bg/радиус/паддинг сам (паддинг 24 vs 20 — «принято ДС» REPORT §3.3/mapping)', () => {
@@ -182,7 +186,7 @@ describe('pilot.css — шимы сайт-зоны на крючках слоя 
   });
 
   it('в блоке шимов сайдбара нет hex и !important (инварианты системы)', () => {
-    const start = pilotCss.indexOf('.lpp-side__group .cp-pill');
+    const start = pilotCss.indexOf('.lpp-side > .ui-button--text');
     const end = pilotCss.indexOf('.cp-vac-main');
     const section = pilotCss.slice(start, end);
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);

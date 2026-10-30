@@ -7,7 +7,7 @@
 `/showcase/dist/stands/patterns/list-page.html` (генерируется
 `showcase/build.mjs`). Ветки стенда: «с данными» (сетка карточек), «ничего не
 найдено», плюс ветки T14.10 — «строки» и «сайдбар фильтров» (раскладки
-оригинала, REPORT §4 / PLAN P1-3/P1-4).
+оригинала, REPORT §4 / PLAN P1-3/P1-4) и поднавигация разделов (T17.11).
 
 Собирается **без нового CSS системы**: только компоненты
 (`ui-breadcrumbs`, `ui-select`, `ui-button`, `ui-card`, `ui-tag`, `ui-empty`,
@@ -29,6 +29,7 @@
 | Выдача | `ui-grid--3` + `ui-card--hover ui-card--link` + `ui-tag` | карточка-ссылка T4.4, теги T4.3; вариант «строками» — ниже (T14.10) |
 | Выдача строками (T14.10) | `ui-card--hover` + связка `lpp-row` + CTA `ui-button--pill` (T14.4) | заголовок выдачи — h2, строки — article с h3-ссылкой; демо-модалка отклика — `ui-modal` |
 | Сайдбар фильтров (T14.10) | select-пилюли, `ui-radio-group`, `ui-checkbox`, `ui-button`, промо `ui-card--filled`, чипы `ui-chip` (T14.8) | grid «aside \| выдача»; aside sticky от md + scrollable-focusable |
+| Поднавигация разделов (T17.11) | `ui-tabs--pill` + связка `nvp` | межстраничные ссылки без панелей: `data-ui-tabs` не ставится (контракт T13.6), активный раздел — `aria-current="page"` (активную пилюлю красит модификатор, покой + hover); раскладка — связки `nvp` паттерн-слоя: маргины 24/48, сетка 5×1fr от md (мобильная база — перенос ленты) |
 | Пагинация | `ui-pagination` | T6.3; сохраняет GET-параметры фильтров |
 | Empty-ветка | `ui-empty` | заголовок-роль h2; сброс — ссылка на чистый URL |
 
@@ -117,6 +118,36 @@
 - `action` на стенде — `#lpp-title` (якорь результатов: после сабмита статика
   открывает страницу на выдаче); в бою — URL страницы списка. Якорь в `action`
   легален и в бою — как no-JS-скролл к результатам.
+- T17.12: геометрию пилюли несёт модификатор `ui-select--pill` (компонент
+  ui-select: рамка/радиус/фон — система, замена сайт-класса
+  `.vacancy-search__select-wrap`); ширина пилюли в ленте — раскладка
+  (в ленте канона — 260px оригинала, `.lpp-filters > .ui-select--pill`).
+  Для пилюль с видимыми подписями канон ленты несёт `.lpp-pill` (выше) —
+  для пилюль БЕЗ видимых подписей (скрытая `ui-vh`, как на страницах
+  фильтров career-portal) — модификатор компонента.
+
+### Find-bar: строка «найти по списку» (T17.12)
+
+```html
+<form class="lpp-find" action="/vacancies/" method="get" role="search">
+  <div class="ui-field">
+    <input class="ui-field__input" type="search" name="q"
+      placeholder="Поиск по списку" aria-label="Найти вакансию">
+  </div>
+  <button class="ui-button ui-button--accent" type="submit">Найти</button>
+</form>
+```
+
+- Связка `lpp-find` — flex-строка «поле + кнопка»: поле растягивается
+  (`flex: 1 1 auto`), gap 8px и ритм снизу 8px (метрики принятого find-bar
+  career-portal, T15.5). Вид поля — `ui-field` (T5.2), кнопка —
+  `ui-button` (вариант задаёт сайт: vacancies — accent, события — primary).
+- `role="search"` — канон поисковой формы WAI; нативный GET — работа
+  фильтра — зона бэкенда (мок-слой сайта).
+- Имя поля — `aria-label` (видимой подписи в каноне нет, как у пилюль
+  фильтров).
+- Порядок чтения: find-bar — первый ребёнок main-колонки выдачи (до чипов и
+  строк, как в композиции vacancies career-portal).
 
 ### Выдача и пагинация
 
@@ -237,7 +268,8 @@
   `scrollable-region-focusable`). На мобильной базе — одна колонка, aside в
   потоке (min-width-деградация).
 - **Label у каждого контрола**: select-пилюли — `label[for]` рядом (канон
-  `ui-select` wrap, тот же `.lpp-pill`), radio-группа «Опыт» —
+  `ui-select` wrap; геометрия пилюли — `ui-select--pill` или `.lpp-pill`,
+  см. «Панель фильтров» выше), radio-группа «Опыт» —
   `fieldset`/`legend` (гейт `irao/radio-group-fieldset`), чекбокс доступности
   — `label` оборачивает нативный input.
 - **Кнопки**: «Применить» (`type="submit"`) и «Сбросить» (`type="reset"`) —
@@ -336,9 +368,11 @@ $iCount = count($arResult['ITEMS']);
   (JSON-паттерн 02-architecture §6.3).
 - Динамически вставленная разметка (AJAX-подмена выдачи — зона сайта) требует
   повторного `IraoUI.select.init()` — README `ui-select`, Bitrix-раздел.
-- Связующие стили (`.lpp-filters`, `.lpp-pill`, `.lpp-pill__name`, отступы
-  page-head) перенесите в `template_styles.css` сайта — источник: `<style>`
-  в [`list-page.html`](list-page.html), значения — только токены `--ui-*`.
+- Связующие стили (`.lpp-filters`, `.lpp-pill`, `.lpp-pill__name`, `.lpp-find`,
+  отступы page-head) живут в паттерн-слое `ui-patterns.css` (T17.1/T17.12 —
+  подключение опционально); геометрия пилюль фильтров — модификатор
+  `ui-select--pill` компонента (T17.12). Источник значений:
+  [`patterns/patterns.css`](../../patterns/patterns.css) — только токены `--ui-*`.
 
 ## Do / Don't
 
@@ -349,8 +383,9 @@ $iCount = count($arResult['ITEMS']);
   значение без JS) — README `ui-select`.
 - **Don't**: не прячьте нативный select в разметке (скрытие — работа модуля);
   не кладите `.ui-select__native`/`tabindex="-1"` руками.
-- **Don't**: не оборачивайте select в `ui-field__select-wrap` — пилюля рисует
-  обёртку сама (`.lpp-pill`), стрелка — шеврон триггера.
+- **Don't**: не оборачивайте select в `ui-field__select-wrap` — пилюлю рисует
+  модификатор `ui-select--pill` (или `.lpp-pill` канона), стрелка — шеврон
+  триггера.
 - **Don't**: не делайте фильтры-чипы ссылками-«пилюлями» с JS-переключением —
   это либо ссылки с полным набором параметров (без JS), либо select'ы формы.
 

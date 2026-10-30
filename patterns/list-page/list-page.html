@@ -625,6 +625,27 @@
            выдачи → h3 строк); tabindex="-1" — цель фокуса гварда ветки. -->
       <h2 class="ui-h3" id="lpp-side-results" tabindex="-1">Открытые вакансии</h2>
 
+      <!-- Find-bar «найти по списку» (T17.12): связка lpp-find — строка
+           «поле + кнопка» над выдачей (канон композиции vacancies: findBar →
+           чипы → строки). GET-форма работает без JS (action — якорь выдачи
+           стенда; в бою — URL страницы); role="search" — канон поисковой
+           формы WAI; имя поля — aria-label (видимой подписи в каноне нет,
+           как у пилюль фильтров). Поле растягивается (слой), кнопка —
+           ui-button--accent (пара принятого findBar vacancies). -->
+      <form class="lpp-find" method="get" action="#lpp-side-results" role="search">
+        <div class="ui-field">
+          <!-- prettier-ignore -->
+          <input
+            class="ui-field__input"
+            type="search"
+            name="q"
+            placeholder="Поиск по списку"
+            aria-label="Найти вакансию"
+          >
+        </div>
+        <button class="ui-button ui-button--accent" type="submit">Найти</button>
+      </form>
+
       <!-- Чипы направлений (T14.8, ссылочная форма): GET-фильтр — ссылки с
            полным набором параметров (работают без JS); активная —
            aria-current="page" и ОСТАЁТСЯ ссылкой (повторный клик
@@ -737,6 +758,41 @@
       </div>
     </div>
   </div>
+</section>
+
+<section class="ui-section" id="lpp-subnav" aria-labelledby="lpp-subnav-title">
+  <h2 class="ui-h3" id="lpp-subnav-title">Поднавигация разделов (T17.11)</h2>
+  <p class="ui-showcase-stand__note">
+    Навигационный набор на <code>ui-tabs--pill</code>: межстраничные ссылки без панелей —
+    <code>data-ui-tabs</code> не ставится, модуль такие наборы не инициализирует (контракт T13.6:
+    табы = панели). Ролей <code>tablist/tab</code> и roving tabindex нет — это навигация. Активный
+    раздел — <code>aria-current="page"</code> (ровно один): активную пилюлю красит модификатор
+    (заливка primary + text-on-dark, hover заливку не гасит — T17.11). Вид пилюль — модификатор
+    <code>ui-tabs--pill</code> (T14.9), раскладка страницы — связки <code>nvp</code> паттерн-слоя:
+    маргины 24/48 (pages.css:969) и сетка 5×1fr «сетка 264» (pages.css:975) от md — мобильная база
+    ДС: лента переносится (flex). Без слоя лента остаётся flex на всех ширинах.
+  </p>
+
+  <!-- nav[aria-label] > лента ui-tabs__list со ссылками-разделами; активный
+       раздел — ровно один aria-current="page" (семантика «текущая страница»,
+       прецедент ui-chip T14.8 / ui-breadcrumbs). href — страницы-разделы
+       канонического примера (спека T17.11); в бою — реальные URL сайта.
+       irao/tabs-id-links отключён локально: правило кодирует контракт T6.2
+       «таб-ссылка ведёт на панель», а навигационный набор панелей НЕ имеет
+       сознательно (T17.11: межстраничная навигация, модуль не подключается,
+       href'ы ведут на страницы) — панелей и id-связок здесь нет по дизайну.
+       Ошибки падают на дочерних <a> — отключение блоком disable/enable. -->
+  <!-- html-validate-disable irao/tabs-id-links -->
+  <nav class="ui-tabs ui-tabs--pill nvp" aria-label="Разделы школьникам и студентам">
+    <div class="ui-tabs__list">
+      <a class="ui-tabs__tab" href="practices.html">Практики</a>
+      <a class="ui-tabs__tab" href="internships.html" aria-current="page">Стажировки</a>
+      <a class="ui-tabs__tab" href="education.html">Целевое обучение</a>
+      <a class="ui-tabs__tab" href="career-track.html">Карьерный трек</a>
+      <a class="ui-tabs__tab" href="events.html">Мероприятия</a>
+    </div>
+  </nav>
+  <!-- html-validate-enable irao/tabs-id-links -->
 </section>
 
 <script>
