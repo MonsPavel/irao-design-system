@@ -692,6 +692,21 @@ standTest.describe('patterns/form-page: эталоны (AC: visual 375/768/1440)
     'эталоны страницы формы на 375/768/1440 — fullPage, только из контейнера/CI',
     async ({ stand }) => {
       const page = await stand('patterns/form-page');
+      // Пин готовности перед эталонами (BACKLOG low, разбор 31.10 — решение
+      // владельца): гонка загрузки на тяжёлой странице (108k px) изредка
+      // давала ghosting aside-карточки — прогрев lazy-изображений ниже
+      // фолда (прецедент lazyWarmup compare.mjs) + document.fonts.ready
+      // (FOUT шрифта расходил строку заголовка вакансии) до снимков.
+      await page.evaluate(async () => {
+        const step = window.innerHeight;
+        for (let y = 0; y < document.documentElement.scrollHeight; y += step) {
+          window.scrollTo(0, y);
+          await new Promise((r) => setTimeout(r, 60));
+        }
+        window.scrollTo(0, 0);
+        await document.fonts.ready;
+      });
+      await page.waitForTimeout(150);
       // Хелпер shot(): вьюпорт из шкалы, fullPage; вне контейнера/CI — no-op
       // с аннотацией shot-skipped (ADR-0004).
       await shot(page, { name: 'pattern-form-page', viewport: 'mobile' });

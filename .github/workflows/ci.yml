@@ -1,12 +1,13 @@
 # CI-конвейер irao-ui (задача T1.5; docs/02-architecture.md §10, 06 §7, ADR-0004).
 #
-# Обязательные гейты PR (06 §7): lint, html-validate, unit, build, e2e+axe.
-# Visual regression — ADVISORY до v1.0 (ADR-0004): отдельная джоба-чек,
-# диф-артефакты прикладываются; при расхождении чек visual и прогон красные,
-# merge НЕ блокируется — чек не включён в required checks до v1.0 (включение
-# mandatory — Iteration 10). Job-level continue-on-error сознательно НЕ
-# используется: GitHub даёт упавшей джобе conclusion=success — чек выглядел
-# бы зелёным («игнорировать красное» не приучаем).
+# Обязательные гейты PR (06 §7): lint, html-validate, unit, build, e2e+axe,
+# visual. Visual regression — MANDATORY с v1.0 (ADR-0004 errata 31.10, решение
+# владельца «флип сейчас»: advisory-пропуски давали 4 инцидента устаревших
+# эталонов — см. BACKLOG): джоба в required checks ветки main; при
+# расхождении чек и прогон красные, merge блокируется. Job-level
+# continue-on-error сознательно НЕ используется: GitHub даёт упавшей джобе
+# conclusion=success — чек выглядел бы зелёным («игнорировать красное» не
+# приучаем).
 #
 # Браузерные джобы — в пиннутом Playwright-образе, том же, что локальный
 # `npm run test:docker` (ADR-0004; пин — package.json iraoUi.playwrightImage,
@@ -188,12 +189,12 @@ jobs:
           if-no-files-found: ignore
 
   visual:
-    name: Visual regression (advisory, ADR-0004)
+    name: Visual regression (mandatory, ADR-0004)
     needs:
       - build
-    # Advisory: расхождение эталонов красит ЭТОТ чек и прогон; merge не
-    # блокируется — чек не в required checks до v1.0 (mandatory — Iteration 10,
-    # ADR-0004). Job-level continue-on-error запрещён: упавшей джобе GitHub
+    # Mandatory с v1.0 (ADR-0004 errata 31.10): расхождение эталонов красит
+    # ЭТОТ чек и прогон; чек в required checks ветки main — merge
+    # блокируется. Job-level continue-on-error запрещён: упавшей джобе GitHub
     # ставит conclusion=success, чек маскировался бы зелёным (ревью T1.5 high).
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/playwright:v1.63.0-jammy # пин — package.json iraoUi.playwrightImage; контроль — tools/validate-workflows.mjs
@@ -225,7 +226,7 @@ jobs:
           IRAO_SCALING: 'off'
         run: npx playwright test --project=chromium
 
-      # Диф-артефакты прикладываются даже при advisory (требование T1.5).
+      # Диф-артефакты прикладываются и при красной джобе (требование T1.5).
       - name: Upload visual diffs
         if: always()
         uses: actions/upload-artifact@v4
@@ -244,5 +245,5 @@ jobs:
       - name: Fail check on visual diff
         if: always() && steps.visual.outcome == 'failure'
         run: |
-          echo "visual: расхождение эталонов — чек и прогон красные, дифы в артефакте visual-diffs; merge не блокируется — visual не в required checks до v1.0 (ADR-0004). Обновление: npm run test:docker -- --update-snapshots"
+          echo "visual: расхождение эталонов — чек и прогон красные, дифы в артефакте visual-diffs; merge блокируется (mandatory с v1.0, ADR-0004 errata 31.10). Обновление: npm run test:docker -- --update-snapshots"
           exit 1

@@ -158,6 +158,7 @@ CSS/JS», 02-architecture §7). Копипаста канона в пилоте 
 - [T17.11 — Активная пилюля по aria-current](T17.11-tabs-aria-current.md)
 - [T17.12 — Пилюля select-фильтра и find-bar](T17.12-filter-pill.md)
 - [T17.17 — Флекс-примитивы ui-row / ui-stack](T17.17-flex-primitives.md)
+- [T17.18 — Постерная иллюстрированная карточка (pstr-)](T17.18-poster-card.md)
 - [T17.13 — Каркасы шапки и подвала](T17.13-header-footer.md)
 - [T17.14 — Детальные страницы на ddp-канон](T17.14-detail-pages.md)
 - [T17.15 — Лендинг-композиции и спец-тинты](T17.15-landing-compositions.md)
