@@ -108,7 +108,10 @@ standTest.describe('patterns/timeline: эталонная сборка (Scope) �
           part.dotHidden,
           'точка НЕ aria-hidden: номер — контент, скринридер читает текст',
         ).toBeNull();
-        expect(part.heading, `этап №${i + 1}: заголовок — роль ui-h3 (h2 → h3)`).toContain('ui-h3');
+        expect(
+          part.heading,
+          `этап №${i + 1}: заголовок — роль ui-h6 (h3-тег, канон T16.12)`,
+        ).toContain('ui-h6');
         expect(part.text, `этап №${i + 1}: текст — ui-small + ui-text--muted`).toContain(
           'ui-small',
         );

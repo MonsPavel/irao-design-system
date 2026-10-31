@@ -178,12 +178,13 @@ describe('пороги ценза — числа зафиксированы по
       expect(gate.problems).toEqual([]);
       expect(gate.newBlocks).toEqual([]);
       // машиночитаемые факты ценза для REPORT §11.4 («ценз после»);
-      // обновлены интеграцией T17.5 (adoption ui-card--media, смержена
-      // 30.10): сырые 1040→970, код 519→457, селекторы 106→93,
-      // семейства 30→28 — ушли event-card/intern-person (движение
-      // зафиксировано дописью в REPORT §11.4, таблица T17.16 не менялась):
-      expect(metrics.css.lines).toBe(970);
-      expect(metrics.css.codeLines).toBe(457);
+      // обновлены батчем 31.10 (перенос hover VI-пилюли — решение
+      // владельца, T17.13): сырые 970→980, код 457→462 (+8 строк правила
+      // сайт-зоны .hsp__action:hover под (hover: hover)); селекторы 93 и
+      // семейства 28 — без изменений (правило на хуке слоя, не .cp-;
+      // движение зафиксировано дописью в REPORT §11.4):
+      expect(metrics.css.lines).toBe(980);
+      expect(metrics.css.codeLines).toBe(462);
       expect(metrics.css.selectors).toBe(93);
       expect(metrics.css.families).toHaveLength(28);
       expect(metrics.js.lines).toBe(187);

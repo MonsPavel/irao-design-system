@@ -231,20 +231,31 @@ describe('patterns/patterns.css — связка lnk-card (T17.9 Scope)', () => 
   });
 });
 
-describe('patterns/patterns.css — связка lgo-grid/lgo-card (T17.9 Scope)', () => {
-  it('сетка на ui-grid: шаг 8px, ступени 4/6 (инверсия лестницы пилота ≤1023/≤767)', () => {
+describe('patterns/patterns.css — связка lgo-grid/lgo-card (T17.9; канон по оригиналу — решение владельца 31.10)', () => {
+  it('сетка на ui-grid: лестница и шаг — оригинал employers.css (2×12 база, 3×24 от md, 6×40/36 от lg)', () => {
     const grid = blockOf(layer, '.lgo-grid');
     expect(grid, '.lgo-grid найдено').toBeTruthy();
-    expect(grid, 'шаг 8px — .cp-employers__grid').toContain('gap: var(--ui-space-2);');
+    expect(grid, 'база — 2 колонки (≤767 оригинала, mobile-first)').toContain(
+      'grid-template-columns: repeat(2, minmax(0, 1fr));',
+    );
+    expect(grid, 'шаг базы 12px — employers.css:71').toContain('gap: var(--ui-space-3);');
     const md = mediaBlockOf(768, 'lgo-grid');
     expect(md, 'ступень md есть').toBeTruthy();
-    expect(md, 'md — 4 колонки').toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
+    expect(md, 'md — 3 колонки (≤1023 оригинала)').toContain(
+      'grid-template-columns: repeat(3, minmax(0, 1fr));',
+    );
+    expect(md, 'шаг 24px — employers.css:65').toContain('gap: var(--ui-space-5);');
     const lg = mediaBlockOf(1024, 'lgo-grid');
     expect(lg, 'ступень lg есть').toBeTruthy();
-    expect(lg, 'lg — 6 колонок').toContain('grid-template-columns: repeat(6, minmax(0, 1fr));');
+    expect(lg, 'lg — 6 колонок (база оригинала employers.css:12)').toContain(
+      'grid-template-columns: repeat(6, minmax(0, 1fr));',
+    );
+    expect(lg, 'шаг 40/36 «как есть» — employers.css:12 (вне шкалы)').toContain(
+      'gap: 2.5rem 2.25rem;',
+    );
   });
 
-  it('рамочная плашка: растянута, радиус md, рамка border-muted (спека), поверхность surface', () => {
+  it('плашка — голый img: без рамки и фона (blue-50 запечён в PNG), радиус md = --radius-card 16px оригинала', () => {
     const card = blockOf(layer, '.lgo-card');
     expect(card, '.lgo-card найдено').toBeTruthy();
     expect(card, 'box-sizing на корне (ADR-0002)').toContain('box-sizing: border-box;');
@@ -253,10 +264,14 @@ describe('patterns/patterns.css — связка lgo-grid/lgo-card (T17.9 Scope)
     );
     expect(
       card,
-      'рамка — border-muted по спеке (в пилоте рамка несуществующим токеном --ui-color-border вычислялась 0px)',
-    ).toContain('border: var(--ui-border-width) solid var(--ui-color-border-muted);');
-    expect(card, 'радиус md').toContain('border-radius: var(--ui-radius-md);');
-    expect(card, 'поверхность — surface').toContain('background-color: var(--ui-color-surface);');
+      'рамки нет — «рамка-в-рамке» на белых полях PNG, решение владельца 31.10 (спека T17.9 «рамочная» снята)',
+    ).not.toContain('border:');
+    expect(card, 'фон не задаётся — заливка в PNG (оригинал не красит)').not.toContain(
+      'background-color',
+    );
+    expect(card, 'радиус md = --radius-card 16px оригинала').toContain(
+      'border-radius: var(--ui-radius-md);',
+    );
   });
 });
 

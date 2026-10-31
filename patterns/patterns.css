@@ -885,40 +885,46 @@
   align-self: flex-end;
 }
 
-/* Сетка ленты логотипов «Работодатели Группы»: шаг 8px (.cp-employers__grid,
-   pilot.css:394 — --ui-space-2); ступени 4 (md) → 6 (lg) — инверсия лестницы
-   пилота (≤1023 → 4, ≤767 → 1). Каркас — ui-grid в разметке канона. */
+/* Сетка ленты логотипов «Работодатели Группы»: лестница и шаг — оригинал
+   employers.css (база 6 колонок, gap 40/36; ≤1023 → 3 колонки gap 24;
+   ≤767 → 2 колонки gap 12), переформулирован mobile-first. Шаги вне шкалы
+   отступов — «как есть» (прецедент gap-литералов канонов dpp-where).
+   Мозаика live-индекса (5×197px, gap 64, смещения nth-child, margin −172 —
+   employers.css:33–47) — композиция страницы, не канон (прецедент tlp:
+   переносится композиция, не стили; активация — сайт-зона). Каркас —
+   ui-grid в разметке канона. */
 .lgo-grid {
   box-sizing: border-box;
-  gap: var(--ui-space-2);
+  gap: var(--ui-space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 @media (min-width: 768px) {
   .lgo-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--ui-space-5);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1024px) {
   .lgo-grid {
+    gap: 2.5rem 2.25rem;
     grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 }
 
-/* Рамочная плашка логотипа (порт .cp-employers__card, pilot.css:400):
-   img-плашка растянута на ячейку («img растянута» — width 100%, высота от
-   атрибутов канона — рендер пилота), радиус md, поверхность surface.
-   Рамка — --ui-color-border-muted (Спека T17.9): в пилоте рамка писалась
-   несуществующим токеном --ui-color-border и вычислялась 0px (рендер без
-   рамки); волосяная рамка slate-100 суб-видима на белых плашках-логотипах.
-   Паддинги «как есть» — нулевые: плашка обнимает логотип (в оригинале
-   паддингов нет). */
+/* Плашка логотипа — голый img (порт .employers__card, employers.css:14–19):
+   blue-50 запечён в PNG — CSS не даёт ни рамки, ни фона; радиус md = 1rem =
+   --radius-card 16px оригинала. Рамка border-muted (спека T17.9) снята
+   решением владельца 31.10 (сравнение с оригиналом 30.10: «рамка-в-рамке» на
+   белых полях логотипов; в исходном пилоте рамка вообще не рендерилась —
+   несуществующий токен). Hover-подъём оригинала (translateY −4 + тень) —
+   сайт-зона при интерактивных применениях (плитка канона — не ссылка).
+   Паддинги нулевые — плашка обнимает логотип. */
 .lgo-card {
   box-sizing: border-box;
   width: 100%;
-  border: var(--ui-border-width) solid var(--ui-color-border-muted);
   border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface);
 }
 
 /* ══════════════════════ Паттерн «Таймлайн этапов» (T14.11) — связки tlp- ══════════════════════

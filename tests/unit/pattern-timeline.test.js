@@ -87,10 +87,11 @@ describe('patterns/timeline/timeline.html — mini-эталон (Scope T14.11)',
     expect(stages.length, 'mini-эталон — не больше 4 этапов (Scope)').toBeLessThanOrEqual(4);
     const dots = markupOf(pattern).match(/<span class="tlp__dot">/g) ?? [];
     expect(dots.length, 'точка на каждом этапе').toBe(stages.length);
-    const headings = markupOf(pattern).match(/<h3\b[^>]*ui-h3[^>]*>/g) ?? [];
-    expect(headings.length, 'заголовок этапа — роль ui-h3 (h2 секции → h3, без пропусков)').toBe(
-      stages.length,
-    );
+    const headings = markupOf(pattern).match(/<h3\b[^>]*ui-h6[^>]*>/g) ?? [];
+    expect(
+      headings.length,
+      'заголовок этапа — роль ui-h6 (h3-тег, канон T16.12 «карточка списков»; унификация с пилотом — батч 31.10)',
+    ).toBe(stages.length);
     const texts = markupOf(pattern).match(/<p\b[^>]*ui-small[^>]*>/g) ?? [];
     expect(texts.length, 'текст этапа — роль ui-small (fs-small оригинала)').toBe(stages.length);
   });
@@ -241,7 +242,7 @@ describe('patterns/timeline/README.md — композиция, a11y, Bitrix (AC
   }
 
   it('композиция: ol этапов — точка с номером, h3, текст; ряд/колонка', () => {
-    for (const marker of ['ol', 'tlp__dot', 'tlp__stage', 'ui-h3']) {
+    for (const marker of ['ol', 'tlp__dot', 'tlp__stage', 'ui-h6']) {
       expect(readme, `дока называет «${marker}»`).toContain(marker);
     }
     expect(readme, 'горизонтальный ряд и мобильная колонка задокументированы').toContain('колонк');

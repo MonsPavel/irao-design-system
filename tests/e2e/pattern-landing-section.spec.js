@@ -505,7 +505,7 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
   );
 
   standTest(
-    'лента логотипов: сетка 1 (375) → 4 (768) → 6 (1280); плашка lgo-card — рамка border-muted, радиус md, img растянута',
+    'лента логотипов: сетка 2 (375) → 3 (768) → 6 (1280) — лестница оригинала; плашка lgo-card — голый img без рамки/фона, радиус md',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
       const sec = page.locator(SEL_LOGO.section);
@@ -519,11 +519,11 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
           .locator('.lgo-grid')
           .evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
       await page.setViewportSize(VIEWPORTS.mobile);
-      expect(await columnsOf(), 'мобильная база — 1 колонка').toBe(1);
+      expect(await columnsOf(), 'мобильная база — 2 колонки (≤767 оригинала)').toBe(2);
       await page.setViewportSize(VIEWPORTS.tablet);
-      expect(await columnsOf(), 'md — 4 колонки').toBe(4);
+      expect(await columnsOf(), 'md — 3 колонки (≤1023 оригинала)').toBe(3);
       await page.setViewportSize(VIEWPORTS.xl);
-      expect(await columnsOf(), 'lg+ — 6 колонок').toBe(6);
+      expect(await columnsOf(), 'lg+ — 6 колонок (база оригинала)').toBe(6);
 
       const plate = await sec
         .locator('img.lgo-card')
@@ -534,7 +534,8 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
             width: cs.width,
             boxWidth: Math.round(el.getBoundingClientRect().width),
             radius: cs.borderRadius,
-            border: `${cs.borderTopWidth} ${cs.borderTopStyle} ${cs.borderTopColor}`,
+            border: `${cs.borderTopWidth} ${cs.borderTopStyle}`,
+            bg: cs.backgroundColor,
             natural: `${el.naturalWidth}x${el.naturalHeight}`,
           };
         });
@@ -546,10 +547,11 @@ standTest.describe('patterns/landing-section: nav-карточки и лента
         plate.boxWidth,
         'плашка растянута на ячейку сетки (width: 100%)',
       ).toBeGreaterThanOrEqual(Math.floor(cell) - 1);
-      expect(plate.radius, 'радиус md').toBe('16px');
-      expect(plate.border, 'рамка — 1px solid slate-100 (--ui-color-border-muted)').toBe(
-        '1px solid rgb(232, 238, 246)',
+      expect(plate.radius, 'радиус md = --radius-card 16px оригинала').toBe('16px');
+      expect(plate.border, 'рамки нет — img самодостаточен (решение владельца 31.10)').toBe(
+        '0px none',
       );
+      expect(plate.bg, 'фон не задаётся — blue-50 запечён в PNG').toBe('rgba(0, 0, 0, 0)');
     },
   );
 });

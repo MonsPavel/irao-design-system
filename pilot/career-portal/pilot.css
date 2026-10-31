@@ -67,6 +67,16 @@
   line-height: 1.1;
 }
 
+/* Hover VI-пилюли — оригинал .header__link--vi:hover (header.css:152: фон
+   #FFFFFF, opacity 1 — дефолт, не переносится): перенос оригинала по решению
+   владельца 31.10 (батч — унаследованное отсутствие hover старого
+   .cp-header__vi; кнопка — голый button, generic-hover ДС не применяется). */
+@media (hover: hover) {
+  .hsp__action:hover {
+    background-color: var(--ui-color-surface);
+  }
+}
+
 /* Логотип-размеры — сайт-зона (Implementation requirements п.1 T17.13). */
 .hsp__logo img {
   width: 105px;
