@@ -92,8 +92,7 @@
   /* Оптический сдвиг глифа вправо — svg margin-left 6px оригинала
      (video-block.css:45); элементный селектор в каноне запрещён. */
   padding-left: 0.375rem;
-  border: 0.125rem solid
-    color-mix(in srgb, var(--ui-color-text-on-dark) 80%, transparent); /* 2px video-block.css:39 «как есть» (--ui-border-width 1px) */
+  border: 0.125rem solid color-mix(in srgb, var(--ui-color-text-on-dark) 80%, transparent); /* 2px video-block.css:39 «как есть» (--ui-border-width 1px) */
   border-radius: 50%;
   background-color: color-mix(in srgb, var(--ui-color-primary-hover) 45%, transparent);
   color: var(--ui-color-text-on-dark);
