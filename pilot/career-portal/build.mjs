@@ -1277,7 +1277,7 @@ ${directionsGrid}
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section lgo">
   <div class="ui-container">
     <h2 class="ui-h2">Популярные работодатели Группы</h2>
     <div class="ui-grid lgo-grid">

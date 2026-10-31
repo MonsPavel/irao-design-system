@@ -26,13 +26,14 @@
  *
  * Пороги — явные числа по факту итога T17.16 (Implementation requirements
  * п.1 — «не „меньше“, а конкретное значение»; деградация — exit 1):
- *  - MAX_PILOT_CSS_LINES = 1162 — сырые строки pilot.css. Errata 31.10:
- *    1040 → 1162 — батч паритета production/directions (решение владельца
- *    «приведи к оригиналу»: v1-координаты production.css + каркас
- *    directions.css); любой рост сверх — деградация сайт-зоны;
- *  - MAX_PILOT_CSS_CODE_LINES = 618 — цель эпика (README EPIC-17 AC) в
- *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 — тот же батч
- *    паритета (факт до батча 462);
+ *  - MAX_PILOT_CSS_LINES = 1169 — сырые строки pilot.css. Errata 31.10:
+ *    1040 → 1162 (батч паритета production/directions) → 1169 (батч
+ *    паритета раунда 7: степпер — gap 0 + li display:contents, решение
+ *    владельца «приведи к оригиналу»); любой рост сверх — деградация
+ *    сайт-зоны;
+ *  - MAX_PILOT_CSS_CODE_LINES = 622 — цель эпика (README EPIC-17 AC) в
+ *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 (батч production/
+ *    directions) → 622 (раунд 7 — тот же курс);
  *  - MAX_PILOT_JS_LINES = 187 — строки pilot.js на закрытие эпика;
  *  - MAX_CP_FAMILIES = 30 и ALLOWED_CP_FAMILIES — семейства ценза «после»:
  *    появление семейства вне списка = новый cp-визуальный блок = ошибка
@@ -56,8 +57,8 @@ const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** Пороги — факт итога T17.16 + errata 31.10 (см. шапку). Изменение числа —
  *  осознанная правка ценза вместе с юнит-пином и REPORT §11.4, не «подгонка». */
-export const MAX_PILOT_CSS_LINES = 1162;
-export const MAX_PILOT_CSS_CODE_LINES = 618;
+export const MAX_PILOT_CSS_LINES = 1169;
+export const MAX_PILOT_CSS_CODE_LINES = 622;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 

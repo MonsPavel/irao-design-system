@@ -273,6 +273,27 @@ describe('patterns/patterns.css — связка lgo-grid/lgo-card (T17.9; ка�
       'border-radius: var(--ui-radius-md);',
     );
   });
+
+  it('секция .lgo — ритм оригинала (батч паритета 31.10, раунд 7: 100px 0 + тайтл 64px)', () => {
+    const section = blockOf(layer, '.lgo');
+    expect(section, '.lgo найдено').toBeTruthy();
+    expect(section, 'box-sizing на корне (ADR-0002)').toContain('box-sizing: border-box;');
+    expect(
+      section,
+      'padding 100px 0 — employers.css:2 «как есть» (ритм ui-section погашен)',
+    ).toContain('padding: 6.25rem 0;');
+    const title = blockOf(layer, '.lgo .ui-h2');
+    expect(title, 'отступ тайтла 64px — employers.css:10').toContain('margin-bottom: 4rem;');
+  });
+
+  it('обёртка dropdown в шапке — строка пункта (раунд 7: inline-flex/center, header.css:19-22)', () => {
+    const wrap = blockOf(layer, '.hsp__menu .ui-dropdown');
+    expect(wrap, '.hsp__menu .ui-dropdown найдено').toBeTruthy();
+    expect(wrap, 'display inline-flex — block-обёртка выше строки ссылки').toContain(
+      'display: inline-flex;',
+    );
+    expect(wrap, 'центрирование строки').toContain('align-items: center;');
+  });
 });
 
 describe('гейт префиксов слоя расширен: lnk-|lgo- каноничны (Implementation requirements T17.1 п.2 + T17.9)', () => {

@@ -11,9 +11,12 @@
  *    (высоту ведёт кадр — высоты оригинала 720/420/240 не переносились,
  *    REPORT §3.4); оверлей — linear-gradient transparent 40% → primary-a72
  *    (ступень лестницы тинтов T17.6, Context «градиент к primary 72%»);
- *    play — круг accent 88px (5.5rem) с on-dark-стрелкой, размер — токен-хук
- *    --ui-video-play-size на корне (Scope: «размер токеном»); время —
- *    on-dark в правом нижнем углу (--ui-space-4);
+ *    play — стеклянный круг (primary-hover 45% + рамка on-dark 80%)
+ *    размером токен-хука --ui-video-play-size на корне (Scope: «размер
+ *    токеном»; errata 31.10 — решение владельца «приведи к оригиналу»:
+ *    4.5rem база / 7rem от md, video-block.css:36/85 — прежняя
+ *    интерпретация T17.6 «accent 88px, время в углу» снята); время —
+ *    on-dark под кнопкой (translate(-50%, 78px), video-block.css:58-62);
  *  - компонент статический (вид): поведение воспроизведения — слот сайта
  *    (Out of scope: реальный плеер/эмбед/JS);
  *  - канон (Implementation requirements п.1/п.3): <button type="button"> с
@@ -75,9 +78,9 @@ describe('components/ui-video/ui-video.css — обёртка и элемент�
     expect(block).toContain('background-color: var(--ui-color-primary);');
   });
 
-  it('токен-хук размера play на корне: --ui-video-play-size: 5.5rem (Scope «размер токеном»)', () => {
+  it('токен-хук размера play на корне: 4.5rem база / 7rem от md (errata 31.10 — оригинал)', () => {
     const block = blockOf(css, '.ui-video');
-    expect(block).toContain('--ui-video-play-size: 5.5rem;');
+    expect(block).toContain('--ui-video-play-size: 4.5rem;');
   });
 
   it('__poster: img cover во всю ширину — высоту ведёт кадр (пилот .cp-video__poster)', () => {
@@ -106,7 +109,7 @@ describe('components/ui-video/ui-video.css — обёртка и элемент�
     expect(block, '72% — только тинтом лестницы').not.toContain('72%');
   });
 
-  it('__play: круг accent размером --ui-video-play-size, on-dark, центр кадра', () => {
+  it('__play: стеклянный круг (primary-hover 45% + рамка on-dark) размером токена, центр кадра', () => {
     const block = blockOf(css, '.ui-video__play');
     expect(block, 'правило .ui-video__play найдено').toBeTruthy();
     expect(block).toContain('box-sizing: border-box;');
@@ -116,23 +119,41 @@ describe('components/ui-video/ui-video.css — обёртка и элемент�
     expect(block).toContain('left: 50%;');
     expect(block).toContain('align-items: center;');
     expect(block).toContain('justify-content: center;');
-    // 88px одобренного дизайна пилота = 5.5rem; размер — только токеном.
+    // Размер — только токеном (errata 31.10: дефолт 4.5rem/7rem от md —
+    // video-block.css:36/85; прежние «88px одобренного дизайна» сняты).
     expect(block).toContain('width: var(--ui-video-play-size);');
     expect(block).toContain('height: var(--ui-video-play-size);');
     expect(block).toContain('border-radius: 50%;');
-    // Пара accent + on-dark — уже одобренная (Implementation requirements п.2).
-    expect(block).toContain('background-color: var(--ui-color-accent);');
+    // Стекло оригинала (video-block.css:39-40) на семантических токенах:
+    // primary-hover = blue-700; рамка — on-dark 80%.
+    expect(block).toContain(
+      'background-color: color-mix(in srgb, var(--ui-color-primary-hover) 45%, transparent);',
+    );
+    // prettier переносит длинную строку — пин по частям; 2px «как есть»
+    // (video-block.css:39; --ui-border-width 1px — другая ступень)
+    expect(block).toContain('border: 0.125rem solid');
+    expect(block).toContain('color-mix(in srgb, var(--ui-color-text-on-dark) 80%, transparent);');
     expect(block).toContain('color: var(--ui-color-text-on-dark);');
     expect(block).toContain('transform: translate(-50%, -50%);');
   });
 
-  it('__time: on-dark в правом нижнем углу с отступом space-4', () => {
+  it('__play: hover — масштаб 1.06 и стекло 70% (video-block.css:52-55, mobile-first hover)', () => {
+    expect(css).toContain('.ui-video:hover .ui-video__play');
+    expect(css).toContain(
+      'background-color: color-mix(in srgb, var(--ui-color-primary-hover) 70%, transparent);',
+    );
+    expect(css).toContain('transform: translate(-50%, -50%) scale(1.06);');
+  });
+
+  it('__time: on-dark под кнопкой (translate 3.375rem база / 4.875rem от md, fs 1.25rem «как есть»)', () => {
     const block = blockOf(css, '.ui-video__time');
     expect(block, 'правило .ui-video__time найдено').toBeTruthy();
     expect(block).toContain('box-sizing: border-box;');
     expect(block).toContain('position: absolute;');
-    expect(block).toContain('right: var(--ui-space-4);');
-    expect(block).toContain('bottom: var(--ui-space-4);');
+    expect(block).toContain('top: 50%;');
+    expect(block).toContain('left: 50%;');
+    expect(block).toContain('transform: translate(-50%, 3.375rem);');
+    expect(block).toContain('font-size: 1.25rem;');
     expect(block).toContain('color: var(--ui-color-text-on-dark);');
   });
 
@@ -144,6 +165,7 @@ describe('components/ui-video/ui-video.css — обёртка и элемент�
   it('цвета — только существующие токены слоя 2 (Implementation requirements п.2)', () => {
     const allowed = new Set([
       '--ui-color-primary',
+      '--ui-color-primary-hover', // errata 31.10: стекло play (blue-700@45%, video-block.css:40)
       '--ui-color-primary-a72',
       '--ui-color-accent',
       '--ui-color-text-on-dark',

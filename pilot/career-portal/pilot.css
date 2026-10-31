@@ -264,11 +264,18 @@
   position: absolute;
   bottom: 0;
   z-index: 3;
+  gap: 0; /* табы вплотную — production.css:97-103 gap не задаёт (canon 8px погашен) */
   width: 100%;
   max-width: none;
   height: 5.125rem; /* 82px production.css:231 */
   margin: 0;
   inset-inline: 0;
+}
+
+/* Элементы списка — прозрачны для ленты (в оригинале кнопки — прямые
+   дети степпера, build-разметка несёт li): таб 20% ширины ленты. */
+.cp-production__stepper > li {
+  display: contents;
 }
 
 /* Таб: заливка blue-100@30, без рамки, активности — 50% и радиус сверху

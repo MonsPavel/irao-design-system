@@ -8,15 +8,19 @@
  *     во всю ширину (высоту ведёт кадр);
  *  2. оверлей — градиент transparent 40% → primary-a72 (ступень лестницы
  *     тинтов T17.6, не локальный color-mix);
- *  3. play: круг accent размером токена --ui-video-play-size (88px дефолт,
+ *  3. play: стеклянный круг (primary-hover 45% + рамка on-dark 80%) размером
+ *     токена --ui-video-play-size (4.5rem база / 7rem от md — errata 31.10,
+ *     решение владельца «приведи к оригиналу», video-block.css:36/85;
  *     демо-инстанс 64px — хук без fork'а), on-dark, центр кадра;
- *  4. время: on-dark в правом нижнем углу (отступ space-4);
+ *  4. время: on-dark под кнопкой (translate(-50%, 3.375rem) база /
+ *     4.875rem от md — video-block.css:58-62);
  *  5. a11y: доступное имя обёртки («Смотреть видео …», не «play») —
  *     параметр разметки; постер декоративен (alt=""); overlay/play
  *     aria-hidden; ссылочная форма — role link;
  *  6. axe: violations вне реестра = 0 (Testing requirements: контраст метки
- *     времени на градиенте — эффективный фон; пара play accent/on-dark —
- *     запись реестра KNOWN_AXE_EXCEPTIONS, как ui-button--accent, AC);
+ *     времени на градиенте — эффективный фон; запись реестра
+ *     .ui-video__play остаётся накрывающей элемент — errata 31.10: стекло
+ *     вместо accent, обоснование строки реестра актуализировано);
  *  7. контраст метки времени вручную: on-dark на композитном фоне градиента
  *     к primary над тёмным постером ≥ 4.5:1 (либа tests/contrast/lib.mjs);
  *  8. эталоны 375/768/1280/1440 — только из контейнера/CI (ADR-0004).
@@ -86,8 +90,9 @@ const stateOf = (page, id) =>
       time: time
         ? {
             position: getComputedStyle(time).position,
-            right: getComputedStyle(time).right,
-            bottom: getComputedStyle(time).bottom,
+            top: getComputedStyle(time).top,
+            left: getComputedStyle(time).left,
+            transform: getComputedStyle(time).transform,
             color: getComputedStyle(time).color,
           }
         : null,
@@ -146,16 +151,18 @@ standTest.describe('ui-video (T17.6)', () => {
   );
 
   standTest(
-    'play: круг accent 88px (--ui-video-play-size), on-dark, центр кадра; хук = 64px',
+    'play: стеклянный круг 112px (--ui-video-play-size 7rem от md), on-dark, центр кадра; хук = 64px',
     async ({ stand }) => {
       const page = await stand('ui-video');
 
       const { play } = await stateOf(page, VIDEO.button);
-      // 88px одобренного дизайна пилота (5.5rem = 88px при root 16px).
-      expect(play.width, 'play — 88px (5.5rem, токен дефолт)').toBe('88px');
-      expect(play.height, 'play — круг').toBe('88px');
+      // 112px оригинала (7rem от md — errata 31.10, video-block.css:36;
+      // база 4.5rem = 72px, video-block.css:85).
+      expect(play.width, 'play — 112px (7rem от md, токен дефолт)').toBe('112px');
+      expect(play.height, 'play — круг').toBe('112px');
       expect(play.radius, 'play — круг 50%').toBe('50%');
-      expect(play.bg, 'play — accent #F26722').toBe('rgb(242, 103, 34)');
+      // Стекло оригинала: primary-hover 45% над постером — axe меряет
+      // композит; точный пин полупрозрачного bg — на каноне (юнит).
       expect(play.color, 'стрелка — on-dark').toBe('rgb(255, 255, 255)');
       expect(play.position, 'позиционирован от кадра').toBe('absolute');
       expect(play.transform, 'центрирование translate(-50%, -50%)').toContain('matrix');
@@ -167,13 +174,14 @@ standTest.describe('ui-video (T17.6)', () => {
     },
   );
 
-  standTest('время: on-dark в правом нижнем углу, отступ space-4', async ({ stand }) => {
+  standTest('время: on-dark под кнопкой (translate 4.875rem от md)', async ({ stand }) => {
     const page = await stand('ui-video');
 
     const { time } = await stateOf(page, VIDEO.button);
     expect(time.position, 'метка — слой кадра').toBe('absolute');
-    expect(time.right, 'отступ справа --ui-space-4 (16px)').toBe('16px');
-    expect(time.bottom, 'отступ снизу --ui-space-4 (16px)').toBe('16px');
+    // left/top 50% в computed резолвятся в px — пин по y-компоненте
+    // translate (78px от md — video-block.css:62; база 54px).
+    expect(time.transform, 'сдвиг под кнопку (y 78px)').toContain(', 78)');
     expect(time.color, 'метка — on-dark').toBe('rgb(255, 255, 255)');
   });
 
@@ -223,18 +231,18 @@ standTest.describe('ui-video (T17.6)', () => {
   );
 
   standTest(
-    'axe: violations вне реестра = 0 (play accent/on-dark — реестр, как ui-button--accent)',
+    'axe: violations вне реестра = 0 (запись .ui-video__play накрывает элемент — errata 31.10: стекло вместо accent)',
     async ({ stand }) => {
       const page = await stand('ui-video');
       const results = await a11y(page).analyze();
       expect(unexpectedViolations(results), 'axe: ноль нарушений вне KNOWN_AXE_EXCEPTIONS').toEqual(
         [],
       );
-      // AC «контраст пар (play accent/on-dark — исключение реестра, как
-      // ui-button--accent)»: запись реестра обязана существовать — глиф ▶
-      // (мелкий текст на accent 3.12:1) и svg-стрелки сайтов-потребителей
-      // (axe на живом стенде глух к aria-hidden-глифу — запись страхует
-      // док-страницы и будущие формы, где глиф виден axe).
+      // AC «контраст пар» (T17.6): запись реестра обязана существовать.
+      // Errata 31.10 — стекло вместо accent: запись остаётся накрывающей
+      // .ui-video__play (axe глух к aria-hidden-глифу на живом стенде —
+      // запись страхует док-страницы и будущие формы, где глиф виден axe;
+      // обоснование строки — tests/README.md).
       expect(
         KNOWN_AXE_EXCEPTIONS.some(
           (exception) =>

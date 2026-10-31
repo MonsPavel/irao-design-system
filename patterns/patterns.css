@@ -927,6 +927,18 @@
   border-radius: var(--ui-radius-md);
 }
 
+/* Секция «Работодатели Группы» — ритм оригинала (employers.css:2 —
+   100px 0; отступ тайтла employers.css:10 — 64px; батч паритета 31.10,
+   решение владельца «приведи к оригиналу» — ритм ui-section погашен). */
+.lgo {
+  box-sizing: border-box;
+  padding: 6.25rem 0;
+}
+
+.lgo .ui-h2 {
+  margin-bottom: 4rem;
+}
+
 /* ══════════════════════ Паттерн «Таймлайн этапов» (T14.11) — связки tlp- ══════════════════════
  *
  * Adoption T17.10: связки переехали из style-блока дока timeline.html
@@ -1145,6 +1157,15 @@
 .hsp__menu .ui-dropdown__trigger {
   font-size: var(--ui-fs-small);
   line-height: 1.1;
+}
+
+/* Обёртка dropdown — строка пункта меню (header.css:19-22 — wrap
+   inline-flex с центрированием): block-обёртка компонента выше строки
+   ссылки и рвёт выравнивание ленты (батч паритета 31.10, замечание
+   владельца «дропдаун не на одном уровне»). */
+.hsp__menu .ui-dropdown {
+  display: inline-flex;
+  align-items: center;
 }
 
 /* Слот логотипа: inline-flex держит знак и текст-логотип на одной строке

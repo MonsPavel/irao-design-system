@@ -5,12 +5,16 @@
  * (задача T17.6, EPIC-17).
  *
  * Источник — видео-блок главной career-portal (оригинал
- * src/blocks/video-block/, реального плеера нет — клик-заглушка) в
- * интерпретации пилота (.cp-video__player/poster/overlay/play/time,
- * pilot.css:653–700 — одобренные значения, переносятся «как есть»):
- * обёртка-кнопка с постером, градиент-оверлей к primary 72% (нарастает к
- * низу кадра — метка времени читается на любом постере), круглая
- * play-кнопка accent 88px и время 24:23 в правом нижнем углу.
+ * src/blocks/video-block/). Errata 31.10 (батч паритета, решение
+ * владельца «приведи к оригиналу» — прежняя интерпретация T17.6 с
+ * оранжевой кнопкой 88px и временем в углу снята): обёртка-кнопка с
+ * постером, градиент-оверлей к primary 72% (нарастает к низу кадра —
+ * метка времени читается на любом постере), стеклянная play-кнопка
+ * 112px (mobile-first: 72px база, 112 от md — video-block.css:36/85
+ * переформулировано) — заливка primary-hover 45% (blue-700@0.45,
+ * video-block.css:40) с рамкой on-dark 80% (video-block.css:39) и
+ * hover-масштабом 1.06 (video-block.css:52-55), время 24:23 под кнопкой
+ * (translate(-50%, 78px), video-block.css:58-62; 54px в базе).
  *
  * Компонент статический (вид): поведение воспроизведения — слот сайта
  * (Out of scope T17.6 — эмбед/ссылка за постером; при появлении — отдельная
@@ -25,15 +29,15 @@
  * при узких постерах.
  *
  * Цвета — только существующие токены (Implementation requirements п.2):
- * пара accent + on-dark — уже одобренная (как ui-button--accent, контраст
- * 3.12:1 — исключение реестра axe, ADR-0010); градиент — primary-a72,
- * ступень лестницы тинтов (T17.6). Размер play — токен-хук
- * --ui-video-play-size (5.5rem = 88px одобренного дизайна): потребитель
- * перекрашивает/масштабирует без fork'а.
+ * play — color-mix primary-hover/on-dark (полупрозрачное стекло над
+ * фото — контраст глифа меряет axe по усреднённой подложке; прежняя
+ * запись реестра accent/on-dark остаётся накрывающей этот элемент);
+ * градиент — primary-a72, ступень лестницы тинтов (T17.6). Размер play —
+ * токен-хук --ui-video-play-size: потребитель масштабирует без fork'а.
  */
 
 .ui-video {
-  --ui-video-play-size: 5.5rem;
+  --ui-video-play-size: 4.5rem; /* 72px видео-blok.css:85, mobile-first */
   box-sizing: border-box;
   display: block;
   position: relative;
@@ -43,6 +47,12 @@
   border: 0;
   border-radius: var(--ui-radius-lg);
   background-color: var(--ui-color-primary);
+}
+
+@media (min-width: 768px) {
+  .ui-video {
+    --ui-video-play-size: 7rem; /* 112px video-block.css:36 «как есть» */
+  }
 }
 
 /* ── Элементы (Scope): постер/оверлей/play/время ── */
@@ -66,8 +76,9 @@
   background: linear-gradient(180deg, transparent 40%, var(--ui-color-primary-a72) 100%);
 }
 
-/* Play-кнопка: круг accent с on-dark-стрелкой (слот сайта: svg-стрелка
-   или глиф), размер — токен-хук корня --ui-video-play-size. */
+/* Play-кнопка: стеклянный круг (primary-hover 45% + рамка on-dark 80%,
+   video-block.css:36-42) с on-dark-стрелкой (слот сайта: svg или глиф),
+   размер — токен-хук корня --ui-video-play-size. */
 .ui-video__play {
   box-sizing: border-box;
   display: inline-flex;
@@ -78,18 +89,41 @@
   justify-content: center;
   width: var(--ui-video-play-size);
   height: var(--ui-video-play-size);
+  /* Оптический сдвиг глифа вправо — svg margin-left 6px оригинала
+     (video-block.css:45); элементный селектор в каноне запрещён. */
+  padding-left: 0.375rem;
+  border: 0.125rem solid
+    color-mix(in srgb, var(--ui-color-text-on-dark) 80%, transparent); /* 2px video-block.css:39 «как есть» (--ui-border-width 1px) */
   border-radius: 50%;
-  background-color: var(--ui-color-accent);
+  background-color: color-mix(in srgb, var(--ui-color-primary-hover) 45%, transparent);
   color: var(--ui-color-text-on-dark);
   transform: translate(-50%, -50%);
+  transition:
+    transform var(--ui-transition),
+    background-color var(--ui-transition);
 }
 
-/* Метка времени: on-dark в правом нижнем углу — читается поверх
-   градиент-оверлея. */
+@media (hover: hover) {
+  .ui-video:hover .ui-video__play {
+    background-color: color-mix(in srgb, var(--ui-color-primary-hover) 70%, transparent);
+    transform: translate(-50%, -50%) scale(1.06); /* video-block.css:52-55 */
+  }
+}
+
+/* Метка времени: on-dark под кнопкой по центру (translate(-50%, 78px),
+   video-block.css:57-62 — 20px «как есть»; 54px в базе, 78 от md). */
 .ui-video__time {
   box-sizing: border-box;
   position: absolute;
-  right: var(--ui-space-4);
-  bottom: var(--ui-space-4);
+  top: 50%;
+  left: 50%;
   color: var(--ui-color-text-on-dark);
+  font-size: 1.25rem; /* 20px video-block.css:60 «как есть» */
+  transform: translate(-50%, 3.375rem); /* 54px video-block.css:85 */
+}
+
+@media (min-width: 768px) {
+  .ui-video__time {
+    transform: translate(-50%, 4.875rem); /* 78px video-block.css:62 */
+  }
 }
