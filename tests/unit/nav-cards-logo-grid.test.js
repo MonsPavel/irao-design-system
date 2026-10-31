@@ -122,6 +122,15 @@ describe('components/ui-button — модификатор --round (T17.9 Scope)'
     expect(round, 'паддинг базы гасится — диаметр строгий').toContain('padding: 0;');
   });
 
+  it('round + sm (комбинированный, прецедент pill+sm): sm-токен стоит позже и перебил бы сбросы — min-height/padding-block гасятся явно (эллипс 20×32 без правила, ревью T17.9)', () => {
+    const combo = blockOf(buttonCss, '.ui-button--round.ui-button--sm');
+    expect(combo, 'правило .ui-button--round.ui-button--sm найдено').toBeTruthy();
+    expect(combo, 'min-height 0 — sm-токен 32px не растягивает круг').toContain('min-height: 0;');
+    expect(combo, 'padding-block 0 — sm-уплотнение не входит в бокс 20px').toContain(
+      'padding-block: 0;',
+    );
+  });
+
   it('цветовая пара — токен-хуках --ui-button-bg/--ui-button-color (дефолт primary/on-dark)', () => {
     expect(round, 'фон — хук, дефолт primary').toContain(
       'background-color: var(--ui-button-bg, var(--ui-color-primary));',
@@ -378,9 +387,9 @@ describe('пилот career-portal: students/employers на связках (AC T
     );
     expect(
       light,
-      'рамка light-тона — исходник 1:1 (токен --ui-color-border не существует,' +
-        ' рендер без рамки сохранён; починка — решение владельца)',
-    ).toContain('border: var(--ui-border-width) solid var(--ui-color-border);');
+      'рамки нет — исходник 1:1 (токен --ui-color-border не существует;' +
+        ' dead-ссылка заменена явным border: none, батч 31.10 — T17.9)',
+    ).toContain('border: none;');
     // Медиа-лестницы пилота для двух сеток сняты вместе с правилами.
     expect(pilotCss).not.toMatch(/\.cp-students__grid/);
     expect(pilotCss).not.toMatch(/\.cp-employers__grid/);

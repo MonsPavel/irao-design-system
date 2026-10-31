@@ -260,9 +260,13 @@ describe('components/ui-table/ui-table.css — карточная трансфо
     // Каскад hover × zebra на чётных строках ≥md (ревью T13.7): hover обязан
     // побеждать и там — дизайн «hover виден и на полосатых строках»
     // (ui-table.css, hover-блок). Специфичность считаем машиной: селектор —
-    // классы + псевдоклассы (тегов в селекторах компонента нет).
+    // классы + псевдоклассы (тегов в селекторах компонента нет); подчёркивания
+    // в классе символов — BEM-имена считаются целиком, не усекаются по __
+    // (ревью T13.7, батч 31.10: усечение было симметричным, но счётчик лгал
+    // на именах элементов).
     const specOf = (selector) =>
-      (selector.match(/\.[a-z0-9-]+/gi) ?? []).length + (selector.match(/:[a-z-]+/gi) ?? []).length;
+      (selector.match(/\.[a-z0-9_-]+/gi) ?? []).length +
+      (selector.match(/:[a-z-]+/gi) ?? []).length;
     const zebraRestoreMatch = md.match(/\.ui-table--cards\.ui-table--zebra[^{]*\{/);
     expect(zebraRestoreMatch, 'zebra-восстановление найдено').toBeTruthy();
     const hoverRestoreSel = md.slice(hoverRestore).match(/\.ui-table--cards[^{]*:hover[^{]*\{/);

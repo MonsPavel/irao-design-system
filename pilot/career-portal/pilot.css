@@ -204,7 +204,7 @@
   gap: var(--ui-space-3);
   align-items: flex-start;
   padding: var(--ui-space-4);
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  border: none; /* рамки нет: оригинал 1px #D6D6D6 — «воздушнее» REPORT §9.1 */
   border-radius: var(--ui-radius-md);
   background-color: var(--ui-color-surface);
 }
@@ -376,14 +376,14 @@
 }
 
 /* Тон light: surface (дефолт пары связки), кнопка — primary/surface (пара
-   «navy»); рамка — исходник 1:1 (pilot.css:531): токен --ui-color-border в
-   ДС не существует, рамка вычислялась 0px — рендер без рамки сохранён
-   (починка значения меняла бы одобренный вид; решение владельца). */
+   «navy»); рамки нет — исходник вёл несуществующий токен (рендер без рамки,
+   «исходник 1:1»; ловушка неопределённого токена снята явным border: none,
+   батч 31.10 — T17.9: починка значения меняла бы одобренный вид). */
 .lnk-card--light {
   --lnk-card-bg: var(--ui-color-surface);
   --ui-button-bg: var(--ui-color-primary);
   --ui-button-color: var(--ui-color-surface);
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  border: none;
 }
 
 /* ── media: сетка главной — ПАТТЕРН-СЛОЙ (T17.15) ──
@@ -748,7 +748,7 @@ a.cp-intern-card {
    Hero-2кол и where-пары — ПАТТЕРН-СЛОЙ (T17.14): канон dpp-hero
    (400px/1fr от 1280, фото 260/320) и dpp-where (пары от lg, фото 280px)
    — patterns/patterns.css; разметка companyMain несёт классы
-   dpp-hero и dpp-where с элементами __photo/__body/__text/__item. */
+   dpp-hero и dpp-where с элементами __photo/__body/__text. */
 
 /* Факты компании: сетка 3 колонки, шаг 24px, низ 40px «как есть»
    (pages.css:805). Плашки — ui-stat--filled (T17.4): primary-поверхность,

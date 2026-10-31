@@ -253,9 +253,10 @@ describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 S
 
   it('в блоках каталога нет hex и !important (инварианты системы)', () => {
     const start = pilotCss.indexOf('.cp-catalog-nav');
-    const end =
-      pilotCss.indexOf('.cp-catalog-nav') +
-      pilotCss.indexOf('}', pilotCss.indexOf('.cp-catalog-nav'));
+    // срез ровно по проверяемому блоку (ревью T17.12: до-веточная формула
+    // складывала два абсолютных индекса — end уходил за конец файла,
+    // проверка фактически покрывала хвост всего pilot.css)
+    const end = pilotCss.indexOf('}', start) + 1;
     const section = pilotCss.slice(start, end);
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(section).not.toContain('!important');

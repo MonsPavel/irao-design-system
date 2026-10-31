@@ -382,13 +382,27 @@ const SHELL_PROBES = [
     },
     rect: true,
   },
+  // Подпись-полоса промо-блока (T16.15, батч 31.10): fs 18 — pages.css:1077
+  // «как есть» (вне тройки ролей T3.3); вторая пара добирает прямой гейт fs
+  // --bar (базовая пара --xl гейтила fw/tt/color, fs 40 — своя).
+  {
+    name: 'marquee-bar',
+    original: '.adv-marquee__line--bar',
+    pilot: '.mrq__line--bar',
+    fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
+  },
   // Карточка компании (T16.16, REPORT §9.1 №7): канон мини-карточки — 14/500
   // color-text (inline-стиль companies.html:153+: --fs-small-regular ×
   // --fw-small = тройка small ДС, роль ui-small на ссылке), паддинг 20×24,
-  // высота строки в grid-3. Первое вхождение — companies.html.
+  // высота строки в grid-3. Первое вхождение — companies.html. Селектор
+  // оригинала сужен сеткой сегментов (карта.card--hover без доп-класса
+  // живёт только в .cards-grid--3, build.py:649-653): без сужения на
+  // страницах без сетки компаний пара ловила первую попавшуюся .card--hover
+  // (ревью T16.16, батч 31.10; вариант находки «.companies» не существует —
+  // контейнер в оригинале называется cards-grid).
   {
     name: 'company-card',
-    original: '.card--hover',
+    original: '.cards-grid--3 .card--hover',
     pilot: '.cp-company-card',
     fields: {
       fs: 'font-size',

@@ -195,7 +195,10 @@ describe('compare.mjs — гейт ценза подключен в тот же 
   it('compare.mjs импортирует census.mjs и гонит гейт до браузерного прогона', () => {
     expect(compare).toContain("from './census.mjs'");
     expect(compare).toContain('runCensusGate');
-    const censusCall = compare.indexOf('runCensusGate');
+    // Пин позиции ВЫЗОВА (ревью T17.16: первое вхождение имени матчит
+    // импорт — при переносе вызова ниже chromium.launch() пин оставался
+    // зелёным); фактически: compare.mjs:80 «const censusGate = runCensusGate(».
+    const censusCall = compare.indexOf('const censusGate = runCensusGate');
     const browserLaunch = compare.indexOf('chromium.launch()');
     expect(censusCall).toBeGreaterThan(-1);
     expect(browserLaunch).toBeGreaterThan(-1);

@@ -1059,18 +1059,19 @@ const MEDIA_HOME = [
   },
 ];
 
-function mediaHomeCard(card, extraClass = '') {
+function mediaHomeCard(card) {
   // Тег на фото — __media-tag (позиция каркаса) + тинт варианта + точка,
   // как в articleCard (маркер реклассификации REPORT §3.3 — ревью T16.10:
   // on-photo в пилоте не применяется). Заголовок (ветка с desc) — мини-тайтл
   // 14/500, один выбор с articleCard (T16.12); дата — muted (.media__card-date
   // оригинала). T17.5: каркас — ui-card--media (правила cp-article-card*,
   // которые занимала эта карточка-заёмщик, сняты); класс cp-article-card__date
-  // на дате — специфика fw 400 (см. pilot.css).
+  // на дате — специфика fw 400 (см. pilot.css). Мёртвый extraClass снят
+  // (батч 31.10 — ревью T17.15: единственный вызов с классом был снят T17.5).
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
     card.type
   ];
-  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media${extraClass}">
+  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media">
   <a class="ui-card__link" href="article.html">
     <div class="ui-card__media">
       <img src="${esc(card.image)}" alt="" loading="lazy">

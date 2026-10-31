@@ -553,6 +553,12 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     const link = blockOf('.hsp__menu .ui-link');
     expect(link, 'nowrap-пункты меню').toContain('white-space: nowrap;');
+    const action = blockOf('.hsp__action');
+    expect(action, '.hsp__action найдено (общий вид кнопки — п.2)').toBeTruthy();
+    expect(action, 'пилюля — радиус токеном').toContain('border-radius: var(--ui-radius-pill);');
+    expect(action, 'шрифт явно — UA-дефолт кнопки не наследует сайт').toContain(
+      'font-family: var(--ui-font-family);',
+    );
   });
 
   it('значения канона 1:1 — режимы шапки: базовый static (border muted) поверх — hsp--overlay (absolute, z-40)', () => {
@@ -587,6 +593,11 @@ describe('patterns/patterns.css — единый исходник паттерн
   });
 
   it('значения канона 1:1 — каркас подвала ftp (T17.13): сетка auto 2fr 2fr 1fr от 1024, база 2 колонки, паддинги 48', () => {
+    const muted = blockOf('.ftp--muted');
+    expect(muted, '.ftp--muted найдено (тон-специмен — единственное содержимое)').toBeTruthy();
+    expect(muted, 'приглушённый фон — surface-пара поверх базы').toContain(
+      'background-color: var(--ui-color-surface-muted);',
+    );
     const inner = blockOf('.ftp__inner');
     expect(inner, '.ftp__inner найдено').toBeTruthy();
     expect(inner, 'база — 2 колонки (ступень ≤1023 пилота, mobile-first)').toContain(

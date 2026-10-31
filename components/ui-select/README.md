@@ -30,7 +30,7 @@ career-portal (класс B аудита); критический рефакто
 | Нативный select после init | класс `.ui-select__native` (opacity 0 + pointer-events none — custom-select-hidden career-portal) + `tabindex="-1"` (триггер заменяет его в Tab-порядке); форму не покидает, значение уходит |
 | JS | `IraoUI.select`: `init()`, `selector`, `closeAll()`, `destroy(selectOrRootOrId)`; чистые функции `viewOf(select)`, `typeaheadIndex(texts, from, char[, disabled])` |
 | Событие | нативный `change` (bubbles) на select — единственная точка расширения; собственных событий модуль не диспатчит |
-| Токены | `--ui-z-dropdown` (лестница T2.2), `--ui-color-{text, text-muted, surface, surface-muted, surface-hover, primary}`, `--ui-radius-{sm, pill}`, `--ui-border-width`, `--ui-color-border` (рамка пилюли `ui-select--pill` T17.12 + forced-colors-граница триггера и списка, T9.2), `--ui-space-{1,2,3,4}`, `--ui-shadow-lg`, `--ui-fs-{small,micro}`, `--ui-fw-{body,small}`, `--ui-lh-{small,micro}`, `--ui-transition`, focus-тройка ADR-0001 |
+| Токены | `--ui-z-dropdown` (лестница T2.2), `--ui-color-{text, text-muted, surface, surface-muted, surface-hover, primary}`, `--ui-radius-{sm, pill}`, `--ui-border-width` (forced-colors-граница триггера и списка, T9.2 — цвет currentColor; пилюля `ui-select--pill` рамки не имеет, T17.9), `--ui-space-{1,2,3,4}`, `--ui-shadow-lg`, `--ui-fs-{small,micro}`, `--ui-fw-{body,small}`, `--ui-lh-{small,micro}`, `--ui-transition`, focus-тройка ADR-0001 |
 
 ```html
 <!-- Авторская разметка: обычный select; всё остальное строит модуль -->
@@ -165,7 +165,7 @@ career-portal (класс B аудита); критический рефакто
 - **Do**: select в ui-field — просто оставьте `ui-field__select` на select;
   триггер накроет его той же поверхностью (surface-muted + radius-sm — визуал
   поля сохраняется).
-- **Do**: для «пилюли» фильтра — модификатор `ui-select--pill` на обёртке + `data-ui-select="wrap"` (геометрия пилюли — в системе, T17.12; ширина — раскладка сайта/слоя); имя поля — `label[for]` на id select
+- **Do**: для «пилюли» фильтра — модификатор `ui-select--pill` на обёртке + `data-ui-select="wrap"` (геометрия пилюли — в системе, T17.12; ширина — раскладка сайта/слоя); select несёт `ui-field__select` — растяжку на обёртку и высоту поля даёт ui-field (голый select сожмёт пилюлю до его интенсы, `ui-select.css`); имя поля — `label[for]` на id select
   **рядом с обёрткой** (как на стенде `#uiss-wrap`/`#uiss-pill`): имя получают и нативный
   select, и триггер (`aria-labelledby`), а подпись не накрывается триггером.
 - **Don't**: текст внутри wrap-обёртки запрещён — в том числе label-обёртка

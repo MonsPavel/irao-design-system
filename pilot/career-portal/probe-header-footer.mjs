@@ -16,7 +16,11 @@
  *  2. Соц-кнопки подвала — «по оригиналу» (остаток §8.3): пара computed
  *     покоя (36px, r12, blue-50/текст) и hover (primary/on-dark).
  *  3. Слот VI и адрес: font-family кнопки VI и font-style address —
- *     нормализация слоем (пара с оригиналом).
+ *     нормализация слоем (пара с оригиналом). Унаследованное расхождение
+ *     слота VI (записано, батч 31.10): hover оригинала (.header__link--vi:hover
+ *     → фон #FFFFFF, header.css:152) пилотом не воспроизводился и до каркаса
+ *     (старый .cp-header__vi тоже без hover) — не вносится в список
+ *     унаследованных расхождений pilot.css; решение о переносе — владельцу.
  *  4. axe (Testing requirements): лендмарки banner/contentinfo — по одному,
  *     имена меню — непустые и уникальные; на трёх страницах пилота и на
  *     мини-стенде каркасов.
@@ -183,7 +187,16 @@ for (const [vpName, viewport] of Object.entries(VIEWPORTS)) {
     const { context, page } = await open(base, pageName, viewport);
     let out;
     if (kind === 'social') {
-      if (hover) await page.hover(PAIRS.social[side]);
+      if (hover) {
+        // Гашение transition (ui-button.css/footer.css): computed-read сразу
+        // после hover ловил середину CSS-перехода — проба сравнивала пару
+        // ПОКОЯ с покоем («MATCH» при реальном расхождении; ревью T17.13).
+        // С гашением значение меняется синхронно с hover; выдержка — на
+        // асинхронный repaint playwright-хавера.
+        await page.addStyleTag({ content: '* { transition: none !important }' });
+        await page.hover(PAIRS.social[side]);
+        await page.waitForTimeout(100);
+      }
       out = await computedOf(page, PAIRS.social[side], [
         'background-color',
         'color',
@@ -238,7 +251,9 @@ for (const [vpName, viewport] of Object.entries(VIEWPORTS)) {
     const pilot = await read('pilot', pageName, kind, hover);
     result.pairs[key] = { original, pilot };
     if (!original || !pilot) {
-      problems.push(`${key}: элемент не найден (${PAIRS[kind][side]})`);
+      problems.push(
+        `${key}: элемент не найден (original ${PAIRS[kind].original} / pilot ${PAIRS[kind].pilot})`,
+      );
       continue;
     }
     const diffs = Object.keys(original).filter((k) => original[k] !== pilot[k]);
@@ -248,6 +263,17 @@ for (const [vpName, viewport] of Object.entries(VIEWPORTS)) {
     }
     // width — зависит от контента/шрифта страницы; для VI-слота смотрим
     // семейство (нормализация слоем), для address — только font-style.
+    // Самопроверка вакуумности hover-пары: hover-состояние пилота обязано
+    // отличаться от его же покоя — иначе пара сравнивала бы покой с покоем
+    // даже при сломанном hover-фиксе (гашение transition не сработало).
+    if (key === 'social-hover') {
+      const restBg = result.pairs['social-rest'].pilot['background-color'];
+      if (restBg !== undefined && pilot['background-color'] === restBg) {
+        problems.push(
+          `social-hover: hover-фон пилота не отличается от покоя (${restBg}) — проверка вакуумна`,
+        );
+      }
+    }
     if (key === 'social-rest' || key === 'social-hover') {
       if (diffs.length > 0)
         problems.push(`${key}: расхождение ${diffs.join(',')} (пара с оригиналом)`);

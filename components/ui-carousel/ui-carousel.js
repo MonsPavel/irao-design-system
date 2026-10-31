@@ -286,11 +286,18 @@
         }
         if (linkSlot) {
           // CTA: slide.link из данных, иначе строка пилота «Подробнее: N»
-          // (PRODUCTION_SLIDES career-portal несут count, не link).
+          // (PRODUCTION_SLIDES career-portal несут count, не link). Слайд без
+          // link и count CTA не имеет — слот скрыт (пустая ссылка —
+          // axe-нарушение и мёртвый контрол; на слайдах с данными слот
+          // возвращается — контракт в README, ревью T17.7).
           if (slide.link !== null && slide.link !== undefined) {
             linkSlot.textContent = slide.link;
+            linkSlot.removeAttribute('hidden');
           } else if (slide.count !== null && slide.count !== undefined) {
             linkSlot.textContent = 'Подробнее: ' + slide.count;
+            linkSlot.removeAttribute('hidden');
+          } else {
+            linkSlot.setAttribute('hidden', '');
           }
         }
         for (var i = 0; i < tabs.length; i += 1) {
@@ -481,7 +488,7 @@
   function select(root, index) {
     var el = typeof root === 'string' ? document.getElementById(root) : root;
     if (!el) {
-      warnOnce('select(): корень не найден');
+      moduleWarn('select(): корень не найден');
       return null;
     }
     var inst = instanceOf(el);
@@ -489,7 +496,7 @@
       try {
         inst = initInstance(el);
       } catch (err) {
-        warnOnce('select():', err.message);
+        moduleWarn('select():', err.message);
         return null;
       }
     }
@@ -498,7 +505,7 @@
   }
 
   /** console.warn с префиксом модуля (jsdom-пины собирают аргументы). */
-  function warnOnce() {
+  function moduleWarn() {
     if (window.console && window.console.warn) {
       var args = ['[IraoUI:' + MODULE_NAME + ']'];
       for (var i = 0; i < arguments.length; i += 1) {

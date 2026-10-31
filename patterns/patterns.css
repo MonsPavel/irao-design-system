@@ -65,14 +65,16 @@
 }
 
 /* «Пилюля» фильтра (замена .vacancy-search__select-wrap career-portal):
-   геометрия и рамка — здесь, триггер модуля растягивается на обёртку.
+   геометрия — здесь, триггер модуля растягивается на обёртку; рамки нет —
+   оригинал вёл несуществующий токен --ui-color-border, фактический рендер
+   «без рамки» закреплён явно (ловушка снята, батч 31.10 — T17.9).
    box-sizing на корне связки — ADR-0002. */
 .lpp-pill {
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   padding: var(--ui-space-1) var(--ui-space-2);
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  border: none;
   border-radius: var(--ui-radius-pill);
   background-color: var(--ui-color-surface);
 }
@@ -106,7 +108,11 @@
    вакансий gap 8 (space-2) и ритм снизу 8 (space-2) («принято ДС», REPORT
    T15.9; расхождения events-search — материал отчёта). Поле растягивается,
    кнопка рядом; разметку несёт док-канон list-page (синхронность — пин
-   patterns-layer.test.js). */
+   patterns-layer.test.js). Композиция: в каноне find-bar — ребёнок
+   gap-колонки .lpp-main (gap 24), margin-bottom НЕ схлопывается во флексе —
+   фактический ритм find-bar→чипы на стенде 32px (8+24); «чистые» 8px из
+   метрик пилота держатся в cp-vac-main (колонка без gap). Гашение маргина
+   в каноне — design-decision владельца (батч 31.10, ревью T17.12). */
 .lpp-find {
   box-sizing: border-box;
   display: flex;
@@ -1148,17 +1154,18 @@
 }
 
 /* Слот действия (кнопка VI — T9.1): общий вид кнопки для дока-канона
-   (Implementation requirements п.2) — аффорданс пилюли на токенах.
-   Бренд-вид (VI-пилюля 15px, рамка primary, glass-light у career-portal) —
-   сайт-зона поверх. font-family явно: UA-дефолт кнопки шрифт сайта не
-   наследует. */
+   (Implementation requirements п.2) — аффорданс пилюли на токенах; рамки
+   нет — строка вела несуществующий токен --ui-color-border, фактический
+   рендер «без рамки» закреплён явно (ловушка снята, батч 31.10 — T17.9):
+   бренд-вид (рамка primary у career-portal) — сайт-зона поверх.
+   font-family явно: UA-дефолт кнопки шрифт сайта не наследует. */
 .hsp__action {
   box-sizing: border-box;
   display: inline-flex;
   gap: var(--ui-space-2);
   align-items: center;
   padding: var(--ui-space-2) var(--ui-space-3);
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  border: none;
   border-radius: var(--ui-radius-pill);
   background-color: transparent;
   color: var(--ui-color-text);
@@ -1644,16 +1651,17 @@
 }
 
 /* Lead-карточка «статья + дата + анонс + ссылка»: колонка с шагом 8px,
-   паддинг 16, рамка/радиус/поверхность карточки (порт cp-media__lead
-   пилота — сводка рядом с big-фото; исходник .media__lead
-   media.css:151–160 без рамки — принятый вид клона, калибровка). */
+   паддинг 16, радиус/поверхность карточки (порт cp-media__lead пилота —
+   сводка рядом с big-фото; исходник .media__lead media.css:151–160 без
+   рамки — принятый вид клона, калибровка; dead-токен строки заменён
+   явным border: none, батч 31.10 — T17.9). */
 .mdl__lead {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: var(--ui-space-2);
   padding: var(--ui-space-4);
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  border: none;
   border-radius: var(--ui-radius-md);
   background-color: var(--ui-color-surface);
 }

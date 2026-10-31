@@ -15,7 +15,7 @@
 |---|---|
 | Блок | `.ui-carousel` — корень инстанса (типично секция фото-композиции) |
 | Хуки форм | `data-ui-carousel` — карусель со степпером; `data-ui-gallery` — фото-галерея prev/next (степпера нет) |
-| Данные карусели | `<script type="application/json" data-ui-carousel-slides>` — массив `{photo, title, text, link, count}`; `link` опционален (CTA-подпись: `slide.link`, иначе строка пилота «Подробнее: count»), `count` — только для этой подписи |
+| Данные карусели | `<script type="application/json" data-ui-carousel-slides>` — массив `{photo, title, text, link, count}`; `link` опционален (CTA-подпись: `slide.link`, иначе строка пилота «Подробнее: count»), `count` — только для этой подписи. Слайд без `link` **и** `count` CTA не имеет: link-слот скрывается (`hidden`), при переходе на слайд с данными возвращается — чужой CTA «не залипает» |
 | Данные галереи | `<script type="application/json" data-ui-gallery-photos>` — массив строк-URL |
 | Слот карусели | `[data-ui-carousel-photo]` (img), `[data-ui-carousel-title]`, `[data-ui-carousel-text]`, `[data-ui-carousel-link]` — активный слайд; слоты опциональны (рендер по наличию), типографика — ролями в разметке (`ui-h2`, `ui-lead`, `ui-button`) |
 | Слот галереи | `[data-ui-gallery-photo]` (img, обязателен); `alt` не меняется модулем — фото попапа декоративны (`alt=""`) |

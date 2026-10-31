@@ -61,12 +61,14 @@ describe('ДС: модификатор ui-select--pill (компонент, Impl
     expect(block, '.ui-select--pill найдено').toBeTruthy();
   });
 
-  it('геометрия пилюли: рамка --ui-border-color, радиус pill, фон surface-muted (канон cp-pill/T16.11)', () => {
+  it('геометрия пилюли: без рамки (dead-токен исходника закреплён явно), радиус pill, фон surface-muted (канон cp-pill/T16.11)', () => {
     const block = blockOf(componentCss, '.ui-select--pill');
     expect(block, 'box-sizing на корне (ADR-0002)').toContain('box-sizing: border-box;');
-    expect(block, 'рамка пилюли — токены T16.11-канона').toContain(
-      'border: var(--ui-border-width) solid var(--ui-color-border);',
-    );
+    expect(
+      block,
+      'рамки нет — cp-pill вёл несуществующий --ui-color-border, рендер без рамки',
+    ).toContain('border: none;');
+    expect(block, 'радиус пилюли').toContain('border-radius: var(--ui-radius-pill);');
     expect(block, 'радиус пилюли').toContain('border-radius: var(--ui-radius-pill);');
     expect(block, 'фон пилюли — surface-muted (blue-50)').toContain(
       'background-color: var(--ui-color-surface-muted);',

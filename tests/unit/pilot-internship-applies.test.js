@@ -38,6 +38,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { JSDOM } from 'jsdom';
 import { describe, expect, it } from 'vitest';
 
 const root = join(import.meta.dirname, '..', '..');
@@ -336,6 +337,107 @@ describe('pilot.js — мок-формы видят только видимые 
   it('сабмит всегда мок (preventDefault) — отправки на сервер нет, как в forms.js оригинала', () => {
     const handler = pilotJs.match(/data-cp-form[\s\S]*?\}\);/)?.[0] ?? '';
     expect(handler).toContain('preventDefault()');
+  });
+
+  /** Фикстура формы: видимые text/select/email/checkbox + скрытая условная
+   *  ветка (блок опыта internship-apply) + body/success мока. Select — клан
+   *  selectField: обе опции value="" (выбор уходит текстом опции). */
+  const formFixture = `
+    <form data-cp-form>
+      <div class="ui-field"><input name="fio" required></div>
+      <div class="ui-field"><select name="course" required>
+        <option value="">Выберите курс</option>
+        <option value="">1 курс бакалавриата</option>
+      </select></div>
+      <div class="ui-field"><input type="email" name="email" required></div>
+      <div class="ui-field"><input type="checkbox" name="consent" required></div>
+      <div hidden><div class="ui-field"><input name="lastjob" required></div></div>
+      <div data-cp-form-body><button type="submit">подать заявку</button></div>
+      <div data-cp-form-success hidden><h2 tabindex="-1">Заявка принята</h2></div>
+    </form>`;
+
+  /** Песочница с формой: pilot.js — страничный IIFE, исполняется сразу. */
+  function makeFormSandbox() {
+    const dom = new JSDOM('<!doctype html><html><body>' + formFixture + '</body></html>', {
+      url: 'https://pilot.test/internship-apply.html',
+      runScripts: 'outside-only',
+    });
+    const { window } = dom;
+    const { document } = window;
+    window.eval(pilotJs);
+    const form = document.querySelector('[data-cp-form]');
+    const fieldOf = (name) => form.querySelector(`[name="${name}"]`);
+    return { window, document, form, fieldOf };
+  }
+
+  describe('поведение валидации (jsdom — behavioral-пин, опциональная запись бэклога T15.4)', () => {
+    it('пустая форма: скрытое lastjob не валидируется, фокус — первое видимое (fio), ошибка — канон ui-field', () => {
+      const { document, form, fieldOf } = makeFormSandbox();
+      form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+      const wrap = fieldOf('fio').closest('.ui-field');
+      expect(wrap.classList.contains('ui-field--error'), 'ошибка на корне поля').toBe(true);
+      expect(fieldOf('fio').getAttribute('aria-invalid')).toBe('true');
+      expect(
+        fieldOf('lastjob').getAttribute('aria-invalid'),
+        'скрытая ветка не тронута',
+      ).toBeNull();
+      expect(document.activeElement, 'фокус — первое видимое поле').toBe(fieldOf('fio'));
+      expect(
+        form.querySelector('[data-cp-form-success]').hasAttribute('hidden'),
+        'success не показан',
+      ).toBe(true);
+    });
+
+    it('select по индексу: выбранная опция клана value="" валидна (placeholder — только первая)', () => {
+      const { window, form, fieldOf } = makeFormSandbox();
+      const select = fieldOf('course');
+      select.selectedIndex = 1; // «1 курс бакалавриата», value = ""
+      select.dispatchEvent(new window.Event('change', { bubbles: true }));
+      const wrap = select.closest('.ui-field');
+      expect(wrap.classList.contains('ui-field--error'), 'выбор по индексу валиден').toBe(false);
+      // и на сабмите пустой select (index 0) держит ошибку
+      select.selectedIndex = 0;
+      form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+      expect(select.getAttribute('aria-invalid')).toBe('true');
+      expect(wrap.classList.contains('ui-field--error')).toBe(true);
+    });
+
+    it('email-regex: «a@b» невалиден, «a@b.cd» валиден — форма доходит до success', () => {
+      const { document, form, fieldOf } = makeFormSandbox();
+      fieldOf('fio').value = 'Иванов Иван';
+      fieldOf('course').selectedIndex = 1;
+      fieldOf('consent').checked = true;
+
+      fieldOf('email').value = 'a@b';
+      form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+      expect(
+        fieldOf('email').closest('.ui-field').classList.contains('ui-field--error'),
+        'короткий домен — ошибка',
+      ).toBe(true);
+      expect(document.activeElement, 'фокус — невалидный email').toBe(fieldOf('email'));
+
+      fieldOf('email').value = 'a@b.cd';
+      form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+      expect(form.querySelector('[data-cp-form-body]').hasAttribute('hidden'), 'body скрыт').toBe(
+        true,
+      );
+      expect(
+        form.querySelector('[data-cp-form-success]').hasAttribute('hidden'),
+        'success показан',
+      ).toBe(false);
+    });
+
+    it('ввод снимает состояние ошибки (input) — как validateField forms.js оригинала', () => {
+      const { window, form, fieldOf } = makeFormSandbox();
+      form.dispatchEvent(new window.Event('submit', { bubbles: true, cancelable: true }));
+      const wrap = fieldOf('fio').closest('.ui-field');
+      expect(wrap.classList.contains('ui-field--error')).toBe(true);
+
+      fieldOf('fio').value = 'Иванов Иван';
+      fieldOf('fio').dispatchEvent(new window.Event('input', { bubbles: true }));
+      expect(wrap.classList.contains('ui-field--error'), 'ошибка снята').toBe(false);
+      expect(fieldOf('fio').hasAttribute('aria-invalid'), 'aria-invalid снят').toBe(false);
+    });
   });
 });
 

@@ -336,7 +336,7 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
   const galleryPhotoOf = (root) => root.querySelector('[data-ui-gallery-photo]');
 
   /** Собрать события irao-ui:carousel-select на корне. */
-  function collectSelectEvents(window, root) {
+  function collectSelectEvents(root) {
     const events = [];
     root.addEventListener('irao-ui:carousel-select', (event) => events.push(event));
     return events;
@@ -465,7 +465,7 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     it('стартовый рендер — silent: слоты несут данные первого слайда, событие не диспатчится', () => {
       const { document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
       const rootEl = document.getElementById('c1');
-      const events = collectSelectEvents(window, rootEl);
+      const events = collectSelectEvents(rootEl);
       const slots = slotsOf(rootEl);
       expect(slots.photo.getAttribute('src')).toBe('a.png');
       expect(slots.photo.getAttribute('alt')).toBe('Производство');
@@ -481,6 +481,33 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
       // слайд 3 (индекс 2) — {"link":"Подробнее"} без count
       tabsOf(rootEl)[2].click();
       expect(slotsOf(rootEl).link.textContent).toBe('Подробнее');
+    });
+
+    it('слайд без link и count: link-слот скрыт (чужой CTA не «залипает»), на слайде с данными возвращается', () => {
+      // Слайд 2 (индекс 1) в фикстуре — {"count":"13 вакансий"}, добавим
+      // соседний без CTA-полей: контракт «нет link и count → слот hidden».
+      const mixed = carouselHtml('c1').replace(
+        '{"photo":"c.png","title":"IT сфера","text":"Текст В","link":"Подробнее"}',
+        '{"photo":"c.png","title":"IT сфера","text":"Текст В"}',
+      );
+      const { document } = makeSandbox({ bodyHtml: mixed });
+      const rootEl = document.getElementById('c1');
+      const link = slotsOf(rootEl).link;
+
+      // старт: разметка — источник (слот не тронут), далее переходы
+      expect(link.hasAttribute('hidden'), 'разметка без JS не тронута').toBe(false);
+
+      rootEl.querySelector('[data-ui-carousel-next]').click();
+      expect(link.textContent).toBe('Подробнее: 13 вакансий');
+      expect(link.hasAttribute('hidden'), 'слайд с count — CTA виден').toBe(false);
+
+      rootEl.querySelector('[data-ui-carousel-next]').click();
+      expect(link.hasAttribute('hidden'), 'слайд без link/count — CTA скрыт').toBe(true);
+
+      // возврат на слайд с данными — слот снова жив (не залип в hidden)
+      rootEl.querySelector('[data-ui-carousel-prev]').click();
+      expect(link.textContent).toBe('Подробнее: 13 вакансий');
+      expect(link.hasAttribute('hidden'), 'возврат на слайд с count — CTA виден').toBe(false);
     });
 
     it('init при стартовом индексе 0 НЕ перезаписывает слоты (разметка — источник; пилот рендерит только по действию)', () => {
@@ -559,9 +586,9 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
 
     it('клик по табу выбирает слайд; событие irao-ui:carousel-select с detail.index (bubbles)', () => {
-      const { window, document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
+      const { document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
       const rootEl = document.getElementById('c1');
-      const events = collectSelectEvents(window, rootEl);
+      const events = collectSelectEvents(rootEl);
 
       tabsOf(rootEl)[2].click();
       expect(slotsOf(rootEl).title.textContent).toBe('IT сфера');
@@ -571,9 +598,9 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
 
     it('стрелки диспатчат то же событие; клик по уже активному табу — no-op без события', () => {
-      const { window, document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
+      const { document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
       const rootEl = document.getElementById('c1');
-      const events = collectSelectEvents(window, rootEl);
+      const events = collectSelectEvents(rootEl);
 
       rootEl.querySelector('[data-ui-carousel-next]').click();
       expect(events).toHaveLength(1);
@@ -622,7 +649,7 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     it('API IraoUI.carousel.select(root, index): программный выбор с рендером и событием; вне диапазона — no-op', () => {
       const { window, document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
       const rootEl = document.getElementById('c1');
-      const events = collectSelectEvents(window, rootEl);
+      const events = collectSelectEvents(rootEl);
 
       apiOf({ window }).select(rootEl, 1);
       expect(slotsOf(rootEl).title.textContent).toBe('Женские вакансии');
@@ -647,6 +674,57 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
   });
 
+  describe('destroy-контракт (прецедент tabs.test.js:537 / modal.test.js:666)', () => {
+    it('destroy() возвращает разметку к no-JS состоянию: hidden на контролах, tabindex снят, класс/флаг сняты, слушатели отключены', () => {
+      const { window, document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
+      const rootEl = document.getElementById('c1');
+      const handle = apiOf({ window }).select(rootEl, 1);
+      expect(handle, 'хэндл с destroy доступен из публичного API').toBeTruthy();
+      expect(slotsOf(rootEl).title.textContent, 'перед destroy — слайд 2').toBe('Женские вакансии');
+
+      handle.destroy();
+
+      for (const selector of [
+        '[data-ui-carousel-prev]',
+        '[data-ui-carousel-next]',
+        '.ui-carousel__stepper',
+      ]) {
+        expect(
+          rootEl.querySelector(selector).hasAttribute('hidden'),
+          `${selector} скрыт обратно`,
+        ).toBe(true);
+      }
+      for (const tab of tabsOf(rootEl)) {
+        expect(tab.hasAttribute('tabindex'), 'roving tabindex снят').toBe(false);
+      }
+      expect(rootEl.classList.contains('is-initialized'), 'is-initialized снят').toBe(false);
+      expect(rootEl.hasAttribute(INIT_ATTR), 'флаг data-ui-carousel-init снят').toBe(false);
+
+      // Слушатели сняты: клик по стрелке не меняет разметку (no-JS вид)
+      rootEl.querySelector('[data-ui-carousel-next]').click();
+      expect(slotsOf(rootEl).title.textContent, 'клик после destroy — no-op').toBe(
+        'Женские вакансии',
+      );
+    });
+
+    it('повторный select() после destroy жив (ленивая переинициализация), повторный destroy() безопасен', () => {
+      const { window, document } = makeSandbox({ bodyHtml: carouselHtml('c1') });
+      const rootEl = document.getElementById('c1');
+      apiOf({ window }).select(rootEl, 1).destroy();
+
+      const revived = apiOf({ window }).select(rootEl, 0);
+      expect(revived, 'повторный select() переинициализирует').toBeTruthy();
+      expect(rootEl.hasAttribute(INIT_ATTR), 'флаг возвращён').toBe(true);
+      expect(slotsOf(rootEl).title.textContent, 'выбор слайда 1 отработал').toBe('Производство');
+
+      expect(() => revived.destroy(), 'повторный destroy() не бросает').not.toThrow();
+      expect(
+        document.querySelectorAll(`[${INIT_ATTR}]`),
+        'реестр не задвоился после второго destroy',
+      ).toHaveLength(0);
+    });
+  });
+
   describe('форма-галерея (data-ui-gallery)', () => {
     it('init: hidden снят со стрелок; фото — первое из JSON; флаг data-ui-gallery-init', () => {
       const { document } = makeSandbox({ bodyHtml: galleryHtml('g1') });
@@ -659,9 +737,9 @@ describe('контракт модуля ui-carousel.js (jsdom; образец �
     });
 
     it('prev/next листают фото с зацикливанием; событие с detail.index; alt не трогается', () => {
-      const { window, document } = makeSandbox({ bodyHtml: galleryHtml('g1') });
+      const { document } = makeSandbox({ bodyHtml: galleryHtml('g1') });
       const rootEl = document.getElementById('g1');
-      const events = collectSelectEvents(window, rootEl);
+      const events = collectSelectEvents(rootEl);
       const photo = galleryPhotoOf(rootEl);
 
       rootEl.querySelector('[data-ui-gallery-next]').click();

@@ -245,11 +245,13 @@
    T14.4 «рамку/кружок несёт компонент»). Перенос «как есть» cp-pill
    (pilot.css:476–488): компоновка обёртки inline-flex по центру —
    нативный select остаётся в потоке и держит высоту пилюли, триггер
-   (ui-select--wrap) растягивается на неё. Рамка — пара T16.11-канона пилюли
-   (токены --ui-border-width/--ui-color-border, cp-pill вёл те же), радиус
-   pill, фон пилюли — surface-muted (blue-50 канона; фон триггера тот же —
-   пара торчит единым полем). Внутренности listbox/триггера модификатор НЕ
-   меняет (Implementation requirements п.1): только геометрия обёртки.
+   (ui-select--wrap) растягивается на неё. Рамки нет: cp-pill канона вёл
+   несуществующий токен --ui-color-border — фактический рендер «без рамки»
+   закреплён явно (border: none; ловушка неопределённого токена снята,
+   батч 31.10 — T17.9), радиус pill, фон пилюли — surface-muted (blue-50
+   канона; фон триггера тот же — пара торчит единым полем). Внутренности
+   listbox/триггера модификатор НЕ меняет (Implementation requirements
+   п.1): только геометрия обёртки.
 
    Ширина — раскладка сайта/слоя (flex-basis 12rem в ленте фильтров /
    260px в каталоге — канон list-page; в колонке сайдбара обёртку
@@ -266,7 +268,7 @@
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
-  border: var(--ui-border-width) solid var(--ui-color-border);
+  border: none;
   border-radius: var(--ui-radius-pill);
   background-color: var(--ui-color-surface-muted);
 }

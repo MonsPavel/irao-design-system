@@ -339,7 +339,7 @@ describe('patterns/patterns.css — канон спец-сетки media (mdl) �
     expect(lg, 'lg — 4 колонки').toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
   });
 
-  it('mdl__lead: карточка-сводка — колонка gap 8, паддинг 16, рамка/радиус/поверхность (1:1 порт cp-media__lead)', () => {
+  it('mdl__lead: карточка-сводка — колонка gap 8, паддинг 16, без рамки (dead-токен закреплён явно), радиус/поверхность (1:1 порт cp-media__lead)', () => {
     const lead = blockOf(layer, '.mdl__lead');
     expect(lead, '.mdl__lead найдено').toBeTruthy();
     expect(lead).toContain('box-sizing: border-box;');
@@ -347,7 +347,10 @@ describe('patterns/patterns.css — канон спец-сетки media (mdl) �
     expect(lead).toContain('flex-direction: column;');
     expect(lead, 'шаг 8px — space-2').toContain('gap: var(--ui-space-2);');
     expect(lead).toContain('padding: var(--ui-space-4);');
-    expect(lead).toContain('border: var(--ui-border-width) solid var(--ui-color-border);');
+    expect(
+      lead,
+      'рамки нет — исходник media.css:151–160 без рамки (T17.9: dead-токен снят)',
+    ).toContain('border: none;');
     expect(lead).toContain('border-radius: var(--ui-radius-md);');
     expect(lead).toContain('background-color: var(--ui-color-surface);');
   });
