@@ -1,36 +1,29 @@
 /* zcode-workflow
-description: >-
-  Ночной AFK-конвейер irao-ui (аналог health-log night-cycle): берёт
-    задачи из docs/ui-system/STATUS.md по зависимостям из файлов задач; для каждой
-    — ветка от main, TDD-реализация, УСИЛЕННОЕ ревью (severity-модель ecc
-    code-reviewer: critical/high всегда блокируют и правятся, до 3 раундов),
-    независимая приёмка по Acceptance Criteria/DoD, gate (validate-backlog + npm
-    lint/test:unit, когда настроены; + полный контейнерный npm run test:docker,
-    когда диф ветки трогает каталоги, влияющие на рендер — components/patterns/
-    tokens/base/showcase/tests-e2e/tests-visual; docker-демон недоступен —
-    advisory-пропуск), мердж --no-ff в main и push. Неблокирующие
-    medium/low замечания собираются в docs/process/nightly/BACKLOG.md. Окно
-    18:00–08:00: новые задачи не начинаются позже 06:00 (cutoffHour=6, решение
-    07.10 — было 04:00), 06:00–08:00 — зона доделывания начатого, после 08:00 цикл
-    завершается. Утренний предел 08:00–12:00 (второй рубеж). force=true — без
-    лимитов времени. Сбой на задаче блокирует только её — ночь продолжается.
-whenToUse: |-
-  Вечерний запуск на ночь из корня репозитория irao-design-system:
-    «Запусти workflow night-cycle до 08:00» (последняя задача — не позже 06:00).
-    Днём — только с force=true. Требует чистого рабочего дерева (незакоммиченные
-    .zcode/ игнорируются) и запущенной машины без сна.
+description: "Ночной AFK-конвейер irao-ui: задачи STATUS.md по зависимостям —
+  TDD-ветка, усиленное ревью, независимая приёмка, gate (validate-backlog +
+  lint/unit + контейнерный test:docker при визуальных диффах: демон не
+  поднимался на старте — advisory-пропуск, демон умер в ходе ночи — гейт
+  обязателен, решение владельца 31.10 вариант (б)), мердж --no-ff + push,
+  находки — в BACKLOG.md. Окно 18:00–08:00 (cutoff 06:00), force=true — без
+  лимитов."
+whenToUse: "Вечерний запуск на ночь из корня репозитория irao-design-system:
+  «Запусти workflow night-cycle до 08:00» (последняя задача — не позже 06:00).
+  Днём — только с force=true. Требует чистого рабочего дерева (незакоммиченные
+  .zcode/ игнорируются) и запущенной машины без сна."
 args:
   cutoffHour:
     type: number
     description: Локальный час, после которого конвейер не начинает новые задачи (6
       = последняя задача не берётся позже 06:00 — решение 07.10; начатая задача
       спокойно доводится до конца).
+    required: false
     default: 6
   force:
     type: boolean
     description: "true — игнорировать проверки времени (ночное окно 18:00–08:00 и
       утренний предел 08:00–12:00): запуск в любое время, остановка по
       исчерпанию реестра, лимиту задач или вручную."
+    required: false
     default: false
   windowEndHour:
     type: number
@@ -38,6 +31,7 @@ args:
       18:00–08:00, решение 07.10): после этого времени цикл завершается, если
       ещё работает между задачами; 06:00–08:00 — зона доделывания начатого
       (новые задачи не берутся с 06:00)."
+    required: false
     default: 8
 */
 interface ImplResult {
@@ -244,6 +238,18 @@ async function localHour(): Promise<number | null> {
   return null;
 }
 
+/** Доступность docker-демона на СТАРТЕ ночи (решение владельца 31.10 —
+ *  вариант (б): если демон был поднят на старте, контейнерный visual-гейт
+ *  обязателен — его advisory-пропуск при умершем ночью демоне роняет gate;
+ *  если демон не был поднят вовсе — advisory-пропуск как раньше). */
+let daemonAtStart: boolean | null = null;
+
+async function probeDaemonAtStart(): Promise<void> {
+  const d = await world.run("docker", ["version", "--format", "ok"], { timeoutMs: 30000 });
+  daemonAtStart = d.exitCode === 0;
+  log("Docker-демон на старте ночи: " + (daemonAtStart ? "доступен (visual-гейт обязателен)" : "недоступен (advisory-режим)"));
+}
+
 async function runGate(): Promise<{ ok: boolean; details: string }> {
   const parts: string[] = [];
   // Валидатор — node-скрипт: спавн bash на Windows вне Git Bash уходил в WSL-релей и падал.
@@ -281,10 +287,23 @@ async function runGate(): Promise<{ ok: boolean; details: string }> {
       : [];
     const visualTouched = touched.filter((p) => VISUAL_DIRS.some((dir) => p.startsWith(dir)));
     if (typeof scripts["test:docker"] === "string" && visualTouched.length > 0) {
-      // Контейнер-паритет требует живого демона: недоступен — advisory-пропуск
-      // (ночь не должна вставать из-за выключенного Docker Desktop).
+      // Контейнер-паритет требует живого демона. Решение владельца 31.10
+      // (вариант (б)): демон был доступен на старте ночи — гейт ОБЯЗАТЕЛЕН,
+      // его пропуск при умершем ночью демоне роняет gate (иначе мерджи уходят
+      // с непроверенными эталонами — 5-й класс инцидентов); демон не
+      // поднимался вовсе — advisory-пропуск (ночь не должна вставать из-за
+      // выключенного Docker Desktop).
       const daemon = await world.run("docker", ["version", "--format", "ok"], { timeoutMs: 30000 });
       if (daemon.exitCode !== 0) {
+        if (daemonAtStart === true) {
+          return {
+            ok: false,
+            details:
+              "npm run test:docker ОБЯЗАТЕЛЕН, но docker-демон умер в ходе ночи (на старте был доступен): " +
+              "мердж с непроверенными визуальными эталонами запрещён — подними демон и перезапусти, либо сними эталоны вручную. " +
+              "Диф трогает визуальные каталоги: " + visualTouched.slice(0, 5).join(", ") + (visualTouched.length > 5 ? "…" : ""),
+          };
+        }
         parts.push("npm run test:docker ПРОПУЩЕН — docker-демон недоступен (advisory; прогнать вручную до v1.0)");
       } else {
         const d = await world.run("cmd", ["/c", "npm", "run", "test:docker"], { timeoutMs: 1800000 });
@@ -316,6 +335,7 @@ function stopReport(conclusion: string, findings: Finding[], notCovered: string[
 }
 
 phase("Готовим репозиторий к ночному циклу");
+await probeDaemonAtStart();
 const checkout = await world.run("git", ["checkout", "main"]);
 if (checkout.exitCode !== 0) {
   return stopReport(
@@ -575,7 +595,7 @@ lines.push("### Последние коммиты main", "", "```", recent.stdou
 lines.push("### Как проверялось", "",
   "- Каждая задача: усиленное независимое ревью (severity-модель ecc code-reviewer) — critical/high блокируют мердж и правятся всегда (до " + maxReviewRounds + " раундов).",
   "- Каждая задача: независимая приёмка по ## Acceptance Criteria / ## Definition of Done с доказательствами.",
-  "- Gate перед мерджем: node tools/validate-backlog.mjs + npm run lint/test:unit (когда настроены); при дифе, трогающем визуальные каталоги, — полный контейнерный npm run test:docker (устаревшие эталоны роняют gate до мерджа; docker недоступен — advisory-пропуск).",
+  "- Gate перед мерджем: node tools/validate-backlog.mjs + npm run lint/test:unit (когда настроены); при дифе, трогающем визуальные каталоги, — полный контейнерный npm run test:docker (устаревшие эталоны роняют gate до мерджа; демон не поднимался на старте ночи — advisory-пропуск; демон умер в ходе ночи после подъёма на старте — гейт обязателен, пропуск роняет gate — решение владельца 31.10 вариант (б)).",
   "- Мердж --no-ff в main, push после каждой задачи (мог не пройти — помечено в примечаниях).", "");
 await artifact.markdown("night-report", lines.join("\n"), {
   title: "Итоги ночного цикла",
