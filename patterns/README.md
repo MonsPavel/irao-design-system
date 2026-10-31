@@ -55,5 +55,5 @@
   `hsp`/`hsp--overlay`; стенд — `stands/patterns/header.html`.
 - [`footer/`](footer/README.md) — «Подвал» (T7.6): footer (contentinfo) +
   колонка ссылок + контакты в address + соц-кнопки на `ui-button--round` +
-  переход кверху; каркас `ftp-*` — в паттерн-слое (T17.13), светлый база /
+  переход кверху; каркас `ftp-*` — в паттерн-слое (T17.13), светлая база /
   `ftp--muted`; стенд — `stands/patterns/footer.html`.

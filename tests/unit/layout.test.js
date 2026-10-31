@@ -15,9 +15,9 @@
  *    (свойство order не используется — Accessibility requirements);
  *  - флекс-примитивы T17.17: ui-row (wrap по умолчанию — защита от hscroll
  *    гейта T3.6; align-items: center — доминирующий кейс пилота, замер
- *    9 из 13 явных align-items строк; модификаторы --center/--between/
+ *    9 из 10 явных align-items строк; модификаторы --center/--between/
  *    --end/--no-wrap) и ui-stack (решение «делать сейчас» по замеру:
- *    29 из 31 стопок column с gap, 10 делят --ui-space-2, 6 — --ui-space-4 —
+ *    29 из 31 стопок column с gap, 12 делят --ui-space-2, 5 — --ui-space-4 —
  *    критерий «≥ 3 инстансов с равным gap» закрыт с запасом); gap-токены
  *    --ui-row-gap/--ui-stack-gap от --ui-space-4;
  *  - стенд layout в полигоне (Definition of Done: стенд layout-примитивов);
@@ -286,7 +286,7 @@ describe('base/layout.css — флекс-примитив ui-row (T17.17)', () =
     expect(block).toContain('flex-wrap: wrap;');
   });
 
-  it('.ui-row: вертикальное выравнивание центр — доминирующий кейс пилота (замер T17.17: 9 из 13 явных align-items строк — center)', () => {
+  it('.ui-row: вертикальное выравнивание центр — доминирующий кейс пилота (замер T17.17: 9 из 10 явных align-items строк — center)', () => {
     expect(blockOf(css, '.ui-row')).toContain('align-items: center;');
   });
 
