@@ -1190,17 +1190,21 @@ function indexMain() {
 </section>
 
 <section class="ui-section ui-section--photo cp-production ui-carousel" data-ui-carousel>
-  <!-- фон и glow-оверлей — ui-section--photo (T17.3): канон --glow
-       (горизонтальный градиент слева), оверлей под контентом -->
+  <!-- фон и сплошная тонировка — ui-section--photo: канон --tint через хук
+       --ui-section-overlay-tint (решение владельца 31.10 «приведи к
+       оригиналу»: production.css:26-33 — solid primary 90% поверх фото
+       завода; прежний --glow-градиент 88→0% и его z-index: auto
+       затирали текст слайда — ошибочное прочтение T17.3; радиальный
+       glow-слой опущен — цвет вне токенов, вторичен над сплошным тоном) -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/factory-big.jpg" alt="" loading="lazy">
   </div>
-  <div class="ui-section__overlay ui-section__overlay--glow" aria-hidden="true"></div>
+  <div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>
   <img class="cp-production__photo ui-carousel__photo" src="assets/images/worker-production.png" alt="Сотрудник на производстве" width="585" height="674" data-ui-carousel-photo loading="lazy">
   <div class="cp-production__body ui-carousel__body">
     <h2 class="cp-production__title ui-h2" data-ui-carousel-title>Производство</h2>
     <p class="cp-production__text ui-lead" data-ui-carousel-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
-    <p><a class="ui-button ui-button--light" href="vacancies.html" data-ui-carousel-link>Подробнее о вакансии</a></p>
+    <p><a class="ui-button ui-button--light cp-production__btn" href="vacancies.html" data-ui-carousel-link>Подробнее о вакансии</a></p>
   </div>
   <button class="cp-production__arrow cp-production__arrow--prev ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
     <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1214,7 +1218,7 @@ ${stepperTabs}
   </ul>
 </section>
 
-<section class="ui-section" id="directions">
+<section class="ui-section cp-directions" id="directions">
   <div class="ui-container">
     <h2 class="ui-h2">Направления деятельности</h2>
     <ul class="cp-directions__grid" data-cp-directions>

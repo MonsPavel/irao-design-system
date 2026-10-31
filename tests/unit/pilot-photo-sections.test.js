@@ -9,9 +9,11 @@
  * ДС снимает фоновые правила `__bg`/`__glow` из pilot.css:
  *  - hero — оверлей `--fade-bottom` (градиент surface→transparent→
  *    primary-a94, канон оригинала);
- *  - production — оверлей `--glow` (горизонтальный градиент primary
- *    88%→34%→transparent слева; pointer-events-артефакт site-зоны уходит
- *    вместе с правилом — оверлей ДС под контентом);
+ *  - production — оверлей `--tint` через хук `--ui-section-overlay-tint`
+ *    (errata 31.10, решение владельца «приведи к оригиналу»: solid primary
+ *    90% поверх фото завода — production.css:28; прежний `--glow`
+ *    88%→34%→0% с z-index: auto замирал текст слайда — ошибочное
+ *    прочтение оригинала при T17.3);
  *  - holding/why-us — фото без оверлея (on-dark текст — контентом);
  *  - company-banner — тинт primary-a55 токен-хуком
  *    `--ui-section-overlay-tint` (лестница T14.7).
@@ -54,17 +56,20 @@ describe('build.mjs — пять фоновых секций на ui-section--ph
     expect(indexHtml).not.toContain('cp-hero__bg');
   });
 
-  it('production: модификатор + __bg + оверлей --glow; порядок слоёв bg → glow → контент', () => {
+  it('production: модификатор + __bg + оверлей --tint; порядок слоёв bg → tint → контент', () => {
     expect(indexHtml).toMatch(
       /<section class="ui-section ui-section--photo cp-production ui-carousel" data-ui-carousel>/,
     );
     const section = indexHtml.slice(indexHtml.indexOf('cp-production'));
     expect(section.indexOf('ui-section__bg'), 'фон раньше оверлея').toBeLessThan(
-      section.indexOf('ui-section__overlay ui-section__overlay--glow'),
+      section.indexOf('ui-section__overlay ui-section__overlay--tint'),
     );
     expect(section).toContain('cp-production__photo');
     expect(section).not.toContain('cp-production__glow');
     expect(section).not.toContain('cp-production__bg');
+    // --tint без канон-правила «над контентом» (errata 31.10 — см. шапку):
+    // glow-оверрайд z-index: auto ушёл вместе с модификатором
+    expect(indexHtml).not.toContain('ui-section__overlay--glow');
   });
 
   it('holding и why-us: модификатор + __bg без оверлея (фото без затемнения — канон оригинала)', () => {

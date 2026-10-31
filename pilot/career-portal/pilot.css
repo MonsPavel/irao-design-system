@@ -122,86 +122,242 @@
   --hro-tag-bg: color-mix(in srgb, #ff3134 20%, transparent);
 }
 
-/* ── production: карусель (T17.7 — компонент ui-carousel) ──
-   Вид карусели (стрелки on-dark, табы-степпер с рамкой, активный glass-dark)
-   несёт ui-carousel; здесь — только композиция секции (bg/glow/позиции).
-   Данные слайдов — data-ui-carousel-slides, поведение — IraoUI.carousel.
-
-   Фото-фон и glow-оверлей — ui-section--photo (T17.3, канон --glow):
-   оверлей ДС красится под контентом, pointer-events-артефакт site-зоны
-   (original production.css:38) уходит вместе с правилом. Ритм ui-section
-   погашен — вертикальную геометрию несёт паддинг __body. */
+/* ── production: карусель (T17.7 — компонент ui-carousel; поведение и
+   разметка — ДС). Композиция секции — сайт, solid-тон 90% и v1-раскладка
+   production.css — решение владельца 31.10 «приведи к оригиналу» (снимает
+   --glow T17.3 с его z-index: auto, затиравшим текст слайда). */
 
 .cp-production {
+  /* Тон завода production.css:28 rgba(0,40,86,.9) через канон-хук
+     --tint (base/layout.css:169, z -1, под контентом); радиальный glow
+     production.css:34-40 опущен — цвет вне токенов, слой вторичен. */
+  --ui-section-overlay-tint: color-mix(in srgb, var(--ui-color-primary) 90%, transparent);
+  display: flex;
   position: relative;
+  align-items: flex-end; /* тело прижато к низу (production.css:4) */
   overflow: hidden;
+  min-height: 47.5rem; /* 760px production.css:3 «как есть» */
   padding: 0;
+}
+
+/* Белая планка-спинка под лентой табов (production.css:169-179). */
+.cp-production::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  z-index: 5;
+  height: 1.0625rem;
+  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
+  background: var(--ui-color-surface);
+  pointer-events: none;
+  inset-inline: 0;
 }
 
 .cp-production__photo {
   position: absolute;
-  right: var(--ui-container-pad);
-  bottom: 0;
-  max-height: 42rem;
+  top: 4.4375rem; /* 71px production.css:41 */
+  left: 43.5%; /* production.css:40 «как есть» */
+  z-index: 2;
+  object-fit: contain;
+  object-position: bottom center;
 }
 
 .cp-production__body {
   display: flex;
+  position: relative;
+  z-index: 3;
   flex-direction: column;
-  gap: var(--ui-space-4);
-  max-width: 40rem;
-  padding: var(--ui-space-8) var(--ui-container-pad) 14rem;
+  gap: var(--ui-space-4); /* 24px production.css:53 */
+  align-items: flex-start;
+  max-width: 34.0625rem; /* 545px production.css:52 */
+  padding: 0 0 4.5rem 3.5rem; /* 72/56 production.css:54 */
 }
 
-.cp-production__title,
+.cp-production__title {
+  color: var(--ui-color-text-on-dark); /* производство: пара цветов (production.css:59-62) */
+  font-size: 3rem; /* 48px production.css:59 «как есть» (против ui-h2 60) */
+  font-weight: var(--ui-fw-body-bold); /* 500 production.css:60 */
+  line-height: 1.2;
+}
+
 .cp-production__text {
   color: var(--ui-color-text-on-dark);
+  font-size: 1.125rem; /* 18px production.css:66 */
+  font-weight: var(--ui-fw-body-bold);
+  line-height: 1.22;
 }
 
-/* Позиции стрелок (вид — ui-carousel__arrow, компонент): абсолют
-   относительно секции — композиция оригинала. */
+/* Кнопка — ui-button--light (вид ДС); регистр — сайт (production.css:88-90);
+   letter-spacing 0.01em production.css:89 не переносится — решение «не
+   переносить» по прецеденту шапки (REPORT, дайджест 25.10, бонус). */
+.cp-production__btn {
+  font-size: var(--ui-fs-caption);
+  text-transform: uppercase;
+}
+
+/* Вариант 1 главной: текст/кнопка — абсолютные координаты макета
+   (production.css:215-240, breakpoint 1280 «как есть»). */
+@media (min-width: 1280px) {
+  .cp-production__body {
+    display: block;
+    position: absolute;
+    inset: 0;
+    max-width: none;
+    padding: 0;
+  }
+
+  .cp-production__title,
+  .cp-production__text,
+  .cp-production__btn {
+    position: absolute;
+    left: 3.4375rem; /* 55px */
+  }
+
+  .cp-production__title {
+    top: 4.875rem; /* 78px */
+    width: 34.0625rem;
+  }
+
+  .cp-production__text {
+    top: 26.875rem; /* 430px */
+    width: 34.0625rem;
+  }
+
+  .cp-production__btn {
+    top: 32.6875rem; /* 523px */
+  }
+}
+
+/* Позиции стрелок (вид — ui-carousel__arrow, компонент): по краям секции,
+   100×100 hit-area (production.css:79-96) — композиция оригинала. */
 .cp-production__arrow {
+  display: inline-flex;
   position: absolute;
-  bottom: 9rem;
-  z-index: 5;
+  top: 19.4375rem; /* 311px production.css:80 */
+  z-index: 4;
+  align-items: center;
+  justify-content: center;
+  width: 6.25rem;
+  height: 6.25rem;
+  opacity: 0.9;
+  transition: opacity var(--ui-transition);
 }
 
 .cp-production__arrow--prev {
-  right: 26rem;
+  right: auto;
+  left: 0;
 }
 
 .cp-production__arrow--next {
-  right: 10rem;
+  right: 0;
 }
 
-/* Позиция степпера (flex/gap/сброс списка — ui-carousel__stepper,
-   компонент): ширина ленты и выравнивание с контейнером — композиция. */
+@media (hover: hover) {
+  .cp-production__arrow:hover {
+    opacity: 0.6;
+  }
+}
+
+/* Лента табов (v1): абсолютная полоса внизу во всю ширину
+   (production.css:228-235). */
 .cp-production__stepper {
-  max-width: 62rem;
-  padding: 0 var(--ui-container-pad) var(--ui-space-6);
+  position: absolute;
+  bottom: 0;
+  z-index: 3;
+  width: 100%;
+  max-width: none;
+  height: 5.125rem; /* 82px production.css:231 */
+  margin: 0;
+  inset-inline: 0;
 }
 
-/* Контент таба (типографирует разметка сайта — README ui-carousel):
-   номер, подпись, счётчик. Вид рамки/состояний — ui-carousel__tab. */
+/* Таб: заливка blue-100@30, без рамки, активности — 50% и радиус сверху
+   (production.css:99-111) — сайт-облик поверх рамки канона ui-carousel
+   (дельта канона с оригиналом — REPORT §9.1). */
+.cp-production__tab {
+  flex: 0 0 20%; /* 5 табов поровну (production.css:237) */
+  gap: 0.75rem; /* 12px production.css:103 */
+  min-height: 4.25rem; /* 68px production.css:104 */
+  padding: 0.875rem 1.75rem; /* 14/28 production.css:106 */
+  border: none;
+  border-radius: 0;
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 30%, transparent);
+  transition:
+    background-color var(--ui-transition),
+    min-height var(--ui-transition);
+}
+
+.cp-production__tab:where([aria-selected='true']) {
+  min-height: 5.125rem; /* 82px production.css:109 */
+  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0;
+  background-color: color-mix(in srgb, var(--ui-color-surface-hover) 50%, transparent);
+}
+
+/* Номер — только у активного таба (production.css:146-155). */
 .cp-production__tab-num {
+  display: none;
   flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem; /* 30px production.css:150 */
+  height: 1.875rem;
+  border: var(--ui-border-width) solid
+    color-mix(in srgb, var(--ui-color-text-on-dark) 50%, transparent);
+  border-radius: var(--ui-radius-pill);
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-caption);
+}
+
+.cp-production__tab:where([aria-selected='true']) .cp-production__tab-num {
+  display: inline-flex;
+}
+
+.cp-production__tab-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
 
 .cp-production__tab-title {
-  display: block;
+  overflow: hidden;
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-small);
+  font-weight: var(--ui-fw-small);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .cp-production__tab-count {
   display: block;
-  font-size: var(--ui-fs-small);
-  opacity: 0.72;
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-micro);
+  line-height: 1.35;
 }
 
-/* ── directions: сетка иконок-карточек (сайт-зона) ── */
+@media (min-width: 1280px) {
+  .cp-production__tab-num,
+  .cp-production__tab-body {
+    transform: translateY(-0.5rem); /* -8px production.css:242 */
+  }
+}
 
+/* ── directions: сетка карточек-направлений (сайт-зона) ──
+   Каркас — оригинал directions.css (решение владельца 31.10 «приведи к
+   оригиналу»: прежнее «рамки нет — воздушнее» REPORT §9.1 снято). */
+
+.cp-directions {
+  padding-top: 4.5rem; /* 72px directions.css:2 «как есть» (ритм ui-section погашен) */
+  padding-bottom: 4.5rem;
+}
+
+.cp-directions .ui-h2 {
+  margin-bottom: 3rem; /* 48px directions.css:8 (ui-h2 канона без отступа) */
+}
 .cp-directions__grid {
   display: grid;
-  gap: var(--ui-space-3);
+  gap: 2.25rem; /* 36px directions.css:10 «как есть» */
   grid-template-columns: repeat(4, 1fr);
   margin: 0;
   padding: 0;
@@ -211,20 +367,46 @@
 .cp-directions__card {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-3);
-  align-items: flex-start;
-  padding: var(--ui-space-4);
-  border: none; /* рамки нет: оригинал 1px #D6D6D6 — «воздушнее» REPORT §9.1 */
+  gap: 2.125rem; /* 34px directions.css:17 «как есть» */
+  justify-content: space-between; /* имя прижато к низу (directions.css:15) */
+  width: 100%;
+  min-height: 11.1875rem; /* 179px directions.css:18 */
+  padding: 1.25rem; /* 20px directions.css:19 */
+  border: var(--ui-border-width) solid var(--ui-border-color); /* #D6D6D6 = gray-300, directions.css:20 */
   border-radius: var(--ui-radius-md);
   background-color: var(--ui-color-surface);
+  text-align: left;
+  transition:
+    background-color var(--ui-transition),
+    border-color var(--ui-transition);
+}
+
+@media (hover: hover) {
+  .cp-directions__card:hover {
+    border-color: var(--ui-color-surface-hover); /* blue-100 directions.css:25-28 */
+    background-color: var(--ui-color-surface-hover);
+  }
+}
+
+.cp-directions__icon {
+  object-fit: contain;
+  width: 4.75rem; /* 76px directions.css:31 */
+  height: 4.75rem;
 }
 
 .cp-directions__name {
-  display: inline-flex;
-  gap: var(--ui-space-1);
-  align-items: center;
-  color: var(--ui-color-primary);
-  font-weight: var(--ui-fw-h4);
+  display: flex;
+  gap: 0.25rem; /* 4px directions.css:34 */
+  align-items: flex-end;
+  justify-content: space-between;
+  color: var(--ui-color-text); /* directions.css:38 — не primary */
+  font-weight: var(--ui-fw-body-bold);
+  letter-spacing: -0.02em; /* directions.css:37 «как есть» */
+}
+
+.cp-directions__name svg {
+  flex: 0 0 auto;
+  margin-bottom: 0.3125rem; /* 5px directions.css:42 */
 }
 
 /* Модалка направления — ui-modal; контентная раскладка — сайт */

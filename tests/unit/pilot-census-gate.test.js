@@ -12,9 +12,12 @@
  *  - Пороги — явные числа по факту итога T17.16 (Implementation
  *    requirements п.1: «не „меньше“, а конкретное значение»; деградация —
  *    проблема гейта → exit 1 в CLI и в compare):
- *      MAX_PILOT_CSS_LINES 1040 — сырые строки файлы (деградация запрещена);
- *      MAX_PILOT_CSS_CODE_LINES 600 — цель эпика «≤600 строк ритма/
+ *      MAX_PILOT_CSS_LINES 1162 — сырые строки файла (деградация запрещена);
+ *      errata 31.10: 1040 → 1162 — батч паритета production/directions
+ *      (решение владельца «приведи к оригиналу»);
+ *      MAX_PILOT_CSS_CODE_LINES 618 — цель эпика «≤600 строк ритма/
  *      раскладок» в метрике кода сайт-зоны (без комментариев/пустых);
+ *      errata 31.10: 600 → 618 — тот же батч (факт до 462);
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -161,10 +164,10 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1040);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(600);
+    expect(MAX_PILOT_CSS_LINES).toBe(1162);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(618);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(30);
@@ -178,14 +181,16 @@ describe('пороги ценза — числа зафиксированы по
       expect(gate.problems).toEqual([]);
       expect(gate.newBlocks).toEqual([]);
       // машиночитаемые факты ценза для REPORT §11.4 («ценз после»);
-      // обновлены батчем 31.10 (перенос hover VI-пилюли — решение
-      // владельца, T17.13): сырые 970→980, код 457→462 (+8 строк правила
-      // сайт-зоны .hsp__action:hover под (hover: hover)); селекторы 93 и
-      // семейства 28 — без изменений (правило на хуке слоя, не .cp-;
-      // движение зафиксировано дописью в REPORT §11.4):
-      expect(metrics.css.lines).toBe(980);
-      expect(metrics.css.codeLines).toBe(462);
-      expect(metrics.css.selectors).toBe(93);
+      // обновлены батчем паритета production/directions 31.10 (решение
+      // владельца «приведи к оригиналу»: v1-координаты production.css,
+      // каркас directions.css — прежнее «воздушнее» §9.1 снято): сырые
+      // 980→1162, код 462→618; пороги-потолки 1040/600 → 1162/618
+      // (errata в шапке census.mjs + допись REPORT §11.4); селекторы
+      // 93→114, семейства 28 — без изменений (оба блока — существующие
+      // семейства ценза):
+      expect(metrics.css.lines).toBe(1162);
+      expect(metrics.css.codeLines).toBe(618);
+      expect(metrics.css.selectors).toBe(114);
       expect(metrics.css.families).toHaveLength(28);
       expect(metrics.js.lines).toBe(187);
     },
