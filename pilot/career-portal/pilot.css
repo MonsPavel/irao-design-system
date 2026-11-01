@@ -417,7 +417,7 @@
    holding.css:34 — __inner 638px; у канона v1 ритм секции погашен —
    на модификаторе возвращается: компакт = сумма 758 оригинала). */
 .cp-holding.cp-holding--compact {
-  padding: 4.5rem 0 3rem; /* 72/48 holding.css:3 «как есть»; специфичность 0-2-0 — против .cp-holding ниже по файлу */
+  /* паддинги 72/48 теперь на базе .cp-holding — модификатор несёт только __inner 638 */
 }
 
 .cp-holding.cp-holding--compact .cp-holding__inner {
@@ -510,7 +510,7 @@
    погашен — вертикальную геометрию несёт __inner (space-8). */
 .cp-holding {
   position: relative;
-  padding: 0;
+  padding: 4.5rem 0 3rem; /* 72/48 holding.css:3 «как есть» (ритм ui-section погашен; compact — та же сумма) */
 }
 
 .cp-holding__inner {
@@ -543,19 +543,39 @@
    погашен — вертикальную геометрию несёт __inner (space-8). */
 .cp-why-us {
   position: relative;
-  padding: 0;
+  overflow: hidden;
+  padding: 8.75rem 0 5rem; /* 140/80 why-us.css:3 «как есть» (ритм ui-section погашен) */
 }
 
 .cp-why-us__inner {
-  padding-top: var(--ui-space-8);
-  padding-bottom: var(--ui-space-8);
+  /* ритм секции целиком на .cp-why-us (140/80 — why-us.css:3) — паддинги
+     __inner погашены (батч ритма 01.11) */
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .cp-why-us__top {
-  display: grid;
-  gap: var(--ui-space-4);
-  align-items: start;
-  grid-template-columns: 1fr 1fr;
+  display: flex; /* why-us.css:23 — flex space-between, title + карточка 429px */
+  gap: 2.25rem; /* 36px why-us.css:27 «как есть» */
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2.25rem; /* 36px why-us.css:28 */
+}
+
+.cp-why-us__top .cp-why-us__card {
+  flex: 0 0 26.8125rem; /* 429px why-us.css:64 «как есть» */
+}
+
+.cp-why-us__title {
+  max-width: 55.875rem; /* 894px why-us.css:32 */
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+.cp-why-us__row {
+  display: flex; /* why-us.css:40 */
+  gap: 2.25rem; /* 36px why-us.css:41 */
+  margin-bottom: 9rem; /* 144px why-us.css:42 «как есть» — панель вакансий ниже */
 }
 
 .cp-why-us__title {
@@ -570,28 +590,79 @@
 }
 
 .cp-why-us__card {
+  --cp-why-photo: 1; /* hover-гаситель фото (why-us.css:77) */
   display: flex;
   position: relative;
   flex-direction: column;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-4);
-  border: var(--ui-border-width) solid var(--ui-color-text-on-dark-muted);
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-glass-dark);
+  gap: 2.25rem; /* 36px why-us.css:55 */
+  overflow: hidden;
+  min-height: 20rem; /* 320px why-us.css:56 */
+  padding: 1.25rem; /* 20px why-us.css:57 */
+  border: none;
+  border-radius: var(--ui-radius-md); /* radius-card 16 */
+  background-color: var(--ui-color-surface-blue-deep); /* blue-700 why-us.css:58 */
   color: var(--ui-color-text-on-dark);
 }
 
 .cp-why-us__card-photo {
+  position: absolute; /* фото-фон карточки (why-us.css:68-75) */
+  inset: 0;
   object-fit: cover;
-  border-radius: var(--ui-radius-md);
+  width: 100%;
+  height: 100%;
+  transition: opacity var(--ui-transition);
+}
+
+@media (hover: hover) {
+  .cp-why-us__card:hover .cp-why-us__card-photo {
+    opacity: 0.15;
+  }
+}
+
+.cp-why-us__card-title {
+  position: relative;
+  line-height: 1.25; /* why-us.css:83 */
+  letter-spacing: -0.02em; /* why-us.css:84 */
+}
+
+.cp-why-us__card-text {
+  position: relative;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    opacity var(--ui-transition),
+    max-height 0.3s ease; /* why-us.css:95-96 */
+}
+
+@media (hover: hover) {
+  .cp-why-us__card:hover .cp-why-us__card-text {
+    max-height: 13.75rem; /* 220px why-us.css:100 */
+    opacity: 1;
+  }
 }
 
 .cp-why-us__card-num {
+  display: inline-flex;
   position: absolute;
-  top: var(--ui-space-3);
-  right: var(--ui-space-4);
-  font-size: var(--ui-fs-h3);
-  opacity: 0.5;
+  right: 1.25rem; /* 20px why-us.css:106 */
+  bottom: 1rem; /* 16px why-us.css:107 */
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px why-us.css:108 */
+  height: 2.75rem;
+  padding: 0.625rem; /* 10px why-us.css:112 */
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-glass-dark); /* white 10% why-us.css:113 */
+  font-size: var(--ui-fs-body);
+  opacity: 0;
+  transition: opacity var(--ui-transition);
+}
+
+@media (hover: hover) {
+  .cp-why-us__card:hover .cp-why-us__card-num {
+    opacity: 1;
+  }
 }
 
 /* ── vacancy-search: панель фильтров-пилюль (связки поверх ui-select) ── */
@@ -605,8 +676,10 @@
 .cp-vacancy-search__panel {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-4);
-  padding: var(--ui-space-5);
+  justify-content: space-between; /* vacancy-search.css:15 */
+  gap: 3rem; /* 48px vacancy-search.css:16 «как есть» */
+  min-height: 19.375rem; /* 310px vacancy-search.css:17 */
+  padding: 2.25rem; /* 36px vacancy-search.css:18 */
   border-radius: var(--ui-radius-lg);
   background-color: var(--ui-color-surface);
 }
@@ -614,7 +687,7 @@
 .cp-vacancy-search__fields {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--ui-space-2);
+  gap: 1rem; /* 16px vacancy-search.css:33 */
 }
 
 /* Пилюли селектов панели — модификатор ДС ui-select--pill (T17.12: геометрия
@@ -623,7 +696,7 @@
    requirements T17.12): flex-basis 12rem ленты фильтров панели — канон
    list-page, запинен пробой против оригинала. */
 .cp-vacancy-search__fields > .ui-select--pill {
-  flex: 1 1 12rem;
+  flex: 0 0 16.25rem; /* 260px vacancy-search.css:36 «как есть» (лента фильтров панели) */
 }
 
 /* ── students/employers: постерные карточки и лента логотипов — связки слоя

@@ -557,7 +557,7 @@
 
   <div class="ui-container">
     <h2 class="ui-h2" id="lsp-media-grid-title">Медиа о работе в компании</h2>
-    <div class="mdl">
+    <div class="mdl mdl--wide">
       <article class="ui-card mdl__big">
         <img
           class="ui-image ui-image--cover ui-image--ratio-16-9"
@@ -574,7 +574,12 @@
         <time class="ui-small ui-text--muted" datetime="2026-02-19">19.02.26</time>
         <p class="ui-small">Молодые люди приобретают опыт по&nbsp;основным для&nbsp;компании направлениям: электро-, теплоэнергетика и&nbsp;техника; энергетическое машиностроение; электрические станции, сети и&nbsp;системы.</p>
         <a class="ui-link" href="#lsp-media-grid">Подробнее <svg aria-hidden="true" focusable="false" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
-      </div>
+      
+    <!-- extra-карточки (mdl__extra) — в разметке всегда, базой скрыты,
+         показывает mdl--wide (батч «все страницы» 01.11) -->
+    <article class="ui-card ui-card--hover ui-card--link ui-card--media mdl__extra">
+      <a class="ui-card__link" href="#lsp-mdl"><div class="ui-card__media"><img src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27340%27%20height%3D%27177%27%3E%3Crect%20width%3D%27340%27%20height%3D%27177%27%20fill%3D%27%23F1F5FE%27%2F%3E%3C%2Fsvg%3E" alt="" loading="lazy"></div><div class="ui-card__body"><h3 class="ui-card__title ui-h6">Extra-карточка (wide)</h3><p class="ui-card__meta ui-small ui-text--muted">01.02.26</p></div></a>
+    </article></div>
       <article class="ui-card">
         <img
           class="ui-image ui-image--cover ui-image--ratio-16-9"

@@ -26,12 +26,12 @@
  *
  * Пороги — явные числа по факту итога T17.16 (Implementation requirements
  * п.1 — «не „меньше“, а конкретное значение»; деградация — exit 1):
- *  - MAX_PILOT_CSS_LINES = 1243 — сырые строки pilot.css. Errata 31.10:
+ *  - MAX_PILOT_CSS_LINES = 1290 — сырые строки pilot.css. Errata 31.10:
  *    1040 → 1162 (production/directions) → 1169 (раунд 7) → 1237 (батч
  *    «все страницы»: v2-модификаторы cp-production--v2/cp-holding--compact
  *    — решение владельца, билд всех 43 страниц оригинала); любой рост
  *    сверх — деградация сайт-зоны;
- *  - MAX_PILOT_CSS_CODE_LINES = 678 — цель эпика (README EPIC-17 AC) в
+ *  - MAX_PILOT_CSS_CODE_LINES = 723 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
  *    «все страницы» — тот же курс);
  *  - MAX_PILOT_JS_LINES = 187 — строки pilot.js на закрытие эпика;
@@ -57,8 +57,8 @@ const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** Пороги — факт итога T17.16 + errata 31.10 (см. шапку). Изменение числа —
  *  осознанная правка ценза вместе с юнит-пином и REPORT §11.4, не «подгонка». */
-export const MAX_PILOT_CSS_LINES = 1243;
-export const MAX_PILOT_CSS_CODE_LINES = 678;
+export const MAX_PILOT_CSS_LINES = 1290;
+export const MAX_PILOT_CSS_CODE_LINES = 723;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 

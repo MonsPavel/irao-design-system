@@ -210,10 +210,13 @@ describe('пилот career-portal: cp-* сняты (AC «~30 строк»)', ()
     expect(pilotCss).not.toContain('.lpp-side__group .cp-pill');
   });
 
-  it('pilot.css: ширина пилюль hero-панели (12rem) — правило сайта на модификаторе', () => {
+  it('pilot.css: ширина пилюль hero-панели (16.25rem = 260px оригинала) — правило сайта на модификаторе', () => {
+    // Errata 01.11 (батч ритма): 12rem канона list-page → 260px — замер
+    // .vacancy-search__select-wrap оригинала (vacancy-search.css:36);
+    // лента list-page остаётся на своём каноне.
     const hero = blockOf(pilotCss, '.cp-vacancy-search__fields > .ui-select--pill');
     expect(hero, 'правило hero-панели найдено').toBeTruthy();
-    expect(hero).toContain('flex: 1 1 12rem;');
+    expect(hero).toContain('flex: 0 0 16.25rem;');
   });
 });
 

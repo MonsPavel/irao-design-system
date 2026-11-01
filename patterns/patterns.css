@@ -1846,6 +1846,74 @@
   }
 }
 
+/* Extra-карточки — в разметке всегда, базой скрыты (оригинал:
+   media__card--extra вне --wide не показывается); показывает mdl--wide. */
+.mdl__extra {
+  display: none;
+}
+
+/* Фото-высоты v1 «как есть» (media.css:48 big 374, :53 малые 177; от lg —
+   базовая сетка 4 колонок): аспект канона гасится, высоту ведёт сетка/
+   фикс оригинала. В --wide big добивает ячейку (media.css:52). */
+@media (min-width: 1024px) {
+  .mdl .ui-card--media:not(.mdl__big) .ui-card__media img {
+    height: 11.0625rem; /* 177px media.css:53 */
+  }
+
+  .mdl .ui-card--media:not(.mdl__big) .ui-card__media {
+    aspect-ratio: auto;
+  }
+
+  .mdl .mdl__big .ui-card__media img {
+    height: 23.375rem; /* 374px media.css:48 */
+  }
+
+  .mdl .mdl__big .ui-card__media {
+    aspect-ratio: auto;
+  }
+}
+
+/* ── Вариант --wide (media.css:129-190; батч «все страницы» 01.11,
+   решение владельца (а) — разбора media-записи): сетка 4×(394/250/250),
+   big без подписей, lead — сводка 255px справа. Мобильные ступени
+   наследует база mdl (1/2/4 — media.css:185-187 ≤1279: 2 колонки). */
+@media (min-width: 1024px) {
+  .mdl--wide {
+    gap: 2.25rem 1rem; /* 36/16 media.css:131-135 «как есть» */
+    grid-template-rows: 24.625rem 15.625rem 15.625rem; /* 394/250/250 media.css:132-134 */
+  }
+
+  .mdl--wide .mdl__extra {
+    display: block; /* media.css:129 */
+  }
+
+  .mdl--wide .mdl__big {
+    height: 100%; /* media.css:52 */
+  }
+
+  /* big без подписей (media.css:144-146): у ui-card--media текст несёт
+     __body целиком (title/meta — элемент канона) */
+  .mdl--wide .mdl__big .ui-card__body {
+    display: none;
+  }
+
+  .mdl--wide .ui-card--media:not(.mdl__big) {
+    height: 15.625rem; /* 250px media.css:147 */
+  }
+
+  .mdl--wide .mdl__lead {
+    align-self: start;
+    grid-column: 3 / span 2; /* media.css:151 */
+    height: 15.9375rem; /* 255px media.css:157 */
+  }
+
+  .mdl--wide .mdl__lead .ui-h4 {
+    font-size: 1.75rem; /* 28px media.css:160 */
+    line-height: 2.1875rem; /* 35px media.css:161 */
+    letter-spacing: -0.02em;
+  }
+}
+
 /* ── Cover-hero (cvh): колонка «заголовок + lead + CTA» обложки лендингов ──
    Порт .cover-hero оригинала (pages.css:953–959) в принятой форме клона:
    зазор 16px (--ui-space-4 против 20px оригинала — принято ДС), прижато

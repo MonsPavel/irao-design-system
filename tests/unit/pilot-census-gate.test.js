@@ -12,11 +12,11 @@
  *  - Пороги — явные числа по факту итога T17.16 (Implementation
  *    requirements п.1: «не „меньше“, а конкретное значение»; деградация —
  *    проблема гейта → exit 1 в CLI и в compare):
- *      MAX_PILOT_CSS_LINES 1243 — сырые строки файла (деградация
- *      запрещена); errata 31.10: 1040 → 1162 → 1169 → 1243 (батчи
+ *      MAX_PILOT_CSS_LINES 1290 — сырые строки файла (деградация
+ *      запрещена); errata 31.10: 1040 → 1162 → 1169 → 1290 (батчи
  *      паритета + «все страницы» — v2-модификаторы);
- *      MAX_PILOT_CSS_CODE_LINES 678 — цель эпика в метрике кода
- *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 678;
+ *      MAX_PILOT_CSS_CODE_LINES 723 — цель эпика в метрике кода
+ *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723;
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -165,8 +165,8 @@ describe('гейт ценза — runCensusGate (порог числом; дег
 
 describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1243);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(678);
+    expect(MAX_PILOT_CSS_LINES).toBe(1290);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(723);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(30);
@@ -182,17 +182,18 @@ describe('пороги ценза — числа зафиксированы по
       // машиночитаемые факты ценза для REPORT §11.4 («ценз после»);
       // обновлены батчами паритета 31.10 (решение владельца «приведи к
       // оригиналу»): production/directions — сырые 980→1162, код 462→618;
-      // раунд 7 — 1162→1169; батч «все страницы» — 1169→1243, 622→678,
-      // селекторы 114→126; пороги-потолки 1040/600 → 1169/622
+      // раунд 7 — 1162→1169; батч «все страницы» — 1169→1243, 622→678;
+      // батч ритма 01.11 — 1243→1290, 678→723, селекторы →134; пороги-потолки 1040/600 → 1169/622
       // (errata в шапке census.mjs + дописи REPORT §11.4); семейства 28;
       // adoption T17.18 (постерные карточки — канон pstr- слоя, тон-строки
       // lnk-card студентского блока сняты из сайт-зоны): сырые 1243→1217,
       // код 678→661; пороги-потолки НЕ двигаются (спека T17.18 «пороги
       // не двигаются»), cp-селекторы/семейства не менялись (lnk-правила
       // не несли cp-крючков):
-      expect(metrics.css.lines).toBe(1217);
-      expect(metrics.css.codeLines).toBe(661);
-      expect(metrics.css.selectors).toBe(126);
+      expect(metrics.css.lines).toBe(1290);
+      expect(metrics.css.codeLines).toBe(723);
+      expect(metrics.css.selectors).toBe(134);
+      // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(28);
       expect(metrics.js.lines).toBe(187);
     },

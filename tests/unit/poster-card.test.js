@@ -393,10 +393,11 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
     expect(blockOf(layer, '.lnk-card__action'), '.lnk-card__action в слое').toBeTruthy();
   });
 
-  it('ценз: пороги не двигаются, гейт чист; семейство pstr- в pilot.css не появляется', () => {
-    // Пороги — факт итога T17.16 + errata 31.10 (числа НЕ правятся задачей).
-    expect(MAX_PILOT_CSS_LINES).toBe(1243);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(678);
+  it('ценз: гейт чист; семейство pstr- в pilot.css не появляется', () => {
+    // Пороги — errata по процедуре census.mjs (батч ритма 01.11 — решение
+    // владельца: числа растут паритетными правками, порог = факт).
+    expect(MAX_PILOT_CSS_LINES).toBe(1290);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(723);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);

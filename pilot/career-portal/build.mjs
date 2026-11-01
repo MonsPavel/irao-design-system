@@ -1059,7 +1059,10 @@ const MEDIA_HOME = [
   },
 ];
 
-function mediaHomeCard(card) {
+function mediaHomeCard(card, kind = '') {
+  // kind: 'big' — mdl__big (span 2×2, активация design-decision владельца
+  // 01.11 — решение (а) разбора media-записи), 'extra' — mdl__extra
+  // (скрыта базой, показывает mdl--wide на index-2 — media.css:129).
   // Тег на фото — __media-tag (позиция каркаса) + тинт варианта + точка,
   // как в articleCard (маркер реклассификации REPORT §3.3 — ревью T16.10:
   // on-photo в пилоте не применяется). Заголовок (ветка с desc) — мини-тайтл
@@ -1071,7 +1074,8 @@ function mediaHomeCard(card) {
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
     card.type
   ];
-  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media">
+  const kindClass = kind === 'big' ? ' mdl__big' : kind === 'extra' ? ' mdl__extra' : '';
+  return `<article class="ui-card ui-card--hover ui-card--link ui-card--media${kindClass}">
   <a class="ui-card__link" href="article.html">
     <div class="ui-card__media">
       <img src="${esc(card.image)}" alt="" loading="lazy">
@@ -1105,8 +1109,8 @@ function indexMain() {
   const whyCards = WHY_US.map(
     (card, index) => `      <article class="cp-why-us__card">
         <img class="cp-why-us__card-photo" src="${esc(card.photo)}" alt="" loading="lazy">
-        <h3 class="ui-h4">${esc(card.title)}</h3>
-        <p class="ui-small">${esc(card.text)}</p>
+        <h3 class="ui-h4 cp-why-us__card-title">${esc(card.title)}</h3>
+        <p class="ui-small cp-why-us__card-text">${esc(card.text)}</p>
         <span class="cp-why-us__card-num" aria-hidden="true">0${index + 1}</span>
       </article>`,
   );
@@ -1142,14 +1146,17 @@ function indexMain() {
     // (замер 27.10: активация +214px docHeight index, +3.1% > порога
     // compare ±1%); канон mdl__big в слое есть, активация —
     // design-decision владельца.
-    mediaHomeCard(MEDIA_HOME[0]),
+    mediaHomeCard(MEDIA_HOME[0], 'big'),
     `      <div class="mdl__lead">
         <h3 class="ui-h4">${esc(MEDIA_HOME[0].caption)}</h3>
         <time class="ui-small ui-text--muted">19.02.26</time>
         <p class="ui-small">Молодые люди приобретают опыт по основным для компании направлениям: электро-, теплоэнергетика и техника; энергетическое машиностроение; электрические станции, сети и системы; тепловые электрические станции.</p>
         <a class="ui-link" href="media.html">Подробнее ${ARROW}</a>
       </div>`,
-    ...MEDIA_HOME.slice(1).map((card) => mediaHomeCard(card)),
+    ...MEDIA_HOME.slice(1, 5).map((card) => mediaHomeCard(card)),
+    // extra ×4 — скрыты базой (mdl__extra), показывает mdl--wide на
+    // index-2 (оригинал media.html: extra в разметке всегда)
+    ...MEDIA_HOME.slice(5, 9).map((card) => mediaHomeCard(card, 'extra')),
   ].join('\n');
 
   const stepperTabs = PRODUCTION_SLIDES.map(
@@ -1303,14 +1310,13 @@ ${whyCards[0]}
     <div class="cp-why-us__row">
 ${whyCards.slice(1).join('\n')}
     </div>
-  </div>
-</section>
-
-<div id="vacancies" class="ui-section">
-  <div class="ui-container">
-    <div class="cp-vacancy-search__wrap">
+    <!-- Панель «Найди свою вакансию» — ВНУТРИ тёмной секции (оригинал:
+         build.py SLOTS — VACANCY_SLOT внутри why-us, why-us.css:46-47;
+         батч ритма 01.11 — композиция приведена к оригиналу). id
+         сохранён — цель навигации не меняется. -->
+    <div class="cp-vacancy-search__wrap" id="vacancies">
       <form class="cp-vacancy-search__panel" action="vacancies.html" method="get" aria-label="Поиск вакансии">
-        <h2 class="ui-h3">Найди свою вакансию</h2>
+        <h2 class="ui-page-title">Найди свою вакансию</h2>
         <div class="cp-vacancy-search__fields">
           ${selectField({ name: 'city', ariaLabel: 'Город', options: ['Город', 'Москва', 'Санкт-Петербург', 'Екатеринбург'], pill: true })}
           ${selectField({ name: 'position', ariaLabel: 'Должность', options: ['Должность', 'Инженер', 'Электромонтёр', 'Специалист'], pill: true })}
@@ -1324,7 +1330,7 @@ ${whyCards.slice(1).join('\n')}
       </a>
     </div>
   </div>
-</div>
+</section>
 
 <section class="ui-section" id="students">
   <div class="ui-container">
@@ -2800,6 +2806,7 @@ function applyVariant2(html) {
       'class="ui-section ui-section--photo cp-holding cp-holding--compact"',
     )
     .replace('class="ui-section lgo"', 'class="ui-section lgo lgo--mosaic"')
+    .replace('class="mdl"', 'class="mdl mdl--wide"')
     .replace('hero-city-1.png', 'hero-city-2.png')
     .replace(
       '<h1 class="hro__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>',

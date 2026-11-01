@@ -138,16 +138,25 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     }
   });
 
-  it('вертикальная геометрия пяти блоков не изменилась: ритм ui-section гашится (padding: 0) — паритет высот compare ±4px', () => {
+  it('вертикальная геометрия пяти блоков: hero/production гасят ритм (padding: 0); holding/why-us несут ритм оригинала (батч ритма 01.11, решение владельца)', () => {
     // hero — канон hro (T17.15): блок перенесён в паттерн-слой, пин — по слою.
     expect(blockOf(layerCss, '.hro'), '.hro найдено (слой, T17.15)').toBeTruthy();
     expect(blockOf(layerCss, '.hro'), '.hro: ритм ui-section погашен').toContain('padding: 0;');
-    for (const block of ['.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
+    for (const block of ['.cp-production', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block} найдено`).toBeTruthy();
       expect(blockOf(pilotCss, block), `${block}: ритм ui-section погашен`).toContain(
         'padding: 0;',
       );
     }
+    // Errata 01.11 — ритм-батч: why-us 140/80 (why-us.css:3), holding
+    // 72/48 (holding.css:3) — паритет высот compare (why 1350↔1350);
+    // у holding остаток −75 = принятая дельта статов (T17.4, lh 1.1).
+    expect(blockOf(pilotCss, '.cp-why-us'), 'why-us: ритм оригинала').toContain(
+      'padding: 8.75rem 0 5rem;',
+    );
+    expect(blockOf(pilotCss, '.cp-holding'), 'holding: ритм оригинала').toContain(
+      'padding: 4.5rem 0 3rem;',
+    );
   });
 
   it('позиционирование корней сохранено (якорь absolute-слоёв)', () => {
