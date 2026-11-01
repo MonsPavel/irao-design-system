@@ -676,8 +676,8 @@
 .cp-vacancy-search__panel {
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* vacancy-search.css:15 */
   gap: 3rem; /* 48px vacancy-search.css:16 «как есть» */
+  justify-content: space-between; /* vacancy-search.css:15 */
   min-height: 19.375rem; /* 310px vacancy-search.css:17 */
   padding: 2.25rem; /* 36px vacancy-search.css:18 */
   border-radius: var(--ui-radius-lg);
