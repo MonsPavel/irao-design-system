@@ -13,7 +13,7 @@
  *  - подключение ОПЦИОНАЛЬНО: ui-core.min.css не меняется; порядок в <head>:
  *    токены → core → patterns → сайт;
  *  - селекторы слоя — только канонические префиксы
- *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp- (гейт «защита от
+ *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|pstr- (гейт «защита от
  *    превращения слоя в свалку»); док-HTML паттернов и слой синхронны
  *    (одни классы);
  *  - слой не содержит @media-ступеней, кроме канонических ступеней паттернов
@@ -167,7 +167,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
@@ -177,13 +177,15 @@ describe('patterns/patterns.css — единый исходник паттерн
       // продолжается дефисом, модификатором __ или заканчивается на нём.
       expect(
         hooks.some((hook) =>
-          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh)(?:-|__|$)/.test(hook),
+          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr)(?:-|__|$)/.test(hook),
         ),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh`,
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh)(?:-|__|$))/.test(hook),
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr)(?:-|__|$))/.test(
+            hook,
+          ),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
         ).toBe(true);
       }

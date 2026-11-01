@@ -1,0 +1,125 @@
+<!--
+  Паттерн «Постерная карточка» (T17.18): порт постерной иллюстрированной
+  карточки блока «Школьникам и студентам» career-portal (.students--illustrated,
+  src/blocks/students/students.css) — цветной постер с крупным заголовком,
+  текстом, иллюстрацией в рост и круглой кнопкой-действием.
+
+  Формула (Scope): карточка (.pstr-card + тон-модификатор) со слотами —
+  тело (__body: заголовок-роль ui-h3 + текст ui-body), декоративная
+  иллюстрация (__illu, alt="" — координаты несёт тон) и действие (__action —
+  ссылка с доступным именем; вид — пара хуков --pstr-action-bg/--pstr-action-
+  color от тона карточки).
+
+  Три тона — часть одобренной КОМПОЗИЦИИ постера (в отличие от nav-карточек
+  T17.9, где тон — параметр сайта): peach (color-mix от токенов через хук
+  --pstr-bg; #FFDDC7 оригинала вне токенов), navy (--ui-color-primary-deep),
+  light (--ui-color-surface-muted). Связки pstr-* — ПАТТЕРН-СЛОЙ
+  (patterns/patterns.css → опциональный dist/ui-patterns.css, вариант A
+  T17.1; прецеденты lnk-/lgo- T17.9, hro/mrq/mdl/cvh T17.15); тон — НЕ
+  параметр сайта: Approved-значения в модификаторах слоя, сайт выбирает
+  модификатор, а не цвет.
+
+  Компонент dist/ui-poster-card не создаётся — второго потребителя нет
+  (прецедент tlp- T17.10); при появлении решение о компоненте отдельно.
+  Высота постера: min-height 600px (440 ≤1023, 380 ≤767 оригинала) —
+  mobile-first инверсия, ступени 1024/768 шкалы T2.5.
+-->
+
+<!-- Mini-эталон (Scope): три тона канона — peach / navy / light. Тексты —
+     оригинал students.html; иллюстрации — плейсхолдеры (контент сайта).
+     Каркас демо-страницы несёт служебный h1, секция — h2, заголовки
+     карточек — h3 (h1 → h2 → h3 без пропусков, гейт irao/heading-order). -->
+<section class="ui-section" id="pstr-demo" aria-labelledby="pstr-demo-title">
+  <p class="ui-showcase-stand__note">
+    Постерная карточка: тон — модификатор слоя (<code>--peach/--navy/--light</code>); тело
+    (<code>__body</code>) с заголовком-ролью и текстом, декоративная иллюстрация
+    (<code>__illu</code>, <code>alt=""</code>) и действие-ссылка (<code>__action</code>,
+    имя — <code>aria-label</code>). Связки <code>pstr-*</code> — паттерн-слой
+    (<code>dist/ui-patterns.css</code>, подключение опционально — T17.18).
+  </p>
+
+  <div class="ui-container">
+    <h2 class="ui-h2" id="pstr-demo-title">Школьникам и студентам</h2>
+
+    <div class="poster-demo-grid">
+      <article class="pstr-card pstr-card--peach">
+        <div class="pstr-card__body">
+          <h3 class="pstr-card__title ui-h3">Стажировки и&nbsp;практики</h3>
+          <p class="pstr-card__text ui-body">
+            Стажировки и&nbsp;практики&nbsp;— уникальный шанс получить опыт в&nbsp;энергетике!
+          </p>
+        </div>
+        <img
+          class="pstr-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27280%27%20height%3D%27300%27%3E%3Ccircle%20cx%3D%27140%27%20cy%3D%27150%27%20r%3D%27110%27%20fill%3D%27%23F26722%27%20opacity%3D%270.55%27%2F%3E%3Ccircle%20cx%3D%27190%27%20cy%3D%27100%27%20r%3D%2750%27%20fill%3D%27%23164B89%27%20opacity%3D%270.4%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="280"
+          height="300"
+          loading="lazy"
+        >
+        <a class="pstr-card__action" href="#pstr-demo" aria-label="Подробнее о стажировках и практиках">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </article>
+
+      <article class="pstr-card pstr-card--navy">
+        <div class="pstr-card__body">
+          <h3 class="pstr-card__title ui-h3">Целевое обучение</h3>
+          <p class="pstr-card__text ui-body">
+            Проходи целевое обучение, чтобы влиться в&nbsp;профессию, и&nbsp;получай поддержку
+            на&nbsp;старте своей карьеры
+          </p>
+        </div>
+        <img
+          class="pstr-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27240%27%20height%3D%27300%27%3E%3Ccircle%20cx%3D%27120%27%20cy%3D%27150%27%20r%3D%2795%27%20fill%3D%27%23FFFFFF%27%20opacity%3D%270.3%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27210%27%20r%3D%2740%27%20fill%3D%27%23F26722%27%20opacity%3D%270.6%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="240"
+          height="300"
+          loading="lazy"
+        >
+        <a class="pstr-card__action" href="#pstr-demo" aria-label="Подробнее о целевом обучении">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </article>
+
+      <article class="pstr-card pstr-card--light">
+        <div class="pstr-card__body">
+          <h3 class="pstr-card__title ui-h3">Карьерный трек</h3>
+          <p class="pstr-card__text ui-body">
+            Найди лучшие возможности для&nbsp;профессионального роста вместе с&nbsp;нами!
+          </p>
+        </div>
+        <img
+          class="pstr-card__illu"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27260%27%20height%3D%27300%27%3E%3Ccircle%20cx%3D%27130%27%20cy%3D%27150%27%20r%3D%27100%27%20fill%3D%27%23164B89%27%20opacity%3D%270.35%27%2F%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%27220%27%20r%3D%2745%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="260"
+          height="300"
+          loading="lazy"
+        >
+        <a class="pstr-card__action" href="#pstr-demo" aria-label="Подробнее о карьерном треке">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M9 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- Сборка демо (зона стенда, в dist не попадает — прецедент lsp-* дока
+     landing-section): лента постеров 1 колонка (мобильная база), 3 от lg
+     (сетка оригинала students.css:99-101 — repeat(3, 1fr), gap 36px «как
+     есть», вне шкалы §3.2). -->
+<style>
+  .poster-demo-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.25rem;
+  }
+
+  @media (min-width: 1024px) {
+    .poster-demo-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>
