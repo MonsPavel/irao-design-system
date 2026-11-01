@@ -1118,9 +1118,7 @@ function indexMain() {
   // Прежняя сборка на lnk-card (T17.9) снята: lnk-канон остаётся в слое —
   // потребитель «Может быть интересно».
   const studentCards = STUDENTS.map(
-    (
-      card,
-    ) => `      <article class="pstr-card pstr-card--${card.tone}">
+    (card) => `      <article class="pstr-card pstr-card--${card.tone}">
         <div class="pstr-card__body">
           <h3 class="pstr-card__title ui-h3">${esc(card.title)}</h3>
           <p class="pstr-card__text ui-body">${esc(card.text)}</p>

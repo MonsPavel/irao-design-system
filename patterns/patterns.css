@@ -1870,7 +1870,7 @@
  *
  * Тоны — часть одобренной КОМПОЗИЦИИ постера (в отличие от nav-карточек
  * T17.9, где тон — параметр сайта на хуках): три тона «как есть» —
- * модификаторы слоя. Peach (#FFDDC7 оригинала, students.css:95) вне токенов
+ * модификаторы слоя. Peach (FFDDC7 оригинала, students.css:95) вне токенов
  * — хук --pstr-bg с color-mix от токенов (прецедент тон-хука --hro-tag-bg
  * T17.15, вариант (а): hex в ДС не едет — гейт слоя; рендер — approved
  * тон-строка пилота .lnk-card--peach). Кнопка-действие — пара хуков
@@ -1917,9 +1917,9 @@
   box-sizing: border-box;
   display: flex;
   position: relative;
+  z-index: 1;
   flex-direction: column;
   gap: var(--ui-space-3);
-  z-index: 1;
 }
 
 /* Заголовок/текст: цвет text оригинала (students.css:112/120) — heading-роль
@@ -1959,7 +1959,7 @@
   --pstr-action-color: var(--ui-color-text-on-dark);
 }
 
-/* Тон peach: #FFDDC7 (students.css:95) вне токенов — хук --pstr-bg с
+/* Тон peach: FFDDC7 (students.css:95) вне токенов — хук --pstr-bg с
    color-mix от токенов (approved рендер пилота T17.9, .lnk-card--peach);
    кнопка accent/on-dark — пара «orange» (students.css:174). */
 .pstr-card--peach {
@@ -2003,11 +2003,11 @@
    accent/on-dark (пара peach — первый тон канона). */
 .pstr-card__action {
   box-sizing: border-box;
+  display: inline-flex;
   position: absolute;
   right: 1.25rem; /* 20px students.css:151 «как есть» */
   bottom: 1.25rem; /* 20px students.css:152 «как есть» */
   z-index: 1;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 3.25rem; /* 52px students.css:157–158 */

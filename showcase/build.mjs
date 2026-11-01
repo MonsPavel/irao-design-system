@@ -90,7 +90,8 @@ const STAND_DESCRIPTIONS = {
   'patterns/form-page': 'Паттерн «Страница формы»: форма отклика с aside-сводкой',
   'patterns/landing-section': 'Паттерн «Landing-секция»: светлая, тёмная, full-bleed, фото-фон',
   'patterns/timeline': 'Паттерн «Таймлайн этапов»: нумерованные точки этапов процесса',
-  'patterns/poster-card': 'Паттерн «Постерная карточка»: цветной постер с иллюстрацией и круглым действием',
+  'patterns/poster-card':
+    'Паттерн «Постерная карточка»: цветной постер с иллюстрацией и круглым действием',
   'patterns/search-overlay': 'Паттерн «Поисковый оверлей» на ui-modal--full',
   'patterns/header': 'Паттерн «Шапка сайта» с навигацией и оверлеем поиска',
   'patterns/footer': 'Паттерн «Подвал сайта»: contentinfo, контакты, «Наверх»',
@@ -1305,7 +1306,9 @@ async function generateShowcase({ themes }) {
     writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'poster-card.html'), page);
     stands.push({ name: 'patterns/poster-card', source: 'patterns/poster-card/poster-card.html' });
   } else {
-    warn('patterns/poster-card/poster-card.html ещё нет — стенд patterns/poster-card не сгенерирован');
+    warn(
+      'patterns/poster-card/poster-card.html ещё нет — стенд patterns/poster-card не сгенерирован',
+    );
   }
 
   // Стенд «patterns/search-overlay» (T7.6) — паттерн «Поисковый оверлей»:

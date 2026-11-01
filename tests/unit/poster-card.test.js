@@ -104,7 +104,9 @@ const layerHookSet = () => {
 
 /** Крючки pstr в селекторах слоя — для BEM-формы (AC4). */
 const layerPstrSelectors = () =>
-  (layer.match(/[^{}]+(?=\{)/g) ?? []).filter((selector) => /(^|[^a-z-])\.pstr(?:-|__|$)/.test(selector));
+  (layer.match(/[^{}]+(?=\{)/g) ?? []).filter((selector) =>
+    /(^|[^a-z-])\.pstr(?:-|__|$)/.test(selector),
+  );
 
 /** Класс разметки связки без собственных правил (вид несёт роли/хуки;
  *  таксономия имён канона, список осознанный). */
@@ -119,7 +121,9 @@ describe('patterns/patterns.css — каркас постерной карточ
     expect(card, '.pstr-card найдено').toBeTruthy();
     expect(card, 'box-sizing на корне (ADR-0002)').toContain('box-sizing: border-box;');
     expect(card, 'flex-колонка (students.css:85-87)').toContain('display: flex;');
-    expect(card, 'relative — абсолюты __illu/__action от карточки').toContain('position: relative;');
+    expect(card, 'relative — абсолюты __illu/__action от карточки').toContain(
+      'position: relative;',
+    );
     expect(card, 'flex-колонка (students.css:86)').toContain('flex-direction: column;');
     expect(card, 'клип иллюстрации (students.css:92)').toContain('overflow: hidden;');
     expect(card, 'паддинг 20px оригинала (students.css:89) — «как есть», вне шкалы §3.2').toContain(
@@ -128,14 +132,17 @@ describe('patterns/patterns.css — каркас постерной карточ
     expect(card, 'радиус --radius-card 16px оригинала = md').toContain(
       'border-radius: var(--ui-radius-md);',
     );
-    expect(card, 'заливка — хук --pstr-bg (peach вне токенов; T17.15-прецедент --hro-tag-bg)').toContain(
-      'background-color: var(--pstr-bg, var(--ui-color-surface));',
-    );
+    expect(
+      card,
+      'заливка — хук --pstr-bg (peach вне токенов; T17.15-прецедент --hro-tag-bg)',
+    ).toContain('background-color: var(--pstr-bg, var(--ui-color-surface));');
   });
 
   it('min-height 600px оригинала — mobile-first инверсия лестницы 600/440/380 (Implementation requirements T17.1 п.4)', () => {
     const card = blockOf(layer, '.pstr-card');
-    expect(card, 'база ≤767 — 380px оригинала (students.css:187)').toContain('min-height: 23.75rem;');
+    expect(card, 'база ≤767 — 380px оригинала (students.css:187)').toContain(
+      'min-height: 23.75rem;',
+    );
     const md = mediaBlockOf(layer, '768', 'pstr-card');
     expect(md, 'ступень md — 440px оригинала (students.css:183)').toBeTruthy();
     expect(md).toContain('min-height: 27.5rem;');
@@ -243,7 +250,9 @@ describe('patterns/patterns.css — каркас постерной карточ
 
   it('hover scale 1.08 (students.css:172) на transition --ui-transition', () => {
     const action = blockOf(layer, '.pstr-card__action');
-    expect(action, 'переход transform — токен').toContain('transition: transform var(--ui-transition);');
+    expect(action, 'переход transform — токен').toContain(
+      'transition: transform var(--ui-transition);',
+    );
     const hover = blockOf(layer, '.pstr-card__action:hover');
     expect(hover, '.pstr-card__action:hover найдено').toBeTruthy();
     expect(hover).toContain('transform: scale(1.08);');
@@ -315,10 +324,11 @@ describe('док-паттерн poster-card — источник правды (�
     expect(docHtml, 'тоны канона — все три').toContain('pstr-card--peach');
     expect(docHtml).toContain('pstr-card--navy');
     expect(docHtml).toContain('pstr-card--light');
-    expect(docHtml, 'действие — ссылка с aria-label (do/don\'t: имя действия на доступном имени)').toMatch(
-      /<a class="pstr-card__action"[^>]*aria-label="/,
-    );
-    expect(docHtml, 'иллюстрация декоративна (do/don\'t)').toMatch(
+    expect(
+      docHtml,
+      "действие — ссылка с aria-label (do/don't: имя действия на доступном имени)",
+    ).toMatch(/<a class="pstr-card__action"[^>]*aria-label="/);
+    expect(docHtml, "иллюстрация декоративна (do/don't)").toMatch(
       /class="pstr-card__illu"[^>]*alt=""/,
     );
     // Заголовки карточек — h3 (иерархия стенда: h1 каркаса → h2 секции → h3).
@@ -338,12 +348,12 @@ describe('README паттерна (AC5)', () => {
     }
   };
 
-  it('README с API-таблицей и do/don\'t (доступное имя, иллюстрация декоративна) на месте', () => {
+  it("README с API-таблицей и do/don't (доступное имя, иллюстрация декоративна) на месте", () => {
     const md = readme();
     expect(md, 'patterns/poster-card/README.md существует').not.toBe('');
     expect(md, 'API-таблица есть').toMatch(/\|.*Класс.*\|/);
-    expect(md, 'do/don\'t: доступное имя действия').toMatch(/aria-label|доступн/i);
-    expect(md, 'do/don\'t: иллюстрация декоративна').toMatch(/alt=""/);
+    expect(md, "do/don't: доступное имя действия").toMatch(/aria-label|доступн/i);
+    expect(md, "do/don't: иллюстрация декоративна").toMatch(/alt=""/);
   });
 });
 
@@ -391,9 +401,10 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);
     expect(gate.problems, 'гейт ценза чист после adoption').toEqual([]);
-    expect(metrics.css.families, 'pstr- в цензе сайт-зоны не появляется (правила в слое)').not.toContain(
-      'pstr',
-    );
+    expect(
+      metrics.css.families,
+      'pstr- в цензе сайт-зоны не появляется (правила в слое)',
+    ).not.toContain('pstr');
     expect(pilotCss, 'правил pstr- в pilot.css нет').not.toMatch(/\.pstr/);
   });
 });

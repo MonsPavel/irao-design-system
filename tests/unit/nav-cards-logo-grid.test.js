@@ -362,20 +362,18 @@ describe('синхронность док-паттерна landing-section и с
 });
 
 describe('пилот career-portal: students/employers на связках (AC T17.9)', () => {
-  it('students: сетка — ui-grid + lnk-cards, карточки — ссылки lnk-card с aria-label', () => {
+  it('students: сетка — ui-grid + lnk-cards; карточки — канон pstr-card (adoption T17.18 снял lnk-сборку T17.9)', () => {
+    // Актуализация T17.18: постерная карточка блока «Школьникам и
+    // студентам» — канон pstr- слоя (спека T17.18: разметка pstr-);
+    // lnk-cards остаётся каркасом сетки (канон T17.9 не тронут —
+    // потребитель «Может быть интересно»). Контракт pstr- пинит
+    // tests/unit/poster-card.test.js; здесь — что lnk-сборки больше нет.
     expect(pilotBuild).toContain('<div class="ui-grid lnk-cards">');
-    expect(pilotBuild).toContain(
-      '<a class="lnk-card lnk-card--${card.tone}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">',
+    expect(pilotBuild, 'карточки — article на каноне pstr (T17.18)').toContain(
+      '<article class="pstr-card pstr-card--${card.tone}">',
     );
-    expect(pilotBuild).toContain('<div class="lnk-card__body">');
-    expect(pilotBuild).toContain(
-      '<img class="lnk-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">',
-    );
-    expect(
-      pilotBuild,
-      'стрелка — декоративный span ui-button--round (канон примера спеки: интерактив один — карточка)',
-    ).toContain(
-      '<span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">${ARROW}</span>',
+    expect(pilotBuild, 'сборки T17.9 из студентского блока снята').not.toContain(
+      '<a class="lnk-card lnk-card--${card.tone}"',
     );
     expect(pilotBuild, 'cp-students* из разметки сняты').not.toContain('cp-students');
   });
@@ -386,7 +384,7 @@ describe('пилот career-portal: students/employers на связках (AC T
     expect(pilotBuild, 'cp-employers* из разметки сняты').not.toContain('cp-employers');
   });
 
-  it('pilot.css: правила cp-students*/cp-employers* сняты (~75 строк), сайт-зона — тоны на хуках', () => {
+  it('pilot.css: правила cp-students*/cp-employers* сняты (~75 строк); тоны студенческого блока — модификаторы слоя (adoption T17.18 снял тон-строки T17.9)', () => {
     for (const gone of [
       '.cp-students__grid',
       '.cp-students__card',
@@ -403,29 +401,12 @@ describe('пилот career-portal: students/employers на связках (AC T
     ]) {
       expect(pilotCss, `дубликат ${gone} удалён`).not.toContain(gone);
     }
-    const peach = blockOf(pilotCss, '.lnk-card--peach');
-    expect(peach, 'тон peach — color-mix accent-пары на хуке bg').toContain(
-      '--lnk-card-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));',
-    );
-    expect(peach, 'кнопка тона peach — accent/on-dark («orange»)').toContain(
-      '--ui-button-bg: var(--ui-color-accent);',
-    );
-    const navy = blockOf(pilotCss, '.lnk-card--navy');
-    expect(navy, 'тон navy — пара primary/on-dark').toContain(
-      '--lnk-card-fg: var(--ui-color-text-on-dark);',
-    );
-    expect(navy, 'кнопка тона navy — surface/primary («white»)').toContain(
-      '--ui-button-bg: var(--ui-color-surface);',
-    );
-    const light = blockOf(pilotCss, '.lnk-card--light');
-    expect(light, 'кнопка тона light — primary/surface («navy»)').toContain(
-      '--ui-button-bg: var(--ui-color-primary);',
-    );
-    expect(
-      light,
-      'рамки нет — исходник 1:1 (токен --ui-color-border не существует;' +
-        ' dead-ссылка заменена явным border: none, батч 31.10 — T17.9)',
-    ).toContain('border: none;');
+    // Актуализация T17.18: тон-строки lnk-card студентского блока переехали
+    // в модификаторы канона pstr- (паттерн-слой) — из сайт-зоны сняты.
+    // Контракт тонов пинит tests/unit/poster-card.test.js.
+    for (const gone of ['.lnk-card--peach', '.lnk-card--navy', '.lnk-card--light']) {
+      expect(pilotCss, `тон-строка ${gone} снята (T17.18)`).not.toContain(gone);
+    }
     // Медиа-лестницы пилота для двух сеток сняты вместе с правилами.
     expect(pilotCss).not.toMatch(/\.cp-students__grid/);
     expect(pilotCss).not.toMatch(/\.cp-employers__grid/);
