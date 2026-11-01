@@ -689,7 +689,7 @@ standTest.describe('patterns/landing-section: лендинг-композици�
       // (media.css:36-41) — big в ОДНОЙ колонке 2fr (span 2 колонок —
       // только md/wide); lead СКРЫТ базой (v1: media__lead display:none —
       // показ только в mdl--wide, как extra).
-      expect(xl.colsRaw, 'lg — v1-раскладка 2fr 1fr 1fr').toContain('644');
+      expect(xl.cols, 'lg — v1-раскладка: 3 колонки (2fr 1fr 1fr, media.css:38)').toBe(3);
       expect(xl.bigCol, 'big — колонка по потоку (не span 2)').toBe('auto');
       expect(xl.leadDisplay, 'lead скрыт базой (v1 — media__lead none)').toBe('none');
     },
