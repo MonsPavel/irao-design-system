@@ -99,14 +99,19 @@ const blockOf = (selector) => {
   return match ? match[1] : null;
 };
 
-/** Селекторы исполняемого кода: прелюдии @media/at-rule пропускаются. */
+/** Селекторы исполняемого кода: прелюдии @media/at-rule пропускаются,
+ *  шаги @keyframes (from/to/%) — не селекторы (первый @keyframes в слое —
+ *  hro--marquee, батч «все страницы» 31.10; синхронно с гейтом). */
+const KEYFRAME_STEP = /^(from|to|-?\d+(?:\.\d+)?)$/;
 const selectors =
   code
     .split('\n')
     .join('\n')
     .match(/([^{}]+)\{/g)
     ?.map((piece) => piece.replace(/\{$/, '').trim())
-    .filter((selector) => selector !== '' && !selector.startsWith('@')) ?? [];
+    .filter(
+      (selector) => selector !== '' && !selector.startsWith('@') && !KEYFRAME_STEP.test(selector),
+    ) ?? [];
 
 /** Классы-крючки селектора: все \.имена в нём. */
 const hookClasses = (selector) => selector.match(/\.[a-z][a-z0-9_-]*/g) ?? [];
@@ -206,7 +211,14 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(medias.length, 'media-ступени в слое есть').toBeGreaterThan(0);
     for (const media of medias) {
       if (media.startsWith('(hover')) {
-        expect(media, 'hover-гвард канонический').toBe('(hover: hover)');
+        // Канон — ровно (hover: hover); комбинация с width-ступенью шкалы
+        // допустима (мозаика lgo--mosaic от 2xl — батч «все страницы»).
+        const [hover, ...rest] = media.split(' and ');
+        expect(hover.trim(), 'hover-гвард канонический').toBe('(hover: hover)');
+        for (const part of rest) {
+          const value = part.match(/min-width:\s*(\d+)px/)?.[1];
+          expect(BREAKPOINTS, `комбинация hover+width: ${value}px из шкалы`).toContain(value);
+        }
         continue;
       }
       const values = [...media.matchAll(/min-width:\s*(\d+)px/g)].map((match) => match[1]);
@@ -1091,6 +1103,23 @@ describe('пилот career-portal: детальные страницы на dpp
 });
 
 describe('гейт селекторов слоя — patternLayerProblems (функционально; ревью T17.1: матч всех правил, не первого)', () => {
+  it('шаги @keyframes (from/to/%) — не селекторы: первый @keyframes в слое hro--marquee проходит', () => {
+    // Кейфрейм без единого правила — «слой пуст»; рядом каноничная связка.
+    const css = `.hro--marquee .hro__marquee {
+  display: block;
+}
+@keyframes hro-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+  50% { transform: translateX(-25%); }
+}`;
+    expect(patternLayerProblems(css), 'шаги кейфрейма вне гейта').toEqual([]);
+    expect(
+      patternLayerProblems(`${css}
+.cp-evil { color: var(--ui-color-text); }`).length,
+      'чужой крючок по-прежнему ловится рядом с кейфреймом',
+    ).toBeGreaterThan(0);
+  });
   /** Ревью T17.1 high: гейт в selfChecks матчил /([^{}]+)\{/ БЕЗ /g —
    *  проверялось только первое правило, чужой префикс в любом другом
    *  проходил сборку. Гейт вынесен в showcase/patterns-layer-gate.mjs

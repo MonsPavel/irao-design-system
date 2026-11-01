@@ -1501,6 +1501,15 @@ ${rows}
 
 /* ── вакансия: детальная ── */
 
+/* hrefs — суффиксы генеративных страниц (vacancy-2..12): хардкоды
+   vacancy.html держит первая вакансия; бэклог-разбор 31.10 — билд ВСЕХ
+   страниц оригинала (REPORT §1 «вне пилота» снят). */
+function vacancyHref(v, apply = false) {
+  const index = VAC.items.indexOf(v);
+  const suffix = index <= 0 ? '' : `-${index + 1}`;
+  return `vacancy${apply ? '-apply' : ''}${suffix}.html`;
+}
+
 function vacancyMain(v = VAC.items[0]) {
   const requirements = [
     `Опыт работы: ${v.experience.toLowerCase()} — или готовность быстро освоить профиль;`,
@@ -1576,7 +1585,7 @@ function vacancyApplyMain(v = VAC.items[0]) {
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Вакансии', 'vacancies.html'],
-    [v.title, 'vacancy.html'],
+    [v.title, vacancyHref(v)],
     ['Отклик', ''],
   ])}
 <section class="ui-section">
@@ -1602,7 +1611,7 @@ function vacancyApplyMain(v = VAC.items[0]) {
             <dd class="ui-form__aside-value">${esc(v.direction)}</dd>
           </div>
         </dl>
-        <a class="ui-button ui-button--outline" href="vacancy.html">вернуться к вакансии</a>
+        <a class="ui-button ui-button--outline" href="${vacancyHref(v)}">вернуться к вакансии</a>
       </aside>
     </div>
   </div>
@@ -2766,11 +2775,61 @@ function notFoundMain() {
 
 /* ── генерация ── */
 
+/* Вариант 2 главной (build.py:585-608 оригинала — apply_variant2):
+   те же блоки с модификаторами; строковые замены — 1:1. Трансформы
+   media--wide (рекомпозиция mdl + design-decision mdl__big) и
+   students--photographic (фото-карточки) отложены: первая — кандидат
+   модификатора mdl--wide в слое (REPORT §6.2), вторая — T17.18. */
+function applyVariant2(html) {
+  return html
+    .replace(
+      'class="ui-section ui-section--photo hro"',
+      'class="ui-section ui-section--photo hro hro--marquee"',
+    )
+    .replace(
+      'ui-section--photo cp-production ui-carousel"',
+      'ui-section--photo cp-production cp-production--v2 ui-carousel"',
+    )
+    .replace(
+      'class="ui-section ui-section--photo cp-holding"',
+      'class="ui-section ui-section--photo cp-holding cp-holding--compact"',
+    )
+    .replace('class="ui-section lgo"', 'class="ui-section lgo lgo--mosaic"')
+    .replace('hero-city-1.png', 'hero-city-2.png')
+    .replace(
+      '<h1 class="hro__title ui-h1">Зажигай свет и&nbsp;дари тепло вместе с&nbsp;нами</h1>',
+      '<h1 class="hro__title ui-h1">Зажги свет вместе с&nbsp;нами</h1>',
+    )
+    .replace('placeholder="Введите название вакансии"', 'placeholder="Найти вакансию"')
+    .replace(
+      '<h2 class="ui-h2">Школьникам и студентам</h2>',
+      '<h2 class="ui-h2">Найди свою команду</h2>',
+    )
+    .replace(
+      '<span class="ui-h4">Все 140 вакансий</span>',
+      '<span class="ui-h4">Все 144 вакансии</span>',
+    )
+    .replace(
+      '<span class="ui-video__time">24:23</span>',
+      '<span class="ui-video__time">3:25</span>',
+    );
+}
+
+function index2Main() {
+  return applyVariant2(indexMain());
+}
+
 const PAGES = [
   {
     file: 'index.html',
     title: 'Портал карьеры Интер РАО — клон на irao-ui',
     main: () => indexMain(),
+    staticHeader: false,
+  },
+  {
+    file: 'index-2.html',
+    title: 'Портал карьеры Интер РАО — вариант 2',
+    main: () => index2Main(),
     staticHeader: false,
   },
   {
@@ -2783,6 +2842,21 @@ const PAGES = [
     title: 'Ведущий инженер по эксплуатации энергоблоков — Портал карьеры Интер РАО',
     main: () => vacancyMain(),
   },
+  // Генеративные страницы вакансий 2..12 (build.py:906-930 оригинала):
+  // тот же шаблон, данные из data/vacancies.json — REPORT §1 «вне пилота»
+  // снято решением владельца (билд всех страниц).
+  ...VAC.items.slice(1).flatMap((v) => [
+    {
+      file: vacancyHref(v),
+      title: `${v.title} — Портал карьеры Интер РАО`,
+      main: () => vacancyMain(v),
+    },
+    {
+      file: vacancyHref(v, true),
+      title: `Отклик на вакансию «${v.title}» — Портал карьеры Интер РАО`,
+      main: () => vacancyApplyMain(v),
+    },
+  ]),
   {
     file: 'vacancy-apply.html',
     title: 'Отклик на вакансию — Портал карьеры Интер РАО',

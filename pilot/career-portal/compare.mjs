@@ -91,8 +91,13 @@ console.log(
   `Гейт ценза: новых cp-визуальных блоков 0, пороги строк/семейств в норме (census.mjs, T17.16)`,
 );
 
+// Все 43 страницы оригинала (бэклог-разбор 31.10 «билд всех страниц»):
+// генеративные вакансии 2..12 + анкеты + вариант 2 главной.
+const VACANCY_SUFFIXES = Array.from({ length: 11 }, (_, i) => `-${i + 2}`);
 const PAGES = [
   'index.html',
+  'index-2.html',
+  ...VACANCY_SUFFIXES.flatMap((suffix) => [`vacancy${suffix}.html`, `vacancy-apply${suffix}.html`]),
   'vacancies.html',
   'vacancy.html',
   'vacancy-apply.html',
@@ -478,6 +483,15 @@ const SHELL_PROBES = [
 
 /** Пары блоков главной (высота секций). */
 const BLOCK_PROBES = {
+  'index-2.html': [
+    // Вариант 2: те же блоки-семейства + мозаика employers.
+    ['hero', '.hero', '.hro'],
+    ['production', '.production', '.cp-production'],
+    ['holding', '.holding', '.cp-holding'],
+    ['employers', '.employers', '.lgo'],
+    ['students', '.students--photographic', '#students'],
+    ['media', '.media', '#media'],
+  ],
   'index.html': [
     // Крючок слоя hro (T17.15): связка hero — паттерн-слой.
     ['hero', '.hero', '.hro'],

@@ -12,12 +12,11 @@
  *  - Пороги — явные числа по факту итога T17.16 (Implementation
  *    requirements п.1: «не „меньше“, а конкретное значение»; деградация —
  *    проблема гейта → exit 1 в CLI и в compare):
- *      MAX_PILOT_CSS_LINES 1169 — сырые строки файла (деградация
- *      запрещена); errata 31.10: 1040 → 1162 (батч production/directions)
- *      → 1169 (раунд 7 — степпер);
- *      MAX_PILOT_CSS_CODE_LINES 622 — цель эпика «≤600 строк ритма/
- *      раскладок» в метрике кода сайт-зоны (без комментариев/пустых);
- *      errata 31.10: 600 → 618 → 622 (оба батча паритета);
+ *      MAX_PILOT_CSS_LINES 1243 — сырые строки файла (деградация
+ *      запрещена); errata 31.10: 1040 → 1162 → 1169 → 1243 (батчи
+ *      паритета + «все страницы» — v2-модификаторы);
+ *      MAX_PILOT_CSS_CODE_LINES 678 — цель эпика в метрике кода
+ *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 678;
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -166,8 +165,8 @@ describe('гейт ценза — runCensusGate (порог числом; дег
 
 describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1169);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(622);
+    expect(MAX_PILOT_CSS_LINES).toBe(1243);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(678);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(30);
@@ -183,12 +182,12 @@ describe('пороги ценза — числа зафиксированы по
       // машиночитаемые факты ценза для REPORT §11.4 («ценз после»);
       // обновлены батчами паритета 31.10 (решение владельца «приведи к
       // оригиналу»): production/directions — сырые 980→1162, код 462→618;
-      // раунд 7 (степпер gap 0 + li display:contents) — 1162→1169,
-      // 618→622, селекторы 114→115; пороги-потолки 1040/600 → 1169/622
+      // раунд 7 — 1162→1169; батч «все страницы» — 1169→1243, 622→678,
+      // селекторы 114→126; пороги-потолки 1040/600 → 1169/622
       // (errata в шапке census.mjs + дописи REPORT §11.4); семейства 28:
-      expect(metrics.css.lines).toBe(1169);
-      expect(metrics.css.codeLines).toBe(622);
-      expect(metrics.css.selectors).toBe(115);
+      expect(metrics.css.lines).toBe(1243);
+      expect(metrics.css.codeLines).toBe(678);
+      expect(metrics.css.selectors).toBe(126);
       expect(metrics.css.families).toHaveLength(28);
       expect(metrics.js.lines).toBe(187);
     },

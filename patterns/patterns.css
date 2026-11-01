@@ -927,6 +927,135 @@
   border-radius: var(--ui-radius-md);
 }
 
+/* ── Hero v2 — бегущая строка (hero.css:157-198, T17.15-слой по прецеденту
+   tlp: переносится КОМПОЗИЦИЯ; errata 31.10 — раунд «все страницы»: индекс
+   варианта 2 главной). База — полоса скрыта; маска по краям, трек —
+   60s линейный цикл, текст 120px белый 42% «как есть» (вне шкалы). */
+.hro__marquee {
+  display: none;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-bottom: 1.625rem; /* 26px hero.css:164 */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ui-color-text) 12%,
+    var(--ui-color-text) 88%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--ui-color-text) 12%,
+    var(--ui-color-text) 88%,
+    transparent 100%
+  ); /* 000 hero.css:163 → color-text */
+}
+
+.hro__marquee-track {
+  display: flex;
+  white-space: nowrap;
+  animation: hro-marquee 60s linear infinite;
+}
+
+.hro__marquee-text {
+  flex: 0 0 auto;
+  color: color-mix(in srgb, var(--ui-color-text-on-dark) 42%, transparent);
+  font-size: 7.5rem; /* 120px hero.css:176 «как есть» */
+  line-height: 1.35;
+}
+
+@keyframes hro-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Модификатор v2: nowrap-заголовок, пилюля 1006×100 белая 80%, «все
+   вакансии» 92px/18px, теги скрыты, полоса видима (hero.css:187-198). */
+.hro--marquee .hro__title {
+  max-width: none;
+  white-space: nowrap;
+}
+
+.hro--marquee .hro__search {
+  width: 62.875rem; /* 1006px hero.css:189 «как есть» */
+  height: 6.25rem; /* 100px hero.css:190 */
+  background-color: color-mix(in srgb, var(--ui-color-surface) 80%, transparent);
+}
+
+.hro--marquee .hro__search-all {
+  height: 5.75rem; /* 92px hero.css:193 */
+  padding: 0.75rem 2.5rem; /* 12/40 hero.css:195 */
+  font-size: 1.125rem; /* 18px hero.css:194 */
+}
+
+.hro--marquee .hro__tags {
+  display: none;
+}
+
+.hro--marquee .hro__marquee {
+  display: block;
+}
+
+/* ── Лента работодателей v2 — мозаика (employers.css:33-60; батч «все
+   страницы» 31.10): сетка 5×197 с шагом 64, сдвиг вверх -172px, первые
+   две плашки — в колонки 4-5 со смещением -12px (hover -16px).
+   Mobile-first: база — деградация ≤1365 оригинала (3 колонки, без
+   смещений), мозаика — от порога оригинала. Порог 1366 между ступенями
+   xl/2xl шкалы T2.5 — снят ступенью 2xl (1440px): полоса 1366–1439
+   показывает деградацию вместо мозаики — осознанное отклонение вне
+   шкалы (REPORT §9.1). */
+.lgo--mosaic .ui-h2 {
+  max-width: none;
+}
+
+.lgo--mosaic .lgo-grid {
+  gap: 1.5rem; /* 24px employers.css:52 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lgo--mosaic .lgo-card {
+  width: 100%; /* employers.css:53 */
+}
+
+@media (min-width: 1440px) {
+  /* порог 1366 employers.css:49 — ступень 2xl шкалы, см. шапку блока */
+  .lgo--mosaic .ui-h2 {
+    max-width: 44.9375rem; /* 719px employers.css:42 */
+  }
+
+  .lgo--mosaic .lgo-grid {
+    gap: 4rem; /* 64px employers.css:36 */
+    grid-template-columns: repeat(5, 12.3125rem); /* 197px employers.css:35 */
+    margin-top: -10.75rem; /* -172px employers.css:37 «как есть» */
+  }
+
+  .lgo--mosaic .lgo-card {
+    width: 12.3125rem; /* 197px employers.css:40 */
+  }
+
+  .lgo--mosaic .lgo-card:nth-child(1) {
+    grid-column: 4;
+    transform: translateY(-0.75rem); /* -12px employers.css:45 */
+  }
+
+  .lgo--mosaic .lgo-card:nth-child(2) {
+    grid-column: 5;
+    transform: translateY(-0.75rem); /* -12px employers.css:46 */
+  }
+}
+
+.lgo--mosaic .lgo-card:nth-child(-n + 2):hover {
+  transform: translateY(
+    -1rem
+  ); /* -16px employers.css:47; вне hover-гварда — transform безвреден на тач-устройствах */
+}
+
 /* Секция «Работодатели Группы» — ритм оригинала (employers.css:2 —
    100px 0; отступ тайтла employers.css:10 — 64px; батч паритета 31.10,
    решение владельца «приведи к оригиналу» — ритм ui-section погашен). */

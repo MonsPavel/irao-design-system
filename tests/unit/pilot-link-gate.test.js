@@ -1,5 +1,5 @@
 /**
- * Юнит-пин гейта мёртвых ссылок пилота и compare-поверхности 20 страниц
+ * Юнит-пин гейта мёртвых ссылок пилота и compare-поверхности 43 страниц
  * (T15.9; Testing requirements — «гейт ссылок + compare — и есть тестовая
  * поверхность задачи»; практика pilot-events-search-pagination.test.js
  * T15.5 — пины исполняемой формы решения до браузерной пробы).
@@ -13,8 +13,9 @@
  *    чистая функция collectDeadLinks (практика tools/release-gate-lib.mjs +
  *    tests/unit/release-gate.test.js), CLI — тонкая обёртка с ненулевым
  *    выходом на DEAD;
- *  - compare.mjs: PAGES = все 20 страниц сборки build.mjs, список и порядок
- *    совпадают (Scope п.1; AC «compare.json/viewer на 20 страниц»);
+ *  - compare.mjs: PAGES = все 43 страницы сборки build.mjs (бэклог-разбор
+ *    31.10: +index-2, +генеративные вакансии 2..12), список литеральных
+ *    совпадает, генеративные — спред в обеих сторонах;
  *  - compare.mjs: гейт подключен в тот же запуск — collectDeadLinks
  *    вызывается до браузерного прогона (Scope п.2).
  */
@@ -158,22 +159,28 @@ describe('гейт на реальном dist пилота (AC: 0 DEAD)', () => 
   const dist = join(pilotDir, 'dist');
 
   it.skipIf(!existsSync(dist))(
-    'все внутренние href 20 страниц dist резолвятся (Epic AC: «все внутренние ссылки… резолвятся»)',
+    'все внутренние href 43 страниц dist резолвятся (Epic AC: «все внутренние ссылки… резолвятся»; бэклог-разбор 31.10 — билд всех страниц оригинала)',
     () => {
       const result = collectDeadLinks(dist);
       expect(result.dead).toEqual([]);
-      expect(result.checked).toHaveLength(20);
+      expect(result.checked).toHaveLength(43);
     },
   );
 });
 
-describe('compare.mjs — PAGES = все 20 страниц сборки (T15.9 Scope п.1)', () => {
-  it('список и порядок PAGES compare.mjs = PAGES build.mjs; страниц 20', async () => {
+describe('compare.mjs — PAGES = все 43 страницы сборки (T15.9 Scope п.1; бэклог-разбор 31.10)', () => {
+  it('литеральные PAGES compare.mjs = литеральным PAGES build.mjs (21), генеративные вакансии — спредом; страниц 43', async () => {
     const buildPages = [...build.matchAll(/file: '([a-z0-9-]+\.html)'/g)].map((m) => m[1]);
     const comparePagesBlock = compare.match(/const PAGES = \[([\s\S]*?)\n\];/)?.[1] ?? '';
     const comparePages = [...comparePagesBlock.matchAll(/'([a-z0-9-]+\.html)'/g)].map((m) => m[1]);
-    expect(buildPages).toHaveLength(20);
+    // 20 прежних + index-2; вакансии 2..12 — динамическим спредом
+    // (vacancyHref), литералом не выражаются — пин отдельно ниже.
+    expect(buildPages).toHaveLength(21);
     expect(comparePages).toEqual(buildPages);
+    expect(build).toContain('VAC.items.slice(1).flatMap');
+    expect(build).toContain('function vacancyHref');
+    expect(compare).toContain('VACANCY_SUFFIXES');
+    // 21 литерал + 11×2 генеративных = 43 (гейт ссылок ниже гонит dist).
   });
 });
 

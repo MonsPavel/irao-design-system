@@ -55,12 +55,16 @@ export function patternLayerProblems(css) {
 
   // Глобальный матч ВСЕХ правил: matchAll по «селектор {» — после среза
   // прелюдий правила внутри @media матчатся наравне с верхнеуровневыми.
+  // Шаги @keyframes (from/to/проценты) — НЕ селекторы: срез прелюдий глотает
+  // и «@keyframes <имя> {», оставляя шаги правилами (первый @keyframes в
+  // слое — hro--marquee, батч «все страницы» 31.10).
+  const KEYFRAME_STEP = /^(from|to|-?\d+(?:\.\d+)?%)$/;
   const rules = [...flat.matchAll(/([^{}]+)\{([^}]*)\}/g)];
   const selectors = rules
     .map((match) => match[1])
     .flatMap(splitGroup)
     .map((selector) => selector.trim())
-    .filter((selector) => selector !== '');
+    .filter((selector) => selector !== '' && !KEYFRAME_STEP.test(selector));
 
   if (selectors.length === 0) {
     problems.push('паттерн-слой пуст — связки не перенесены');

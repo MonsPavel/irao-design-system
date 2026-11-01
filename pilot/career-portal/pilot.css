@@ -350,6 +350,80 @@
   }
 }
 
+/* ── Вариант 2 главной (production.css:274-302 — производство «фото
+   слева, текст справа, чипы сверху»; батч «все страницы» 31.10). */
+.cp-production--v2 {
+  align-items: stretch; /* production.css:276 */
+  min-height: 46.25rem; /* 740px production.css:275 «как есть» */
+}
+
+.cp-production--v2 .cp-production__photo {
+  top: 4.5rem; /* 72px production.css:280 */
+  right: auto;
+  left: 1.375rem; /* 22px production.css:279 */
+}
+
+.cp-production--v2 .cp-production__body {
+  justify-content: flex-end; /* production.css:283 */
+  margin-left: auto;
+  padding: 0 3.5rem 4.5rem 0; /* 56/72 production.css:284 */
+}
+
+.cp-production--v2 .cp-production__title {
+  margin-bottom: 1.625rem; /* 26px production.css:288 */
+}
+
+.cp-production--v2 .cp-production__text {
+  margin-bottom: 1.5rem; /* 24px production.css:291 */
+}
+
+/* Чипы сверху (production.css:293-298): лента — абсолютная справа сверху,
+   табы — автоширина 59px, radius 32, blue-100@50 + blur(6px). */
+.cp-production--v2 .cp-production__stepper {
+  top: 2.625rem; /* 42px production.css:293 */
+  flex-wrap: wrap;
+  gap: 1.1875rem; /* 19px production.css:297 */
+  width: 43.75rem; /* 700px production.css:296 */
+  height: auto;
+  background: none;
+  inset-inline: auto 3.5rem; /* right 56px production.css:294 */
+}
+
+.cp-production--v2 .cp-production__tab {
+  flex: 0 0 auto;
+  min-height: 3.6875rem; /* 59px production.css:301 */
+  padding: 0.75rem 1rem; /* 12/16 production.css:302 */
+  border-radius: 2rem; /* 32px production.css:303 */
+  -webkit-backdrop-filter: blur(6px); /* production.css:305 */
+  backdrop-filter: blur(6px);
+}
+
+.cp-production--v2 .cp-production__tab:where([aria-selected='true']) {
+  --cp-tab-ring: inset 0 0 0 1px color-mix(in srgb, var(--ui-color-text-on-dark) 35%, transparent); /* production.css:310, хук — гейт теней требует var() */
+  min-height: 3.6875rem;
+  background-color: color-mix(
+    in srgb,
+    var(--ui-color-primary-deep) 90%,
+    transparent
+  ); /* rgba(21,42,79,.9) production.css:309 */
+  box-shadow: var(--cp-tab-ring);
+}
+
+.cp-production--v2 .cp-production__tab-num {
+  display: inline-flex; /* production.css:312 */
+}
+
+/* ── Холдинг v2 — компакт (holding.css:2 — паддинги секции 72/48,
+   holding.css:34 — __inner 638px; у канона v1 ритм секции погашен —
+   на модификаторе возвращается: компакт = сумма 758 оригинала). */
+.cp-holding.cp-holding--compact {
+  padding: 4.5rem 0 3rem; /* 72/48 holding.css:3 «как есть»; специфичность 0-2-0 — против .cp-holding ниже по файлу */
+}
+
+.cp-holding.cp-holding--compact .cp-holding__inner {
+  height: 39.875rem; /* 638px holding.css:34 «как есть» */
+}
+
 /* ── directions: сетка карточек-направлений (сайт-зона) ──
    Каркас — оригинал directions.css (решение владельца 31.10 «приведи к
    оригиналу»: прежнее «рамки нет — воздушнее» REPORT §9.1 снято). */
