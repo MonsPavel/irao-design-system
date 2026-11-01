@@ -313,7 +313,7 @@ describe('patterns/patterns.css — канон adv-marquee (связка mrq, л
 });
 
 describe('patterns/patterns.css — канон спец-сетки media (mdl) и cover-hero (cvh)', () => {
-  it('mdl: 4 колонки от lg, big 2×2 и lead 2 колонки от md, ступени 2→1 (mobile-first)', () => {
+  it('mdl: база v1-раскладка от lg (2fr 1fr 1fr, min-height 565), big — одна колонка span 2 rows; wide — 4 колонки (errata 02.11, батч «доделаем»)', () => {
     const grid = blockOf(layer, '.mdl');
     expect(grid, '.mdl найдено').toBeTruthy();
     expect(grid).toContain('box-sizing: border-box;');
@@ -331,19 +331,37 @@ describe('patterns/patterns.css — канон спец-сетки media (mdl) �
     expect(big, 'span big в ступени md (на 1 колонке span 2 порвал бы базу)').toBeTruthy();
     expect(big[1], 'big — row/col span 2 (pilot.css:466)').toContain('grid-row: span 2;');
     expect(big[1]).toContain('grid-column: span 2;');
-    const lead = md.match(/\.mdl__lead\s*\{([^}]*)\}/);
-    expect(lead, 'span lead в ступени md').toBeTruthy();
-    expect(lead[1], 'lead — col span 2 (pilot.css:471)').toContain('grid-column: span 2;');
     const lg = mediaBlockOf(layer, 1024, 'mdl');
     expect(lg, 'ступень lg есть').toBeTruthy();
-    expect(lg, 'lg — 4 колонки').toContain('grid-template-columns: repeat(4, minmax(0, 1fr));');
+    expect(lg, 'lg — v1-раскладка 2fr 1fr 1fr (media.css:38)').toContain(
+      'grid-template-columns: 2fr 1fr 1fr;',
+    );
+    expect(lg, 'lg — min-height 565 (media.css:41)').toContain('min-height: 35.3125rem;');
+    const lgBig = lg.match(/\.mdl\s+\.mdl__big\s*\{([^}]*)\}/) ?? lg.match(/\.mdl__big\s*\{([^}]*)\}/);
+    expect(lgBig, 'big — колонка по потоку (v1: одна колонка 2fr)').toBeTruthy();
+    // lead/extra скрыты базой v1 (lead показ только в wide — media.html)
+    expect(blockOf(layer, '.mdl__lead'), 'lead скрыт базой (display: none)').toContain(
+      'display: none;',
+    );
+    expect(blockOf(layer, '.mdl__extra'), 'extra скрыт базой').toContain('display: none;');
+    const wide = mediaBlockOf(layer, 1024, 'mdl--wide');
+    expect(wide, 'wide — 4 колонки (media.css:130)').toContain(
+      'grid-template-columns: repeat(4, minmax(0, 1fr));',
+    );
+    expect(wide, 'wide — rows 394/250/250 «как есть»').toContain(
+      'grid-template-rows: 24.625rem 15.625rem 15.625rem;',
+    );
+    expect(wide, 'wide: lead виден (media.css:151)').toContain('display: flex;');
+    expect(wide, 'wide: extra видны (media.css:129)').toContain('display: block;');
   });
 
   it('mdl__lead: карточка-сводка — колонка gap 8, паддинг 16, без рамки (dead-токен закреплён явно), радиус/поверхность (1:1 порт cp-media__lead)', () => {
     const lead = blockOf(layer, '.mdl__lead');
     expect(lead, '.mdl__lead найдено').toBeTruthy();
     expect(lead).toContain('box-sizing: border-box;');
-    expect(lead).toContain('display: flex;');
+    // display: flex — в правиле есть, но база v1 = display: none (показ
+    // только в mdl--wide); flex-свойства канона сохранены для wide.
+    expect(lead).toContain('display: none;');
     expect(lead).toContain('flex-direction: column;');
     expect(lead, 'шаг 8px — space-2').toContain('gap: var(--ui-space-2);');
     expect(lead).toContain('padding: var(--ui-space-4);');

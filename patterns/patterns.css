@@ -1793,12 +1793,14 @@
   border-radius: var(--ui-radius-md);
 }
 
-/* ── Спец-сетка «Медиа» (mdl): big 2×2 + lead 2 колонки + мелкие ──
-   Порт принятой раскладки index (pilot.css 460–480; оригинал — вариант
-   --wide .media__grid media.css:130–153: 4 колонки, big 2×2, lead 2
-   колонки). Карточки — компонент ui-card, сетка — связка (не ui-grid:
-   span-геометрия big/lead — часть канона). Ступени мобильные: 1 колонка
-   (база, оригинал ≤767), 2 — от md (оригинал ≤1023), 4 — от lg. */
+/* ── Спец-сетка «Медиа» (mdl): big 2×2 + 4 малых + lead/extra под wide ──
+   Вариант v1 — база (media.css:36-41: cols 2fr 1fr 1fr, rows auto auto,
+   gap 36, min-height 565 «как есть»; big — col 1 на два ряда, lead
+   display:none). Вариант --wide (media.css:129-190) — модификатор: сетка
+   4 колонок 394/250/250, lead — сводка col 3/span2 255px, extra видны.
+   Карточки — компонент ui-card, сетка — связка. Ступени мобильные: 1
+   колонка (база ≤767 оригинала), 2 — от md, v1-раскладка — от lg.
+   Батч «все страницы»/mdl v1-layout 01.11–02.11 — решение владельца (а). */
 .mdl {
   box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
   display: grid;
@@ -1807,13 +1809,11 @@
 }
 
 /* Lead-карточка «статья + дата + анонс + ссылка»: колонка с шагом 8px,
-   паддинг 16, радиус/поверхность карточки (порт cp-media__lead пилота —
-   сводка рядом с big-фото; исходник .media__lead media.css:151–160 без
-   рамки — принятый вид клона, калибровка; dead-токен строки заменён
-   явным border: none, батч 31.10 — T17.9). */
+   паддинг 16, радиус/поверхность карточки. Базой СКРЫТА (v1 — lead
+   display:none, media.html: lead в разметке всегда; показывает --wide). */
 .mdl__lead {
   box-sizing: border-box;
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: var(--ui-space-2);
   padding: var(--ui-space-4);
@@ -1822,9 +1822,14 @@
   background-color: var(--ui-color-surface);
 }
 
+/* Extra-карточки — в разметке всегда, базой скрыты (media__card--extra
+   вне --wide не показывается); показывает mdl--wide. */
+.mdl__extra {
+  display: none;
+}
+
 /* Span-геометрия — от md: на мобильной базе (1 колонка) span 2 порвал бы
-   сетку implicit-колонкой (оригинал гасил span ступенью ≤767 —
-   pages.css-лестница; mobile-first: включение от md, рендер тот же). */
+   сетку implicit-колонкой; mobile-first: включение от md, рендер тот же. */
 @media (min-width: 768px) {
   .mdl {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1834,33 +1839,34 @@
     grid-row: span 2;
     grid-column: span 2;
   }
-
-  .mdl__lead {
-    grid-column: span 2;
-  }
 }
 
+/* V1-раскладка (media.css:36-41): big — колонка 2fr на два ряда, четыре
+   малых в колонках 1fr×2; фото-высоты «как есть» (big 374 — media.css:48,
+   малые 177 — media.css:53); аспект канона ui-card--media гасится. */
 @media (min-width: 1024px) {
   .mdl {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2.25rem; /* 36px media.css:40 */
+    grid-template-rows: auto auto;
+    grid-template-columns: 2fr 1fr 1fr;
+    min-height: 35.3125rem; /* 565px media.css:41 «как есть» */
   }
-}
 
-/* Extra-карточки — в разметке всегда, базой скрыты (оригинал:
-   media__card--extra вне --wide не показывается); показывает mdl--wide. */
-.mdl__extra {
-  display: none;
-}
+  /* big — ОДНА колонка 2fr (span 2 колонок — ступени md/wide: big 2×2;
+     v1: media.css:44 grid-row 1/span 2, колонка по потоку) */
+  .mdl .mdl__big {
+    grid-column: auto;
+  }
 
-/* Фото-высоты v1 «как есть» (media.css:48 big 374, :53 малые 177; от lg —
-   базовая сетка 4 колонок): аспект канона гасится, высоту ведёт сетка/
-   фикс оригинала. В --wide big добивает ячейку (media.css:52). */
-@media (min-width: 1024px) {
+  .mdl .ui-card--media:not(.mdl__big) .ui-card__media {
+    aspect-ratio: auto;
+  }
+
   .mdl .ui-card--media:not(.mdl__big) .ui-card__media img {
     height: 11.0625rem; /* 177px media.css:53 */
   }
 
-  .mdl .ui-card--media:not(.mdl__big) .ui-card__media {
+  .mdl .mdl__big .ui-card__media {
     aspect-ratio: auto;
   }
 
@@ -1868,19 +1874,35 @@
     height: 23.375rem; /* 374px media.css:48 */
   }
 
-  .mdl .mdl__big .ui-card__media {
-    aspect-ratio: auto;
+  /* Big-подпись — caption fs-lead 20/500 (media.css:88-92): роль-токены */
+  .mdl__big .ui-card__title {
+    font-size: var(--ui-fs-h4);
+    line-height: 1.3;
   }
 }
 
-/* ── Вариант --wide (media.css:129-190; батч «все страницы» 01.11,
-   решение владельца (а) — разбора media-записи): сетка 4×(394/250/250),
-   big без подписей, lead — сводка 255px справа. Мобильные ступени
-   наследует база mdl (1/2/4 — media.css:185-187 ≤1279: 2 колонки). */
+/* ── Вариант --wide (media.css:129-190): сетка 4×(394/250/250), big без
+   подписей, lead — сводка справа, extra видны. Мобильные ступени
+   наследует база mdl (1/2 — media.css:185-187 ≤1279: 2 колонки). */
 @media (min-width: 1024px) {
   .mdl--wide {
-    gap: 2.25rem 1rem; /* 36/16 media.css:131-135 «как есть» */
+    gap: 1rem 2.25rem; /* row 16 / column 36 — media.css:131-135 (column-gap 36, row-gap 16) */
     grid-template-rows: 24.625rem 15.625rem 15.625rem; /* 394/250/250 media.css:132-134 */
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-height: 0;
+  }
+
+  .mdl--wide .mdl__lead {
+    display: flex; /* media.css:151 — lead только в wide */
+    align-self: start;
+    grid-column: 3 / span 2;
+    height: 15.9375rem; /* 255px media.css:157 */
+  }
+
+  .mdl--wide .mdl__lead .ui-h4 {
+    font-size: 1.75rem; /* 28px media.css:160 */
+    line-height: 2.1875rem; /* 35px media.css:161 */
+    letter-spacing: -0.02em;
   }
 
   .mdl--wide .mdl__extra {
@@ -1891,26 +1913,12 @@
     height: 100%; /* media.css:52 */
   }
 
-  /* big без подписей (media.css:144-146): у ui-card--media текст несёт
-     __body целиком (title/meta — элемент канона) */
   .mdl--wide .mdl__big .ui-card__body {
-    display: none;
+    display: none; /* media.css:144-146 — big без подписей */
   }
 
   .mdl--wide .ui-card--media:not(.mdl__big) {
     height: 15.625rem; /* 250px media.css:147 */
-  }
-
-  .mdl--wide .mdl__lead {
-    align-self: start;
-    grid-column: 3 / span 2; /* media.css:151 */
-    height: 15.9375rem; /* 255px media.css:157 */
-  }
-
-  .mdl--wide .mdl__lead .ui-h4 {
-    font-size: 1.75rem; /* 28px media.css:160 */
-    line-height: 2.1875rem; /* 35px media.css:161 */
-    letter-spacing: -0.02em;
   }
 }
 
