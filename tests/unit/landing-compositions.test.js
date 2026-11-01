@@ -337,7 +337,8 @@ describe('patterns/patterns.css — канон спец-сетки media (mdl) �
       'grid-template-columns: 2fr 1fr 1fr;',
     );
     expect(lg, 'lg — min-height 565 (media.css:41)').toContain('min-height: 35.3125rem;');
-    const lgBig = lg.match(/\.mdl\s+\.mdl__big\s*\{([^}]*)\}/) ?? lg.match(/\.mdl__big\s*\{([^}]*)\}/);
+    const lgBig =
+      lg.match(/\.mdl\s+\.mdl__big\s*\{([^}]*)\}/) ?? lg.match(/\.mdl__big\s*\{([^}]*)\}/);
     expect(lgBig, 'big — колонка по потоку (v1: одна колонка 2fr)').toBeTruthy();
     // lead/extra скрыты базой v1 (lead показ только в wide — media.html)
     expect(blockOf(layer, '.mdl__lead'), 'lead скрыт базой (display: none)').toContain(
