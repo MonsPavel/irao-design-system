@@ -652,7 +652,7 @@ standTest.describe('patterns/landing-section: лендинг-композици�
   );
 
   standTest(
-    'mdl: 1 колонка (375) → 2 с span big 2×2 / lead 2 (768) → 4 (1280)',
+    'mdl: 1 колонка (375) → 2 с span big 2×2 (768) → v1-раскладка 2fr 1fr 1fr (1280); lead скрыт базой',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
       await expect(page.locator(SEL_MDL.title)).toBeVisible();
@@ -663,9 +663,10 @@ standTest.describe('patterns/landing-section: лендинг-композици�
           const lead = el.querySelector('.mdl__lead');
           return {
             cols: getComputedStyle(el).gridTemplateColumns.split(' ').length,
+            colsRaw: getComputedStyle(el).gridTemplateColumns,
             bigRow: big ? getComputedStyle(big).gridRow : null,
             bigCol: big ? getComputedStyle(big).gridColumn : null,
-            leadCol: lead ? getComputedStyle(lead).gridColumn : null,
+            leadDisplay: lead ? getComputedStyle(lead).display : null,
           };
         });
 
@@ -681,10 +682,16 @@ standTest.describe('patterns/landing-section: лендинг-композици�
       expect(md.cols, 'md — 2 колонки (оригинал ≤1023)').toBe(2);
       expect(md.bigRow, 'big — row span 2 от md').toBe('span 2');
       expect(md.bigCol, 'big — col span 2 от md').toBe('span 2');
-      expect(md.leadCol, 'lead — col span 2 от md').toBe('span 2');
 
       await page.setViewportSize(VIEWPORTS.xl);
-      expect((await state()).cols, 'lg — 4 колонки').toBe(4);
+      const xl = await state();
+      // Errata 02.11 (батч «доделаем»): база mdl = v1-раскладка оригинала
+      // (media.css:36-41) — big в ОДНОЙ колонке 2fr (span 2 колонок —
+      // только md/wide); lead СКРЫТ базой (v1: media__lead display:none —
+      // показ только в mdl--wide, как extra).
+      expect(xl.colsRaw, 'lg — v1-раскладка 2fr 1fr 1fr').toContain('644');
+      expect(xl.bigCol, 'big — колонка по потоку (не span 2)').toBe('auto');
+      expect(xl.leadDisplay, 'lead скрыт базой (v1 — media__lead none)').toBe('none');
     },
   );
 
