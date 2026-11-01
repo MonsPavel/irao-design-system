@@ -626,38 +626,12 @@
   flex: 1 1 12rem;
 }
 
-/* ── students/employers: nav-карточки и лента логотипов — связки слоя
-   lnk-card/lgo-grid (T17.9); правила cp-students/cp-employers-семейства
-   сняты (~75 строк, гейт Adoption). Сайт-зона — только тоны: пары
-   одобренного дизайна на токен-хуках связки (Implementation requirements
-   п.1 T17.9); контраст пар — таблица в patterns/landing-section/README.md. ── */
-
-/* Тон peach: color-mix accent-пары оригинала (спец-тинты — зона T17.15,
-   сюда не входит); кнопка — accent/on-dark (пара «orange»). */
-.lnk-card--peach {
-  --lnk-card-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));
-  --ui-button-bg: var(--ui-color-accent);
-  --ui-button-color: var(--ui-color-text-on-dark);
-}
-
-/* Тон navy: primary/on-dark; кнопка — surface/primary (пара «white»). */
-.lnk-card--navy {
-  --lnk-card-bg: var(--ui-color-primary);
-  --lnk-card-fg: var(--ui-color-text-on-dark);
-  --ui-button-bg: var(--ui-color-surface);
-  --ui-button-color: var(--ui-color-primary);
-}
-
-/* Тон light: surface (дефолт пары связки), кнопка — primary/surface (пара
-   «navy»); рамки нет — исходник вёл несуществующий токен (рендер без рамки,
-   «исходник 1:1»; ловушка неопределённого токена снята явным border: none,
-   батч 31.10 — T17.9: починка значения меняла бы одобренный вид). */
-.lnk-card--light {
-  --lnk-card-bg: var(--ui-color-surface);
-  --ui-button-bg: var(--ui-color-primary);
-  --ui-button-color: var(--ui-color-surface);
-  border: none;
-}
+/* ── students/employers: постерные карточки и лента логотипов — связки слоя
+   pstr-card (T17.18; прежде lnk-card T17.9 — его тон-строки сняты: тоны
+   постера — модификаторы слоя, сайт-зона цвета не несёт; lnk-канон в слое
+   остаётся — потребитель «Может быть интересно») и lgo-grid (T17.9);
+   правила cp-students/cp-employers-семейства сняты (~75 строк, гейт
+   Adoption). ── */
 
 /* ── media: сетка главной — ПАТТЕРН-СЛОЙ (T17.15) ──
    Спец-сетка «Медиа» — канон mdl (ds/ui-patterns.css): 4 колонки от lg,
@@ -1210,7 +1184,7 @@ a.cp-intern-card {
   /* Таймлайн — канон слоя tlp- (T17.10): ступень 767 копипасты снята —
      мобильная база канона и так колонка. */
 
-  /* Nav-карточки и лента логотипов — связки lnk-cards/lgo-grid (T17.9):
+  /* Постерные карточки и лента логотипов — связки pstr-card (T17.18) и lgo-grid (T17.9):
      мобильная база одна колонка — канон слоя, лестница снята. */
 
   /* Строка вакансии — слой lpp-row (T17.1): на узких экранах пилюля

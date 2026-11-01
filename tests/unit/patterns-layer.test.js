@@ -13,7 +13,7 @@
  *  - подключение ОПЦИОНАЛЬНО: ui-core.min.css не меняется; порядок в <head>:
  *    токены → core → patterns → сайт;
  *  - селекторы слоя — только канонические префиксы
- *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp- (гейт «защита от
+ *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|pstr- (гейт «защита от
  *    превращения слоя в свалку»); док-HTML паттернов и слой синхронны
  *    (одни классы);
  *  - слой не содержит @media-ступеней, кроме канонических ступеней паттернов
@@ -167,7 +167,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
@@ -177,13 +177,15 @@ describe('patterns/patterns.css — единый исходник паттерн
       // продолжается дефисом, модификатором __ или заканчивается на нём.
       expect(
         hooks.some((hook) =>
-          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh)(?:-|__|$)/.test(hook),
+          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr)(?:-|__|$)/.test(hook),
         ),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh`,
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh)(?:-|__|$))/.test(hook),
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr)(?:-|__|$))/.test(
+            hook,
+          ),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
         ).toBe(true);
       }
@@ -761,13 +763,14 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
     expect(build, 'self-check селекторов слоя в сборке').toContain('слоя');
   });
 
-  it('подключение опционально: слой получают стенды паттернов с связками в слое (list/detail/form, landing-section, timeline — T17.10, header/footer — T17.13)', () => {
+  it('подключение опционально: слой получают стенды паттернов с связками в слое (list/detail/form, landing-section, timeline — T17.10, poster-card — T17.18, header/footer — T17.13)', () => {
     for (const stand of [
       'list-page',
       'detail-page',
       'form-page',
       'landing-section',
       'timeline',
+      'poster-card',
       'header',
       'footer',
     ]) {
@@ -778,17 +781,18 @@ describe('сборка showcase/build.mjs: dist/ui-patterns.css (AC: собир�
         'withPatterns: true',
       );
     }
-    // Включение адресное: ровно семь вызовов frame() передают слой
+    // Включение адресное: ровно восемь вызовов frame() передают слой
     // («withPatterns: true,»); остальные страницы полигона — нет.
     // Четвёртый — patterns/landing-section (T17.9): связки lnk-card/lgo-grid
     // живут в слое, мини-стенд паттерна их рендерит; пятый — patterns/
     // timeline (T17.10): связки tlp-* переехали из <style> дока в слой;
-    // шестой/седьмой — patterns/header и patterns/footer (T17.13): связки
+    // шестой — patterns/poster-card (T17.18): связки pstr-* — в слое;
+    // седьмой/восьмой — patterns/header и patterns/footer (T17.13): связки
     // hsp-*/ftp-* — в слое (один источник правды).
     expect(
       build.match(/withPatterns: true,/g)?.length,
-      'получателей слоя ровно семь — стенды паттернов с связками в слое',
-    ).toBe(7);
+      'получателей слоя ровно восемь — стенды паттернов с связками в слое',
+    ).toBe(8);
   });
 
   it('self-check: dist/ui-patterns.css существует и несёт баннер версии', () => {

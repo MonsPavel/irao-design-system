@@ -1111,17 +1111,21 @@ function indexMain() {
       </article>`,
   );
 
+  // Постерная карточка — канон pstr (T17.18): карточка-article со слотами
+  // (тело с заголовком-ролью ui-h3 и текстом ui-body, декоративная
+  // иллюстрация alt="", действие-ссылка с доступным именем); тон —
+  // модификатор слоя (значения в паттерн-слое, сайт-зона цвета не несёт).
+  // Прежняя сборка на lnk-card (T17.9) снята: lnk-канон остаётся в слое —
+  // потребитель «Может быть интересно».
   const studentCards = STUDENTS.map(
-    (
-      card,
-    ) => `      <a class="lnk-card lnk-card--${card.tone}" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">
-        <div class="lnk-card__body">
-          <h3 class="ui-h4">${esc(card.title)}</h3>
-          <p class="ui-small">${esc(card.text)}</p>
+    (card) => `      <article class="pstr-card pstr-card--${card.tone}">
+        <div class="pstr-card__body">
+          <h3 class="pstr-card__title ui-h3">${esc(card.title)}</h3>
+          <p class="pstr-card__text ui-body">${esc(card.text)}</p>
         </div>
-        <img class="lnk-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">
-        <span class="ui-button ui-button--round lnk-card__action" aria-hidden="true">${ARROW}</span>
-      </a>`,
+        <img class="pstr-card__illu" src="${esc(card.illu)}" alt="" loading="lazy">
+        <a class="pstr-card__action" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">${ARROW}</a>
+      </article>`,
   ).join('\n');
 
   const employerLogos = Array.from(
@@ -2779,7 +2783,8 @@ function notFoundMain() {
    те же блоки с модификаторами; строковые замены — 1:1. Трансформы
    media--wide (рекомпозиция mdl + design-decision mdl__big) и
    students--photographic (фото-карточки) отложены: первая — кандидат
-   модификатора mdl--wide в слое (REPORT §6.2), вторая — T17.18. */
+   модификатора mdl--wide в слое (REPORT §6.2), вторая — вне T17.18
+   (тот эпик — постерная карточка .students--illustrated, канон pstr). */
 function applyVariant2(html) {
   return html
     .replace(

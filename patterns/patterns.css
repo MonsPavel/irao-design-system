@@ -14,8 +14,8 @@
  * (лендинг-связки nav-карточек и ленты логотипов, T17.9), tlp- (таймлайн,
  * T17.10), nvp (поднавигация, T17.11), hsp-/ftp- (каркасы шапки/подвала,
  * T17.13), hro/mrq/mdl/cvh (лендинг-композиции hero/adv-marquee/медиа-сетки/
- * cover-hero, T17.15); потомки — компоненты ui-*. Список пополняют задачи
- * эпика, не руками сайтов.
+ * cover-hero, T17.15), pstr- (постерная карточка, T17.18); потомки —
+ * компоненты ui-*. Список пополняют задачи эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
  * несёт те же классы, значения перенесены 1:1 (включая «как есть»-литералы
@@ -1857,4 +1857,167 @@
   flex-direction: column;
   gap: var(--ui-space-4);
   align-items: flex-start;
+}
+
+/* ════════════════ Постерная карточка (T17.18) — связка pstr ════════════════
+ *
+ * Порт постерной карточки блока «Школьникам и студентам» career-portal
+ * (.students--illustrated, src/blocks/students/students.css — строки в
+ * комментариях): цветной постер с крупным заголовком, текстом, иллюстрацией
+ * в рост и круглой кнопкой-действием. Разметка канона —
+ * patterns/poster-card/poster-card.html (док — источник правды, пин
+ * синхронности tests/unit/poster-card.test.js).
+ *
+ * Тоны — часть одобренной КОМПОЗИЦИИ постера (в отличие от nav-карточек
+ * T17.9, где тон — параметр сайта на хуках): три тона «как есть» —
+ * модификаторы слоя. Peach (FFDDC7 оригинала, students.css:95) вне токенов
+ * — хук --pstr-bg с color-mix от токенов (прецедент тон-хука --hro-tag-bg
+ * T17.15, вариант (а): hex в ДС не едет — гейт слоя; рендер — approved
+ * тон-строка пилота .lnk-card--peach). Кнопка-действие — пара хуков
+ * --pstr-action-bg/--pstr-action-color (оригинал students.css:174–176).
+ *
+ * Мобильная база ДС: лестница min-height 600/440/380 (students.css:88/183/
+ * 187, max-width 1023/767) инвертирована mobile-first — ступени 1024/768
+ * шкалы T2.5 (Implementation requirements T17.1 п.4). Hover-состояние
+ * КАРТОЧКИ оригиналом не диктуется (в оригинале интерактивна только
+ * кнопка) — слой его не изобретает.
+ */
+
+/* Каркас постера: relative — абсолюты __illu/__action от карточки; паддинг
+   20px «как есть» (students.css:89, вне шкалы §3.2 — прецедент
+   --ui-button-pad-inline); радиус --radius-card 16px оригинала = md; клип
+   иллюстрации (overflow hidden, students.css:92). */
+.pstr-card {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 23.75rem; /* 380px @max-767 students.css:187 — мобильная база */
+  padding: 1.25rem; /* 20px students.css:89 «как есть», вне шкалы §3.2 */
+  border-radius: var(--ui-radius-md);
+  background-color: var(--pstr-bg, var(--ui-color-surface));
+}
+
+@media (min-width: 768px) {
+  .pstr-card {
+    min-height: 27.5rem; /* 440px @max-1023 students.css:183 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .pstr-card {
+    min-height: 37.5rem; /* 600px students.css:88 */
+  }
+}
+
+/* Тело постера: поверх иллюстрации (z-пара «контент над фоном»,
+   students.css:98–103 + z-index: 1 в :154), шаг 12px — --ui-space-3. */
+.pstr-card__body {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  z-index: 1;
+  flex-direction: column;
+  gap: var(--ui-space-3);
+}
+
+/* Заголовок/текст: цвет text оригинала (students.css:112/120) — heading-роль
+   несёт primary, постер красит текст карточки text; типографика — роли
+   разметки (ui-h3: fs-h3/fw-h3/1.3/−0.02em; ui-body: fs-body/lh-body), слой
+   её не дублирует. */
+.pstr-card__title {
+  color: var(--ui-color-text);
+}
+
+.pstr-card__text {
+  color: var(--ui-color-text);
+}
+
+/* Тон navy: заливка primary-deep (students.css:96), текст on-dark
+   (students.css:114/122), кнопка surface/text — пара «white»
+   (students.css:175). */
+.pstr-card--navy {
+  --pstr-bg: var(--ui-color-primary-deep);
+  --pstr-action-bg: var(--ui-color-surface);
+  --pstr-action-color: var(--ui-color-text);
+}
+
+.pstr-card--navy .pstr-card__title {
+  color: var(--ui-color-text-on-dark);
+}
+
+.pstr-card--navy .pstr-card__text {
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Тон light: заливка surface-blue-50 → surface-muted (students.css:97),
+   кнопка primary/on-dark — пара «navy» (students.css:176). */
+.pstr-card--light {
+  --pstr-bg: var(--ui-color-surface-muted);
+  --pstr-action-bg: var(--ui-color-primary);
+  --pstr-action-color: var(--ui-color-text-on-dark);
+}
+
+/* Тон peach: FFDDC7 (students.css:95) вне токенов — хук --pstr-bg с
+   color-mix от токенов (approved рендер пилота T17.9, .lnk-card--peach);
+   кнопка accent/on-dark — пара «orange» (students.css:174). */
+.pstr-card--peach {
+  --pstr-bg: color-mix(in srgb, var(--ui-color-accent) 24%, var(--ui-color-surface));
+  --pstr-action-bg: var(--ui-color-accent);
+  --pstr-action-color: var(--ui-color-text-on-dark);
+}
+
+/* Иллюстрация: декоративная, в рост (alt="" в разметке); pointer-events
+   none — не перехватывает клик (students.css:125–129). */
+.pstr-card__illu {
+  box-sizing: border-box;
+  position: absolute;
+  height: auto;
+  pointer-events: none;
+}
+
+/* Координаты иллюстраций — «как есть» по тонам (students.css:131–148;
+   проценты — вне шкалы). */
+.pstr-card--peach .pstr-card__illu {
+  top: 42%;
+  left: 0;
+  width: 67%;
+}
+
+.pstr-card--navy .pstr-card__illu {
+  top: 43%;
+  left: 6%;
+  width: 56%;
+}
+
+.pstr-card--light .pstr-card__illu {
+  top: 45%;
+  right: -8%;
+  width: 63%;
+}
+
+/* Кнопка-действие: абсолют правый-низ 20px (students.css:151–152, «как
+   есть»), 52px = 3.25rem (спека T17.18 Scope), круг. Не ui-button --round:
+   диаметр 52px против --ui-control-size — пары хуков своих. Дефолт пары —
+   accent/on-dark (пара peach — первый тон канона). */
+.pstr-card__action {
+  box-sizing: border-box;
+  display: inline-flex;
+  position: absolute;
+  right: 1.25rem; /* 20px students.css:151 «как есть» */
+  bottom: 1.25rem; /* 20px students.css:152 «как есть» */
+  z-index: 1;
+  align-items: center;
+  justify-content: center;
+  width: 3.25rem; /* 52px students.css:157–158 */
+  height: 3.25rem;
+  border-radius: 50%; /* --radius-pill оригинала ≡ круг на квадрате; канон круглой кнопки ДС */
+  background-color: var(--pstr-action-bg, var(--ui-color-accent));
+  color: var(--pstr-action-color, var(--ui-color-text-on-dark));
+  transition: transform var(--ui-transition);
+}
+
+.pstr-card__action:hover {
+  transform: scale(1.08); /* students.css:172 */
 }

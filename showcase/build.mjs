@@ -90,6 +90,8 @@ const STAND_DESCRIPTIONS = {
   'patterns/form-page': 'Паттерн «Страница формы»: форма отклика с aside-сводкой',
   'patterns/landing-section': 'Паттерн «Landing-секция»: светлая, тёмная, full-bleed, фото-фон',
   'patterns/timeline': 'Паттерн «Таймлайн этапов»: нумерованные точки этапов процесса',
+  'patterns/poster-card':
+    'Паттерн «Постерная карточка»: цветной постер с иллюстрацией и круглым действием',
   'patterns/search-overlay': 'Паттерн «Поисковый оверлей» на ui-modal--full',
   'patterns/header': 'Паттерн «Шапка сайта» с навигацией и оверлеем поиска',
   'patterns/footer': 'Паттерн «Подвал сайта»: contentinfo, контакты, «Наверх»',
@@ -160,6 +162,7 @@ const EXTRA_STAND_SECTIONS = new Set([
   'patterns/form-page',
   'patterns/landing-section',
   'patterns/timeline',
+  'patterns/poster-card',
   'patterns/search-overlay',
   'patterns/header',
   'patterns/footer',
@@ -516,6 +519,7 @@ function buildNav() {
     'form-page',
     'landing-section',
     'timeline',
+    'poster-card',
     'search-overlay',
     'header',
     'footer',
@@ -1275,6 +1279,38 @@ async function generateShowcase({ themes }) {
     warn('patterns/timeline/timeline.html ещё нет — стенд patterns/timeline не сгенерирован');
   }
 
+  // Стенд «patterns/poster-card» (T17.18) — паттерн «Постерная карточка»:
+  // цветной постер с крупным заголовком, текстом, иллюстрацией в рост и
+  // круглой кнопкой-действием (порт .students--illustrated career-portal).
+  // Связки паттерна (pstr-*) — паттерн-слой dist/ui-patterns.css
+  // (с тонами-модификаторами в слое; сборка демо-ленты — <style> в доке,
+  // зона сайта, в dist не попадает). Каркас СО СЛУЖЕБНЫМ <h1> (как
+  // timeline/landing-section): постер — фрагмент секции, h1 у него нет по
+  // определению, а стенд — демо-страница полигона; axe
+  // page-has-heading-one требует h1, заголовок секции эталона — h2 с ролью
+  // ui-h2 (иерархия h1 → h2 → h3 без пропусков).
+  const posterCardStandSource = join(ROOT, 'patterns', 'poster-card', 'poster-card.html');
+  if (existsSync(posterCardStandSource)) {
+    mkdirSync(join(SHOWCASE_DIST, 'stands', 'patterns'), { recursive: true });
+    const page = frame({
+      rel: '../..', // stands/patterns/poster-card.html → SHOWCASE_DIST (на два уровня выше)
+      home: '../../index.html', // → index.html каталога стендов
+      title: 'patterns/poster-card — irao-ui showcase',
+      // Служебный h1: постер — фрагмент, h1 несёт каркас демо-страницы.
+      main: `    <h1 class="ui-showcase-title">patterns/poster-card</h1>\n${readFileSync(posterCardStandSource, 'utf8').trim()}`,
+      themes,
+      navCurrent: { kind: 'stand', name: 'patterns/poster-card' },
+      navMode: 'strip',
+      withPatterns: true,
+    });
+    writeFileSync(join(SHOWCASE_DIST, 'stands', 'patterns', 'poster-card.html'), page);
+    stands.push({ name: 'patterns/poster-card', source: 'patterns/poster-card/poster-card.html' });
+  } else {
+    warn(
+      'patterns/poster-card/poster-card.html ещё нет — стенд patterns/poster-card не сгенерирован',
+    );
+  }
+
   // Стенд «patterns/search-overlay» (T7.6) — паттерн «Поисковый оверлей»:
   // полноэкранный поиск на ui-modal--full (T7.2) с GET-формой и фокусом в
   // поле при открытии (сниппет паттерна по событию irao-ui:modal-open).
@@ -1846,6 +1882,7 @@ async function selfChecks({ banner, stands, docs, guides, discovered }) {
     'stands/patterns/form-page.html',
     'stands/patterns/landing-section.html',
     'stands/patterns/timeline.html',
+    'stands/patterns/poster-card.html',
     'stands/patterns/header.html',
     'stands/patterns/footer.html',
   ]);

@@ -184,9 +184,14 @@ describe('пороги ценза — числа зафиксированы по
       // оригиналу»): production/directions — сырые 980→1162, код 462→618;
       // раунд 7 — 1162→1169; батч «все страницы» — 1169→1243, 622→678,
       // селекторы 114→126; пороги-потолки 1040/600 → 1169/622
-      // (errata в шапке census.mjs + дописи REPORT §11.4); семейства 28:
-      expect(metrics.css.lines).toBe(1243);
-      expect(metrics.css.codeLines).toBe(678);
+      // (errata в шапке census.mjs + дописи REPORT §11.4); семейства 28;
+      // adoption T17.18 (постерные карточки — канон pstr- слоя, тон-строки
+      // lnk-card студентского блока сняты из сайт-зоны): сырые 1243→1217,
+      // код 678→661; пороги-потолки НЕ двигаются (спека T17.18 «пороги
+      // не двигаются»), cp-селекторы/семейства не менялись (lnk-правила
+      // не несли cp-крючков):
+      expect(metrics.css.lines).toBe(1217);
+      expect(metrics.css.codeLines).toBe(661);
       expect(metrics.css.selectors).toBe(126);
       expect(metrics.css.families).toHaveLength(28);
       expect(metrics.js.lines).toBe(187);
