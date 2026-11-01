@@ -652,7 +652,7 @@ standTest.describe('patterns/landing-section: лендинг-композици�
   );
 
   standTest(
-    'mdl: 1 колонка (375) → 2 с span big 2×2 (768) → v1-раскладка 2fr 1fr 1fr (1280); lead скрыт базой',
+    'mdl (док-пример = mdl--wide): 1 колонка (375) → 2 с span big 2×2 (768) → 4 (1280), lead/extra видны',
     async ({ stand }) => {
       const page = await stand('patterns/landing-section');
       await expect(page.locator(SEL_MDL.title)).toBeVisible();
@@ -685,13 +685,11 @@ standTest.describe('patterns/landing-section: лендинг-композици�
 
       await page.setViewportSize(VIEWPORTS.xl);
       const xl = await state();
-      // Errata 02.11 (батч «доделаем»): база mdl = v1-раскладка оригинала
-      // (media.css:36-41) — big в ОДНОЙ колонке 2fr (span 2 колонок —
-      // только md/wide); lead СКРЫТ базой (v1: media__lead display:none —
-      // показ только в mdl--wide, как extra).
-      expect(xl.cols, 'lg — v1-раскладка: 3 колонки (2fr 1fr 1fr, media.css:38)').toBe(3);
-      expect(xl.bigCol, 'big — колонка по потоку (не span 2)').toBe('auto');
-      expect(xl.leadDisplay, 'lead скрыт базой (v1 — media__lead none)').toBe('none');
+      // Errata 02.11: док-пример несёт mdl--wide (мозаика extra/lead) —
+      // 4 колонки, lead/extra видны; v1-база (3 колонки, lead скрыт) —
+      // пин юнит-теста landing-compositions (render пилота, index).
+      expect(xl.cols, 'lg — wide: 4 колонки (media.css:130)').toBe(4);
+      expect(xl.leadDisplay, 'wide: lead виден (media.css:151)').toBe('flex');
     },
   );
 
