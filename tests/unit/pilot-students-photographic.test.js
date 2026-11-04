@@ -304,12 +304,14 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
     expect(blockOf(pilotCss, '.stu-photo--v2 .stu-photo-card')).toContain('min-height: 32.5rem;');
   });
 
-  it('инварианты сайт-зоны: без !important, без новых hex (спец-тинты hero-тегов — единственное исключение)', () => {
+  it('инварианты сайт-зоны: без !important, без новых hex (спец-тинты hero-тегов T17.15 и градиент активной карточки mentorship T18.2 — исключения)', () => {
     expect(pilotCss).not.toContain('!important');
     const hexes = [...pilotCss.matchAll(/#([0-9a-f]{3,8})\b/gi)].map((m) => m[1]);
     expect(
-      hexes.every((hex) => ['3142ff', '31ff76', 'ff3134'].includes(hex.toLowerCase())),
-      `сырые цвета в pilot.css — только спец-тинты hero-тегов (найдено: ${hexes.join(', ')})`,
+      hexes.every((hex) =>
+        ['3142ff', '31ff76', 'ff3134', 'e88a2c', 'd9a441'].includes(hex.toLowerCase()),
+      ),
+      `сырые цвета в pilot.css — только спец-тинты hero-тегов и градиент mentorship (найдено: ${hexes.join(', ')})`,
     ).toBe(true);
   });
 });

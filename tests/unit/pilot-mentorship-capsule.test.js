@@ -75,22 +75,34 @@ const fixture = [
   sectionAround('Нет подходящей вакансии?'),
 ].join('\n');
 
-/** Исполняемая копия applyVariant2 + index2Main из исходника build.mjs
+/** Исполняемая копия билдеров T18.2 (MENTORSHIP/mentorshipMain/
+ *  vacancyCapsuleMain) + applyVariant2 + index2Main из исходника build.mjs
  *  (build.mjs — скрипт с верхнеуровневыми побочками, импортом не берётся;
  *  indexMain подставляется стабом-фикстурой). */
 const index2Main = (() => {
+  const t182Start = build.indexOf('/* ── mentorship/vacancy-capsule (T18.2)');
+  const indexMainStart = build.indexOf('function indexMain()');
   const applyStart = build.indexOf('function applyVariant2');
   const idx2End = build.indexOf('const PAGES');
+  expect(t182Start, 'блок билдеров T18.2 в build.mjs').toBeGreaterThan(-1);
+  expect(indexMainStart, 'indexMain после билдеров').toBeGreaterThan(t182Start);
   expect(applyStart, 'applyVariant2 в build.mjs').toBeGreaterThan(-1);
   expect(idx2End, 'PAGES после index2Main').toBeGreaterThan(applyStart);
-  return new Function('indexMain', `${build.slice(applyStart, idx2End)}\nreturn index2Main;`)(
-    () => fixture,
-  );
+  const builders = build.slice(t182Start, indexMainStart);
+  const variant = build.slice(applyStart, idx2End);
+  return new Function('indexMain', `${builders}\n${variant}\nreturn index2Main;`)(() => fixture);
 })();
 
 /** Тело билдера по имени функции (исходник, с интерполяциями). */
 const fnBody = (name) =>
-  build.match(new RegExp(`function ${name}\\(\\)[\\s\\S]*?\\n\\}`))?.[0] ?? '';
+  build.match(new RegExp(`function ${name}\\([^)]*\\)[\\s\\S]*?\\n\\}`))?.[0] ?? '';
+
+/** Исходник блока T18.2 (данные MENTORSHIP + билдеры): пины данных — мок
+ *  оригинала index-2.html:413-451. */
+const t182Source = build.slice(
+  build.indexOf('/* ── mentorship/vacancy-capsule (T18.2)'),
+  build.indexOf('function indexMain()'),
+);
 
 describe('build.mjs — index (v1) без mentorship/capsule (блоки только у v2)', () => {
   it('шаблон главной не несёт msh/vcp-разметки (оригинал index.html: PAGES без mentorship/vacancy-capsule)', () => {
@@ -114,7 +126,9 @@ describe('build.mjs — билдер наставничества на кано�
   it('слои канона: __bg с blend-фоном bg-elektro.jpg, mask-фото msh__photo (mentorship.png), декоративные aria-hidden', () => {
     expect(builder).toContain('assets/images/bg-elektro.jpg');
     expect(builder).toContain('<div class="msh__photo" aria-hidden="true">');
-    expect(builder).toContain('assets/images/mentorship.png');
+    expect(t182Source, 'фото mask-слоя — мок оригинала').toContain(
+      "photo: 'assets/images/mentorship.png'",
+    );
     expect(builder.match(/aria-hidden="true"/g)?.length ?? 0, 'два декоративных слоя').toBe(2);
     for (const img of builder.match(/<img[^>]*>/g) ?? []) {
       expect(img, `img декоративный (alt=""): ${img.slice(0, 60)}`).toContain('alt=""');
@@ -124,27 +138,22 @@ describe('build.mjs — билдер наставничества на кано�
 
   it('внутренняя сетка msh__inner + роли ui-h2/ui-lead; заголовок/текст — мок оригинала (index-2.html:421-422)', () => {
     expect(builder).toContain('<div class="ui-container msh__inner">');
-    expect(builder).toContain(
-      '<h2 class="ui-h2 msh__title">Наставничество в&nbsp;реальном времени</h2>',
-    );
-    expect(builder).toContain(
-      '<p class="ui-lead msh__text">Преуспеть в&nbsp;профессии поможет опытный наставник',
-    );
+    expect(t182Source).toContain("title: 'Наставничество в&nbsp;реальном времени'");
+    expect(t182Source).toContain('Преуспеть в&nbsp;профессии поможет опытный наставник');
   });
 
   it('rail: 4 карточки канона msh__card, активная — вторая (--active — BEM-модификатор канона), thumb из ассетов', () => {
     expect(builder).toContain('<div class="msh__rail">');
-    expect(builder.match(/<article class="msh__card">/g)?.length, '3 неактивных').toBe(3);
-    expect(
-      builder.match(/<article class="msh__card msh__card--active">/g)?.length,
-      'ровно одна активная',
-    ).toBe(1);
-    expect(builder.indexOf('msh__card--active'), 'активная — вторая в DOM').toBeGreaterThan(
-      builder.indexOf('<article class="msh__card">'),
+    expect(t182Source, '4 карточки в данных').toMatch(
+      /cards:\s*\[[\s\S]*?tag-photo-1\.png[\s\S]*?mentorship\.png[\s\S]*?job-card-1\.png[\s\S]*?job-card-2\.png[\s\S]*?\]/,
     );
-    for (const thumb of ['tag-photo-1.png', 'mentorship.png', 'job-card-1.png', 'job-card-2.png']) {
-      expect(builder, `thumb ${thumb}`).toContain(`assets/images/${thumb}`);
-    }
+    expect(t182Source.match(/active: true/g)?.length, 'ровно одна активная в данных').toBe(1);
+    const activeIdx = t182Source.indexOf('active: true');
+    expect(activeIdx, 'активная — вторая в данных').toBeGreaterThan(
+      t182Source.indexOf('tag-photo-1.png'),
+    );
+    expect(activeIdx).toBeLessThan(t182Source.indexOf('job-card-1.png'));
+    expect(builder).toContain('msh__card--active');
     expect(builder).toContain('class="msh__card-title"');
     expect(builder).toContain('class="msh__card-thumb"');
   });

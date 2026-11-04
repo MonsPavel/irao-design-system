@@ -26,22 +26,27 @@
  *
  * Пороги — явные числа по факту итога T17.16 (Implementation requirements
  * п.1 — «не „меньше“, а конкретное значение»; деградация — exit 1):
- *  - MAX_PILOT_CSS_LINES = 1417 — сырые строки pilot.css. Errata 31.10:
+ *  - MAX_PILOT_CSS_LINES = 1431 — сырые строки pilot.css. Errata 31.10:
  *    1040 → 1162 (production/directions) → 1169 (раунд 7) → 1237 (батч
  *    «все страницы»: v2-модификаторы cp-production--v2/cp-holding--compact)
  *    → 1290 (батч ритма 01.11); → 1417 (T18.1: вариант фото-карточек
  *    students--photographic — сайт-зона stu-photo ПОКА, вынос в слой —
- *    T18.17; файл был ровно на потолке, правка по процедуре errata);
- *    любой рост сверх — деградация сайт-зоны;
- *  - MAX_PILOT_CSS_CODE_LINES = 819 — цель эпика (README EPIC-17 AC) в
+ *    T18.17); → 1431 (T18.2: тон-строка активной карточки mentorship на
+ *    хуке канона --msh-card-active-bg — блоки v2 msh/vcp на канонах
+ *    паттерн-слоя, сайт-зоне осталась только цветовая строка; правка по
+ *    процедуре errata); любой рост сверх — деградация сайт-зоны;
+ *  - MAX_PILOT_CSS_CODE_LINES = 822 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
- *    «все страницы») → 723 (батч ритма 01.11) → 819 (T18.1 — тот же курс);
+ *    «все страницы») → 723 (батч ритма 01.11) → 819 (T18.1) → 822 (T18.2 —
+ *    тот же курс: одна тон-строка + каркас правила);
  *  - MAX_PILOT_JS_LINES = 187 — строки pilot.js на закрытие эпика;
  *  - MAX_CP_FAMILIES = 30 и ALLOWED_CP_FAMILIES — семейства ценза «после»:
  *    появление семейства вне списка = новый cp-визуальный блок = ошибка
  *    (правило CONTRIBUTING: новый визуальный блок клона — задача ДС).
  *    T18.1: правила варианта students--photographic названы stu- (не cp-) —
  *    новых cp-семейств не создаёт; pstr- в pilot.css запрещён пином T17.18.
+ *    T18.2: mentorship/vacancy-capsule — каноны msh/vcp паттерн-слоя, хук
+ *    тон-строки назван msh__card (не cp-) — семейства не менялись (28).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -61,8 +66,8 @@ const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** Пороги — факт итога T17.16 + errata 31.10 (см. шапку). Изменение числа —
  *  осознанная правка ценза вместе с юнит-пином и REPORT §11.4, не «подгонка». */
-export const MAX_PILOT_CSS_LINES = 1417;
-export const MAX_PILOT_CSS_CODE_LINES = 819;
+export const MAX_PILOT_CSS_LINES = 1431;
+export const MAX_PILOT_CSS_CODE_LINES = 822;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 
