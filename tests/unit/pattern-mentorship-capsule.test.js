@@ -239,11 +239,18 @@ describe('patterns/patterns.css — канон наставничества (msh
     );
   });
 
-  it('текст карточки — fs-body/fw-body-bold/lh 1.35 (mentorship.css:94-98); thumb 88×68 radius-sm (mentorship.css:103-106)', () => {
+  it('текст карточки — fs-body/fw-body-bold/lh 1.35/ls −0.02em (mentorship.css:94-98, роль-класса нет — override переносится, как у .msh__text); thumb 88×68 radius-sm (mentorship.css:103-106)', () => {
     const title = blockOf(layer, '.msh__card-title');
     expect(title).toContain('font-size: var(--ui-fs-body);');
     expect(title).toContain('font-weight: var(--ui-fw-body-bold);');
     expect(title).toContain('line-height: 1.35;');
+    // Ревью T18.2: ls −0.02em оригинала (mentorship.css:97) — у заголовка
+    // карточки нет роль-класса (разметка <h3 class="msh__card-title">), а
+    // текстовые роли несут normal (base/typography.css:152) — в отличие от
+    // .msh__title (ls закрывает роль ui-h2), override переносится в канон.
+    expect(title, 'ls −0.02em (mentorship.css:97) — override роли normal').toContain(
+      'letter-spacing: -0.02em;',
+    );
     expect(title).toContain('color: var(--ui-color-text-on-dark);');
     const thumb = blockOf(layer, '.msh__card-thumb');
     expect(thumb, '88px (mentorship.css:103)').toContain('width: 5.5rem;');

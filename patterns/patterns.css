@@ -2310,13 +2310,17 @@
 }
 
 /* Заголовок карточки: fs-body/fw-body-bold (mentorship.css:94-95), lh 1.35
-   (mentorship.css:96) — override lh-роли; цвет on-dark (mentorship.css:98). */
+   (mentorship.css:96) — override lh-роли; ls −0.02em (mentorship.css:97) —
+   override текстовых ролей (normal, base/typography.css:152; роль-класса у
+   заголовка карточки нет — в отличие от .msh__title, где ls закрывает роль
+   ui-h2); цвет on-dark (mentorship.css:98). */
 .msh__card-title {
   box-sizing: border-box;
   color: var(--ui-color-text-on-dark);
   font-size: var(--ui-fs-body);
   font-weight: var(--ui-fw-body-bold);
   line-height: 1.35;
+  letter-spacing: -0.02em;
 }
 
 /* Thumb карточки: 88×68px (mentorship.css:103-104), cover, радиус
