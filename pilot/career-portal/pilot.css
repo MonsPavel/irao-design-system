@@ -733,7 +733,7 @@
   gap: var(--ui-space-2); /* 8px students.css:26 */
   align-items: center;
   height: 3.25rem; /* 52px students.css:27 */
-  padding: var(--ui-space-5); /* 20px students.css:28 «как есть» (контент центрируется высотой) */
+  padding: 1.25rem; /* 20px students.css:28 «как есть», вне шкалы §3.2 (контент центрируется высотой; space-5 = 24px — не 20px, ревью T18.1) */
   border-radius: var(--ui-radius-pill); /* 100px students.css:29 */
   color: var(--ui-color-primary); /* students.css:33 */
   font-size: var(--ui-fs-small); /* 14px students.css:30 */
@@ -764,6 +764,7 @@
   --pstr-action-color: var(--ui-color-text);
   overflow: hidden; /* клип фото — students.css:92 (канон pstr-card слоя) */
   min-height: 23.75rem; /* 380px students.css:179 — мобильная база (лестница pstr-card T17.18) */
+  padding: 1.25rem; /* 20px students.css:89 «как есть», вне шкалы §3.2 — перекрывает каркас ui-card (24px, ui-card.css:65; ревью T18.1) */
   border: 0; /* рамки ui-card у карточек оригинала нет */
   border-radius: var(--ui-radius-md); /* --radius-card 16px оригинала; ui-card base — md */
   background-color: var(--ui-color-primary); /* students.css:62 — все тоны navy */

@@ -236,6 +236,12 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
   it('пилюля «подробнее»: 52px pill 14/500 (students.css:23-35), hover — под (hover: hover) (EPIC-4)', () => {
     const more = blockOf(pilotCss, '.stu-photo__more');
     expect(more).toContain('height: 3.25rem;');
+    // Паддинг 20px «как есть» (students.css:28) — вне шкалы §3.2: space-5 =
+    // 24px делал пилюлю на 6-8px шире оригинала при той же высоте 52
+    // (141→147 / 186→192 — ревью T18.1; прецедент вне-шкалы — gap: 2.25rem
+    // этой же зоны).
+    expect(more).toContain('padding: 1.25rem;');
+    expect(more, 'space-5 (24px) — не паддинг пилюли').not.toContain('padding: var(--ui-space-5)');
     expect(more).toContain('border-radius: var(--ui-radius-pill);');
     expect(more).toContain('color: var(--ui-color-primary);');
     const hoverZone = pilotCss.slice(pilotCss.indexOf('.stu-photo__more:hover'));
@@ -254,6 +260,10 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
     expect(card).toContain('background-color: var(--ui-color-primary);');
     expect(card).toContain('border: 0;');
     expect(card).toContain('border-radius: var(--ui-radius-md);');
+    // Паддинг 20px оригинала (students.css:89) — без перекрытия каркас
+    // ui-card давал бы 24px (ui-card.css:65) и сдвиг заголовка/текста
+    // на 4px по обеим осям (ревью T18.1).
+    expect(card).toContain('padding: 1.25rem;');
     expect(card).toContain('min-height: 23.75rem;');
     expect(mediaBlockOf(pilotCss, 768, 'stu-photo-card'), '440px — ступень 768').toContain(
       'min-height: 27.5rem;',

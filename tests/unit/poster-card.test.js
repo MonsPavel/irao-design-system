@@ -396,10 +396,10 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
   it('ценз: гейт чист; семейство pstr- в pilot.css не появляется', () => {
     // Пороги — errata по процедуре census.mjs (батч ритма 01.11 — решение
     // владельца: числа растут паритетными правками, порог = факт);
-    // T18.1: 1290→1416 / 723→818 — вариант stu-photo (фото-карточки,
+    // T18.1: 1290→1417 / 723→819 — вариант stu-photo (фото-карточки,
     // pstr- в pilot.css по-прежнему запрещён).
-    expect(MAX_PILOT_CSS_LINES).toBe(1416);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(818);
+    expect(MAX_PILOT_CSS_LINES).toBe(1417);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(819);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);

@@ -26,16 +26,16 @@
  *
  * Пороги — явные числа по факту итога T17.16 (Implementation requirements
  * п.1 — «не „меньше“, а конкретное значение»; деградация — exit 1):
- *  - MAX_PILOT_CSS_LINES = 1416 — сырые строки pilot.css. Errata 31.10:
+ *  - MAX_PILOT_CSS_LINES = 1417 — сырые строки pilot.css. Errata 31.10:
  *    1040 → 1162 (production/directions) → 1169 (раунд 7) → 1237 (батч
  *    «все страницы»: v2-модификаторы cp-production--v2/cp-holding--compact)
- *    → 1290 (батч ритма 01.11); → 1416 (T18.1: вариант фото-карточек
+ *    → 1290 (батч ритма 01.11); → 1417 (T18.1: вариант фото-карточек
  *    students--photographic — сайт-зона stu-photo ПОКА, вынос в слой —
  *    T18.17; файл был ровно на потолке, правка по процедуре errata);
  *    любой рост сверх — деградация сайт-зоны;
- *  - MAX_PILOT_CSS_CODE_LINES = 818 — цель эпика (README EPIC-17 AC) в
+ *  - MAX_PILOT_CSS_CODE_LINES = 819 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
- *    «все страницы») → 723 (батч ритма 01.11) → 818 (T18.1 — тот же курс);
+ *    «все страницы») → 723 (батч ритма 01.11) → 819 (T18.1 — тот же курс);
  *  - MAX_PILOT_JS_LINES = 187 — строки pilot.js на закрытие эпика;
  *  - MAX_CP_FAMILIES = 30 и ALLOWED_CP_FAMILIES — семейства ценза «после»:
  *    появление семейства вне списка = новый cp-визуальный блок = ошибка
@@ -61,8 +61,8 @@ const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** Пороги — факт итога T17.16 + errata 31.10 (см. шапку). Изменение числа —
  *  осознанная правка ценза вместе с юнит-пином и REPORT §11.4, не «подгонка». */
-export const MAX_PILOT_CSS_LINES = 1416;
-export const MAX_PILOT_CSS_CODE_LINES = 818;
+export const MAX_PILOT_CSS_LINES = 1417;
+export const MAX_PILOT_CSS_CODE_LINES = 819;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 
