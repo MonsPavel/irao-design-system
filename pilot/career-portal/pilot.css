@@ -762,6 +762,7 @@
 .stu-photo-card {
   --pstr-action-bg: var(--ui-color-surface); /* пара «white» students.css:167 */
   --pstr-action-color: var(--ui-color-text);
+  overflow: hidden; /* клип фото — students.css:92 (канон pstr-card слоя) */
   min-height: 23.75rem; /* 380px students.css:179 — мобильная база (лестница pstr-card T17.18) */
   border: 0; /* рамки ui-card у карточек оригинала нет */
   border-radius: var(--ui-radius-md); /* --radius-card 16px оригинала; ui-card base — md */
