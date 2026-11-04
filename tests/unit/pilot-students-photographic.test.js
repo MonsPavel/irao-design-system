@@ -52,6 +52,18 @@ const blockOf = (css, selector) => {
   return match ? match[1] : null;
 };
 
+/** Тело media-ступени (min-width: Npx), содержащей селектор hook — поиск по
+ *  ВСЕМ ступеням файла (первая @media файла — не T18.1; практика
+ *  poster-card.test.js T17.18). */
+const mediaBlockOf = (css, px, hook) => {
+  for (const match of css.matchAll(
+    new RegExp(`@media \\(min-width: ${px}px\\)\\s*\\{([\\s\\S]*?)\\n\\}`, 'g'),
+  )) {
+    if (match[1].includes(`.${hook}`)) return match[1];
+  }
+  return null;
+};
+
 const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8').replace(/\r\n/g, '\n');
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8').replace(/\r\n/g, '\n');
 const pilotCssRaw = readFileSync(join(pilotDir, 'pilot.css'), 'utf8').replace(/\r\n/g, '\n');
@@ -105,7 +117,11 @@ describe('build.mjs — index: две секции students подряд (T18.1 
 
   it('иллюстрированная секция не тронута (Out of scope — канон pstr T17.18)', () => {
     expect(indexTemplate).toContain('<section class="ui-section" id="students">');
-    expect((indexTemplate.match(/pstr-card pstr-card--/g) ?? []).length).toBe(3);
+    // карточки постера собираются билдером вне шаблона — пин билдера
+    // (практика poster-card.test.js) + интерполяция в секции
+    expect(build).toContain('pstr-card pstr-card--${card.tone}');
+    const illustrated = sliceSection(indexTemplate, '<section class="ui-section" id="students">');
+    expect(illustrated).toContain('${studentCards}');
   });
 
   it('грид секции — 3 колонки; головка — роль ui-h2 + пилюля «подробнее» (v1-форма оригинала)', () => {
@@ -115,37 +131,47 @@ describe('build.mjs — index: две секции students подряд (T18.1 
     expect(section).toContain('<h2 class="ui-h2">Школьникам и студентам</h2>');
     // href practices.html — результат преобразования build.py:942 на v1
     // (в шаблон заложена сразу форма оригинала index.html:505)
-    expect(section).toContain(
-      '<a class="stu-photo__more" href="practices.html">подробнее',
-    );
+    expect(section).toContain('<a class="stu-photo__more" href="practices.html">подробнее');
   });
 });
 
 describe('build.mjs — фото-карточки на каркасе ui-card--media (Implementation requirements п.1)', () => {
   const section = sliceSection(indexTemplate, '<section class="ui-section stu-photo">');
+  // билдер карточек — вне шаблона; пины исполняемой формы — по исходнику
+  const builder = build.slice(
+    build.indexOf('const STUDENT_PHOTOS'),
+    build.indexOf('const employerLogos'),
+  );
 
-  it('три карточки ui-card--media + вариант stu-photo-card', () => {
-    expect((section.match(/class="ui-card ui-card--media stu-photo-card"/g) ?? []).length).toBe(3);
+  it('билдер: три карточки ui-card--media + вариант stu-photo-card (map по STUDENTS)', () => {
+    expect(builder).toContain('ui-card ui-card--media stu-photo-card');
+    expect(builder).toMatch(/STUDENTS\.map\(\s*\(card, index\)/s);
+    expect(section, 'интерполяция билдера в секции').toContain('${studentPhotoCards}');
   });
 
   it('фото — из ассетов оригинала dist/assets, декоративные (alt="", lazy)', () => {
     for (const photo of ['students-photo-1.jpg', 'students-photo-2.jpg', 'students-photo-3.jpg']) {
-      expect(section, `фото ${photo} в разметке`).toContain(`assets/images/${photo}`);
+      expect(builder, `фото ${photo} в билдере`).toContain(`assets/images/${photo}`);
     }
-    for (const img of section.match(/<img class="stu-photo-card__photo"[^>]*>/g) ?? []) {
-      expect(img, 'alt="" — декоративное').toContain('alt=""');
-      expect(img, 'loading="lazy"').toContain('loading="lazy"');
-    }
+    expect(builder).toContain('class="stu-photo-card__photo" src="${STUDENT_PHOTOS[index]}"');
+    expect(builder).toMatch(/<img class="stu-photo-card__photo"[^>]*alt=""/);
+    expect(builder).toMatch(/<img class="stu-photo-card__photo"[^>]*loading="lazy"/);
   });
 
   it('тело карточки — роли типографики (ui-h3/ui-body), действие — канон слоя pstr-card__action', () => {
-    expect(section).toContain('<div class="stu-photo-card__body">');
-    expect(section).toContain('class="stu-photo-card__title ui-h3"');
-    expect(section).toContain('class="stu-photo-card__text ui-body"');
+    expect(builder).toContain('<div class="stu-photo-card__body">');
+    expect(builder).toContain('class="stu-photo-card__title ui-h3"');
+    expect(builder).toContain('class="stu-photo-card__text ui-body"');
     // Действие — та же круглая кнопка-стрелка, что у постерных карточек:
     // канон слоя (52px, right/bottom 20, hover scale) + пара white хуками.
-    expect(section).toMatch(/<a class="pstr-card__action stu-photo-card__action" href="/);
-    expect(section).toMatch(/aria-label="Подробнее: [^"]+"/);
+    expect(builder).toMatch(/<a class="pstr-card__action stu-photo-card__action" href="/);
+    expect(builder).toMatch(/aria-label="Подробнее: \$\{esc\(card\.title\)\}"/);
+  });
+
+  it('состав v2 не меняется — applyVariant2 не трогает карточки (пин замены id)', () => {
+    const v2 = applyVariant2(fixture);
+    expect(v2).toContain('${studentPhotoCards}');
+    expect(v2).toContain('<section class="ui-section stu-photo stu-photo--v2" id="students">');
   });
 });
 
@@ -179,11 +205,6 @@ describe('applyVariant2 — index-2: 0 why-us, photographic --v2 (behavioral п�
     );
     expect(v2, 'текст capsule — не задача T18.1 (T18.2)').not.toContain('Найди свою команду');
   });
-
-  it('состав фото-карточек v2 не меняется (3 карточки на месте)', () => {
-    const v2 = applyVariant2(fixture);
-    expect((v2.match(/stu-photo-card"/g) ?? []).length).toBeGreaterThanOrEqual(3);
-  });
 });
 
 describe('compare.mjs — BLOCK_PROBES на photographic (AC: Δ секции ≤ 8px)', () => {
@@ -207,8 +228,7 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
   it('грид: шаг 36px «как есть» (students.css:42), 3 колонки от lg (≤1023 — колонка, students.css:171)', () => {
     const grid = blockOf(pilotCss, '.stu-photo__grid');
     expect(grid).toContain('gap: 2.25rem;');
-    const lg = pilotCss.match(/@media \(min-width: 1024px\) \{[^@]*?\.stu-photo__grid\s*\{([^}]*)\}/);
-    expect(lg?.[1] ?? '', '3 колонки — ступень 1024').toContain(
+    expect(mediaBlockOf(pilotCss, 1024, 'stu-photo__grid'), '3 колонки — ступень 1024').toContain(
       'grid-template-columns: repeat(3, minmax(0, 1fr));',
     );
   });
@@ -219,9 +239,10 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
     expect(more).toContain('border-radius: var(--ui-radius-pill);');
     expect(more).toContain('color: var(--ui-color-primary);');
     const hoverZone = pilotCss.slice(pilotCss.indexOf('.stu-photo__more:hover'));
-    expect(pilotCss.slice(0, pilotCss.indexOf('.stu-photo__more:hover')), 'hover вне media — нет').not.toContain(
-      '.stu-photo__more:hover',
-    );
+    expect(
+      pilotCss.slice(0, pilotCss.indexOf('.stu-photo__more:hover')),
+      'hover вне media — нет',
+    ).not.toContain('.stu-photo__more:hover');
     expect(hoverZone).toMatch(/@media \(hover: hover\)/);
     expect(blockOf(pilotCss, '.stu-photo__more:hover')).toContain(
       'background-color: var(--ui-color-surface-hover);',
@@ -234,10 +255,12 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
     expect(card).toContain('border: 0;');
     expect(card).toContain('border-radius: var(--ui-radius-md);');
     expect(card).toContain('min-height: 23.75rem;');
-    const md = pilotCss.match(/@media \(min-width: 768px\) \{[^@]*?\.stu-photo-card \{([^}]*)\}/);
-    expect(md?.[1] ?? '', '440px — ступень 768').toContain('min-height: 27.5rem;');
-    const lg = pilotCss.match(/@media \(min-width: 1024px\) \{[^@]*?\.stu-photo-card \{([^}]*)\}/);
-    expect(lg?.[1] ?? '', '600px — ступень 1024').toContain('min-height: 37.5rem;');
+    expect(mediaBlockOf(pilotCss, 768, 'stu-photo-card'), '440px — ступень 768').toContain(
+      'min-height: 27.5rem;',
+    );
+    expect(mediaBlockOf(pilotCss, 1024, 'stu-photo-card'), '600px — ступень 1024').toContain(
+      'min-height: 37.5rem;',
+    );
   });
 
   it('тело поверх фото (z-пара), текст on-dark (students.css:82/113/121)', () => {
@@ -268,9 +291,7 @@ describe('pilot.css — вариант photographic в сайт-зоне ПОК�
   });
 
   it('вариант 2: карточки 520px поверх лестницы (students.css:81)', () => {
-    expect(blockOf(pilotCss, '.stu-photo--v2 .stu-photo-card')).toContain(
-      'min-height: 32.5rem;',
-    );
+    expect(blockOf(pilotCss, '.stu-photo--v2 .stu-photo-card')).toContain('min-height: 32.5rem;');
   });
 
   it('инварианты сайт-зоны: без !important, без новых hex (спец-тинты hero-тегов — единственное исключение)', () => {

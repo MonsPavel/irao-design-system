@@ -489,6 +489,9 @@ const BLOCK_PROBES = {
     ['production', '.production', '.cp-production'],
     ['holding', '.holding', '.cp-holding'],
     ['employers', '.employers', '.lgo'],
+    // T18.1: id="students" переехал на photographic --v2 (apply_variant2
+    // build.py:595-596) — пара меряет фото-секцию (778px оригинала); why-us
+    // с v2 снята — проба не добавляется.
     ['students', '.students--photographic', '#students'],
     ['media', '.media', '#media'],
   ],
@@ -504,6 +507,9 @@ const BLOCK_PROBES = {
     ['why-us', '.why-us', '.cp-why-us'],
     ['vacancy-search', '.vacancy-search', '#vacancies'],
     ['students', '.students--illustrated', '#students'],
+    // Вторая секция «Школьникам и студентам» — фото-карточки (T18.1):
+    // пара .students--photographic → крючок сайт-зоны stu-photo.
+    ['students-photo', '.students--photographic', '.stu-photo'],
     ['video-block', '.video-block', '.ui-video'],
     ['media', '.media', '#media'],
     ['team', '.team', '.cp-team__photo'],

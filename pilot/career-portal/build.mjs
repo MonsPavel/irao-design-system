@@ -1132,6 +1132,31 @@ function indexMain() {
       </article>`,
   ).join('\n');
 
+  // Вторая секция «Школьникам и студентам» — фото-карточки (T18.1):
+  // .students--photographic оригинала (students.html:48-92) — те же
+  // заголовки/тексты/цели, что у постерных, тоны ВСЕ navy (students.css:62),
+  // действие — кнопка «white» (students.css:167). Каркас карточки —
+  // ui-card--media (прецедент T17.5, Implementation requirements п.1);
+  // вариант — сайт-зона stu-photo (вынос в слой — T18.17; имя по стыку:
+  // cp-* дало бы новое cp-семейство мимо ценза T17.16, pstr- в pilot.css
+  // запрещён пином T17.18). Действие — канон слоя pstr-card__action,
+  // пара «white» — хуками на карточке.
+  const STUDENT_PHOTOS = [
+    'assets/images/students-photo-1.jpg',
+    'assets/images/students-photo-2.jpg',
+    'assets/images/students-photo-3.jpg',
+  ];
+  const studentPhotoCards = STUDENTS.map(
+    (card, index) => `      <article class="ui-card ui-card--media stu-photo-card">
+        <img class="stu-photo-card__photo" src="${STUDENT_PHOTOS[index]}" alt="" loading="lazy">
+        <div class="stu-photo-card__body">
+          <h3 class="stu-photo-card__title ui-h3">${esc(card.title)}</h3>
+          <p class="stu-photo-card__text ui-body">${esc(card.text)}</p>
+        </div>
+        <a class="pstr-card__action stu-photo-card__action" href="${esc(card.href)}" aria-label="Подробнее: ${esc(card.title)}">${ARROW}</a>
+      </article>`,
+  ).join('\n');
+
   const employerLogos = Array.from(
     { length: 11 },
     (_, index) =>
@@ -1337,6 +1362,23 @@ ${whyCards.slice(1).join('\n')}
     <h2 class="ui-h2">Школьникам и студентам</h2>
     <div class="ui-grid lnk-cards">
 ${studentCards}
+    </div>
+  </div>
+</section>
+
+<!-- Вторая секция «Школьникам и студентам» — фото-карточки (T18.1):
+     .students--photographic оригинала. Головка с пилюлей «подробнее» —
+     v1-форма оригинала (index.html:550-553, href — build.py:942); v2
+     apply_variant2 скрывает иллюстрированную и переносит сюда id="students"
+     с модификатором --v2 (build.py:593-596). -->
+<section class="ui-section stu-photo">
+  <div class="ui-container">
+    <div class="stu-photo__head">
+      <h2 class="ui-h2">Школьникам и студентам</h2>
+      <a class="stu-photo__more" href="practices.html">подробнее ${ARROW}</a>
+    </div>
+    <div class="ui-grid stu-photo__grid">
+${studentPhotoCards}
     </div>
   </div>
 </section>
@@ -2786,12 +2828,23 @@ function notFoundMain() {
 /* ── генерация ── */
 
 /* Вариант 2 главной (build.py:585-608 оригинала — apply_variant2):
-   те же блоки с модификаторами; строковые замены — 1:1. Трансформы
-   media--wide (рекомпозиция mdl + design-decision mdl__big) и
-   students--photographic (фото-карточки) отложены: первая — кандидат
-   модификатора mdl--wide в слое (REPORT §6.2), вторая — вне T17.18
-   (тот эпик — постерная карточка .students--illustrated, канон pstr). */
+   те же блоки с модификаторами; строковые замены — 1:1. students-трансформа
+   (build.py:593-596): иллюстрированная секция скрыта (hidden), id="students"
+   переезжает на photographic с модификатором --v2; ссылка головки —
+   «все мероприятия» (build.py:942, is_v2). Секция cp-why-us снимается: в
+   v2 оригинала её нет (INDEX_FRAGS index-2 — mentorship/vacancy-capsule
+   вместо why-us, T18.2 собирает их), панель вакансий #vacancies уходит
+   вместе с секцией. Заголовок секции students остаётся «Школьникам и
+   студентам» (index-2.html:501) — прежняя подмена «Найди свою команду»
+   была стенд-ином отсутствующей capsule (текст второй vacancy-capsule,
+   T18.2). */
 function applyVariant2(html) {
+  const whyStart = html.indexOf('<section class="ui-section ui-section--photo cp-why-us">');
+  if (whyStart !== -1) {
+    // внутри why-us вложенных <section> нет — секция до первого </section>
+    const whyEnd = html.indexOf('</section>', whyStart) + '</section>'.length;
+    html = html.slice(0, whyStart) + html.slice(whyEnd);
+  }
   return html
     .replace(
       'class="ui-section ui-section--photo hro"',
@@ -2813,9 +2866,14 @@ function applyVariant2(html) {
       '<h1 class="hro__title ui-h1">Зажги свет вместе с&nbsp;нами</h1>',
     )
     .replace('placeholder="Введите название вакансии"', 'placeholder="Найти вакансию"')
+    .replace('<section class="ui-section" id="students">', '<section class="ui-section" hidden>')
     .replace(
-      '<h2 class="ui-h2">Школьникам и студентам</h2>',
-      '<h2 class="ui-h2">Найди свою команду</h2>',
+      '<section class="ui-section stu-photo">',
+      '<section class="ui-section stu-photo stu-photo--v2" id="students">',
+    )
+    .replace(
+      'class="stu-photo__more" href="practices.html">подробнее',
+      'class="stu-photo__more" href="practices.html">все мероприятия',
     )
     .replace(
       '<span class="ui-h4">Все 140 вакансий</span>',
