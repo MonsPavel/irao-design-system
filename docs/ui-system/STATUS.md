@@ -127,7 +127,7 @@
 | T17.14 | done | смержена |
 | T17.15 | done | смержена 29.10 (вручную): gate доведён — эталоны landing-section пересняты на merged-состоянии с каркасом PR #9 (кнопка «Разделы» <768, −643px mobile), спека 25/25 ×2, unit 2029, lint чист |
 | T17.16 | done | смержена |
-| T18.1 | todo | index: students--photographic + index-2: снять лишнюю why-us (build.mjs) |
+| T18.1 | done | смержена |
 | T18.2 | todo | index-2: mentorship + vacancy-capsule ×2 — новые макро-блоки, каноны слоя msh-/vcp- |
 | T18.3 | todo | company.html: 6 лент + 2-й banner + фотогалерея (−3328px) |
 | T18.4 | todo | career-track.html: 3 секции + кнопка cover-hero (−1475px) |
