@@ -668,8 +668,11 @@
   </div>
 
   <!-- Rail-полоса: карточки-теги 429px от lg, активная — модификатор
-       --active (is-active оригинала → BEM-модификатор канона). -->
-  <div class="msh__rail">
+       --active (is-active оригинала → BEM-модификатор канона).
+       Скролл-лента — нативный section с именем (регион по умолчанию) и
+       tabindex="0" — keyboard access прокручиваемого региона (axe
+       scrollable-region-focusable; прецедент ui-table__scroll/lpp-side). -->
+  <section class="msh__rail" aria-label="Карточки направлений наставничества" tabindex="0">
     <article class="msh__card">
       <h3 class="msh__card-title">Ответственное отношение к&nbsp;каждому</h3>
       <img
@@ -714,7 +717,7 @@
         loading="lazy"
        >
     </article>
-  </div>
+  </section>
 </section>
 
 <!-- Вариант 12 — капсула вакансий (vcp, T18.2): плашка-пилюля «label +

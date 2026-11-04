@@ -143,7 +143,9 @@ describe('build.mjs — билдер наставничества на кано�
   });
 
   it('rail: 4 карточки канона msh__card, активная — вторая (--active — BEM-модификатор канона), thumb из ассетов', () => {
-    expect(builder).toContain('<div class="msh__rail">');
+    expect(builder).toContain(
+      '<section class="msh__rail" aria-label="Карточки направлений наставничества" tabindex="0">',
+    );
     expect(t182Source, '4 карточки в данных').toMatch(
       /cards:\s*\[[\s\S]*?tag-photo-1\.png[\s\S]*?mentorship\.png[\s\S]*?job-card-1\.png[\s\S]*?job-card-2\.png[\s\S]*?\]/,
     );

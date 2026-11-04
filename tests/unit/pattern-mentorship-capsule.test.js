@@ -403,6 +403,10 @@ describe('док-паттерн landing-section — источник правд�
     );
     expect(section, 'маска-фото — второй слой канона').toContain('msh__photo');
     expect(section, 'rail-полоса на месте').toContain('msh__rail');
+    expect(
+      section.match(/<section class="msh__rail"[^>]*>/)?.[0] ?? '',
+      'rail — фокусируемый регион (tabindex="0", axe scrollable-region-focusable; прецедент ui-table__scroll)',
+    ).toContain('tabindex="0"');
     expect(section, 'активная карточка — BEM-модификатор канона').toContain('msh__card--active');
   });
 

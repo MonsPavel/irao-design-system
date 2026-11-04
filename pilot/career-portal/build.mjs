@@ -1120,8 +1120,12 @@ const MENTORSHIP = {
 /** Секция наставничества (канон msh): __bg — заливка primary + blend-фото
  *  (bg-elektro.jpg, mentorship.css:7-21), msh__photo — mask-фото справа
  *  (mentorship.css:23-38); rail — 4 карточки-тега (скролл-лента, канон
- *  несёт скрытый скроллбар). Постраничный скролл rail оригинала (JS) не
- *  переносится — Out of scope поведения (T18.2). */
+ *  несёт скрытый скроллбар; нативный section с именем = регион по
+ *  умолчанию + tabindex="0" — keyboard access прокручиваемого региона,
+ *  axe scrollable-region-focusable, прецедент ui-table__scroll — в
+ *  оригинале атрибутов нет, a11y-добавка ДС).
+ *  Постраничный скролл rail оригинала (JS) не переносится — Out of scope
+ *  поведения (T18.2). */
 function mentorshipMain() {
   const cards = MENTORSHIP.cards
     .map(
@@ -1142,9 +1146,9 @@ function mentorshipMain() {
     <h2 class="ui-h2 msh__title">${MENTORSHIP.title}</h2>
     <p class="ui-lead msh__text">${MENTORSHIP.text}</p>
   </div>
-  <div class="msh__rail">
+  <section class="msh__rail" aria-label="Карточки направлений наставничества" tabindex="0">
 ${cards}
-  </div>
+  </section>
 </section>`;
 }
 
