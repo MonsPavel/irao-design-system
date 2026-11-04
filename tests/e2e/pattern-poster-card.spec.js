@@ -242,8 +242,10 @@ standTest.describe('patterns/poster-card: эталонная сборка (Scope
       const peach = await actionOf(SEL.peach);
       expect(peach.width, '52px = 3.25rem (спека Scope)').toBe(52);
       expect(peach.height).toBe(52);
-      expect(peach.rightGap, 'right 20px').toBe(20);
-      expect(peach.bottomGap, 'bottom 20px').toBe(20);
+      // Firefox-квантование координат (1/64 px): nightly 41393981047/41587572746/
+      // 41780959375 — bottomGap «19.99993896484375». Оба гэпа — одна механика.
+      expect(peach.rightGap, 'right 20px').toBeCloseTo(20, 1);
+      expect(peach.bottomGap, 'bottom 20px').toBeCloseTo(20, 1);
       expect(peach.radius, 'круг').toBe('50%');
 
       const [navy, light] = [await actionOf(SEL.navy), await actionOf(SEL.light)];
