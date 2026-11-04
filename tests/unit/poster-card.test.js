@@ -397,9 +397,11 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
     // Пороги — errata по процедуре census.mjs (батч ритма 01.11 — решение
     // владельца: числа растут паритетными правками, порог = факт);
     // T18.1: 1290→1417 / 723→819 — вариант stu-photo (фото-карточки,
-    // pstr- в pilot.css по-прежнему запрещён).
-    expect(MAX_PILOT_CSS_LINES).toBe(1417);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(819);
+    // pstr- в pilot.css по-прежнему запрещён);
+    // T18.2: 1417→1431 / 819→822 — тон-строка карточек mentorship на хуке
+    // канона --msh-card-active-bg (блоки msh/vcp — на канонах слоя).
+    expect(MAX_PILOT_CSS_LINES).toBe(1431);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(822);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);

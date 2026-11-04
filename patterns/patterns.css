@@ -2153,7 +2153,7 @@
 /* Второй слой — mask-фото справа (mentorship.css:23-38): absolute, снизу
    140px @max-1023 — мобильная база (mentorship.css:111) / 156px от lg
    (mentorship.css:27), ширина 80% → 62%; z -1 (DOM после __bg — красится
-   над ним, под контентом). Маска 22% (mentorship.css:30-31); #000
+   над ним, под контентом). Маска 22% (mentorship.css:30-31); 000
    оригинала → var(--ui-color-text) — маска-градиент, не цвет краски
    (прецедент hro__marquee, hero.css:163 → color-text). */
 .msh__photo {
