@@ -75,6 +75,16 @@ const layerHookSet = (layer) => {
   return hooks;
 };
 
+/** Тело media-ступени (hover: hover), содержащей селектор hook (hover-состояния
+ *  канонов — под гвардом EPIC-4; срез «от вхождения до конца файла» не работает
+ *  для последнего правила файла). */
+const hoverBlockOf = (css, hook) => {
+  for (const match of css.matchAll(/@media \(hover: hover\)\s*\{([\s\S]*?)\n\}/g)) {
+    if (match[1].includes(hook)) return match[1];
+  }
+  return null;
+};
+
 const layerFile = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8');
 const layer = stripCssComments(layerFile);
 const docHtml = readFileSync(
@@ -161,9 +171,7 @@ describe('patterns/patterns.css — канон наставничества (msh
     );
     const md = mediaBlockOf(layer, 768, 'msh__title');
     expect(md, 'mb 48px (mentorship.css:46) от md').toContain('margin-bottom: var(--ui-space-7);');
-    expect(md, 'fs — роль ui-h2 (лестница fs-h2) от md').toContain(
-      'font-size: var(--ui-fs-h2);',
-    );
+    expect(md, 'fs — роль ui-h2 (лестница fs-h2) от md').toContain('font-size: var(--ui-fs-h2);');
     const text = blockOf(layer, '.msh__text');
     expect(text, 'max-width 514px (mentorship.css:55)').toContain('max-width: 32.125rem;');
     expect(text, 'lh 1.25 (mentorship.css:57) — override lh-роли 1.35').toContain(
@@ -199,9 +207,7 @@ describe('patterns/patterns.css — канон наставничества (msh
 
   it('карточка rail: 300px мобильная база / 429px от lg, высота 108, паддинг 20 «как есть», заливка blue-700 (--ui-color-surface-blue-deep)', () => {
     const card = blockOf(layer, '.msh__card');
-    expect(card, 'flex-базис 300px @max-767 (mentorship.css:119)').toContain(
-      'flex: 0 0 18.75rem;',
-    );
+    expect(card, 'flex-базис 300px @max-767 (mentorship.css:119)').toContain('flex: 0 0 18.75rem;');
     expect(card, 'центрирование строки (mentorship.css:77-78)').toContain('align-items: center;');
     expect(card).toContain('justify-content: space-between;');
     expect(card, 'gap 16px (mentorship.css:79)').toContain('gap: var(--ui-space-4);');
@@ -212,9 +218,7 @@ describe('patterns/patterns.css — канон наставничества (msh
     expect(card, 'blue-700 (mentorship.css:82) — семантика surface-blue-deep').toContain(
       'background-color: var(--ui-color-surface-blue-deep);',
     );
-    expect(card, 'радиус --radius-card 16px = md').toContain(
-      'border-radius: var(--ui-radius-md);',
-    );
+    expect(card, 'радиус --radius-card 16px = md').toContain('border-radius: var(--ui-radius-md);');
     expect(card, 'курсор — псевдо-навигация rail (mentorship.css:84)').toContain(
       'cursor: pointer;',
     );
@@ -224,15 +228,12 @@ describe('patterns/patterns.css — канон наставничества (msh
 
   it('активная/hover-карточка: градиент — хук --msh-card-active-bg (дефолт токен, одобренная строка E88A2C→D9A441 — сайт-зона, прецедент --hro-tag-bg); hover под (hover: hover)', () => {
     const active = blockOf(layer, '.msh__card--active');
-    expect(active, 'is-active оригинала (mentorship.css:88) → --active (BEM-модификатор канона)').toContain(
-      'background: var(--msh-card-active-bg, var(--ui-color-accent));',
-    );
-    const hoverZone = layer.slice(layer.indexOf('.msh__card:hover'));
     expect(
-      layer.slice(0, layer.indexOf('.msh__card:hover')),
-      'hover вне media — нет (EPIC-4)',
-    ).not.toContain('.msh__card:hover');
-    expect(hoverZone).toMatch(/@media \(hover: hover\)/);
+      active,
+      'is-active оригинала (mentorship.css:88) → --active (BEM-модификатор канона)',
+    ).toContain('background: var(--msh-card-active-bg, var(--ui-color-accent));');
+    expect(layer.match(/\.msh__card:hover/g)?.length, 'hover в слое один').toBe(1);
+    expect(hoverBlockOf(layer, '.msh__card:hover'), 'hover под гвардом (EPIC-4)').toBeTruthy();
     expect(blockOf(layer, '.msh__card:hover')).toContain(
       'background: var(--msh-card-active-bg, var(--ui-color-accent));',
     );
@@ -274,17 +275,19 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     );
   });
 
-  it('inner: flex — колонка stretch на мобильной базе, строка по центру от md; gap 0 (vacancy-capsule.css:7-11)', () => {
+  it('inner: flex — колонка stretch на мобильной базе, строка от md; центр строки и gap 0 — база (vacancy-capsule.css:7-11)', () => {
     const inner = blockOf(layer, '.vcp__inner');
     expect(inner).toContain('display: flex;');
     expect(inner, 'мобильная база — колонка (vacancy-capsule.css:47)').toContain(
       'flex-direction: column;',
     );
     expect(inner).toContain('align-items: stretch;');
+    expect(inner, 'центр строки (vacancy-capsule.css:9) — на всех ступенях').toContain(
+      'justify-content: center;',
+    );
     expect(inner, 'gap 0 (vacancy-capsule.css:10)').toContain('gap: 0;');
     const md = mediaBlockOf(layer, 768, 'vcp__inner');
     expect(md, 'строка (vacancy-capsule.css:8) от md').toContain('flex-direction: row;');
-    expect(md, 'центр (vacancy-capsule.css:9)').toContain('justify-content: center;');
   });
 
   it('label: пилюля-заголовок 64 → 80px, blue-50/surface-muted, fs 20 → 36px «как есть», radius pill-слева; hover — под (hover: hover)', () => {
@@ -304,9 +307,7 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     expect(label, '20px @max-767 (vacancy-capsule.css:51)').toContain('font-size: 1.25rem;');
     expect(label, 'fw-h1 (vacancy-capsule.css:21)').toContain('font-weight: var(--ui-fw-h1);');
     expect(label, 'lh 1.1 (vacancy-capsule.css:22)').toContain('line-height: 1.1;');
-    expect(label, 'primary (vacancy-capsule.css:23)').toContain(
-      'color: var(--ui-color-primary);',
-    );
+    expect(label, 'primary (vacancy-capsule.css:23)').toContain('color: var(--ui-color-primary);');
     expect(label, 'transition (vacancy-capsule.css:24)').toContain(
       'transition: background-color var(--ui-transition);',
     );
@@ -319,12 +320,8 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     expect(md, 'radius pill 0 0 pill (vacancy-capsule.css:19)').toContain(
       'border-radius: var(--ui-radius-pill) 0 0 var(--ui-radius-pill);',
     );
-    const hoverZone = layer.slice(layer.indexOf('.vcp__label:hover'));
-    expect(
-      layer.slice(0, layer.indexOf('.vcp__label:hover')),
-      'hover вне media — нет (EPIC-4)',
-    ).not.toContain('.vcp__label:hover');
-    expect(hoverZone).toMatch(/@media \(hover: hover\)/);
+    expect(layer.match(/\.vcp__label:hover/g)?.length, 'hover в слое один').toBe(1);
+    expect(hoverBlockOf(layer, '.vcp__label:hover'), 'hover под гвардом (EPIC-4)').toBeTruthy();
     expect(blockOf(layer, '.vcp__label:hover'), 'blue-100 (vacancy-capsule.css:27)').toContain(
       'background-color: var(--ui-color-surface-hover);',
     );
@@ -337,9 +334,7 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     expect(btn, 'центр подписи @max-767 (vacancy-capsule.css:56)').toContain(
       'justify-content: center;',
     );
-    expect(btn, 'gap 12px (vacancy-capsule.css:32) — space-3').toContain(
-      'gap: var(--ui-space-3);',
-    );
+    expect(btn, 'gap 12px (vacancy-capsule.css:32) — space-3').toContain('gap: var(--ui-space-3);');
     expect(btn, 'pad 0 44px (vacancy-capsule.css:34) «как есть» — на всех ступенях').toContain(
       'padding: 0 2.75rem;',
     );
@@ -364,12 +359,8 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     expect(md, 'radius 0 pill pill 0 (vacancy-capsule.css:36)').toContain(
       'border-radius: 0 var(--ui-radius-pill) var(--ui-radius-pill) 0;',
     );
-    const hoverZone = layer.slice(layer.indexOf('.vcp__btn:hover'));
-    expect(
-      layer.slice(0, layer.indexOf('.vcp__btn:hover')),
-      'hover вне media — нет (EPIC-4)',
-    ).not.toContain('.vcp__btn:hover');
-    expect(hoverZone).toMatch(/@media \(hover: hover\)/);
+    expect(layer.match(/\.vcp__btn:hover/g)?.length, 'hover в слое один').toBe(1);
+    expect(hoverBlockOf(layer, '.vcp__btn:hover'), 'hover под гвардом (EPIC-4)').toBeTruthy();
     expect(blockOf(layer, '.vcp__btn:hover'), 'accent-light (vacancy-capsule.css:43)').toContain(
       'background-color: var(--ui-color-accent-hover);',
     );
@@ -426,10 +417,7 @@ describe('док-паттерн landing-section — источник правд�
 
   it('шапка дока и README называют канон T18.2 (msh/vcp)', () => {
     expect(docHtml, 'шапка дока перечисляет T18.2').toContain('T18.2');
-    const readme = readFileSync(
-      join(root, 'patterns', 'landing-section', 'README.md'),
-      'utf8',
-    );
+    const readme = readFileSync(join(root, 'patterns', 'landing-section', 'README.md'), 'utf8');
     expect(readme, 'README несёт раздел наставничества').toContain('msh');
     expect(readme, 'README несёт раздел капсулы').toContain('vcp');
   });
@@ -438,14 +426,18 @@ describe('док-паттерн landing-section — источник правд�
 describe('гейт префиксов слоя — msh|vcp допущены (Implementation requirements: канон исполняем)', () => {
   it('showcase/patterns-layer-gate.mjs допускает msh|vcp и пропускает слой с канонами', () => {
     const gate = readFileSync(join(root, 'showcase', 'patterns-layer-gate.mjs'), 'utf8');
-    expect(gate).toMatch(/lpp\|dpp\|fpp\|lnk\|lgo\|tlp\|nvp\|hsp\|ftp\|hro\|mrq\|mdl\|cvh\|pstr\|msh\|vcp/);
+    expect(gate).toMatch(
+      /lpp\|dpp\|fpp\|lnk\|lgo\|tlp\|nvp\|hsp\|ftp\|hro\|mrq\|mdl\|cvh\|pstr\|msh\|vcp/,
+    );
     expect(patternLayerProblems(layerFile), 'гейт на фактическом слое чист').toEqual([]);
   });
 
   it('tests/unit/patterns-layer.test.js — гейт префиксов синхронен с patterns-layer-gate.mjs', () => {
     const test = readFileSync(join(root, 'tests', 'unit', 'patterns-layer.test.js'), 'utf8');
-    expect(test.match(/lpp\|dpp\|fpp\|lnk\|lgo\|tlp\|nvp\|hsp\|ftp\|hro\|mrq\|mdl\|cvh\|pstr\|msh\|vcp/g)?.length ?? 0)
-      .toBeGreaterThanOrEqual(2);
+    expect(
+      test.match(/lpp\|dpp\|fpp\|lnk\|lgo\|tlp\|nvp\|hsp\|ftp\|hro\|mrq\|mdl\|cvh\|pstr\|msh\|vcp/g)
+        ?.length ?? 0,
+    ).toBeGreaterThanOrEqual(2);
   });
 
   it('tests/unit/pattern-landing-section.test.js — инвариант «чужих классов» допускает msh-/vcp- в эталоне', () => {

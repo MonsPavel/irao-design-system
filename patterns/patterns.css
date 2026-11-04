@@ -2097,3 +2097,359 @@
 .pstr-card__action:hover {
   transform: scale(1.08); /* students.css:172 */
 }
+
+/* ════════════════ Наставничество (T18.2) — связка msh ════════════════
+ *
+ * Порт секции «Наставничество в реальном времени» career-portal
+ * (.mentorship, src/blocks/mentorship/mentorship.css — строки в
+ * комментариях; блок v2 главной, index-2.html:413-442): фото-секция с
+ * blend-фоном, внутренняя сетка 552px и нижняя rail-полоса карточек-тегов
+ * 108px (горизонтальный скролл). Разметка канона —
+ * patterns/landing-section/landing-section.html (секция lsp-mentorship;
+ * док — источник правды, пин синхронности
+ * tests/unit/pattern-mentorship-capsule.test.js).
+ *
+ * VI-инвариант (Implementation requirements п.2): фото-фон — примитив
+ * ui-section--photo (T17.3), не голым IMG: слой __bg несёт заливку primary
+ * и blend-фото (IMAGE fill LUMINOSITY @ 40% оригинала), mask-фото — второй
+ * декоративный слой канона в стекинг-контексте секции (negative-z дети
+ * красятся после фона секции — изоляция примитива).
+ *
+ * Мобильная база ДС: лестницы @max-1023/767 (mentorship.css:109-120)
+ * инвертированы mobile-first — ступени 768/1024 шкалы T2.5 (прецедент
+ * pstr-card T17.18).
+ */
+
+/* Каркас: клип (overflow hidden — mentorship.css:4); ритм ui-section
+   перекрыт паддингами оригинала: 72px 0 48px (mentorship.css:3) от md
+   (72 «как есть», 48 = space-7), мобильная база 40px 0 32px @max-767
+   (mentorship.css:115; 40 «как есть», 32 = space-6). position/isolation —
+   от примитива ui-section--photo. */
+.msh {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  overflow: hidden;
+  padding: 2.5rem 0 var(--ui-space-6);
+}
+
+@media (min-width: 768px) {
+  .msh {
+    padding: 4.5rem 0 var(--ui-space-7);
+  }
+}
+
+/* Слой фона: заливка primary (mentorship.css:11), blend-фото поверх
+   (mix-blend-mode luminosity + opacity 40% — mentorship.css:19-20; в
+   оригинале слой несёт z -2 — в примитиве стекинг-пара -1/DOM-порядок,
+   изоляция секции защищает от «пропадания» под обёртками сайта). */
+.msh .ui-section__bg {
+  background-color: var(--ui-color-primary);
+}
+
+.msh .ui-section__bg img {
+  opacity: 0.4;
+  mix-blend-mode: luminosity;
+}
+
+/* Второй слой — mask-фото справа (mentorship.css:23-38): absolute, снизу
+   140px @max-1023 — мобильная база (mentorship.css:111) / 156px от lg
+   (mentorship.css:27), ширина 80% → 62%; z -1 (DOM после __bg — красится
+   над ним, под контентом). Маска 22% (mentorship.css:30-31); #000
+   оригинала → var(--ui-color-text) — маска-градиент, не цвет краски
+   (прецедент hro__marquee, hero.css:163 → color-text). */
+.msh__photo {
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 8.75rem;
+  z-index: -1;
+  width: 80%;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, var(--ui-color-text) 22%);
+  mask-image: linear-gradient(90deg, transparent 0%, var(--ui-color-text) 22%);
+}
+
+@media (min-width: 1024px) {
+  .msh__photo {
+    bottom: 9.75rem;
+    width: 62%;
+  }
+}
+
+.msh__photo img {
+  box-sizing: border-box;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+}
+
+/* Внутренняя сетка: min-height 552px (mentorship.css:41) от lg; лестница
+   380px @max-1023 (mentorship.css:110) → ступень 768, 300px @max-767
+   (mentorship.css:118) — мобильная база. */
+.msh__inner {
+  box-sizing: border-box;
+  min-height: 18.75rem;
+}
+
+@media (min-width: 768px) {
+  .msh__inner {
+    min-height: 23.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .msh__inner {
+    min-height: 34.5rem;
+  }
+}
+
+/* Заголовок: max-width 894px (mentorship.css:45), mb 48px (mentorship.css:46)
+   от md / 24px @max-767 (mentorship.css:116) — база; fs — роль ui-h2
+   (лестница fs-h2), @max-767 34px «как есть» (mentorship.css:116) — база с
+   восстановлением роли от md. lh 1.3 (mentorship.css:49) и цвет on-dark
+   (mentorship.css:51) — override роли (ui-h2 несёт lh 1.1 и heading). */
+.msh__title {
+  box-sizing: border-box;
+  max-width: 55.875rem;
+  margin-bottom: var(--ui-space-5);
+  color: var(--ui-color-text-on-dark);
+  font-size: 2.125rem;
+  line-height: 1.3;
+}
+
+@media (min-width: 768px) {
+  .msh__title {
+    margin-bottom: var(--ui-space-7);
+    font-size: var(--ui-fs-h2);
+  }
+}
+
+/* Текст: max-width 514px (mentorship.css:55), lh 1.25 (mentorship.css:57) и
+   ls −0.02em (mentorship.css:58) — override роли ui-lead (1.35/normal);
+   fs несёт роль (лестница fs-lead: 18px @max-767 = mentorship.css:117). */
+.msh__text {
+  box-sizing: border-box;
+  max-width: 32.125rem;
+  color: var(--ui-color-text-on-dark);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+/* Rail-полоса карточек-тегов (mentorship.css:63-72): flex-лента со
+   скроллом, gap 24px; отступ слева «под контейнер» — max(container-pad,
+   (100vw − container-max)/2) со ступенями pad оригинала (аналог
+   ui-container: 16 → 24 md → 32 lg); справа 16px; скроллбар скрыт. */
+.msh__rail {
+  box-sizing: border-box;
+  display: flex;
+  gap: var(--ui-space-5);
+  overflow-x: auto;
+  padding-right: var(--ui-space-4);
+  padding-left: max(var(--ui-container-pad), (100vw - var(--ui-container-max)) / 2);
+  scrollbar-width: none;
+}
+
+@media (min-width: 768px) {
+  .msh__rail {
+    padding-left: max(var(--ui-container-pad-md), (100vw - var(--ui-container-max)) / 2);
+  }
+}
+
+@media (min-width: 1024px) {
+  .msh__rail {
+    padding-left: max(var(--ui-container-pad-lg), (100vw - var(--ui-container-max)) / 2);
+  }
+}
+
+.msh__rail::-webkit-scrollbar {
+  display: none;
+}
+
+/* Карточка rail (mentorship.css:74-86): flex-базис 429px (mentorship.css:75)
+   от lg / 300px @max-767 (mentorship.css:119) — мобильная база; min-height
+   108px (mentorship.css:80); padding 20px «как есть» (mentorship.css:81,
+   вне шкалы §3.2 — прецедент pstr-card); заливка blue-700
+   (mentorship.css:82) — семантика --ui-color-surface-blue-deep (tokens/
+   semantic.css:66); радиус --radius-card 16px = md. Курсор — псевдо-
+   навигация rail оригинала (постраничный скролл на JS — не переносится,
+   Out of scope поведения). */
+.msh__card {
+  box-sizing: border-box;
+  display: flex;
+  flex: 0 0 18.75rem;
+  gap: var(--ui-space-4);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 6.75rem;
+  padding: 1.25rem;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-blue-deep);
+  transition: background var(--ui-transition);
+  cursor: pointer;
+}
+
+@media (min-width: 1024px) {
+  .msh__card {
+    flex: 0 0 26.8125rem;
+  }
+}
+
+/* Активная карточка (mentorship.css:88-91): is-active оригинала →
+   BEM-модификатор --active (гейт префиксов слоя — .is-* чужой крючок).
+   Градиент E88A2C→D9A441 (mentorship.css:90) вне токенов — хук
+   --msh-card-active-bg (прецедент --hro-tag-bg T17.15): дефолт — токен
+   accent, одобренная строка — цветовая строка сайт-зоны (hex в ДС не едет,
+   гейт слоя; рендер пилота — pilot.css). */
+.msh__card--active {
+  background: var(--msh-card-active-bg, var(--ui-color-accent));
+}
+
+@media (hover: hover) {
+  .msh__card:hover {
+    background: var(--msh-card-active-bg, var(--ui-color-accent));
+  }
+}
+
+/* Заголовок карточки: fs-body/fw-body-bold (mentorship.css:94-95), lh 1.35
+   (mentorship.css:96) — override lh-роли; цвет on-dark (mentorship.css:98). */
+.msh__card-title {
+  box-sizing: border-box;
+  color: var(--ui-color-text-on-dark);
+  font-size: var(--ui-fs-body);
+  font-weight: var(--ui-fw-body-bold);
+  line-height: 1.35;
+}
+
+/* Thumb карточки: 88×68px (mentorship.css:103-104), cover, радиус
+   --radius-small 8px = sm (mentorship.css:106). */
+.msh__card-thumb {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  object-fit: cover;
+  width: 5.5rem;
+  height: 4.25rem;
+  border-radius: var(--ui-radius-sm);
+}
+
+/* ════════════════ Капсула вакансий (T18.2) — связка vcp ════════════════
+ *
+ * Порт капсулы «Найди своё призвание / свою команду» career-portal
+ * (.vacancy-capsule, src/blocks/vacancy-capsule/vacancy-capsule.css —
+ * строки в комментариях; блок v2 главной, index-2.html:444-451 и 691-698 —
+ * две позиции): плашка-пилюля «label + CTA-кнопка», контейнер-внутренность
+ * 80px. Разметка канона — patterns/landing-section/landing-section.html
+ * (секция lsp-capsule; пин синхронности — выше).
+ *
+ * Мобильная база ДС: ступень @max-767 (vacancy-capsule.css:45-58)
+ * инвертирована mobile-first — база колонкой, включение строки от md.
+ * Высота секции 176.5px (vacancy-capsule.css:2) — min-height «как есть»
+ * (border-box; прецедент hro — декларативные пропорции min-height).
+ */
+
+/* Секция: паддинг 48px 0 (vacancy-capsule.css:3 = space-7) от md; мобильная
+   база 32px 0 @max-767 (vacancy-capsule.css:46 = space-6). */
+.vcp {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  padding: var(--ui-space-6) 0;
+}
+
+@media (min-width: 768px) {
+  .vcp {
+    min-height: 11.03125rem; /* 176.5px vacancy-capsule.css:2 «как есть» */
+    padding: var(--ui-space-7) 0;
+  }
+}
+
+/* Контейнер-внутренность (vacancy-capsule.css:6-11): flex; на мобильной
+   базе — колонка stretch (vacancy-capsule.css:47), от md — строка по
+   центру (vacancy-capsule.css:8-9); gap 0 — стык пилюль без зазора. */
+.vcp__inner {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  align-items: stretch;
+  justify-content: center;
+}
+
+@media (min-width: 768px) {
+  .vcp__inner {
+    flex-direction: row;
+  }
+}
+
+/* Label-пилюля (vacancy-capsule.css:13-27): 80px высота (vacancy-capsule.css:16)
+   от md / 64px @max-767 (vacancy-capsule.css:49) — база; паддинг 0 56px
+   «как есть» (vacancy-capsule.css:17, вне шкалы §3.2) / 0 24px база
+   (vacancy-capsule.css:50 = space-5); fs 36px «как есть» (vacancy-capsule.css:20,
+   вне тройки ролей T3.3) / 20px база (vacancy-capsule.css:51); заливка
+   blue-50 (vacancy-capsule.css:18) — surface-muted; цвет primary
+   (vacancy-capsule.css:23); fw-h1/lh 1.1 (vacancy-capsule.css:21-22).
+   Радиус: слева (pill 0 0 pill) от md (vacancy-capsule.css:19); на базе —
+   pill pill 0 0 (колонка, vacancy-capsule.css:52). */
+.vcp__label {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  height: 4rem;
+  padding: 0 var(--ui-space-5);
+  border-radius: var(--ui-radius-pill) var(--ui-radius-pill) 0 0;
+  background-color: var(--ui-color-surface-muted);
+  color: var(--ui-color-primary);
+  font-size: 1.25rem;
+  font-weight: var(--ui-fw-h1);
+  line-height: 1.1;
+  transition: background-color var(--ui-transition); /* vacancy-capsule.css:24 */
+}
+
+@media (min-width: 768px) {
+  .vcp__label {
+    height: 5rem;
+    padding: 0 3.5rem;
+    border-radius: var(--ui-radius-pill) 0 0 var(--ui-radius-pill);
+    font-size: 2.25rem;
+  }
+}
+
+@media (hover: hover) {
+  .vcp__label:hover {
+    background-color: var(--ui-color-surface-hover); /* blue-100 vacancy-capsule.css:27 */
+  }
+}
+
+/* CTA-кнопка (vacancy-capsule.css:29-43): 80px от md / 64px база; паддинг
+   0 44px «как есть» (vacancy-capsule.css:34, вне шкалы §3.2 — на всех
+   ступенях); gap 12px (vacancy-capsule.css:32 = space-3); заливка accent
+   (vacancy-capsule.css:35) — hover accent-light (vacancy-capsule.css:43) =
+   --ui-color-accent-hover (пара одобренного дизайна, tokens/semantic.css:43);
+   fs 18px (vacancy-capsule.css:37), fw-body-bold, on-dark. justify-content:
+   центр подписи только на колонке (vacancy-capsule.css:56) — от md дефолт
+   flex-start (vacancy-capsule.css:30). */
+.vcp__btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  gap: var(--ui-space-3);
+  align-items: center;
+  justify-content: center;
+  height: 4rem;
+  padding: 0 2.75rem;
+  border-radius: 0 0 var(--ui-radius-pill) var(--ui-radius-pill);
+  background-color: var(--ui-color-accent);
+  color: var(--ui-color-text-on-dark);
+  font-size: 1.125rem;
+  font-weight: var(--ui-fw-body-bold);
+  transition: background-color var(--ui-transition); /* vacancy-capsule.css:40 */
+}
+
+@media (min-width: 768px) {
+  .vcp__btn {
+    justify-content: flex-start;
+    height: 5rem;
+    border-radius: 0 var(--ui-radius-pill) var(--ui-radius-pill) 0;
+  }
+}
+
+@media (hover: hover) {
+  .vcp__btn:hover {
+    background-color: var(--ui-color-accent-hover);
+  }
+}

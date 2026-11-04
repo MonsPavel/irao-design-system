@@ -1,9 +1,10 @@
 # Паттерн «Landing-секция» (T8.3)
 
-Правила сборки лендинг-секций из системных примитивов + mini-эталон из десяти
-секций (светлая / тёмная / с-изображением full-bleed / с-фото-фоном — T17.3 /
-nav-карточки и лента логотипов — T17.9 / hero, adv-marquee, спец-сетка
-«Медиа», cover-hero — T17.15).
+Правила сборки лендинг-секций из системных примитивов + mini-эталон из
+двенадцати секций (светлая / тёмная / с-изображением full-bleed /
+с-фото-фоном — T17.3 / nav-карточки и лента логотипов — T17.9 / hero,
+adv-marquee, спец-сетка «Медиа», cover-hero — T17.15 / наставничество,
+капсула вакансий — T18.2).
 Эталон целиком: [`landing-section.html`](landing-section.html) — он же стенд
 `/showcase/dist/stands/patterns/landing-section.html` (генерируется
 `showcase/build.mjs`).
@@ -472,6 +473,80 @@ lead-сводка 2 колонки; ступени 2 (md) → 1 (база). Ка
 сайт-зона — тон-строки тегов hero на хуке `--hro-tag-bg` (таблица выше).
 Compare-пробы `hero`/`marquee-line` — на крючках слоя.
 
+## Наставничество и капсула вакансий (msh / vcp, T18.2)
+
+Два макро-блока v2 главной career-portal вынесены в паттерн-слой целиком
+(`dist/ui-patterns.css`, гейт префиксов `msh|vcp`); разметка канона —
+секции 11–12 эталона. Значения — оригинал 1:1 с источниками
+`mentorship.css` / `vacancy-capsule.css` в комментариях; лестницы
+`@max-1023/767` переформулированы mobile-first (768/1024 шкалы T2.5).
+
+### Наставничество (msh)
+
+Секция «Наставничество в реальном времени» (порт `.mentorship`):
+фото-фон — примитив `ui-section--photo` (T17.3, VI-инвариант — не голым
+IMG): слой `__bg` несёт заливку primary и blend-фото (IMAGE fill
+LUMINOSITY @ 40%), mask-фото справа — второй декоративный слой канона;
+внутренняя сетка min-height 552px от lg (380/300 — ступени) и нижняя
+rail-полоса карточек-тегов 108px с горизонтальным скроллом (отступ слева —
+`max(container-pad, (100vw − container-max)/2)` со ступенями pad, скроллбар
+скрыт):
+
+```html
+<section class="ui-section ui-section--photo msh" aria-labelledby="msh-title">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="bg.jpg" alt="" width="1600" height="900" loading="lazy">
+  </div>
+  <div class="msh__photo" aria-hidden="true">
+    <img src="photo.png" alt="" width="920" height="624" loading="lazy">
+  </div>
+  <div class="ui-container msh__inner">
+    <h2 class="ui-h2 msh__title" id="msh-title">Наставничество…</h2>
+    <p class="ui-lead msh__text">…</p>
+  </div>
+  <div class="msh__rail">
+    <article class="msh__card">
+      <h3 class="msh__card-title">…</h3>
+      <img class="msh__card-thumb" src="thumb.png" alt="" width="88" height="68" loading="lazy">
+    </article>
+    <article class="msh__card msh__card--active">…</article>
+  </div>
+</section>
+```
+
+- Заголовок/текст — роли `ui-h2`/`ui-lead`; канон несёт override ролей
+  оригинала (lh 1.3/1.25, ls −0.02em текста, 34px мобильной базы заголовка).
+- Активная карточка — `msh__card--active` (is-active оригинала →
+  BEM-модификатор, гейт префиксов слоя). Тон — хук `--msh-card-active-bg`:
+  дефолт токен (`--ui-color-accent`), одобренный градиент E88A2C→D9A441
+  (mentorship.css:90) — цветовая строка сайт-зоны (прецедент
+  `--hro-tag-bg` T17.15).
+- Постраничный скролл rail оригинала (JS) — не часть связки; канон несёт
+  ленту со скроллом и состояние разметки.
+
+### Капсула вакансий (vcp)
+
+Плашка-пилюля «Найди своё призвание / свою команду» (порт
+`.vacancy-capsule`): label — ссылка-заголовок blue-50 (fs 36px «как есть»),
+btn — CTA-ссылка accent (80px от md); от md — строка по центру, на
+мобильной базе — колонка stretch (радиусы складываются в пилюлю):
+
+```html
+<section class="ui-section vcp" aria-label="Капсула вакансий">
+  <div class="ui-container vcp__inner">
+    <a class="vcp__label" href="/vacancies">Найди своё призвание</a>
+    <a class="vcp__btn" href="/vacancies">Все 144 вакансии
+      <svg … aria-hidden="true">…</svg>
+    </a>
+  </div>
+</section>
+```
+
+- Высота секции 176.5px оригинала — `min-height` «как есть» от md (border-box;
+  прецедент hro — декларативные пропорции min-height); на мобильной базе
+  секция от контента.
+- Hover-пары (blue-100/accent-light) — под гвардом `(hover: hover)` (EPIC-4).
+
 ## A11y
 
 - Заголовок секции — h2 с ролью `ui-h2`; секция именована
@@ -518,5 +593,7 @@ Compare-пробы `hero`/`marquee-line` — на крючках слоя.
 - Юнит-пины контракта: `tests/unit/pattern-landing-section.test.js`.
 - Юнит-пины лендинг-композиций (hro/mrq/mdl/cvh, тон-хук, синхронность
   дока и слоя, миграция пилота): `tests/unit/landing-compositions.test.js`.
+- Юнит-пины наставничества и капсулы (msh/vcp, синхронность дока и слоя,
+  гейт префиксов): `tests/unit/pattern-mentorship-capsule.test.js`.
 - Поверхность браузера (4 секции, computed on-dark-цвета, bleed-геометрия по
   вьюпортам, axe, адаптив, эталоны): `tests/e2e/pattern-landing-section.spec.js`.
