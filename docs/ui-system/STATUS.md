@@ -127,3 +127,21 @@
 | T17.14 | done | смержена |
 | T17.15 | done | смержена 29.10 (вручную): gate доведён — эталоны landing-section пересняты на merged-состоянии с каркасом PR #9 (кнопка «Разделы» <768, −643px mobile), спека 25/25 ×2, unit 2029, lint чист |
 | T17.16 | done | смержена |
+| T18.1 | todo | index: students--photographic + index-2: снять лишнюю why-us (build.mjs) |
+| T18.2 | todo | index-2: mentorship + vacancy-capsule ×2 — новые макро-блоки, каноны слоя msh-/vcp- |
+| T18.3 | todo | company.html: 6 лент + 2-й banner + фотогалерея (−3328px) |
+| T18.4 | todo | career-track.html: 3 секции + кнопка cover-hero (−1475px) |
+| T18.5 | todo | education.html: интро/каталог/направления (−980px) |
+| T18.6 | todo | internships/practices: секция-8 (−555) + ритм лендингов (−679/−606) |
+| T18.7 | todo | vacancies: lpp-row — пилюля «Откликнуться» всегда справа (+400px, слой) |
+| T18.8 | todo | vacancy-N: ритм dpp__section −15…−53 (−108px на страницу, слой) |
+| T18.9 | todo | точечный хвост: companies/events/education-catalog/internship-apply/article/events-search/404 |
+| T18.10 | todo | макро-вынос: page-head/page-subtitle → слой (php-) |
+| T18.11 | todo | макро-вынос: строка табов-ссылок (tabs-row/links) → слой — GAP REPORT §11.4 |
+| T18.12 | todo | макро-вынос: why-us (стекло) → слой (whu-) — кандидат §11.4 |
+| T18.13 | todo | макро-вынос: production v1/v2 раскладки → слой (prd-) поверх ui-carousel |
+| T18.14 | todo | макро-вынос: directions + holding → слой (dir-/hld-) |
+| T18.15 | todo | макро-вынос: company-семейства (5 шт) → dpp-каноны |
+| T18.16 | todo | макро-вынос: vacancy-search (панель фильтров) + dir-modal → слой |
+| T18.17 | todo | макро-вынос: батч cp-остатков (16 семейств — вынос или судьба «остаётся») |
+| T18.18 | todo | закрывающая: ценз/allowlist, BLOCK_PROBES, REPORT §8/§11, финальный прогон 43×2 |
