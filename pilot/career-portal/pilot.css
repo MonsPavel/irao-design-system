@@ -706,6 +706,133 @@
    правила cp-students/cp-employers-семейства сняты (~75 строк, гейт
    Adoption). ── */
 
+/* ── students photographic (T18.1): вариант фото-карточек второй секции
+   «Школьникам и студентам» (.students--photographic оригинала,
+   students.css) — сайт-зона ПОКА, вынос в слой — T18.17. Семейство stu-
+   (имя по стыку — конвенция T18.17): cp-* дало бы новое cp-семейство
+   «students» вне allowlist ценза T17.16 (пороги семейств не трогаем),
+   pstr- в pilot.css запрещён пином T17.18 (правила постера — в слое).
+   Каркас карточки — ui-card--media (прецедент T17.5); действие — канон
+   слоя pstr-card__action, пара «white» — хуками на карточке. ── */
+
+.stu-photo {
+  padding: 8.75rem 0 4.5rem; /* 140/72 students.css:2 «как есть» (ритм ui-section погашен) */
+}
+
+.stu-photo__head {
+  display: flex; /* students.css:7-13 — flex space-between, title + пилюля */
+  gap: var(--ui-space-5); /* 24px students.css:11 */
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ui-space-7); /* 48px students.css:12 */
+}
+
+.stu-photo__more {
+  box-sizing: border-box;
+  display: inline-flex; /* students.css:24 */
+  gap: var(--ui-space-2); /* 8px students.css:26 */
+  align-items: center;
+  height: 3.25rem; /* 52px students.css:27 */
+  padding: 1.25rem; /* 20px students.css:28 «как есть», вне шкалы §3.2 (контент центрируется высотой; space-5 = 24px — не 20px, ревью T18.1) */
+  border-radius: var(--ui-radius-pill); /* 100px students.css:29 */
+  color: var(--ui-color-primary); /* students.css:33 */
+  font-size: var(--ui-fs-small); /* 14px students.css:30 */
+  font-weight: var(--ui-fw-small); /* 500 students.css:31 */
+  text-decoration: none;
+  transition: background-color var(--ui-transition); /* students.css:34 */
+}
+
+@media (hover: hover) {
+  .stu-photo__more:hover {
+    background-color: var(--ui-color-surface-hover); /* surface-blue-100 students.css:37 */
+  }
+}
+
+.stu-photo__grid {
+  gap: 2.25rem; /* 36px students.css:42 «как есть», вне шкалы §3.2 */
+}
+
+@media (min-width: 1024px) {
+  .stu-photo__grid {
+    /* 3 колонки — students.css:41 (≤1023 — колонка, students.css:171) */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.stu-photo-card {
+  --pstr-action-bg: var(--ui-color-surface); /* пара «white» students.css:167 */
+  --pstr-action-color: var(--ui-color-text);
+  overflow: hidden; /* клип фото — students.css:92 (канон pstr-card слоя) */
+  min-height: 23.75rem; /* 380px students.css:179 — мобильная база (лестница pstr-card T17.18) */
+  padding: 1.25rem; /* 20px students.css:89 «как есть», вне шкалы §3.2 — перекрывает каркас ui-card (24px, ui-card.css:65; ревью T18.1) */
+  border: 0; /* рамки ui-card у карточек оригинала нет */
+  border-radius: var(--ui-radius-md); /* --radius-card 16px оригинала; ui-card base — md */
+  background-color: var(--ui-color-primary); /* students.css:62 — все тоны navy */
+  color: var(--ui-color-text-on-dark);
+}
+
+@media (min-width: 768px) {
+  .stu-photo-card {
+    min-height: 27.5rem; /* 440px students.css:172 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .stu-photo-card {
+    min-height: 37.5rem; /* 600px students.css:88 */
+  }
+}
+
+.stu-photo-card__body {
+  display: flex; /* students.css:98-103 — тело поверх фото (z-пара) */
+  position: relative;
+  z-index: 1;
+  flex-direction: column;
+  gap: var(--ui-space-3); /* 12px students.css:102 */
+}
+
+.stu-photo-card__title,
+.stu-photo-card__text {
+  color: var(--ui-color-text-on-dark); /* students.css:113/121 */
+}
+
+.stu-photo-card__photo {
+  position: absolute;
+  top: 13.75rem; /* 220px students.css:64 */
+  right: 0;
+  bottom: auto; /* students.css:65 */
+  left: 0;
+  object-fit: fill; /* students.css:67 */
+  width: 100%; /* students.css:54 */
+  height: auto; /* students.css:66 */
+  border-radius: var(--ui-radius-lg) var(--ui-radius-lg) 0 0; /* 24px students.css:68 */
+  clip-path: inset(0 round var(--ui-radius-lg) var(--ui-radius-lg) 0 0); /* students.css:69 */
+}
+
+/* Квирки первых двух карточек — «как есть» students.css:71-79 (стык фото
+   с радиусом карточки 16px против радиуса фото 24px). */
+.stu-photo-card:nth-child(1) .stu-photo-card__photo {
+  top: 13.9375rem; /* 223px */
+  left: 1px;
+  width: calc(100% - 1px);
+}
+
+.stu-photo-card:nth-child(2) .stu-photo-card__photo {
+  top: 13.875rem; /* 222px */
+  width: calc(100% + 2px);
+}
+
+/* Вариант 2 (index-2): ритм 72/72 (students.css:5); карточки 520px —
+   поверх лестницы на всех ширинах (0,2,0 против 0,1,0 медиа-лестницы,
+   students.css:81). */
+.stu-photo--v2 {
+  padding: 4.5rem 0;
+}
+
+.stu-photo--v2 .stu-photo-card {
+  min-height: 32.5rem; /* 520px */
+}
+
 /* ── media: сетка главной — ПАТТЕРН-СЛОЙ (T17.15) ──
    Спец-сетка «Медиа» — канон mdl (ds/ui-patterns.css): 4 колонки от lg,
    2 от md, 1 в мобильной базе; mdl__lead — сводка 2 колонки (от md);

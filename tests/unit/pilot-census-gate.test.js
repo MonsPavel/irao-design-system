@@ -12,11 +12,15 @@
  *  - Пороги — явные числа по факту итога T17.16 (Implementation
  *    requirements п.1: «не „меньше“, а конкретное значение»; деградация —
  *    проблема гейта → exit 1 в CLI и в compare):
- *      MAX_PILOT_CSS_LINES 1290 — сырые строки файла (деградация
+ *      MAX_PILOT_CSS_LINES 1417 — сырые строки файла (деградация
  *      запрещена); errata 31.10: 1040 → 1162 → 1169 → 1290 (батчи
- *      паритета + «все страницы» — v2-модификаторы);
- *      MAX_PILOT_CSS_CODE_LINES 723 — цель эпика в метрике кода
- *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723;
+ *      паритета + «все страницы» — v2-модификаторы); errata T18.1:
+ *      1290 → 1417 (вариант фото-карточек students--photographic —
+ *      сайт-зона stu-photo ПОКА, вынос в слой — T18.17; файл был ровно
+ *      на потолке);
+ *      MAX_PILOT_CSS_CODE_LINES 819 — цель эпика в метрике кода
+ *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723; errata T18.1:
+ *      723 → 819 (тот же курс);
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -163,10 +167,10 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1290);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(723);
+    expect(MAX_PILOT_CSS_LINES).toBe(1417);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(819);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(30);
@@ -189,9 +193,13 @@ describe('пороги ценза — числа зафиксированы по
       // lnk-card студентского блока сняты из сайт-зоны): сырые 1243→1217,
       // код 678→661; пороги-потолки НЕ двигаются (спека T17.18 «пороги
       // не двигаются»), cp-селекторы/семейства не менялись (lnk-правила
-      // не несли cp-крючков):
-      expect(metrics.css.lines).toBe(1290);
-      expect(metrics.css.codeLines).toBe(723);
+      // не несли cp-крючков);
+      // T18.1 (фото-карточки students--photographic — сайт-зона stu-photo
+      // ПОКА, вынос в слой — T18.17): сырые 1290→1417, код 723→819;
+      // файл был ровно на потолке — errata по процедуре census.mjs,
+      // cp-селекторы/семейства не менялись (stu- не cp-):
+      expect(metrics.css.lines).toBe(1417);
+      expect(metrics.css.codeLines).toBe(819);
       expect(metrics.css.selectors).toBe(134);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(28);
