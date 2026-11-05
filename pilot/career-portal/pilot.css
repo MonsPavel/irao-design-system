@@ -994,7 +994,9 @@
 /* track-chips (pages.css:680–692) на группе ui-chip: шаг 12 (pages.css:680 —
    против 8 канона чипов), низ 32; пилюля — вид track-chip «как есть»:
    паддинг 10/24 без рамки (высота 37 = lh normal), тон blue-50/primary.
-   Активное состояние — канон aria-pressed (правило пилота data-cp-filter-group). */
+   Активное состояние — канон aria-pressed (правило пилота data-cp-filter-group):
+   пара-хук 0-3-0 старше тон-хука 0-2-0 — иначе :where-канон 0-1-0
+   (ui-chip.css:103) тон-хуком перебит и нажатый чип неотличим (ревью T18.4). */
 .ctr-chips {
   gap: var(--ui-space-3);
   margin: 0 0 var(--ui-space-6);
@@ -1006,6 +1008,12 @@
   background-color: var(--ui-color-surface-muted);
   color: var(--ui-color-primary);
   line-height: normal; /* высота пилюли 37 оригинала (lh normal кнопки) */
+}
+
+.ctr-chips .ui-chip__pill[aria-pressed='true'] {
+  border-color: var(--ui-color-primary);
+  background-color: var(--ui-color-primary);
+  color: var(--ui-color-text-on-dark);
 }
 
 /* Заголовки секций — mb 32 (база .section__title, components.css:341); имя
@@ -1111,7 +1119,7 @@
 .ctr-test {
   box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
   display: grid;
-  gap: var(--ui-space-6);
+  gap: var(--ui-space-7); /* 48px pages.css:740 (ревью T18.4: space-6 = 32px) */
   grid-template-columns: minmax(0, 1fr);
   padding: 2rem;
   border-radius: var(--ui-radius-md);

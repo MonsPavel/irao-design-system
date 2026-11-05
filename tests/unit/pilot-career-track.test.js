@@ -222,6 +222,13 @@ describe('pilot.css — позиционные хуки ctr- (T18.4 Scope: бе�
     expect(pill).toContain('line-height: normal');
   });
 
+  it('активный чип трека — пара канона ui-chip (заливка primary/подпись on-dark, pages.css:692 .track-chip.is-active): хук-пара 0-3-0 старше тон-хука 0-2-0, иначе :where-канон 0-1-0 перебит (ревью T18.4: замер dist — активный неотличим от неактивного)', () => {
+    const active = blockOf(pilotCss, ".ctr-chips .ui-chip__pill[aria-pressed='true']");
+    expect(active, 'заливка primary').toContain('background-color: var(--ui-color-primary)');
+    expect(active, 'подпись on-dark').toContain('color: var(--ui-color-text-on-dark)');
+    expect(active, 'рамка primary').toContain('border-color: var(--ui-color-primary)');
+  });
+
   it('этапы: пилюля 14/16 blue-50/radius-sm, активная blue-100 + тень accent «как есть» (pages.css:696–727); точка — одобренный литерал #C4CDDC на хуке --ctr-step-dot-bg (прецедент --msh-card-active-bg T18.2)', () => {
     const step = blockOf(pilotCss, '.ctr-step');
     expect(step).toContain('padding: 0.875rem 1rem');
@@ -244,10 +251,10 @@ describe('pilot.css — позиционные хуки ctr- (T18.4 Scope: бе�
     expect(blockOf(pilotCss, '.ctr-info__value')).toContain('line-height: 1.4');
   });
 
-  it('тест: интро — сетка 480px/1fr от lg (single column — мобильная база; pages.css:737–747, 788), фото 240→320, текст 1.45 «как есть»', () => {
+  it('тест: интро — сетка 480px/1fr от lg (single column — мобильная база; pages.css:737–747, 788), шаг 48 (pages.css:740 — токен space-7; ревью T18.4: space-6 давал 32px вместо 48), фото 240→320, текст 1.45 «как есть»', () => {
     const test = blockOf(pilotCss, '.ctr-test');
     expect(test).toContain('padding: 2rem');
-    expect(test).toContain('gap: var(--ui-space-6)');
+    expect(test).toContain('gap: var(--ui-space-7)');
     expect(test).toContain('grid-template-columns: minmax(0, 1fr)');
     const media = pilotCss.match(
       /@media \(min-width: 1024px\)\s*\{[^@]*?\.ctr-test\s*\{[\s\S]*?\}/,
