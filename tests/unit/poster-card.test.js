@@ -399,9 +399,11 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
     // T18.1: 1290→1417 / 723→819 — вариант stu-photo (фото-карточки,
     // pstr- в pilot.css по-прежнему запрещён);
     // T18.2: 1417→1431 / 819→822 — тон-строка карточек mentorship на хуке
-    // канона --msh-card-active-bg (блоки msh/vcp — на канонах слоя).
-    expect(MAX_PILOT_CSS_LINES).toBe(1431);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(822);
+    // канона --msh-card-active-bg (блоки msh/vcp — на канонах слоя);
+    // T18.3: 1431→1520 / 822→869 — позиционные хуки лент компании
+    // cp-company-feed (шаг/низ/nowrap/кламп, высоты фото карточек).
+    expect(MAX_PILOT_CSS_LINES).toBe(1520);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(869);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);

@@ -1292,8 +1292,8 @@ a.cp-intern-card {
    --practice/--articles/--events/--photos — крючки блок-проб compare
    (класс без CSS — прецедент cp-vac-side__promo, T16.5). */
 .cp-company-feed {
-  margin-bottom: 3.5rem;
   gap: 2.25rem;
+  margin-bottom: 3.5rem;
 }
 
 /* Строки вакансий ленты (lpp-row, T14.10): пилюля — без переноса (nowrap,
@@ -1316,9 +1316,9 @@ a.cp-intern-card {
 .cp-company-feed .lpp-row__short {
   display: -webkit-box;
   overflow: hidden;
+  line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  line-height: 1.45;
 }
 
 /* Карточки лент (ui-card--media, T17.5): паддинг 16px «как есть»
@@ -1360,8 +1360,8 @@ a.cp-intern-card {
    блок страницы (company-section-gap в оригинале не несёт); фото 260px
    «как есть» (pages.css:888–893), кадрирование/радиус — ui-image--cover. */
 .cp-company-feed--photos {
-  margin-bottom: 0;
   gap: var(--ui-space-5);
+  margin-bottom: 0;
 }
 
 .cp-company-feed--photos .ui-image {

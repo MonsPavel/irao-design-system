@@ -261,7 +261,9 @@ describe('pilot.css — тон активной карточки на хуке �
     expect(metrics.css.families, 'семейств mentorship/capsule в цензе нет').not.toContain(
       'mentorship',
     );
-    expect(metrics.css.families).toHaveLength(28);
+    // errata T18.3: семейство company-feed (позиционные хуки лент компании)
+    // — 28 → 29
+    expect(metrics.css.families).toHaveLength(29);
   });
 });
 
@@ -271,6 +273,7 @@ describe('ценз T17.16 — гейт чист после сборки блок
     const gate = runCensusGate(metrics);
     expect(gate.problems, 'гейт ценза чист').toEqual([]);
     expect(gate.newBlocks, 'новых cp-семейств 0').toEqual([]);
-    expect(ALLOWED_CP_FAMILIES, 'allowlist не расширялся').toHaveLength(30);
+    // errata T18.3: allowlist расширен семейством company-feed — 30 → 31
+    expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3').toHaveLength(31);
   });
 });

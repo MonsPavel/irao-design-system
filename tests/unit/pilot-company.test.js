@@ -144,8 +144,12 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   it('banner-card №1 «Практики и стажировки»: CTA-панель с фото-подложкой и ui-button «смотреть предложения» на internships.html (T18.3: контент/позиция оригинала company.html:45–52 — замена CTA vacancies.html из T15.2, лента вакансий теперь на странице); тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
     expect(companyHtml).toContain('<div class="ui-section ui-section--photo cp-company-banner">');
     expect(companyHtml).toContain('<div class="cp-company-banner__body ui-card ui-card--cta">');
-    expect(companyHtml).toContain('<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>');
-    expect(companyHtml).toContain('Посмотрите предложения практики и стажировки именно в нашей компании.');
+    expect(companyHtml).toContain(
+      '<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>',
+    );
+    expect(companyHtml).toContain(
+      'Посмотрите предложения практики и стажировки именно в нашей компании.',
+    );
     expect(companyHtml).toMatch(
       /<a class="ui-button ui-button--primary" href="internships.html">смотреть предложения<\/a>/,
     );
@@ -296,8 +300,14 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
       ['vac feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--vac">'],
       ['banner №1', '<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>'],
       ['intern feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--intern">'],
-      ['practice feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--practice">'],
-      ['articles feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">'],
+      [
+        'practice feed',
+        '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--practice">',
+      ],
+      [
+        'articles feed',
+        '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">',
+      ],
       ['banner №2', '<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>'],
       ['events feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--events">'],
       ['photos feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--photos">'],
@@ -361,8 +371,13 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
   });
 
   it('баннер №2 «Целевое обучение» (company.html:69–76): фото internship-4.png, кнопка — ui-button на education-catalog.html; тот же каркас cp-company-banner (переиспользование)', () => {
-    expect(companyHtml.match(/<div class="ui-section ui-section--photo cp-company-banner">/g)?.length ?? 0).toBe(2);
-    expect(companyHtml).toContain('<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>');
+    expect(
+      companyHtml.match(/<div class="ui-section ui-section--photo cp-company-banner">/g)?.length ??
+        0,
+    ).toBe(2);
+    expect(companyHtml).toContain(
+      '<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>',
+    );
     expect(companyHtml).toContain('Посмотрите предложения целевого обучения от нашей компании.');
     expect(companyHtml).toMatch(
       /<a class="ui-button ui-button--primary" href="education-catalog.html">смотреть предложения<\/a>/,
@@ -446,23 +461,50 @@ describe('T18.3: pilot.css — позиционные хуки лент cp-compa
 });
 
 describe('T18.3: compare.mjs — блок-пробы лент компании (AC: все 6 лент с Δ ≤ 8px)', () => {
-  const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\n  \],/)?.[1] ?? '';
+  const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\n\s{2}\],/)?.[1] ?? '';
 
   it('пары блок-проб: 6 лент + 2 баннера в порядке оригинала; пилотные селекторы — хуки cp-company-feed--*', () => {
-    for (const [name, original, pilot] of [
+    const probes = companyProbes.replace(/\r\n/g, '\n');
+    const expected = [
       ['company-vacancies', '.cards-grid--2', '.cp-company-feed--vac'],
       ['company-banner', '.banner-card', '.cp-company-banner'],
-      ['company-internships', '.cards-grid--2:nth-child(2 of .cards-grid--2)', '.cp-company-feed--intern'],
-      ['company-practices', '.cards-grid--2:nth-child(3 of .cards-grid--2)', '.cp-company-feed--practice'],
+      [
+        'company-internships',
+        '.cards-grid--2:nth-child(2 of .cards-grid--2)',
+        '.cp-company-feed--intern',
+      ],
+      [
+        'company-practices',
+        '.cards-grid--2:nth-child(3 of .cards-grid--2)',
+        '.cp-company-feed--practice',
+      ],
       ['company-articles', '.cards-grid--3:not(.company-photos)', '.cp-company-feed--articles'],
-      ['company-banner-2', '.banner-card:nth-child(2 of .banner-card)'],
-      ['company-events', '.cards-grid--3:not(.company-photos) ~ .cards-grid--3:not(.company-photos)', '.cp-company-feed--events'],
+      [
+        'company-banner-2',
+        '.banner-card:nth-child(2 of .banner-card)',
+        '.cp-company-feed--articles ~ .cp-company-banner',
+      ],
+      [
+        'company-events',
+        '.cards-grid--3:not(.company-photos) ~ .cards-grid--3:not(.company-photos)',
+        '.cp-company-feed--events',
+      ],
       ['company-photos', '.company-photos', '.cp-company-feed--photos'],
-    ]) {
-      expect(companyProbes, `проба ${name}`).toContain(`['${name}', '${original}'`);
-      if (pilot) expect(companyProbes, `пилотный селектор ${name}`).toContain(`'${pilot}']`);
+    ];
+    // форматирование массива — за prettier: пин смотрит на тройку
+    // «имя/селектор оригинала/селектор пилота» независимо от переносов
+    for (const [name, original, pilot] of expected) {
+      expect(probes, `проба ${name}: имя`).toContain(`'${name}'`);
+      expect(probes, `проба ${name}: селектор оригинала`).toContain(`'${original}'`);
+      expect(probes, `проба ${name}: селектор пилота`).toContain(`'${pilot}'`);
     }
-    expect(companyProbes.match(/company-/g)?.length ?? 0).toBeGreaterThanOrEqual(8);
+    // порядок проб = порядок блоков на странице
+    let at = -1;
+    for (const [name] of expected) {
+      const next = probes.indexOf(`'${name}'`);
+      expect(next, `${name} после предыдущего блока`).toBeGreaterThan(at);
+      at = next;
+    }
   });
 });
 
