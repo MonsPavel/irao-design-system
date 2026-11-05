@@ -567,6 +567,18 @@ const BLOCK_PROBES = {
   // блок гейтит высоту миграции (AC: порог ±4px). Оригинал — .timeline
   // (pages.css:1096); education/career-track таймлайна не несут (career-track
   // строит steps-bar — другая композиция, канона в ДС нет).
+  // T18.4: career-track — обложка (cover-hero 399) и три секции после
+  // поднавигации (треки 810 / тест 551 / статьи 500). Пары: обложка —
+  // .cover-hero → хук формы .ctr-cover на каркасе cvh; секция треков —
+  // id="tracks" с обеих сторон; тест — контейнер интерактива .test →
+  // .ctr-test (интро; quiz/result скрыты); статьи — сетка .cards-grid--4 →
+  // ui-grid--4 (крючки проб — не новые сущности: классы есть в разметке).
+  'career-track.html': [
+    ['ctr-cover', '.cover-hero', '.ctr-cover'],
+    ['ctr-tracks', '#tracks', '#tracks'],
+    ['ctr-test', '.test', '.ctr-test'],
+    ['ctr-articles', '.cards-grid--4', '.ui-grid--4'],
+  ],
   'internships.html': [['timeline', '.timeline', '.tlp']],
   'practices.html': [['timeline', '.timeline', '.tlp']],
 };
