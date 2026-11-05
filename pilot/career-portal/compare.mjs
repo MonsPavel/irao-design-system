@@ -540,11 +540,27 @@ const BLOCK_PROBES = {
     // Фото-секция ui-section--photo (T17.3): CTA-баннер №1 «Практики и
     // стажировки» (banner-card оригинала, pages.css:656–674).
     ['company-banner', '.banner-card', '.cp-company-banner'],
-    ['company-internships', '.cards-grid--2:nth-child(2 of .cards-grid--2)', '.cp-company-feed--intern'],
-    ['company-practices', '.cards-grid--2:nth-child(3 of .cards-grid--2)', '.cp-company-feed--practice'],
+    [
+      'company-internships',
+      '.cards-grid--2:nth-child(2 of .cards-grid--2)',
+      '.cp-company-feed--intern',
+    ],
+    [
+      'company-practices',
+      '.cards-grid--2:nth-child(3 of .cards-grid--2)',
+      '.cp-company-feed--practice',
+    ],
     ['company-articles', '.cards-grid--3:not(.company-photos)', '.cp-company-feed--articles'],
-    ['company-banner-2', '.banner-card:nth-child(2 of .banner-card)', '.cp-company-feed--articles ~ .cp-company-banner'],
-    ['company-events', '.cards-grid--3:not(.company-photos) ~ .cards-grid--3:not(.company-photos)', '.cp-company-feed--events'],
+    [
+      'company-banner-2',
+      '.banner-card:nth-child(2 of .banner-card)',
+      '.cp-company-feed--articles ~ .cp-company-banner',
+    ],
+    [
+      'company-events',
+      '.cards-grid--3:not(.company-photos) ~ .cards-grid--3:not(.company-photos)',
+      '.cp-company-feed--events',
+    ],
     ['company-photos', '.company-photos', '.cp-company-feed--photos'],
   ],
   // Таймлайн «Как попасть» (T17.10): adoption на связки tlp-* паттерн-слоя;
