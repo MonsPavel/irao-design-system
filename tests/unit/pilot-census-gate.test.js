@@ -12,7 +12,7 @@
  *  - Пороги — явные числа по факту итога T17.16 (Implementation
  *    requirements п.1: «не „меньше“, а конкретное значение»; деградация —
  *    проблема гейта → exit 1 в CLI и в compare):
- *      MAX_PILOT_CSS_LINES 1738 — сырые строки файла (деградация
+ *      MAX_PILOT_CSS_LINES 1894 — сырые строки файла (деградация
  *      запрещена); errata 31.10: 1040 → 1162 → 1169 → 1290 (батчи
  *      паритета + «все страницы» — v2-модификаторы); errata T18.1:
  *      1290 → 1417 (вариант фото-карточек students--photographic —
@@ -23,10 +23,13 @@
  *      (позиционные хуки лент компании cp-company-feed); errata T18.4:
  *      1520 → 1738 (позиционные хуки career-track ctr- — форма
  *      cover-hero на каркасе cvh, вид чипов/этапов/step-info/теста);
- *      MAX_PILOT_CSS_CODE_LINES 1013 — цель эпика в метрике кода
+ *      errata T18.5: 1738 → 1894 (позиционные хуки education edu- —
+ *      форма cover-hero на каркасе cvh, группа тегов-фильтров, hero
+ *      компаний, шапки/сетки; карточки к канону оригинала);
+ *      MAX_PILOT_CSS_CODE_LINES 1089 — цель эпика в метрике кода
  *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723; errata T18.1:
  *      723 → 819 (тот же курс); errata T18.2: 819 → 822; errata T18.3:
- *      822 → 869; errata T18.4: 869 → 1013;
+ *      822 → 869; errata T18.4: 869 → 1013; errata T18.5: 1013 → 1089;
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -173,10 +176,10 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.4', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.5', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1738);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1013);
+    expect(MAX_PILOT_CSS_LINES).toBe(1894);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1089);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
@@ -220,10 +223,18 @@ describe('пороги ценза — числа зафиксированы по
       // .ctr-chips .ui-chip__pill[aria-pressed='true'] — :where-канон 0-1-0
       // был перебит тон-хуком 0-2-0): сырые 1520→1738, код 869→1013,
       // селекторы 147→148; семейства/allowlist НЕ менялись (ctr- — не cp-,
-      // прецедент stu- T18.1):
-      expect(metrics.css.lines).toBe(1738);
-      expect(metrics.css.codeLines).toBe(1013);
-      expect(metrics.css.selectors).toBe(148);
+      // прецедент stu- T18.1);
+      // T18.5 (позиционные хуки education edu-: форма cover-hero на
+      // каркасе cvh — прецедент .ctr-cover, группа тегов-фильтров
+      // организаций, hero компаний, шапки/сетки «как есть»; карточки к
+      // канону оригинала — cp-org-card/cp-offer-card паддинг 24, мета
+      // колонкой, cp-adv-grid шаг 24, пары заголовков карточек lh 1.3/без трекинга, flex-shrink: 0 кнопке шапки): сырые 1738→1894, код 1013→1089,
+      // селекторы 148→152 (.edu-cover .cp-page-subtitle, новый
+      // спан .cp-offer-card__company, пары .cp-org-card/.cp-offer-card × .ui-h6); семейства/allowlist НЕ менялись
+      // (edu- — не cp-, прецедент ctr- T18.4):
+      expect(metrics.css.lines).toBe(1894);
+      expect(metrics.css.codeLines).toBe(1089);
+      expect(metrics.css.selectors).toBe(152);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(29);
       expect(metrics.js.lines).toBe(187);

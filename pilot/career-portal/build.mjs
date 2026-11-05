@@ -473,7 +473,11 @@ function orgCard(o) {
  *  h2 перед карточками; каталог education-catalog собирается с 'h2'
  *  (первый offer — сразу за h1 страницы). T16.12: направление —
  *  ui-h6--primary (20/500, .offer-card__direction оригинала), шорт —
- *  color-text без muted (.offer-card__short). */
+ *  color-text без muted (.offer-card__short). T18.5: мета — колонка
+ *  .offer-card__meta оригинала (pages.css:861–864): компания отдельным
+ *  спаном (fs-small/fw-small, primary — pages.css:865–866), город под ней
+ *  (muted наследует мета) — прежняя склейка «компания · город» одной
+ *  muted-строкой не соответствовала оригиналу. */
 function offerCard(o, headingTag) {
   return `<article class="ui-card ui-card--hover cp-offer-card">
   <div class="cp-offer-card__head">
@@ -485,7 +489,7 @@ function offerCard(o, headingTag) {
     <span class="ui-tag ui-tag--blue">${esc(o.orgTag)}</span>
     <span class="ui-tag ui-tag--gray">${esc(o.form)}</span>
   </p>
-  <p class="cp-offer-card__meta ui-small">${esc(o.company)} · ${esc(o.city)}</p>
+  <p class="cp-offer-card__meta ui-small"><span class="cp-offer-card__company">${esc(o.company)}</span><span class="cp-offer-card__city">${esc(o.city)}</span></p>
   <div class="cp-offer-card__footer">
     <!-- базовая accent-кнопка 52px оригинала (раунд 2: probe height 52→32
          при --sm, прочие стили совпали; T15.6 снял --sm) -->
@@ -2318,20 +2322,43 @@ function educationMain() {
     ['Школьникам и студентам', null],
     ['Целевое обучение', ''],
   ])}
-<section class="ui-section">
+<section class="ui-section edu-lead">
+  <!-- Интро — обложка cover-hero оригинала (education.html:147–165):
+       каркас cvh канона (T17.15) + хук формы сайта .edu-cover (паддинг
+       64/56, шаг 20 — прецедент .ctr-cover T18.4); CTA на каталог
+       (education.html:152); секция без верхнего ритма (section
+       style="padding-top: 0") — над обложкой ритм ведут крошки. -->
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="cvh edu-cover">
       <h1 class="ui-page-title">Целевое обучение</h1>
-      <p class="cp-page-subtitle ui-lead">Учись по целевому договору — с гарантированным местом работы в Группе после выпуска.</p>
+      <p class="cp-page-subtitle ui-lead">Поступайте по целевому договору с компаниями Группы «Интер РАО»: отдельная квота при поступлении, стипендия от компании и гарантированное место работы после выпуска.</p>
+      <a class="ui-button ui-button--primary" href="education-catalog.html">смотреть все предложения</a>
     </div>
     ${subnav('education.html')}
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section" id="orgs">
   <div class="ui-container">
-    <h2 class="ui-h2">Организации-партнёры</h2>
-    <div class="ui-grid ui-grid--3">
+    <h2 class="ui-h2">Образовательные организации</h2>
+    <!-- Фильтры организаций (education.html:171–191): лента lpp-filters —
+         канон .vac-filters (gap 16, низ 40; T17.12 — тот же исходник, что у
+         каталога обучения); пилюли — ui-select--pill с aria-label (как
+         .vacancy-search__select оригинала), ширина 260 — канон ленты; теги —
+         ui-tag--blue × ui-tag--filter (T16.14), активный «Все» —
+         aria-current (оригинал красит inline-стилем); группа — nav
+         (landmark-маркер, прецедент cp-media-toolbar__group). Шаг 24 внутри
+         группы — хук .edu-filter-group. -->
+    <div class="lpp-filters">
+      ${selectField({ name: 'region', options: ['Все регионы', 'Москва', 'Санкт-Петербург', 'Омская область'], pill: true, ariaLabel: 'Регион' })}
+      ${selectField({ name: 'city', options: ['Все города', 'Москва', 'Санкт-Петербург', 'Омск'], pill: true, ariaLabel: 'Город' })}
+      <nav class="edu-filter-group" aria-label="Тип организации">
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="education.html" aria-current="page">Все</a>
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="education.html">ВУЗы</a>
+        <a class="ui-tag ui-tag--blue ui-tag--filter" href="education.html">СУЗы</a>
+      </nav>
+    </div>
+    <div class="ui-grid ui-grid--3 edu-org-grid">
 ${orgs}
     </div>
   </div>
@@ -2339,20 +2366,24 @@ ${orgs}
 
 <section class="ui-section">
   <div class="ui-container">
-    <h2 class="ui-h2">Преимущества целевого обучения</h2>
+    <div class="cp-page-head cp-page-head--split edu-offer-head">
+      <!-- Шапка «предложения + кнопка» (education.html:230–233): заголовок
+           без нижнего маргина — низ 40px несёт .edu-offer-head. -->
+      <h2 class="ui-h2">Актуальные предложения о целевом обучении</h2>
+      <a class="ui-button ui-button--outline" href="education-catalog.html">все предложения</a>
+    </div>
+    <div class="ui-grid ui-grid--3 edu-offer-grid">
+${offers}
+    </div>
+    <h2 class="ui-h2 edu-title">Преимущества компаний</h2>
+    <div class="edu-company-hero">
+      <img class="edu-company-hero__photo" src="assets/images/internship-adv.png" alt="" loading="lazy">
+      <p class="edu-company-hero__text ui-body">Компании Группы «Интер РАО» заинтересованы в молодых специалистах: целевики получают стипендию, оплачиваемую практику и гарантированное рабочее место после выпуска.</p>
+    </div>
+    <h2 class="ui-h2 edu-title">Наши преимущества целевого обучения</h2>
     <div class="cp-adv-grid">
 ${advantages}
     </div>
-  </div>
-</section>
-
-<section class="ui-section">
-  <div class="ui-container">
-    <h2 class="ui-h2">Предложения</h2>
-    <div class="ui-grid ui-grid--3">
-${offers}
-    </div>
-    <p style="margin-top: var(--ui-space-4);"><a class="ui-button ui-button--outline" href="education-catalog.html">Все предложения</a></p>
   </div>
 </section>
 

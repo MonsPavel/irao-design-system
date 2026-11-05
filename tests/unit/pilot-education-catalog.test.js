@@ -79,8 +79,9 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
     );
   });
 
-  it('мёртвая ссылка закрыта: education.html ведёт «Все предложения» на education-catalog.html (раунд 2; обе страницы собираются)', () => {
-    expect(build).toContain(`href="education-catalog.html">Все предложения</a>`);
+  it('мёртвая ссылка закрыта: education.html ведёт на education-catalog.html (раунд 2; обе страницы собираются; T18.5 — состав оригинала: CTA обложки «смотреть все предложения» + кнопка шапки split «все предложения», education.html:152/232)', () => {
+    expect(build).toContain(`href="education-catalog.html">смотреть все предложения</a>`);
+    expect(build).toContain(`href="education-catalog.html">все предложения</a>`);
     expect(catalogHtml, 'страница каталога собиралась бы main()-функцией').toContain(
       'ui-page-title',
     );

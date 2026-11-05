@@ -40,13 +40,17 @@
  *    против aspect-канона ui-card--media); → 1738 (T18.4: позиционные хуки
  *    career-track ctr- — форма cover-hero на каркасе cvh, вид чипов/этапов/
  *    step-info/теста «как есть» pages.css:676–792; каркасы — ДС/слой cvh/
- *    ui-chip/ui-button/роли); любой рост сверх — деградация сайт-зоны;
+ *    ui-chip/ui-button/роли); → 1894 (T18.5: позиционные хуки education
+ *    edu- — форма cover-hero на каркасе cvh, группа тегов-фильтров, hero
+ *    компаний, шапки/сетки «как есть» pages.css:953–967/217/796–803/11/827;
+ *    карточки к канону оригинала — cp-org-card/cp-offer-card паддинг 24,
+ *    cp-adv-grid шаг 24, пары заголовков карточек lh 1.3/без трекинга роли, flex-shrink: 0 кнопке шапки); любой рост сверх — деградация сайт-зоны;
  *  - MAX_PILOT_CSS_CODE_LINES = 869 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
  *    «все страницы») → 723 (батч ритма 01.11) → 819 (T18.1) → 822 (T18.2 —
  *    тот же курс: одна тон-строка + каркас правила) → 869 (T18.3 — хуки
  *    лент компании, тот же курс) → 1013 (T18.4 — хуки career-track, тот же
- *    курс);
+ *    курс) → 1089 (T18.5 — хуки education + канон карточек, тот же курс);
  *  - MAX_PILOT_JS_LINES = 187 — строки pilot.js на закрытие эпика;
  *  - MAX_CP_FAMILIES = 30 и ALLOWED_CP_FAMILIES — семейства ценза «после»:
  *    появление семейства вне списка = новый cp-визуальный блок = ошибка
@@ -78,8 +82,8 @@ const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** Пороги — факт итога T17.16 + errata 31.10 (см. шапку). Изменение числа —
  *  осознанная правка ценза вместе с юнит-пином и REPORT §11.4, не «подгонка». */
-export const MAX_PILOT_CSS_LINES = 1738;
-export const MAX_PILOT_CSS_CODE_LINES = 1013;
+export const MAX_PILOT_CSS_LINES = 1894;
+export const MAX_PILOT_CSS_CODE_LINES = 1089;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 

@@ -277,9 +277,9 @@ describe('pilot.css — позиционные хуки ctr- (T18.4 Scope: бе�
 });
 
 describe('ценз T17.16 — гейт чист после errata T18.4 (потолки строк, семейства не менялись)', () => {
-  it('пороги строк подняты errata по процедуре census.mjs (файл был ровно на 1520/869 — прецедент T18.1)', async () => {
+  it('пороги строк подняты errata по процедуре census.mjs (последний ход — T18.5: education edu-; файл был ровно на 1738/1013, прецедент T18.4)', async () => {
     const census = readFileSync(join(pilotDir, 'census.mjs'), 'utf8');
-    expect(census).toMatch(/MAX_PILOT_CSS_LINES = 17\d\d/);
+    expect(census).toMatch(/MAX_PILOT_CSS_LINES = 18\d\d/);
     expect(census).toMatch(/MAX_PILOT_CSS_CODE_LINES = 10\d\d/);
     expect(census).toContain('T18.4');
   });
