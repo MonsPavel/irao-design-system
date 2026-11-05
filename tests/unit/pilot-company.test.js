@@ -28,6 +28,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { ALLOWED_CP_FAMILIES } from '../../pilot/career-portal/census.mjs';
 
 const root = join(import.meta.dirname, '..', '..');
 
@@ -137,16 +138,18 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     );
   });
 
-  it('banner-card: CTA-панель с фото-подложкой и ui-button «смотреть вакансии» на vacancies.html (Scope); тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
+  it('banner-card №1 «Практики и стажировки»: CTA-панель с фото-подложкой и ui-button «смотреть предложения» на internships.html (T18.3: контент/позиция оригинала company.html:45–52 — замена CTA vacancies.html из T15.2, лента вакансий теперь на странице); тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
     expect(companyHtml).toContain('<div class="ui-section ui-section--photo cp-company-banner">');
     expect(companyHtml).toContain('<div class="cp-company-banner__body ui-card ui-card--cta">');
+    expect(companyHtml).toContain('<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>');
+    expect(companyHtml).toContain('Посмотрите предложения практики и стажировки именно в нашей компании.');
     expect(companyHtml).toMatch(
-      /<a class="ui-button ui-button--primary" href="vacancies.html">смотреть вакансии<\/a>/,
+      /<a class="ui-button ui-button--primary" href="internships.html">смотреть предложения<\/a>/,
     );
   });
 
-  it('заголовки разделов «Преимущества компании»/«Где мы работаем» — роль ui-h3 (оригинал .section-title--h3 = fs-h3 42px/1.3, pages.css:880; тот же маппинг, что на companies.html; ревью T15.2: ui-h2 60px — в 1.4 раза крупнее оригинала)', () => {
-    expect(companyHtml.match(/<h2 class="ui-h3 cp-company-title">/g)?.length ?? 0).toBe(2);
+  it('заголовки разделов — роль ui-h3 (оригинал .section-title--h3 = fs-h3 42px/1.3, pages.css:880; тот же маппинг, что на companies.html; ревью T15.2: ui-h2 60px — в 1.4 раза крупнее оригинала). T18.3: 2 + 6 лент = 8 (каждая лента — с section__title 55px перед ней)', () => {
+    expect(companyHtml.match(/<h2 class="ui-h3 cp-company-title">/g)?.length ?? 0).toBe(8);
     expect(companyHtml, 'ui-h2 на разделах не применяется').not.toContain(
       '<h2 class="ui-h2 cp-company-title">',
     );
@@ -279,6 +282,176 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
     expect(m1023, 'преимущества в ступени 1023 (сайт-зона)').toContain('.cp-company-adv');
     expect(m767).toContain('.cp-company-stats');
     expect(m767).toContain('.cp-company-adv');
+  });
+});
+
+describe('T18.3: ленты компании (company.html) — build.mjs: состав/порядок build.py:881–888', () => {
+  /** Позиции блоков в разметке companyMain (порядок оригинала
+   *  src/pages/company.html:40–88). */
+  const orderOf = (html) =>
+    [
+      ['vac feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--vac">'],
+      ['banner №1', '<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>'],
+      ['intern feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--intern">'],
+      ['practice feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--practice">'],
+      ['articles feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">'],
+      ['banner №2', '<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>'],
+      ['events feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--events">'],
+      ['photos feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--photos">'],
+    ].map(([name, marker]) => [name, html.indexOf(marker)]);
+
+  it('порядок и состав 1:1 оригиналу (Implementation requirements п.1): вакансии → баннер №1 → стажировки → практики → статьи → баннер №2 → события → фото; каждая лента с section__title перед ней', () => {
+    const positions = orderOf(companyHtml);
+    for (const [name, at] of positions) {
+      expect(at, `${name} найдено`).toBeGreaterThan(-1);
+    }
+    for (let i = 1; i < positions.length; i += 1) {
+      expect(positions[i][1], `${positions[i][0]} после ${positions[i - 1][0]}`).toBeGreaterThan(
+        positions[i - 1][1],
+      );
+    }
+    for (const title of [
+      'Вакансии компании',
+      'Стажировки компании',
+      'Практики компании',
+      'Может быть интересно',
+      'Наши мероприятия',
+      'Фото о работе в компании',
+    ]) {
+      expect(companyHtml, `заголовок ленты «${title}»`).toContain(
+        `<h2 class="ui-h3 cp-company-title">${title}</h2>`,
+      );
+    }
+  });
+
+  it('лента вакансий: свои + сегмента «Генерация», первые 4 (build.py:882–885), каркас — vacancyRow/lpp-row (T14.10); сетка — канон ui-grid--2', () => {
+    expect(build).toMatch(
+      /\.filter\(\(v\) => v\.company === company\.name\),\s*\n\s*\.\.\.VAC\.items\.filter\(\(v\) => v\.company !== company\.name && v\.segment === 'Генерация'\),\s*\n\s*\]\s*\n\s*\.slice\(0, 4\)/,
+    );
+    expect(build).toMatch(/const companyVacancies = \[[\s\S]*?\.map\(vacancyRow\)/);
+    expect(companyHtml.match(/class="ui-card ui-card--hover lpp-row"/g)?.length ?? 0).toBe(4);
+  });
+
+  it('ленты стажировок/практик: все элементы данных (internship_cards build.py:479–483), каркас — internCard/cp-intern-card (переиспользование, не дублирование; T15.4: карточка ведёт на internship.html)', () => {
+    expect(build).toMatch(/const companyInternships = INT\.internship\.items\.map\(internCard\)/);
+    expect(build).toMatch(/const companyPractices = INT\.practice\.items\.map\(internCard\)/);
+    expect(companyHtml.match(/class="ui-card ui-card--hover cp-intern-card"/g)?.length ?? 0).toBe(8);
+  });
+
+  it('лента статей: первые 3 (ART.items[:3], build.py:886), каркас — articleCard/ui-card--media (T17.5); лента событий: первые 3 предстоящих (EVT.upcoming[:3], build.py:885), каркас — eventCard/ui-card--media', () => {
+    expect(build).toMatch(/const companyArticles = ART\.items\.slice\(0, 3\)\.map\(articleCard\)/);
+    expect(build).toMatch(/const companyEvents = EVT\.upcoming\.slice\(0, 3\)\.map\(eventCard\)/);
+    expect(companyHtml.match(/class="ui-card ui-card--hover ui-card--link ui-card--media"/g)?.length ?? 0).toBe(6);
+  });
+
+  it('баннер №2 «Целевое обучение» (company.html:69–76): фото internship-4.png, кнопка — ui-button на education-catalog.html; тот же каркас cp-company-banner (переиспользование)', () => {
+    expect(companyHtml.match(/<div class="ui-section ui-section--photo cp-company-banner">/g)?.length ?? 0).toBe(2);
+    expect(companyHtml).toContain('<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>');
+    expect(companyHtml).toContain('Посмотрите предложения целевого обучения от нашей компании.');
+    expect(companyHtml).toMatch(
+      /<a class="ui-button ui-button--primary" href="education-catalog.html">смотреть предложения<\/a>/,
+    );
+    expect(companyHtml).toMatch(/src="assets\/images\/internship-4\.png"/);
+  });
+
+  it('фото-галерея «Фото о работе в компании» (company.html:83–88): 3 фото media-1/3/5 в ui-figure; alt="" оригинала сохранён (фото-подборка без текстов-источников)', () => {
+    expect(companyHtml.match(/class="ui-image ui-image--cover" src="assets\/images\/media-\d\.jpg"/g)?.length ?? 0).toBe(3);
+    for (const name of ['media-1.jpg', 'media-3.jpg', 'media-5.jpg']) {
+      expect(companyHtml).toContain(`src="assets/images/${name}"`);
+    }
+    const photosBlock = companyHtml.slice(companyHtml.indexOf('cp-company-feed--photos'));
+    expect(photosBlock.match(/<figure class="ui-figure">/g)?.length ?? 0).toBe(3);
+  });
+
+  it('href лент — реальные страницы клона (Implementation requirements п.1: гейт ссылок не ловит DEAD); строки вакансий — vacancyRow (→ vacancy.html, конвенция списка); триггер «откликнуться» без модалки — как на article.html (диалога #vac-apply нет ни в оригинале, ни в клоне)', () => {
+    for (const href of ['internships.html', 'education-catalog.html']) {
+      expect(companyHtml).toContain(`href="${href}"`);
+    }
+    expect(build).not.toMatch(/companyVacancies[\s\S]*?applyDialogHtml/);
+  });
+
+  it('hero/статы/преимущества/where неизменны (Out of scope: вынос company-семейств — T18.15)', () => {
+    expect(companyHtml).toContain('<div class="dpp-hero">');
+    expect(companyHtml).toContain('<ul class="cp-company-stats">');
+    expect(companyHtml).toContain('<ul class="cp-company-adv">');
+    expect(companyHtml).toContain('<div class="dpp-where">');
+  });
+});
+
+describe('T18.3: pilot.css — позиционные хуки лент cp-company-feed', () => {
+  it('хук ленты: шаг 36px «как есть» (.cards-grid, pages.css:8) и низ 56px company-section-gap (pages.css:884); колонки/адаптив несёт ui-grid', () => {
+    const feed = blockOf(pilotCss, '.cp-company-feed');
+    expect(feed).toContain('margin-bottom: 3.5rem;');
+    expect(feed).toContain('gap: 2.25rem;');
+  });
+
+  it('строки вакансий ленты: nowrap (pages.css:159–166) + кламп описания 2 строки (pages.css:194–201) + типографика «как есть» 1.3/1.45 (pages.css:171/196 — прецедент cp-why-us__card-title); на узких экранах перенос восстановлен ступенью 767', () => {
+    expect(blockOf(pilotCss, '.cp-company-feed .lpp-row')).toContain('flex-wrap: nowrap;');
+    const short = blockOf(pilotCss, '.cp-company-feed .lpp-row__short');
+    expect(short).toContain('-webkit-line-clamp: 2;');
+    expect(short).toContain('line-height: 1.45;');
+    expect(blockOf(pilotCss, '.cp-company-feed .lpp-row__title')).toContain('line-height: 1.3;');
+    const m767 = pilotCssRaw.slice(pilotCssRaw.indexOf('@media (max-width: 767px)'));
+    expect(blockOf(m767, '.cp-company-feed .lpp-row')).toContain('flex-wrap: wrap;');
+  });
+
+  it('карточки лент: паддинг 16px «как есть» (pages.css:565/598); фото фиксированной высоты оригинала — статьи 200px (pages.css:604), события 220px (pages.css:569) — против aspect 3/2 канона ui-card--media (T17.5); тело статей: шаг 12px (.article-card__link, pages.css:600), нижний паддинг гасится', () => {
+    expect(blockOf(pilotCss, '.cp-company-feed .ui-card--media')).toContain('padding: 1rem;');
+    expect(blockOf(pilotCss, '.cp-company-feed--articles .ui-card__media')).toContain(
+      'aspect-ratio: auto;',
+    );
+    expect(blockOf(pilotCss, '.cp-company-feed--articles .ui-card__media img')).toContain(
+      'height: 12.5rem;',
+    );
+    expect(blockOf(pilotCss, '.cp-company-feed--events .ui-card__media')).toContain(
+      'aspect-ratio: auto;',
+    );
+    expect(blockOf(pilotCss, '.cp-company-feed--events .ui-card__media img')).toContain(
+      'height: 13.75rem;',
+    );
+    const articlesBody = blockOf(pilotCss, '.cp-company-feed--articles .ui-card__body');
+    expect(articlesBody).toContain('gap: 0.75rem;');
+    expect(articlesBody).toContain('padding-bottom: 0;');
+  });
+
+  it('фото-галерея: шаг 24px (pages.css:886), без нижнего отступа (последний блок, company-section-gap не несёт), фото 260px «как есть» (pages.css:888–893)', () => {
+    const photos = blockOf(pilotCss, '.cp-company-feed--photos');
+    expect(photos).toContain('margin-bottom: 0;');
+    expect(photos).toContain('gap: var(--ui-space-5);');
+    expect(blockOf(pilotCss, '.cp-company-feed--photos .ui-image')).toContain('height: 16.25rem;');
+  });
+
+  it('в хуках лент нет hex и !important (инварианты системы)', () => {
+    const feedCss = pilotCss.slice(pilotCss.indexOf('.cp-company-feed'));
+    expect(feedCss).not.toMatch(/#[0-9a-f]{3,8}\b/i);
+    expect(feedCss).not.toContain('!important');
+  });
+});
+
+describe('T18.3: compare.mjs — блок-пробы лент компании (AC: все 6 лент с Δ ≤ 8px)', () => {
+  const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\],\n  \}/)?.[1] ?? '';
+
+  it('пары блок-проб: 6 лент + 2 баннера в порядке оригинала; пилотные селекторы — хуки cp-company-feed--*', () => {
+    for (const [name, original, pilot] of [
+      ['company-vacancies', '.cards-grid--2', '.cp-company-feed--vac'],
+      ['company-banner', '.banner-card', '.cp-company-banner'],
+      ['company-internships', '.cards-grid--2:nth-child(2 of .cards-grid--2)', '.cp-company-feed--intern'],
+      ['company-practices', '.cards-grid--2:nth-child(3 of .cards-grid--2)', '.cp-company-feed--practice'],
+      ['company-articles', '.cards-grid--3:not(.company-photos)', '.cp-company-feed--articles'],
+      ['company-banner-2', '.banner-card:nth-child(2 of .banner-card)'],
+      ['company-events', '.cards-grid--3:not(.company-photos) ~ .cards-grid--3:not(.company-photos)', '.cp-company-feed--events'],
+      ['company-photos', '.company-photos', '.cp-company-feed--photos'],
+    ]) {
+      expect(companyProbes, `проба ${name}`).toContain(`['${name}', '${original}'`);
+      if (pilot) expect(companyProbes, `пилотный селектор ${name}`).toContain(`'${pilot}']`);
+    }
+    expect(companyProbes.match(/company-/g)?.length ?? 0).toBeGreaterThanOrEqual(8);
+  });
+});
+
+describe('T18.3: census — errata порогов и семейства company-feed', () => {
+  it('семейство company-feed в allowlist (позиционные хуки лент — не новый визуальный блок: каркасы лент — ui-grid/ui-card/lpp-row/cp-intern-card)', () => {
+    expect(ALLOWED_CP_FAMILIES).toContain('company-feed');
   });
 });
 
