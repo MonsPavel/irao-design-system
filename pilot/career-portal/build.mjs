@@ -439,12 +439,14 @@ function internLinkCard(i, href) {
 }
 
 /** карточка стажёра (T16.12: имя — ui-h6 20/500, шорт — muted; T17.5:
- *  каркас — ui-card--media, фото __media--square 1/1, тело __body; правила
- *  cp-intern-person* сняты) */
+ *  каркас — ui-card--media, тело __body; правила cp-intern-person* сняты.
+ *  T18.6: хук int-person — фото 4/3 (pages.css:1138) и тело 0 20 20/шаг 10
+ *  (pages.css:1142–1146) оригинала против канона слота (--square 1/1,
+ *  тело 12/шаг 8): квадрат давал секции +100px (замер 06.11).) */
 function internPerson(p, photo) {
   const tags = p.tags.map((tag) => `<span class="ui-tag ui-tag--blue">${esc(tag)}</span>`).join('');
-  return `<article class="ui-card ui-card--hover ui-card--media">
-  <div class="ui-card__media ui-card__media--square">
+  return `<article class="ui-card ui-card--hover ui-card--media int-person">
+  <div class="ui-card__media">
     <img src="${esc(photo)}" alt="" loading="lazy">
   </div>
   <div class="ui-card__body">
@@ -508,8 +510,10 @@ function advCard(a) {
 </article>`;
 }
 
-/** ui-accordion--faq (T6.4) */
-function faq(items) {
+/** ui-accordion--faq (T6.4). titleClass — класс заголовка секции сайта
+ *  (T18.6: int-title — ритм .section__title оригинала; потребители без
+ *  класса — education T18.5, состояние задачи не меняется). */
+function faq(items, titleClass = '') {
   const html = items
     .map(
       (item, index) => `<details class="ui-accordion__item"${index === 0 ? ' open' : ''}>
@@ -520,7 +524,7 @@ function faq(items) {
 </details>`,
     )
     .join('\n');
-  return `<h2 class="ui-h2">Вопросы и ответы</h2>\n<div class="ui-accordion ui-accordion--faq">\n${html}\n</div>`;
+  return `<h2 class="ui-h2${titleClass ? ` ${titleClass}` : ''}">Вопросы и ответы</h2>\n<div class="ui-accordion ui-accordion--faq">\n${html}\n</div>`;
 }
 
 /** таймлайн этапов — канон паттерна patterns/timeline, связки tlp-* слоя
@@ -2181,9 +2185,15 @@ function internshipsMain(set) {
     ['Школьникам и студентам', null],
     [title, ''],
   ])}
-<section class="ui-section">
+<!-- T18.6: состав/ритм 1:1 по internships.html:145–403 (практики —
+     зеркальная страница, тот же строитель). Секционные хуки семейства int-
+     (конвенция не-cp имени сайт-зоны, прецедент ctr- T18.4/edu- T18.5):
+     обложка без ритма секции (inline padding: 0, internships.html:147),
+     табы pt 24 (internships.html:158), остальные — .section pad 40
+     (components.css:336) и титулы mb 32 (components.css:341). -->
+<section class="ui-section int-lead">
   <div class="ui-container">
-    <div class="cvh">
+    <div class="cvh int-cover">
       <h1 class="ui-page-title">${title}</h1>
       <p class="cp-page-subtitle ui-lead">${esc(data.subtitle)}</p>
       <a class="ui-button ui-button--primary" href="#directions">смотреть ${titleLower}</a>
@@ -2191,7 +2201,7 @@ function internshipsMain(set) {
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section int-tabs">
   <div class="ui-container">
     <div class="ui-tabs ui-tabs--pill" data-ui-tabs>
       <div class="cp-tabs-row">
@@ -2210,23 +2220,32 @@ function internshipsMain(set) {
           <a class="ui-link" href="events.html">мероприятия</a>
         </nav>
       </div>
-      <section class="ui-tabs__panel" id="cptab-practice" aria-labelledby="cptab-practice-tab">
+      <!-- Панели-подсказки (T15.4) — visually-hidden (.ui-vh, T17.2):
+           в оригинале панелей у tabs-pill нет (internships.html:158–168),
+           панель активного таба давала секции +19px (замер 06.11);
+           структуру tablist APG панелей сохраняют, рантайм ДС управляет
+           hidden — видимым панелям остаётся подсказка для скринридера. -->
+      <section class="ui-tabs__panel ui-vh" id="cptab-practice" aria-labelledby="cptab-practice-tab">
         <p class="ui-small">Каталог практик — на странице «Практики».</p>
       </section>
-      <section class="ui-tabs__panel" id="cptab-internship" aria-labelledby="cptab-internship-tab">
+      <section class="ui-tabs__panel ui-vh" id="cptab-internship" aria-labelledby="cptab-internship-tab">
         <p class="ui-small">Каталог стажировок — на странице «Стажировки».</p>
       </section>
     </div>
   </div>
 </section>
 
-<section class="ui-section" id="directions">
+<section class="ui-section int-sec" id="directions">
   <div class="ui-container">
-    <h2 class="ui-h2">Выбери свой город и направление</h2>
-    <p>${selectField({ name: 'city', options: ['все города', 'Москва', 'Санкт-Петербург', 'Екатеринбург'], pill: true, ariaLabel: 'Город' })}</p>
+    <!-- Шапка направлений — dir-head оригинала (internships.html:172–182):
+         титул + select в одном ряду (pages.css:1009), не столбцом. -->
+    <div class="int-dir-head">
+      <h2 class="ui-h2 int-title">Выбери свой город и направление</h2>
+      ${selectField({ name: 'city', options: ['все города', 'Москва', 'Санкт-Петербург', 'Екатеринбург'], pill: true, ariaLabel: 'Город' })}
+    </div>
     <!-- ui-chip (T14.8), кнопочная форма: мок-фильтр, состояние — aria-pressed
          (переключение — один слушатель в pilot.js на data-cp-filter-group) -->
-    <div class="ui-chip" role="group" aria-label="Направления" data-cp-filter-group>
+    <div class="ui-chip int-chips" role="group" aria-label="Направления" data-cp-filter-group>
       <button class="ui-chip__pill" type="button" aria-pressed="true">все направления</button>
       <button class="ui-chip__pill" type="button" aria-pressed="false">экономика и финансы</button>
       <button class="ui-chip__pill" type="button" aria-pressed="false">атомная энергетика и энергостроительство</button>
@@ -2236,7 +2255,7 @@ function internshipsMain(set) {
       <button class="ui-chip__pill" type="button" aria-pressed="false">конструирование</button>
       <button class="ui-chip__pill" type="button" aria-pressed="false">общие направления</button>
     </div>
-    <div class="ui-grid ui-grid--3">
+    <div class="ui-grid ui-grid--3 int-dir-grid">
 ${cards}
     </div>
   </div>
@@ -2248,12 +2267,16 @@ ${cards}
      остаётся в каркасе страницы. -->
 ${applyDialogHtml()}
 
-<section class="ui-section">
+<section class="ui-section int-sec">
   <div class="ui-container">
-    <div class="mrq">
+    <div class="mrq int-marquee">
       <!-- Канон adv-marquee (T16.15) — связка mrq паттерн-слоя (T17.15):
            бирки строк — по ролям оригинала (internships.html:247–250):
-           подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px) -->
+           подписи --bar (18px), мелкая --sm (13px), базовая крупная --xl (40px).
+           Хук int-marquee — композиция тела оригинала (колонка, фото 100%×260,
+           pages.css:1083–1092): канон T17.15 принял строку с фото 256
+           («принятая композиция клона»), расхождение ведётся сайт-зоной
+           (Out of scope спеки: каноны слоя не трогать). -->
       <div class="mrq__type" aria-hidden="true">
         <span class="mrq__line mrq__line--bar">Группа «Интер РАО»</span>
         <span class="mrq__line mrq__line--sm">оплачиваемые программы для студентов и выпускников по всей России</span>
@@ -2268,45 +2291,48 @@ ${applyDialogHtml()}
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section int-sec">
   <div class="ui-container">
-    <h2 class="ui-h2">Преимущества прохождения ${titleLower}</h2>
+    <h2 class="ui-h2 int-title">Преимущества прохождения ${titleLower}</h2>
     <div class="cp-adv-grid">
 ${advantages}
     </div>
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section int-sec">
   <div class="ui-container">
-    <h2 class="ui-h2">Как попасть на ${titleAcc}</h2>
+    <h2 class="ui-h2 int-title">Как попасть на ${titleAcc}</h2>
     <ol class="tlp" role="list">
 ${steps}
     </ol>
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section int-sec">
   <div class="ui-container">
-    <h2 class="ui-h2">Познакомьтесь с нашими ${who}</h2>
-    <div class="ui-grid ui-grid--3">
+    <h2 class="ui-h2 int-title">Познакомьтесь с нашими ${who}</h2>
+    <div class="ui-grid ui-grid--3 int-people">
 ${interns}
     </div>
   </div>
 </section>
 
-<section class="ui-section">
+<!-- Секция 8 (T18.6 Goal: −555px): лента events-feature оригинала
+     (internships.html:313–361) — большая карточка на два ряда (2fr/1fr),
+     каркас — ui-card--media ДС + hooks cp-events-feature. -->
+<section class="ui-section int-sec">
   <div class="ui-container">
-    <h2 class="ui-h2">Наши мероприятия</h2>
+    <h2 class="ui-h2 int-title">Наши мероприятия</h2>
     <div class="cp-events-feature">
 ${events}
     </div>
   </div>
 </section>
 
-<section class="ui-section">
+<section class="ui-section int-sec">
   <div class="ui-container">
-    ${faq(INT.faq)}
+    ${faq(INT.faq, 'int-title')}
   </div>
 </section>`;
 }

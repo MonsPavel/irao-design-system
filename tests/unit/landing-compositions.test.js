@@ -518,7 +518,9 @@ describe('пилот career-portal: лендинг-композиции на к�
   });
 
   it('marquee — разметка mrq: строки с модификаторами канона T16.15', () => {
-    expect(pilotBuild).toContain('<div class="mrq">');
+    // T18.6: хук int-marquee на каркасе канона — композиция тела оригинала
+    // (pages.css:1083–1092) сайт-зоной; канон mrq не тронут.
+    expect(pilotBuild).toContain('<div class="mrq int-marquee">');
     expect(pilotBuild, 'лента aria-hidden (визуальная типографика — дубликат смысла)').toContain(
       '<div class="mrq__type" aria-hidden="true">',
     );
@@ -560,7 +562,10 @@ describe('пилот career-portal: лендинг-композиции на к�
   });
 
   it('cover-hero — разметка cvh', () => {
-    expect(pilotBuild).toContain('<div class="cvh">');
+    // T18.6: обложка лендингов стажировок несёт хук формы сайта int-cover
+    // (прецедент .edu-cover T18.5 / .ctr-cover T18.4); голый каркас в
+    // разметке пилота больше не встречается.
+    expect(pilotBuild).toContain('<div class="cvh int-cover">');
     expect(pilotBuild, 'cp-cover-hero из разметки снят').not.toMatch(
       /class="[^"]*\bcp-cover-hero\b/,
     );

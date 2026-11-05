@@ -406,9 +406,12 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
     // (форма cover-hero на каркасе cvh, чипы/этапы/step-info/тест);
     // T18.5: 1738→1894 / 1013→1089 — позиционные хуки education edu-
     // (форма cover-hero на каркасе cvh, теги-фильтры/hero компаний,
-    // карточки к канону оригинала).
-    expect(MAX_PILOT_CSS_LINES).toBe(1894);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1089);
+    // карточки к канону оригинала);
+    // T18.6: 1894→2138 / 1089→1222 — позиционные хуки лендингов
+    // стажировок/практик int- (ритм секций, cover-hero, лента мероприятий
+    // events-feature 2fr/1fr).
+    expect(MAX_PILOT_CSS_LINES).toBe(2138);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1222);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);
