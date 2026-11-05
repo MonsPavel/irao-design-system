@@ -489,6 +489,13 @@ const BLOCK_PROBES = {
     ['production', '.production', '.cp-production'],
     ['holding', '.holding', '.cp-holding'],
     ['employers', '.employers', '.lgo'],
+    // T18.2: mentorship и капсула вакансий — каноны msh/vcp паттерн-слоя
+    // (блоки v2, INDEX_FRAGS index-2 build.py:573-590). querySelector
+    // берёт первую капсулу (после mentorship); вторая (перед cta-mail) —
+    // тот же канон (пин presence — tests/unit/pilot-mentorship-capsule
+    // .test.js, DOM-проба .zcode/accept-t182).
+    ['mentorship', '.mentorship', '.msh'],
+    ['vacancy-capsule', '.vacancy-capsule', '.vcp'],
     // T18.1: id="students" переехал на photographic --v2 (apply_variant2
     // build.py:595-596) — пара меряет фото-секцию (778px оригинала); why-us
     // с v2 снята — проба не добавляется.

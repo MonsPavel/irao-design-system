@@ -1,9 +1,10 @@
 <!--
   Паттерн «Landing-секция» (T8.3): правила сборки лендинг-секций из
-  системных примитивов + mini-эталон из десяти секций — светлая, тёмная,
+  системных примитивов + mini-эталон из двенадцати секций — светлая, тёмная,
   с-изображением full-bleed, с-фото-фоном (T17.3), nav-карточки и лента
   логотипов (T17.9), лендинг-композиции hero / adv-marquee / спец-сетка
-  «Медиа» / cover-hero (T17.15 — связки паттерн-слоя hro/mrq/mdl/cvh).
+  «Медиа» / cover-hero (T17.15 — связки паттерн-слоя hro/mrq/mdl/cvh),
+  наставничество и капсула вакансий (T18.2 — связки msh/vcp).
 
   Формула секции (Scope): ui-section (вертикальный ритм, T3.4) + ui-container
   (центрируемый контейнер, T3.4) + заголовок-роль (ui-h2, «классы, а не
@@ -622,5 +623,119 @@
       <p class="ui-lead">Оплачиваемые программы для студентов и выпускников по всей России.</p>
       <a class="ui-button ui-button--primary" href="#lsp-cover-hero">смотреть стажировки</a>
     </div>
+  </div>
+</section>
+
+<!-- Вариант 11 — наставничество (msh, T18.2): фото-секция на примитиве
+     ui-section--photo (T17.3, VI-инвариант — не голым IMG): __bg несёт
+     заливку primary и blend-фото (IMAGE fill LUMINOSITY @ 40% оригинала),
+     mask-фото справа — второй декоративный слой канона; внутренняя сетка
+     min-height 552px от lg и rail-полоса карточек-тегов 108px (скролл,
+     отступ «под контейнер»). Тон активной карточки — хук
+     --msh-card-active-bg (одобренный градиент — строка сайт-зоны,
+     дефолт хука — токен; прецедент --hro-tag-bg T17.15). В эталоне-
+     фрагменте заголовок — ui-h2 (h1 несёт каркас стенда, пин T8.3). -->
+<section class="ui-section ui-section--photo msh" id="lsp-mentorship" aria-labelledby="lsp-mentorship-title">
+  <p class="ui-showcase-stand__note">
+    Связка «наставничество» (<code>msh</code>, T18.2): фото-фон — примитив
+    <code>ui-section--photo</code> (заливка primary + blend-фото LUMINOSITY @ 40%),
+    mask-фото справа — второй слой; rail-полоса карточек 108px со скрытым скроллбаром.
+    Тон активной карточки — хук <code>--msh-card-active-bg</code> (сайт-зона).
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271240%27%20cy%3D%27340%27%20r%3D%27380%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27340%27%20cy%3D%27860%27%20r%3D%27260%27%20fill%3D%27%23F26722%27%20opacity%3D%270.7%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+     >
+  </div>
+  <div class="msh__photo" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27920%27%20height%3D%27624%27%3E%3Crect%20width%3D%27920%27%20height%3D%27624%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27700%27%20cy%3D%27200%27%20r%3D%27160%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27480%27%20r%3D%27120%27%20fill%3D%27%23F26722%27%20opacity%3D%270.6%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="920"
+      height="624"
+      loading="lazy"
+     >
+  </div>
+
+  <div class="ui-container msh__inner">
+    <h2 class="ui-h2 msh__title" id="lsp-mentorship-title">Наставничество в&nbsp;реальном времени</h2>
+    <p class="ui-lead msh__text">Преуспеть в&nbsp;профессии поможет опытный наставник: получить мгновенную обратную связь, научиться на&nbsp;практике реальных ситуаций, влиться в&nbsp;коллектив</p>
+  </div>
+
+  <!-- Rail-полоса: карточки-теги 429px от lg, активная — модификатор
+       --active (is-active оригинала → BEM-модификатор канона).
+       Скролл-лента — нативный section с именем (регион по умолчанию) и
+       tabindex="0" — keyboard access прокручиваемого региона (axe
+       scrollable-region-focusable; прецедент ui-table__scroll/lpp-side). -->
+  <section class="msh__rail" aria-label="Карточки направлений наставничества" tabindex="0">
+    <article class="msh__card">
+      <h3 class="msh__card-title">Ответственное отношение к&nbsp;каждому</h3>
+      <img
+        class="msh__card-thumb"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2788%27%20height%3D%2768%27%3E%3Crect%20width%3D%2788%27%20height%3D%2768%27%20rx%3D%278%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%2730%27%20cy%3D%2728%27%20r%3D%2712%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="88"
+        height="68"
+        loading="lazy"
+       >
+    </article>
+    <article class="msh__card msh__card--active">
+      <h3 class="msh__card-title">Наставничество в&nbsp;реальном времени</h3>
+      <img
+        class="msh__card-thumb"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2788%27%20height%3D%2768%27%3E%3Crect%20width%3D%2788%27%20height%3D%2768%27%20rx%3D%278%27%20fill%3D%27%23F26722%27%2F%3E%3Ccircle%20cx%3D%2760%27%20cy%3D%2740%27%20r%3D%2712%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="88"
+        height="68"
+        loading="lazy"
+       >
+    </article>
+    <article class="msh__card">
+      <h3 class="msh__card-title">Лучшие возможности для&nbsp;роста</h3>
+      <img
+        class="msh__card-thumb"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2788%27%20height%3D%2768%27%3E%3Crect%20width%3D%2788%27%20height%3D%2768%27%20rx%3D%278%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%2744%27%20cy%3D%2724%27%20r%3D%2712%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="88"
+        height="68"
+        loading="lazy"
+       >
+    </article>
+    <article class="msh__card">
+      <h3 class="msh__card-title">Личная самореализация</h3>
+      <img
+        class="msh__card-thumb"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2788%27%20height%3D%2768%27%3E%3Crect%20width%3D%2788%27%20height%3D%2768%27%20rx%3D%278%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="88"
+        height="68"
+        loading="lazy"
+       >
+    </article>
+  </section>
+</section>
+
+<!-- Вариант 12 — капсула вакансий (vcp, T18.2): плашка-пилюля «label +
+     CTA-кнопка» на контейнере 80px (min-height 176.5px от md); label —
+     ссылка-заголовок blue-50 (fs 36px «как есть»), btn — CTA accent.
+     От md — строка по центру (радиусы: слева/справа), на мобильной базе —
+     колонка stretch (радиусы складываются в пилюлю). -->
+<section class="ui-section vcp" id="lsp-capsule" aria-label="Капсула вакансий">
+  <p class="ui-showcase-stand__note">
+    Связка «капсула вакансий» (<code>vcp</code>, T18.2): плашка-пилюля «label + CTA» —
+    <code>vcp__label</code> (blue-50, 36px) и <code>vcp__btn</code> (accent, 80px от md);
+    от md — строка по центру, на мобильной базе — колонка (радиусы складываются пилюлей).
+  </p>
+
+  <div class="ui-container vcp__inner">
+    <a class="vcp__label" href="#lsp-capsule">Найди своё призвание</a>
+    <a class="vcp__btn" href="#lsp-capsule">Все 144 вакансии
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h13M11 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
   </div>
 </section>

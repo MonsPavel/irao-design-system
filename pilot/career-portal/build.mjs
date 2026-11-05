@@ -23,6 +23,9 @@
  * в доработки ДС по итогам сравнения (REPORT.md). Чипы (T14.8), табы-пилюли
  * и начальный выбор (T14.9), заголовок страницы (T14.2) и CTA-пилюля
  * (T14.4) с эпика EPIC-14 живут в ДС — пилот использует их напрямую.
+ * Лендинг-композиции (hero/adv-marquee/media/cover-hero — T17.15,
+ * наставничество msh и капсула вакансий vcp — T18.2) — каноны
+ * паттерн-слоя ds/ui-patterns.css.
  *
  * Запуск:  node pilot/career-portal/build.mjs [--ref <путь-к-career-portal>]
  * Перед запуском нужен собранный dist/ ДС:  npm run build
@@ -1086,6 +1089,85 @@ function mediaHomeCard(card, kind = '') {
     </div>
   </a>
 </article>`;
+}
+
+/* ── mentorship/vacancy-capsule (T18.2): макро-блоки v2 главной, которых
+   нет в v1 (build.py PAGES.index их не собирает; INDEX_FRAGS index-2 —
+   build.py:573-590). Разметка — каноны паттерн-слоя msh/vcp
+   (ds/ui-patterns.css; VI-инвариант: фото-фон — примитив
+   ui-section--photo T17.3, не голым IMG). Данные — мок оригинала
+   (index-2.html:413-451 и 691-698). ── */
+
+/** Данные секции наставничества (index-2.html:413-442): заголовок/текст
+ *  (v2-тексты, «каждому»/«Преуспеть» — 1:1 против WHY_US v1), фото
+ *  mask-слоя и 4 карточки rail (активная — вторая, index-2.html:429). */
+const MENTORSHIP = {
+  title: 'Наставничество в&nbsp;реальном времени',
+  text: 'Преуспеть в&nbsp;профессии поможет опытный наставник: получить мгновенную обратную связь, научиться на&nbsp;практике реальных ситуаций, влиться в&nbsp;коллектив',
+  photo: 'assets/images/mentorship.png',
+  cards: [
+    { title: 'Ответственное отношение к&nbsp;каждому', thumb: 'assets/images/tag-photo-1.png' },
+    {
+      title: 'Наставничество в&nbsp;реальном времени',
+      thumb: 'assets/images/mentorship.png',
+      active: true,
+    },
+    { title: 'Лучшие возможности для&nbsp;роста', thumb: 'assets/images/job-card-1.png' },
+    { title: 'Личная самореализация', thumb: 'assets/images/job-card-2.png' },
+  ],
+};
+
+/** Секция наставничества (канон msh): __bg — заливка primary + blend-фото
+ *  (bg-elektro.jpg, mentorship.css:7-21), msh__photo — mask-фото справа
+ *  (mentorship.css:23-38); rail — 4 карточки-тега (скролл-лента, канон
+ *  несёт скрытый скроллбар; нативный section с именем = регион по
+ *  умолчанию + tabindex="0" — keyboard access прокручиваемого региона,
+ *  axe scrollable-region-focusable, прецедент ui-table__scroll — в
+ *  оригинале атрибутов нет, a11y-добавка ДС).
+ *  Постраничный скролл rail оригинала (JS) не переносится — Out of scope
+ *  поведения (T18.2). */
+function mentorshipMain() {
+  const cards = MENTORSHIP.cards
+    .map(
+      (card) => `    <article class="msh__card${card.active ? ' msh__card--active' : ''}">
+      <h3 class="msh__card-title">${card.title}</h3>
+      <img class="msh__card-thumb" src="${card.thumb}" alt="" loading="lazy">
+    </article>`,
+    )
+    .join('\n');
+  return `<section class="ui-section ui-section--photo msh">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="assets/images/bg-elektro.jpg" alt="" loading="lazy">
+  </div>
+  <div class="msh__photo" aria-hidden="true">
+    <img src="${MENTORSHIP.photo}" alt="" loading="lazy">
+  </div>
+  <div class="ui-container msh__inner">
+    <h2 class="ui-h2 msh__title">${MENTORSHIP.title}</h2>
+    <p class="ui-lead msh__text">${MENTORSHIP.text}</p>
+  </div>
+  <section class="msh__rail" aria-label="Карточки направлений наставничества" tabindex="0">
+${cards}
+  </section>
+</section>`;
+}
+
+/** Капсула вакансий (канон vcp): label-пилюля + CTA-кнопка «Все 144
+ *  вакансии» (v2-число оригинала, index-2.html:447); svg-стрелка 20×20 —
+ *  1:1 index-2.html:448 (ARROW канона — 16×16, другой глиф). Позиции v2 —
+ *  «Найди своё призвание» (после mentorship) и «Найди свою команду»
+ *  (перед cta-mail; build.py:605-607 подменял текст второй капсулы —
+ *  здесь тексты запечены позициями). Якоря id нет — оригинал index-2
+ *  капсулы не именует (панель #vacancies живёт только в v1-why-us). */
+function vacancyCapsuleMain(label) {
+  return `<section class="ui-section vcp">
+  <div class="ui-container vcp__inner">
+    <a class="vcp__label" href="vacancies.html">${label}</a>
+    <a class="vcp__btn" href="vacancies.html">Все 144 вакансии
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 10h13M11 4l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+</section>`;
 }
 
 function indexMain() {
@@ -2832,12 +2914,11 @@ function notFoundMain() {
    (build.py:593-596): иллюстрированная секция скрыта (hidden), id="students"
    переезжает на photographic с модификатором --v2; ссылка головки —
    «все мероприятия» (build.py:942, is_v2). Секция cp-why-us снимается: в
-   v2 оригинала её нет (INDEX_FRAGS index-2 — mentorship/vacancy-capsule
-   вместо why-us, T18.2 собирает их), панель вакансий #vacancies уходит
-   вместе с секцией. Заголовок секции students остаётся «Школьникам и
-   студентам» (index-2.html:501) — прежняя подмена «Найди свою команду»
-   была стенд-ином отсутствующей capsule (текст второй vacancy-capsule,
-   T18.2). */
+   v2 оригинала её нет (панель вакансий #vacancies уходит вместе с секцией).
+   Заголовок секции students остаётся «Школьникам и студентам»
+   (index-2.html:501). Подмену текста второй капсулы (build.py:605-607)
+   build.mjs не выполняет — капсулы запечены позициями в index2Main
+   (T18.2). */
 function applyVariant2(html) {
   const whyStart = html.indexOf('<section class="ui-section ui-section--photo cp-why-us">');
   if (whyStart !== -1) {
@@ -2885,8 +2966,26 @@ function applyVariant2(html) {
     );
 }
 
+/* Вариант 2 главной с блоками v2 (T18.2): mentorship + капсула «Найди
+   своё призвание» — после employers (lgo), перед скрытой иллюстрированной
+   секцией students; капсула «Найди свою команду» — перед cta-mail
+   (contacts-block). Порядок и позиции — INDEX_FRAGS index-2
+   (build.py:573-590) / probe 04.11: employers → mentorship →
+   vacancy-capsule → students(hidden) → students--photographic--v2 →
+   video → media → team → vacancy-capsule → cta-mail. Вставки — строковые
+   маркеры ПОСЛЕ applyVariant2 (id="students" уже переехал на --v2,
+   why-us снята): маркер скрытой секции — уникален (единственная
+   hidden-секция главной), contacts-block — якорь cta-mail. */
 function index2Main() {
-  return applyVariant2(indexMain());
+  const html = applyVariant2(indexMain());
+  const studentsAnchor = '<section class="ui-section" hidden>';
+  const ctaAnchor = '<section class="ui-section" id="contacts-block">';
+  return html
+    .replace(
+      studentsAnchor,
+      `${mentorshipMain()}\n\n${vacancyCapsuleMain('Найди своё призвание')}\n\n${studentsAnchor}`,
+    )
+    .replace(ctaAnchor, `${vacancyCapsuleMain('Найди свою команду')}\n\n${ctaAnchor}`);
 }
 
 const PAGES = [

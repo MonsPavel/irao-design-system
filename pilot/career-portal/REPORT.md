@@ -952,3 +952,100 @@ T15.9) и ASYM-артефакты выборки (скрытые модалки,
 `landing-compositions.test.js` (wrap в базе, nowrap@480, anywhere,
 max-width на фото). Постоянный probe hscroll internships/practices@375
 в compare.mjs — кандидат при следующем структурном касании compare.
+
+## T18.2 — index-2: mentorship и vacancy-capsule — новые макро-блоки (05.11)
+
+Спека: `docs/ui-system/epics/EPIC-18-macro-parity/T18.2-index2-mentorship-capsule.md`.
+Два макро-блока v2, отсутствовавших в билде целиком, собраны на index-2 в
+позициях оригинала и вынесены в паттерн-слой канонами `msh`/`vcp`:
+
+- **канон msh** (наставничество, порт `.mentorship` mentorship.css 1:1 с
+  источниками в комментариях): фото-секция на примитиве `ui-section--photo`
+  (T17.3, VI-инвариант — не голым IMG): слой `__bg` несёт заливку primary и
+  blend-фото (LUMINOSITY @ 40%), mask-фото — второй декоративный слой
+  канона (000 маски → `--ui-color-text`, прецедент hro__marquee);
+  внутренняя сетка 552px от lg (380/300 ступени), rail-полоса карточек
+  108px (скролл, отступ `max(pad, (100vw − container-max)/2)` со ступенями);
+  лестницы @max-1023/767 инвертированы mobile-first;
+- **канон vcp** (капсула вакансий, порт `.vacancy-capsule`): min-height
+  176.5px «как есть» от md, inner 80px, label-пилюля blue-50 (36px «как
+  есть») + CTA accent (44px паддинг «как есть»); мобильная база — колонка
+  (радиусы складываются пилюлей), включение строки от md; hover-пары под
+  гвардом `(hover: hover)`;
+- гейт префиксов слоя расширен `msh|vcp` (patterns-layer-gate.mjs +
+  юнит-пины); док-эталон landing-section — секции 11–12 (`lsp-mentorship`/
+  `lsp-capsule`) + README (синхронность «док ↔ слой» — пин
+  pattern-mentorship-capsule.test.js);
+- сборка: `index2Main` = `applyVariant2` + вставки (INDEX_FRAGS index-2,
+  build.py:573-590): mentorship + капсула «Найди своё призвание» — после
+  employers, капсула «Найди свою команду» — перед cta-mail; v1-шаблон не
+  тронут; подмену текстов build.py:605-607 заменяет запечённая позиция
+  (тексты — данные билдера);
+- **решение по «фильтрам капсулы»** (Implementation requirements п.2 спеки
+  — «фильтры — ui-select--pill»): капсула оригинала (index-2.html:444-451,
+  vacancy-capsule.html) НЕ несёт select-фильтров — composition «label +
+  CTA» (probe 04.11: inner h=80). Добавление ui-select--pill создало бы
+  контент вне оригинала и ударило по AC «Δ ≤ 8px 1:1»; собрано 1:1
+  оригинала. Отклонение от буквы спеки — design-decision в её духе
+  (Implementation requirements п.1 «Значения 1:1 из оригинала» сильнее);
+- тон активной карточки rail — хук канона `--msh-card-active-bg`
+  (дефолт токен accent); одобренный градиент E88A2C→D9A441
+  (mentorship.css:90) — цветовая строка сайт-зоны pilot.css (hex в ДС не
+  едет; прецедент спец-тинов hero-тегов T17.15); hex-allowlist пинов
+  расширен (pilot-photo-sections/students-photographic —
+  e88a2c/d9a441);
+
+**Движение ценза после T18.2** (блоки v2 — на канонах слоя, сайт-зоне
+осталась тон-строка): сырые 1417 → **1431**, код 819 → **822**, селекторы
+**134** и семейства **28** — без изменений (хук назван `msh__card` — не
+`.cp-`, новых cp-семейств нет). Пороги-потолки подняты на новый факт:
+1417 → **1431**, 819 → **822** (errata в шапке census.mjs + юнит-пины
+pilot-census-gate/poster-card, допись здесь). Приёмка index-2 (1440,
+проба `.zcode/accept-t182-probe.mjs`, оригинал — локальный чекаут
+file://): presence mentorship **1/1**, капсулы **2/2**, why-us 0/0;
+позиции (индексы секций): employers 4 → mentorship 5 → капсула 6 →
+students 8 → team 11 → капсула 12 → cta-mail 13 — **идентичны оригиналу**;
+высоты: mentorship 780 ↔ 780, капсула-1 177 ↔ 177, капсула-2 177 ↔ 177 —
+**Δ 0px по каждому блоку** (AC ≤ 8px); top mentorship 3634 ↔ 3634.
+Скрин-пара: `.zcode/accept-t182-mentorship-{original,pilot}.png` (blend-
+фон, mask-фото, rail с активной карточкой — рендер совпадает). docHeight
+index-2: 9002 → 9138 (**+136** — докомпозиция T18.2 +1134 (780 + 177×2)
+и известные хвостовые дельты прежних блоков (media--wide +170,
+students--v2 −16 и др. — таблица эпика); разбор хвоста — T18.9, вне
+Scope T18.2: AC гейтит Δ по каждому блоку, не страницу).
+
+A11y-добавки канона (ревью e2e-стенда): rail-полоса msh — нативный
+`<section class="msh__rail" aria-label tabindex="0">` — keyboard access
+прокручиваемого региона (axe scrollable-region-focusable; прецедент
+ui-table__scroll/lpp-side; в оригинале атрибутов нет — a11y-добавка ДС,
+геометрия не меняет — проба Δ0 выше после правки). CTA-кнопка капсулы
+(`.vcp__btn`, белый на accent 3.12:1 при 18px/500) — та же одобренная
+пара on-dark-on-accent (T2.6/ADR-0010), узнанная записью реестра
+KNOWN_AXE_EXCEPTIONS (harness.js; прецедент узнавания — T15.9);
+гейт-тест стенда переведён на реестр «вне реестра = []» (прецедент
+pattern-list-page.spec.js).
+
+Приёмка T18.2 (docker-гейт) — два красных пункта и их закрытие:
+1. визуальные эталоны лендинг-секции (pattern-landing-section--mobile/
+   tablet/desktop.png) — базы не несли секции 11–12; перегенерированы в
+   пиннутом контейнере (`npm run test:docker --
+   tests/e2e/pattern-landing-section.spec.js --update-snapshots`,
+   IRAO_SNAPSHOTS=1). Ревью диффа (png-diff порог 8: старая база vs
+   crop новой до старой высоты): 375 — верх 0–9558 идентичен, полоса
+   9559–9699 = вставленная секция msh вместо подвала; 768 — верх до
+   8100 идентичен; 1440 — верх до 7512 идентичен; прирост высот
+   +1037/+1098/+1147 = секции 11–12 + сдвиг подвала — осознанное
+   визуальное изменение, вьюпорты/существующие секции не затронуты;
+2. release-гейт T3.6 (scaling.spec.js B, 32px-база: html scrollWidth
+   874 > 768 @768) — строка label+btn капсулы не сжималась ниже
+   min-content; гранулы канона: `.vcp__inner { flex-wrap: wrap }` +
+   `max-width: 100%` на `.vcp__label`/`.vcp__btn` (прецедент reflow-
+   гранулы .lpp-pill max-width: 100%) — на одобренном 16px-рендере
+   строка помещается на всех ступенях, рендер 1:1 не меняет (проба
+   Δ0 после правки — выше). Гейтовые ширины 1280/768/375 после
+   правки чисты (диагностика .zcode/accept-t182-hscroll-diag.mjs).
+Итог приёмки: `npm run test:docker` — 646 passed / 1 skipped / 0 failed
+(включая scaling B и эталоны лендинг-секции на 375/768/1440).
+Вывод прогона: `ценз сайт-зоны: pilot.css 1431 строк (код 822, цель эпика
+≤822 кода — выполнена), cp-семейств 28 (134 селектора), JS пилота 187
+строк / гейт: новых cp-визуальных блоков 0 (allowlist 30) — OK`.

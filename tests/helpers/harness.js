@@ -129,6 +129,18 @@ export const KNOWN_AXE_EXCEPTIONS = Object.freeze([
       'изменение пары — design-decision владельца; токен-уровень — ' +
       'tests/contrast/pairs.config.mjs',
   },
+  {
+    id: 'color-contrast',
+    // CTA-кнопка капсулы вакансий (T18.2): тот же lookahead-механизм, что
+    // у .ui-button--accent (не более длинное имя).
+    match: /(^|\s)\.vcp__btn(?![\w-])/,
+    reason:
+      'подпись CTA-кнопки капсулы вакансий (.vcp__btn, T18.2) — та же ' +
+      'одобренная пара on-dark на accent 3.12:1 (как ui-button--accent/' +
+      'ui-video__play/ui-card--cta--accent): 18px/500 axe меряет как мелкий ' +
+      'текст 4.5:1 (пара on-dark-on-accent, T2.6/ADR-0010); изменение пары — ' +
+      'design-decision владельца; токен-уровень — tests/contrast/pairs.config.mjs',
+  },
 ]);
 
 /**

@@ -22,7 +22,13 @@
  */
 import { expect } from '@playwright/test';
 
-import { a11y, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js';
+import {
+  a11y,
+  shot,
+  test as standTest,
+  unexpectedViolations,
+  VIEWPORTS,
+} from '../helpers/harness.js';
 
 const SEL = {
   light: '#lsp-light',
@@ -736,13 +742,14 @@ standTest.describe('patterns/landing-section: лендинг-композици�
 });
 
 standTest.describe('patterns/landing-section: a11y страницы (AC)', () => {
-  standTest('axe страницы чист', async ({ stand }) => {
+  standTest('axe страницы чист (вне реестра KNOWN_AXE_EXCEPTIONS)', async ({ stand }) => {
     const page = await stand('patterns/landing-section');
     const results = await a11y(page).analyze();
-    expect(
-      results.violations.map((violation) => `${violation.id} → ${violation.nodes.length} узл(ов)`),
-      'axe: violations = []',
-    ).toEqual([]);
+    // T18.2: CTA-кнопка капсулы vcp__btn несёт одобренную пару on-dark на
+    // accent 3.12:1 (как ui-button--accent/ui-card--cta--accent) — узнана
+    // реестром харнесса; гейт остаётся строгим ко всему вне реестра
+    // (прецедент pattern-list-page.spec.js).
+    expect(unexpectedViolations(results), 'axe: violations вне реестра = []').toEqual([]);
   });
 
   standTest(

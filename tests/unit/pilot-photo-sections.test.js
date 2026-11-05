@@ -183,14 +183,18 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     expect(body, 'рамка гасится (T17.8)').toContain('border: 0;');
   });
 
-  it('в правках нет !important (инвариант); hex не добавлен — спец-тинты hero-тегов (violet/green/rose) остаются сайт-зоной до T17.15', () => {
+  it('в правках нет !important (инвариант); hex не добавлен — спец-тинты hero-тегов (violet/green/rose) и градиент карточек mentorship (T18.2) — сайт-зона', () => {
     expect(pilotCss).not.toContain('!important');
     // бывшие color-mix-градиенты __bg/__glow переехали в ДС на токенах —
-    // сырого primary в них больше нет (остаются только спец-тинты тегов)
+    // сырого primary в них больше нет (спец-тинты тегов T17.15 + тон-строка
+    // активной карточки mentorship на хуке канона --msh-card-active-bg —
+    // T18.2, прецедент тон-строк сайт-зоны)
     const tagTintHexes = [...pilotCss.matchAll(/#([0-9a-f]{3,8})\b/gi)].map((m) => m[1]);
     expect(
-      tagTintHexes.every((hex) => ['3142ff', '31ff76', 'ff3134'].includes(hex.toLowerCase())),
-      `сырые цвета в pilot.css — только спец-тинты hero-тегов (найдено: ${tagTintHexes.join(', ')})`,
+      tagTintHexes.every((hex) =>
+        ['3142ff', '31ff76', 'ff3134', 'e88a2c', 'd9a441'].includes(hex.toLowerCase()),
+      ),
+      `сырые цвета в pilot.css — только спец-тинты hero-тегов и градиент mentorship (найдено: ${tagTintHexes.join(', ')})`,
     ).toBe(true);
   });
 });
