@@ -178,8 +178,8 @@ describe('гейт ценза — runCensusGate (порог числом; дег
 
 describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.6', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(2128);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1217);
+    expect(MAX_PILOT_CSS_LINES).toBe(2138);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1222);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
@@ -238,14 +238,14 @@ describe('пороги ценза — числа зафиксированы по
       // композиция марки mrq — колонка/фото 260, карточки стажёров 4/3,
       // лента мероприятий events-feature 2fr/1fr «как есть»
       // pages.css:336/341/68/1009–1054/1083–1146/565–581/1150–1171):
-      // сырые 1894→2128, код 1089→1217, селекторы 152→166
+      // сырые 1894→2138, код 1089→1222, селекторы 152→167
       // (.cp-events-feature — сетка/карточки/фото/тело × медиа-ступени,
       // .int-sec .cp-adv-grid .ui-card, .int-dir-grid .cp-intern-card ×
       // .ui-h6/.ui-small-кламп канона); семейства/allowlist НЕ менялись
       // (int- — не cp-, прецедент edu- T18.5):
-      expect(metrics.css.lines).toBe(2128);
-      expect(metrics.css.codeLines).toBe(1217);
-      expect(metrics.css.selectors).toBe(166);
+      expect(metrics.css.lines).toBe(2138);
+      expect(metrics.css.codeLines).toBe(1222);
+      expect(metrics.css.selectors).toBe(167);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(29);
       expect(metrics.js.lines).toBe(187);

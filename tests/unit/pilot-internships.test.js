@@ -115,9 +115,9 @@ describe('build.mjs + pilot.css — ритм секций лендингов (Sc
     expect(blockOf(pilotCss, '.int-sec')).toContain('padding-block: 2.5rem');
   });
 
-  it('контейнеры лендинга — горизонтальные паддинги 40 (--container-pad variables.css:68, против 32 канона --ui-container-pad; замер 06.11: контент 1361 против 1345 — фото 2/3-колонки секции 8 +10px)', () => {
+  it('контейнеры лендинга — паддинг 40 только на ступени 2xl (--container-pad variables.css:68 = 40 база; ниже у оригинала лестница 32/24/16 — base.css:96–102, канон ДС с ней совпадает; ступень 40 ≥1440 в слой не перенесена — T2.2, base/layout.css:41; ревью T18.6: без media 1280 → 1185 против 1201, 375 → 280 против 328)', () => {
     expect(pilotCss).toMatch(
-      /\.int-lead \.ui-container,\s*\.int-tabs \.ui-container,\s*\.int-sec \.ui-container \{\s*padding-inline: 2\.5rem;/,
+      /@media \(min-width: 1440px\) \{\s*\.int-lead \.ui-container,\s*\.int-tabs \.ui-container,\s*\.int-sec \.ui-container \{\s*padding-inline: 2\.5rem;/,
     );
   });
 
@@ -210,9 +210,13 @@ describe('build.mjs + pilot.css — секция 8 «Наши мероприят
     expect(pilotCss).toMatch(/\.cp-events-feature \.ui-card:first-child \{\s*grid-row: 1 \/ 3;/);
   });
 
-  it('большая карточка — фото 1/1 (pages.css:1163–1171: флекс-растяжка до натуральной пропорции; internship-1.png 431×431 — квадрат, замер 06.11)', () => {
-    const media = blockOf(pilotCss, '.cp-events-feature .ui-card:first-child .ui-card__media');
-    expect(media).toContain('aspect-ratio: 1 / 1');
+  it('большая карточка — слот без аспекта и img без фикс-высоты (pages.css:1163–1171: флекс-растяжка; internship-1.png 431×431 — квадрат; ревью T18.6: aspect-ratio 1/1 на слоте оставлял img полосой 220px от правил 12.5/13.75rem — 627px пустоты при Δ0 гейта; гашение специфичностью (0,4,1), height:100% не нужен — урок ui-card.css:163–172)', () => {
+    expect(pilotCss).toMatch(
+      /\.cp-events-feature \.ui-card:first-child \.ui-card__media \{\s*aspect-ratio: auto;/,
+    );
+    expect(pilotCss).toMatch(
+      /\.cp-events-feature \.ui-card:first-child \.ui-card__media img \{\s*height: auto;/,
+    );
   });
 
   it('карточка события — паддинг 16 (.event-card pages.css:565), фото 200→220 (pages.css:569/932), тело 16 4 0 с шагом 10 (pages.css:575)', () => {

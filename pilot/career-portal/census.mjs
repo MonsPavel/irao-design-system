@@ -57,7 +57,7 @@
  *    тот же курс: одна тон-строка + каркас правила) → 869 (T18.3 — хуки
  *    ленты компании, тот же курс) → 1013 (T18.4 — хуки career-track, тот же
  *    курс) → 1089 (T18.5 — хуки education + канон карточек, тот же курс) →
- *    1217 (T18.6 — хуки лендингов стажировок, тот же курс);
+ *    1217 (T18.6 — хуки лендингов стажировок, тот же курс) → 1222 (ревью T18.6: слот/img большой карточки events-feature без аспекта/фикс-высоты, +2 строки);
  *  - MAX_PILOT_JS_LINES = 187 — строки pilot.js на закрытие эпика;
  *  - MAX_CP_FAMILIES = 30 и ALLOWED_CP_FAMILIES — семейства ценза «после»:
  *    появление семейства вне списка = новый cp-визуальный блок = ошибка
@@ -89,8 +89,8 @@ const PILOT_DIR = dirname(fileURLToPath(import.meta.url));
 
 /** Пороги — факт итога T17.16 + errata 31.10 (см. шапку). Изменение числа —
  *  осознанная правка ценза вместе с юнит-пином и REPORT §11.4, не «подгонка». */
-export const MAX_PILOT_CSS_LINES = 2128;
-export const MAX_PILOT_CSS_CODE_LINES = 1217;
+export const MAX_PILOT_CSS_LINES = 2138;
+export const MAX_PILOT_CSS_CODE_LINES = 1222;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 

@@ -1599,11 +1599,16 @@ a.cp-intern-card {
 /* Контейнеры лендинга — горизонтальные паддинги 40 (.container
    --container-pad variables.css:68) против 32 канона --ui-container-pad:
    замер 06.11 — контент 1361 против 1345 оригинала, +16px ширины давали
-   секции 8 +10px (фото 2/3-колонки) и расхождения сеток. */
-.int-lead .ui-container,
-.int-tabs .ui-container,
-.int-sec .ui-container {
-  padding-inline: 2.5rem;
+   секции 8 +10px (фото 2/3-колонки) и расхождения сеток. Ступень 40 у
+   оригинала только ≥1440 (variables.css:68 — база; ниже лестница 32/24/16,
+   base.css:96–102 = канон ДС; в слой 2 не перенесена — T2.2,
+   base/layout.css:41) — хук на ступени 2xl шкалы T2.5, ниже канон. */
+@media (min-width: 1440px) {
+  .int-lead .ui-container,
+  .int-tabs .ui-container,
+  .int-sec .ui-container {
+    padding-inline: 2.5rem;
+  }
 }
 
 /* Сетка преимуществ — карточки с шагом 12 (.adv-card pages.css:507)
@@ -1734,13 +1739,14 @@ a.cp-intern-card {
 
 /* Лента мероприятий «фича» — events-feature оригинала (pages.css:1150–1171):
    2fr/1fr от lg (mobile-first: база колонка — оригинал держал колонку до
-   1024, pages.css:1254), большая карточка — на два ряда; её фото — 1/1
-   (pages.css:1163–1171 растягивали флексом до натуральной пропорции;
-   internship-1.png 431×431 — квадрат, aspect-ratio даёт тот же рендер
-   детерминированно — порт T17.5 каркаса; height: 100% запрещён —
-   интринсик-цикл, урок в ui-card.css:163–172). Карточки — .event-card
-   (pages.css:565–581): паддинг 16, фото 200→220 (md), тело 16 4 0 с шагом
-   10; канон ui-card--media (паддинг 24, фото 3/2, тело 12/шаг 8) давал
+   1024, pages.css:1254), большая карточка — на два ряда; её фото растягивал
+   флекс до натуральной пропорции (pages.css:1163–1171): слот без аспекта и
+   img без фикс-высоты (ревью T18.6: aspect-ratio 1/1 на слоте оставлял img
+   полосой 220px от правил ниже — 627px пустоты при Δ0 высотного гейта;
+   height: 100% не нужен — интринсик-цикл, урок в ui-card.css:163–172).
+   Карточки — .event-card (pages.css:565–581): паддинг 16, фото 200→220 (md),
+   тело 16 4 0 с шагом 10; канон ui-card--media (паддинг 24, фото 3/2,
+   тело 12/шаг 8) давал
    ленту 613 против 1168 (замер 06.11). */
 .cp-events-feature {
   display: grid;
@@ -1792,7 +1798,11 @@ a.cp-intern-card {
   }
 
   .cp-events-feature .ui-card:first-child .ui-card__media {
-    aspect-ratio: 1 / 1; /* pages.css:1163–1171 — флекс-растяжка до 1/1 */
+    aspect-ratio: auto; /* pages.css:1163–1171 — высоту несёт img */
+  }
+
+  .cp-events-feature .ui-card:first-child .ui-card__media img {
+    height: auto; /* специфичность (0,4,1) гасит 12.5/13.75rem выше */
   }
 }
 
