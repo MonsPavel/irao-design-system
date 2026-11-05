@@ -293,6 +293,14 @@ describe('patterns/patterns.css — канон капсулы вакансий (
       'justify-content: center;',
     );
     expect(inner, 'gap 0 (vacancy-capsule.css:10)').toContain('gap: 0;');
+    // Ревью-гейт T3.6 (32px-база, scaling.spec.js B): min-content строки
+    // label+btn при 32px-базе шире контейнера — перенос разрешён; на
+    // одобренном 16px-рендере строка помещается на всех ступенях — wrap
+    // не срабатывает, рендер 1:1 не меняет (прецедент lpp-pill
+    // max-width: 100%).
+    expect(inner, 'перенос строки капсулы при раздувании базы (T3.6)').toContain(
+      'flex-wrap: wrap;',
+    );
     const md = mediaBlockOf(layer, 768, 'vcp__inner');
     expect(md, 'строка (vacancy-capsule.css:8) от md').toContain('flex-direction: row;');
   });
@@ -318,6 +326,11 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     expect(label, 'transition (vacancy-capsule.css:24)').toContain(
       'transition: background-color var(--ui-transition);',
     );
+    // Ревью-гейт T3.6 (32px-база): inline-flex пилюля не сжимается ниже
+    // min-content — на узких вьюпортах 32px-базы вылезала за контейнер
+    // (+45px html @375); max-width: 100% зажимает бокс, текст переносится
+    // (прецедент reflow-гранулы .lpp-pill max-width: 100%).
+    expect(label, 'гранула T3.6 — бокс не шире контейнера').toContain('max-width: 100%;');
     const md = mediaBlockOf(layer, 768, 'vcp__label');
     expect(md, '80px (vacancy-capsule.css:16)').toContain('height: 5rem;');
     expect(md, 'pad 0 56px (vacancy-capsule.css:17) «как есть», вне шкалы §3.2').toContain(
@@ -354,6 +367,9 @@ describe('patterns/patterns.css — канон капсулы вакансий (
     expect(btn, '18px (vacancy-capsule.css:37)').toContain('font-size: 1.125rem;');
     expect(btn, 'fw-body-bold (vacancy-capsule.css:38)').toContain(
       'font-weight: var(--ui-fw-body-bold);',
+    );
+    expect(btn, 'гранула T3.6 — бокс не шире контейнера (как у label)').toContain(
+      'max-width: 100%;',
     );
     expect(btn, 'on-dark (vacancy-capsule.css:39)').toContain(
       'color: var(--ui-color-text-on-dark);',
