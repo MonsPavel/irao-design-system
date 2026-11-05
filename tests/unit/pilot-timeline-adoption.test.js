@@ -63,12 +63,14 @@ describe('pilot.css — дубликат cp-timeline снят (T17.10 AC)', () =
 
 describe('compare.mjs — проба блока таймлайна (AC: высоты ±4px)', () => {
   it('internships/practices: BLOCK_PROBES несёт пару original .timeline → pilot .tlp', () => {
-    const block = compare.match(/'internships\.html':\s*\[[\s\S]*?\],/)?.[0] ?? '';
+    // T18.6: списки пар обеих страниц расширены составом лендингов —
+    // выборка до конца массива (закрывающая скобка на отступе блока).
+    const block = compare.match(/'internships\.html':\s*\[[\s\S]*?\n {2}\],/)?.[0] ?? '';
     expect(block, 'проба internships.html объявлена').not.toBe('');
     expect(block, 'пара original .timeline → pilot .tlp').toContain(
       "['timeline', '.timeline', '.tlp']",
     );
-    const practicesBlock = compare.match(/'practices\.html':\s*\[[\s\S]*?\],/)?.[0] ?? '';
+    const practicesBlock = compare.match(/'practices\.html':\s*\[[\s\S]*?\n {2}\],/)?.[0] ?? '';
     expect(practicesBlock, 'проба practices.html объявлена').not.toBe('');
     expect(practicesBlock, 'пара original .timeline → pilot .tlp').toContain(
       "['timeline', '.timeline', '.tlp']",

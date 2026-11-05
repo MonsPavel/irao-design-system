@@ -468,9 +468,11 @@ describe('пилот (T17.5): медиа-карточки на модифика�
     expect(build).toMatch(
       /<span class="ui-card__media-tag ui-tag [^"]*"><span class="ui-tag__icon"/,
     );
-    // Карточка стажёра: квадратное фото — __media--square, без --link (не ссылка).
+    // Карточка стажёра: без --link (не ссылка). T18.6: слот без --square —
+    // фото 4/3 ведёт хук int-person (.intern-person pages.css:1138);
+    // квадратный канон-модификатор с потребителя снят.
     expect(build).toMatch(
-      /<article class="ui-card ui-card--hover ui-card--media">\r?\n\s*<div class="ui-card__media ui-card__media--square">/,
+      /<article class="ui-card ui-card--hover ui-card--media int-person">\r?\n\s*<div class="ui-card__media">/,
     );
   });
 

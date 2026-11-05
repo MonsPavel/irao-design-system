@@ -59,8 +59,10 @@ describe('build.mjs — бирки строк marquee по ролям ориги
     expect(internshipsMainBody).toContain('<div class="mrq__type" aria-hidden="true">');
   });
 
-  it('блок — канон mrq паттерн-слоя; cp-дубликаты из pilot.css сняты (T17.15)', () => {
-    expect(internshipsMainBody, 'блок — связка mrq').toContain('<div class="mrq">');
+  it('блок — канон mrq паттерн-слоя с хуком int-marquee (T18.6); cp-дубликаты из pilot.css сняты (T17.15)', () => {
+    expect(internshipsMainBody, 'блок — связка mrq + хук сайта').toContain(
+      '<div class="mrq int-marquee">',
+    );
     expect(pilotCss, 'cp-adv-marquee* сняты (канон — слой, T17.15)').not.toContain(
       '.cp-adv-marquee',
     );

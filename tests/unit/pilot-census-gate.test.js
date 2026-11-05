@@ -176,10 +176,10 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.5', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.6', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1894);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1089);
+    expect(MAX_PILOT_CSS_LINES).toBe(2128);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1217);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
@@ -231,10 +231,21 @@ describe('пороги ценза — числа зафиксированы по
       // колонкой, cp-adv-grid шаг 24, пары заголовков карточек lh 1.3/без трекинга, flex-shrink: 0 кнопке шапки): сырые 1738→1894, код 1013→1089,
       // селекторы 148→152 (.edu-cover .cp-page-subtitle, новый
       // спан .cp-offer-card__company, пары .cp-org-card/.cp-offer-card × .ui-h6); семейства/allowlist НЕ менялись
-      // (edu- — не cp-, прецедент ctr- T18.4):
-      expect(metrics.css.lines).toBe(1894);
-      expect(metrics.css.codeLines).toBe(1089);
-      expect(metrics.css.selectors).toBe(152);
+      // (edu- — не cp-, прецедент ctr- T18.4);
+      // T18.6 (позиционные хуки лендингов стажировок/практик int-: ритм
+      // секций pad 40/титулы mb 32/контейнеры pad 40, форма cover-hero на
+      // каркасе cvh — прецедент .edu-cover, шапка/чипы/сетка направлений,
+      // композиция марки mrq — колонка/фото 260, карточки стажёров 4/3,
+      // лента мероприятий events-feature 2fr/1fr «как есть»
+      // pages.css:336/341/68/1009–1054/1083–1146/565–581/1150–1171):
+      // сырые 1894→2128, код 1089→1217, селекторы 152→166
+      // (.cp-events-feature — сетка/карточки/фото/тело × медиа-ступени,
+      // .int-sec .cp-adv-grid .ui-card, .int-dir-grid .cp-intern-card ×
+      // .ui-h6/.ui-small-кламп канона); семейства/allowlist НЕ менялись
+      // (int- — не cp-, прецедент edu- T18.5):
+      expect(metrics.css.lines).toBe(2128);
+      expect(metrics.css.codeLines).toBe(1217);
+      expect(metrics.css.selectors).toBe(166);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(29);
       expect(metrics.js.lines).toBe(187);
