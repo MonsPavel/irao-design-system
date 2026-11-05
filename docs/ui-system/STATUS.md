@@ -129,7 +129,7 @@
 | T17.16 | done | смержена |
 | T18.1 | done | смержена |
 | T18.2 | done | смержена |
-| T18.3 | todo | company.html: 6 лент + 2-й banner + фотогалерея (−3328px) |
+| T18.3 | done | смержена |
 | T18.4 | todo | career-track.html: 3 секции + кнопка cover-hero (−1475px) |
 | T18.5 | todo | education.html: интро/каталог/направления (−980px) |
 | T18.6 | todo | internships/practices: секция-8 (−555) + ритм лендингов (−679/−606) |
