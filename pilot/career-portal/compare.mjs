@@ -579,6 +579,21 @@ const BLOCK_PROBES = {
     ['ctr-test', '.test', '.ctr-test'],
     ['ctr-articles', '.cards-grid--4', '.ui-grid--4'],
   ],
+  // T18.5: education — обложка (cover-hero 432, с CTA) и секции 1:1
+  // (организации #orgs 706 с лентой фильтров; предложения — шапка
+  // .page-head--split 132; hero компаний .company-hero 320; adv-сетка 283).
+  // Пары: обложка — .cover-hero → хук формы .edu-cover на каркасе cvh;
+  // организации — id="orgs" с обеих сторон; шапка предложений —
+  // .page-head--split → .edu-offer-head; hero — .company-hero →
+  // .edu-company-hero; сетка преимуществ — .adv-grid → .cp-adv-grid
+  // (крючки проб — не новые сущности: классы есть в разметке).
+  'education.html': [
+    ['edu-cover', '.cover-hero', '.edu-cover'],
+    ['edu-orgs', '#orgs', '#orgs'],
+    ['edu-offers-head', '.page-head--split', '.edu-offer-head'],
+    ['edu-company-hero', '.company-hero', '.edu-company-hero'],
+    ['edu-adv', '.adv-grid', '.cp-adv-grid'],
+  ],
   'internships.html': [['timeline', '.timeline', '.tlp']],
   'practices.html': [['timeline', '.timeline', '.tlp']],
 };

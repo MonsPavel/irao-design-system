@@ -1305,10 +1305,12 @@ a.cp-intern-card {
    cp-timeline сняты, канон приходит dist/ui-patterns.css (точки 56px
    surface-hover/primary, ряд от 1024). */
 
-/* Сетка преимуществ — карточки ui-card--filled */
+/* Сетка преимуществ — карточки ui-card--filled. T18.5: шаг 24 — канон
+   .adv-grid (pages.css:505); прежние 12px занижали высоту ленты
+   (потребители — стажировки/практики/education, у всех тот же .adv-grid). */
 .cp-adv-grid {
   display: grid;
-  gap: var(--ui-space-3);
+  gap: var(--ui-space-5);
   grid-template-columns: repeat(3, 1fr);
 }
 
@@ -1360,12 +1362,23 @@ a.cp-intern-card {
   margin-left: var(--ui-space-5);
 }
 
-/* Карточка предложения целевого обучения */
+/* Карточка предложения целевого обучения. T18.5: паддинг 24/шаг 14 — канон
+   .offer-card (pages.css:838; шаг «как есть» — 14px вне шкалы §3.2,
+   прецедент .cp-breadcrumbs 1.25rem); прежние 16/8 занижали карточку
+   (339 ↔ 275 на 1440). Потребители мета-колонки — education/каталог/event. */
 .cp-offer-card {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-4);
+  gap: 0.875rem;
+  padding: var(--ui-space-5);
+}
+
+/* Направление — роль ui-h6 (T16.12), пара карточного заголовка оригинала:
+   lh 1.3 без трекинга роли (pages.css:840 — .offer-card__direction,
+   fs-body × 1.3; замер 05.11: имя 2 строки 52 ↔ 50, переносы совпадают) */
+.cp-offer-card .ui-h6 {
+  line-height: 1.3;
+  letter-spacing: normal;
 }
 
 .cp-offer-card__head {
@@ -1379,29 +1392,172 @@ a.cp-intern-card {
   color: var(--ui-color-text-muted);
 }
 
+/* Мета — колонка .offer-card__meta (pages.css:861–864): компания над
+   городом, шаг 2 «как есть»; подпись компании — fw-small/primary
+   (pages.css:865–866), город наследует muted меты. */
 .cp-offer-card__meta {
   display: flex;
-  gap: var(--ui-space-2);
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.125rem;
   color: var(--ui-color-text-muted);
+}
+
+.cp-offer-card__company {
+  color: var(--ui-color-primary);
+  font-weight: var(--ui-fw-small);
 }
 
 .cp-offer-card__footer {
   margin-top: auto;
 }
 
-/* Карточка организации */
+/* Карточка организации. T18.5: паддинг 24/шаг 12 — канон .org-card
+   (pages.css:829); мета к низу — .org-card__meta margin-top auto
+   (pages.css:835: карточки ряда растягиваются, мета прижата к низу). */
 .cp-org-card {
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-2);
-  padding: var(--ui-space-4);
+  gap: var(--ui-space-3);
+  padding: var(--ui-space-5);
+}
+
+/* Имя организации — роль ui-h6 (T16.12), пара карточного заголовка
+   оригинала: lh 1.3 без трекинга роли (pages.css:831 — .org-card__name,
+   fs-body × 1.3; замер 05.11: трекинг роли −0.02em переворачивал перенос
+   «Санкт-Петербургский политехнический…» в 2 строки вместо 3 — ряд 190
+   вместо 219). */
+.cp-org-card .ui-h6 {
+  line-height: 1.3;
+  letter-spacing: normal;
 }
 
 .cp-org-card__meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--ui-space-1);
+  margin-top: auto;
+}
+
+/* ── education.html: интро, каталог, направления (T18.5) ──
+   Позиционные хуки edu- (конвенция не-cp имени сайт-зоны — прецедент ctr-
+   T18.4/stu- T18.1: ценз T17.16, семейства/allowlist не меняются). Каркасы —
+   ДС/слой: обложка cvh (T17.15), фильтры lpp-filters (T17.12), теги
+   ui-tag--filter (T16.14), шапка cp-page-head--split, карточки ui-card,
+   заголовки/текст — роли; источник значений — .cover-hero (pages.css:953–
+   967), .vac-filters (pages.css:14–20), .radio-row (components.css:217),
+   .page-head (components.css:36–43), .cards-grid--3 (pages.css:11),
+   .company-hero (pages.css:796–803), .org-grid (pages.css:827) оригинала. */
+
+/* Секция обложки: оригинал гасит верхний ритм секции (education.html:147,
+   section style="padding-top: 0") — над обложкой ритм ведут крошки.
+   Прецедент .ctr-lead (T18.4). */
+.edu-lead {
+  padding-top: 0;
+}
+
+/* Форма cover-hero (pages.css:953–959): паддинг 64/56 «как есть» (вне шкалы
+   §3.2 — прецедент .ctr-cover T18.4), шаг 20 (gap канона cvh 16 — «принято
+   ДС», здесь ритм высоты 432 оригинала ведёт шаг оригинала), фон/радиус —
+   токены поверх каркаса cvh (карточную форму канон не переносил — переносит
+   сайт). */
+.edu-cover {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  gap: 1.25rem;
+  padding: 4rem 3.5rem;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+}
+
+/* Подзаголовок обложки — max-width 640px (pages.css:965; база
+   cp-page-subtitle 768px даёт 3 строки вместо 4 — 97px высоты). */
+.edu-cover .cp-page-subtitle {
+  max-width: 40rem;
+}
+
+/* Кнопка обложки — +16px к шагу (pages.css:967, сверх gap 20 блока). */
+.edu-cover .ui-button {
+  margin-top: var(--ui-space-4);
+}
+
+/* Группа тегов-фильтров организаций (.radio-row education.html:186,
+   components.css:217): шаг 24 «как есть» — против gap 16 ленты фильтров;
+   крест-ось центр — лента lpp-filters (align-items center канона). */
+.edu-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-5);
+  align-items: center;
+}
+
+/* Сетка организаций (.org-grid pages.css:827): шаг 24 — против 32 канона
+   ui-grid от lg (лента организаций оригинала плотнее). */
+.edu-org-grid {
+  gap: var(--ui-space-5);
+}
+
+/* Заголовки разделов внутри секции (components.css:341 .section__title —
+   mb 32; reset ДС маргины h* гасит; прецедент .ctr-title T18.4): пары
+   «заголовок → лента» без lpp-канона (hero компаний, adv-сетка). Над #orgs
+   шаг 24 несёт лента lpp-filters (margin-top канона). */
+.edu-title {
+  margin: 0 0 var(--ui-space-6);
+}
+
+/* Шапка «предложения + кнопка» (.page-head components.css:40): низ 40px
+   «как есть» (вне шкалы §3.2 — прецедент ленты lpp-filters 2.5rem); база
+   cp-page-head несёт 32. Кнопка не усаживается flex-рядом (flex-shrink 0 —
+   white-space: nowrap .btn components.css:41 оригинала; без пары кнопка
+   сжималась до 168px и переносила подпись в 2 строки — 66px вместо 52). */
+.edu-offer-head {
+  margin-bottom: 2.5rem;
+}
+
+.edu-offer-head .ui-button {
+  flex-shrink: 0;
+}
+
+/* Сетка предложений (.cards-grid--3 pages.css:11): шаг 36 «как есть» (вне
+   шкалы §3.2 — прецедент .cp-breadcrumbs), низ 48 — inline оригинала
+   (education.html:234, margin-bottom: 48px на ленте offers). */
+.edu-offer-grid {
+  gap: 2.25rem;
+  margin-bottom: var(--ui-space-7);
+}
+
+/* Блок «Преимущества компаний» (.company-hero--wide pages.css:796–803):
+   сетка фото+текст, шаг 48 (space-7), низ 48 — inline оригинала
+   (education.html:268); колонка — мобильная база (pages.css:902), 480px/1fr
+   от lg (pages.css:797); фото 260→320 (pages.css:903/799), радиус md
+   (= --radius-card 16 оригинала); текст lh 1.45 «как есть» (pages.css:803 —
+   роль ui-body несёт 1.35). */
+.edu-company-hero {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: grid;
+  gap: var(--ui-space-7);
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: var(--ui-space-7);
+}
+
+.edu-company-hero__photo {
+  object-fit: cover;
+  width: 100%;
+  height: 16.25rem; /* 260px @max-1023 pages.css:903 */
+  border-radius: var(--ui-radius-md);
+}
+
+.edu-company-hero__text {
+  line-height: 1.45;
+}
+
+@media (min-width: 1024px) {
+  .edu-company-hero {
+    grid-template-columns: 30rem minmax(0, 1fr); /* 480px pages.css:797 */
+  }
+
+  .edu-company-hero__photo {
+    height: 20rem; /* 320px pages.css:799 */
+  }
 }
 
 /* Простая карточка компании (companies): паддинг 20/24 — inline-стиль
