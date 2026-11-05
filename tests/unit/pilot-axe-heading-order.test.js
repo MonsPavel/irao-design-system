@@ -81,9 +81,18 @@ describe('build.mjs — старые страницы media/career-track без 
     expect(build).toContain(`ART.items.map((item) => articleCard(item, 'h2'))`);
   });
 
-  it('career-track.html: трек-карточки h2 (сразу за h1, до секции «Материалы»), вид — та же роль ui-h4', () => {
+  it('career-track.html: карта заголовков без пропусков — h1 обложки → h2 имя трека/тест/статьи → h3 интро теста и карточек (T18.4: секции оригинала career-track.html:150–221; прежние трек-карточки ui-h4 сняты вместе с ui-tabs-панелями)', () => {
     const trackBody = build.match(/function careerTrackMain[\s\S]*?(?=\n\/\* ──)/)?.[0] ?? '';
-    expect(trackBody).toContain('<h2 class="ui-h4">${esc(track.name)}</h2>');
+    expect(trackBody).toContain('<h1 class="ui-page-title">Карьерные треки</h1>');
+    expect(trackBody).toContain('<h2 class="ui-h3 ctr-name">${esc(activeTrack.name)}</h2>');
+    expect(trackBody).toContain('<h2 class="ui-h3 ctr-title">Тест на профориентацию</h2>');
+    expect(trackBody).toContain('<h3 class="ui-h3">${esc(TRK.test.intro.title)}</h3>');
+    expect(trackBody).toContain('<h2 class="ui-h3 ctr-title">Может быть интересно</h2>');
+    // уровень заголовков — только h1/h2/h3 (роль ui-h4 на скрытом p вопроса
+    // теста — вид абзаца, не уровень); трек-карточки ui-h4 не собираются
+    expect(trackBody, 'пропусков нет: заголовки глубже h3 не собираются').not.toMatch(
+      /<h[456][\s>]/,
+    );
   });
 
   it('articleCard параметризован по образцу eventCard (map-безопасный cardHeading, дефолт h3); «Материалы по теме» career-track — дефолт h3 после секционного h2 — не меняется', () => {

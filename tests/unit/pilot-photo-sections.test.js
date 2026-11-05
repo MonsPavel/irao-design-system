@@ -192,9 +192,9 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     const tagTintHexes = [...pilotCss.matchAll(/#([0-9a-f]{3,8})\b/gi)].map((m) => m[1]);
     expect(
       tagTintHexes.every((hex) =>
-        ['3142ff', '31ff76', 'ff3134', 'e88a2c', 'd9a441'].includes(hex.toLowerCase()),
+        ['3142ff', '31ff76', 'ff3134', 'e88a2c', 'd9a441', 'c4cddc'].includes(hex.toLowerCase()),
       ),
-      `сырые цвета в pilot.css — только спец-тинты hero-тегов и градиент mentorship (найдено: ${tagTintHexes.join(', ')})`,
+      `сырые цвета в pilot.css — только спец-тинты hero-тегов, градиент mentorship и тон точки этапа career-track T18.4 (найдено: ${tagTintHexes.join(', ')})`,
     ).toBe(true);
   });
 });
