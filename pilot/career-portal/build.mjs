@@ -2679,56 +2679,133 @@ ${relatedEducations}
 </section>`;
 }
 
-/* ── карьерные треки ── */
-
+/* ── карьерные треки ──
+   T18.4: состав страницы 1:1 по HTML оригинала career-track.html:147–265
+   (Probe 04.11: orig = cover-hero(399, с кнопкой) + tabs-pill(56) + секции
+   810/551/500; пилот был cp-page-head(143) без кнопки + ui-tabs--pill +
+   ui-tabs(221) + ui-h2 + ui-grid--4). Обложка — каркас cvh канона
+   (T17.15) + хук формы cover-hero сайта (позиционные хуки ctr-, Scope
+   «без новых cp-сущностей»), CTA — ui-button--primary (Implementation
+   requirements п.2: базовый вид 52px, урок T15.6 — не --sm). Секции в
+   порядке оригинала: треки (#tracks), тест, статьи. Начальный рендер
+   интерактивной секции треков (js/tracks.js DOMContentLoaded: вкладка 0 →
+   трек 0 → этап 0 — чипы/имя/этапы/инфо из window.__TRACKS_DATA__)
+   собран SERVER-SIDE из мока data/tracks.json — compare меряет первый
+   рендер обеих сторон; переключение вкладок/треков/этапов и прохождение
+   теста (quiz/result скрыты) пилотом не воспроизводится — мок-практика
+   T18.3 («триггер — без модалки»); активный вид чипов — канон состояния
+   ui-chip aria-pressed (мок-переключение pilot.js data-cp-filter-group). */
 function careerTrackMain() {
-  const tabs = TRK.tabs
-    .map(
-      (tab, index) =>
-        `      <a class="ui-tabs__tab" href="#cptab-track-${index}" id="cptab-track-${index}-tab">${esc(tab.name)}</a>`,
-    )
-    .join('\n');
-  const panels = TRK.tabs
-    .map((tab, index) => {
-      const tracks = tab.tracks
-        .map(
-          // h2 (решение владельца 25.10, T15.9-бэклог): трек-карточки идут
-          // сразу за h1 (без секционного h2) — пропуск h1→h3 ловил axe.
-          (track) => `      <article class="ui-card ui-card--filled">
-        <h2 class="ui-h4">${esc(track.name)}</h2>
-        <p class="ui-small">${esc(track.steps.map((step) => step.name).join(' → '))}</p>
-      </article>`,
-        )
-        .join('\n');
-      return `  <section class="ui-tabs__panel" id="cptab-track-${index}" aria-labelledby="cptab-track-${index}-tab">
-    <div class="ui-grid ui-grid--2">
-${tracks}
-    </div>
-  </section>`;
-    })
-    .join('\n');
+  const [activeTab] = TRK.tabs;
+  const [activeTrack] = activeTab.tracks;
+  const [activeStep] = activeTrack.steps;
+
+  const trackTabs = TRK.tabs.map(
+    (tab, index) =>
+      `      <button class="ui-button ui-button--outline${index === 0 ? ' is-active' : ''}" type="button">${esc(tab.name)}</button>`,
+  );
+
+  const chips = activeTab.tracks.map(
+    (track, index) =>
+      `        <button class="ui-chip__pill" type="button" aria-pressed="${index === 0 ? 'true' : 'false'}">${esc(track.name)}</button>`,
+  );
+
+  const steps = activeTrack.steps.map(
+    (
+      step,
+      index,
+    ) => `      <button class="ctr-step${index === 0 ? ' is-active' : ''}" type="button">
+        <span class="ctr-step__dot" aria-hidden="true"></span>
+        <span class="ctr-step__name ui-caption">${esc(step.name)}</span>
+        <span class="ctr-step__duration ui-micro">${esc(step.duration)}</span>
+      </button>`,
+  );
+
+  const infoRows = [
+    ['Должность', activeStep.position],
+    ['Задачи', activeStep.desc],
+    ['Образование', activeStep.education],
+    ['Повышение квалификации', activeStep.growth],
+    ['Соцпакет', activeStep.benefits],
+  ].map(
+    ([label, value]) => `      <div class="ctr-info__row">
+        <span class="ctr-info__label ui-micro ui-text--muted">${label}</span>
+        <span class="ctr-info__value ui-body">${esc(value)}</span>
+      </div>`,
+  );
+
   const articles = ART.items.slice(0, 4).map(articleCard).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Школьникам и студентам', null],
     ['Карьерные треки', ''],
   ])}
-<section class="ui-section">
+<section class="ui-section ctr-lead">
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="cvh ctr-cover">
       <h1 class="ui-page-title">Карьерные треки</h1>
-      <p class="cp-page-subtitle ui-lead">Путь от студента до руководителя направления — со всеми ступенями, сроками и требованиями.</p>
+      <p class="cp-page-subtitle ui-lead">Просмотрите карьерные траектории в компаниях Группы «Интер РАО»: от первой ступени до руководителя направления.</p>
+      <a class="ui-button ui-button--primary" href="#tracks">смотреть треки</a>
     </div>
     ${subnav('career-track.html')}
+  </div>
+</section>
 
-    <div class="ui-tabs" data-ui-tabs>
-      <div class="ui-tabs__list">
-${tabs}
-      </div>
-${panels}
+<section class="ui-section" id="tracks">
+  <div class="ui-container">
+    <div class="ctr-tabs">
+${trackTabs.join('\n')}
     </div>
 
-    <h2 class="ui-h2">Материалы по теме</h2>
+    <div class="ui-chip ctr-chips" data-cp-filter-group>
+${chips.join('\n')}
+    </div>
+
+    <h2 class="ui-h3 ctr-name">${esc(activeTrack.name)}</h2>
+
+    <div class="ctr-steps">
+${steps.join('\n')}
+    </div>
+
+    <div class="ctr-info">
+${infoRows.join('\n')}
+    </div>
+  </div>
+</section>
+
+<section class="ui-section">
+  <div class="ui-container">
+    <h2 class="ui-h3 ctr-title">Тест на профориентацию</h2>
+    <div class="ctr-test">
+      <img class="ctr-test-photo" src="${esc(TRK.test.intro.image)}" alt="">
+      <div class="ctr-test-body">
+        <h3 class="ui-h3">${esc(TRK.test.intro.title)}</h3>
+        <p class="ctr-test-text ui-body">${esc(TRK.test.intro.text)}</p>
+        <button class="ui-button ui-button--primary" type="button">${esc(TRK.test.intro.button)}</button>
+      </div>
+    </div>
+    <!-- quiz/result — скрытые ветки интерактива оригинала (career-track.html:200–214):
+         наполнение — js/tracks.js по ходу теста; в пилоте ветки не активируются. -->
+    <div class="ctr-quiz" hidden>
+      <p class="ctr-quiz-progress ui-small ui-text--muted"></p>
+      <img class="ctr-quiz-photo" src="${esc(TRK.test.questions[1].image)}" alt="">
+      <p class="ctr-quiz-question ui-h4"></p>
+      <div class="ctr-quiz-options"></div>
+    </div>
+    <div class="ctr-result" hidden>
+      <img class="ctr-result-photo" src="${esc(TRK.test.directions.energo.image)}" alt="">
+      <h3 class="ui-h3 ctr-result-title"></h3>
+      <div class="ctr-result-directions"></div>
+      <p class="ctr-result-text ui-body"></p>
+      <div class="ctr-result-links"></div>
+      <button class="ui-button ui-button--light" type="button">пройти тест ещё раз</button>
+    </div>
+  </div>
+</section>
+
+<section class="ui-section">
+  <div class="ui-container">
+    <h2 class="ui-h3 ctr-title">Может быть интересно</h2>
     <div class="ui-grid ui-grid--4">
 ${articles}
     </div>
