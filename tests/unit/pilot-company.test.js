@@ -51,8 +51,11 @@ const pilotCss = stripCssComments(pilotCssRaw);
 const companies = JSON.parse(readFileSync(join(pilotDir, 'data', 'companies.json'), 'utf8'));
 
 /** Разметка, которую возвращает companyMain() (один return-шаблон;
- *  хвост без `\n}` — рабочая копия Windows отдаёт CRLF, см. link.test.js). */
-const companyHtml = build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? '';
+ *  хвост без `\n}` — рабочая копия Windows отдаёт CRLF, см. link.test.js;
+ *  CRLF нормализуется — пины порядка/интерполяций матчат \n). */
+const companyHtml = (
+  build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? ''
+).replace(/\r\n/g, '\n');
 
 /** Кусок pilot.css от блоков компании (сайт-зонные раскладки) до общего
  *  адаптива сайт-зоны. Hero-2кол и where-пары — канон dpp-hero/dpp-where
@@ -326,22 +329,35 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
 
   it('лента вакансий: свои + сегмента «Генерация», первые 4 (build.py:882–885), каркас — vacancyRow/lpp-row (T14.10); сетка — канон ui-grid--2', () => {
     expect(build).toMatch(
-      /\.filter\(\(v\) => v\.company === company\.name\),\s*\n\s*\.\.\.VAC\.items\.filter\(\(v\) => v\.company !== company\.name && v\.segment === 'Генерация'\),\s*\n\s*\]\s*\n\s*\.slice\(0, 4\)/,
+      /\.filter\(\(v\) => v\.company === company\.name\),\s*\n\s*\.\.\.VAC\.items\.filter\(\(v\) => v\.company !== company\.name && v\.segment === 'Генерация'\),\s*\n\s*\]\s*\n\s*\.slice\(0, 4\)\s*\n\s*\.map\(vacancyRow\)/,
     );
-    expect(build).toMatch(/const companyVacancies = \[[\s\S]*?\.map\(vacancyRow\)/);
-    expect(companyHtml.match(/class="ui-card ui-card--hover lpp-row"/g)?.length ?? 0).toBe(4);
+    // карточки собирает vacancyRow (каркас lpp-row) — в шаблоне ленты
+    // интерполяция готовой ленты
+    expect(companyHtml).toMatch(
+      /<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--vac">\n\$\{companyVacancies\}/,
+    );
   });
 
   it('ленты стажировок/практик: все элементы данных (internship_cards build.py:479–483), каркас — internCard/cp-intern-card (переиспользование, не дублирование; T15.4: карточка ведёт на internship.html)', () => {
     expect(build).toMatch(/const companyInternships = INT\.internship\.items\.map\(internCard\)/);
     expect(build).toMatch(/const companyPractices = INT\.practice\.items\.map\(internCard\)/);
-    expect(companyHtml.match(/class="ui-card ui-card--hover cp-intern-card"/g)?.length ?? 0).toBe(8);
+    expect(companyHtml).toMatch(
+      /<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--intern">\n\$\{companyInternships\}/,
+    );
+    expect(companyHtml).toMatch(
+      /<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--practice">\n\$\{companyPractices\}/,
+    );
   });
 
   it('лента статей: первые 3 (ART.items[:3], build.py:886), каркас — articleCard/ui-card--media (T17.5); лента событий: первые 3 предстоящих (EVT.upcoming[:3], build.py:885), каркас — eventCard/ui-card--media', () => {
     expect(build).toMatch(/const companyArticles = ART\.items\.slice\(0, 3\)\.map\(articleCard\)/);
     expect(build).toMatch(/const companyEvents = EVT\.upcoming\.slice\(0, 3\)\.map\(eventCard\)/);
-    expect(companyHtml.match(/class="ui-card ui-card--hover ui-card--link ui-card--media"/g)?.length ?? 0).toBe(6);
+    expect(companyHtml).toMatch(
+      /<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">\n\$\{companyArticles\}/,
+    );
+    expect(companyHtml).toMatch(
+      /<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--events">\n\$\{companyEvents\}/,
+    );
   });
 
   it('баннер №2 «Целевое обучение» (company.html:69–76): фото internship-4.png, кнопка — ui-button на education-catalog.html; тот же каркас cp-company-banner (переиспользование)', () => {
@@ -355,12 +371,13 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
   });
 
   it('фото-галерея «Фото о работе в компании» (company.html:83–88): 3 фото media-1/3/5 в ui-figure; alt="" оригинала сохранён (фото-подборка без текстов-источников)', () => {
-    expect(companyHtml.match(/class="ui-image ui-image--cover" src="assets\/images\/media-\d\.jpg"/g)?.length ?? 0).toBe(3);
-    for (const name of ['media-1.jpg', 'media-3.jpg', 'media-5.jpg']) {
-      expect(companyHtml).toContain(`src="assets/images/${name}"`);
-    }
-    const photosBlock = companyHtml.slice(companyHtml.indexOf('cp-company-feed--photos'));
-    expect(photosBlock.match(/<figure class="ui-figure">/g)?.length ?? 0).toBe(3);
+    // фото собирает helper companyPhotos из литерала имён (порядок оригинала)
+    expect(build).toMatch(
+      /const companyPhotos = \['media-1\.jpg', 'media-3\.jpg', 'media-5\.jpg'\]/,
+    );
+    expect(companyHtml).toMatch(
+      /<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--photos">\n\$\{companyPhotos\}/,
+    );
   });
 
   it('href лент — реальные страницы клона (Implementation requirements п.1: гейт ссылок не ловит DEAD); строки вакансий — vacancyRow (→ vacancy.html, конвенция списка); триггер «откликнуться» без модалки — как на article.html (диалога #vac-apply нет ни в оригинале, ни в клоне)', () => {
@@ -429,7 +446,7 @@ describe('T18.3: pilot.css — позиционные хуки лент cp-compa
 });
 
 describe('T18.3: compare.mjs — блок-пробы лент компании (AC: все 6 лент с Δ ≤ 8px)', () => {
-  const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\],\n  \}/)?.[1] ?? '';
+  const companyProbes = compare.match(/'company\.html': \[([\s\S]*?)\n  \],/)?.[1] ?? '';
 
   it('пары блок-проб: 6 лент + 2 баннера в порядке оригинала; пилотные селекторы — хуки cp-company-feed--*', () => {
     for (const [name, original, pilot] of [

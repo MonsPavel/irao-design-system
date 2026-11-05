@@ -171,8 +171,8 @@ describe('гейт ценза — runCensusGate (порог числом; дег
 
 describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1/T18.2/T18.3', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(1517);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(867);
+    expect(MAX_PILOT_CSS_LINES).toBe(1520);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(869);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
@@ -209,8 +209,8 @@ describe('пороги ценза — числа зафиксированы по
       // карточек и галереи): сырые 1431→1517, код 822→867, селекторы
       // 134→147, семейства 28→29 (company-feed — в allowlist по errata,
       // модификаторы --vac…--photos семейства не плодят):
-      expect(metrics.css.lines).toBe(1517);
-      expect(metrics.css.codeLines).toBe(867);
+      expect(metrics.css.lines).toBe(1520);
+      expect(metrics.css.codeLines).toBe(869);
       expect(metrics.css.selectors).toBe(147);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(29);

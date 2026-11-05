@@ -530,9 +530,22 @@ const BLOCK_PROBES = {
   'company.html': [
     ['company-stats', '.company-stats', '.cp-company-stats'],
     ['company-adv', '.company-adv', '.cp-company-adv'],
-    // Фото-секция ui-section--photo (T17.3): CTA-баннер (banner-card
-    // оригинала, pages.css:656–674) — высота миграции на модификатор ДС.
+    // T18.3: ленты компании в порядке оригинала (build.py:881–888) — гейт
+    // высот AC (Δ ≤ 8px/feed). Оригинальные селекторы — позиционные
+    // (.cards-grid--2 первая = вакансии; :nth-child(n of S) — стажировки/
+    // практики; ~-комбинация — события; .company-photos уникален). Пилотные
+    // — хуки cp-company-feed--* (без CSS, T16.5). Баннеры: №1 — первые
+    // вхождения, №2 — второй .banner-card / после ленты статей.
+    ['company-vacancies', '.cards-grid--2', '.cp-company-feed--vac'],
+    // Фото-секция ui-section--photo (T17.3): CTA-баннер №1 «Практики и
+    // стажировки» (banner-card оригинала, pages.css:656–674).
     ['company-banner', '.banner-card', '.cp-company-banner'],
+    ['company-internships', '.cards-grid--2:nth-child(2 of .cards-grid--2)', '.cp-company-feed--intern'],
+    ['company-practices', '.cards-grid--2:nth-child(3 of .cards-grid--2)', '.cp-company-feed--practice'],
+    ['company-articles', '.cards-grid--3:not(.company-photos)', '.cp-company-feed--articles'],
+    ['company-banner-2', '.banner-card:nth-child(2 of .banner-card)', '.cp-company-feed--articles ~ .cp-company-banner'],
+    ['company-events', '.cards-grid--3:not(.company-photos) ~ .cards-grid--3:not(.company-photos)', '.cp-company-feed--events'],
+    ['company-photos', '.company-photos', '.cp-company-feed--photos'],
   ],
   // Таймлайн «Как попасть» (T17.10): adoption на связки tlp-* паттерн-слоя;
   // блок гейтит высоту миграции (AC: порог ±4px). Оригинал — .timeline
