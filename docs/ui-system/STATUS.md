@@ -132,7 +132,7 @@
 | T18.3 | done | смержена |
 | T18.4 | done | смержена |
 | T18.5 | done | смержена |
-| T18.6 | todo | internships/practices: секция-8 (−555) + ритм лендингов (−679/−606) |
+| T18.6 | done | смержена |
 | T18.7 | todo | vacancies: lpp-row — пилюля «Откликнуться» всегда справа (+400px, слой) |
 | T18.8 | todo | vacancy-N: ритм dpp__section −15…−53 (−108px на страницу, слой) |
 | T18.9 | todo | точечный хвост: companies/events/education-catalog/internship-apply/article/events-search/404 |
