@@ -1158,9 +1158,9 @@
 
 /* Ритм лент ui-chip (T14.8) в раскладках пилота: компонент отступов не
    несёт — вертикальный ритм добавляет раскладка сайт-зоны (вид пилюль и
-   состояния — сам компонент). */
-.cp-vac-main .ui-chip,
-#directions .ui-chip {
+   состояния — сам компонент). Ритм #directions ведёт хук .int-chips
+   (T18.6 — низ 32 .chip-row оригинала, pages.css:135). */
+.cp-vac-main .ui-chip {
   margin: var(--ui-space-4) 0;
 }
 
@@ -1314,12 +1314,9 @@ a.cp-intern-card {
   grid-template-columns: repeat(3, 1fr);
 }
 
-/* Лента мероприятий «фича» на лендинге стажировок */
-.cp-events-feature {
-  display: grid;
-  gap: var(--ui-space-3);
-  grid-template-columns: repeat(3, 1fr);
-}
+/* Лента мероприятий «фича» на лендинге стажировок — events-feature оригинала
+   (T18.6): правила семейства int- выше (сетка 2fr/1fr от lg, большая
+   карточка на два ряда, карточки .event-card). */
 
 /* Карточки событий/статей/стажёров — медиа-карточки ui-card--media (T17.5):
    фото __media (3/2; --square 1/1), тег __media-tag (absolute 8/8), тело
@@ -1560,6 +1557,245 @@ a.cp-intern-card {
   }
 }
 
+/* ── стажировки/практики: ритм лендингов и состав (T18.6) ──
+   Источник — internships.html:145–403 + pages.css:953–1171 (practices —
+   зеркальная страница, тот же строитель internshipsMain). Секционные хуки
+   семейства int- (конвенция не-cp имени сайт-зоны, прецедент ctr- T18.4/
+   edu- T18.5/stu- T18.1): каркасы — ДС/слой (cvh/ui-tabs--pill/ui-chip/
+   mrq/tlp/ui-card--media/ui-grid), хуки несут геометрию и композицию
+   «как есть» (значения вне шкалы §3.2 — rem с источником в комментарии,
+   прецедент cp-breadcrumbs/edu-cover). */
+
+/* Секции лендинга — паддинг 40/40 (.section components.css:336) против
+   48 канона ui-section; обложка — без ритма (section style="padding: 0",
+   internships.html:147; прецедент .edu-lead), табы — 24/40 (inline
+   padding-top: 24px, internships.html:158 + низ .section). */
+.int-lead {
+  padding-block: 0;
+}
+
+.int-tabs {
+  padding-top: 1.5rem; /* 24px internships.html:158 */
+  padding-bottom: 2.5rem;
+}
+
+.int-sec {
+  padding-block: 2.5rem;
+}
+
+/* Ряд табов + ссылок — одна полоса (tabs-pill pages.css:974–1003:
+   5 колонок 1fr без переноса); перенос канона cp-tabs-row давал ряд 92px,
+   нижний маргин ленты ui-tabs__list (канон табов — ритм «лента → панель»)
+   — 92px в самом ряду (замер 06.11): здесь панелей-подсказок в потоке нет
+   (ui-vh в разметке), ритм ведёт секция. */
+.int-tabs .cp-tabs-row {
+  flex-wrap: nowrap;
+}
+
+.int-tabs .cp-tabs-row .ui-tabs__list {
+  margin-bottom: 0;
+}
+
+/* Контейнеры лендинга — горизонтальные паддинги 40 (.container
+   --container-pad variables.css:68) против 32 канона --ui-container-pad:
+   замер 06.11 — контент 1361 против 1345 оригинала, +16px ширины давали
+   секции 8 +10px (фото 2/3-колонки) и расхождения сеток. */
+.int-lead .ui-container,
+.int-tabs .ui-container,
+.int-sec .ui-container {
+  padding-inline: 2.5rem;
+}
+
+/* Сетка преимуществ — карточки с шагом 12 (.adv-card pages.css:507)
+   против 14 канона ui-card (позиция — секции int-; education T18.5 не
+   задет). */
+.int-sec .cp-adv-grid .ui-card {
+  gap: var(--ui-space-3);
+}
+
+/* Заголовки разделов — низ 32 (.section__title components.css:341; reset
+   ДС маргины гасит; прецедент .ctr-title T18.4/.edu-title T18.5). */
+.int-title {
+  margin: 0 0 var(--ui-space-6);
+}
+
+/* Форма cover-hero (pages.css:953–967) — прецедент .edu-cover T18.5:
+   паддинг 64/56 «как есть» (вне шкалы §3.2), шаг 20 (gap канона cvh 16 —
+   ритм высоты 432 ведёт шаг оригинала), фон/радиус токенами. */
+.int-cover {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  gap: 1.25rem;
+  padding: 4rem 3.5rem;
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-muted);
+}
+
+.int-cover .cp-page-subtitle {
+  max-width: 40rem; /* 640px pages.css:965 */
+}
+
+/* Кнопка обложки — +16px к шагу (pages.css:967, сверх gap 20 блока). */
+.int-cover .ui-button {
+  margin-top: var(--ui-space-4);
+}
+
+/* Шапка направлений — dir-head (pages.css:1009–1017): титул + select
+   в одном ряду space-between (в сборке были столбцом), низ 24; титул без
+   нижнего маргина (inline margin-bottom: 0, internships.html:173);
+   select 180px — .vac-side__dd (pages.css:1017). */
+.int-dir-head {
+  display: flex;
+  gap: var(--ui-space-5);
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ui-space-5);
+}
+
+.int-dir-head .ui-h2 {
+  margin-bottom: 0;
+}
+
+.int-dir-head .ui-select--pill {
+  min-width: 11.25rem; /* 180px pages.css:1017 */
+}
+
+/* Чипы направлений — низ 32 (.chip-row pages.css:135) против маргинов
+   канона ui-chip (16). */
+.int-chips {
+  margin: 0 0 var(--ui-space-6);
+}
+
+/* Сетка направлений — шаг 36 (.cards-grid) против 32 канона ui-grid от lg;
+   минвысота 424 (.dir-set pages.css:1007 — фикс зоны под переключение
+   табов: оба набора ведут на детальные, зона держит высоту секции). */
+.int-dir-grid {
+  gap: 2.25rem; /* 36px .cards-grid */
+  min-height: 26.5rem; /* 424px pages.css:1007 */
+}
+
+/* Карточка направления — шаг 12 (.dir-card pages.css:1024) против 14
+   канона ui-card. Кламп шорта — канон T16.12 на общей cp-intern-card
+   (.dir-card__short pages.css:1045–1054), отдельного хука не требует. */
+.int-dir-grid .cp-intern-card {
+  gap: var(--ui-space-3);
+}
+
+/* Заголовок карточки направления — lh 1.3 без трекинга роли
+   (.dir-card__title pages.css:1041 — fs-body × 1.3; прецедент пар T18.5:
+   трекинг −0.02em роли ui-h6 переворачивал переносы заголовков). */
+.int-dir-grid .cp-intern-card .ui-h6 {
+  line-height: 1.3;
+  letter-spacing: normal;
+}
+
+/* Марка преимуществ — композиция тела оригинала (pages.css:1083–1092):
+   колонка с шагом 20, фото 100%×260, текст 1.5. Канон mrq (T17.15) принял
+   строку с фото 256 («принятая композиция клона», расхождение записано
+   пробой T16.15) — канон слоя не трогается (Out of scope спеки),
+   расхождение ведётся сайт-зоной (Implementation requirements п.1);
+   высота секции 546/576 ведётся колонкой тела (замер 06.11: строка —
+   386/408). */
+.int-marquee .mrq__body {
+  flex-direction: column;
+  gap: 1.25rem; /* 20px pages.css:1083 */
+  align-items: stretch;
+}
+
+.int-marquee .mrq__photo {
+  width: 100%; /* pages.css:1086 */
+  height: 16.25rem; /* 260px pages.css:1087 */
+}
+
+.int-marquee .mrq__body .ui-body {
+  line-height: 1.5; /* pages.css:1092 (роль — 1.35) */
+}
+
+/* Сетка людей — шаг 36 (.cards-grid) против 32 канона ui-grid. */
+.int-people {
+  gap: 2.25rem; /* 36px .cards-grid */
+}
+
+/* Карточка стажёра — .intern-person (pages.css:1136–1146): карточка без
+   паддинга (фото full-bleed) с шагом 10, фото 4/3 (против 1/1 канона
+   --square — квадрат давал секции +100px, замер 06.11), тело 0 20 20. */
+.int-person {
+  gap: 0.625rem; /* 10px pages.css:1136 */
+  padding: 0;
+}
+
+.int-person .ui-card__media {
+  aspect-ratio: 4 / 3; /* pages.css:1138 */
+}
+
+.int-person .ui-card__body {
+  gap: 0.625rem; /* 10px pages.css:1141 */
+  padding: 0 1.25rem 1.25rem; /* 0 20px 20px pages.css:1142–1146 */
+}
+
+/* Лента мероприятий «фича» — events-feature оригинала (pages.css:1150–1171):
+   2fr/1fr от lg (mobile-first: база колонка — оригинал держал колонку до
+   1024, pages.css:1254), большая карточка — на два ряда; её фото — 1/1
+   (pages.css:1163–1171 растягивали флексом до натуральной пропорции;
+   internship-1.png 431×431 — квадрат, aspect-ratio даёт тот же рендер
+   детерминированно — порт T17.5 каркаса; height: 100% запрещён —
+   интринсик-цикл, урок в ui-card.css:163–172). Карточки — .event-card
+   (pages.css:565–581): паддинг 16, фото 200→220 (md), тело 16 4 0 с шагом
+   10; канон ui-card--media (паддинг 24, фото 3/2, тело 12/шаг 8) давал
+   ленту 613 против 1168 (замер 06.11). */
+.cp-events-feature {
+  display: grid;
+  gap: var(--ui-space-5); /* 24px pages.css:1154 */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cp-events-feature .ui-card {
+  gap: 0; /* .event-card — ритм несёт тело (pages.css:565/575) */
+  padding: var(--ui-space-4); /* 16px pages.css:565 */
+}
+
+.cp-events-feature .ui-card__media {
+  aspect-ratio: auto; /* высоту несёт img (pages.css:569) */
+}
+
+.cp-events-feature .ui-card__media img {
+  height: 12.5rem; /* 200px @max-767 pages.css:932 — мобильная база */
+  border-radius: var(--ui-radius-md); /* pages.css:567 */
+}
+
+.cp-events-feature .ui-card__body {
+  gap: 0.625rem; /* 10px pages.css:575 */
+  padding: var(--ui-space-4) 0.25rem 0; /* 16px 4px 0 pages.css:575 */
+}
+
+.cp-events-feature .ui-h6 {
+  line-height: 1.3; /* pages.css:579 (роль — 1.25); прецедент пар T18.5 */
+  letter-spacing: normal; /* .event-card__title оригинала без трекинга */
+}
+
+.cp-events-feature .ui-card__body time {
+  font-size: var(--ui-fs-small); /* .event-card__date pages.css:577 */
+}
+
+@media (min-width: 768px) {
+  .cp-events-feature .ui-card__media img {
+    height: 13.75rem; /* 220px pages.css:569 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .cp-events-feature {
+    grid-template-columns: 2fr minmax(0, 1fr); /* pages.css:1152 */
+  }
+
+  .cp-events-feature .ui-card:first-child {
+    grid-row: 1 / 3; /* pages.css:1158 */
+  }
+
+  .cp-events-feature .ui-card:first-child .ui-card__media {
+    aspect-ratio: 1 / 1; /* pages.css:1163–1171 — флекс-растяжка до 1/1 */
+  }
+}
+
 /* Простая карточка компании (companies): паддинг 20/24 — inline-стиль
    карточек companies.html:153+ («как есть»: вертикаль 20px вне шкалы
    отступов §3.2 — прецедент cp-breadcrumbs 1.25rem; горизонталь 24px —
@@ -1790,8 +2026,7 @@ a.cp-intern-card {
   .cp-why-us__top,
   .cp-why-us__row,
   .cp-holding__stats,
-  .cp-adv-grid,
-  .cp-events-feature {
+  .cp-adv-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
@@ -1844,8 +2079,7 @@ a.cp-intern-card {
   .cp-why-us__top,
   .cp-why-us__row,
   .cp-holding__stats,
-  .cp-adv-grid,
-  .cp-events-feature {
+  .cp-adv-grid {
     grid-template-columns: 1fr;
   }
 

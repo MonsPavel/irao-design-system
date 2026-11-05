@@ -594,8 +594,34 @@ const BLOCK_PROBES = {
     ['edu-company-hero', '.company-hero', '.edu-company-hero'],
     ['edu-adv', '.adv-grid', '.cp-adv-grid'],
   ],
-  'internships.html': [['timeline', '.timeline', '.tlp']],
-  'practices.html': [['timeline', '.timeline', '.tlp']],
+  // T18.6: лендинги стажировок/практик — состав и ритм 1:1 (internships
+  // .html:145–403, practices — зеркальная страница): обложка cover-hero,
+  // полоса табов, направления, марка (mrq-канон + хук int-marquee),
+  // преимущества, таймлайн (tlp-канон), стажёры, секция 8 «Наши
+  // мероприятия» (events-feature 2fr/1fr, AC Δ≤8), FAQ (ui-accordion —
+  // компонент ДС, дельта известная — Out of scope).
+  'internships.html': [
+    ['cover', '.cover-hero', '.int-cover'],
+    ['tabs', '.tabs-pill', '.cp-tabs-row'],
+    ['directions', '#directions', '#directions'],
+    ['marquee', '.adv-marquee', '.int-marquee'],
+    ['advantages', '.adv-grid', '.cp-adv-grid'],
+    ['timeline', '.timeline', '.tlp'],
+    ['interns', '.cards-grid--3:not(.dir-set)', '.int-people'],
+    ['events', '.events-feature', '.cp-events-feature'],
+    ['faq', '.faq', '.ui-accordion'],
+  ],
+  'practices.html': [
+    ['cover', '.cover-hero', '.int-cover'],
+    ['tabs', '.tabs-pill', '.cp-tabs-row'],
+    ['directions', '#directions', '#directions'],
+    ['marquee', '.adv-marquee', '.int-marquee'],
+    ['advantages', '.adv-grid', '.cp-adv-grid'],
+    ['timeline', '.timeline', '.tlp'],
+    ['interns', '.cards-grid--3:not(.dir-set)', '.int-people'],
+    ['events', '.events-feature', '.cp-events-feature'],
+    ['faq', '.faq', '.ui-accordion'],
+  ],
 };
 
 const STYLES = [
