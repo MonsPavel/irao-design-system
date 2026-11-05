@@ -2787,11 +2787,38 @@ ${sections}
    Имя берём из data/companies.json — первая компания сегмента «Генерация»
    (в байт-в-байт копии данных это та же компания); остальной контент —
    фрагмент оригинала src/pages/company.html без выдумывания: описание,
-   3 факта, 4 преимущества, подписи «где мы работаем». Секции «Вакансии/
-   Стажировки/Практики компании», лента «Может быть интересно» и второй
-   баннер в композицию спеки T15.2 не входят (CTA ведёт на vacancies.html). */
+   3 факта, 4 преимущества, подписи «где мы работаем». Ленты компании
+   (T18.3) — состав/порядок build.py:881–888: вакансии компании (свои +
+   сегмента «Генерация», первые 4), баннер «Практики и стажировки»,
+   стажировки/практики (все элементы данных), статьи (первые 3), баннер
+   «Целевое обучение», события (первые 3), фото-галерея. Каркасы лент —
+   существующие API ДС: vac-row — lpp-row (T14.10), dir-card —
+   cp-intern-card (T15.4: карточка ведёт на internship.html вместо модалки
+   оригинала), article/event — ui-card--media (T17.5), баннеры —
+   cp-company-banner, фото — ui-figure/ui-image. href — реальные страницы
+   клона (гейт ссылок compare); триггер «откликнуться» строк — без модалки,
+   как на article.html (диалога #vac-apply на странице нет ни в оригинале,
+   ни в клоне — modals.js молча выходит). */
 function companyMain() {
   const company = COMP.companies.find((c) => c.segment === 'Генерация');
+  const companyVacancies = [
+    ...VAC.items.filter((v) => v.company === company.name),
+    ...VAC.items.filter((v) => v.company !== company.name && v.segment === 'Генерация'),
+  ]
+    .slice(0, 4)
+    .map(vacancyRow)
+    .join('\n');
+  const companyInternships = INT.internship.items.map(internCard).join('\n');
+  const companyPractices = INT.practice.items.map(internCard).join('\n');
+  const companyArticles = ART.items.slice(0, 3).map(articleCard).join('\n');
+  const companyEvents = EVT.upcoming.slice(0, 3).map(eventCard).join('\n');
+  const companyPhotos = ['media-1.jpg', 'media-3.jpg', 'media-5.jpg']
+    .map(
+      (name) => `      <figure class="ui-figure">
+        <img class="ui-image ui-image--cover" src="assets/images/${name}" alt="" loading="lazy">
+      </figure>`,
+    )
+    .join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Компании группы', 'companies.html'],
@@ -2866,22 +2893,74 @@ function companyMain() {
       </figure>
     </div>
 
-    <!-- CTA-баннер (banner-card оригинала): фото-секция ui-section--photo
-         (T17.3) — __bg-подложка (alt="", README ui-image: подписывать
-         декоративное нечего); тинт primary-a55 (pages.css:666) — на теле,
-         как в оригинале: заливка body-бокса со скруглением, полосы фото
-         видны сверху/снизу (паритет скрин-пар; полно-секционный оверлей
-         --tint дал бы сплошной тинт — другой вид). Кнопка — ui-button на
-         vacancies.html (Scope T15.2). -->
+    <!-- ── Ленты компании (T18.3): порядок оригинала company.html:40–88 ──
+         Лента — заголовок section__title (ui-h3 cp-company-title) + сетка
+         ui-grid--2/--3 с хуком cp-company-feed (шаг/низ — позиционные хуки
+         pilot.css); модификаторы --vac/--intern/--practice/--articles/
+         --events/--photos — крючки блок-проб compare. -->
+
+    <h2 class="ui-h3 cp-company-title">Вакансии компании</h2>
+    <div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--vac">
+${companyVacancies}
+    </div>
+
+    <!-- Баннер №1 (banner-card оригинала, company.html:45–52): фото-секция
+         ui-section--photo (T17.3) — __bg-подложка (alt="", README ui-image:
+         подписывать декоративное нечего); тинт primary-a55 (pages.css:666)
+         — на теле, как в оригинале. Кнопка — ui-button на internships.html
+         (Scope T18.3; замена CTA vacancies.html из T15.2 — лента вакансий
+         теперь на странице). -->
     <div class="ui-section ui-section--photo cp-company-banner">
       <div class="ui-section__bg" aria-hidden="true">
         <img src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
       </div>
       <div class="cp-company-banner__body ui-card ui-card--cta">
-        <h2 class="ui-h2 cp-company-banner__title">Вакансии компании</h2>
-        <p class="ui-small cp-company-banner__text">Посмотрите открытые вакансии именно в нашей компании.</p>
-        <a class="ui-button ui-button--primary" href="vacancies.html">смотреть вакансии</a>
+        <h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>
+        <p class="ui-small cp-company-banner__text">Посмотрите предложения практики и стажировки именно в нашей компании.</p>
+        <a class="ui-button ui-button--primary" href="internships.html">смотреть предложения</a>
       </div>
+    </div>
+
+    <h2 class="ui-h3 cp-company-title">Стажировки компании</h2>
+    <div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--intern">
+${companyInternships}
+    </div>
+
+    <h2 class="ui-h3 cp-company-title">Практики компании</h2>
+    <div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--practice">
+${companyPractices}
+    </div>
+
+    <h2 class="ui-h3 cp-company-title">Может быть интересно</h2>
+    <div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">
+${companyArticles}
+    </div>
+
+    <!-- Баннер №2 (banner-card оригинала, company.html:69–76) — тот же
+         каркас cp-company-banner, фото internship-4.png. -->
+    <div class="ui-section ui-section--photo cp-company-banner">
+      <div class="ui-section__bg" aria-hidden="true">
+        <img src="assets/images/internship-4.png" alt="" width="692" height="326" loading="lazy">
+      </div>
+      <div class="cp-company-banner__body ui-card ui-card--cta">
+        <h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>
+        <p class="ui-small cp-company-banner__text">Посмотрите предложения целевого обучения от нашей компании.</p>
+        <a class="ui-button ui-button--primary" href="education-catalog.html">смотреть предложения</a>
+      </div>
+    </div>
+
+    <h2 class="ui-h3 cp-company-title">Наши мероприятия</h2>
+    <div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--events">
+${companyEvents}
+    </div>
+
+    <!-- Фото-галерея (company-photos оригинала, company.html:83–88): фото
+         без подписей — ui-figure (без figcaption) + ui-image--cover; alt=""
+         оригинала сохранён (фото-подборка без текстов-источников, подписывать
+         декоративное нечего); высоту 260px несёт хук cp-company-feed--photos. -->
+    <h2 class="ui-h3 cp-company-title">Фото о работе в компании</h2>
+    <div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--photos">
+${companyPhotos}
     </div>
   </div>
 </section>`;
