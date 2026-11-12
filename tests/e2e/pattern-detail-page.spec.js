@@ -291,6 +291,52 @@ standTest.describe('patterns/detail-page: sticky-aside (Implementation requireme
   );
 });
 
+standTest.describe('patterns/detail-page: ритм секций канона (T18.8)', () => {
+  /** Computed-значение свойства узла (числом; computed не квантуется). */
+  const computed = (page, selector, prop) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el, name) => parseFloat(getComputedStyle(el).getPropertyValue(name)), prop);
+
+  standTest(
+    'ритм канона 1:1 оригиналу (T18.8): колонка 32, секции базы 8, foot без разделителя с шагом 24, медиа-слот 320',
+    async ({ stand }) => {
+      const page = await stand('patterns/detail-page');
+
+      // Колонка dpp: база 32px — .internship__main (pages.css:544); ритм
+      // колонки вакансии 40px — на карточной форме (пин исходника:
+      // tests/unit/patterns-layer.test.js), стенд несёт базовую колонку.
+      expect(await computed(page, '.dpp', 'row-gap'), 'колонка dpp — шаг 32').toBeCloseTo(32, 6);
+      expect(
+        await computed(page, '.dpp__section', 'row-gap'),
+        'секции базы — шаг 8 (event/internship, T18.9 «не трогать»)',
+      ).toBeCloseTo(8, 6);
+
+      // Слот медиа — 1:1 карте оригинала (.vacancy-page__map pages.css:315).
+      expect(
+        await computed(page, '.dpp__media', 'height'),
+        'медиа-слот 320px — .vacancy-page__map (pages.css:315)',
+      ).toBeCloseTo(320, 6);
+
+      // Foot — 1:1 .vacancy-page__foot (pages.css:338–343): без разделителя
+      // (errata T17.14 «разделитель + padding 16»), шаг пар 24.
+      expect(
+        await computed(page, '.dpp__foot', 'border-top-width'),
+        'foot без разделителя (errata T18.8)',
+      ).toBeCloseTo(0, 6);
+      expect(
+        await computed(page, '.dpp__foot', 'padding-top'),
+        'foot без отступа сверху',
+      ).toBeCloseTo(0, 6);
+      expect(
+        await computed(page, '.dpp__foot', 'row-gap'),
+        'шаг пар «дата — CTA» 24 — .vacancy-page__foot (pages.css:342)',
+      ).toBeCloseTo(24, 6);
+    },
+  );
+});
+
 standTest.describe(
   'patterns/detail-page: 32px-сценарий (Implementation requirements п.1 — не перекрывает)',
   () => {

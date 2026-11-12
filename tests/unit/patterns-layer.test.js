@@ -333,9 +333,16 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     expect(card, 'радиус карточки').toContain('border-radius: var(--ui-radius-md);');
     expect(card, 'поверхность карточки').toContain('background-color: var(--ui-color-surface);');
+    // Ритм колонки вакансии — T18.8: 40px (.vacancy-page pages.css:258) на
+    // карточной форме; базовый .dpp 32 ведёт event/internship
+    // (.internship__main pages.css:544 — паритет ±6, T18.9 «не трогать»).
+    expect(
+      card,
+      'ритм колонки вакансии 40 — .vacancy-page (pages.css:258, вне шкалы «как есть»)',
+    ).toContain('gap: 2.5rem;');
     const head = blockOf('.dpp__head');
     expect(head, '.dpp__head найдено').toBeTruthy();
-    expect(head, 'шапка-тройка gap 8 — cp-vacancy-page__head/cp-detail-head').toContain(
+    expect(head, 'шапка-тройка gap 8 — база (event/internship, T18.9 «не трогать»)').toContain(
       'gap: var(--ui-space-2);',
     );
     const tags = blockOf('.dpp__tags');
@@ -358,8 +365,26 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     const section = blockOf('.dpp__section');
     expect(section, '.dpp__section найдено').toBeTruthy();
-    expect(section, 'секция gap 8 — cp-vacancy-page__section/cp-detail-section').toContain(
-      'gap: var(--ui-space-2);',
+    expect(
+      section,
+      'секция gap 8 — база (event/internship, T18.9 «не трогать»; вакансия — ступень карточки ниже)',
+    ).toContain('gap: var(--ui-space-2);');
+    // Ритм секций вакансии — T18.8: 1:1 .vacancy-page__section (pages.css:285–289,
+    // gap 16). Ступень на карточной форме: база ведёт event/internship
+    // (.internship__section h2 margin-bottom 16 при абзацах вплотную —
+    // состав страниц, не секции; errata калибровки T15.1 «8px»).
+    const cardSection = blockOf('.dpp--card .dpp__section');
+    expect(cardSection, '.dpp--card .dpp__section найдено (ритм секций вакансии)').toBeTruthy();
+    expect(
+      cardSection,
+      'секции вакансии gap 16 — .vacancy-page__section (pages.css:285)',
+    ).toContain('gap: var(--ui-space-4);');
+    // Шапка вакансии: шаг 12px (.vacancy-page__head pages.css:260; errata
+    // калибровки раундов 2–4 «принято 8px» — EPIC-18: канон 1:1).
+    const cardHead = blockOf('.dpp--card .dpp__head');
+    expect(cardHead, '.dpp--card .dpp__head найдено (шаг шапки вакансии)').toBeTruthy();
+    expect(cardHead, 'шапка вакансии gap 12 — .vacancy-page__head (pages.css:260)').toContain(
+      'gap: var(--ui-space-3);',
     );
   });
 
@@ -378,11 +403,14 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(place, 'цвет muted несёт роль ui-text--muted разметки').not.toContain('color');
   });
 
-  it('значения канона 1:1 — слот медиа (карта-заглушка) и foot (разделитель + space-between)', () => {
+  it('значения канона 1:1 — слот медиа (карта-заглушка) и foot («дата — CTA» без разделителя, errata T18.8)', () => {
     const media = blockOf('.dpp__media');
     expect(media, '.dpp__media найдено').toBeTruthy();
-    expect(media, 'высота 18rem — cp-vacancy-page__map (карта — контент сайта)').toContain(
-      'height: 18rem;',
+    // T18.8: высота слота 1:1 карте оригинала — 320px (.vacancy-page__map
+    // pages.css:315–317); 288px плейсхолдера cp-vacancy-page__map снято
+    // (errata канона, EPIC-18 «канон значений — оригинал 1:1»).
+    expect(media, 'высота 20rem = 320px — .vacancy-page__map (pages.css:315)').toContain(
+      'height: 20rem;',
     );
     expect(media, 'радиус слота').toContain('border-radius: var(--ui-radius-md);');
     expect(media, 'заглушка на muted-поверхности').toContain(
@@ -390,14 +418,17 @@ describe('patterns/patterns.css — единый исходник паттерн
     );
     const foot = blockOf('.dpp__foot');
     expect(foot, '.dpp__foot найдено').toBeTruthy();
-    expect(foot, 'space-between — cp-vacancy-page__foot').toContain(
+    expect(foot, 'space-between — .vacancy-page__foot (pages.css:338–343)').toContain(
       'justify-content: space-between;',
     );
-    expect(foot, 'разделитель — border-top muted').toContain(
-      'border-top: var(--ui-border-width) solid var(--ui-color-border-muted);',
+    // T18.8: разделитель (border-top + padding 16, «принято ДС» T17.14) —
+    // errata: оригинал .vacancy-page__foot без разделителя, foot 44→61 (+17).
+    expect(foot, 'без разделителя — оригинал pages.css:338–343 (errata T17.14)').not.toContain(
+      'border-top',
     );
-    expect(foot, 'отступ над разделителем 16 — cp-vacancy-page__foot').toContain(
-      'padding-top: var(--ui-space-4);',
+    expect(foot, 'без отступа над разделителем').not.toContain('padding-top');
+    expect(foot, 'шаг пар «дата — CTA» 24 — .vacancy-page__foot (pages.css:342)').toContain(
+      'gap: var(--ui-space-5);',
     );
     // Мобильная база — колонка (оригинал .vacancy-page__foot @max-760 →
     // column; канон принимает значение оригинала, ступень md из шкалы T2.5).
@@ -1023,6 +1054,30 @@ describe('пилот career-portal: детальные страницы на dpp
       build,
       'cp-vacancy-page* из разметки сняты (упоминания в комментариях — история переноса)',
     ).not.toMatch(/class="[^"]*\bcp-vacancy-page/);
+  });
+
+  it('vacancy-1 (vacancy.html): доп. состав секции «Что предстоит» — полный абзац + обязанности ×4 (T18.8, −185 сверх ритма)', () => {
+    const main = mainOf('vacancyMain');
+    expect(
+      main,
+      'сборка по флагу first — абзац первой вакансии из оригинала (src/pages/vacancy.html:15)',
+    ).toContain('introLead');
+    expect(main, 'обязанности — ul секции (src/pages/vacancy.html:17–20) по флагу first').toContain(
+      'dutiesHtml',
+    );
+    expect(build, 'текст абзаца первой вакансии — полный (не v.short данных)').toContain(
+      "'Контроль режимов работы основного и вспомогательного оборудования энергоблоков ТЭЦ, планирование ремонтов и координация оперативного персонала.'",
+    );
+    expect(build, 'обязанность 1 — как в оригинале').toContain(
+      "'Ведение режимов работы энергооборудования в соответствии с диспетчерскими графиками;'",
+    );
+    expect(build, 'обязанность 4 — как в оригинале').toContain(
+      "'Ведение технической документации и отчётности.'",
+    );
+    expect(
+      build,
+      'vacancy.html собирается с составом первой вакансии (генеративные vacancy-2..12 — данные JSON)',
+    ).toContain('vacancyMain(VAC.items[0], true)');
   });
 
   it('событие/стажировка (internshipDetail): main-колонка dpp, шапка-тройка, теги, фото, секции; cp-detail-* сняты', () => {
