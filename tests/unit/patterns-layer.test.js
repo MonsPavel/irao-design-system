@@ -336,9 +336,10 @@ describe('patterns/patterns.css — единый исходник паттерн
     // Ритм колонки вакансии — T18.8: 40px (.vacancy-page pages.css:258) на
     // карточной форме; базовый .dpp 32 ведёт event/internship
     // (.internship__main pages.css:544 — паритет ±6, T18.9 «не трогать»).
-    expect(card, 'ритм колонки вакансии 40 — .vacancy-page (pages.css:258, вне шкалы «как есть»)').toContain(
-      'gap: 2.5rem;',
-    );
+    expect(
+      card,
+      'ритм колонки вакансии 40 — .vacancy-page (pages.css:258, вне шкалы «как есть»)',
+    ).toContain('gap: 2.5rem;');
     const head = blockOf('.dpp__head');
     expect(head, '.dpp__head найдено').toBeTruthy();
     expect(head, 'шапка-тройка gap 8 — база (event/internship, T18.9 «не трогать»)').toContain(
@@ -374,9 +375,10 @@ describe('patterns/patterns.css — единый исходник паттерн
     // состав страниц, не секции; errata калибровки T15.1 «8px»).
     const cardSection = blockOf('.dpp--card .dpp__section');
     expect(cardSection, '.dpp--card .dpp__section найдено (ритм секций вакансии)').toBeTruthy();
-    expect(cardSection, 'секции вакансии gap 16 — .vacancy-page__section (pages.css:285)').toContain(
-      'gap: var(--ui-space-4);',
-    );
+    expect(
+      cardSection,
+      'секции вакансии gap 16 — .vacancy-page__section (pages.css:285)',
+    ).toContain('gap: var(--ui-space-4);');
     // Шапка вакансии: шаг 12px (.vacancy-page__head pages.css:260; errata
     // калибровки раундов 2–4 «принято 8px» — EPIC-18: канон 1:1).
     const cardHead = blockOf('.dpp--card .dpp__head');
@@ -1060,14 +1062,10 @@ describe('пилот career-portal: детальные страницы на dpp
       main,
       'сборка по флагу first — абзац первой вакансии из оригинала (src/pages/vacancy.html:15)',
     ).toContain('introLead');
-    expect(
-      main,
-      'обязанности — ul секции (src/pages/vacancy.html:17–20) по флагу first',
-    ).toContain('dutiesHtml');
-    expect(
-      build,
-      'текст абзаца первой вакансии — полный (не v.short данных)',
-    ).toContain(
+    expect(main, 'обязанности — ul секции (src/pages/vacancy.html:17–20) по флагу first').toContain(
+      'dutiesHtml',
+    );
+    expect(build, 'текст абзаца первой вакансии — полный (не v.short данных)').toContain(
       "'Контроль режимов работы основного и вспомогательного оборудования энергоблоков ТЭЦ, планирование ремонтов и координация оперативного персонала.'",
     );
     expect(build, 'обязанность 1 — как в оригинале').toContain(

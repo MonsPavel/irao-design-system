@@ -325,10 +325,10 @@ standTest.describe('patterns/detail-page: ритм секций канона (T1
         await computed(page, '.dpp__foot', 'border-top-width'),
         'foot без разделителя (errata T18.8)',
       ).toBeCloseTo(0, 6);
-      expect(await computed(page, '.dpp__foot', 'padding-top'), 'foot без отступа сверху').toBeCloseTo(
-        0,
-        6,
-      );
+      expect(
+        await computed(page, '.dpp__foot', 'padding-top'),
+        'foot без отступа сверху',
+      ).toBeCloseTo(0, 6);
       expect(
         await computed(page, '.dpp__foot', 'row-gap'),
         'шаг пар «дата — CTA» 24 — .vacancy-page__foot (pages.css:342)',
