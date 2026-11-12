@@ -1652,7 +1652,7 @@ function vacancyHref(v, apply = false) {
   return `vacancy${apply ? '-apply' : ''}${suffix}.html`;
 }
 
-function vacancyMain(v = VAC.items[0]) {
+function vacancyMain(v = VAC.items[0], first = false) {
   const requirements = [
     `Опыт работы: ${v.experience.toLowerCase()} — или готовность быстро освоить профиль;`,
     'Профильное техническое или экономическое образование (для рабочих позиций — среднее специальное);',
@@ -1667,6 +1667,22 @@ function vacancyMain(v = VAC.items[0]) {
   ];
   const list = (items) =>
     `<ul class="ui-list">\n${items.map((item) => `  <li>${esc(item)}</li>`).join('\n')}\n</ul>`;
+  // Доп. состав первой вакансии (vacancy.html, T18.8 −185 сверх ритма):
+  // страница-фрагмент оригинала src/pages/vacancy.html собрана вручную
+  // (build.py INNER_PAGES берёт её как статический frag) — секция «Что
+  // предстоит» несёт полный абзац (src/pages/vacancy.html:15) и обязанности
+  // (ul ×4, :17–20); генеративные vacancy-2..12 (build.py:906–930,
+  // render_vacancy_detail) ведут абзац из данных (v.short) без списка.
+  const firstIntro =
+    'Контроль режимов работы основного и вспомогательного оборудования энергоблоков ТЭЦ, планирование ремонтов и координация оперативного персонала.';
+  const firstDuties = [
+    'Ведение режимов работы энергооборудования в соответствии с диспетчерскими графиками;',
+    'Анализ технического состояния оборудования и подготовка заявок на ремонт;',
+    'Участие в испытаниях и вводе оборудования после ремонтов;',
+    'Ведение технической документации и отчётности.',
+  ];
+  const introLead = first ? firstIntro : esc(v.short);
+  const dutiesHtml = first ? `\n        ${list(firstDuties)}` : '';
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Вакансии', 'vacancies.html'],
@@ -1693,7 +1709,7 @@ function vacancyMain(v = VAC.items[0]) {
         <!-- подзаголовки секций (T16.13): канон fs-h4-тройка 28/500
              (pages.css, --fs-h4) — роль ui-h4 вместо ui-h3 (42/500) -->
         <h2 class="ui-h4">Что предстоит</h2>
-        <p class="ui-body">${esc(v.short)} Работа ведётся на объекте ${esc(v.place)} в составе оперативной команды подразделения, с наставником на период адаптации.</p>
+        <p class="ui-body">${introLead} Работа ведётся на объекте ${esc(v.place)} в составе оперативной команды подразделения, с наставником на период адаптации.</p>${dutiesHtml}
       </div>
       <div class="dpp__section">
         <h2 class="ui-h4">Требования</h2>
@@ -3222,7 +3238,10 @@ const PAGES = [
   {
     file: 'vacancy.html',
     title: 'Ведущий инженер по эксплуатации энергоблоков — Портал карьеры Интер РАО',
-    main: () => vacancyMain(),
+    // T18.8: первая вакансия — ручной состав оригинала (src/pages/vacancy.html):
+    // полный абзац секции «Что предстоит» + обязанности (генеративные
+    // vacancy-2..12 ведут v.short без списка).
+    main: () => vacancyMain(VAC.items[0], true),
   },
   // Генеративные страницы вакансий 2..12 (build.py:906-930 оригинала):
   // тот же шаблон, данные из data/vacancies.json — REPORT §1 «вне пилота»

@@ -377,9 +377,14 @@
 /* Карточная форма колонки (порт cp-vacancy-page пилота: паддинг/радиус/
    поверхность — принято ДС в калибровке T15.1; оригинал .vacancy-page
    рендерит колонку без карточки). Исполнение — разметка пилота
-   (vacancy.html), док канона несёт базовую колонку. */
+   (vacancy.html), док канона несёт базовую колонку. Ритм колонки вакансии —
+   40px (.vacancy-page pages.css:258; вне шкалы §3.2 — перенос «как есть»,
+   прецедент dpp__photo 26.25rem): T18.8 — базовый .dpp 32 ведёт колонки
+   event/internship (.internship__main pages.css:544, паритет ±6 — T18.9
+   «не трогать»), поэтому шаг блоков вакансии едет на карточной форме. */
 .dpp--card {
   box-sizing: border-box;
+  gap: 2.5rem;
   padding: var(--ui-space-6);
   border-radius: var(--ui-radius-md);
   background-color: var(--ui-color-surface);
@@ -447,9 +452,12 @@
   align-items: center;
 }
 
-/* Контент-секция «h2 + содержимое»: шаг 8px (cp-vacancy-page__section/
-   cp-detail-section; оригинал .internship__section h2 margin-bottom 16px,
-   абзацы вплотную — приближение каноном, калибровка T15.1). */
+/* Контент-секция «h2 + содержимое»: шаг 8px — база (cp-detail-section;
+   event/internship рендерятся ±6, T18.9 «не трогать»; оригинал
+   .internship__section — h2 margin-bottom 16px при абзацах вплотную —
+   состав страниц, не секция). Ритм секций вакансии — 1:1 оригиналу
+   (.vacancy-page__section gap 16px, pages.css:285–289): errata калибровки
+   T15.1 «8px» — T18.8, ступень на карточной форме вакансии. */
 .dpp__section {
   box-sizing: border-box;
   display: flex;
@@ -457,33 +465,43 @@
   gap: var(--ui-space-2);
 }
 
-/* Слот медиа (карта-заглушка вакансии): высота 288px и muted-поверхность —
-   порт cp-vacancy-page__map пилота (заглушка; оригинал .vacancy-page__map
-   320px с фотоподложкой и подписью — контент САЙТА, канон несёт только
-   слот). Скругление слота — радиус карточки. */
+/* Шаг шапки вакансии — 12px 1:1 (.vacancy-page__head pages.css:260;
+   errata калибровки раундов 2–4 «принято 8px»). T18.8. */
+.dpp--card .dpp__head {
+  gap: var(--ui-space-3);
+}
+
+/* Шаг секций вакансии — 16px 1:1 (.vacancy-page__section pages.css:285–289).
+   T18.8. */
+.dpp--card .dpp__section {
+  gap: var(--ui-space-4);
+}
+
+/* Слот медиа (карта-заглушка вакансии): высота 320px — 1:1 карте оригинала
+   (.vacancy-page__map pages.css:315–317; errata T18.8 — 288px плейсхолдера
+   cp-vacancy-page__map сняты) и muted-поверхность (содержимое — контент
+   САЙТА, канон несёт только слот). Скругление слота — радиус карточки. */
 .dpp__media {
   box-sizing: border-box;
-  height: 18rem;
+  height: 20rem;
   border-radius: var(--ui-radius-md);
   background-color: var(--ui-color-surface-muted);
 }
 
-/* Foot вакансии: разделитель сверху (border muted, padding 16) + пары
-   «дата — CTA» по краям (space-between, gap 16) — порт cp-vacancy-page__
-   foot пилота («разделитель + space-between», спека T17.14; оригинал
-   .vacancy-page__foot без разделителя, gap 24 — принято ДС). Мобильная
-   база — колонка с прижатием влево (оригинал @max-760 → column, pages.css:359;
-   канон принимает значение оригинала — расхождение пилота снято), от md —
-   строка. */
+/* Foot вакансии: пары «дата — CTA» по краям (space-between, gap 24) —
+   1:1 .vacancy-page__foot (pages.css:338–343, без разделителя). Errata
+   T18.8: «разделитель + padding 16» калибровки T17.14 (порт
+   cp-vacancy-page__foot пилота) снят — foot 44→61 (+17) входил в дефект
+   ритма. Мобильная база — колонка с прижатием влево (оригинал @max-760 →
+   column, pages.css:360; канон принимает значение оригинала — расхождение
+   пилота снято), от md — строка. */
 .dpp__foot {
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--ui-space-4);
+  gap: var(--ui-space-5);
   align-items: flex-start;
   justify-content: space-between;
-  padding-top: var(--ui-space-4);
-  border-top: var(--ui-border-width) solid var(--ui-color-border-muted);
 }
 
 @media (min-width: 768px) {
