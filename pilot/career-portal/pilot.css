@@ -2134,3 +2134,138 @@ a.cp-intern-card {
   flex-wrap: wrap;
   gap: var(--ui-space-2) var(--ui-space-4);
 }
+
+/* ── точечный хвост паритета (T18.9) ──
+   Сайт-хуки cmp-/ev-/ia- (конвенция не-cp имени — прецедент ctr-/edu-/int-/
+   stu-): геометрия «как есть» оригинала на каркасах ДС/слоя, без новых
+   cp-сущностей (ценз T17.16). Источник каждой ступени — в комментарии. */
+
+/* companies.html: ритм грида сегментов. Секция — 40/40 (.section
+   components.css:347) с гашением верхнего (inline companies.html:147 —
+   над шапкой ритм ведут крошки; прецедент .ctr-lead). Шапка — шаг 16/низ
+   40 (.page-head components.css:38/41 — против 12/32 базы cp-page-head;
+   прецедент .edu-offer-head). Заголовки сегментов — низ 32
+   (.section__title components.css:340). Сетки — шаг 36 (.cards-grid
+   pages.css:9, «как есть» — прецедент .edu-offer-grid) + низ 48 (inline
+   companies.html:153–196, margin-bottom: 48px). */
+.cmp-sec {
+  padding-top: 0;
+  padding-bottom: 2.5rem;
+}
+
+.cmp-head {
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.cmp-title {
+  margin-bottom: var(--ui-space-6);
+}
+
+.cmp-grid {
+  gap: 2.25rem;
+  margin-bottom: var(--ui-space-7);
+}
+
+/* events.html: обложка cover-hero (pages.css:953–969) — паддинг 64/56,
+   шаг 20, фон blue-50, радиус --radius-card 16, без нижнего ритма (ниже
+   табы с mt 24 канона nvp); кнопка +16 сверх шага (pages.css:967);
+   подпись max-width 640px (pages.css:965). Форма — та же, что каркас
+   .ctr-cover T18.4 (cvh/cp-page-head + хук позиции); дубликат осознанный —
+   слияние хуков страниц треков и мероприятий вне Scope задачи. */
+.ev-sec {
+  padding-top: 0; /* inline events.html:147 */
+  padding-bottom: 2.5rem; /* .section components.css:347 */
+}
+
+.ev-cover {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  gap: 1.25rem; /* 20px pages.css:956 */
+  margin-bottom: 0; /* cover-hero нижнего ритма не несёт — таблица pages.css:971 */
+  padding: 4rem 3.5rem; /* 64/56 pages.css:957 */
+  border-radius: var(--ui-radius-md); /* --radius-card = 16px */
+  background-color: var(--ui-color-surface-muted); /* surface-blue-50 */
+}
+
+.ev-cover .cp-page-subtitle {
+  max-width: 40rem; /* 640px pages.css:965 */
+}
+
+.ev-cover .ui-button {
+  margin-top: var(--ui-space-4); /* 16px pages.css:967 */
+}
+
+/* Заголовки лент событий — низ 24 (.events-section-title pages.css:583);
+   роль ui-h3 (fs-h3 = 42/500 primary — та же тройка; ui-h2 60px снят). */
+.ev-title {
+  margin-bottom: var(--ui-space-5);
+}
+
+/* Лента событий — карточка оригинала (pages.css:565–581) на сетке 36
+   (pages.css:9): карточка паддинг 16, фото-слот 220px фикс (не 3/2 канона
+   ui-card--media — форма события «как есть»; слот ДС не трогается — на
+   media/article канон 3/2 держит паритет ±4/±6), тело 16/4/0 с шагом 10,
+   мета-шаг 8, заголовок 1.3 без трекинга (pages.css:579; прецедент
+   .int-dir-grid .ui-h6). */
+.ev-grid {
+  gap: 2.25rem; /* 36px pages.css:9 */
+}
+
+.ev-grid--lead {
+  margin-bottom: 3.5rem; /* 56px inline events.html:210 */
+}
+
+.ev-grid .ui-card {
+  padding: 1rem; /* 16px pages.css:565 */
+}
+
+.ev-grid .ui-card__media {
+  height: 13.75rem; /* 220px pages.css:569 */
+  aspect-ratio: auto;
+}
+
+.ev-grid .ui-card__media > img {
+  height: 100%; /* слот фиксированной высоты — фото следует за ним */
+}
+
+.ev-grid .ui-card__body {
+  gap: 0.625rem; /* 10px pages.css:575 */
+  padding: 1rem 0.25rem 0; /* pages.css:575 */
+}
+
+.ev-grid .ui-card__meta {
+  gap: var(--ui-space-2); /* 8px pages.css:581 против 4 канона ui-card */
+}
+
+.ev-grid .ui-h6 {
+  line-height: 1.3; /* pages.css:579 */
+  letter-spacing: normal;
+}
+
+/* internship-apply.html: карточная форма (.form-card pages.css:367–375) —
+   колонка 24, паддинг 36, фон surface, рамка 1px #D6D6D6 (токен
+   border-muted — hex в сайт-зоне запрещён; приглушённый чуть светлее
+   оригинала, дельты высот не несёт), радиус --radius-card 16; заголовок
+   h1 внутри карточки (form-card__title pages.css:377). Секция 40/40
+   (.section components.css:347 против 48 канона ui-section; прецедент
+   .int-sec). Строки радио — 52px по центру (inline
+   internship-apply.html:171/216/226). */
+.ia-sec {
+  padding-block: 2.5rem;
+}
+
+.ia-form-card {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-5); /* 24px pages.css:370 */
+  padding: 2.25rem; /* 36px pages.css:372 */
+  border: 1px solid var(--ui-color-border-muted);
+  border-radius: var(--ui-radius-md); /* --radius-card = 16px */
+  background-color: var(--ui-color-surface);
+}
+
+.ia-form-card .ui-radio-group__row {
+  align-items: center;
+  min-height: 3.25rem; /* 52px internship-apply.html:171/216/226 */
+}

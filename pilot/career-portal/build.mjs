@@ -1789,21 +1789,30 @@ function vacancyApplyMain(v = VAC.items[0]) {
    детальная internship.html. */
 function internshipApplyMain(i = INT.internship.items[1]) {
   const reqStar = ` <span class="ui-field__req"><span aria-hidden="true">*</span><span class="ui-field__req-text ui-vh">обязательное поле</span></span>`;
+  // T18.9: карточная форма оригинала (pages.css:367–375) — хук ia-form-card
+  // на cp-form-wrap несёт фон/рамку/паддинг 36; заголовок анкеты — h1 роль
+  // ui-h3 ВНУТРИ карточки (form-card__title pages.css:377,
+  // T18.9: карточная форма оригинала (pages.css:367–375) — хук ia-form-card
+  // на cp-form-wrap несёт фон/рамку/паддинг 36; заголовок h1 и вводный
+  // абзац остаются ВНЕ карточки — решение T15.4 (пин: «form-card__title
+  // fs-h3 не переносится — клон несёт канон 60px»), T18.9 его не отменяет.
+  // ui-form__layout один (оригинал form-page — одна раскладка pages.css:365;
+  // вложенная сжимала колонку формы до 465px). Высота radio-строк 52 —
+  // inline оригинала (internship-apply.html:171/216/226) — хук в pilot.css.
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Стажировки', 'internships.html'],
     ['Заявка', ''],
   ])}
-<section class="ui-section">
+<section class="ui-section ia-sec">
   <div class="ui-container">
     <h1 class="ui-page-title">Заявка на стажировку</h1>
     <div class="ui-form__layout" style="margin-top: var(--ui-space-5);">
       <div class="ui-form__main">
         <p class="ui-small ui-text--muted">Стажировка: <strong>${esc(i.title.replace(/^Стажировка:\s*/, ''))}</strong>, ${esc(i.company)}</p>
-        <div class="cp-form-wrap">
+        <div class="cp-form-wrap ia-form-card">
           <form class="ui-form" action="#ia" method="post" data-cp-form novalidate>
-  <div class="ui-form__layout">
-    <div class="ui-form__main" data-cp-form-body>
+  <div class="ui-form__main" data-cp-form-body>
       <div class="ui-form__grid">
         ${field({ label: 'Фамилия', name: 'lastname', required: true, placeholder: 'Иванов' })}
         ${field({ label: 'Имя', name: 'firstname', required: true, placeholder: 'Иван' })}
@@ -1882,7 +1891,6 @@ function internshipApplyMain(i = INT.internship.items[1]) {
       <div class="ui-form__actions">
         <button class="ui-button ui-button--accent" type="submit">отправить заявку</button>
       </div>
-    </div>
   </div>
   <div class="ui-form__success" data-cp-form-success hidden>
     <h2 class="ui-h4 ui-form__success-title" tabindex="-1">Заявка отправлена</h2>
@@ -2527,31 +2535,76 @@ ${offers}
 </section>`;
 }
 
-/* ── мероприятия ── */
+/* ── мероприятия ──
+
+   T18.9: состав 1:1 оригиналу (events.html:147–367) — обложка cover-hero
+   с кнопкой «смотреть мероприятия» (events.html:149–152), лента фильтров
+   vac-filters (events.html:163–208, та же форма пилюль, что каталог
+   обучения — канон lpp-filters слоя T17.12), ленты событий на карточке
+   оригинала (pages.css:565–581) и сетке 36 (pages.css:9). Геометрия —
+   сайт-хуки ev- (конвенция не-cp имени — прецедент ctr-/edu-/int-);
+   каркасы — cp-page-head/ui-button/ui-tabs--pill/ui-card--media/ui-grid. */
+
+/** Фильтры ленты мероприятий — options 1:1 events.html:164–207 (подписи —
+ *  aria-label оригинала; в пилюлях имя поля — label[for] .ui-vh, канон
+ *  T7.3 — прецедент CATALOG_FILTERS каталога обучения). */
+const EVENT_FILTERS = [
+  {
+    name: 'region',
+    label: 'Регион',
+    options: ['Все регионы', 'Москва', 'Санкт-Петербург', 'Омская область'],
+  },
+  { name: 'city', label: 'Город', options: ['Все города', 'Москва', 'Санкт-Петербург', 'Омск'] },
+  {
+    name: 'audience',
+    label: 'Для кого',
+    options: ['Для всех', 'Школьникам', 'Студентам', 'Начинающим специалистам'],
+  },
+  { name: 'format', label: 'Формат', options: ['Любой формат', 'Очно', 'Онлайн'] },
+  {
+    name: 'study',
+    label: 'Направления подготовки',
+    options: ['Все направления', 'Энергетика', 'ИТ', 'Экономика'],
+  },
+  {
+    name: 'period',
+    label: 'Период',
+    options: ['Выберите период', 'Сентябрь 2026', 'Октябрь 2026', 'Ноябрь 2026'],
+  },
+];
 
 function eventsMain() {
   const upcoming = EVT.upcoming.map(eventCard).join('\n');
   const past = EVT.past.map(eventCard).join('\n');
+  const filters = EVENT_FILTERS.map(
+    (f) => `      ${selectField({ name: f.name, label: f.label, options: f.options, pill: true })}`,
+  ).join('\n');
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Школьникам и студентам', null],
     ['Мероприятия', ''],
   ])}
-<section class="ui-section">
+<section class="ui-section ev-sec" id="upcoming">
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="cp-page-head ev-cover">
       <h1 class="ui-page-title">Мероприятия</h1>
-      <p class="cp-page-subtitle ui-lead">Дни открытых дверей, экскурсии и чемпионаты Группы «Интер РАО».</p>
+      <p class="cp-page-subtitle ui-lead">Экскурсии, кейс-чемпионаты, вебинары и ярмарки вакансий компаний Группы «Интер РАО» для школьников, студентов и начинающих специалистов.</p>
+      <a class="ui-button ui-button--primary" href="#upcoming">смотреть мероприятия</a>
     </div>
     ${subnav('events.html')}
 
-    <h2 class="ui-h2">Предстоящие</h2>
-    <div class="ui-grid ui-grid--3">
+    <div class="lpp-filters">
+${filters}
+      <a class="ui-button ui-button--light" href="events-search.html">поиск мероприятий</a>
+    </div>
+
+    <h2 class="ui-h3 ev-title">Предстоящие</h2>
+    <div class="ui-grid ui-grid--3 ev-grid ev-grid--lead">
 ${upcoming}
     </div>
 
-    <h2 class="ui-h2">Прошедшие</h2>
-    <div class="ui-grid ui-grid--3">
+    <h2 class="ui-h3 ev-title">Прошедшие</h2>
+    <div class="ui-grid ui-grid--3 ev-grid">
 ${past}
     </div>
 
@@ -2910,19 +2963,23 @@ function companiesMain() {
             `        <a class="ui-card ui-card--hover ui-small cp-company-card" href="company.html">${esc(name)}</a>`,
         )
         .join('\n');
-      return `    <h2 class="ui-h3">${esc(segment)}</h2>
-    <div class="ui-grid ui-grid--3">
+      return `    <h2 class="ui-h3 cmp-title">${esc(segment)}</h2>
+    <div class="ui-grid ui-grid--3 cmp-grid">
 ${cards}
     </div>`;
     })
     .join('\n');
+  // T18.9: ритм страницы ведут сайт-хуки cmp- (гашение верхнего ритма
+  // секции inline companies.html:147; шапка 16/40, заголовки 32, сетки
+  // 36/48 — источники в pilot.css). Каркас — ui-section/cp-page-head/
+  // ui-grid канонов ДС.
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Компании группы', ''],
   ])}
-<section class="ui-section">
+<section class="ui-section cmp-sec">
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="cp-page-head cmp-head">
       <h1 class="ui-page-title">Компании группы</h1>
       <p class="cp-page-subtitle ui-lead">Работодатели Группы «Интер РАО» — от генерации до сбыта и сервисов.</p>
     </div>
