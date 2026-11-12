@@ -133,7 +133,7 @@
 | T18.4 | done | смержена |
 | T18.5 | done | смержена |
 | T18.6 | done | смержена |
-| T18.7 | todo | vacancies: lpp-row — пилюля «Откликнуться» всегда справа (+400px, слой) |
+| T18.7 | done | смержена |
 | T18.8 | todo | vacancy-N: ритм dpp__section −15…−53 (−108px на страницу, слой) |
 | T18.9 | todo | точечный хвост: companies/events/education-catalog/internship-apply/article/events-search/404 |
 | T18.10 | todo | макро-вынос: page-head/page-subtitle → слой (php-) |

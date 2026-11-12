@@ -242,10 +242,16 @@ describe('пороги ценза — числа зафиксированы по
       // (.cp-events-feature — сетка/карточки/фото/тело × медиа-ступени,
       // .int-sec .cp-adv-grid .ui-card, .int-dir-grid .cp-intern-card ×
       // .ui-h6/.ui-small-кламп канона); семейства/allowlist НЕ менялись
-      // (int- — не cp-, прецедент edu- T18.5):
-      expect(metrics.css.lines).toBe(2138);
-      expect(metrics.css.codeLines).toBe(1222);
-      expect(metrics.css.selectors).toBe(167);
+      // (int- — не cp-, прецедент edu- T18.5);
+      // T18.7 (row-nowrap канона ведёт слой — md-ступень .lpp-row):
+      // дубликаты раскладки сняты из сайт-зоны — хук nowrap лент
+      // (.cp-company-feed .lpp-row, T18.3) и ступень 767 wrap:
+      // сырые 2138→2136, код 1222→1216, селекторы 167→165; раскладка
+      // строки — слой, типографика лент (кламп/lh) остаётся сайт-зоной;
+      // семейства/allowlist НЕ менялись:
+      expect(metrics.css.lines).toBe(2136);
+      expect(metrics.css.codeLines).toBe(1216);
+      expect(metrics.css.selectors).toBe(165);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(29);
       expect(metrics.js.lines).toBe(187);
