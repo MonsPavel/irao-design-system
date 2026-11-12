@@ -265,12 +265,12 @@ describe('patterns/patterns.css — единый исходник паттерн
       'flex-wrap: wrap;',
     );
     const md = code.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
-    const rowMd = md.match(/\n  \.lpp-row \{([^}]*)\}/)?.[1];
+    const rowMd = md.match(/\n {2}\.lpp-row \{([^}]*)\}/)?.[1];
     expect(
       rowMd,
       'ступень md канона list-page: row-nowrap — кнопка всегда справа (Scope T18.7; оригинал .vac-row pages.css:159–166 без wrap)',
     ).toContain('flex-wrap: nowrap;');
-    const mainMd = md.match(/\n  \.lpp-row__main \{([^}]*)\}/)?.[1];
+    const mainMd = md.match(/\n {2}\.lpp-row__main \{([^}]*)\}/)?.[1];
     expect(
       mainMd,
       'main flex: 1 (T18.7): main занимает строку, текст переносится внутри, пилюля прижата вправо',
