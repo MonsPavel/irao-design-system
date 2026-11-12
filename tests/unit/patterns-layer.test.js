@@ -259,6 +259,28 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(title).toContain('text-decoration: none;');
   });
 
+  it('row-nowrap канон (T18.7): от md пилюля «Откликнуться» не переносится — .lpp-row flex-wrap: nowrap + main flex: 1 в ступени md; мобильная база — перенос сохранён (канон T17.1: оригинал ≤760 — колонка, pages.css:359)', () => {
+    const row = blockOf('.lpp-row');
+    expect(row, 'мобильная база: перенос пилюли под текст (канон T17.1)').toContain(
+      'flex-wrap: wrap;',
+    );
+    const md = code.match(/@media \(min-width: 768px\)\s*\{[\s\S]*?\n\}/)?.[0] ?? '';
+    const rowMd = md.match(/\n  \.lpp-row \{([^}]*)\}/)?.[1];
+    expect(
+      rowMd,
+      'ступень md канона list-page: row-nowrap — кнопка всегда справа (Scope T18.7; оригинал .vac-row pages.css:159–166 без wrap)',
+    ).toContain('flex-wrap: nowrap;');
+    const mainMd = md.match(/\n  \.lpp-row__main \{([^}]*)\}/)?.[1];
+    expect(
+      mainMd,
+      'main flex: 1 (T18.7): main занимает строку, текст переносится внутри, пилюля прижата вправо',
+    ).toContain('flex: 1;');
+    expect(
+      blockOf('.lpp-row__main'),
+      'min-width: 0 в базе — усадка main под пилюлю и на md (перенос текста внутри)',
+    ).toContain('min-width: 0;');
+  });
+
   it('значения канона 1:1 — сайдбар (280px от lg, mobile-база одна колонка, sticky от md)', () => {
     const lgBlock = code.match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/);
     expect(lgBlock, 'ступень lg в слое есть').toBeTruthy();

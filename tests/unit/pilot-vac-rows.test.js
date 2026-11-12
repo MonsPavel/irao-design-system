@@ -192,6 +192,18 @@ describe('pilot.css — шимы сайт-зоны на крючках слоя 
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(section).not.toContain('!important');
   });
+
+  it('дубли канона раскладки строки сняты (T18.7: row-nowrap ведёт md-ступень слоя .lpp-row — хук nowrap лент и ступень 767 wrap сайт-зоны не дублируют канон; Implementation requirements T18.7 п.1)', () => {
+    expect(
+      blockOf(pilotCss, '.cp-company-feed .lpp-row'),
+      'хук nowrap лент (T18.3) — теперь дубликат md-ступени канона слоя',
+    ).toBeNull();
+    const m767 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 767px)'));
+    expect(
+      blockOf(m767, '.cp-company-feed .lpp-row'),
+      'ступень 767 wrap снята — мобильная база канона (.lpp-row flex-wrap: wrap) и так действует',
+    ).toBeNull();
+  });
 });
 
 describe('compare.mjs — пробы строк/сайдбара (T16.5; Testing requirements: замер как §8.2 №6)', () => {

@@ -403,6 +403,76 @@ standTest.describe(
         await expect(dialog, 'диалог закрывается крестом').not.toBeVisible();
       },
     );
+
+    standTest(
+      'row-nowrap канон (T18.7): от md пилюля прижата к правому краю строки и не ниже main.bottom; на мобильной базе — перенос под текст (канон T17.1); порядок DOM не меняется',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        // VI-инвариант T18.7: порядок DOM не меняется — кнопка после текста
+        // (main — первый ребёнок строки, пилюля — второй).
+        const order = await page.evaluate(() => {
+          const row = document.querySelector('#lpp-rows .lpp-row');
+          return (
+            row.children.length === 2 &&
+            row.children[0].classList.contains('lpp-row__main') &&
+            row.children[1].classList.contains('ui-button--pill')
+          );
+        });
+        expect(order, 'кнопка — второй ребёнок строки (после текста)').toBe(true);
+
+        const rows = page.locator(`${ROWS.section} ${ROWS.row}`);
+        for (const [name, viewport] of Object.entries(VIEWPORTS)) {
+          await page.setViewportSize(viewport);
+          const count = await rows.count();
+          for (let i = 0; i < count; i += 1) {
+            const geo = await rows.nth(i).evaluate((row) => {
+              const main = row.querySelector('.lpp-row__main');
+              const pill = row.querySelector('.ui-button--pill');
+              const rowStyle = getComputedStyle(row);
+              const rowRect = row.getBoundingClientRect();
+              const mainRect = main.getBoundingClientRect();
+              const pillRect = pill.getBoundingClientRect();
+              return {
+                rightDelta:
+                  rowRect.right -
+                  parseFloat(rowStyle.borderRightWidth) -
+                  parseFloat(rowStyle.paddingRight) -
+                  pillRect.right,
+                pillTop: pillRect.top,
+                pillBottom: pillRect.bottom,
+                mainTop: mainRect.top,
+                mainBottom: mainRect.bottom,
+              };
+            });
+            const where = `ветка строк, ${name}, строка ${i + 1}`;
+            if (viewport.width >= 768) {
+              // right-edge проба T18.7: пилюля прижата к правому контент-краю
+              // строки; допуск 2px — квантование дробных боксов (урок
+              // firefox-квантования T18.7).
+              expect(
+                Math.abs(geo.rightDelta),
+                `${where}: пилюля прижата к правому краю строки (right-edge)`,
+              ).toBeLessThanOrEqual(2);
+              // y-совпадение с main: пилюля в вертикальной полосе main-блока;
+              // перенос под текст давал бы pillTop > mainBottom (гэп 48).
+              expect(geo.pillTop, `${where}: пилюля не выше main.top`).toBeGreaterThanOrEqual(
+                geo.mainTop - 2,
+              );
+              expect(
+                geo.pillBottom,
+                `${where}: пилюля не ниже main.bottom (не перенесена под текст)`,
+              ).toBeLessThanOrEqual(geo.mainBottom + 2);
+            } else {
+              expect(
+                geo.pillTop,
+                `${where}: мобильная база — пилюля перенесена под текст (канон T17.1; оригинал ≤760 — колонка, pages.css:359)`,
+              ).toBeGreaterThanOrEqual(geo.mainBottom);
+            }
+          }
+        }
+      },
+    );
   },
 );
 

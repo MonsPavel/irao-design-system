@@ -417,14 +417,20 @@ describe('T18.3: pilot.css — позиционные хуки лент cp-compa
     expect(feed).toContain('gap: 2.25rem;');
   });
 
-  it('строки вакансий ленты: nowrap (pages.css:159–166) + кламп описания 2 строки (pages.css:194–201) + типографика «как есть» 1.3/1.45 (pages.css:171/196 — прецедент cp-why-us__card-title); на узких экранах перенос восстановлен ступенью 767', () => {
-    expect(blockOf(pilotCss, '.cp-company-feed .lpp-row')).toContain('flex-wrap: nowrap;');
+  it('строки вакансий ленты: раскладка ведёт СЛОЙ — row-nowrap от md (канон T18.7, ступень md .lpp-row); сайт-зона несёт только типографику лент: кламп описания 2 строки (pages.css:194–201) и «как есть» 1.3/1.45 (pages.css:171/196 — прецедент cp-why-us__card-title); дубли flex-wrap сняты (Implementation requirements T18.7 п.1)', () => {
+    expect(
+      blockOf(pilotCss, '.cp-company-feed .lpp-row'),
+      'хук nowrap лент (T18.3) — дубликат md-ступени канона слоя, снят',
+    ).toBeNull();
     const short = blockOf(pilotCss, '.cp-company-feed .lpp-row__short');
     expect(short).toContain('-webkit-line-clamp: 2;');
     expect(short).toContain('line-height: 1.45;');
     expect(blockOf(pilotCss, '.cp-company-feed .lpp-row__title')).toContain('line-height: 1.3;');
     const m767 = pilotCssRaw.slice(pilotCssRaw.indexOf('@media (max-width: 767px)'));
-    expect(blockOf(m767, '.cp-company-feed .lpp-row')).toContain('flex-wrap: wrap;');
+    expect(
+      blockOf(m767, '.cp-company-feed .lpp-row'),
+      'ступень 767 wrap снята — мобильная база канона (.lpp-row flex-wrap: wrap) и так действует',
+    ).toBeNull();
   });
 
   it('карточки лент: паддинг 16px «как есть» (pages.css:565/598); фото фиксированной высоты оригинала — статьи 200px (pages.css:604), события 220px (pages.css:569) — против aspect 3/2 канона ui-card--media (T17.5); тело статей: шаг 12px (.article-card__link, pages.css:600), нижний паддинг гасится', () => {
