@@ -5,7 +5,8 @@
  * с-изображением full-bleed / с-фото-фоном (ui-section--photo, T17.3) /
  * nav-карточки и лента логотипов (связки слоя lnk-/lgo-, T17.9) /
  * лендинг-композиции hro/mrq/mdl/cvh (T17.15) / тёмная секция why-us
- * (связка слоя whu, T18.12).
+ * (связка слоя whu, T18.12), раскладки карусели production v1/v2
+ * (связка слоя prd поверх ui-carousel, T18.13).
  *
  * Ключевые сценарии спеки:
  *  1. каркас секции = ui-section + ui-container + заголовок-роль h2 + сетка
@@ -61,6 +62,24 @@ const contrastOfDarkSection = (page) =>
     const [l1, l2] = [luminance(fg), luminance(bg)].sort((a, b) => b - a);
     return (l1 + 0.05) / (l2 + 0.05);
   });
+
+/** Цвет computed-значения в нормализованной форме [r, g, b, a] (0–255 / 0–1):
+ *  Chrome возвращает color-mix как color(srgb …), младшие — как rgba(…). */
+const colorChannels = (value) => {
+  const numbers = value.match(/[\d.]+/g)?.map(Number) ?? [];
+  const [r, g, b, a = 1] = numbers;
+  const scale = r > 1 ? 1 : 255;
+  return [r * scale, g * scale, b * scale, a];
+};
+
+const expectColor = (received, [r, g, b, a], label) => {
+  const channels = colorChannels(received);
+  expect(
+    channels.slice(0, 3).map((c) => Math.round(c)),
+    label,
+  ).toEqual([r, g, b]);
+  expect(channels[3], `${label}: альфа`).toBeCloseTo(a, 2);
+};
 
 standTest.describe('patterns/landing-section: эталонная сборка (Scope) — каркас', () => {
   standTest(
@@ -940,6 +959,255 @@ standTest.describe('patterns/landing-section: тёмная секция why-us (
   );
 });
 
+// Раскладки карусели «production» (T18.13): канон prd слоя поверх
+// ui-carousel (T17.7 — поведение/вид элементов). Секции 14–15 mini-эталона
+// (после lsp-why-us): lsp-production — модификатор --v1 (лента табов
+// внизу, абсолютные координаты текста/кнопки от 1280 — пины errata 31.10),
+// lsp-production-v2 — модификатор --v2 (фото-центр, чипы сверху 59px).
+standTest.describe('patterns/landing-section: раскладки карусели production (prd, T18.13)', () => {
+  standTest(
+    'prd v1: модуль карусели инициализирован (контролы показаны), тело/текст/кнопка — абсолютные координаты 55/78/430/523 от 1440 (пины errata 31.10), лента-полоса внизу 82px, табы 20% (285×82), планка-спинка 17px',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const section = page.locator('#lsp-production');
+      await expect(section, 'секция prd--v1 видима').toBeVisible();
+
+      const state = await section.evaluate((el) => {
+        const cs = (node) => getComputedStyle(node);
+        const rect = el.getBoundingClientRect();
+        const pick = (sel) => {
+          const node = el.querySelector(sel);
+          if (!node) return null;
+          const r = node.getBoundingClientRect();
+          const s = cs(node);
+          return {
+            left: Math.round(r.left),
+            top: Math.round(r.top - rect.top),
+            w: Math.round(r.width),
+            h: Math.round(r.height),
+            pos: s.position,
+          };
+        };
+        const activeTab = el.querySelector('.prd__tab[aria-selected="true"]');
+        return {
+          initialized: el.classList.contains('is-initialized'),
+          height: Math.round(rect.height),
+          prevHidden: el.querySelector('[data-ui-carousel-prev]')?.hasAttribute('hidden'),
+          stepHidden: el
+            .querySelector('[data-ui-carousel-stepper], .prd__stepper')
+            ?.hasAttribute('hidden'),
+          photoDisplay: cs(el.querySelector('.prd__photo')).display,
+          photoRect: pick('.prd__photo'),
+          bodyRect: pick('.prd__body'),
+          titleRect: pick('.prd__title'),
+          textRect: pick('.prd__text'),
+          btnRect: pick('.prd__btn'),
+          stepperRect: pick('.prd__stepper'),
+          tabW: Math.round(activeTab.getBoundingClientRect().width),
+          tabH: Math.round(activeTab.getBoundingClientRect().height),
+          tabBg: cs(activeTab).backgroundColor,
+          arrowPrevLeft: Math.round(
+            el.querySelector('.prd__arrow--prev').getBoundingClientRect().left,
+          ),
+          arrowNextRight: Math.round(
+            el.getBoundingClientRect().right -
+              el.querySelector('.prd__arrow--next').getBoundingClientRect().right,
+          ),
+          afterHeight: getComputedStyle(el, '::after').height,
+        };
+      });
+      expect(state.initialized, 'модуль ui-carousel поставил is-initialized').toBe(true);
+      expect(state.prevHidden, 'стрелки показаны (hidden снят модулем)').toBe(false);
+      expect(state.stepHidden, 'степпер показан (hidden снят модулем)').toBe(false);
+      expect(state.height, 'высота секции 760 (min-height «как есть»)').toBe(760);
+      expect(state.photoDisplay, 'фото видимо от lg (мобильная база скрыта)').toBe('block');
+      expect(state.bodyRect.pos, 'тело — блок на всю секцию от 1280 (production.css:203-209)').toBe(
+        'absolute',
+      );
+      expect(state.titleRect, 'title 55/78/545 (production.css:218-221)').toEqual({
+        left: 55,
+        top: 78,
+        w: 545,
+        h: expect.any(Number),
+        pos: 'absolute',
+      });
+      expect(state.textRect.top, 'text top 430 (production.css:224)').toBe(430);
+      expect(state.textRect.left, 'text left 55').toBe(55);
+      expect(state.btnRect.top, 'btn top 523 (production.css:228)').toBe(523);
+      expect(state.btnRect.left, 'btn left 55').toBe(55);
+      // Ширина секции на стенде зависит от каркаса полигона — процентные
+      // значения канона (left 43.5%, width 100%, 20% табов) сверяем
+      // относительно фактической ширины секции.
+      const sectionW = Math.round((await section.boundingBox()).width);
+      expect(state.photoRect, 'фото top 71 «как есть», left 43.5% от ширины секции').toEqual({
+        left: Math.round(sectionW * 0.435),
+        top: 71,
+        w: 585,
+        h: 674,
+        pos: 'absolute',
+      });
+      expect(state.stepperRect, 'лента-полоса внизу во всю ширину, высота 82').toEqual({
+        left: 0,
+        top: 678,
+        w: sectionW,
+        h: 82,
+        pos: 'absolute',
+      });
+      expect(state.tabW, 'таб 20% ленты (production.css:240)').toBe(Math.round(sectionW * 0.2));
+      expect(state.tabH, 'активный таб 82 (production.css:109)').toBe(82);
+      expectColor(
+        state.tabBg,
+        [232, 238, 254, 0.5],
+        'активный таб blue-100@50 (production.css:145)',
+      );
+      expect(state.arrowPrevLeft, 'стрелка prev у левого края').toBe(0);
+      expect(state.arrowNextRight, 'стрелка next у правого края (100×100)').toBe(0);
+      expect(state.afterHeight, 'планка-спинка 17px (production.css:196)').toBe('17px');
+    },
+  );
+
+  standTest(
+    'prd v1: поведение карусели — клик по табу 2 переключает слот заголовка (компонент ui-carousel T17.7 поверх канона)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const section = page.locator('#lsp-production');
+      await expect(section).toBeVisible();
+      const secondTab = section.locator('.prd__tab').nth(1);
+      await secondTab.click();
+      await expect(secondTab, 'aria-selected переехал (roving модуля)').toHaveAttribute(
+        'aria-selected',
+        'true',
+      );
+      await expect(
+        section.locator('[data-ui-carousel-title]'),
+        'слот заголовка — данные слайда 2',
+      ).toHaveText('Женские вакансии на производстве');
+      await expect(
+        section.locator('[data-ui-carousel-text]'),
+        'слот текста — данные слайда 2',
+      ).toContainText('комфортные условия');
+    },
+  );
+
+  standTest(
+    'prd v2: чипы сверху 59px radius 32 blur справа (width 700, top 42, right 56), актив — primary-deep 90% + кольцо, тело в потоке справа (margin-left auto), фото left 22/top 72, секция 740',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const section = page.locator('#lsp-production-v2');
+      await expect(section, 'секция prd--v2 видима').toBeVisible();
+
+      const state = await section.evaluate((el) => {
+        const cs = (node) => getComputedStyle(node);
+        const rect = el.getBoundingClientRect();
+        const pick = (sel) => {
+          const node = el.querySelector(sel);
+          if (!node) return null;
+          const r = node.getBoundingClientRect();
+          return {
+            left: Math.round(r.left),
+            top: Math.round(r.top - rect.top),
+            right: Math.round(rect.right - r.right),
+            w: Math.round(r.width),
+            h: Math.round(r.height),
+            pos: cs(node).position,
+          };
+        };
+        const activeTab = el.querySelector('.prd__tab[aria-selected="true"]');
+        return {
+          height: Math.round(rect.height),
+          photo: pick('.prd__photo'),
+          body: pick('.prd__body'),
+          titlePos: cs(el.querySelector('.prd__title')).position,
+          stepper: pick('.prd__stepper'),
+          tabH: Math.round(activeTab.getBoundingClientRect().height),
+          tabRadius: cs(activeTab).borderRadius,
+          tabBg: cs(activeTab).backgroundColor,
+          activeBg: cs(activeTab).backgroundColor,
+          numDisplay: cs(el.querySelector('.prd__tab[aria-selected="false"] .prd__tab-num'))
+            .display,
+          tabShadow: cs(activeTab).boxShadow,
+        };
+      });
+      expect(state.height, 'высота секции 740 (min-height v2 «как есть»)').toBe(740);
+      expect(state.photo, 'фото left 22/top 72 (production.css:279-280)').toEqual({
+        left: 22,
+        top: 72,
+        right: expect.any(Number),
+        w: 585,
+        h: 674,
+        pos: 'absolute',
+      });
+      expect(state.body.pos, 'тело в потоке (v1-абсолют не переезжает на v2)').toBe('relative');
+      expect(state.body.w, 'тело max-width 545').toBe(545);
+      expect(
+        state.body.right,
+        'бокс тела прижат к правому краю (margin-left auto — production.css:282); 56 несёт padding',
+      ).toBe(0);
+      expect(state.titlePos, 'заголовок в потоке (не абсолют)').toBe('static');
+      expect(
+        state.stepper,
+        'чипы absolute top 42/right 56, width 700 (left — от ширины секции)',
+      ).toEqual({
+        left: Math.round((await section.boundingBox()).width - 56 - 700),
+        top: 42,
+        right: 56,
+        w: 700,
+        h: expect.any(Number),
+        pos: 'absolute',
+      });
+      expect(state.stepper.h, 'чипы сжимаются по контенту (bottom 0 ленты погашен)').toBeLessThan(
+        300,
+      );
+      expect(state.tabH, 'чип 59px (production.css:301)').toBe(61);
+      expect(state.tabRadius, 'radius 32 (production.css:303)').toBe('32px');
+      expectColor(state.activeBg, [21, 42, 79, 0.9], 'актив primary-deep 90% (production.css:309)');
+      // inline-flex блока-фицируется во flex-item таба (computed display)
+      expect(state.numDisplay, 'номер виден у НЕактивного тоже (production.css:299)').toBe('flex');
+      // Chrome возвращает color-mix кольца как color(srgb …) — компоненты и
+      // геометрия (преттиер/версии браузера не влияют)
+      expect(state.tabShadow, 'кольцо white@35 через var(--prd-tab-ring)').toMatch(
+        /color\(srgb 1 1 1 \/ 0\.35\)|rgba\(255, 255, 255, 0\.35\)/,
+      );
+      expect(state.tabShadow, 'геометрия кольца — 1px inset').toContain('0px 0px 0px 1px inset');
+    },
+  );
+
+  standTest(
+    'prd: мобильные базы — фото скрыто (ступень пилота max-1023 инвертирована), тело/лента в базе канона; hscroll нет на 375 (32px-база T3.6 — v2-чипы static)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.setViewportSize(VIEWPORTS.mobile);
+      const state = await page.evaluate(() => {
+        const pick = (id) => {
+          const el = document.querySelector(id);
+          const styleOf = (node) => getComputedStyle(node);
+          const rect = el.getBoundingClientRect();
+          return {
+            photoDisplay: styleOf(el.querySelector('.prd__photo')).display,
+            bodyPos: styleOf(el.querySelector('.prd__body')).position,
+            stepperPos: styleOf(el.querySelector('.prd__stepper')).position,
+            minH: styleOf(el).minHeight,
+            h: Math.round(rect.height),
+          };
+        };
+        return {
+          v1: pick('#lsp-production'),
+          v2: pick('#lsp-production-v2'),
+          hscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      });
+      expect(state.v1.photoDisplay, 'v1: фото скрыто в мобильной базе').toBe('none');
+      expect(state.v1.bodyPos, 'v1: тело в потоке (абсолют от 1280)').toBe('relative');
+      expect(state.v1.minH, 'v1: min-height 760 (пилот — десктоп-форма)').toBe('760px');
+      expect(state.v2.photoDisplay, 'v2: фото скрыто в мобильной базе').toBe('none');
+      expect(state.v2.stepperPos, 'v2: чипы static-лента (production.css:313, mobile-first)').toBe(
+        'static',
+      );
+      expect(state.hscroll, 'на 375 горизонтального скролла нет (T3.6)').toBe(false);
+    },
+  );
+});
+
 standTest.describe('patterns/landing-section: a11y страницы (AC)', () => {
   standTest('axe страницы чист (вне реестра KNOWN_AXE_EXCEPTIONS)', async ({ stand }) => {
     const page = await stand('patterns/landing-section');
@@ -984,6 +1252,53 @@ standTest.describe('patterns/landing-section: эталоны (AC: visual 375/768
     },
   );
 });
+
+// Раскладки карусели production (T18.13): контейнерные эталоны канона prd —
+// v1 на desktop (1440 — лента табов внизу, абсолютные координаты текста/
+// кнопки, стрелки по краям) и mobile (375 — мобильная база: фото скрыто,
+// тело в потоке) + v2 на desktop (чипы сверху 59px справа, тело вправо).
+// Три снимка (прецедент whu T18.12 — element-снимки канона).
+standTest.describe(
+  'patterns/landing-section: эталоны карусели production prd (T18.13, AC: ×3)',
+  () => {
+    standTest(
+      'prd-v1/prd-v2 — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/landing-section');
+
+        const shots = [
+          ['prd-v1', page.locator('#lsp-production'), ['desktop', 'mobile']],
+          ['prd-v2', page.locator('#lsp-production-v2'), ['desktop']],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            await locator.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(300);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): лента табов в покое у нижней
+              // кромки снимка (планка-спинка по её границе — срез по кромке
+              // секции; лотерея растеризации 19.10 не проявлена).
+            });
+          }
+        }
+      },
+    );
+  },
+);
 
 // Тёмная секция why-us (T18.12): контейнерные эталоны канона whu — секция в
 // покое на desktop (1440 — топ строкой «заголовок + карточка 429px», ряд
