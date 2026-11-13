@@ -486,7 +486,7 @@ const BLOCK_PROBES = {
   'index-2.html': [
     // Вариант 2: те же блоки-семейства + мозаика employers.
     ['hero', '.hero', '.hro'],
-    ['production', '.production', '.cp-production'],
+    ['production', '.production', '.prd'],
     ['holding', '.holding', '.cp-holding'],
     ['employers', '.employers', '.lgo'],
     // T18.2: mentorship и капсула вакансий — каноны msh/vcp паттерн-слоя
@@ -505,7 +505,7 @@ const BLOCK_PROBES = {
   'index.html': [
     // Крючок слоя hro (T17.15): связка hero — паттерн-слой.
     ['hero', '.hero', '.hro'],
-    ['production', '.production', '.cp-production'],
+    ['production', '.production', '.prd'],
     ['directions', '.directions', '#directions'],
     ['holding', '.holding', '.cp-holding'],
     // Лента логотипов — связка lgo-grid (T17.9): проба на крючке слоя

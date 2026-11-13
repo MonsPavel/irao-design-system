@@ -1,10 +1,11 @@
 # Паттерн «Landing-секция» (T8.3)
 
 Правила сборки лендинг-секций из системных примитивов + mini-эталон из
-тринадцати секций (светлая / тёмная / с-изображением full-bleed /
+пятнадцати секций (светлая / тёмная / с-изображением full-bleed /
 с-фото-фоном — T17.3 / nav-карточки и лента логотипов — T17.9 / hero,
 adv-marquee, спец-сетка «Медиа», cover-hero — T17.15 / наставничество,
-капсула вакансий — T18.2 / тёмная секция «why-us» — T18.12).
+капсула вакансий — T18.2 / тёмная секция «why-us» — T18.12 / раскладки
+карусели production v1/v2 — T18.13).
 Эталон целиком: [`landing-section.html`](landing-section.html) — он же стенд
 `/showcase/dist/stands/patterns/landing-section.html` (генерируется
 `showcase/build.mjs`).
@@ -616,6 +617,100 @@ mobile-first (прецедент msh, T18.2):
   нет), правила сняты из `pilot.css` (~130 строк + ступени 1023/767);
   панель `cp-vacancy-search__*` — сайт-зона остаётся (T18.16).
 
+## Раскладки карусели «production» v1/v2 (prd, T18.13)
+
+Раскладки карусели «Производство» (порт `.cp-production` career-portal —
+блок 760↔760 байт-паритет errata 31.10 «приведи к оригиналу») поверх
+компонента **`ui-carousel`** (T17.7): поведение слайдов (модуль в dist) и
+вид элементов несёт компонент, слой несёт **раскладку секции** — позиции
+фото/тела/стрелок/ленты, облик табов сайт-зоны и модификаторы вариантов.
+Связка живёт в паттерн-слое (`dist/ui-patterns.css`, гейт префиксов
+`prd`); значения — принятый пилот 1:1 с источниками `production.css` в
+комментариях. Варианты — модификаторы оригинала: **`prd--v1`** (текст/
+кнопка — абсолютные координаты макета от 1280, лента табов внизу) и
+**`prd--v2`** (фото-центр + чипы сверху). Тон завода — оверлей `--tint`
+примитива `ui-section--photo` (solid primary 90% — хук
+`--ui-section-overlay-tint`, errata 31.10: `--glow`-градиент с z-index
+auto замирал текст слайда):
+
+```html
+<section class="ui-section ui-section--photo prd prd--v1 ui-carousel"
+         data-ui-carousel aria-labelledby="prd-title">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="factory.jpg" alt="" width="1600" height="900" loading="lazy">
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>
+  <img class="prd__photo ui-carousel__photo" src="worker.png"
+       alt="Сотрудник на производстве" width="585" height="674"
+       data-ui-carousel-photo loading="lazy">
+  <div class="prd__body ui-carousel__body">
+    <h2 class="prd__title ui-h2" id="prd-title" data-ui-carousel-title>Производство</h2>
+    <p class="prd__text ui-lead" data-ui-carousel-text>…</p>
+    <p><a class="ui-button ui-button--light prd__btn" href="/vacancies"
+          data-ui-carousel-link>Подробнее о вакансии</a></p>
+  </div>
+  <button class="prd__arrow prd__arrow--prev ui-carousel__arrow" type="button"
+          data-ui-carousel-prev hidden aria-label="Предыдущий слайд">…</button>
+  <button class="prd__arrow prd__arrow--next ui-carousel__arrow" type="button"
+          data-ui-carousel-next hidden aria-label="Следующий слайд">…</button>
+  <script type="application/json" data-ui-carousel-slides>…</script>
+  <ul class="prd__stepper ui-carousel__stepper" role="tablist"
+      aria-label="Направления производства" hidden>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button"
+        role="tab" aria-selected="true">
+      <span class="prd__tab-num">1</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Производство</span>
+        <span class="prd__tab-count">25 вакансий</span>
+      </span>
+    </button></li>…
+  </ul>
+</section>
+```
+
+| Слой | Что | Откуда |
+|---|---|---|
+| Секция | `.prd` — flex, тело прижато к низу, клип, min-height 760, ритм погашен; тинт — хук `--tint` (solid primary 90%) | паттерн-слой, порт `.cp-production` (production.css:3-6/28) |
+| Планка | `.prd::after` — белая спинка 17px под лентой, радиус сверху md, z 5 | паттерн-слой (production.css:189-200) |
+| Фото | `.prd__photo` — absolute top 71/left 43.5%, contain к низу; скрыто до lg (ступень пилота, mobile-first) | паттерн-слой (production.css:40-45 + pilot.css:1928) |
+| Тело | `.prd__body` — flex-колонка gap 24, max-width 545, padding 72/56, z 3 | паттерн-слой (production.css:55-64) |
+| Типографика | `.prd__title`/`.prd__text` — 48/18px «как есть», on-dark (override ролей); `.prd__btn` — caption/uppercase (ls 0.01em оригинала не переносится — пин errata) | паттерн-слой (production.css:66-93) |
+| Стрелки | `.prd__arrow[--prev/--next]` — 100×100 по краям, top 311, opacity .9→.6 под `(hover: hover)` | паттерн-слой (production.css:79-96/114) |
+| Лента | `.prd__stepper` — absolute внизу во всю ширину, высота 82, табы вплотную; `> li` — display: contents | паттерн-слой (production.css:228-235/97-103) |
+| Таб | `.prd__tab` — 20% ленты, заливка blue-100@30, без рамки; активный — 82px/радиус сверху/50%; номер — только у активного (круг 30) | паттерн-слой (production.css:130-163) |
+| v1 | `.prd--v1` — от 1280: тело блок на всю секцию, текст/кнопка absolute (55/78/430/523), номер/тело таба −8px; скоуп модификатором — как в оригинале | паттерн-слой (production.css:202-249) |
+| v2 | `.prd--v2` — min-height 740/stretch, фото left 22/top 72, тело вправо, шаги 26/24; чипы 59px radius 32 blur, заливка 50%, актив — primary-deep 90% + кольцо; чипы absolute справа сверху от lg, static-лента в базе | паттерн-слой (production.css:274-302/313) |
+
+- **Поверх ui-carousel** (T17.7): контент-слоты (`__photo`/`__body` +
+  роли `ui-h2`/`ui-lead`/`ui-button--light`) и контролы (стрелки/степпер
+  с `hidden` — разметка правдива без JS), данные слайдов —
+  `<script type="application/json" data-ui-carousel-slides>` (компонент
+  не ходит в сеть). Слой не дублирует вид компонента: cursor/font-family/
+  текст-выравнивание табов и display-переключение контролов
+  (`is-initialized`) — из `ui-carousel.css`. Рамка табов канона компонента
+  против заливок сайта — дельта канона REPORT §9.1 (PLAN P3-кандидат
+  `ui-carousel__tab--bar`) — **НЕ** решается связкой (Implementation
+  requirements T18.13 п.3 — отдельное решение владельца).
+- **Варианты — модификаторы разметки**: v1 — `prd prd--v1` (index), v2 —
+  `prd prd--v2` (index-2; в билде пилота ставит applyVariant2 — прецедент
+  build.py:589 оригинала «--v1 → --v2»). Скоуп v1-координат модификатором
+  снял артефакт пилота: блок @min-1280 был без скоупа и правила
+  перебрасывало и на v2 index-2 (тело absolute, чипы растянуты) —
+  рендер index (v1) при выносе не меняется.
+- **v2-дельты оригиналу синхронизированы при выносе**: заливка чипов 50%
+  (production.css:288 — в пилоте наследовалась база 30%), чипы ≤1023 —
+  static-лента оригинала (production.css:313 — фиксированные 700px
+  absolute пилота давали hscroll на 375), погашение bottom 0 ленты-базы.
+- **Мобильная база**: фото слайда скрыто до lg (ступень пилота max-1023,
+  инвертирована mobile-first); прочие лестницы оригинала
+  (production.css:301-334) пилот не вёз — не переносятся.
+- **VI-инвариант**: фото слайда — класс `__photo` (vi.css img:off прячет,
+  прецедент whu/msh); фон секции — `__bg` примитива.
+- Миграция из пилота career-portal: разметка `cp-production*` →
+  `prd[--v1|--v2]`/`prd__*` (поведение и слоты — ui-carousel), правила
+  сняты из `pilot.css` (~290 строк + ступень 1023); тинт — хук `--tint`
+  на секции (errata 31.10).
+
 ## A11y
 
 - Заголовок секции — h2 с ролью `ui-h2`; секция именована
@@ -666,5 +761,7 @@ mobile-first (прецедент msh, T18.2):
   гейт префиксов): `tests/unit/pattern-mentorship-capsule.test.js`.
 - Юнит-пины тёмной секции why-us (whu, hover-раскрытие — CSS-канон,
   синхронность дока и слоя, миграция пилота): `tests/unit/pattern-why-us.test.js`.
+- Юнит-пины раскладок карусели production (prd, поверх ui-carousel,
+  синхронность дока и слоя, миграция пилота): `tests/unit/pattern-production.test.js`.
 - Поверхность браузера (4 секции, computed on-dark-цвета, bleed-геометрия по
   вьюпортам, axe, адаптив, эталоны): `tests/e2e/pattern-landing-section.spec.js`.

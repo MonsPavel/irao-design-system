@@ -56,15 +56,15 @@ describe('build.mjs — пять фоновых секций на ui-section--ph
     expect(indexHtml).not.toContain('cp-hero__bg');
   });
 
-  it('production: модификатор + __bg + оверлей --tint; порядок слоёв bg → tint → контент', () => {
+  it('production: модификатор + __bg + оверлей --tint; порядок слоёв bg → tint → контент (T18.13 — канон prd слоя)', () => {
     expect(indexHtml).toMatch(
-      /<section class="ui-section ui-section--photo cp-production ui-carousel" data-ui-carousel>/,
+      /<section class="ui-section ui-section--photo prd prd--v1 ui-carousel" data-ui-carousel>/,
     );
-    const section = indexHtml.slice(indexHtml.indexOf('cp-production'));
+    const section = indexHtml.slice(indexHtml.indexOf('prd prd--v1'));
     expect(section.indexOf('ui-section__bg'), 'фон раньше оверлея').toBeLessThan(
       section.indexOf('ui-section__overlay ui-section__overlay--tint'),
     );
-    expect(section).toContain('cp-production__photo');
+    expect(section).toContain('prd__photo');
     expect(section).not.toContain('cp-production__glow');
     expect(section).not.toContain('cp-production__bg');
     // --tint без канон-правила «над контентом» (errata 31.10 — см. шапку):
@@ -142,12 +142,14 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     // hero — канон hro (T17.15): блок перенесён в паттерн-слой, пин — по слою.
     expect(blockOf(layerCss, '.hro'), '.hro найдено (слой, T17.15)').toBeTruthy();
     expect(blockOf(layerCss, '.hro'), '.hro: ритм ui-section погашен').toContain('padding: 0;');
-    for (const block of ['.cp-production', '.cp-company-banner']) {
-      expect(blockOf(pilotCss, block), `${block} найдено`).toBeTruthy();
-      expect(blockOf(pilotCss, block), `${block}: ритм ui-section погашен`).toContain(
-        'padding: 0;',
-      );
-    }
+    // production — канон prd (T18.13): блок перенесён в паттерн-слой, пин — по слою.
+    expect(blockOf(layerCss, '.prd'), '.prd найдено (слой, T18.13)').toBeTruthy();
+    expect(blockOf(layerCss, '.prd'), '.prd: ритм ui-section погашен').toContain('padding: 0;');
+    expect(blockOf(pilotCss, '.cp-company-banner'), '.cp-company-banner найдено').toBeTruthy();
+    expect(
+      blockOf(pilotCss, '.cp-company-banner'),
+      '.cp-company-banner: ритм ui-section погашен',
+    ).toContain('padding: 0;');
     // Errata 01.11 — ритм-батч: why-us 140/80 (why-us.css:3), holding
     // 72/48 (holding.css:3) — паритет высот compare (why 1350↔1350);
     // у holding остаток −75 = принятая дельта статов (T17.4, lh 1.1).
@@ -170,16 +172,21 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
 
   it('позиционирование корней сохранено (якорь absolute-слоёв)', () => {
     // hero — канон hro (T17.15): пин position — по слою. why-us — канон whu
-    // (T18.12): position несёт примитив ui-section--photo — слой его не
-    // переобъявляет (пин инварианта — по слою).
+    // (T18.12) и production — канон prd (T18.13): position несёт примитив
+    // ui-section--photo — слой его не переобъявляет (пин инварианта — по
+    // слою).
     expect(blockOf(layerCss, '.hro'), '.hro: position: relative (слой)').toContain(
       'position: relative;',
     );
     expect(
+      blockOf(layerCss, '.prd'),
+      'prd: position несёт примитив (не переобъявляется)',
+    ).not.toContain('position');
+    expect(
       blockOf(layerCss, '.whu'),
       'whu: position несёт примитив (не переобъявляется)',
     ).not.toContain('position');
-    for (const block of ['.cp-production', '.cp-holding', '.cp-company-banner']) {
+    for (const block of ['.cp-holding', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block}: position: relative`).toContain(
         'position: relative;',
       );
