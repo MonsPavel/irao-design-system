@@ -920,23 +920,11 @@
    разметка breadcrumbs() build.mjs несёт канон. Компонент отступов не
    получает (инвариант T4.7): ритм несёт шаблон. */
 
-.cp-page-head {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-3);
-  margin-bottom: var(--ui-space-6);
-}
-
-.cp-page-head--split {
-  flex-direction: row;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.cp-page-subtitle {
-  max-width: 48rem;
-  color: var(--ui-color-text-muted);
-}
+/* Обложка страниц — канон php паттерн-слоя (T18.10): пара cp-page-head/
+   cp-page-subtitle снята (шаг 12/низ 32 — «принято ДС» раундов T15; канон
+   1:1 оригинала ведёт шаг 16/низ 40 — components.css:39/40, подзаголовок
+   780px — components.css:61). Разметка build.mjs несёт классы php/php--
+   split/php-note/php-subtitle (слой — dist/ui-patterns.css). */
 
 /* ── career-track.html: три секции и кнопка обложки (T18.4) ──
    Позиционные хуки ctr- (конвенция не-cp имени сайт-зоны — прецедент stu-
@@ -965,8 +953,8 @@
 }
 
 /* Подзаголовок обложки — max-width 640px (pages.css:965; база
-   cp-page-subtitle 768px даёт 2 строки вместо трёх — 97px высоты). */
-.ctr-cover .cp-page-subtitle {
+   php-subtitle канона 780px даёт 2 строки вместо трёх — 97px высоты). */
+.ctr-cover .php-subtitle {
   max-width: 40rem;
 }
 
@@ -1205,9 +1193,9 @@
    для положения текстовой кнопки «Сбросить»; пилюля фильтра — модификатор
    ДС ui-select--pill (T17.12, шим .lpp-side__group .cp-pill снят —
    flex-basis в модификаторе нет, колонка панели растягивает сама).
-   cp-page-head — ритм страниц без канона в док-HTML (полное снятие —
-   adoption T17.14). Раскладка страницы: cp-vac-main — main-колонка с
-   findBar/chips/пагинацией (нет в списке снятия T17.1). */
+   Обложка страниц — канон php слоя (T18.10 — снятие пары cp-page-head/
+   cp-page-subtitle из сайт-зоны). Раскладка страницы: cp-vac-main —
+   main-колонка с findBar/chips/пагинацией (нет в списке снятия T17.1). */
 
 /* «Сбросить» — прижата к левому краю панели (оригинал .vac-side__reset
    align-self: flex-start, pages.css:101). Вид строки (fs 14/400, underline,
@@ -1439,7 +1427,7 @@ a.cp-intern-card {
    Позиционные хуки edu- (конвенция не-cp имени сайт-зоны — прецедент ctr-
    T18.4/stu- T18.1: ценз T17.16, семейства/allowlist не меняются). Каркасы —
    ДС/слой: обложка cvh (T17.15), фильтры lpp-filters (T17.12), теги
-   ui-tag--filter (T16.14), шапка cp-page-head--split, карточки ui-card,
+   ui-tag--filter (T16.14), шапка php--split (канон слоя, T18.10), карточки ui-card,
    заголовки/текст — роли; источник значений — .cover-hero (pages.css:953–
    967), .vac-filters (pages.css:14–20), .radio-row (components.css:217),
    .page-head (components.css:36–43), .cards-grid--3 (pages.css:11),
@@ -1466,8 +1454,8 @@ a.cp-intern-card {
 }
 
 /* Подзаголовок обложки — max-width 640px (pages.css:965; база
-   cp-page-subtitle 768px даёт 3 строки вместо 4 — 97px высоты). */
-.edu-cover .cp-page-subtitle {
+   php-subtitle канона 780px даёт 3 строки вместо 4 — 97px высоты). */
+.edu-cover .php-subtitle {
   max-width: 40rem;
 }
 
@@ -1500,15 +1488,12 @@ a.cp-intern-card {
   margin: 0 0 var(--ui-space-6);
 }
 
-/* Шапка «предложения + кнопка» (.page-head components.css:40): низ 40px
-   «как есть» (вне шкалы §3.2 — прецедент ленты lpp-filters 2.5rem); база
-   cp-page-head несёт 32. Кнопка не усаживается flex-рядом (flex-shrink 0 —
-   white-space: nowrap .btn components.css:41 оригинала; без пары кнопка
-   сжималась до 168px и переносила подпись в 2 строки — 66px вместо 52). */
-.edu-offer-head {
-  margin-bottom: 2.5rem;
-}
-
+/* Шапка «предложения + кнопка» — сайт-хук кнопки на split-обложке канона
+   php (T18.10): низ 40px несёт база канона (components.css:40 — был хук
+   .edu-offer-head, снят как дубликат базы). Кнопка не усаживается
+   flex-рядом (flex-shrink 0 — white-space: nowrap .btn components.css:41
+   оригинала; ui-button nowrap не несёт, без пары кнопка сжималась до 168px
+   и переносила подпись в 2 строки — 66px вместо 52). */
 .edu-offer-head .ui-button {
   flex-shrink: 0;
 }
@@ -1635,7 +1620,7 @@ a.cp-intern-card {
   background-color: var(--ui-color-surface-muted);
 }
 
-.int-cover .cp-page-subtitle {
+.int-cover .php-subtitle {
   max-width: 40rem; /* 640px pages.css:965 */
 }
 
@@ -2115,10 +2100,9 @@ a.cp-intern-card {
     grid-template-columns: 1fr;
   }
 
-  .cp-page-head--split {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  /* Обложка — канон php (T18.10): ступень 767 split снята — мобильная база
+     канона (.php--split колонка/прижато влево, инверсия components.css:46)
+     и так совпадает с оригиналом. */
 }
 
 /* Строка табов + ссылок разделов (tabs-pill оригинала — GAP: нет в ДС) */
@@ -2142,20 +2126,15 @@ a.cp-intern-card {
 
 /* companies.html: ритм грида сегментов. Секция — 40/40 (.section
    components.css:347) с гашением верхнего (inline companies.html:147 —
-   над шапкой ритм ведут крошки; прецедент .ctr-lead). Шапка — шаг 16/низ
-   40 (.page-head components.css:38/41 — против 12/32 базы cp-page-head;
-   прецедент .edu-offer-head). Заголовки сегментов — низ 32
+   над шапкой ритм ведут крошки; прецедент .ctr-lead). Шапка 16/40 — с
+   T18.10 база канона php (хук .cmp-head снят как дубликат базы — был
+   против 12/32 базы cp-page-head). Заголовки сегментов — низ 32
    (.section__title components.css:340). Сетки — шаг 36 (.cards-grid
    pages.css:9, «как есть» — прецедент .edu-offer-grid) + низ 48 (inline
    companies.html:153–196, margin-bottom: 48px). */
 .cmp-sec {
   padding-top: 0;
   padding-bottom: 2.5rem;
-}
-
-.cmp-head {
-  gap: 1rem;
-  margin-bottom: 2.5rem;
 }
 
 .cmp-title {
@@ -2167,12 +2146,13 @@ a.cp-intern-card {
   margin-bottom: var(--ui-space-7);
 }
 
-/* events.html: обложка cover-hero (pages.css:953–969) — паддинг 64/56,
-   шаг 20, фон blue-50, радиус --radius-card 16, без нижнего ритма (ниже
-   табы с mt 24 канона nvp); кнопка +16 сверх шага (pages.css:967);
-   подпись max-width 640px (pages.css:965). Форма — та же, что каркас
-   .ctr-cover T18.4 (cvh/cp-page-head + хук позиции); дубликат осознанный —
-   слияние хуков страниц треков и мероприятий вне Scope задачи. */
+/* events.html: обложка cover-hero (pages.css:953–969) — каркас cvh канона
+   (T17.15: align-items flex-start — база каркаса, кнопка не растягивается
+   на ширину обложки), хук формы .ev-cover: паддинг 64/56, шаг 20, фон
+   blue-50, радиус --radius-card 16; нижнего ритма каркас не несёт (ниже
+   табы с mt 24 канона nvp; отмена маргина базы cp-page-head снята вместе
+   с парой — T18.10); кнопка +16 сверх шага (pages.css:967); подпись
+   max-width 640px (pages.css:965) — хук на php-subtitle канона (T18.10). */
 .ev-sec {
   padding-top: 0; /* inline events.html:147 */
   padding-bottom: 2.5rem; /* .section components.css:347 */
@@ -2181,14 +2161,12 @@ a.cp-intern-card {
 .ev-cover {
   box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
   gap: 1.25rem; /* 20px pages.css:956 */
-  align-items: flex-start; /* pages.css:955 — кнопка не растягивается на ширину обложки */
-  margin-bottom: 0; /* cover-hero нижнего ритма не несёт — таблица pages.css:971 */
   padding: 4rem 3.5rem; /* 64/56 pages.css:957 */
   border-radius: var(--ui-radius-md); /* --radius-card = 16px */
   background-color: var(--ui-color-surface-muted); /* surface-blue-50 */
 }
 
-.ev-cover .cp-page-subtitle {
+.ev-cover .php-subtitle {
   max-width: 40rem; /* 640px pages.css:965 */
 }
 

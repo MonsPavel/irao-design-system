@@ -66,9 +66,10 @@ const eduFn = build.slice(
 describe('build.mjs — обложка education (T18.5 Goal: интро, education.html:147–165)', () => {
   it('каркас — канон cvh слоя (T17.15) с хуком формы сайта, прежний cp-page-head интро снят', () => {
     expect(eduHtml).toContain('<div class="cvh edu-cover">');
-    expect(eduHtml, 'page-head — прежний каркас без кнопки').not.toContain(
-      '<div class="cp-page-head">',
-    );
+    expect(
+      eduHtml,
+      'page-head — прежний каркас без кнопки (T18.10: обложки — php/cvh)',
+    ).not.toContain('<div class="cp-page-head">');
   });
 
   it('CTA обложки — ui-button--primary «смотреть все предложения» на каталог (оригинал education.html:152)', () => {
@@ -77,12 +78,12 @@ describe('build.mjs — обложка education (T18.5 Goal: интро, educat
     );
   });
 
-  it('заголовок/подзаголовок — текст оригинала (education.html:150–151), подзаголовок на паре cp-page-subtitle × ui-lead', () => {
+  it('заголовок/подзаголовок — текст оригинала (education.html:150–151), подзаголовок на паре php-subtitle × ui-lead × ui-text--muted (канон T18.10)', () => {
     expect(eduHtml).toContain('<h1 class="ui-page-title">Целевое обучение</h1>');
     expect(eduHtml).toContain(
       'Поступайте по целевому договору с компаниями Группы «Интер РАО»: отдельная квота при поступлении, стипендия от компании и гарантированное место работы после выпуска.',
     );
-    expect(eduHtml).toMatch(/class="cp-page-subtitle ui-lead"/);
+    expect(eduHtml).toMatch(/class="php-subtitle ui-lead ui-text--muted"/);
   });
 
   it('поднавигация разделов — subnav (tabs-pill оригинала, education.html:155–161)', () => {
@@ -128,8 +129,8 @@ describe('build.mjs — секция организаций #orgs (T18.5, educat
 });
 
 describe('build.mjs — секция предложений и преимуществ (T18.5, education.html:228–283)', () => {
-  it('шапка split — cp-page-head--split с кнопкой ui-button--outline «все предложения» (education.html:230–233)', () => {
-    expect(eduHtml).toContain('<div class="cp-page-head cp-page-head--split edu-offer-head">');
+  it('шапка split — split-обложка канона php (T18.10) с кнопкой ui-button--outline «все предложения» (education.html:230–233)', () => {
+    expect(eduHtml).toContain('<div class="php php--split edu-offer-head">');
     expect(eduHtml).toContain('<h2 class="ui-h2">Актуальные предложения о целевом обучении</h2>');
     expect(eduHtml).toContain(
       '<a class="ui-button ui-button--outline" href="education-catalog.html">все предложения</a>',
@@ -189,7 +190,7 @@ describe('compare.mjs — блок-пробы education (T18.5, практика
     expect(compare).toMatch(/'education\.html':\s*\[/);
     expect(compare).toContain("['edu-cover', '.cover-hero', '.edu-cover']");
     expect(compare).toContain("['edu-orgs', '#orgs', '#orgs']");
-    expect(compare).toContain("['edu-offers-head', '.page-head--split', '.edu-offer-head']");
+    expect(compare).toContain("['edu-offers-head', '.page-head--split', '.php--split']");
     expect(compare).toContain("['edu-company-hero', '.company-hero', '.edu-company-hero']");
     expect(compare).toContain("['edu-adv', '.adv-grid', '.cp-adv-grid']");
   });
@@ -207,7 +208,7 @@ describe('pilot.css — позиционные хуки edu- (T18.5 Scope: бе�
     expect(cover).toContain('gap: 1.25rem');
     expect(cover).toContain('var(--ui-color-surface-muted)');
     expect(cover).toContain('var(--ui-radius-md)');
-    expect(blockOf(pilotCss, '.edu-cover .cp-page-subtitle')).toContain('max-width: 40rem');
+    expect(blockOf(pilotCss, '.edu-cover .php-subtitle')).toContain('max-width: 40rem');
     expect(blockOf(pilotCss, '.edu-cover .ui-button')).toContain('margin-top: var(--ui-space-4)');
   });
 
@@ -228,8 +229,8 @@ describe('pilot.css — позиционные хуки edu- (T18.5 Scope: бе�
     expect(blockOf(pilotCss, '.edu-title')).toContain('margin: 0 0 var(--ui-space-6)');
   });
 
-  it('шапка предложений — низ 40 (.page-head components.css:40, против 32 базы cp-page-head); кнопка не усаживается flex-рядом (white-space: nowrap .btn components.css:41 — замер 05.11: усадка до 168px переносила подпись в 2 строки, 66px вместо 52); сетка offers — шаг 36 «как есть» (pages.css:11) + низ 48 (inline оригинала education.html:234)', () => {
-    expect(blockOf(pilotCss, '.edu-offer-head')).toContain('margin-bottom: 2.5rem');
+  it('шапка предложений — низ 40 несёт база канона php (T18.10, components.css:40; хук .edu-offer-head снят как дубликат базы); кнопка не усаживается flex-рядом (white-space: nowrap .btn components.css:41 — замер 05.11: усадка до 168px переносила подпись в 2 строки, 66px вместо 52); сетка offers — шаг 36 «как есть» (pages.css:11) + низ 48 (inline оригинала education.html:234)', () => {
+    expect(blockOf(pilotCss, '.edu-offer-head'), 'низ 40 — база php, хук снят').toBeNull();
     expect(blockOf(pilotCss, '.edu-offer-head .ui-button')).toContain('flex-shrink: 0');
     const grid = blockOf(pilotCss, '.edu-offer-grid');
     expect(grid).toContain('gap: 2.25rem');

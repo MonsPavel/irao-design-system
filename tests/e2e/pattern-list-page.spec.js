@@ -829,4 +829,47 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
       }
     },
   );
+
+  // Обложка страницы (T18.10): контейнерные эталоны канона php — база
+  // (колонка «заголовок → подзаголовок») и split (правая колонка «На сайте
+  // N вакансий», прижата к низу строки от md; мобильная база — колонка,
+  // инверсия @max-767 оригинала). Три снимка: база и split на desktop (1280
+  // — обе ступени канона) и split на mobile (375 — мобильная база; база на
+  // мобиле рендерится той же колонкой, отдельный снимок не несёт ступени).
+  standTest.describe('patterns/list-page: эталоны обложки php (T18.10, AC: ×3)', () => {
+    standTest(
+      'php-base/php-split — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const shots = [
+          ['php-base', page.locator('#lpp-cover > .php:not(.php--split)'), ['desktop']],
+          ['php-split', page.locator('#lpp-cover > .php--split'), ['desktop', 'mobile']],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): у обложки нет скруглённых
+              // карточек у правого среза снимка — лотерея растеризации
+              // (диагноз 19.10) на ней не проявлена.
+            });
+          }
+        }
+      },
+    );
+  });
 });

@@ -77,12 +77,12 @@ describe('build.mjs — обложка career-track (T18.4 Goal п.1)', () => {
     expect(trackHtml).not.toContain('ui-button--sm');
   });
 
-  it('заголовок/подзаголовок — текст оригинала (career-track.html:150–151), подзаголовок на паре cp-page-subtitle × ui-lead', () => {
+  it('заголовок/подзаголовок — текст оригинала (career-track.html:150–151), подзаголовок на паре php-subtitle × ui-lead × ui-text--muted (канон T18.10)', () => {
     expect(trackHtml).toContain('<h1 class="ui-page-title">Карьерные треки</h1>');
     expect(trackHtml).toContain(
       'Просмотрите карьерные траектории в компаниях Группы «Интер РАО»: от первой ступени до руководителя направления.',
     );
-    expect(trackHtml).toMatch(/class="cp-page-subtitle ui-lead"/);
+    expect(trackHtml).toMatch(/class="php-subtitle ui-lead ui-text--muted"/);
   });
 
   it('поднавигация разделов — subnav (tabs-pill оригинала, career-track.html:155–161)', () => {
@@ -205,7 +205,7 @@ describe('pilot.css — позиционные хуки ctr- (T18.4 Scope: бе�
     expect(cover).toContain('gap: 1.25rem');
     expect(cover).toContain('var(--ui-color-surface-muted)');
     expect(cover).toContain('var(--ui-radius-md)');
-    expect(blockOf(pilotCss, '.ctr-cover .cp-page-subtitle')).toContain('max-width: 40rem');
+    expect(blockOf(pilotCss, '.ctr-cover .php-subtitle')).toContain('max-width: 40rem');
     expect(blockOf(pilotCss, '.ctr-cover .ui-button')).toContain('margin-top: var(--ui-space-4)');
   });
 

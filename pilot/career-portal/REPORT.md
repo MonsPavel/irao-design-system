@@ -853,7 +853,7 @@ white); index-2: why-us и #vacancies сняты, `.stu-photo--v2` 778 ↔ 778
 | строка вакансии + сайдбар | снято — канон `lpp-row/lpp-side` слоя | T17.1 |
 | таймлайн | снято — канон `tlp-*` слоя | T17.10 |
 | ритм крошек | снято — `lpp-breadcrumbs` | T17.1 |
-| page-head/subtitle | **осталось** — ритм страниц списков (ddp-канон детальных их не покрывает) | остаток ценза п.3 |
+| page-head/subtitle | **снято T18.10 — канон `php` слоя** (`php/php--split/php-note/php-subtitle`; дубликаты базы сняты — `.cmp-head`, низ `.edu-offer-head`) | T18.10 |
 | каркасы шапки/подвала | снято — каноны `hsp`/`ftp`; бренд-строки (VI-пилюля 15px, лого 105, hover-accent футера) — остались тон-строками | T17.13 |
 | композиция детальной страницы | снято — канон `dpp` (+`--card/--article`, `dpp-hero/dpp-where`) | T17.14 |
 | find-bar / фильтры каталогов | снято — `lpp-find`/`lpp-filters` + `ui-select--pill` | T17.12 |
@@ -888,6 +888,8 @@ ui-stat/ui-carousel/ui-section--photo/ui-card); 17 — ритм/раскладк
 `adv-grid`, `events-feature`, `directions`, `catalog-nav`, `events-nav`,
 `media-toolbar`, `vac-main`, `team`, `company-stats`, `company-adv`,
 `company-title`, `dir-modal`, `tabs-row`, `tabs-links`).
+**Errata T18.10**: `page-head`/`page-subtitle` ушли из allowlist (вынос
+обложки страниц в слой — канон `php`); семейств ценза 29 → 27.
 
 **Количественная цель эпика — итог:**
 
@@ -1680,3 +1682,113 @@ pilot-education/pilot-internships/poster-card — прецедент T18.3–T18
 билда слой не трогает — docker-прогон не даёт диффов снимков, дифф-лист
 пуст, пересъём по списку не требуется (урок 31.10: пересъём — только по
 дифф-списку артефакта).
+
+## T18.10 — Макро-вынос: page-head/page-subtitle → паттерн-слой (13.11)
+
+Спека: `docs/ui-system/epics/EPIC-18-macro-parity/T18.10-page-head-layer.md`.
+
+Обложка внутренних страниц вынесена в паттерн-слой каноном `php`
+(patterns/patterns.css, гейт префиксов расширен — `php`): обёртка `.php`
+(колонка, шаг 16 — components.css:39, низ 40 «как есть» — components.css:40,
+вне шкалы §3.2), модификатор `.php--split` (правая колонка «На сайте N
+вакансий»), `.php-note` (flex: none — pages.css:31) и `.php-subtitle`
+(max-width 780px «как есть» — components.css:61). Типографика слой не
+дублирует — роли: заголовок `ui-page-title` (T14.2 — та же тройка, что
+.page-title оригинала; дельта семейства — раскладка обёртки, её несёт php),
+подзаголовок — пара `ui-lead` + `ui-text--muted`, нота — `ui-body` +
+`ui-text--muted` (fs-body/color — pages.css:31; прежний пин разметки
+`ui-small` расходился с оригиналом — снят). Док-разделы «обложка страницы» —
+patterns/list-page (#lpp-cover) и patterns/detail-page (#dpp-cover) —
+источник правды (пин синхронности tests/unit/pattern-page-head.test.js;
+гейт php — patterns-layer.test.js/patterns-layer-gate.mjs).
+
+**Эффективные значения --split (находка пробы).** У оригинала `.page-head--split`
+описан дважды: components.css:43 (шаг 16, mobile ≤767 — flex-start из
+components.css:46) и pages.css:24–29 (грузится последним и выигрывает
+каскад): **шаг 24px** (pages.css:28), **align-items: flex-end на всех
+ширинах** (pages.css:26 — components.css:46 со своим flex-start перебит).
+Канон переносит рендер одобренного дизайна: `.php--split` несёт gap 1.5rem +
+flex-end в мобильной базе (колонка), ступень md (768, шкала T2.5) меняет
+только направление. Проба подтвердила байт-паритет: vacancies/education
+split-head h 131/132 desktop и 174/168 mobile — Δ0 в обеих ширинах (с
+каноном components.css было Δ8 на мобиле). Гранула 32px-гейта T3.6: в
+ступени md ноте разрешена усадка (`flex-shrink: 1` + `min-width: 0` на
+`.php--split .php-note` — прецеденты `.lpp-row__main`/overflow-wrap:
+anywhere; wrap-гранула на строке отвергнута — max-content пары
+«заголовок + кнопка» шапки предложений education уводит её на вторую
+строку уже на одобренных ширинах); на одобренных ширинах строка не
+переполняется — усадка не активируется.
+
+**Снятие из сайт-зоны.** Разметка build.mjs — на каноне: vacancies
+(`php php--split` + `php-note`), education-catalog/media/events-search
+(`php`), education (шапка предложений `php php--split edu-offer-head`),
+companies (`php`); подзаголовки обложек лендингов career-track/internships/
+practices/events — `php-subtitle` на каркасе cvh (cover-hero — отдельная
+сущность, лендинги не сломаны: обложка events переведена с cp-page-head на
+каркас cvh — `.ev-cover` больше не гасит ритм базы и не переобъявляет
+align — база cvh несёт flex-start; рендер прежний). Пары cp-page-head/
+cp-page-subtitle сняты из pilot.css вместе с дубликатами базы канона:
+`.cmp-head` (шаг 16/низ 40 — теперь база php) и низ `.edu-offer-head`
+(остался хук кнопки `.edu-offer-head .ui-button { flex-shrink: 0 }` —
+ui-button nowrap не несёт, прецедент REPORT T18.5). Ступень 767
+`.cp-page-head--split` снята (мобильная база канона).
+
+**Сопутствующая правка (текст 1:1)**: подпись companies — «Работодатели
+Группы «Интер РАО» — …» заменена на текст оригинала companies.html:151
+(«Компании Группы «Интер РАО». Клик по названию откроет страницу компании
+в новой вкладке.») — проба обложки на мобиле расходилась на Δ25 из-за
+другой длины текста; дисциплина «текст 1:1» — прецедент T18.9 (events).
+
+**Ценз**: семейства `page-head`/`page-subtitle` ушли из allowlist (судьба
+«вынос в слой», §11.4 выше): семейства 29 → **27**, селекторы 166 → **158**
+(3 базы + 1 ступень 767 + 4 хука подзаголовков обложек), сырые 2272 →
+**2250**, код 1297 → **1269**. Потолки-пороги НЕ двигаются (файл сжался;
+прецедент T17.18 «пороги не двигаются»), факт-пины переписаны
+(pilot-census-gate — errata-цепочка в шапке census.mjs и теста; соседние
+пины pilot-education/pilot-tail-parity/pilot-career-track/pilot-internships/
+pilot-mentorship-capsule/pilot-students-photographic — прецедент errata
+T18.3–T18.9; пины T17.1/T17.14 в patterns-layer.test.js инвертированы:
+«cp-page-head снят на канон php»).
+
+**Пробы (AC) — 15 страниц**: `.zcode/accept-t1810-page-head.mjs`
+(оригинал = live Pages ↔ пилот локально, 1440 + 375): гейт семейства
+page-head/page-title — vacancies/companies/media/education-catalog/
+events-search/education(split)/article/vacancy/event/internship —
+**Δ0 на обеих ширинах (30/30 пар)**. Обложки лендингов cvh (INFO, вне
+порта задачи): desktop Δ0 (career-track 399, internships 432, practices
+399, events 399, education 432); на мобиле Δ14 на education/events —
+перенос CTA ui-button на длинных подписях (h 66 против 52 оригинала:
+.fix высота 52px fixed + nowrap components.css:70–71, ДС ui-button —
+min-height с переносом, T14.3) — компонентная геометрия вне Scope T18.10
+(кнопка в задаче не менялась), находка записана в бэклог (T18.17/
+решение владельца).
+
+**Пин-тест (TDD красный → зелёный):** tests/unit/pattern-page-head.test.js
+— 11 пинов (значения канона 1:1 с источниками; гейт php; синхронность
+док ↔ слой обоих доков; разметка/пилот/снятие cp-пар; переадресация хуков
+обложек на php-subtitle; allowlist без page-head/page-subtitle) — красный
+11/11 до реализации, зелёный после. Эталоны php — element-снимки
+(php-base--desktop / php-split--desktop / php-split--mobile) — сняты в
+контейнере (ADR-0004), дифф-лист кроме них: lpp-branch-subnav--desktop/
+mobile — AA-фаза растеризации (±4 байта PNG, класс «лотереи», диагноз
+19.10), lpp-правила не тронуты.
+
+**Приёмка.** Гейты: `npm run lint` 0 (css/js/format/html); `npm run
+test:unit` — **2291 passed** (89 файлов); `node pilot/career-portal/census.mjs`
+— гейт OK (2250 строк / код 1269, 27 семейств, allowlist 29);
+`node tools/test-docker.mjs` (полный chromium-проект) — **649 passed /
+1 skipped**, exit 0 (+1 — тест эталонов php); compare-прогон 13.11
+(финальный билд) — **exit 0**: гейты до браузеров зелёные (ссылки 43
+страницы / 0 DEAD, ценз 0 новых cp-блоков), консоль-ошибок пилота 0 на
+43 страницах (compare.json pilotConsoleErrors). docHeight (оригинал →
+пилот) страниц обложек: vacancies 3224 → 3048, companies 3127 → 3075
+(−52 — без движения T18.9), media 1764 → 1780 (+16 — шаг 16/низ 40
+канона), education-catalog 1663 → 1663 (**Δ0 — остаток −12 T18.9 закрыт
+шагом/низом канона**), events-search 1601 → 1651 (+50 — в пороге ≤60
+T18.9; +8 — низ 40 канона), education 3940 → 3967, events 3104 → 3051
+(−53 — без движения), обложки cvh career-track/internships/practices
+2906/5571/5609 — без движения. Эталоны php ×3 (php-base--desktop /
+php-split--desktop / php-split--mobile) зелёные; дифф-лист пересъёма по
+протоколу ADR-0004: detail-page fullPage ×3 (док-раздел обложки удлинил
+стенд) + lpp-branch-subnav ×2 (AA-фаза, ±4 байта PNG) — пересняты в
+контейнере.

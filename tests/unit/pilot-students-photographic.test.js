@@ -327,9 +327,9 @@ describe('ценз T17.16 — семейство stu- не создаёт cp-с�
     );
   });
 
-  it('пороги семейств не тронуты (MAX_CP_FAMILIES 30; allowlist — errata T18.3: +company-feed, 31)', () => {
+  it('пороги семейств не тронуты (MAX_CP_FAMILIES 30; allowlist — errata T18.3: +company-feed, errata T18.10: −page-head/−page-subtitle, 29)', () => {
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(29);
     expect(ALLOWED_CP_FAMILIES, 'семейство students в allowlist не появляется').not.toContain(
       'students',
     );

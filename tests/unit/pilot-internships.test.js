@@ -99,8 +99,8 @@ describe('pilot.css — хуки обложки int-cover (pages.css:953–967, 
     expect(css).toContain('border-radius: var(--ui-radius-md)');
   });
 
-  it('подзаголовок max-width 640 (pages.css:965), кнопка +16 к шагу (pages.css:967)', () => {
-    expect(blockOf(pilotCss, '.int-cover .cp-page-subtitle')).toContain('max-width: 40rem');
+  it('подзаголовок max-width 640 — хук на php-subtitle канона (pages.css:965, T18.10), кнопка +16 к шагу (pages.css:967)', () => {
+    expect(blockOf(pilotCss, '.int-cover .php-subtitle')).toContain('max-width: 40rem');
     expect(blockOf(pilotCss, '.int-cover .ui-button')).toContain('margin-top: var(--ui-space-4)');
   });
 

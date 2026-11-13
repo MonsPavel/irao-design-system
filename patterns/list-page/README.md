@@ -25,6 +25,7 @@
 |---|---|---|
 | Крошки | `ui-breadcrumbs` | T4.7; текущая страница («Вакансии») — `span` + `aria-current="page"`; вертикальный ритм — обвязка `lpp-breadcrumbs` (T14.5, ниже) |
 | page-head | h1 (`ui-page-title`) + счётчик + lead (`ui-lead`) | счётчик — `aria-live="polite"`; h1 — цель фокуса (`tabindex="-1"`) |
+| Обложка страницы (T18.10) | связка `php` / `php--split` / `php-subtitle` / `php-note` + роли `ui-page-title`, `ui-lead`, `ui-body`, `ui-text--muted` | раскладка обёртки 1:1 (`.page-head` career-portal components.css:36–47: шаг 16, низ 40; `--split` — правая колонка «На сайте N вакансий» прижата к низу от md, мобильная база — колонка); раздел стенда — `#lpp-cover` |
 | Панель фильтров | `select` в пилюлях + `ui-button` | GET-форма: без JS — кнопкой «Применить»; с JS — `IraoUI.select` (wrap-режим), UX тот же |
 | Выдача | `ui-grid--3` + `ui-card--hover ui-card--link` + `ui-tag` | карточка-ссылка T4.4, теги T4.3; вариант «строками» — ниже (T14.10) |
 | Выдача строками (T14.10) | `ui-card--hover` + связка `lpp-row` + CTA `ui-button--pill` (T14.4) | заголовок выдачи — h2, строки — article с h3-ссылкой; демо-модалка отклика — `ui-modal` |
@@ -84,6 +85,45 @@
 (Technical considerations T8.1). `tabindex="-1"` на h1 — цель фокуса после
 применения фильтра. Роль h1 — `ui-page-title` (T14.2): шкала h2 при теге h1,
 как `.page-title` career-portal.
+
+### Обложка страницы: связка php (T18.10)
+
+Обложка внутренних страниц — раскладка обёртки «заголовок → подзаголовок» в
+паттерн-слое (T18.10, точка расширения list-page/detail-page): шаг 16px и
+низ 40px — 1:1 порт `.page-head` career-portal (`components.css:36–41`;
+40px вне шкалы отступов §3.2 — перенос «как есть»). Вариант `php--split`
+несёт правую колонку «На сайте N вакансий» — **эффективные** значения
+оригинала (`pages.css:24–29`, грузится после components.css и выигрывает
+каскад): шаг 24px (`pages.css:28`), прижатие к низу строки/правому краю
+`align-items: flex-end` на всех ширинах (`pages.css:26` — перебивает
+`components.css:46` со своим flex-start); строка — от md
+(`components.css:43`, инверсия mobile-first), мобильная база — колонка;
+усадку ноты гасит `php-note` (`flex: none` — `pages.css:31`).
+Типографика — роли base (слой её не дублирует): заголовок —
+`ui-page-title`, подзаголовок — пара `ui-lead` + `ui-text--muted` (цвет
+muted слой не переобъявляет), ширина подзаголовка 780px — `php-subtitle`
+(`components.css:61`, «как есть»). Обложка лендинга — отдельная сущность
+(cover-hero, `cvh`-канон T17.15) — обложкой страниц не является.
+
+```html
+<div class="php php--split">
+  <div>
+    <h1 class="ui-page-title">Вакансии</h1>
+    <p class="php-subtitle ui-lead ui-text--muted">
+      Открытые вакансии компаний Группы «Интер РАО» — от производственных до офисных направлений.
+    </p>
+  </div>
+  <span class="php-note ui-body ui-text--muted">На сайте 250 вакансий</span>
+</div>
+```
+
+```css
+.php { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--ui-space-4); margin-bottom: 2.5rem; } /* шаг 16 / низ 40 — components.css:39/40 */
+.php--split { flex-direction: column; gap: 1.5rem; align-items: flex-end; justify-content: space-between; } /* база: ≤767 колонка — components.css:46; шаг/прижатие — pages.css:26–28 */
+@media (min-width: 768px) { .php--split { flex-direction: row; } .php--split .php-note { flex-shrink: 1; min-width: 0; } } /* от md: components.css:43; усадка ноты — гранула 32px-гейта T3.6 */
+.php-note { flex: none; } /* pages.css:31 */
+.php-subtitle { max-width: 48.75rem; } /* 780px — components.css:61 */
+```
 
 ### Панель фильтров: GET-форма, select-пилюли
 

@@ -1,12 +1,13 @@
 /**
  * Гейт селекторов паттерн-слоя (T17.1, Implementation requirements п.2 —
  * «stylelint-правило/проверка в сборке»): селекторы слоя — только
- * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp
+ * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php
  * (lnk-/lgo- — лендинг-связки nav-карточек и ленты логотипов, T17.9; tlp- —
  * таймлайн, T17.10; nvp — поднавигация разделов, T17.11; hsp-/ftp- — каркасы
  * шапки/подвала, T17.13; hro/mrq/mdl/cvh — лендинг-композиции hero/adv-marquee/
  * медиа-сетки/cover-hero, T17.15; pstr — постерная карточка, T17.18; msh —
- * наставничество, vcp — капсула вакансий, T18.2; потомки —
+ * наставничество, vcp — капсула вакансий, T18.2; php — обложка страницы,
+ * T18.10; потомки —
  * компоненты ui-*), ID и чужие namespace-крючки запрещены — защита от
  * превращения слоя в свалку.
  *
@@ -75,31 +76,32 @@ export function patternLayerProblems(css) {
 
   for (const selector of selectors) {
     const hooks = selector.match(/\.[a-z][a-z0-9_-]*/g) ?? [];
-    // Блок-классы таймлайна (tlp, T17.10), поднавигации (nvp, T17.11) и
+    // Блок-классы таймлайна (tlp, T17.10), поднавигации (nvp, T17.11),
     // лендинг-композиций (mrq/mdl/cvh, T17.15; hro — голый блок с BEM-
-    // элементами __*, по образцу dpp) — голые `tlp`/`nvp`/`mrq`/`mdl`/`cvh`/
-    // `hro` (примеры спек), у остальных паттернов блок несёт суффикс
+    // элементами __*, по образцу dpp) и обложки страницы (php, T18.10) —
+    // голые `tlp`/`nvp`/`mrq`/`mdl`/`cvh`/`hro`/`php` (примеры спек),
+    // у остальных паттернов блок несёт суффикс
     // (lpp-row; pstr-card — постерная карточка, T17.18): префикс обязан
     // продолжаться дефисом, модификатором __ или закончиться на нём.
     if (
       !hooks.some((hook) =>
-        /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp)(?:-|__|$)/.test(
+        /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php)(?:-|__|$)/.test(
           hook,
         ),
       )
     ) {
       problems.push(
-        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp: «${selector}»`,
+        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php: «${selector}»`,
       );
     }
     for (const hook of hooks) {
       if (
-        !/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp)(?:-|__|$))/.test(
+        !/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php)(?:-|__|$))/.test(
           hook,
         )
       ) {
         problems.push(
-          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp + ui-потомки)`,
+          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php + ui-потомки)`,
         );
       }
     }

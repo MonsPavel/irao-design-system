@@ -13,7 +13,7 @@
  *  - подключение ОПЦИОНАЛЬНО: ui-core.min.css не меняется; порядок в <head>:
  *    токены → core → patterns → сайт;
  *  - селекторы слоя — только канонические префиксы
- *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|pstr- (гейт «защита от
+ *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|pstr-|php (гейт «защита от
  *    превращения слоя в свалку»); док-HTML паттернов и слой синхронны
  *    (одни классы);
  *  - слой не содержит @media-ступеней, кроме канонических ступеней паттернов
@@ -63,7 +63,14 @@ const PATTERN_SOURCES = {
 /** Поднавигация разделов (T17.11): канон nvp — тот же док-источник list-page
  *  (страницы разделов — списки), отдельная пара для синхронности «разметка ↔
  *  слой» (блок-класс — голый `nvp`, пример спеки T17.11). */
-const PATTERN_SOURCE_EXTRA = [['patterns/list-page/list-page.html', 'nvp']];
+const PATTERN_SOURCE_EXTRA = [
+  ['patterns/list-page/list-page.html', 'nvp'],
+  // Обложка страницы (T18.10): канон php — точка расширения list-page/
+  // detail-page (док-раздел «обложка страницы» в обоих доках несёт один и
+  // тот же API: php/php--split/php-note/php-subtitle).
+  ['patterns/list-page/list-page.html', 'php'],
+  ['patterns/detail-page/detail-page.html', 'php'],
+];
 
 /** Крючки слоя без разметки в доке (осознанные, с обоснованием — по образцу
  *  MARKERS_WITHOUT_RULES, обратное направление: правило слоя без класса в
@@ -167,25 +174,26 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
-      // Блок-классы таймлайна (tlp, T17.10), поднавигации (nvp, T17.11) и
+      // Блок-классы таймлайна (tlp, T17.10), поднавигации (nvp, T17.11),
       // лендинг-композиций (mrq/mdl/cvh, T17.15; hro — по образцу dpp:
-      // голый блок с BEM-элементами __*) — голые, без суффикса: префикс
-      // продолжается дефисом, модификатором __ или заканчивается на нём.
+      // голый блок с BEM-элементами __*) и обложки страницы (php, T18.10) —
+      // голые, без суффикса: префикс продолжается дефисом, модификатором __
+      // или заканчивается на нём.
       expect(
         hooks.some((hook) =>
-          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp)(?:-|__|$)/.test(
+          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php)(?:-|__|$)/.test(
             hook,
           ),
         ),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp`,
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp)(?:-|__|$))/.test(
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php)(?:-|__|$))/.test(
             hook,
           ),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
@@ -948,10 +956,14 @@ describe('пилот career-portal: слой подключён, ваканси�
     );
   });
 
-  it('cp-page-head не снимается (канона в док-HTML нет — T17.14); find-bar снят на канон lpp-find (T17.12)', () => {
-    expect(pilotCss, 'page-head — ритм страниц, полное снятие в adoption').toContain(
-      '.cp-page-head',
+  it('cp-page-head снят на канон php слоя (T18.10 — обложка страницы); find-bar снят на канон lpp-find (T17.12)', () => {
+    expect(build, 'обложка — разметка канона php слоя (T18.10): split-обложка вакансий').toContain(
+      '<div class="php php--split">',
     );
+    expect(
+      pilotCss,
+      'пара cp-page-head снята (T18.10 — канон в слое, не в сайт-зоне)',
+    ).not.toContain('.cp-page-head');
     expect(pilotCss, 'find-bar переведён на канон слоя (T17.12)').not.toContain('.cp-find-bar');
     expect(
       build,
@@ -1180,8 +1192,11 @@ describe('пилот career-portal: детальные страницы на dpp
     expect(compare).not.toContain("pilot: '.cp-vacancy-page__section h2'");
   });
 
-  it('cp-page-head остаётся (страницы списков — вне Scope T17.14; пин T17.1)', () => {
-    expect(pilotCss).toContain('.cp-page-head');
+  it('cp-page-head снят на канон php слоя (T18.10 — обложка страницы; пин T17.1 инвертирован)', () => {
+    expect(pilotCss).not.toContain('.cp-page-head');
+    expect(build, 'обложка страниц — разметка канона php слоя (T18.10)').toContain(
+      'class="php-subtitle ui-lead ui-text--muted"',
+    );
   });
 });
 
