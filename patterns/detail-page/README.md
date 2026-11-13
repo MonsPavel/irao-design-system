@@ -26,6 +26,7 @@
 | Крошки | `ui-breadcrumbs` | T4.7; микроразметка BreadcrumbList, текущая — `span` + `aria-current="page"`; вертикальный ритм — обвязка `dpp-breadcrumbs` (T14.5, ниже) |
 | Контентная колонка | `dpp` (+ `dpp--card`) | T17.14: flex-колонка gap 32 (`.internship__main` pages.css:544); карточная форма вакансии — модификатор `--card` (паддинг/радиус/поверхность) с ритмом колонки 40px (`.vacancy-page` pages.css:258 — T18.8) |
 | Шапка-тройка | h1 (`ui-page-title`) + зарплата (`dpp__salary`) + место (`dpp__place`) + теги (`ui-tag`) + мета | T17.14: колонка gap 8 (`dpp__head`); на вакансии — 12px (`.vacancy-page__head` pages.css:260, T18.8); зарплата — литерал 18px канона (T16.13-mapping, НЕ роль); мета — `ui-small ui-text--muted`; дата — `<time datetime>` |
+| Обложка страницы (T18.10) | связка `php` / `php--split` / `php-subtitle` / `php-note` + роли `ui-page-title`, `ui-lead`, `ui-body`, `ui-text--muted` | точка расширения (док-раздел `#dpp-cover`): раскладка обёртки 1:1 (`.page-head` career-portal components.css:36–47: шаг 16, низ 40; `--split` — правая колонка «На сайте N вакансий» прижата к низу от md, мобильная база — колонка); шапку-тройку контентной колонки не заменяет |
 | Фото/медиа | `dpp__photo` / `dpp__media` | T17.14: фото 420/260 по ступеням md (кадрирует `ui-image--cover`); слот медиа (карта-заглушка) — 320px (`.vacancy-page__map` pages.css:315, T18.8), содержимое — сайт |
 | Секции | h2 (`ui-h4`) + `dpp__section` | уровень тега — семантика страницы, роль — вид; база — шаг 8px, на вакансии — 16px (`.vacancy-page__section` pages.css:285–289, T18.8) |
 | Foot | `dpp__foot` | T17.14/T18.8: «дата — CTA» по краям (space-between, шаг 24 — pages.css:342) без разделителя (errata T18.8 — оригинал pages.css:338–343); мобильная база — колонка, строка от md |
@@ -66,6 +67,34 @@ DOM-порядок = смысловой (Accessibility requirements): крошк
 
 Крошки — в DOM раньше page-head (см. «Порядок чтения» ниже); то же правило
 ритма в сборках списка (T8.1) и формы (T8.3) — копируется вместе с ними.
+
+### Обложка страницы: связка php (T18.10)
+
+Точка расширения детальной страницы — обложка внутренних страниц, связка
+`php` паттерн-слоя (T18.10; док-раздел стенда — `#dpp-cover`): раскладка
+обёртки «заголовок → подзаголовок» 1:1 порт `.page-head` career-portal
+(`components.css:36–41` — шаг 16, низ 40; вне шкалы отступов §3.2 — перенос
+«как есть»). Вариант `php--split` несёт правую колонку «На сайте N вакансий»:
+строка с прижатием к низу (`align-items: flex-end`, `components.css:43`) от
+md, мобильная база — колонка с прижатием влево (инверсия `@max-767`,
+`components.css:46`); усадку ноты гасит `php-note` (`flex: none` —
+`pages.css:31`). Типографика — роли base: заголовок — `ui-page-title`
+(T14.2), подзаголовок — пара `ui-lead` + `ui-text--muted`, ширина 780px —
+`php-subtitle` (`components.css:61`, «как есть»). Шапка-тройка контентной
+колонки (`dpp__head`, T17.14) — другая сущность: обложку не заменяет.
+Обложка лендинга — cover-hero (`cvh`-канон T17.15).
+
+```html
+<div class="php php--split">
+  <div>
+    <h1 class="ui-page-title">Вакансии</h1>
+    <p class="php-subtitle ui-lead ui-text--muted">
+      Открытые вакансии компаний Группы «Интер РАО» — от производственных до офисных направлений.
+    </p>
+  </div>
+  <span class="php-note ui-body ui-text--muted">На сайте 250 вакансий</span>
+</div>
+```
 
 ### Контентная колонка dpp (T17.14)
 

@@ -14,8 +14,9 @@
  * (лендинг-связки nav-карточек и ленты логотипов, T17.9), tlp- (таймлайн,
  * T17.10), nvp (поднавигация, T17.11), hsp-/ftp- (каркасы шапки/подвала,
  * T17.13), hro/mrq/mdl/cvh (лендинг-композиции hero/adv-marquee/медиа-сетки/
- * cover-hero, T17.15), pstr- (постерная карточка, T17.18); потомки —
- * компоненты ui-*. Список пополняют задачи эпика, не руками сайтов.
+ * cover-hero, T17.15), pstr- (постерная карточка, T17.18), msh/vcp
+ * (наставничество/капсула вакансий, T18.2), php (обложка страницы, T18.10);
+ * потомки — компоненты ui-*. Список пополняют задачи эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
  * несёт те же классы, значения перенесены 1:1 (включая «как есть»-литералы
@@ -831,6 +832,72 @@
 .fpp-branch-body {
   box-sizing: border-box;
   margin-top: var(--ui-space-5);
+}
+
+/* ════════════════ Обложка страницы (T18.10) — связки php ════════════════
+ *
+ * Порт обложки внутренних страниц career-portal: .page-head /
+ * .page-head--split (components.css:36–47), правая колонка --split
+ * «На сайте N вакансий» (.page-head__note pages.css:31) и подзаголовок
+ * .page-subtitle (components.css:57–62) — точка расширения list-page/
+ * detail-page/landing (обложка есть на ~15 страницах клона; док-разделы
+ * «обложка страницы» — patterns/list-page, patterns/detail-page; пин
+ * синхронности — tests/unit/pattern-page-head.test.js).
+ *
+ * Типографика обложки слой не дублирует — роли base: заголовок —
+ * ui-page-title (T14.2: та же тройка, что .page-title career-portal —
+ * fs-h2/weight/lh/трекинг -0.02em; дельта семейства — раскладка обёртки,
+ * её несёт php), подзаголовок — ui-lead (fs-lead/lh-lead components.css:58–59)
+ * + ui-text--muted (color components.css:60 — слой цвет не переобъявляет,
+ * прецедент dpp__place), нота — ui-body + ui-text--muted (fs-body/color
+ * pages.css:31). Лендинги стажировок — НЕ потребители: обложка лендинга —
+ * cover-hero (cvh-канон, T17.15), её подзаголовок 640px (pages.css:965) —
+ * сайт-хук поверх php-subtitle (прецедент .ctr-cover).
+ */
+
+/* Обёртка обложки: колонка «заголовок → подзаголовок». Шаг 16px —
+   --ui-space-4 (gap components.css:39); низ 40px «как есть» (components.css:40,
+   вне шкалы §3.2 — прецедент ленты lpp-filters 2.5rem). box-sizing на корне
+   связки — ADR-0002. */
+.php {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-4);
+  margin-bottom: 2.5rem;
+}
+
+/* --split (правая колонка «На сайте N вакансий»): мобильная база — колонка
+   с прижатием влево (components.css:46 — оригинал @max-767, инверсия
+   mobile-first ДС); space-between из components.css:43 несётся и в колонке
+   ≤767 (оригинал в ступени его не меняет) — перенос 1:1. От md — строка с
+   прижатием правой колонки к низу (components.css:43; ступень 768 шкалы
+   T2.5 — тот же рендер, что max-width: 767 оригинала). */
+.php--split {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .php--split {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+}
+
+/* Правая колонка --split не усаживается (flex: none — .page-head__note
+   pages.css:31): вид строки — роли ui-body + ui-text--muted разметки. */
+.php-note {
+  flex: none;
+}
+
+/* Подзаголовок обложки: ширина 780px «как есть» (components.css:61 — вне
+   шкалы контейнеров, перенос литерала). Шрифт/цвет — роли ui-lead +
+   ui-text--muted разметки (слой их не переобъявляет); хук обложек лендингов
+   (640px pages.css:965) — сайт-зона поверх связки. */
+.php-subtitle {
+  max-width: 48.75rem;
 }
 
 /* ════════════ Лендинг-связки (T17.9): nav-карточки и лента логотипов ════════════

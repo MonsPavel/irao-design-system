@@ -497,3 +497,46 @@
     </figure>
   </div>
 </section>
+
+<section class="ui-section" id="dpp-cover" aria-labelledby="dpp-cover-title">
+  <h2 class="ui-h3" id="dpp-cover-title">Обложка страницы (T18.10)</h2>
+  <p class="ui-showcase-stand__note">
+    Точка расширения детальной страницы — обложка внутренних страниц, связка
+    <code>php</code> паттерн-слоя (T18.10): колонка «заголовок → подзаголовок» с шагом 16 и низом 40
+    (порт <code>.page-head</code> career-portal, <code>components.css:36–41</code>); вариант
+    <code>php--split</code> — правая колонка «На сайте N вакансий» прижимается к низу строки
+    (<code>php-note</code>, <code>pages.css:31</code>; от md — строка, мобильная база — колонка,
+    инверсия <code>@max-767</code> оригинала). Типографика — роли: заголовок
+    <code>ui-page-title</code> (T14.2), подзаголовок — пара <code>ui-lead</code> +
+    <code>ui-text--muted</code> (ширина 780px несёт <code>php-subtitle</code>; цвет слой не
+    переобъявляет). Шапка-тройка контентной колонки — отдельная связка <code>dpp__head</code>
+    (T17.14) — обложку не заменяет.
+  </p>
+
+  <!-- Обложка — база: колонка «заголовок → подзаголовок». На стенде заголовок
+       — h3 ролью ui-page-title: h1 ветки вакансии уже стоит выше (гейт
+       irao/one-h1), на реальной странице тег — h1 (роль та же, T14.2).
+       Подзаголовок — связка php-subtitle × ui-lead × ui-text--muted. -->
+  <div class="php">
+    <h3 class="ui-page-title">Целевое обучение</h3>
+    <p class="php-subtitle ui-lead ui-text--muted">
+      Поступайте по целевому договору с компаниями Группы «Интер РАО»: отдельная квота при
+      поступлении, стипендия от компании и гарантированное место работы после выпуска.
+    </p>
+  </div>
+
+  <!-- Обложка — split: правая колонка «На сайте N вакансий» (оригинал
+       vacancies.html:149–155) прижимается к низу строки (align-items:
+       flex-end от md); вид ноты — роли ui-body + ui-text--muted
+       (fs-body/color pages.css:31), усадку гасит php-note (flex: none). -->
+  <div class="php php--split">
+    <div>
+      <h3 class="ui-page-title">Вакансии</h3>
+      <p class="php-subtitle ui-lead ui-text--muted">
+        Открытые вакансии компаний Группы «Интер РАО» — от производственных до офисных
+        направлений.
+      </p>
+    </div>
+    <span class="php-note ui-body ui-text--muted">На сайте 250 вакансий</span>
+  </div>
+</section>

@@ -169,7 +169,7 @@ describe('patterns/patterns.css — канон обложки страницы (
       patternLayerProblems('.php--split .ui-button { flex-shrink: 0; }'),
       'php + ui-потомок каноничны',
     ).toEqual([]);
-    expect(patternLayerProblems('.php-evil { gap: 4px; }').length, 'чужой namespace ловится')
+    expect(patternLayerProblems('.tl-evil { gap: 4px; }').length, 'чужой namespace ловится')
       .toBeGreaterThan(0);
   });
 
