@@ -104,9 +104,7 @@ describe('patterns/patterns.css — канон обложки страницы (
     expect(php, 'мобильная база — колонка (components.css:38)').toContain(
       'flex-direction: column;',
     );
-    expect(php, 'шаг 16 — --ui-space-4 (components.css:39)').toContain(
-      'gap: var(--ui-space-4);',
-    );
+    expect(php, 'шаг 16 — --ui-space-4 (components.css:39)').toContain('gap: var(--ui-space-4);');
     expect(php, 'низ 40px «как есть» (components.css:40 — вне шкалы §3.2)').toContain(
       'margin-bottom: 2.5rem;',
     );
@@ -145,8 +143,10 @@ describe('patterns/patterns.css — канон обложки страницы (
     expect(note, 'цвет слой не переобъявляет — роль ui-text--muted разметки').not.toContain(
       'color',
     );
-    expect(note, 'шрифт слой не переобъявляет — роль ui-body разметки (fs-body pages.css:31)')
-      .not.toContain('font');
+    expect(
+      note,
+      'шрифт слой не переобъявляет — роль ui-body разметки (fs-body pages.css:31)',
+    ).not.toContain('font');
   });
 
   it('php-subtitle: max-width 780px «как есть» (components.css:61); цвет/шрифт — роли ui-lead + ui-text--muted разметки', () => {
@@ -169,8 +169,10 @@ describe('patterns/patterns.css — канон обложки страницы (
       patternLayerProblems('.php--split .ui-button { flex-shrink: 0; }'),
       'php + ui-потомок каноничны',
     ).toEqual([]);
-    expect(patternLayerProblems('.tl-evil { gap: 4px; }').length, 'чужой namespace ловится')
-      .toBeGreaterThan(0);
+    expect(
+      patternLayerProblems('.tl-evil { gap: 4px; }').length,
+      'чужой namespace ловится',
+    ).toBeGreaterThan(0);
   });
 
   it('синхронность док ↔ слой: раздел «обложка страницы» в list-page/detail-page несёт ровно те же классы (док — источник правды)', () => {
@@ -186,10 +188,9 @@ describe('patterns/patterns.css — канон обложки страницы (
       const markup = docHooks(html);
       expect(markup.size, `${name}: php-классы в разметке есть`).toBeGreaterThan(0);
       for (const hook of hooks) {
-        expect(
-          markup.has(hook),
-          `${name}: крючок «${hook}» из слоя есть в разметке дока`,
-        ).toBe(true);
+        expect(markup.has(hook), `${name}: крючок «${hook}» из слоя есть в разметке дока`).toBe(
+          true,
+        );
       }
       for (const name2 of markup) {
         expect(hooks.has(name2), `${name}: класс «${name2}» разметки имеет правило слоя`).toBe(
@@ -233,9 +234,7 @@ describe('пилот career-portal: обложки страниц на кано�
 
   it('pilot.css: пары cp-page-head/cp-page-subtitle сняты, компенсирующие хуки 16/40 сняты как дубликаты базы канона', () => {
     expect(pilotCss, 'пара .cp-page-head перенесена в слой').not.toContain('.cp-page-head');
-    expect(pilotCss, 'пара .cp-page-subtitle перенесена в слой').not.toContain(
-      '.cp-page-subtitle',
-    );
+    expect(pilotCss, 'пара .cp-page-subtitle перенесена в слой').not.toContain('.cp-page-subtitle');
     expect(
       pilotCss,
       'хук cmp-head снят (шаг 16/низ 40 — теперь база канона php; пин T18.9 снят)',
@@ -254,14 +253,22 @@ describe('пилот career-portal: обложки страниц на кано�
   });
 
   it('хуки подзаголовка обложек лендингов переадресованы на php-subtitle (лендинги на cvh не сломаны — 640px pages.css:965)', () => {
-    for (const hook of ['.ctr-cover .php-subtitle', '.edu-cover .php-subtitle', '.int-cover .php-subtitle', '.ev-cover .php-subtitle']) {
+    for (const hook of [
+      '.ctr-cover .php-subtitle',
+      '.edu-cover .php-subtitle',
+      '.int-cover .php-subtitle',
+      '.ev-cover .php-subtitle',
+    ]) {
       expect(pilotCss, `хук ${hook} — на крючке канона`).toContain(hook);
-      expect(blockOf(pilotCss, hook), `хук ${hook}: max-width 40rem = 640px (pages.css:965)`).toContain(
-        'max-width: 40rem',
-      );
+      expect(
+        blockOf(pilotCss, hook),
+        `хук ${hook}: max-width 40rem = 640px (pages.css:965)`,
+      ).toContain('max-width: 40rem');
     }
-    expect(blockOf(pilotCss, '.ev-cover'), 'обложка events на каркасе cvh — без отмены ритма')
-      .not.toContain('margin-bottom');
+    expect(
+      blockOf(pilotCss, '.ev-cover'),
+      'обложка events на каркасе cvh — без отмены ритма',
+    ).not.toContain('margin-bottom');
   });
 
   it('compare: пара edu-offers-head — на крючке канона .php--split', () => {

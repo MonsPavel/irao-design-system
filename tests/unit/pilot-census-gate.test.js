@@ -31,12 +31,16 @@
  *      карточки, +10 строк); errata T18.9: 2138 → 2272 (позиционные
  *      хуки хвоста cmp-/ev-/ia- — ритм companies, обложка/фильтры/
  *      лента событий events, карточная форма анкеты internship-apply);
+ *      T18.10: вынос обложки в слой (канон php) — файл сжался
+ *      2272 → 2250, потолок НЕ двигается (прецедент T17.18
+ *      «пороги не двигаются»);
  *      MAX_PILOT_CSS_CODE_LINES 1089 — цель эпика в метрике кода
  *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723; errata T18.1:
  *      723 → 819 (тот же курс); errata T18.2: 819 → 822; errata T18.3:
  *      822 → 869; errata T18.4: 869 → 1013; errata T18.5: 1013 → 1089;
  *      errata T18.6: 1089 → 1217; ревью T18.6: 1217 → 1222; errata
- *      T18.9: 1222 → 1297 (тот же курс);
+ *      T18.9: 1222 → 1297 (тот же курс); T18.10: вынос обложки —
+ *      сжатие 1297 → 1269, потолок не двигается (прецедент T17.18);
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -183,13 +187,13 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.9', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.10', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(29);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -266,12 +270,24 @@ describe('пороги ценза — числа зафиксированы по
       // сырые 2136→2272, код 1216→1297, селекторы 165→166
       // (.ia-form-card .ui-radio-group__row — единственный новый
       // двухклассовый селектор); семейства/allowlist НЕ менялись
-      // (cmp-/ev-/ia- — не cp-, прецедент ctr-/edu-/int-):
-      expect(metrics.css.lines).toBe(2272);
-      expect(metrics.css.codeLines).toBe(1297);
-      expect(metrics.css.selectors).toBe(166);
+      // (cmp-/ev-/ia- — не cp-, прецедент ctr-/edu-/int-);
+      // T18.10 (вынос обложки страниц в слой — канон php: пара
+      // cp-page-head/cp-page-subtitle снята из разметки build.mjs и
+      // pilot.css — 3 базы + 1 ступень 767 + 4 хука подзаголовков обложек;
+      // дубликаты базы канона сняты — .cmp-head и низ .edu-offer-head
+      // (хуки сайт-зоны без cp-крючка — ценз их не считал); обложка events
+      // переведена на каркас cvh): сырые 2272→2250, код 1297→1269,
+      // селекторы 166→158; семейства 29→27 — page-head/page-subtitle ушли
+      // из allowlist (судьба «вынос в слой», REPORT §11.4):
+      expect(metrics.css.lines).toBe(2250);
+      expect(metrics.css.codeLines).toBe(1269);
+      expect(metrics.css.selectors).toBe(158);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(29);
+      expect(metrics.css.families).toHaveLength(27);
+      expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
+        'page-head',
+      );
+      expect(metrics.css.families).not.toContain('page-subtitle');
       expect(metrics.js.lines).toBe(187);
     },
   );

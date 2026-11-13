@@ -17,9 +17,10 @@
  *
  * Блоки без аналога в ДС (hero, production, directions, holding, employers,
  * why-us, students, video, media, team, cta-mail, шапка/подвал, таймлайн,
- * page-head, строка вакансии) собраны как СТЫК СТОРОНЫ САЙТА
+ * строка вакансии) собраны как СТЫК СТОРОНЫ САЙТА
  * (pilot.css, префикс cp-) — ровно так, как это предписывает архитектура
- * (02-architecture §7: связки — зона сайта). Эти блоки — главные кандидаты
+ * (02-architecture §7: связки — зона сайта); page-head вынесен в паттерн-
+ * слой каноном php (T18.10). Эти блоки — главные кандидаты
  * в доработки ДС по итогам сравнения (REPORT.md). Чипы (T14.8), табы-пилюли
  * и начальный выбор (T14.9), заголовок страницы (T14.2) и CTA-пилюля
  * (T14.4) с эпика EPIC-14 живут в ДС — пилот использует их напрямую.
@@ -1526,12 +1527,14 @@ function vacanciesMain() {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-page-head cp-page-head--split">
+    <!-- Обложка — канон php паттерн-слоя (T18.10; оригинал vacancies.html:149–155:
+         .page-head--split — правая колонка «На сайте N вакансий» php-note). -->
+    <div class="php php--split">
       <div>
         <h1 class="ui-page-title">Вакансии</h1>
-        <p class="cp-page-subtitle ui-lead">Открытые вакансии компаний Группы «Интер РАО» — от производственных до офисных направлений.</p>
+        <p class="php-subtitle ui-lead ui-text--muted">Открытые вакансии компаний Группы «Интер РАО» — от производственных до офисных направлений.</p>
       </div>
-      <p class="ui-small ui-text--muted">На сайте ${VAC.total} вакансий</p>
+      <span class="php-note ui-body ui-text--muted">На сайте ${VAC.total} вакансий</span>
     </div>
 
     <!-- Раскладка и сайдбар — канон ветки «сайдбар фильтров» (T14.10) из
@@ -2219,7 +2222,7 @@ function internshipsMain(set) {
   <div class="ui-container">
     <div class="cvh int-cover">
       <h1 class="ui-page-title">${title}</h1>
-      <p class="cp-page-subtitle ui-lead">${esc(data.subtitle)}</p>
+      <p class="php-subtitle ui-lead ui-text--muted">${esc(data.subtitle)}</p>
       <a class="ui-button ui-button--primary" href="#directions">смотреть ${titleLower}</a>
     </div>
   </div>
@@ -2381,7 +2384,7 @@ function educationMain() {
   <div class="ui-container">
     <div class="cvh edu-cover">
       <h1 class="ui-page-title">Целевое обучение</h1>
-      <p class="cp-page-subtitle ui-lead">Поступайте по целевому договору с компаниями Группы «Интер РАО»: отдельная квота при поступлении, стипендия от компании и гарантированное место работы после выпуска.</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Поступайте по целевому договору с компаниями Группы «Интер РАО»: отдельная квота при поступлении, стипендия от компании и гарантированное место работы после выпуска.</p>
       <a class="ui-button ui-button--primary" href="education-catalog.html">смотреть все предложения</a>
     </div>
     ${subnav('education.html')}
@@ -2416,9 +2419,11 @@ ${orgs}
 
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-page-head cp-page-head--split edu-offer-head">
-      <!-- Шапка «предложения + кнопка» (education.html:230–233): заголовок
-           без нижнего маргина — низ 40px несёт .edu-offer-head. -->
+    <!-- Шапка «предложения + кнопка» — split-обложка канона php (T18.10;
+         education.html:230–233). Сайт-хук edu-offer-head остаётся только
+         для кнопки (flex-shrink 0 — ui-button без nowrap оригинала);
+         ритм 16/40 несёт база канона. -->
+    <div class="php php--split edu-offer-head">
       <h2 class="ui-h2">Актуальные предложения о целевом обучении</h2>
       <a class="ui-button ui-button--outline" href="education-catalog.html">все предложения</a>
     </div>
@@ -2509,9 +2514,9 @@ function educationCatalogMain() {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="php">
       <h1 class="ui-page-title">Каталог предложений целевого обучения</h1>
-      <p class="cp-page-subtitle ui-lead">Выберите направление подготовки и компанию Группы «Интер РАО» — заявка оформляется на сайте «Работа России».</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Выберите направление подготовки и компанию Группы «Интер РАО» — заявка оформляется на сайте «Работа России».</p>
     </div>
 
     <div class="lpp-filters">
@@ -2543,7 +2548,7 @@ ${offers}
    обучения — канон lpp-filters слоя T17.12), ленты событий на карточке
    оригинала (pages.css:565–581) и сетке 36 (pages.css:9). Геометрия —
    сайт-хуки ev- (конвенция не-cp имени — прецедент ctr-/edu-/int-);
-   каркасы — cp-page-head/ui-button/ui-tabs--pill/ui-card--media/ui-grid. */
+   каркасы — cvh/php/ui-button/ui-tabs--pill/ui-card--media/ui-grid. */
 
 /** Фильтры ленты мероприятий — options 1:1 events.html:164–207 (подписи —
  *  aria-label оригинала; в пилюлях имя поля — label[for] .ui-vh, канон
@@ -2586,9 +2591,9 @@ function eventsMain() {
   ])}
 <section class="ui-section ev-sec" id="upcoming">
   <div class="ui-container">
-    <div class="cp-page-head ev-cover">
+    <div class="cvh ev-cover">
       <h1 class="ui-page-title">Мероприятия</h1>
-      <p class="cp-page-subtitle ui-lead">Экскурсии, кейс-чемпионаты, вебинары и ярмарки вакансий компаний Группы «Интер РАО» для школьников, студентов и начинающих специалистов.</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Экскурсии, кейс-чемпионаты, вебинары и ярмарки вакансий компаний Группы «Интер РАО» для школьников, студентов и начинающих специалистов.</p>
       <a class="ui-button ui-button--primary" href="#upcoming">смотреть мероприятия</a>
     </div>
     ${subnav('events.html')}
@@ -2651,7 +2656,7 @@ function eventsSearchMain() {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="php">
       <h1 class="ui-page-title">Поиск мероприятий</h1>
     </div>
 
@@ -2702,9 +2707,9 @@ function mediaMain() {
   ])}
 <section class="ui-section">
   <div class="ui-container">
-    <div class="cp-page-head">
+    <div class="php">
       <h1 class="ui-page-title">Медиа</h1>
-      <p class="cp-page-subtitle ui-lead">Статьи, видео и подкасты о работе в Группе «Интер РАО»: люди, проекты, технология и профессии энергетики.</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Статьи, видео и подкасты о работе в Группе «Интер РАО»: люди, проекты, технология и профессии энергетики.</p>
     </div>
 
     <div class="cp-media-toolbar">
@@ -2870,7 +2875,7 @@ function careerTrackMain() {
   <div class="ui-container">
     <div class="cvh ctr-cover">
       <h1 class="ui-page-title">Карьерные треки</h1>
-      <p class="cp-page-subtitle ui-lead">Просмотрите карьерные траектории в компаниях Группы «Интер РАО»: от первой ступени до руководителя направления.</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Просмотрите карьерные траектории в компаниях Группы «Интер РАО»: от первой ступени до руководителя направления.</p>
       <a class="ui-button ui-button--primary" href="#tracks">смотреть треки</a>
     </div>
     ${subnav('career-track.html')}
@@ -2970,18 +2975,18 @@ ${cards}
     })
     .join('\n');
   // T18.9: ритм страницы ведут сайт-хуки cmp- (гашение верхнего ритма
-  // секции inline companies.html:147; шапка 16/40, заголовки 32, сетки
-  // 36/48 — источники в pilot.css). Каркас — ui-section/cp-page-head/
-  // ui-grid канонов ДС.
+  // секции inline companies.html:147; заголовки 32, сетки 36/48 — источники
+  // в pilot.css; шапка 16/40 — с T18.10 база канона php). Каркас —
+  // ui-section/php/ui-grid канонов ДС/слоя.
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Компании группы', ''],
   ])}
 <section class="ui-section cmp-sec">
   <div class="ui-container">
-    <div class="cp-page-head cmp-head">
+    <div class="php">
       <h1 class="ui-page-title">Компании группы</h1>
-      <p class="cp-page-subtitle ui-lead">Работодатели Группы «Интер РАО» — от генерации до сбыта и сервисов.</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Работодатели Группы «Интер РАО» — от генерации до сбыта и сервисов.</p>
     </div>
 ${sections}
   </div>

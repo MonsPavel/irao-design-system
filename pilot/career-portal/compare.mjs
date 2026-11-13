@@ -584,13 +584,14 @@ const BLOCK_PROBES = {
   // .page-head--split 132; hero компаний .company-hero 320; adv-сетка 283).
   // Пары: обложка — .cover-hero → хук формы .edu-cover на каркасе cvh;
   // организации — id="orgs" с обеих сторон; шапка предложений —
-  // .page-head--split → .edu-offer-head; hero — .company-hero →
+  // .page-head--split → .php--split (канон обложки слоя, T18.10 — хук
+  // .edu-offer-head остался только на кнопке); hero — .company-hero →
   // .edu-company-hero; сетка преимуществ — .adv-grid → .cp-adv-grid
   // (крючки проб — не новые сущности: классы есть в разметке).
   'education.html': [
     ['edu-cover', '.cover-hero', '.edu-cover'],
     ['edu-orgs', '#orgs', '#orgs'],
-    ['edu-offers-head', '.page-head--split', '.edu-offer-head'],
+    ['edu-offers-head', '.page-head--split', '.php--split'],
     ['edu-company-hero', '.company-hero', '.edu-company-hero'],
     ['edu-adv', '.adv-grid', '.cp-adv-grid'],
   ],

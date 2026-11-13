@@ -70,10 +70,9 @@ describe('T18.9 — companies.html: ритм грида сегментов (−6
     expect(blockOf(pilotCss, '.cmp-sec')).toMatch(/padding-bottom:\s*2\.5rem/);
   });
 
-  it('шапка — хук cmp-head: шаг 16/низ 40 (.page-head components.css:38/41 против 12/32 базы cp-page-head)', () => {
-    expect(companiesHtml).toContain('<div class="cp-page-head cmp-head">');
-    expect(blockOf(pilotCss, '.cmp-head')).toMatch(/gap:\s*1rem/);
-    expect(blockOf(pilotCss, '.cmp-head')).toMatch(/margin-bottom:\s*2\.5rem/);
+  it('шапка — обложка на каноне php (T18.10): шаг 16/низ 40 несёт база канона (.page-head components.css:38/41; хук cmp-head снят как дубликат базы)', () => {
+    expect(companiesHtml).toContain('<div class="php">');
+    expect(blockOf(pilotCss, '.cmp-head')).toBeNull();
   });
 
   it('заголовки сегментов — низ 32 (.section__title components.css:340); сетки — хук cmp-grid: шаг 36 (pages.css:9) + низ 48 (inline companies.html:153)', () => {
@@ -93,24 +92,26 @@ describe('T18.9 — events.html: обложка, фильтры, лента со
     expect(blockOf(pilotCss, '.ev-sec')).toMatch(/padding-bottom:\s*2\.5rem/);
   });
 
-  it('обложка — форма cover-hero (pages.css:953–969): хук ev-cover на каркасе cp-page-head, паддинг 64/56, шаг 20, фон blue-50, радиус md, без нижнего ритма; дети прижаты влево (align-items: flex-start pages.css:955 — кнопка не растягивается на ширину обложки)', () => {
-    expect(eventsHtml).toContain('<div class="cp-page-head ev-cover">');
+  it('обложка — форма cover-hero (pages.css:953–969): хук ev-cover на каркасе cvh (T18.10 — cp-page-head снят; прижатие влево pages.css:955 — база каркаса cvh), паддинг 64/56, шаг 20, фон blue-50, радиус md; нижнего ритма каркас не несёт', () => {
+    expect(eventsHtml).toContain('<div class="cvh ev-cover">');
     const css = blockOf(pilotCss, '.ev-cover');
     expect(css).toMatch(/gap:\s*1\.25rem/);
     expect(css).toMatch(/padding:\s*4rem 3\.5rem/);
     expect(css).toMatch(/background-color:\s*var\(--ui-color-surface-muted\)/);
     expect(css).toMatch(/border-radius:\s*var\(--ui-radius-md\)/);
     expect(css).toMatch(/box-sizing:\s*border-box/);
-    expect(css).toMatch(/margin-bottom:\s*0/);
-    expect(css).toMatch(/align-items:\s*flex-start/);
+    // прижатие влево (pages.css:955) и отсутствие нижнего ритма — база
+    // каркаса cvh канона (T17.15); хук их не переобъявляет (T18.10).
+    expect(css).not.toMatch(/align-items/);
+    expect(css).not.toMatch(/margin-bottom/);
   });
 
-  it('кнопка обложки — ui-button--primary «смотреть мероприятия» → #upcoming (events.html:152); ритм +16 (pages.css:967); подпись 640px (pages.css:965)', () => {
+  it('кнопка обложки — ui-button--primary «смотреть мероприятия» → #upcoming (events.html:152); ритм +16 (pages.css:967); подпись 640px — хук на php-subtitle канона (T18.10)', () => {
     expect(eventsHtml).toContain(
       '<a class="ui-button ui-button--primary" href="#upcoming">смотреть мероприятия</a>',
     );
     expect(blockOf(pilotCss, '.ev-cover .ui-button')).toMatch(/margin-top:\s*var\(--ui-space-4\)/);
-    expect(blockOf(pilotCss, '.ev-cover .cp-page-subtitle')).toMatch(/max-width:\s*40rem/);
+    expect(blockOf(pilotCss, '.ev-cover .php-subtitle')).toMatch(/max-width:\s*40rem/);
   });
 
   it('подпись обложки — текст оригинала 1:1 (events.html:151 — три строки 97px против двух у сокращённого)', () => {

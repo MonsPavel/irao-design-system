@@ -957,10 +957,13 @@ describe('пилот career-portal: слой подключён, ваканси�
   });
 
   it('cp-page-head снят на канон php слоя (T18.10 — обложка страницы); find-bar снят на канон lpp-find (T17.12)', () => {
-    expect(pilotCss, 'обложка — канон php слоя (T18.10), пара cp-page-head снята').toContain(
-      '.php--split',
+    expect(build, 'обложка — разметка канона php слоя (T18.10): split-обложка вакансий').toContain(
+      '<div class="php php--split">',
     );
-    expect(pilotCss, 'пара cp-page-head снята (T18.10)').not.toContain('.cp-page-head');
+    expect(
+      pilotCss,
+      'пара cp-page-head снята (T18.10 — канон в слое, не в сайт-зоне)',
+    ).not.toContain('.cp-page-head');
     expect(pilotCss, 'find-bar переведён на канон слоя (T17.12)').not.toContain('.cp-find-bar');
     expect(
       build,
@@ -1191,7 +1194,9 @@ describe('пилот career-portal: детальные страницы на dpp
 
   it('cp-page-head снят на канон php слоя (T18.10 — обложка страницы; пин T17.1 инвертирован)', () => {
     expect(pilotCss).not.toContain('.cp-page-head');
-    expect(pilotCss, 'обложка страниц — канон php слоя (T18.10)').toContain('.php--split');
+    expect(build, 'обложка страниц — разметка канона php слоя (T18.10)').toContain(
+      'class="php-subtitle ui-lead ui-text--muted"',
+    );
   });
 });
 

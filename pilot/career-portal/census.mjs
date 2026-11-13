@@ -56,7 +56,12 @@
  *    карточка события 16/220 на сетке 36 events, карточная форма анкеты
  *    internship-apply (паддинг 36, радио-строки 52); каркасы — ДС/слой,
  *    источники pages.css:9/14/36–41/347/565–581/953–969/367–375 + inline
- *    страниц); любой рост сверх — деградация сайт-зоны;
+ *    страниц); → T18.10 (вынос обложки страниц в слой: пара cp-page-head/
+ *    cp-page-subtitle снята из разметки и pilot.css — канон php слоя;
+ *    дубликаты базы канона сняты — хуки .cmp-head и низ .edu-offer-head;
+ *    обложка events переведена с cp-page-head на каркас cvh; семейства
+ *    page-head/page-subtitle ушли из allowlist — судьба «вынос в слой»,
+ *    REPORT §11.4); любой рост сверх — деградация сайт-зоны;
  *  - MAX_PILOT_CSS_CODE_LINES = 869 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
  *    «все страницы») → 723 (батч ритма 01.11) → 819 (T18.1) → 822 (T18.2 —
@@ -79,6 +84,10 @@
  *    (шаг/низ/высоты фото), модификаторы --vac…--photos — крючки проб; не
  *    новый визуальный блок (каркасы лент — ui-grid/ui-card/lpp-row/cp-
  *    intern-card), занесён в allowlist по процедуре errata.
+ *    T18.10: семейства page-head/page-subtitle УШЛИ из allowlist — вынос
+ *    обложки страниц в слой (канон php), снятие пары cp-page-head/
+ *    cp-page-subtitle из разметки и pilot.css (судьба семейств — REPORT
+ *    §11.4).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -130,8 +139,6 @@ export const ALLOWED_CP_FAMILIES = [
   'offer-card',
   'org-card',
   'page',
-  'page-head',
-  'page-subtitle',
   'production',
   'tabs-links',
   'tabs-row',
