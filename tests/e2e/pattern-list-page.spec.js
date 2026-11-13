@@ -872,4 +872,53 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
       },
     );
   });
+
+  // Строка табов + ссылок (T18.11): контейнерные эталоны канона tnv — ряд
+  // «лента табов + nav ссылок» (desktop 1280 — «одна полоса» ступени md;
+  // mobile 375 — мобильная база канона: перенос, осознанное отклонение —
+  // прецедент nvp) и активный таб (aria-current="page" → заливка
+  // модификатора ui-tabs--pill, T14.9/T17.11 — active-состояние 1:1
+  // pages.css:1000). Три снимка: ряд на desktop и mobile + активный таб
+  // на desktop (2 состояния: обычный/active — спека T18.11).
+  standTest.describe('patterns/list-page: эталоны строки табов+ссылок tnv (T18.11, AC: ×3)', () => {
+    standTest(
+      'tnv-row/tnv-tab-active — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const shots = [
+          ['tnv-row', page.locator('#lpp-tabs-row .tnv'), ['desktop', 'mobile']],
+          [
+            'tnv-tab-active',
+            page.locator("#lpp-tabs-row .tnv .ui-tabs__tab[aria-selected='true']"),
+            ['desktop'],
+          ],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): у ряда скруглённые пилюли
+              // на прозрачном фоне — срез снимка по пилюле (лотерея
+              // растеризации, диагноз 19.10) возможен; допуск покрывает
+              // AA-шум, реальный дифф значим по-прежнему.
+            });
+          }
+        }
+      },
+    );
+  });
 });

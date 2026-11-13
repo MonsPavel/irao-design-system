@@ -137,7 +137,7 @@
 | T18.8 | done | смержена |
 | T18.9 | done | смержена |
 | T18.10 | done | смержена |
-| T18.11 | todo | макро-вынос: строка табов-ссылок (tabs-row/links) → слой — GAP REPORT §11.4 |
+| T18.11 | done | смержена |
 | T18.12 | todo | макро-вынос: why-us (стекло) → слой (whu-) — кандидат §11.4 |
 | T18.13 | todo | макро-вынос: production v1/v2 раскладки → слой (prd-) поверх ui-carousel |
 | T18.14 | todo | макро-вынос: directions + holding → слой (dir-/hld-) |

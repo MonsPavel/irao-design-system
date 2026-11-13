@@ -1568,18 +1568,13 @@ a.cp-intern-card {
   padding-block: 2.5rem;
 }
 
-/* Ряд табов + ссылок — одна полоса (tabs-pill pages.css:974–1003:
-   5 колонок 1fr без переноса); перенос канона cp-tabs-row давал ряд 92px,
-   нижний маргин ленты ui-tabs__list (канон табов — ритм «лента → панель»)
-   — 92px в самом ряду (замер 06.11): здесь панелей-подсказок в потоке нет
-   (ui-vh в разметке), ритм ведёт секция. */
-.int-tabs .cp-tabs-row {
-  flex-wrap: nowrap;
-}
-
-.int-tabs .cp-tabs-row .ui-tabs__list {
-  margin-bottom: 0;
-}
+/* Ряд табов + ссылок — канон tnv слоя (T18.11): «одна полоса» от md
+   (nowrap, tabs-pill pages.css:974 — 5 колонок 1fr без переноса) и
+   сброс DS-маргина ленты ui-tabs__list (канон табов — ритм «лента →
+   панель»; замер 06.11: маргин давал ряд 92px, панелей-подсказок в
+   потоке нет (ui-vh в разметке), ритм ведёт секция) — в каноне слоя,
+   хуки .int-tabs сняты как дубликаты (прецедент снятия .cmp-head
+   T18.10). */
 
 /* Контейнеры лендинга — горизонтальные паддинги 40 (.container
    --container-pad variables.css:68) против 32 канона --ui-container-pad:
@@ -2103,20 +2098,6 @@ a.cp-intern-card {
   /* Обложка — канон php (T18.10): ступень 767 split снята — мобильная база
      канона (.php--split колонка/прижато влево, инверсия components.css:46)
      и так совпадает с оригиналом. */
-}
-
-/* Строка табов + ссылок разделов (tabs-pill оригинала — GAP: нет в ДС) */
-.cp-tabs-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-2) var(--ui-space-4);
-  align-items: center;
-}
-
-.cp-tabs-links {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-2) var(--ui-space-4);
 }
 
 /* ── точечный хвост паритета (T18.9) ──
