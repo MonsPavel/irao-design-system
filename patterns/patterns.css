@@ -16,7 +16,8 @@
  * T17.13), hro/mrq/mdl/cvh (лендинг-композиции hero/adv-marquee/медиа-сетки/
  * cover-hero, T17.15), pstr- (постерная карточка, T17.18), msh/vcp
  * (наставничество/капсула вакансий, T18.2), php (обложка страницы, T18.10),
- * tnv (строка табов + ссылок разделов, T18.11); потомки — компоненты
+ * tnv (строка табов + ссылок разделов, T18.11), whu (тёмная секция
+ * «why-us» со стеклом, T18.12); потомки — компоненты
  * ui-*. Список пополняют задачи эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
@@ -2662,5 +2663,219 @@
 @media (hover: hover) {
   .vcp__btn:hover {
     background-color: var(--ui-color-accent-hover);
+  }
+}
+
+/* ════════════════ Тёмная секция «why-us» (T18.12) — связка whu ════════════════
+ *
+ * Порт секции «Работа в „Интер РАО"» career-portal (.cp-why-us —
+ * pilot.css:540–666, батч ритма 01.11: блок 1350↔1350 байт-паритет,
+ * решение владельца; оригинал src/blocks/why-us/why-us.css — строки в
+ * комментариях): фото-секция с заголовком + top-карточкой, ряд стеклянных
+ * карточек с hover-раскрытием, панель вакансий ВНУТРИ секции (build.py
+ * SLOTS). Разметка канона — patterns/landing-section/landing-section.html
+ * (секция lsp-why-us; док — источник правды, пин синхронности
+ * tests/unit/pattern-why-us.test.js).
+ *
+ * Каркас: фото-фон — примитив ui-section--photo (T17.3, без оверлея —
+ * on-dark текст несёт контент; VI-инвариант — не голым IMG, прецедент msh
+ * T18.2). Панель вакансий — СЛОТ контента секции: канон правила не несёт
+ * (в пилоте — cp-vacancy-search__wrap id="vacancies", семейство
+ * vacancy-search — сайт-зона, вынос — T18.16); ритм до панели ведёт
+ * margin-bottom строки (144px, why-us.css:42).
+ *
+ * hover-раскрытие карточек (Implementation requirements T18.12 п.2) —
+ * CSS-канон без JS: текст/номер/фото переключаются opacity/max-height под
+ * гвардом (hover: hover) (EPIC-4) — контент остаётся в a11y-дереве при
+ * любом состоянии (display:none/visibility:hidden не используются),
+ * переходы в VI-режиме гасит vi.css (body.vi * { transition: none }) —
+ * раскрытие мгновенно. Фото-фон секции и фото карточек — классы __bg/
+ * __card-photo: vi.css img:off прячет [class*='-photo']/[class*='__bg']
+ * (пре-существующее поведение T9.1 — фото-секция целиком, пин
+ * задокументированного поведения — прецедент hro/msh на стенде).
+ *
+ * Мобильные базы канона — ступени оригинала why-us.css:108-115,
+ * инвертированные mobile-first (прецедент msh T18.2): top колонкой и row
+ * колонкой ≤1023 — база, строка/3 колонки от lg (1024, шкала T2.5).
+ * Гейт 32px-базы T3.6: top-карточка 429px на 375 переполняет — базовая
+ * ширина 100% (why-us.css:109) проходит. Десктоп-рендер (≥1024) — 1:1
+ * принятому пилоту (байт-паритет 01.11).
+ */
+
+/* Каркас: клип (overflow hidden — why-us.css:4); ритм секции — паддинги
+   оригинала: 140/80 «как есть» (why-us.css:3) от lg — принятый рендер 1440,
+   мобильная база 96/48 @max-1023 (why-us.css:111; 48 = space-7).
+   position/isolation — от примитива ui-section--photo. */
+.whu {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  overflow: hidden;
+  padding: 6rem 0 var(--ui-space-7);
+}
+
+@media (min-width: 1024px) {
+  .whu {
+    padding: 8.75rem 0 5rem; /* 140/80 why-us.css:3 «как есть» */
+  }
+}
+
+/* Top-зона «заголовок + карточка 01» (why-us.css:23-28): flex, gap 36
+   «как есть», прижато кверху (align-items: flex-start), space-between,
+   низ 36 «как есть». Мобильная база — колонкой (why-us.css:108),
+   строка — от lg. */
+.whu__top {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column; /* why-us.css:108 @max-1023 — мобильная база */
+  gap: 2.25rem; /* 36px why-us.css:27 «как есть» */
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 2.25rem; /* 36px why-us.css:28 «как есть» */
+}
+
+@media (min-width: 1024px) {
+  .whu__top {
+    flex-direction: row; /* строка оригинала (≥1024, why-us.css:23) */
+  }
+}
+
+/* Top-карточка: во всю ширину на мобильной базе (why-us.css:109),
+   фикс 429px «как есть» (why-us.css:64) от lg — принятый порт
+   (.cp-why-us__top .cp-why-us__card pilot.css:565-567). */
+.whu__top .whu__card {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .whu__top .whu__card {
+    flex: 0 0 26.8125rem; /* 429px why-us.css:64 «как есть» */
+    width: auto;
+  }
+}
+
+/* Заголовок: max-width 894px (why-us.css:32); lh 1.3 (why-us.css:34) и
+   ls −0.02em (why-us.css:35) — override роли ui-h2 (1.1/normal); цвет
+   on-dark (why-us.css:36). fs/fw несёт роль (лестница fs-h2). */
+.whu__title {
+  box-sizing: border-box;
+  max-width: 55.875rem;
+  color: var(--ui-color-text-on-dark);
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+}
+
+/* Ряд карточек (why-us.css:40-42 + пилот): grid — принятый порт
+   (.cp-why-us__row pilot.css:585-590; оригинал flex); колонка на мобильной
+   базе (оригинал ≤1023, why-us.css:110), 3×1fr от lg; вертикальный шаг
+   стека 36 «как есть» (gap why-us.css:41) — шаг колонок от lg 12px
+   (space-3, принятый рендер батча ритма 01.11); низ 144px «как есть»
+   (why-us.css:42) — панель вакансий ниже. */
+.whu__row {
+  box-sizing: border-box;
+  display: grid;
+  gap: 2.25rem; /* 36px why-us.css:41 «как есть» */
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 9rem; /* 144px why-us.css:42 «как есть» — панель вакансий ниже */
+}
+
+@media (min-width: 1024px) {
+  .whu__row {
+    gap: var(--ui-space-3); /* 12px — принятый рендер pilot.css:587 */
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Стеклянная карточка (why-us.css:49-62): flex-колонка gap 36 «как есть»,
+   клип, min-height 320px, padding 20px, радиус --radius-card 16px = md,
+   заливка blue-700 — семантика --ui-color-surface-blue-deep (tokens/
+   semantic.css:66), текст on-dark (наследуют title/text/num). fs/fw несут
+   роли разметки (ui-h4/ui-small — T3.3). */
+.whu__card {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  gap: 2.25rem; /* 36px why-us.css:55 «как есть» */
+  overflow: hidden;
+  min-height: 20rem; /* 320px why-us.css:56 */
+  padding: 1.25rem; /* 20px why-us.css:57 */
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface-blue-deep); /* blue-700 why-us.css:58 */
+  color: var(--ui-color-text-on-dark); /* why-us.css:59 */
+}
+
+/* Фото карточки (why-us.css:68-75): absolute-слой поверх заливки, cover,
+   переход opacity — hover-гаситель ниже (под (hover: hover)). Класс несёт
+   -photo — vi.css img:off прячет (VI-инвариант, T9.1). */
+.whu__card-photo {
+  box-sizing: border-box;
+  position: absolute;
+  inset: 0;
+  object-fit: cover;
+  width: 100%;
+  height: 100%;
+  transition: opacity var(--ui-transition); /* why-us.css:74 */
+}
+
+/* Заголовок карточки: lh 1.25 (why-us.css:83) — override роли ui-h4 (1.1);
+   ls −0.02em (why-us.css:84) — override роли normal; над фото
+   (position: relative — why-us.css:82). fs/fw несёт роль. */
+.whu__card-title {
+  box-sizing: border-box;
+  position: relative;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+/* Текст карточки (why-us.css:89-96): скрыт в покое (max-height 0 +
+   opacity 0), раскрытие по hover — только opacity/max-height (контент
+   остаётся в a11y-дереве, Implementation requirements п.2); клип при
+   раскрытии; переходы «как есть». fs/lh несёт роль ui-small. */
+.whu__card-text {
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition:
+    opacity var(--ui-transition),
+    max-height 0.3s ease; /* why-us.css:95-96 */
+}
+
+/* Номер карточки (why-us.css:101-116): круг 44px, right/bottom 20/16,
+   padding 10, пилюля, стекло glass-dark (white 10%), fs-body — роль-класса
+   у номера нет (span в разметке), литерал 16px оригинала = fs-body (§3.3);
+   скрыт в покое, виден по hover. */
+.whu__card-num {
+  box-sizing: border-box;
+  display: inline-flex;
+  position: absolute;
+  right: 1.25rem; /* 20px why-us.css:106 */
+  bottom: 1rem; /* 16px why-us.css:107 */
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem; /* 44px why-us.css:108 */
+  height: 2.75rem;
+  padding: 0.625rem; /* 10px why-us.css:112 */
+  border-radius: var(--ui-radius-pill);
+  background-color: var(--ui-color-glass-dark); /* white 10% why-us.css:113 */
+  font-size: var(--ui-fs-body); /* why-us.css:111 */
+  opacity: 0;
+  transition: opacity var(--ui-transition); /* why-us.css:116 */
+}
+
+/* hover-раскрытие (why-us.css:77, 99-100, 114) — под гвардом (hover: hover)
+   (EPIC-4); CSS-канон без JS — Implementation requirements T18.12 п.2. */
+@media (hover: hover) {
+  .whu__card:hover .whu__card-photo {
+    opacity: 0.15; /* why-us.css:77 */
+  }
+
+  .whu__card:hover .whu__card-text {
+    max-height: 13.75rem; /* 220px why-us.css:100 «как есть» */
+    opacity: 1; /* why-us.css:99 */
+  }
+
+  .whu__card:hover .whu__card-num {
+    opacity: 1; /* why-us.css:114 */
   }
 }

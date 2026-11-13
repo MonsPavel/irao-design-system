@@ -72,12 +72,12 @@ describe('build.mjs — пять фоновых секций на ui-section--ph
     expect(indexHtml).not.toContain('ui-section__overlay--glow');
   });
 
-  it('holding и why-us: модификатор + __bg без оверлея (фото без затемнения — канон оригинала)', () => {
+  it('holding и why-us: модификатор + __bg без оверлея (фото без затемнения — канон оригинала; why-us — канон whu слоя, T18.12)', () => {
     expect(indexHtml).toContain('<section class="ui-section ui-section--photo cp-holding">');
-    expect(indexHtml).toContain('<section class="ui-section ui-section--photo cp-why-us">');
+    expect(indexHtml).toContain('<section class="ui-section ui-section--photo whu">');
     for (const [name, section] of [
       ['holding', indexHtml.slice(indexHtml.indexOf('cp-holding'))],
-      ['why-us', indexHtml.slice(indexHtml.indexOf('cp-why-us'))],
+      ['why-us', indexHtml.slice(indexHtml.indexOf('ui-section--photo whu'))],
     ]) {
       expect(section, `${name}: __bg на месте`).toContain('ui-section__bg');
       expect(section.slice(0, section.indexOf('</section>')), `${name}: оверлея нет`).not.toContain(
@@ -151,20 +151,35 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     // Errata 01.11 — ритм-батч: why-us 140/80 (why-us.css:3), holding
     // 72/48 (holding.css:3) — паритет высот compare (why 1350↔1350);
     // у holding остаток −75 = принятая дельта статов (T17.4, lh 1.1).
-    expect(blockOf(pilotCss, '.cp-why-us'), 'why-us: ритм оригинала').toContain(
-      'padding: 8.75rem 0 5rem;',
+    // T18.12 — why-us на каноне whu слоя: пин ритма — по слою (140/80
+    // от lg; 96/48 — мобильная база оригинала, why-us.css:111).
+    const whuIdx = layerCss.indexOf('.whu {');
+    expect(whuIdx, '.whu найдено (слой, T18.12)').toBeGreaterThan(-1);
+    expect(layerCss.slice(whuIdx, whuIdx + 200), 'whu: мобильная база 96/48').toContain(
+      'padding: 6rem 0 var(--ui-space-7);',
     );
+    const whuLg = layerCss
+      .slice(whuIdx)
+      .match(/@media \(min-width: 1024px\)\s*\{\s*\.whu \{([^}]*)\}/);
+    expect(whuLg, 'ступень lg ритма whu найдена').toBeTruthy();
+    expect(whuLg[1], 'whu: ритм оригинала 140/80 от lg').toContain('padding: 8.75rem 0 5rem;');
     expect(blockOf(pilotCss, '.cp-holding'), 'holding: ритм оригинала').toContain(
       'padding: 4.5rem 0 3rem;',
     );
   });
 
   it('позиционирование корней сохранено (якорь absolute-слоёв)', () => {
-    // hero — канон hro (T17.15): пин position — по слою.
+    // hero — канон hro (T17.15): пин position — по слою. why-us — канон whu
+    // (T18.12): position несёт примитив ui-section--photo — слой его не
+    // переобъявляет (пин инварианта — по слою).
     expect(blockOf(layerCss, '.hro'), '.hro: position: relative (слой)').toContain(
       'position: relative;',
     );
-    for (const block of ['.cp-production', '.cp-holding', '.cp-why-us', '.cp-company-banner']) {
+    expect(
+      blockOf(layerCss, '.whu'),
+      'whu: position несёт примитив (не переобъявляется)',
+    ).not.toContain('position');
+    for (const block of ['.cp-production', '.cp-holding', '.cp-company-banner']) {
       expect(blockOf(pilotCss, block), `${block}: position: relative`).toContain(
         'position: relative;',
       );

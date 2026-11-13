@@ -537,133 +537,11 @@
 /* Лента логотипов «Работодатели Группы» — связка lgo-grid/lgo-card (T17.9):
    правила cp-employers-семейства сняты, канон — паттерн-слой. */
 
-/* ── why-us: тёмная секция с карточками (сайт-зона) ── */
-
-/* Фото-фон — ui-section--photo (T17.3, без оверлея); ритм ui-section
-   погашен — вертикальную геометрию несёт __inner (space-8). */
-.cp-why-us {
-  position: relative;
-  overflow: hidden;
-  padding: 8.75rem 0 5rem; /* 140/80 why-us.css:3 «как есть» (ритм ui-section погашен) */
-}
-
-.cp-why-us__inner {
-  /* ритм секции целиком на .cp-why-us (140/80 — why-us.css:3) — паддинги
-     __inner погашены (батч ритма 01.11) */
-  padding-top: 0;
-  padding-bottom: 0;
-}
-
-.cp-why-us__top {
-  display: flex; /* why-us.css:23 — flex space-between, title + карточка 429px */
-  gap: 2.25rem; /* 36px why-us.css:27 «как есть» */
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 2.25rem; /* 36px why-us.css:28 */
-}
-
-.cp-why-us__top .cp-why-us__card {
-  flex: 0 0 26.8125rem; /* 429px why-us.css:64 «как есть» */
-}
-
-.cp-why-us__title {
-  max-width: 55.875rem; /* 894px why-us.css:32 */
-  line-height: 1.3;
-  letter-spacing: -0.02em;
-}
-
-.cp-why-us__row {
-  display: flex; /* why-us.css:40 */
-  gap: 2.25rem; /* 36px why-us.css:41 */
-  margin-bottom: 9rem; /* 144px why-us.css:42 «как есть» — панель вакансий ниже */
-}
-
-.cp-why-us__title {
-  color: var(--ui-color-text-on-dark);
-}
-
-.cp-why-us__row {
-  display: grid;
-  gap: var(--ui-space-3);
-  grid-template-columns: repeat(3, 1fr);
-  margin-top: var(--ui-space-4);
-}
-
-.cp-why-us__card {
-  --cp-why-photo: 1; /* hover-гаситель фото (why-us.css:77) */
-  display: flex;
-  position: relative;
-  flex-direction: column;
-  gap: 2.25rem; /* 36px why-us.css:55 */
-  overflow: hidden;
-  min-height: 20rem; /* 320px why-us.css:56 */
-  padding: 1.25rem; /* 20px why-us.css:57 */
-  border: none;
-  border-radius: var(--ui-radius-md); /* radius-card 16 */
-  background-color: var(--ui-color-surface-blue-deep); /* blue-700 why-us.css:58 */
-  color: var(--ui-color-text-on-dark);
-}
-
-.cp-why-us__card-photo {
-  position: absolute; /* фото-фон карточки (why-us.css:68-75) */
-  inset: 0;
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
-  transition: opacity var(--ui-transition);
-}
-
-@media (hover: hover) {
-  .cp-why-us__card:hover .cp-why-us__card-photo {
-    opacity: 0.15;
-  }
-}
-
-.cp-why-us__card-title {
-  position: relative;
-  line-height: 1.25; /* why-us.css:83 */
-  letter-spacing: -0.02em; /* why-us.css:84 */
-}
-
-.cp-why-us__card-text {
-  position: relative;
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition:
-    opacity var(--ui-transition),
-    max-height 0.3s ease; /* why-us.css:95-96 */
-}
-
-@media (hover: hover) {
-  .cp-why-us__card:hover .cp-why-us__card-text {
-    max-height: 13.75rem; /* 220px why-us.css:100 */
-    opacity: 1;
-  }
-}
-
-.cp-why-us__card-num {
-  display: inline-flex;
-  position: absolute;
-  right: 1.25rem; /* 20px why-us.css:106 */
-  bottom: 1rem; /* 16px why-us.css:107 */
-  align-items: center;
-  justify-content: center;
-  width: 2.75rem; /* 44px why-us.css:108 */
-  height: 2.75rem;
-  padding: 0.625rem; /* 10px why-us.css:112 */
-  border-radius: var(--ui-radius-pill);
-  background-color: var(--ui-color-glass-dark); /* white 10% why-us.css:113 */
-  font-size: var(--ui-fs-body);
-  opacity: 0;
-  transition: opacity var(--ui-transition);
-}
-
-@media (hover: hover) {
-  .cp-why-us__card:hover .cp-why-us__card-num {
-    opacity: 1;
-  }
-}
+/* Тёмная секция why-us — канон whu паттерн-слоя (T18.12): правила
+   cp-why-us-семейства сняты (секция/top/title/row/стекло-карточки + hover-
+   раскрытие), семейство ушло из allowlist ценза (судьба «вынос в слой»,
+   REPORT §11.4). Панель вакансий внутри секции — сайт-зона (vacancy-search,
+   вынос — T18.16). */
 
 /* ── vacancy-search: панель фильтров-пилюль (связки поверх ui-select) ── */
 
@@ -2013,8 +1891,9 @@ a.cp-intern-card {
   /* Лента логотипов — связка lgo-grid (T17.9): ступень 4 колонки — канон
      слоя (min-width: 768px), лестница пилота снята. */
 
-  .cp-why-us__top,
-  .cp-why-us__row,
+  /* why-us — канон whu слоя (T18.12): ступень 2 колонок — база колонкой
+     канона (оригинал ≤1023), лестница пилота снята. */
+
   .cp-holding__stats,
   .cp-adv-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -2066,8 +1945,6 @@ a.cp-intern-card {
      от md — ступень 767 копипасты снята (mobile-first). */
 
   .cp-directions__grid,
-  .cp-why-us__top,
-  .cp-why-us__row,
   .cp-holding__stats,
   .cp-adv-grid {
     grid-template-columns: 1fr;

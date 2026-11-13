@@ -95,7 +95,7 @@ const sliceSection = (from, marker) => {
 /** Фикстура v2-преобразования: реальные блоки шаблона в порядке страницы
  *  (why-us → students illustrated → students photographic). */
 const fixture = [
-  sliceSection(indexTemplate, '<section class="ui-section ui-section--photo cp-why-us">'),
+  sliceSection(indexTemplate, '<section class="ui-section ui-section--photo whu">'),
   sliceSection(indexTemplate, '<section class="ui-section" id="students">'),
   sliceSection(indexTemplate, '<section class="ui-section stu-photo">'),
 ].join('\n');
@@ -176,15 +176,15 @@ describe('build.mjs — фото-карточки на каркасе ui-card--m
 });
 
 describe('applyVariant2 — index-2: 0 why-us, photographic --v2 (behavioral пин)', () => {
-  it('фикстура собрана из реальных блоков шаблона (санити)', () => {
-    expect(fixture).toContain('cp-why-us');
+  it('фикстура собрана из реальных блоков шаблона (санити; маркер секции — канон whu, T18.12)', () => {
+    expect(fixture).toContain('ui-section--photo whu');
     expect(fixture).toContain('<section class="ui-section" id="students">');
     expect(fixture).toContain('<section class="ui-section stu-photo">');
   });
 
   it('why-us снята вместе с панелью вакансий #vacancies (в v2 — vacancy-capsule, T18.2)', () => {
     const v2 = applyVariant2(fixture);
-    expect(v2, 'секции why-us нет').not.toContain('cp-why-us');
+    expect(v2, 'секции why-us нет').not.toContain('ui-section--photo whu');
     expect(v2, 'панель вакансий ушла вместе с секцией').not.toContain('id="vacancies"');
     expect(v2, 'остальные блоки не задеты').toContain('Школьникам и студентам');
   });
@@ -327,9 +327,9 @@ describe('ценз T17.16 — семейство stu- не создаёт cp-с�
     );
   });
 
-  it('пороги семейств не тронуты (MAX_CP_FAMILIES 30; allowlist — errata T18.3: +company-feed, errata T18.10: −page-head/−page-subtitle, errata T18.11: −tabs-row/−tabs-links, 27)', () => {
+  it('пороги семейств не тронуты (MAX_CP_FAMILIES 30; allowlist — errata T18.3: +company-feed, errata T18.10: −page-head/−page-subtitle, errata T18.11: −tabs-row/−tabs-links, errata T18.12: −why-us, 26)', () => {
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(27);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(26);
     expect(ALLOWED_CP_FAMILIES, 'семейство students в allowlist не появляется').not.toContain(
       'students',
     );

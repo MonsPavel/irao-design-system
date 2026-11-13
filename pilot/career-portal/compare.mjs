@@ -511,7 +511,8 @@ const BLOCK_PROBES = {
     // Лента логотипов — связка lgo-grid (T17.9): проба на крючке слоя
     // (прецедент video-block/cta-mail).
     ['employers', '.employers', '.lgo-grid'],
-    ['why-us', '.why-us', '.cp-why-us'],
+    // T18.12: why-us — канон whu паттерн-слоя (прецедент hro/msh).
+    ['why-us', '.why-us', '.whu'],
     ['vacancy-search', '.vacancy-search', '#vacancies'],
     ['students', '.students--illustrated', '#students'],
     // Вторая секция «Школьникам и студентам» — фото-карточки (T18.1):

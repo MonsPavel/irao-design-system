@@ -1,10 +1,10 @@
 # Паттерн «Landing-секция» (T8.3)
 
 Правила сборки лендинг-секций из системных примитивов + mini-эталон из
-двенадцати секций (светлая / тёмная / с-изображением full-bleed /
+тринадцати секций (светлая / тёмная / с-изображением full-bleed /
 с-фото-фоном — T17.3 / nav-карточки и лента логотипов — T17.9 / hero,
 adv-marquee, спец-сетка «Медиа», cover-hero — T17.15 / наставничество,
-капсула вакансий — T18.2).
+капсула вакансий — T18.2 / тёмная секция «why-us» — T18.12).
 Эталон целиком: [`landing-section.html`](landing-section.html) — он же стенд
 `/showcase/dist/stands/patterns/landing-section.html` (генерируется
 `showcase/build.mjs`).
@@ -547,6 +547,75 @@ btn — CTA-ссылка accent (80px от md); от md — строка по ц
   секция от контента.
 - Hover-пары (blue-100/accent-light) — под гвардом `(hover: hover)` (EPIC-4).
 
+## Тёмная секция «why-us» (whu, T18.12)
+
+Тёмная секция с фото-фоном и стеклянными карточками «Работа в „Интер РАО"»
+(порт `.cp-why-us` career-portal — принятый рендер, батч ритма 01.11: блок
+1350↔1350 байт-паритет): фото-фон — примитив `ui-section--photo` (T17.3,
+**без оверлея** — on-dark текст несёт контент), top-зона «заголовок +
+карточка 01» (429px от lg), ряд стеклянных карточек (blue-700) с
+hover-раскрытием, панель вакансий **внутри секции** (build.py SLOTS).
+Связка живёт в паттерн-слое (`dist/ui-patterns.css`, гейт префиксов
+`whu`); значения — принятый пилот 1:1 с источниками `why-us.css` в
+комментариях; мобильные базы — ступени оригинала, инвертированные
+mobile-first (прецедент msh, T18.2):
+
+```html
+<section class="ui-section ui-section--photo whu" aria-labelledby="whu-title">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="bg.jpg" alt="" width="1600" height="900" loading="lazy">
+  </div>
+  <div class="ui-container">
+    <div class="whu__top">
+      <h2 class="ui-h2 whu__title" id="whu-title">Работа в «Интер РАО»…</h2>
+      <article class="whu__card">…</article>
+    </div>
+    <div class="whu__row">
+      <article class="whu__card">…</article> …
+    </div>
+    <!-- Слот панели вакансий — контент секции (в пилоте
+         cp-vacancy-search__wrap id="vacancies"; вынос — T18.16). -->
+  </div>
+</section>
+```
+
+| Слой | Что | Откуда |
+|---|---|---|
+| Секция | `.whu` — клип, ритм 140/80 «как есть» от lg (96/48 — мобильная база оригинала) | паттерн-слой, порт `.cp-why-us` (why-us.css:3/111) |
+| Top-зона | `.whu__top` — flex space-between, gap/низ 36 «как есть»; база колонкой, строка от lg | паттерн-слой (why-us.css:23–28/108) |
+| Top-карточка | `.whu__top .whu__card` — во всю ширину в базе, фикс 429px от lg | паттерн-слой (why-us.css:64/109) |
+| Заголовок | `.whu__title` — max-width 894px, lh 1.3/ls −0.02em (override роли), on-dark | паттерн-слой (why-us.css:32–36) |
+| Ряд | `.whu__row` — grid: колонка в базе, 3×1fr от lg (шаг 36 в базе / 12 от lg — принятый рендер), низ 144 «как есть» | паттерн-слой (why-us.css:40–42 + пилот) |
+| Карточка | `.whu__card` — flex-колонка gap 36, min-height 320, padding 20, радиус md, заливка blue-700 (`--ui-color-surface-blue-deep`), текст on-dark | паттерн-слой (why-us.css:49–62) |
+| Фото | `.whu__card-photo` — absolute-слой поверх заливки, cover; класс несёт `-photo` — vi.css img:off прячет (VI-инвариант) | паттерн-слой (why-us.css:68–75) |
+
+- **Hover-раскрытие — CSS-канон без JS** (Implementation requirements
+  T18.12 п.2): текст (`.whu__card-text` — max-height 0/opacity 0 в покое →
+  220px/1 по hover), номер (`.whu__card-num` — круг 44px на стекле
+  `--ui-color-glass-dark`) и фото (opacity 0.15) переключаются под гвардом
+  `(hover: hover)` (EPIC-4). Раскрытие меняет только opacity/max-height —
+  контент остаётся в a11y-дереве при любом состоянии (display:none/
+  visibility:hidden не используются); переходы в VI-режиме гасит vi.css
+  (`body.vi * { transition: none }`) — раскрытие мгновенно.
+- **Панель вакансий — слот контента секции**: канон правила не несёт
+  (панель — самостоятельное семейство `vacancy-search`: в пилоте
+  `cp-vacancy-search__wrap id="vacancies"` — min-height 310, вынос —
+  T18.16); ритм до панели ведёт margin-bottom 144px строки.
+- **Мобильные базы — ступени оригинала** (why-us.css:108–115,
+  инвертированы mobile-first): top колонкой и row колонкой ≤1023 — база,
+  строка/3 колонки от lg (1024, шкала T2.5); top-карточка 429px от lg,
+  во всю ширину в базе (гейт 32px-базы T3.6: 429px на 375 переполняет).
+- **Заголовки**: у секции h2 → у карточек h3 (без пропуска уровня, гейт
+  `irao/heading-order`); номера карточек — декоративные `span` с
+  `aria-hidden="true"`.
+- **Тёмная секция — on-dark-пары** (раздел выше): заголовок/карточки несут
+  `--ui-color-text-on-dark`; текст карточки — роль `ui-small` (цвет
+  наследует карточка — слой его не переобъявляет, дисциплина dpp__place).
+- Миграция из пилота career-portal: разметка `cp-why-us*` → `whu`/`whu__*`
+  (пара no-op `__inner` снята — вертикальных паддингов у `ui-container`
+  нет), правила сняты из `pilot.css` (~130 строк + ступени 1023/767);
+  панель `cp-vacancy-search__*` — сайт-зона остаётся (T18.16).
+
 ## A11y
 
 - Заголовок секции — h2 с ролью `ui-h2`; секция именована
@@ -595,5 +664,7 @@ btn — CTA-ссылка accent (80px от md); от md — строка по ц
   дока и слоя, миграция пилота): `tests/unit/landing-compositions.test.js`.
 - Юнит-пины наставничества и капсулы (msh/vcp, синхронность дока и слоя,
   гейт префиксов): `tests/unit/pattern-mentorship-capsule.test.js`.
+- Юнит-пины тёмной секции why-us (whu, hover-раскрытие — CSS-канон,
+  синхронность дока и слоя, миграция пилота): `tests/unit/pattern-why-us.test.js`.
 - Поверхность браузера (4 секции, computed on-dark-цвета, bleed-геометрия по
   вьюпортам, axe, адаптив, эталоны): `tests/e2e/pattern-landing-section.spec.js`.
