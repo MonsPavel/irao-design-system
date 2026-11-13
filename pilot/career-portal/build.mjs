@@ -2986,7 +2986,7 @@ ${cards}
   <div class="ui-container">
     <div class="php">
       <h1 class="ui-page-title">Компании группы</h1>
-      <p class="php-subtitle ui-lead ui-text--muted">Работодатели Группы «Интер РАО» — от генерации до сбыта и сервисов.</p>
+      <p class="php-subtitle ui-lead ui-text--muted">Компании Группы «Интер РАО». Клик по названию откроет страницу компании в новой вкладке.</p>
     </div>
 ${sections}
   </div>

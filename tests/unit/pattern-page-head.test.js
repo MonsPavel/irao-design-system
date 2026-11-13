@@ -110,18 +110,27 @@ describe('patterns/patterns.css — канон обложки страницы (
     );
   });
 
-  it('--split: правая колонка «На сайте N вакансий»; мобильная база — колонка/прижато влево (components.css:46), строка с прижатием к низу — от md (components.css:43, инверсия mobile-first)', () => {
+  it('--split: правая колонка «На сайте N вакансий» — эффективные значения оригинала (pages.css:24–29): шаг 24, прижатие flex-end на всех ширинах; мобильная база — колонка (components.css:46), строка — от md (components.css:43, инверсия mobile-first)', () => {
     const split = blockOf(layer, '.php--split');
     expect(split, '.php--split найдено').toBeTruthy();
+    expect(
+      split,
+      'строка без wrap — max-content пары «заголовок+кнопка» education уводит вторую колонку на 2-ю строку на одобренных ширинах',
+    ).not.toContain('flex-wrap');
     expect(split, 'мобильная база — колонка (components.css:46, инверсия @max-767)').toContain(
       'flex-direction: column;',
     );
-    expect(split, 'мобильная база — прижато влево (components.css:46)').toContain(
-      'align-items: flex-start;',
-    );
     expect(
       split,
-      'space-between — components.css:43 (оригинал несёт его и в колонке ≤767 — перенос 1:1)',
+      'шаг 24px — pages.css:28 (вторая пара .page-head--split, грузится после components.css и выигрывает каскад)',
+    ).toContain('gap: 1.5rem;');
+    expect(
+      split,
+      'align-items: flex-end — pages.css:26 (перебивает components.css:46 flex-start: оригинал прижимает ноту к низу строки и к правому краю в колонке ≤767)',
+    ).toContain('align-items: flex-end;');
+    expect(
+      split,
+      'space-between — components.css:43/pages.css:27 (несётся и в колонке ≤767)',
     ).toContain('justify-content: space-between;');
     const md = mediaBlockOf(layer, 768, 'php--split');
     expect(md, 'ступень md есть').toBeTruthy();
@@ -129,11 +138,22 @@ describe('patterns/patterns.css — канон обложки страницы (
       md,
       'от md — строка (components.css:43; тот же рендер, что max-width: 767 оригинала)',
     ).toContain('flex-direction: row;');
-    expect(md, 'прижатие к низу строки (components.css:43)').toContain('align-items: flex-end;');
+    expect(md, 'flex-end в ступени не переобъявляется (база — pages.css:26)').not.toContain(
+      'align-items',
+    );
+    expect(md, 'gap/justify в ступени не переобъявляются (база — pages.css:27–28)').not.toMatch(
+      /gap|justify-content/,
+    );
+    const granule = blockOf(layer, '.php--split .php-note');
     expect(
-      md,
-      'space-between в ступени не переобъявляется (база — components.css:43)',
-    ).not.toContain('justify-content');
+      granule,
+      'гранула 32px-гейта T3.6 в ступени md — усадка ноты под переполнением',
+    ).toBeTruthy();
+    expect(
+      granule,
+      'усадка ноты — flex-shrink: 1 (pages.css:31 flex: none переобъявляется только под переполнением, класс overflow-wrap: anywhere T17.14)',
+    ).toContain('flex-shrink: 1;');
+    expect(granule, 'min-width: 0 — прецедент .lpp-row__main (T18.7)').toContain('min-width: 0;');
   });
 
   it('php-note: правая колонка --split не усаживается (flex: none — .page-head__note pages.css:31); шрифт/цвет несут роли ui-body/ui-text--muted разметки (слой цвет не переобъявляет)', () => {

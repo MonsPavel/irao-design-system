@@ -867,22 +867,42 @@
   margin-bottom: 2.5rem;
 }
 
-/* --split (правая колонка «На сайте N вакансий»): мобильная база — колонка
-   с прижатием влево (components.css:46 — оригинал @max-767, инверсия
-   mobile-first ДС); space-between из components.css:43 несётся и в колонке
-   ≤767 (оригинал в ступени его не меняет) — перенос 1:1. От md — строка с
-   прижатием правой колонки к низу (components.css:43; ступень 768 шкалы
-   T2.5 — тот же рендер, что max-width: 767 оригинала). */
+/* --split (правая колонка «На сайте N вакансий»): эффективные значения
+   оригинала — pages.css:24–29 (вторая пара .page-head--split, грузится
+   после components.css и выигрывает каскад): шаг 24px (pages.css:28 —
+   против 16 базы .page-head) и прижатие к низу/правому краю (pages.css:26,
+   flex-end на всех ширинах — components.css:46 со своим flex-start в
+   ≤767 перебит); space-between — components.css:43/pages.css:27.
+   Мобильная база — колонка (components.css:46, инверсия mobile-first ДС);
+   от md — строка (components.css:43; ступень 768 шкалы T2.5 — тот же
+   рендер, что max-width: 767 оригинала). Строка БЕЗ wrap: wrap-гранула
+   недопустима — max-content пары «заголовок + кнопка» (шапка предложений
+   education, h2 1340px) уводит вторую колонку на вторую строку уже на
+   одобренных ширинах; усадку под rem-стрессом несёт нота (гранула в
+   ступени md ниже). */
 .php--split {
   flex-direction: column;
-  align-items: flex-start;
+  gap: 1.5rem;
+  align-items: flex-end;
   justify-content: space-between;
 }
 
 @media (min-width: 768px) {
   .php--split {
     flex-direction: row;
-    align-items: flex-end;
+  }
+
+  /* Гранула 32px-гейта T3.6 (release-гейт scaling.spec.js B): min-content
+     строки title+note при 32px-базе шире контейнера 768 — ноте разрешена
+     усадка (перенос текста внутри; min-width: 0 — прецедент .lpp-row__main
+     T18.7). На одобренных ширинах строка не переполняется ни на одной
+     странице клона (мин-контент левого столбца ≤ 240px @md, нота 180) —
+     усадка не активируется, рендер прежний: pages.css:31 flex: none
+     переобъявляется в усадку ТОЛЬКО под переполнением — класс reflow-
+     гранулы overflow-wrap: anywhere (T17.14). */
+  .php--split .php-note {
+    flex-shrink: 1;
+    min-width: 0;
   }
 }
 

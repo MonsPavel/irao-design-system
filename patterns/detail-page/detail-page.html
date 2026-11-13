@@ -504,9 +504,10 @@
     Точка расширения детальной страницы — обложка внутренних страниц, связка
     <code>php</code> паттерн-слоя (T18.10): колонка «заголовок → подзаголовок» с шагом 16 и низом 40
     (порт <code>.page-head</code> career-portal, <code>components.css:36–41</code>); вариант
-    <code>php--split</code> — правая колонка «На сайте N вакансий» прижимается к низу строки
-    (<code>php-note</code>, <code>pages.css:31</code>; от md — строка, мобильная база — колонка,
-    инверсия <code>@max-767</code> оригинала). Типографика — роли: заголовок
+    <code>php--split</code> — правая колонка «На сайте N вакансий» прижимается к низу строки/правому
+    краю (<code>pages.css:24–29</code> — эффективные значения: шаг 24, <code>flex-end</code> на всех
+    ширинах; <code>php-note</code>, <code>pages.css:31</code>; от md — строка, мобильная база —
+    колонка, инверсия <code>@max-767</code> оригинала). Типографика — роли: заголовок
     <code>ui-page-title</code> (T14.2), подзаголовок — пара <code>ui-lead</code> +
     <code>ui-text--muted</code> (ширина 780px несёт <code>php-subtitle</code>; цвет слой не
     переобъявляет). Шапка-тройка контентной колонки — отдельная связка <code>dpp__head</code>
@@ -526,9 +527,10 @@
   </div>
 
   <!-- Обложка — split: правая колонка «На сайте N вакансий» (оригинал
-       vacancies.html:149–155) прижимается к низу строки (align-items:
-       flex-end от md); вид ноты — роли ui-body + ui-text--muted
-       (fs-body/color pages.css:31), усадку гасит php-note (flex: none). -->
+       vacancies.html:149–155, эффективные значения pages.css:24–29 — шаг 24,
+       align-items: flex-end на всех ширинах, от md — строка); вид ноты —
+       роли ui-body + ui-text--muted (fs-body/color pages.css:31), усадку
+       гасит php-note (flex: none). -->
   <div class="php php--split">
     <div>
       <h3 class="ui-page-title">Вакансии</h3>

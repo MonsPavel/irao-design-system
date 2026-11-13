@@ -92,15 +92,18 @@
 паттерн-слое (T18.10, точка расширения list-page/detail-page): шаг 16px и
 низ 40px — 1:1 порт `.page-head` career-portal (`components.css:36–41`;
 40px вне шкалы отступов §3.2 — перенос «как есть»). Вариант `php--split`
-несёт правую колонку «На сайте N вакансий»: строка с прижатием к низу
-(`align-items: flex-end`, `components.css:43`) от md, мобильная база —
-колонка с прижатием влево (инверсия `@max-767`, `components.css:46`);
-усадку ноты гасит `php-note` (`flex: none` — `pages.css:31`). Типографика —
-роли base (слой её не дублирует): заголовок — `ui-page-title`, подзаголовок
-— пара `ui-lead` + `ui-text--muted` (цвет muted слой не переобъявляет),
-ширина подзаголовка 780px — `php-subtitle` (`components.css:61`, «как
-есть»). Обложка лендинга — отдельная сущность (cover-hero, `cvh`-канон
-T17.15) — обложкой страниц не является.
+несёт правую колонку «На сайте N вакансий» — **эффективные** значения
+оригинала (`pages.css:24–29`, грузится после components.css и выигрывает
+каскад): шаг 24px (`pages.css:28`), прижатие к низу строки/правому краю
+`align-items: flex-end` на всех ширинах (`pages.css:26` — перебивает
+`components.css:46` со своим flex-start); строка — от md
+(`components.css:43`, инверсия mobile-first), мобильная база — колонка;
+усадку ноты гасит `php-note` (`flex: none` — `pages.css:31`).
+Типографика — роли base (слой её не дублирует): заголовок —
+`ui-page-title`, подзаголовок — пара `ui-lead` + `ui-text--muted` (цвет
+muted слой не переобъявляет), ширина подзаголовка 780px — `php-subtitle`
+(`components.css:61`, «как есть»). Обложка лендинга — отдельная сущность
+(cover-hero, `cvh`-канон T17.15) — обложкой страниц не является.
 
 ```html
 <div class="php php--split">
@@ -116,8 +119,8 @@ T17.15) — обложкой страниц не является.
 
 ```css
 .php { box-sizing: border-box; display: flex; flex-direction: column; gap: var(--ui-space-4); margin-bottom: 2.5rem; } /* шаг 16 / низ 40 — components.css:39/40 */
-.php--split { flex-direction: column; align-items: flex-start; justify-content: space-between; } /* ≤767: components.css:46 */
-@media (min-width: 768px) { .php--split { flex-direction: row; align-items: flex-end; } } /* от md: components.css:43 */
+.php--split { flex-direction: column; gap: 1.5rem; align-items: flex-end; justify-content: space-between; } /* база: ≤767 колонка — components.css:46; шаг/прижатие — pages.css:26–28 */
+@media (min-width: 768px) { .php--split { flex-direction: row; } .php--split .php-note { flex-shrink: 1; min-width: 0; } } /* от md: components.css:43; усадка ноты — гранула 32px-гейта T3.6 */
 .php-note { flex: none; } /* pages.css:31 */
 .php-subtitle { max-width: 48.75rem; } /* 780px — components.css:61 */
 ```
