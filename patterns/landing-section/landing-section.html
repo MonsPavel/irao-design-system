@@ -1,10 +1,12 @@
 <!--
   Паттерн «Landing-секция» (T8.3): правила сборки лендинг-секций из
-  системных примитивов + mini-эталон из двенадцати секций — светлая, тёмная,
+  системных примитивов + mini-эталон из пятнадцати секций — светлая, тёмная,
   с-изображением full-bleed, с-фото-фоном (T17.3), nav-карточки и лента
   логотипов (T17.9), лендинг-композиции hero / adv-marquee / спец-сетка
   «Медиа» / cover-hero (T17.15 — связки паттерн-слоя hro/mrq/mdl/cvh),
-  наставничество и капсула вакансий (T18.2 — связки msh/vcp).
+  наставничество и капсула вакансий (T18.2 — связки msh/vcp), тёмная секция
+  «why-us» (T18.12 — whu), раскладки карусели production v1/v2 (T18.13 —
+  prd поверх ui-carousel).
 
   Формула секции (Scope): ui-section (вертикальный ритм, T3.4) + ui-container
   (центрируемый контейнер, T3.4) + заголовок-роль (ui-h2, «классы, а не
@@ -99,6 +101,19 @@
 
   .lsp-photo .lsp-lead {
     color: var(--ui-color-text-on-dark-muted);
+  }
+
+  /* Карусель production (prd, T18.13): секция — flex-стрека, все слоты
+     позиционированы каноном слоя; служебная нота стенда выводится из
+     потока, чтобы не становиться flex-элементом карусели (зона сайта —
+     «на стенде <style> рядом»). */
+  .lsp-prd-note {
+    box-sizing: border-box;
+    position: absolute;
+    top: var(--ui-space-2);
+    left: var(--ui-space-4);
+    z-index: 6;
+    max-width: 42rem;
   }
 
   /* Full-bleed внутри контейнера (Technical considerations T8.3): бокс
@@ -835,4 +850,202 @@
          (cp-vacancy-search__wrap id="vacancies" — сайт-зона, вынос —
          T18.16); ритм до панели ведёт margin-bottom 144px строки (whu__row). -->
   </div>
+</section>
+
+<!-- Вариант 14 — раскладка карусели «production» v1 (prd, T18.13): фото-
+     секция на примитиве ui-section--photo (T17.3, оверлей --tint — хук
+     --ui-section-overlay-tint: solid primary 90%, errata 31.10 «приведи к
+     оригиналу»), поверх компонента ui-carousel (T17.7 — поведение в dist,
+     вид элементов). Слой несёт раскладку: тело в потоке до xl, абсолютные
+     координаты текста/кнопки от 1280 (модификатор --v1 — пин errata),
+     лента табов внизу с заливками blue-100@30/50 и планкой-спинкой,
+     стрелки 100×100 по краям, номер активного таба. Модификатор --v1 в
+     разметке — рендер v1 (index главной). Слайды — данные разметки
+     (<script type="application/json"> — компонент не ходит в сеть);
+     контролы скрыты до инициализации модуля (разметка правдива без JS). -->
+<section class="ui-section ui-section--photo prd prd--v1 ui-carousel" id="lsp-production" data-ui-carousel aria-label="Раскладка карусели «production» — вариант 1 (лента табов)">
+  <p class="ui-showcase-stand__note lsp-prd-note">
+    Связка «production v1» (<code>prd</code>, T18.13): раскладка карусели
+    поверх <code>ui-carousel</code> (T17.7) — фото-фон <code>ui-section--photo</code>
+    с тинтом <code>--tint</code> (solid primary 90%), лента табов внизу
+    (blue-100@30/50, планка-спинка), стрелки 100×100 по краям; от 1280 —
+    абсолютные координаты текста/кнопки (модификатор <code>--v1</code>).
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27400%27%20cy%3D%27700%27%20r%3D%27320%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%271260%27%20cy%3D%27240%27%20r%3D%27280%27%20fill%3D%27%23F26722%27%20opacity%3D%270.4%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+     >
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>
+
+  <img
+    class="prd__photo ui-carousel__photo"
+    src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27260%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27520%27%20r%3D%27160%27%20fill%3D%27%23F26722%27%20opacity%3D%270.55%27%2F%3E%3C%2Fsvg%3E"
+    alt="Сотрудник на производстве"
+    width="585"
+    height="674"
+    data-ui-carousel-photo
+    loading="lazy"
+   >
+  <div class="prd__body ui-carousel__body">
+    <h2 class="prd__title ui-h2" id="lsp-production-title" data-ui-carousel-title>Производство</h2>
+    <p class="prd__text ui-lead" data-ui-carousel-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
+    <p><a class="ui-button ui-button--light prd__btn" href="#lsp-production" data-ui-carousel-link>Подробнее о вакансии</a></p>
+  </div>
+
+  <button class="prd__arrow prd__arrow--prev ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
+    <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="prd__arrow prd__arrow--next ui-carousel__arrow" type="button" data-ui-carousel-next hidden aria-label="Следующий слайд">
+    <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M2 2l20 23L2 48" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <!-- Слайды: данные для модуля ui-carousel (в Битриксе — из инфоблока). -->
+  <script type="application/json" data-ui-carousel-slides>[
+    { "title": "Производство", "text": "Вклад каждого сотрудника на производстве — это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и был уверен в завтрашнем дне.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27260%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27520%27%20r%3D%27160%27%20fill%3D%27%23F26722%27%20opacity%3D%270.55%27%2F%3E%3C%2Fsvg%3E", "fit": "contain", "count": "25 вакансий" },
+    { "title": "Женские вакансии на производстве", "text": "Мы создаём комфортные условия для работы женщин на производстве: удобный график, современное оборудование и поддержка команды.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27180%27%20cy%3D%27240%27%20r%3D%27100%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27480%27%20r%3D%27140%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E", "fit": "contain", "count": "13 вакансий" },
+    { "title": "Административная работа", "text": "Организационная поддержка ключевых процессов компании. Работа в команде профессионалов и широкие возможности для развития.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27300%27%20r%3D%27130%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E", "fit": "cover", "count": "16 вакансий" },
+    { "title": "Металлообработка", "text": "Работа на современном высокотехнологичном оборудовании. Стабильная занятость и достойная оплата труда.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27400%27%20r%3D%27150%27%20fill%3D%27%23F26722%27%20opacity%3D%270.45%27%2F%3E%3C%2Fsvg%3E", "fit": "cover", "count": "8 вакансий" },
+    { "title": "IT сфера", "text": "Цифровые решения для энергетики: разработка, поддержка и развитие информационных систем компании.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27350%27%20cy%3D%27300%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27520%27%20r%3D%27140%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E", "fit": "contain", "count": "10 вакансий" }
+  ]</script>
+
+  <ul class="prd__stepper ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="true">
+      <span class="prd__tab-num">1</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Производство</span>
+        <span class="prd__tab-count">25 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">2</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Женские вакансии на производстве</span>
+        <span class="prd__tab-count">13 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">3</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Административная работа</span>
+        <span class="prd__tab-count">16 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">4</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Металлообработка</span>
+        <span class="prd__tab-count">8 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">5</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">IT сфера</span>
+        <span class="prd__tab-count">10 вакансий</span>
+      </span>
+    </button></li>
+  </ul>
+</section>
+
+<!-- Вариант 15 — раскладка карусели «production» v2 (prd--v2, T18.13):
+     тот же канон с модификатором --v2 — «фото слева, текст справа, чипы
+     сверху» (production.css:274-302): фото left 22/top 72, тело вправо
+     (padding 56/72), чипы-табы 59px radius 32 blur(6px) справа сверху
+     (от lg — absolute; мобильная база — static-лента), активный чип —
+     primary-deep 90% + кольцо white@35, номер всегда. В билде пилота
+     модификатор ставит applyVariant2 (прецедент build.py:589 оригинала:
+     --v1 → --v2). -->
+<section class="ui-section ui-section--photo prd prd--v2 ui-carousel" id="lsp-production-v2" data-ui-carousel aria-label="Раскладка карусели «production» — вариант 2 (чипы сверху)">
+  <p class="ui-showcase-stand__note lsp-prd-note">
+    Связка «production v2» (<code>prd--v2</code>, T18.13): фото слева, текст
+    справа, чипы-табы сверху (59px, radius 32, blur, заливка blue-100@50);
+    активный — primary-deep 90% с кольцом, номер всегда виден. От lg чипы —
+    absolute справа сверху, мобильная база — static-лента.
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271300%27%20cy%3D%27300%27%20r%3D%27340%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27750%27%20r%3D%27260%27%20fill%3D%27%23F26722%27%20opacity%3D%270.4%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+     >
+  </div>
+  <div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>
+
+  <img
+    class="prd__photo ui-carousel__photo"
+    src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27280%27%20r%3D%27110%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27540%27%20r%3D%27150%27%20fill%3D%27%23F26722%27%20opacity%3D%270.55%27%2F%3E%3C%2Fsvg%3E"
+    alt="Сотрудник на производстве"
+    width="585"
+    height="674"
+    data-ui-carousel-photo
+    loading="lazy"
+   >
+  <div class="prd__body ui-carousel__body">
+    <h2 class="prd__title ui-h2" id="lsp-production-v2-title" data-ui-carousel-title>Производство</h2>
+    <p class="prd__text ui-lead" data-ui-carousel-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
+    <p><a class="ui-button ui-button--light prd__btn" href="#lsp-production-v2" data-ui-carousel-link>Подробнее о вакансии</a></p>
+  </div>
+
+  <button class="prd__arrow prd__arrow--prev ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
+    <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+  <button class="prd__arrow prd__arrow--next ui-carousel__arrow" type="button" data-ui-carousel-next hidden aria-label="Следующий слайд">
+    <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M2 2l20 23L2 48" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+  <!-- Слайды: те же данные, что у v1 (вариант 2 главной — та же карусель). -->
+  <script type="application/json" data-ui-carousel-slides>[
+    { "title": "Производство", "text": "Вклад каждого сотрудника на производстве — это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и был уверен в завтрашнем дне.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27280%27%20r%3D%27110%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27290%27%20cy%3D%27540%27%20r%3D%27150%27%20fill%3D%27%23F26722%27%20opacity%3D%270.55%27%2F%3E%3C%2Fsvg%3E", "fit": "contain", "count": "25 вакансий" },
+    { "title": "Женские вакансии на производстве", "text": "Мы создаём комфортные условия для работы женщин на производстве: удобный график, современное оборудование и поддержка команды.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27180%27%20cy%3D%27240%27%20r%3D%27100%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27480%27%20r%3D%27140%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E", "fit": "contain", "count": "13 вакансий" },
+    { "title": "Административная работа", "text": "Организационная поддержка ключевых процессов компании. Работа в команде профессионалов и широкие возможности для развития.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27300%27%20r%3D%27130%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E", "fit": "cover", "count": "16 вакансий" },
+    { "title": "Металлообработка", "text": "Работа на современном высокотехнологичном оборудовании. Стабильная занятость и достойная оплата труда.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27400%27%20r%3D%27150%27%20fill%3D%27%23F26722%27%20opacity%3D%270.45%27%2F%3E%3C%2Fsvg%3E", "fit": "cover", "count": "8 вакансий" },
+    { "title": "IT сфера", "text": "Цифровые решения для энергетики: разработка, поддержка и развитие информационных систем компании.", "photo": "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27585%27%20height%3D%27674%27%3E%3Crect%20width%3D%27585%27%20height%3D%27674%27%20fill%3D%27none%27%2F%3E%3Ccircle%20cx%3D%27350%27%20cy%3D%27300%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27200%27%20cy%3D%27520%27%20r%3D%27140%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E", "fit": "contain", "count": "10 вакансий" }
+  ]</script>
+
+  <ul class="prd__stepper ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="true">
+      <span class="prd__tab-num">1</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Производство</span>
+        <span class="prd__tab-count">25 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">2</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Женские вакансии на производстве</span>
+        <span class="prd__tab-count">13 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">3</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Административная работа</span>
+        <span class="prd__tab-count">16 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">4</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">Металлообработка</span>
+        <span class="prd__tab-count">8 вакансий</span>
+      </span>
+    </button></li>
+    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="false">
+      <span class="prd__tab-num">5</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">IT сфера</span>
+        <span class="prd__tab-count">10 вакансий</span>
+      </span>
+    </button></li>
+  </ul>
 </section>

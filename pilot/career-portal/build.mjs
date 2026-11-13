@@ -1279,11 +1279,11 @@ function indexMain() {
     (
       slide,
       index,
-    ) => `    <li role="presentation"><button class="cp-production__tab ui-carousel__tab" type="button" role="tab" aria-selected="${index === 0 ? 'true' : 'false'}">
-      <span class="cp-production__tab-num">${index + 1}</span>
-      <span class="cp-production__tab-body">
-        <span class="cp-production__tab-title">${esc(slide.title)}</span>
-        <span class="cp-production__tab-count">${esc(slide.count)}</span>
+    ) => `    <li role="presentation"><button class="prd__tab ui-carousel__tab" type="button" role="tab" aria-selected="${index === 0 ? 'true' : 'false'}">
+      <span class="prd__tab-num">${index + 1}</span>
+      <span class="prd__tab-body">
+        <span class="prd__tab-title">${esc(slide.title)}</span>
+        <span class="prd__tab-count">${esc(slide.count)}</span>
       </span>
     </button></li>`,
   ).join('\n');
@@ -1316,31 +1316,35 @@ function indexMain() {
   </div>
 </section>
 
-<section class="ui-section ui-section--photo cp-production ui-carousel" data-ui-carousel>
+<section class="ui-section ui-section--photo prd prd--v1 ui-carousel" data-ui-carousel>
   <!-- фон и сплошная тонировка — ui-section--photo: канон --tint через хук
        --ui-section-overlay-tint (решение владельца 31.10 «приведи к
        оригиналу»: production.css:26-33 — solid primary 90% поверх фото
        завода; прежний --glow-градиент 88→0% и его z-index: auto
        затирали текст слайда — ошибочное прочтение T17.3; радиальный
-       glow-слой опущен — цвет вне токенов, вторичен над сплошным тоном) -->
+       glow-слой опущен — цвет вне токенов, вторичен над сплошным тоном).
+       Раскладка карусели — канон prd паттерн-слоя (T18.13) поверх
+       ui-carousel (T17.7 — поведение в dist, вид элементов); модификатор
+       --v1 — рендер v1 главной (applyVariant2 меняет на --v2, прецедент
+       build.py:589 оригинала) -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/factory-big.jpg" alt="" loading="lazy">
   </div>
   <div class="ui-section__overlay ui-section__overlay--tint" aria-hidden="true"></div>
-  <img class="cp-production__photo ui-carousel__photo" src="assets/images/worker-production.png" alt="Сотрудник на производстве" width="585" height="674" data-ui-carousel-photo loading="lazy">
-  <div class="cp-production__body ui-carousel__body">
-    <h2 class="cp-production__title ui-h2" data-ui-carousel-title>Производство</h2>
-    <p class="cp-production__text ui-lead" data-ui-carousel-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
-    <p><a class="ui-button ui-button--light cp-production__btn" href="vacancies.html" data-ui-carousel-link>Подробнее о вакансии</a></p>
+  <img class="prd__photo ui-carousel__photo" src="assets/images/worker-production.png" alt="Сотрудник на производстве" width="585" height="674" data-ui-carousel-photo loading="lazy">
+  <div class="prd__body ui-carousel__body">
+    <h2 class="prd__title ui-h2" data-ui-carousel-title>Производство</h2>
+    <p class="prd__text ui-lead" data-ui-carousel-text>Вклад каждого сотрудника на&nbsp;производстве&nbsp;— это основа нашего успеха. Нам важно, чтобы каждый чувствовал свою значимость и&nbsp;был уверен в&nbsp;завтрашнем дне.</p>
+    <p><a class="ui-button ui-button--light prd__btn" href="vacancies.html" data-ui-carousel-link>Подробнее о вакансии</a></p>
   </div>
-  <button class="cp-production__arrow cp-production__arrow--prev ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
+  <button class="prd__arrow prd__arrow--prev ui-carousel__arrow" type="button" data-ui-carousel-prev hidden aria-label="Предыдущий слайд">
     <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M23 2L3 25l20 23" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
-  <button class="cp-production__arrow cp-production__arrow--next ui-carousel__arrow" type="button" data-ui-carousel-next hidden aria-label="Следующий слайд">
+  <button class="prd__arrow prd__arrow--next ui-carousel__arrow" type="button" data-ui-carousel-next hidden aria-label="Следующий слайд">
     <svg width="25" height="50" viewBox="0 0 25 50" fill="none" aria-hidden="true"><path d="M2 2l20 23L2 48" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </button>
   <script type="application/json" data-ui-carousel-slides>${productionSlidesJson.replaceAll('</', '<\\/')}</script>
-  <ul class="cp-production__stepper ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
+  <ul class="prd__stepper ui-carousel__stepper" role="tablist" aria-label="Направления производства" hidden>
 ${stepperTabs}
   </ul>
 </section>
@@ -3228,8 +3232,8 @@ function applyVariant2(html) {
       'class="ui-section ui-section--photo hro hro--marquee"',
     )
     .replace(
-      'ui-section--photo cp-production ui-carousel"',
-      'ui-section--photo cp-production cp-production--v2 ui-carousel"',
+      'ui-section--photo prd prd--v1 ui-carousel"',
+      'ui-section--photo prd prd--v2 ui-carousel"',
     )
     .replace(
       'class="ui-section ui-section--photo cp-holding"',

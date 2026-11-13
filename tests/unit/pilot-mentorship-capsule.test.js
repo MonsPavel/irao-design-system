@@ -268,8 +268,9 @@ describe('pilot.css — тон активной карточки на хуке �
     // (вынос обложки в слой, канон php) — 29 → 27; errata T18.11:
     // tabs-row/tabs-links ушли (вынос строки табов в слой, канон tnv) —
     // 27 → 25; errata T18.12: why-us ушла (вынос тёмной секции в слой,
-    // канон whu) — 25 → 24
-    expect(metrics.css.families).toHaveLength(24);
+    // канон whu) — 25 → 24; errata T18.13: production ушла (вынос
+    // раскладок карусели в слой, канон prd) — 24 → 23
+    expect(metrics.css.families).toHaveLength(23);
   });
 });
 
@@ -282,7 +283,11 @@ describe('ценз T17.16 — гейт чист после сборки блок
     // errata T18.3: allowlist расширен семейством company-feed — 30 → 31;
     // errata T18.10: page-head/page-subtitle ушли (вынос в слой) — 31 → 29;
     // errata T18.11: tabs-row/tabs-links ушли (вынос в слой) — 29 → 27;
-    // errata T18.12: why-us ушла (вынос в слой) — 27 → 26
-    expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3/T18.10/T18.11/T18.12').toHaveLength(26);
+    // errata T18.12: why-us ушла (вынос в слой) — 27 → 26;
+    // errata T18.13: production ушла (вынос раскладок карусели в слой) — 26 → 25
+    expect(
+      ALLOWED_CP_FAMILIES,
+      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13',
+    ).toHaveLength(25);
   });
 });

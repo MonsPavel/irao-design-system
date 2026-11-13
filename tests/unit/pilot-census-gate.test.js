@@ -192,13 +192,13 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.12', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.13', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(26);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(25);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -298,11 +298,18 @@ describe('пороги ценза — числа зафиксированы по
       // 154→134; семейства 25→24 — why-us ушла из allowlist (судьба
       // «вынос в слой», REPORT §11.4; панель vacancy-search внутри секции
       // — сайт-зона остаётся, вынос T18.16):
-      expect(metrics.css.lines).toBe(2108);
-      expect(metrics.css.codeLines).toBe(1142);
-      expect(metrics.css.selectors).toBe(134);
+      // T18.13 (вынос раскладок карусели production в слой — канон prd
+      // поверх ui-carousel: семейство целиком — база/--v1-координаты/
+      // --v2/табы/стрелки/номер (~34 селектора) и ступень 1023 photo-hide
+      // сняты из разметки build.mjs и pilot.css; поведение — компонент
+      // ui-carousel T17.7 в dist): сырые 2108→1818, код 1142→911,
+      // селекторы 134→95; семейства 24→23 — production ушла из allowlist
+      // (судьба «вынос в слой», REPORT §11.4):
+      expect(metrics.css.lines).toBe(1818);
+      expect(metrics.css.codeLines).toBe(911);
+      expect(metrics.css.selectors).toBe(95);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(24);
+      expect(metrics.css.families).toHaveLength(23);
       expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
         'page-head',
       );
@@ -313,6 +320,9 @@ describe('пороги ценза — числа зафиксированы по
       expect(metrics.css.families).not.toContain('tabs-links');
       expect(metrics.css.families, 'семейство why-us вынесено в слой (T18.12)').not.toContain(
         'why-us',
+      );
+      expect(metrics.css.families, 'семейство production вынесено в слой (T18.13)').not.toContain(
+        'production',
       );
       expect(metrics.js.lines).toBe(187);
     },

@@ -105,6 +105,12 @@
  *    1023/767 из разметки и pilot.css; панель вакансий внутри секции —
  *    сайт-зона vacancy-search остаётся (вынос — T18.16) (судьба семейств —
  *    REPORT §11.4).
+ *    T18.13: семейство production УШЛО из allowlist — вынос раскладок
+ *    карусели production v1/v2 в слой (канон prd поверх ui-carousel),
+ *    снятие пары cp-production целиком — база/--v1-координаты/--v2/табы/
+ *    стрелки и ступени 1023 (photo-hide) — из разметки и pilot.css;
+ *    поведение карусели — компонент ui-carousel (T17.7, dist) (судьба
+ *    семейств — REPORT §11.4).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -156,7 +162,6 @@ export const ALLOWED_CP_FAMILIES = [
   'offer-card',
   'org-card',
   'page',
-  'production',
   'team',
   'vac-main',
   'vacancy-search',

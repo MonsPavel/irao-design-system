@@ -139,7 +139,7 @@
 | T18.10 | done | смержена |
 | T18.11 | done | смержена |
 | T18.12 | done | смержена |
-| T18.13 | todo | макро-вынос: production v1/v2 раскладки → слой (prd-) поверх ui-carousel |
+| T18.13 | done | смержена |
 | T18.14 | todo | макро-вынос: directions + holding → слой (dir-/hld-) |
 | T18.15 | todo | макро-вынос: company-семейства (5 шт) → dpp-каноны |
 | T18.16 | todo | макро-вынос: vacancy-search (панель фильтров) + dir-modal → слой |
