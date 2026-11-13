@@ -168,10 +168,10 @@ describe('patterns/patterns.css — канон строки табов + ссы�
 
   it('синхронность док ↔ слой: раздел «строка табов + ссылок» в list-page несёт ровно те же классы (док — источник правды, прецедент php T18.10)', () => {
     const hooks = layerHookSet(layer);
-    expect(
-      [...hooks].sort(),
-      'слой несёт полный API канона: tnv, tnv__links',
-    ).toEqual(['tnv', 'tnv__links']);
+    expect([...hooks].sort(), 'слой несёт полный API канона: tnv, tnv__links').toEqual([
+      'tnv',
+      'tnv__links',
+    ]);
     const markup = docHooks(listPageHtml);
     expect(markup.size, 'list-page.html: tnv-классы в разметке есть').toBeGreaterThan(0);
     for (const hook of hooks) {

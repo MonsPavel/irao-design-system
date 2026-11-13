@@ -80,7 +80,10 @@ describe('build.mjs — обложка и табы (T18.6, internships.html:145�
     expect(blockOf(pilotCss, '.int-tabs')).toContain('padding-top: 1.5rem');
     expect(blockOf(pilotCss, '.int-tabs')).toContain('padding-bottom: 2.5rem');
     expect(internFn, 'ряд — канон tnv слоя (T18.11)').toContain('<div class="tnv">');
-    expect(blockOf(pilotCss, '.int-tabs .cp-tabs-row'), 'хук nowrap снят (ступень md канона)').toBeNull();
+    expect(
+      blockOf(pilotCss, '.int-tabs .cp-tabs-row'),
+      'хук nowrap снят (ступень md канона)',
+    ).toBeNull();
   });
 
   it('панели-подсказки табов — visually-hidden (ui-vh, T17.2): панелей у tabs-pill оригинала нет (internships.html:158–168), панель активного таба давала секции +19px; ритм ленты ui-tabs__list погашен — сброс в каноне tnv слоя (T18.11, errata пина T18.6: хук .int-tabs снят)', () => {
