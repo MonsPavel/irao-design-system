@@ -2181,6 +2181,7 @@ a.cp-intern-card {
 .ev-cover {
   box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
   gap: 1.25rem; /* 20px pages.css:956 */
+  align-items: flex-start; /* pages.css:955 — кнопка не растягивается на ширину обложки */
   margin-bottom: 0; /* cover-hero нижнего ритма не несёт — таблица pages.css:971 */
   padding: 4rem 3.5rem; /* 64/56 pages.css:957 */
   border-radius: var(--ui-radius-md); /* --radius-card = 16px */

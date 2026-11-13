@@ -93,7 +93,7 @@ describe('T18.9 — events.html: обложка, фильтры, лента со
     expect(blockOf(pilotCss, '.ev-sec')).toMatch(/padding-bottom:\s*2\.5rem/);
   });
 
-  it('обложка — форма cover-hero (pages.css:953–969): хук ev-cover на каркасе cp-page-head, паддинг 64/56, шаг 20, фон blue-50, радиус md, без нижнего ритма', () => {
+  it('обложка — форма cover-hero (pages.css:953–969): хук ev-cover на каркасе cp-page-head, паддинг 64/56, шаг 20, фон blue-50, радиус md, без нижнего ритма; дети прижаты влево (align-items: flex-start pages.css:955 — кнопка не растягивается на ширину обложки)', () => {
     expect(eventsHtml).toContain('<div class="cp-page-head ev-cover">');
     const css = blockOf(pilotCss, '.ev-cover');
     expect(css).toMatch(/gap:\s*1\.25rem/);
@@ -102,6 +102,7 @@ describe('T18.9 — events.html: обложка, фильтры, лента со
     expect(css).toMatch(/border-radius:\s*var\(--ui-radius-md\)/);
     expect(css).toMatch(/box-sizing:\s*border-box/);
     expect(css).toMatch(/margin-bottom:\s*0/);
+    expect(css).toMatch(/align-items:\s*flex-start/);
   });
 
   it('кнопка обложки — ui-button--primary «смотреть мероприятия» → #upcoming (events.html:152); ритм +16 (pages.css:967); подпись 640px (pages.css:965)', () => {

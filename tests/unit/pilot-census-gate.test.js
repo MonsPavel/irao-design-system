@@ -28,7 +28,7 @@
  *      компаний, шапки/сетки; карточки к канону оригинала); errata
  *      T18.6: 1894 → 2128 (позиционные хуки лендингов int-) — факт
  *      порога в census.mjs: 2138 (ревью T18.6: слот/img большой
- *      карточки, +10 строк); errata T18.9: 2138 → 2271 (позиционные
+ *      карточки, +10 строк); errata T18.9: 2138 → 2272 (позиционные
  *      хуки хвоста cmp-/ev-/ia- — ритм companies, обложка/фильтры/
  *      лента событий events, карточная форма анкеты internship-apply);
  *      MAX_PILOT_CSS_CODE_LINES 1089 — цель эпика в метрике кода
@@ -36,7 +36,7 @@
  *      723 → 819 (тот же курс); errata T18.2: 819 → 822; errata T18.3:
  *      822 → 869; errata T18.4: 869 → 1013; errata T18.5: 1013 → 1089;
  *      errata T18.6: 1089 → 1217; ревью T18.6: 1217 → 1222; errata
- *      T18.9: 1222 → 1296 (тот же курс);
+ *      T18.9: 1222 → 1297 (тот же курс);
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -185,8 +185,8 @@ describe('гейт ценза — runCensusGate (порог числом; дег
 
 describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.9', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
-    expect(MAX_PILOT_CSS_LINES).toBe(2271);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1296);
+    expect(MAX_PILOT_CSS_LINES).toBe(2272);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
     expect(ALLOWED_CP_FAMILIES).toHaveLength(31);
@@ -263,12 +263,12 @@ describe('пороги ценза — числа зафиксированы по
       // обложка cover-hero + лента фильтров lpp-filters + карточка
       // события 16/220 на сетке 36 events; карточная форма анкеты
       // internship-apply — паддинг 36/радио-строки 52; каркасы — ДС/слой):
-      // сырые 2136→2271, код 1216→1296, селекторы 165→166
+      // сырые 2136→2272, код 1216→1297, селекторы 165→166
       // (.ia-form-card .ui-radio-group__row — единственный новый
       // двухклассовый селектор); семейства/allowlist НЕ менялись
       // (cmp-/ev-/ia- — не cp-, прецедент ctr-/edu-/int-):
-      expect(metrics.css.lines).toBe(2271);
-      expect(metrics.css.codeLines).toBe(1296);
+      expect(metrics.css.lines).toBe(2272);
+      expect(metrics.css.codeLines).toBe(1297);
       expect(metrics.css.selectors).toBe(166);
       // код: см. строку ниже (батч ритма 01.11)
       expect(metrics.css.families).toHaveLength(29);

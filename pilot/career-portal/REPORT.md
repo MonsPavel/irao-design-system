@@ -1666,12 +1666,12 @@ event-apply 954 (+6), media 1768 (+4), company 5535, career-track 2906 —
 значения эпохи T18.3–T18.8; паритет event/event-apply/internship/media
 в границах ±6 (Out of scope «не трогать» — не сдвинуты).
 
-**Движение ценза после T18.9**: сырые 2136 → **2271**, код 1216 → **1296**,
-селекторы 165 → **166** (`.ev-cover .cp-page-subtitle` — единственный новый
+**Движение ценза после T18.9**: сырые 2136 → **2272**, код 1216 → **1297**,
+селекторы 165 → **166** (`.ev-cover .cp-page-subtitle` — единственное новое
 правило с cp-упоминанием), семейства **29**/allowlist 31 — без движения
 (хуки cmp-/ev-/ia- — не-cp имена сайт-зоны, прецедент ctr-/edu-/int-/stu-).
-Пороги ценза подняты errata по процедуре (census.mjs: 2138 → **2271** /
-1222 → **1296**, история в шапке; пины pilot-census-gate/pilot-career-track/
+Пороги ценза подняты errata по процедуре (census.mjs: 2138 → **2272** /
+1222 → **1297**, история в шапке; пины pilot-census-gate/pilot-career-track/
 pilot-education/pilot-internships/poster-card — прецедент T18.3–T18.6).
 Гейт ссылок: **43 страницы, 917 внутренних ссылок, 0 DEAD**.
 Гейты: `npm run lint` 0; `npm run test:unit` **2274 passed** (88 файлов;
