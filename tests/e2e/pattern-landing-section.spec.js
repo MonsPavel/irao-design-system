@@ -1,10 +1,11 @@
 /**
  * e2e паттерна «Landing-секция» (T8.3; Testing requirements + AC) — стенд
  * patterns/landing-section (stands/patterns/landing-section.html),
- * mini-эталон из десяти секций: светлая / тёмная (on-dark) / с-изображением
- * full-bleed / с-фото-фоном (ui-section--photo, T17.3) / nav-карточки и
- * лента логотипов (связки слоя lnk-/lgo-, T17.9) / лендинг-композиции
- * hro/mrq/mdl/cvh (T17.15).
+ * mini-эталон из тринадцати секций: светлая / тёмная (on-dark) /
+ * с-изображением full-bleed / с-фото-фоном (ui-section--photo, T17.3) /
+ * nav-карточки и лента логотипов (связки слоя lnk-/lgo-, T17.9) /
+ * лендинг-композиции hro/mrq/mdl/cvh (T17.15) / тёмная секция why-us
+ * (связка слоя whu, T18.12).
  *
  * Ключевые сценарии спеки:
  *  1. каркас секции = ui-section + ui-container + заголовок-роль h2 + сетка
@@ -28,6 +29,7 @@ import {
   test as standTest,
   unexpectedViolations,
   VIEWPORTS,
+  SNAPSHOTS_ENABLED,
 } from '../helpers/harness.js';
 
 const SEL = {
@@ -39,6 +41,8 @@ const SEL = {
   imageTitle: '#lsp-image-title',
   photo: '#lsp-photo',
   photoTitle: '#lsp-photo-title',
+  why: '#lsp-why-us',
+  whyTitle: '#lsp-why-us-title',
 };
 
 /** Вычисленный контраст WCAG пары «цвет текста — фон секции» (≥ 4.5 — AA). */
@@ -741,6 +745,201 @@ standTest.describe('patterns/landing-section: лендинг-композици�
   );
 });
 
+// Тёмная секция «why-us» (T18.12): композиция канона whu — top-зона
+// «заголовок + карточка 01», ряд стеклянных карточек, hover-раскрытие
+// CSS-каноном без JS (Implementation requirements п.2), VI-инвариант
+// фото-секции. Секция — 13-я в mini-эталоне (после lsp-capsule).
+standTest.describe('patterns/landing-section: тёмная секция why-us (whu, T18.12)', () => {
+  standTest(
+    'whu: каркас секции на примитиве (без оверлея), top-зона строкой от desktop — заголовок 894px + карточка 429px, ряд 3×1fr шаг 12',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const section = page.locator('#lsp-why-us');
+      await expect(section, 'секция whu видима').toBeVisible();
+
+      const state = await section.evaluate((el) => {
+        const cs = (node) => getComputedStyle(node);
+        const top = el.querySelector('.whu__top');
+        const topCard = top.querySelector('.whu__card');
+        const title = el.querySelector('.whu__title');
+        const row = el.querySelector('.whu__row');
+        return {
+          sectionOverflow: cs(el).overflow,
+          sectionPosition: cs(el).position,
+          topDir: cs(top).flexDirection,
+          topGap: cs(top).gap,
+          topJustify: cs(top).justifyContent,
+          cardFlex: cs(topCard).flex,
+          cardWidth: Math.round(topCard.getBoundingClientRect().width),
+          titleMax: cs(title).maxWidth,
+          titleColor: cs(title).color,
+          rowCols: cs(row).gridTemplateColumns.split(' ').length,
+          rowGap: cs(row).gap,
+          rowMarginBottom: cs(row).marginBottom,
+        };
+      });
+      expect(state.sectionOverflow, 'клип секции (why-us.css:4)').toBe('hidden');
+      expect(state.sectionPosition, 'position несёт примитив ui-section--photo (T17.3)').toBe(
+        'relative',
+      );
+      expect(state.topDir, 'top-зона строкой от desktop (оригинал ≥1024)').toBe('row');
+      expect(state.topGap, 'шаг top-зоны 36 «как есть» (why-us.css:27)').toBe('36px');
+      expect(state.topJustify, 'space-between (why-us.css:25)').toBe('space-between');
+      expect(state.cardFlex, 'top-карточка фикс 429px (why-us.css:64)').toBe('0 0 429px');
+      expect(state.cardWidth, 'бокс top-карточки 429px').toBe(429);
+      expect(state.titleMax, 'заголовок max-width 894 (why-us.css:32)').toBe('894px');
+      expect(state.titleColor, 'on-dark (why-us.css:36)').toBe('rgb(255, 255, 255)');
+      expect(state.rowCols, 'ряд 3×1fr (принятый рендер пилота)').toBe(3);
+      expect(state.rowGap, 'шаг колонок 12 (space-3, батч ритма 01.11)').toBe('12px');
+      expect(
+        state.rowMarginBottom,
+        'низ 144 «как есть» — панель вакансий ниже (why-us.css:42)',
+      ).toBe('144px');
+
+      const card = await section
+        .locator('.whu__row .whu__card')
+        .first()
+        .evaluate((el) => {
+          const cardStyle = getComputedStyle(el);
+          const photo = el.querySelector('.whu__card-photo');
+          const styleOf = (node) => getComputedStyle(node);
+          return {
+            bg: cardStyle.backgroundColor,
+            color: cardStyle.color,
+            minHeight: cardStyle.minHeight,
+            radius: cardStyle.borderRadius,
+            photoOpacity: styleOf(photo).opacity,
+            textMaxHeight: styleOf(el.querySelector('.whu__card-text')).maxHeight,
+            textOpacity: styleOf(el.querySelector('.whu__card-text')).opacity,
+            numOpacity: styleOf(el.querySelector('.whu__card-num')).opacity,
+          };
+        });
+      expect(card.bg, 'заливка blue-700 → surface-blue-deep (why-us.css:58)').toBe(
+        'rgb(22, 75, 137)',
+      );
+      expect(card.color, 'текст on-dark (why-us.css:59)').toBe('rgb(255, 255, 255)');
+      expect(card.minHeight, 'min-height 320 (why-us.css:56)').toBe('320px');
+      expect(card.radius, 'радиус card 16 = md').toBe('16px');
+      expect(card.photoOpacity, 'фото в покое — полная непрозрачность').toBe('1');
+      expect(card.textMaxHeight, 'текст скрыт в покое (why-us.css:94)').toBe('0px');
+      expect(card.textOpacity, 'текст скрыт в покое (why-us.css:94)').toBe('0');
+      expect(card.numOpacity, 'номер скрыт в покое (why-us.css:114)').toBe('0');
+    },
+  );
+
+  standTest(
+    'whu: hover-раскрытие — CSS-канон без JS (Implementation requirements п.2): текст 220px/1, номер 1, фото 0.15; контент остаётся в a11y-дереве в покое',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      const card = page.locator('#lsp-why-us .whu__card').first();
+
+      // В покое: контент в a11y-дереве (opacity/max-height — не display:none).
+      const rest = await card.evaluate((el) => ({
+        textDisplay: getComputedStyle(el.querySelector('.whu__card-text')).display,
+        textHidden: el.querySelector('.whu__card-text').checkVisibility?.() ?? null,
+        ariaContent: Boolean(el.querySelector('.whu__card-text')?.textContent.trim()),
+      }));
+      expect(rest.textDisplay, 'текст в потоке (не display:none — VI/a11y-инвариант)').not.toBe(
+        'none',
+      );
+      expect(rest.ariaContent, 'текст карточки присутствует в DOM').toBe(true);
+
+      await card.hover();
+      await expect
+        .poll(
+          () =>
+            card.evaluate((el) => ({
+              textMaxHeight: getComputedStyle(el.querySelector('.whu__card-text')).maxHeight,
+              textOpacity: getComputedStyle(el.querySelector('.whu__card-text')).opacity,
+              numOpacity: getComputedStyle(el.querySelector('.whu__card-num')).opacity,
+              photoOpacity: getComputedStyle(el.querySelector('.whu__card-photo')).opacity,
+            })),
+          'hover-раскрытие (why-us.css:77/99-100/114, гвард (hover: hover))',
+        )
+        .toEqual({
+          textMaxHeight: '220px',
+          textOpacity: '1',
+          numOpacity: '1',
+          photoOpacity: '0.15',
+        });
+    },
+  );
+
+  standTest(
+    'whu: мобильная база — ступени оригинала (why-us.css:108-111): top колонкой, ряд колонкой, карточка во всю ширину, ритм 96/48',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.setViewportSize(VIEWPORTS.mobile);
+      const state = await page.locator('#lsp-why-us').evaluate((el) => {
+        const cs = (node) => getComputedStyle(node);
+        const top = el.querySelector('.whu__top');
+        const topCard = top.querySelector('.whu__card');
+        const row = el.querySelector('.whu__row');
+        // Контейнер-внутренность — целевая ширина «во всю ширину» (без
+        // хардкода 343: ширина зависит от скроллбара окружения).
+        const container = el.querySelector('.ui-container');
+        const containerStyle = getComputedStyle(container);
+        const inner = Math.round(
+          container.getBoundingClientRect().width -
+            parseFloat(containerStyle.paddingLeft) -
+            parseFloat(containerStyle.paddingRight),
+        );
+        return {
+          sectionPadding: cs(el).padding,
+          topDir: cs(top).flexDirection,
+          topCardWidth: Math.round(topCard.getBoundingClientRect().width),
+          rowCols: cs(row).gridTemplateColumns.split(' ').length,
+          rowGap: cs(row).gap,
+          cardWidth: Math.round(row.querySelector('.whu__card').getBoundingClientRect().width),
+          inner,
+        };
+      });
+      expect(state.sectionPadding, 'ритм базы 96/48 (why-us.css:111; 48 = space-7)').toBe(
+        '96px 0px 48px',
+      );
+      expect(state.topDir, 'top-зона колонкой (why-us.css:108)').toBe('column');
+      expect(state.topCardWidth, 'top-карточка во всю ширину (why-us.css:109)').toBe(state.inner);
+      expect(state.rowCols, 'ряд колонкой (оригинал ≤1023, why-us.css:110)').toBe(1);
+      expect(state.rowGap, 'вертикальный шаг стека 36 (why-us.css:41)').toBe('36px');
+      expect(state.cardWidth, 'карточки ряда во всю ширину колонки').toBe(state.inner);
+    },
+  );
+
+  standTest(
+    'whu: VI-инвариант (Implementation requirements п.2) — img:off секция скрыта целиком (пре-существующее правило vi.css [class*=-photo], прецедент hro/msh); переходы в VI гасятся — раскрытие мгновенно',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+
+      // img:off: фото-секция скрыта целиком (T9.1) — задокументированное
+      // поведение, контент секции не перекрашивается «в слепую» пару.
+      await page.evaluate(() => document.body.classList.add('vi', 'vi-img--off'));
+      const imgOff = await page.locator('#lsp-why-us').evaluate((el) => ({
+        display: getComputedStyle(el).display,
+      }));
+      expect(imgOff.display, 'img:off: секция скрыта (vi.css [class*=-photo])').toBe('none');
+      await page.evaluate(() => document.body.classList.remove('vi', 'vi-img--off'));
+
+      // VI без img:off: переходы гасятся (body.vi * { transition: none }) —
+      // hover-раскрытие срабатывает мгновенно (без анимации).
+      await page.evaluate(() => document.body.classList.add('vi'));
+      const viDuration = await page
+        .locator('#lsp-why-us .whu__card-text')
+        .first()
+        .evaluate((el) => getComputedStyle(el).transitionDuration);
+      expect(viDuration, 'в VI переходов нет (vi.css T9.1)').toBe('0s');
+      const card = page.locator('#lsp-why-us .whu__card').first();
+      await card.hover();
+      await expect
+        .poll(
+          () =>
+            card.evaluate((el) => getComputedStyle(el.querySelector('.whu__card-text')).opacity),
+          'раскрытие в VI — мгновенно (opacity 1 без перехода)',
+        )
+        .toBe('1');
+    },
+  );
+});
+
 standTest.describe('patterns/landing-section: a11y страницы (AC)', () => {
   standTest('axe страницы чист (вне реестра KNOWN_AXE_EXCEPTIONS)', async ({ stand }) => {
     const page = await stand('patterns/landing-section');
@@ -782,6 +981,51 @@ standTest.describe('patterns/landing-section: эталоны (AC: visual 375/768
       await shot(page, { name: 'pattern-landing-section', viewport: 'mobile' });
       await shot(page, { name: 'pattern-landing-section', viewport: 'tablet' });
       await shot(page, { name: 'pattern-landing-section', viewport: 'desktop' });
+    },
+  );
+});
+
+// Тёмная секция why-us (T18.12): контейнерные эталоны канона whu — секция в
+// покое на desktop (1440 — топ строкой «заголовок + карточка 429px», ряд
+// 3×1fr) и mobile (375 — мобильная база: top колонкой, ряд колонкой,
+// карточки во всю ширину) + hover-раскрытие карточки на desktop (спека
+// T18.12 п.2: текст 220px/1, номер 1, фото 0.15 — CSS-канон без JS).
+// Три снимка (прецедент tnv T18.11 — element-снимки канона).
+standTest.describe('patterns/landing-section: эталоны секции why-us whu (T18.12, AC: ×3)', () => {
+  standTest(
+    'whu-section/whu-card-hover — element-снимки канона, только из контейнера/CI (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+
+      const shots = [
+        ['whu-section', page.locator('#lsp-why-us'), ['desktop', 'mobile'], false],
+        ['whu-card-hover', page.locator('#lsp-why-us .whu__card').first(), ['desktop'], true],
+      ];
+
+      for (const [name, locator, viewports, hover] of shots) {
+        for (const viewport of viewports) {
+          await page.setViewportSize(VIEWPORTS[viewport]);
+          if (hover) await locator.hover();
+          const info = standTest.info();
+          if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+            info.annotations.push({
+              type: 'shot-skipped',
+              description:
+                `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                '(ADR-0004) — запустите npm run test:docker',
+            });
+            continue;
+          }
+          await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+            animations: 'disabled',
+            caret: 'hide',
+            // Строгий допуск 8 px (глобальный): у секции нет скруглённых
+            // карточек у правого среза снимка — лотерея растеризации
+            // (диагноз 19.10) на нём не проявлена; hover-снимок —
+            // скруглённая карточка целиком (срез по её границе).
+          });
+        }
+      }
     },
   );
 });

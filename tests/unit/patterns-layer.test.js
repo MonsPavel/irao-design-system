@@ -74,6 +74,12 @@ const PATTERN_SOURCE_EXTRA = [
   // (поднавигационное семейство, рядом с nvp; док-раздел «строка табов +
   // ссылок» несёт API tnv/tnv__links).
   ['patterns/list-page/list-page.html', 'tnv'],
+  // Тёмная секция «why-us» (T18.12): канон whu — док-источник landing-section,
+  // НО в этот цикл он не входит: док легитимно несёт <style> связующих стилей
+  // сайт-зоны (lsp-* — «в бою template_styles.css, на стенде рядом, не в
+  // dist»), полный цикл (включая пин «<style> нет») к нему неприменим.
+  // Синхронность «разметка дока ↔ крючки слоя» пинит pattern-why-us.test.js
+  // (прецедент msh/vcp — pattern-mentorship-capsule.test.js, T18.2).
 ];
 
 /** Крючки слоя без разметки в доке (осознанные, с обоснованием — по образцу
@@ -178,26 +184,27 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
       // Блок-классы таймлайна (tlp, T17.10), поднавигации (nvp, T17.11),
       // лендинг-композиций (mrq/mdl/cvh, T17.15; hro — по образцу dpp:
-      // голый блок с BEM-элементами __*), обложки страницы (php, T18.10) и
-      // строки табов + ссылок (tnv, T18.11) — голые, без суффикса: префикс
-      // продолжается дефисом, модификатором __ или заканчивается на нём.
+      // голый блок с BEM-элементами __*), обложки страницы (php, T18.10),
+      // строки табов + ссылок (tnv, T18.11) и тёмной секции why-us (whu,
+      // T18.12) — голые, без суффикса: префикс продолжается дефисом,
+      // модификатором __ или заканчивается на нём.
       expect(
         hooks.some((hook) =>
-          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv)(?:-|__|$)/.test(
+          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu)(?:-|__|$)/.test(
             hook,
           ),
         ),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv`,
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv)(?:-|__|$))/.test(
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu)(?:-|__|$))/.test(
             hook,
           ),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,

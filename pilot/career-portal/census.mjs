@@ -64,7 +64,11 @@
  *    REPORT §11.4); → T18.11 (вынос строки табов + ссылок в слой: пара
  *    cp-tabs-row/cp-tabs-links и хуки .int-tabs .cp-tabs-row сняты из
  *    разметки и pilot.css — канон tnv слоя; семейства tabs-row/tabs-links
- *    ушли из allowlist — судьба «вынос в слой», REPORT §11.4); любой рост
+ *    ушли из allowlist — судьба «вынос в слой», REPORT §11.4); → T18.12
+ *    (вынос тёмной секции why-us в слой: пара cp-why-us целиком — секция/
+ *    top/title/row/стекло-карточки/hover — и ступени 1023/767 сняты из
+ *    разметки и pilot.css — канон whu слоя; семейство why-us ушло из
+ *    allowlist — судьба «вынос в слой», REPORT §11.4); любой рост
  *    сверх — деградация сайт-зоны;
  *  - MAX_PILOT_CSS_CODE_LINES = 869 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
@@ -96,6 +100,11 @@
  *    строки табов + ссылок в слой (канон tnv), снятие пары
  *    cp-tabs-row/cp-tabs-links и хуков .int-tabs .cp-tabs-row из разметки
  *    и pilot.css (судьба семейств — REPORT §11.4).
+ *    T18.12: семейство why-us УШЛО из allowlist — вынос тёмной секции
+ *    со стеклом в слой (канон whu), снятие пары cp-why-us и ступеней
+ *    1023/767 из разметки и pilot.css; панель вакансий внутри секции —
+ *    сайт-зона vacancy-search остаётся (вынос — T18.16) (судьба семейств —
+ *    REPORT §11.4).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -151,7 +160,6 @@ export const ALLOWED_CP_FAMILIES = [
   'team',
   'vac-main',
   'vacancy-search',
-  'why-us',
 ];
 
 /** wc -l — число \n (файлы под prettier всегда с завершающим \n). */

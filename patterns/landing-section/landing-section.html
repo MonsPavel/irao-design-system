@@ -739,3 +739,100 @@
     </a>
   </div>
 </section>
+
+<!-- Вариант 13 — тёмная секция «why-us» (whu, T18.12): фото-секция на
+     примитиве ui-section--photo (T17.3, без оверлея — on-dark текст несёт
+     контент), top-зона «заголовок + карточка 01» (429px от lg), ряд
+     стеклянных карточек (blue-700) с hover-раскрытием — CSS-канон без JS
+     (текст/номер/фото — opacity/max-height под (hover: hover); контент
+     остаётся в a11y-дереве). Панель вакансий — слот контента секции
+     (канон правила не несёт; в пилоте — cp-vacancy-search__wrap, ритм до
+     панели ведёт margin-bottom 144px строки). Мобильные базы — ступени
+     оригинала (top колонкой, карточки стеком — до lg). В эталоне-
+     фрагменте заголовок — ui-h2 (h1 несёт каркас стенда, пин T8.3). -->
+<section class="ui-section ui-section--photo whu" id="lsp-why-us" aria-labelledby="lsp-why-us-title">
+  <p class="ui-showcase-stand__note">
+    Связка «why-us» (<code>whu</code>, T18.12): тёмная секция со стеклянными
+    карточками — фото-фон <code>ui-section--photo</code> (без оверлея),
+    top-зона «заголовок + карточка 01», ряд карточек с hover-раскрытием
+    (CSS-канон без JS). Панель вакансий — слот контента секции (в пилоте —
+    <code>cp-vacancy-search__wrap</code>).
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%271300%27%20cy%3D%27200%27%20r%3D%27420%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%27800%27%20r%3D%27300%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+     >
+  </div>
+
+  <div class="ui-container">
+    <div class="whu__top">
+      <h2 class="ui-h2 whu__title" id="lsp-why-us-title">Работа в&nbsp;«Интер РАО»&nbsp;— это участие в&nbsp;развитии одной из&nbsp;ключевых отраслей страны</h2>
+
+      <article class="whu__card">
+        <img
+          class="whu__card-photo"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27429%27%20height%3D%27320%27%3E%3Crect%20width%3D%27429%27%20height%3D%27320%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27360%27%20cy%3D%2780%27%20r%3D%27110%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%27260%27%20r%3D%2780%27%20fill%3D%27%23F26722%27%20opacity%3D%270.6%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="429"
+          height="320"
+          loading="lazy"
+         >
+        <h3 class="ui-h4 whu__card-title">Ответственное отношение к&nbsp;каждому</h3>
+        <p class="ui-small whu__card-text">Стабильная, прозрачная заработная плата, премия по&nbsp;итогам года, ежегодная индексация, ДМС и&nbsp;телемедицина</p>
+        <span class="whu__card-num" aria-hidden="true">01</span>
+      </article>
+    </div>
+
+    <div class="whu__row">
+      <article class="whu__card">
+        <img
+          class="whu__card-photo"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27380%27%20height%3D%27320%27%3E%3Crect%20width%3D%27380%27%20height%3D%27320%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27300%27%20cy%3D%2770%27%20r%3D%27100%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="380"
+          height="320"
+          loading="lazy"
+         >
+        <h3 class="ui-h4 whu__card-title">Лучшие возможности для&nbsp;роста</h3>
+        <p class="ui-small whu__card-text">Более 100 образовательных программ, корпоративный университет, тренинги, курсы, обмен опытом, доступ к&nbsp;корпоративной библиотеке</p>
+        <span class="whu__card-num" aria-hidden="true">02</span>
+      </article>
+      <article class="whu__card">
+        <img
+          class="whu__card-photo"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27380%27%20height%3D%27320%27%3E%3Crect%20width%3D%27380%27%20height%3D%27320%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%2780%27%20cy%3D%27260%27%20r%3D%27120%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="380"
+          height="320"
+          loading="lazy"
+         >
+        <h3 class="ui-h4 whu__card-title">Наставничество в&nbsp;реальном времени</h3>
+        <p class="ui-small whu__card-text">Преуспеть в&nbsp;профессии поможет опытный наставник: получить мгновенную обратную связь, научиться на&nbsp;практике реальных ситуаций, влиться в&nbsp;коллектив</p>
+        <span class="whu__card-num" aria-hidden="true">03</span>
+      </article>
+      <article class="whu__card">
+        <img
+          class="whu__card-photo"
+          src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27380%27%20height%3D%27320%27%3E%3Crect%20width%3D%27380%27%20height%3D%27320%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27190%27%20cy%3D%27160%27%20r%3D%27130%27%20fill%3D%27%23F26722%27%20opacity%3D%270.5%27%2F%3E%3C%2Fsvg%3E"
+          alt=""
+          width="380"
+          height="320"
+          loading="lazy"
+         >
+        <h3 class="ui-h4 whu__card-title">Личная самореализация</h3>
+        <p class="ui-small whu__card-text">Более 70 сообществ по&nbsp;интересам и&nbsp;мероприятий: от&nbsp;волонтёрства, спорта и&nbsp;музыки до&nbsp;книжных клубов, шахматных турниров и&nbsp;творческих конкурсов</p>
+        <span class="whu__card-num" aria-hidden="true">04</span>
+      </article>
+    </div>
+
+    <!-- Слот панели вакансий — контент секции (build.py SLOTS): в пилоте
+         панель «Найди свою вакансию» живёт ВНУТРИ тёмной секции
+         (cp-vacancy-search__wrap id="vacancies" — сайт-зона, вынос —
+         T18.16); ритм до панели ведёт margin-bottom 144px строки (whu__row). -->
+  </div>
+</section>

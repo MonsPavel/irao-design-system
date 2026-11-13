@@ -1198,11 +1198,11 @@ function indexMain() {
   ).join('\n');
 
   const whyCards = WHY_US.map(
-    (card, index) => `      <article class="cp-why-us__card">
-        <img class="cp-why-us__card-photo" src="${esc(card.photo)}" alt="" loading="lazy">
-        <h3 class="ui-h4 cp-why-us__card-title">${esc(card.title)}</h3>
-        <p class="ui-small cp-why-us__card-text">${esc(card.text)}</p>
-        <span class="cp-why-us__card-num" aria-hidden="true">0${index + 1}</span>
+    (card, index) => `      <article class="whu__card">
+        <img class="whu__card-photo" src="${esc(card.photo)}" alt="" loading="lazy">
+        <h3 class="ui-h4 whu__card-title">${esc(card.title)}</h3>
+        <p class="ui-small whu__card-text">${esc(card.text)}</p>
+        <span class="whu__card-num" aria-hidden="true">0${index + 1}</span>
       </article>`,
   );
 
@@ -1413,17 +1413,19 @@ ${employerLogos}
   </div>
 </section>
 
-<section class="ui-section ui-section--photo cp-why-us">
-  <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст — контентом -->
+<section class="ui-section ui-section--photo whu">
+  <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст — контентом.
+       Секция — канон whu паттерн-слоя (T18.12); панель вакансий — слот
+       контента секции (сайт-зона vacancy-search, вынос — T18.16). -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/bg-elektro.jpg" alt="" loading="lazy">
   </div>
-  <div class="ui-container cp-why-us__inner">
-    <div class="cp-why-us__top">
-      <h2 class="cp-why-us__title ui-h2">Работа в&nbsp;«Интер РАО»&nbsp;— это участие в&nbsp;развитии одной из&nbsp;ключевых отраслей страны</h2>
+  <div class="ui-container">
+    <div class="whu__top">
+      <h2 class="whu__title ui-h2">Работа в&nbsp;«Интер РАО»&nbsp;— это участие в&nbsp;развитии одной из&nbsp;ключевых отраслей страны</h2>
 ${whyCards[0]}
     </div>
-    <div class="cp-why-us__row">
+    <div class="whu__row">
 ${whyCards.slice(1).join('\n')}
     </div>
     <!-- Панель «Найди свою вакансию» — ВНУТРИ тёмной секции (оригинал:
@@ -3207,16 +3209,16 @@ function notFoundMain() {
    те же блоки с модификаторами; строковые замены — 1:1. students-трансформа
    (build.py:593-596): иллюстрированная секция скрыта (hidden), id="students"
    переезжает на photographic с модификатором --v2; ссылка головки —
-   «все мероприятия» (build.py:942, is_v2). Секция cp-why-us снимается: в
+   «все мероприятия» (build.py:942, is_v2). Секция whu снимается: в
    v2 оригинала её нет (панель вакансий #vacancies уходит вместе с секцией).
    Заголовок секции students остаётся «Школьникам и студентам»
    (index-2.html:501). Подмену текста второй капсулы (build.py:605-607)
    build.mjs не выполняет — капсулы запечены позициями в index2Main
    (T18.2). */
 function applyVariant2(html) {
-  const whyStart = html.indexOf('<section class="ui-section ui-section--photo cp-why-us">');
+  const whyStart = html.indexOf('<section class="ui-section ui-section--photo whu">');
   if (whyStart !== -1) {
-    // внутри why-us вложенных <section> нет — секция до первого </section>
+    // внутри whu вложенных <section> нет — секция до первого </section>
     const whyEnd = html.indexOf('</section>', whyStart) + '</section>'.length;
     html = html.slice(0, whyStart) + html.slice(whyEnd);
   }

@@ -68,7 +68,7 @@ const sectionAround = (marker) => {
  *  pilot-students-photographic.test.js). */
 const fixture = [
   sectionAround('Популярные работодатели'),
-  sectionAround('cp-why-us'),
+  sectionAround('ui-section--photo whu'),
   sectionAround('<section class="ui-section" id="students">'),
   sectionAround('<section class="ui-section stu-photo">'),
   sectionAround('Стань частью нашей большой команды'),
@@ -221,7 +221,9 @@ describe('build.mjs — index2Main: позиции оригинала (AC: бл�
       'mentorship 1',
     ).toBe(1);
     expect(html.match(/<section class="ui-section vcp">/g)?.length, 'капсулы 2').toBe(2);
-    expect(html, 'why-us в v2 нет (T18.1)').not.toContain('cp-why-us');
+    expect(html, 'why-us в v2 нет (T18.1; маркер секции — канон whu, T18.12)').not.toContain(
+      'ui-section--photo whu',
+    );
   });
 
   it('капсулы не несут id="vacancies" (панель ушла вместе с why-us — T18.1; оригинал index-2 без якоря)', () => {
@@ -265,8 +267,9 @@ describe('pilot.css — тон активной карточки на хуке �
     // — 28 → 29; errata T18.10: page-head/page-subtitle ушли из ценза
     // (вынос обложки в слой, канон php) — 29 → 27; errata T18.11:
     // tabs-row/tabs-links ушли (вынос строки табов в слой, канон tnv) —
-    // 27 → 25
-    expect(metrics.css.families).toHaveLength(25);
+    // 27 → 25; errata T18.12: why-us ушла (вынос тёмной секции в слой,
+    // канон whu) — 25 → 24
+    expect(metrics.css.families).toHaveLength(24);
   });
 });
 
@@ -278,7 +281,8 @@ describe('ценз T17.16 — гейт чист после сборки блок
     expect(gate.newBlocks, 'новых cp-семейств 0').toEqual([]);
     // errata T18.3: allowlist расширен семейством company-feed — 30 → 31;
     // errata T18.10: page-head/page-subtitle ушли (вынос в слой) — 31 → 29;
-    // errata T18.11: tabs-row/tabs-links ушли (вынос в слой) — 29 → 27
-    expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3/T18.10/T18.11').toHaveLength(27);
+    // errata T18.11: tabs-row/tabs-links ушли (вынос в слой) — 29 → 27;
+    // errata T18.12: why-us ушла (вынос в слой) — 27 → 26
+    expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3/T18.10/T18.11/T18.12').toHaveLength(26);
   });
 });
