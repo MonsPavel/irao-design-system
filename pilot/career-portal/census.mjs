@@ -61,7 +61,11 @@
  *    дубликаты базы канона сняты — хуки .cmp-head и низ .edu-offer-head;
  *    обложка events переведена с cp-page-head на каркас cvh; семейства
  *    page-head/page-subtitle ушли из allowlist — судьба «вынос в слой»,
- *    REPORT §11.4); любой рост сверх — деградация сайт-зоны;
+ *    REPORT §11.4); → T18.11 (вынос строки табов + ссылок в слой: пара
+ *    cp-tabs-row/cp-tabs-links и хуки .int-tabs .cp-tabs-row сняты из
+ *    разметки и pilot.css — канон tnv слоя; семейства tabs-row/tabs-links
+ *    ушли из allowlist — судьба «вынос в слой», REPORT §11.4); любой рост
+ *    сверх — деградация сайт-зоны;
  *  - MAX_PILOT_CSS_CODE_LINES = 869 — цель эпика (README EPIC-17 AC) в
  *    метрике кода сайт-зоны. Errata 31.10: 600 → 618 → 622 → 675 (батч
  *    «все страницы») → 723 (батч ритма 01.11) → 819 (T18.1) → 822 (T18.2 —
@@ -88,6 +92,10 @@
  *    обложки страниц в слой (канон php), снятие пары cp-page-head/
  *    cp-page-subtitle из разметки и pilot.css (судьба семейств — REPORT
  *    §11.4).
+ *    T18.11: семейства tabs-row/tabs-links УШЛИ из allowlist — вынос
+ *    строки табов + ссылок в слой (канон tnv), снятие пары
+ *    cp-tabs-row/cp-tabs-links и хуков .int-tabs .cp-tabs-row из разметки
+ *    и pilot.css (судьба семейств — REPORT §11.4).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -140,8 +148,6 @@ export const ALLOWED_CP_FAMILIES = [
   'org-card',
   'page',
   'production',
-  'tabs-links',
-  'tabs-row',
   'team',
   'vac-main',
   'vacancy-search',

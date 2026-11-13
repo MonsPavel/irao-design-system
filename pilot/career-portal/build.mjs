@@ -2231,17 +2231,20 @@ function internshipsMain(set) {
 <section class="ui-section int-tabs">
   <div class="ui-container">
     <div class="ui-tabs ui-tabs--pill" data-ui-tabs>
-      <div class="cp-tabs-row">
+      <!-- T18.11: ряд «табы + ссылки» — канон tnv паттерн-слоя (порт
+           cp-tabs-row/cp-tabs-links и хуков .int-tabs: nowrap от md,
+           сброс DS-маргина ленты; замер 06.11). Смешанный набор
+           «табы + ссылки разделов» (tabs-pill оригинала): ссылки —
+           вне tablist, отдельным nav (правило ui-tabs); вид табов —
+           ui-tabs--pill (T14.9), начальный выбор — aria-current="page"
+           из разметки (T14.9): активный таб = раздел страницы, порядок
+           табов фиксированный, как в оригинале. -->
+      <div class="tnv">
         <div class="ui-tabs__list">
           <a class="ui-tabs__tab" href="#cptab-practice" id="cptab-practice-tab"${isPractice ? ' aria-current="page"' : ''}>практика</a>
           <a class="ui-tabs__tab" href="#cptab-internship" id="cptab-internship-tab"${isPractice ? '' : ' aria-current="page"'}>стажировка</a>
         </div>
-        <!-- Смешанный набор «табы + ссылки разделов» (tabs-pill оригинала):
-             ссылки — вне tablist, отдельным nav (правило ui-tabs); вид табов —
-             ui-tabs--pill (T14.9), начальный выбор — aria-current="page"
-             из разметки (T14.9): активный таб = раздел страницы, порядок
-             табов фиксированный, как в оригинале. -->
-        <nav class="cp-tabs-links" aria-label="Другие разделы">
+        <nav class="tnv__links" aria-label="Другие разделы">
           <a class="ui-link" href="education.html">целевое обучение</a>
           <a class="ui-link" href="career-track.html">карьерный трек</a>
           <a class="ui-link" href="events.html">мероприятия</a>

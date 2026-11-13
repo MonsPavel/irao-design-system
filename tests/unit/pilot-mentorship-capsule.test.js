@@ -263,8 +263,10 @@ describe('pilot.css — тон активной карточки на хуке �
     );
     // errata T18.3: семейство company-feed (позиционные хуки лент компании)
     // — 28 → 29; errata T18.10: page-head/page-subtitle ушли из ценза
-    // (вынос обложки в слой, канон php) — 29 → 27
-    expect(metrics.css.families).toHaveLength(27);
+    // (вынос обложки в слой, канон php) — 29 → 27; errata T18.11:
+    // tabs-row/tabs-links ушли (вынос строки табов в слой, канон tnv) —
+    // 27 → 25
+    expect(metrics.css.families).toHaveLength(25);
   });
 });
 
@@ -275,7 +277,8 @@ describe('ценз T17.16 — гейт чист после сборки блок
     expect(gate.problems, 'гейт ценза чист').toEqual([]);
     expect(gate.newBlocks, 'новых cp-семейств 0').toEqual([]);
     // errata T18.3: allowlist расширен семейством company-feed — 30 → 31;
-    // errata T18.10: page-head/page-subtitle ушли (вынос в слой) — 31 → 29
-    expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3/T18.10').toHaveLength(29);
+    // errata T18.10: page-head/page-subtitle ушли (вынос в слой) — 31 → 29;
+    // errata T18.11: tabs-row/tabs-links ушли (вынос в слой) — 29 → 27
+    expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3/T18.10/T18.11').toHaveLength(27);
   });
 });

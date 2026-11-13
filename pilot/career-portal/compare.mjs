@@ -603,7 +603,7 @@ const BLOCK_PROBES = {
   // компонент ДС, дельта известная — Out of scope).
   'internships.html': [
     ['cover', '.cover-hero', '.int-cover'],
-    ['tabs', '.tabs-pill', '.cp-tabs-row'],
+    ['tabs', '.tabs-pill', '.tnv'],
     ['directions', '#directions', '#directions'],
     ['marquee', '.adv-marquee', '.int-marquee'],
     ['advantages', '.adv-grid', '.cp-adv-grid'],
@@ -614,7 +614,7 @@ const BLOCK_PROBES = {
   ],
   'practices.html': [
     ['cover', '.cover-hero', '.int-cover'],
-    ['tabs', '.tabs-pill', '.cp-tabs-row'],
+    ['tabs', '.tabs-pill', '.tnv'],
     ['directions', '#directions', '#directions'],
     ['marquee', '.adv-marquee', '.int-marquee'],
     ['advantages', '.adv-grid', '.cp-adv-grid'],

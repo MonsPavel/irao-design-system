@@ -187,13 +187,13 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.10', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.11', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(29);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(27);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -279,15 +279,25 @@ describe('пороги ценза — числа зафиксированы по
       // переведена на каркас cvh): сырые 2272→2250, код 1297→1269,
       // селекторы 166→158; семейства 29→27 — page-head/page-subtitle ушли
       // из allowlist (судьба «вынос в слой», REPORT §11.4):
-      expect(metrics.css.lines).toBe(2250);
-      expect(metrics.css.codeLines).toBe(1269);
-      expect(metrics.css.selectors).toBe(158);
+      // T18.11 (вынос строки табов + ссылок в слой — канон tnv: пара
+      // cp-tabs-row/cp-tabs-links снята из разметки build.mjs и pilot.css —
+      // 2 базы + 2 хука .int-tabs .cp-tabs-row (nowrap + маргин ленты —
+      // ступень/сброс канона)): сырые 2250→2231, код 1269→1252,
+      // селекторы 158→154; семейства 27→25 — tabs-row/tabs-links ушли
+      // из allowlist (судьба «вынос в слой», REPORT §11.4):
+      expect(metrics.css.lines).toBe(2231);
+      expect(metrics.css.codeLines).toBe(1252);
+      expect(metrics.css.selectors).toBe(154);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(27);
+      expect(metrics.css.families).toHaveLength(25);
       expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
         'page-head',
       );
       expect(metrics.css.families).not.toContain('page-subtitle');
+      expect(metrics.css.families, 'семейства строки табов вынесены в слой (T18.11)').not.toContain(
+        'tabs-row',
+      );
+      expect(metrics.css.families).not.toContain('tabs-links');
       expect(metrics.js.lines).toBe(187);
     },
   );

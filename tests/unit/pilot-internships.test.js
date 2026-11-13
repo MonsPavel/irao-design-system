@@ -75,18 +75,20 @@ describe('build.mjs — обложка и табы (T18.6, internships.html:145�
     );
   });
 
-  it('секция табов — pt 24 (internships.html:158) и ряд cp-tabs-row без переноса (одна полоса 56px, оригинал pages.css:974–1003)', () => {
+  it('секция табов — pt 24 (internships.html:158); ряд «табы + ссылки» — канон tnv слоя (T18.11, errata пина T18.6: «одна полоса» — ступень md канона, хук .int-tabs снят как дубликат)', () => {
     expect(internFn).toContain('<section class="ui-section int-tabs">');
     expect(blockOf(pilotCss, '.int-tabs')).toContain('padding-top: 1.5rem');
     expect(blockOf(pilotCss, '.int-tabs')).toContain('padding-bottom: 2.5rem');
-    expect(blockOf(pilotCss, '.int-tabs .cp-tabs-row')).toContain('flex-wrap: nowrap');
+    expect(internFn, 'ряд — канон tnv слоя (T18.11)').toContain('<div class="tnv">');
+    expect(blockOf(pilotCss, '.int-tabs .cp-tabs-row'), 'хук nowrap снят (ступень md канона)').toBeNull();
   });
 
-  it('панели-подсказки табов — visually-hidden (ui-vh, T17.2): панелей у tabs-pill оригинала нет (internships.html:158–168), панель активного таба давала секции +19px; ритм ленты ui-tabs__list погашен (маргин канона «лента → панель»)', () => {
+  it('панели-подсказки табов — visually-hidden (ui-vh, T17.2): панелей у tabs-pill оригинала нет (internships.html:158–168), панель активного таба давала секции +19px; ритм ленты ui-tabs__list погашен — сброс в каноне tnv слоя (T18.11, errata пина T18.6: хук .int-tabs снят)', () => {
     expect(internFn.match(/class="ui-tabs__panel ui-vh"/g)?.length).toBe(2);
-    expect(blockOf(pilotCss, '.int-tabs .cp-tabs-row .ui-tabs__list')).toContain(
-      'margin-bottom: 0',
-    );
+    expect(
+      blockOf(pilotCss, '.int-tabs .cp-tabs-row .ui-tabs__list'),
+      'хук маргина снят (сброс — канон tnv)',
+    ).toBeNull();
   });
 });
 

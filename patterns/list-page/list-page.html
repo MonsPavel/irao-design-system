@@ -795,6 +795,69 @@
   <!-- html-validate-enable irao/tabs-id-links -->
 </section>
 
+<section class="ui-section" id="lpp-tabs-row" aria-labelledby="lpp-tabs-row-title">
+  <h2 class="ui-h3" id="lpp-tabs-row-title">Строка табов + ссылок (T18.11)</h2>
+  <p class="ui-showcase-stand__note">
+    Смешанный набор «табы + ссылки разделов» — связка <code>tnv</code> паттерн-слоя (порт
+    <code>cp-tabs-row/links</code> career-portal, T18.11): ряд «лента табов + nav ссылок» одной
+    полосой — <code>nowrap</code> от md, мобильная база — перенос (осознанное отклонение канона,
+    прецедент <code>nvp</code>: оригинал держит ряд на всех ширинах — grid 5×1fr
+    <code>pages.css:974</code>). Табы — настоящий tablist: <code>data-ui-tabs</code> + панели-
+    подсказки (клавиатура/roving tabindex — компонент, контракт T13.6), начальный выбор —
+    <code>aria-current="page"</code> (T14.9); активную пилюлю красит модификатор
+    <code>ui-tabs--pill</code> (T14.9/T17.11 — active-состояние 1:1 <code>pages.css:1000</code>).
+    Ссылки разделов — вне tablist отдельным nav (правило ui-tabs), лента — <code>tnv__links</code>
+    (шаг 8/16), вид — роль <code>ui-link</code>; DS-маргин ленты табов в ряду погашен (ритм
+    «лента → панель» ведёт секция).
+  </p>
+
+  <!-- Канон T18.11 — использование 1:1 пилота (internships/practices):
+       ряд tnv внутри ui-tabs--pill ДО панелей; табы — межстраничный набор
+       «практика/стажировка» с панелями-подсказками (ui-vh — T15.4/T17.2,
+       контент панелей — зона сайта); начальный выбор — aria-current="page"
+       (T14.9), модуль ставит роли/aria-selected/roving tabindex; ссылки
+       разделов — nav.tnv__links вне tablist (правило ui-tabs), вид — роль
+       ui-link. irao/tabs-id-links отключён локально по образцу nvp:
+       href'ы табов ведут на панели-подсказки того же инстанса (id есть),
+       но правило кодирует контракт «таб-ссылка → панель контента», а
+       панели здесь — SR-подсказки сознательно (T15.4). -->
+  <!-- html-validate-disable irao/tabs-id-links -->
+  <div class="ui-tabs ui-tabs--pill" data-ui-tabs>
+    <div class="tnv">
+      <div class="ui-tabs__list">
+        <a class="ui-tabs__tab" href="#tnv-panel-practice" id="tnv-tab-practice">практики</a>
+        <a
+          class="ui-tabs__tab"
+          href="#tnv-panel-internship"
+          id="tnv-tab-internship"
+          aria-current="page"
+          >стажировки</a
+        >
+      </div>
+      <nav class="tnv__links" aria-label="Другие разделы">
+        <a class="ui-link" href="education.html">Целевое обучение</a>
+        <a class="ui-link" href="career-track.html">Карьерный трек</a>
+        <a class="ui-link" href="events.html">Мероприятия</a>
+      </nav>
+    </div>
+    <section
+      class="ui-tabs__panel ui-vh"
+      id="tnv-panel-practice"
+      aria-labelledby="tnv-tab-practice"
+    >
+      <p class="ui-small">Каталог практик — на странице «Практики».</p>
+    </section>
+    <section
+      class="ui-tabs__panel ui-vh"
+      id="tnv-panel-internship"
+      aria-labelledby="tnv-tab-internship"
+    >
+      <p class="ui-small">Каталог стажировок — на странице «Стажировки».</p>
+    </section>
+  </div>
+  <!-- html-validate-enable irao/tabs-id-links -->
+</section>
+
 <section class="ui-section" id="lpp-cover" aria-labelledby="lpp-cover-title">
   <h2 class="ui-h3" id="lpp-cover-title">Обложка страницы (T18.10)</h2>
   <p class="ui-showcase-stand__note">

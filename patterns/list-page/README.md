@@ -31,6 +31,7 @@
 | Выдача строками (T14.10) | `ui-card--hover` + связка `lpp-row` + CTA `ui-button--pill` (T14.4) | заголовок выдачи — h2, строки — article с h3-ссылкой; демо-модалка отклика — `ui-modal` |
 | Сайдбар фильтров (T14.10) | select-пилюли, `ui-radio-group`, `ui-checkbox`, `ui-button`, промо `ui-card--filled`, чипы `ui-chip` (T14.8) | grid «aside \| выдача»; aside sticky от md + scrollable-focusable |
 | Поднавигация разделов (T17.11) | `ui-tabs--pill` + связка `nvp` | межстраничные ссылки без панелей: `data-ui-tabs` не ставится (контракт T13.6), активный раздел — `aria-current="page"` (активную пилюлю красит модификатор, покой + hover); раскладка — связки `nvp` паттерн-слоя: маргины 24/48, сетка 5×1fr от md (мобильная база — перенос ленты) |
+| Строка табов + ссылок (T18.11) | `ui-tabs--pill` + табы `ui-tabs__tab` (tablist, `data-ui-tabs` + панели-подсказки) + связки `tnv`/`tnv__links` | смешанный набор «табы + ссылки разделов» (T18.11): ряд одной полосой от md (мобильная база — перенос, осознанное отклонение — прецедент `nvp`), лента ссылок вне tablist (правило ui-tabs), DS-маргин ленты в ряду погашен; раздел стенда — `#lpp-tabs-row` |
 | Пагинация | `ui-pagination` | T6.3; сохраняет GET-параметры фильтров |
 | Empty-ветка | `ui-empty` | заголовок-роль h2; сброс — ссылка на чистый URL |
 
@@ -123,6 +124,50 @@ muted слой не переобъявляет), ширина подзаголо
 @media (min-width: 768px) { .php--split { flex-direction: row; } .php--split .php-note { flex-shrink: 1; min-width: 0; } } /* от md: components.css:43; усадка ноты — гранула 32px-гейта T3.6 */
 .php-note { flex: none; } /* pages.css:31 */
 .php-subtitle { max-width: 48.75rem; } /* 780px — components.css:61 */
+```
+
+### Строка табов + ссылок: связка tnv (T18.11)
+
+Смешанный набор «табы + ссылки разделов» (порт `cp-tabs-row/cp-tabs-links`
+career-portal, T18.11): настоящий tablist на `ui-tabs--pill` (`data-ui-tabs`,
+панели-подсказки — клавиатура/roving tabindex даёт компонент; начальный выбор
+— `aria-current="page"`, T14.9; активную пилюлю красит модификатор —
+active-состояние 1:1 `pages.css:1000`) плюс nav ссылок разделов вне tablist
+(правило ui-tabs). Ряд «лента + nav» — одна полоса от md
+(оригинал `pages.css:974` — grid 5 колонок без переноса); мобильная база —
+перенос (осознанное отклонение канона, прецедент `nvp` T17.11: оригинал
+держит ряд на всех ширинах — на 375/32px-базе T3.6 nowrap min-content ряда
+не проходит). DS-маргин ленты табов (ритм «лента → панель») в ряду погашен —
+панелей-подсказок в потоке нет, ритм ведёт секция (замер 06.11: маргин давал
+ряд 92px).
+
+```html
+<div class="ui-tabs ui-tabs--pill" data-ui-tabs>
+  <div class="tnv">
+    <div class="ui-tabs__list">
+      <a class="ui-tabs__tab" href="#tnv-panel-practice" id="tnv-tab-practice">практики</a>
+      <a class="ui-tabs__tab" href="#tnv-panel-internship" id="tnv-tab-internship" aria-current="page">стажировки</a>
+    </div>
+    <nav class="tnv__links" aria-label="Другие разделы">
+      <a class="ui-link" href="education.html">Целевое обучение</a>
+      <a class="ui-link" href="career-track.html">Карьерный трек</a>
+      <a class="ui-link" href="events.html">Мероприятия</a>
+    </nav>
+  </div>
+  <section class="ui-tabs__panel ui-vh" id="tnv-panel-practice" aria-labelledby="tnv-tab-practice">
+    <p class="ui-small">Каталог практик — на странице «Практики».</p>
+  </section>
+  <section class="ui-tabs__panel ui-vh" id="tnv-panel-internship" aria-labelledby="tnv-tab-internship">
+    <p class="ui-small">Каталог стажировок — на странице «Стажировки».</p>
+  </section>
+</div>
+```
+
+```css
+.tnv { box-sizing: border-box; display: flex; flex-wrap: wrap; gap: var(--ui-space-2) var(--ui-space-4); align-items: center; } /* шаг 8/16 и центр — .cp-tabs-row pilot.css:2110–2113; база — перенос (прецедент nvp) */
+@media (min-width: 768px) { .tnv { flex-wrap: nowrap; } } /* «одна полоса» оригинала — pages.css:974; порт хука .int-tabs (замер 06.11) */
+.tnv .ui-tabs__list { margin-bottom: 0; } /* DS-ритм «лента → панель» в ряду снят — замер 06.11 (ряд 92px); прецедент сброса .nvp */
+.tnv__links { box-sizing: border-box; display: inline-flex; flex-wrap: wrap; gap: var(--ui-space-2) var(--ui-space-4); } /* шаг 8/16 — .cp-tabs-links pilot.css:2116–2120 */
 ```
 
 ### Панель фильтров: GET-форма, select-пилюли
