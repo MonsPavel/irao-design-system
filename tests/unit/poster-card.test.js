@@ -409,9 +409,12 @@ describe('adoption в пилоте (T17.18 Scope; пины исходников)
     // карточки к канону оригинала);
     // T18.6: 1894→2138 / 1089→1222 — позиционные хуки лендингов
     // стажировок/практик int- (ритм секций, cover-hero, лента мероприятий
-    // events-feature 2fr/1fr).
-    expect(MAX_PILOT_CSS_LINES).toBe(2138);
-    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1222);
+    // events-feature 2fr/1fr);
+    // T18.9: 2138→2272 / 1222→1297 — позиционные хуки точечного хвоста
+    // cmp-/ev-/ia- (ритм companies, обложка/фильтры/лента событий events,
+    // карточная форма анкеты internship-apply).
+    expect(MAX_PILOT_CSS_LINES).toBe(2272);
+    expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     const metrics = censusMetrics(pilotCssRaw, pilotJs);
     const gate = runCensusGate(metrics);

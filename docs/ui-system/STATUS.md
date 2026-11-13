@@ -135,7 +135,7 @@
 | T18.6 | done | смержена |
 | T18.7 | done | смержена |
 | T18.8 | done | смержена |
-| T18.9 | todo | точечный хвост: companies/events/education-catalog/internship-apply/article/events-search/404 |
+| T18.9 | done | смержена |
 | T18.10 | todo | макро-вынос: page-head/page-subtitle → слой (php-) |
 | T18.11 | todo | макро-вынос: строка табов-ссылок (tabs-row/links) → слой — GAP REPORT §11.4 |
 | T18.12 | todo | макро-вынос: why-us (стекло) → слой (whu-) — кандидат §11.4 |
