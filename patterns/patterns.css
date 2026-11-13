@@ -17,7 +17,8 @@
  * cover-hero, T17.15), pstr- (постерная карточка, T17.18), msh/vcp
  * (наставничество/капсула вакансий, T18.2), php (обложка страницы, T18.10),
  * tnv (строка табов + ссылок разделов, T18.11), whu (тёмная секция
- * «why-us» со стеклом, T18.12); потомки — компоненты
+ * «why-us» со стеклом, T18.12), prd (раскладки карусели production
+ * v1/v2, T18.13); потомки — компоненты
  * ui-*. Список пополняют задачи эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
@@ -2878,4 +2879,405 @@
   .whu__card:hover .whu__card-num {
     opacity: 1; /* why-us.css:114 */
   }
+}
+
+/* ════════════════ Раскладки карусели «production» (T18.13) — связка prd ════════════════
+ *
+ * Порт раскладок карусели «Производство» career-portal (.cp-production —
+ * pilot.css:125–414 + ступень 1023 pilot.css:1928; оригинал
+ * src/blocks/production/production.css — строки в комментариях, errata
+ * 31.10 «приведи к оригиналу»: --glow → --tint, v1-абсолютные координаты,
+ * min-height 47.5rem, стрелки 100×100 по краям, степпер gap 0, чипы blur —
+ * блок 760↔760 байт-паритет). Разметка канона —
+ * patterns/landing-section/landing-section.html (секции lsp-production v1
+ * и lsp-production-v2; док — источник правды, пин синхронности
+ * tests/unit/pattern-production.test.js).
+ *
+ * ПОВЕРХ КОМПОНЕНТА ui-carousel (T17.7): поведение слайдов (модуль
+ * ui-carousel.js в dist) и вид элементов (рамка/фон/шрифт табов,
+ * кнопочность стрелок, сброс степпера) несёт компонент; слой несёт
+ * РАСКЛАДКУ секции (позиции фото/тела/стрелок/ленты, облик табов сайт-
+ * зоны, модификаторы v1/v2). Связка не дублирует компонент: cursor/
+ * font-family/text-align табов и display-переключение контролов
+ * (is-initialized) — из ui-carousel.css; слой гасит только то, что
+ * расходится с одобренным дизайном (рамка канона против заливок сайта —
+ * дельта канона REPORT §9.1, PLAN P3-кандидат ui-carousel__tab--bar —
+ * НЕ решается здесь, Implementation requirements T18.13 п.3).
+ *
+ * Структура — модификаторы вариантов оригинала: база секции (текст/
+ * кнопка в потоке, лента абсолютом) + --v1 (абсолютные координаты текста/
+ * кнопки и ленты от 1280 — production.css:202-249, скоуп модификатором
+ * как в оригинале; в пилоте блок был без скоупа и правила перебрасывало
+ * и на v2 index-2 — артефакт незавершённого паритета v2, в канон не
+ * переносится; рендер index при выносе не меняется — модификатор в
+ * разметке) + --v2 (фото-центр + чипы сверху — production.css:274-302).
+ * Пины errata 31.10 не тронуты: letter-spacing 0.01em кнопки оригинала
+ * не переносится (прецедент шапки), v1-координаты 1:1.
+ *
+ * v2-дельты оригиналу синхронизируются при выносе (пилот вёз десктоп-
+ * форму в mobile, паритет v2 был по высотам): заливка чипов 50%
+ * (production.css:288 — в пилоте наследовалась база 30%), чипы ≤1023 —
+ * static-лента оригинала (production.css:313; фиксированные 700px
+ * absolute в пилоте давали hscroll на 375 — 32px-база T3.6), погашение
+ * bottom 0 ленты-базы в ступени lg (bottom: auto).
+ *
+ * Мобильная база: фото слайда скрыто до lg (ступень пилота max-1023
+ * pilot.css:1928, инвертирована mobile-first — Implementation requirements
+ * T17.1 п.4); прочие лестницы оригинала (production.css:301-334) пилот не
+ * вёз — сайт-зона приняла десктоп-форму (не переносится).
+ *
+ * VI-инвариант: фото слайда — класс __photo (конвенция vi.css
+ * [class*='__photo'] — img:off прячет; в режиме img:off скрыт и фон
+ * секции [class*='__bg'] примитива), секция — ui-section--photo (T17.3).
+ */
+
+/* Каркас: flex-секция, тело прижато к низу (production.css:4-5), клип
+   (production.css:6); min-height 760px «как есть» (production.css:3);
+   ритм ui-section погашен (padding 0 — секция несёт собственную
+   геометрию, решение владельца 31.10). Тон завода rgba(0,40,86,.9)
+   (production.css:28) — канон-хук --tint (base/layout.css:169, оверлей
+   в базовом z -1 ПОД контентом); радиальный glow production.css:34-40
+   опущен — цвет вне токенов, слой вторичен (errata 31.10). position —
+   примитив ui-section--photo (T17.3). */
+.prd {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  --ui-section-overlay-tint: color-mix(in srgb, var(--ui-color-primary) 90%, transparent);
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+  min-height: 47.5rem; /* 760px production.css:3 «как есть» */
+  padding: 0;
+}
+
+/* Белая планка-спинка под лентой табов (production.css:189-200) —
+   во всю ширину, вне tab-порядка. */
+.prd::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  z-index: 5;
+  height: 1.0625rem; /* 17px production.css:196 */
+  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0; /* 16px — production.css:198 */
+  background: var(--ui-color-surface); /* production.css:197 */
+  pointer-events: none;
+  inset-inline: 0;
+}
+
+/* Фото слайда: absolute top 71px left 43.5% «как есть»
+   (production.css:40-45), contain с привязкой к низу (production.css:50-51).
+   Мобильная база — скрыто (ступень пилота max-1023 pilot.css:1928,
+   инвертирована mobile-first), от lg — виден. Класс несёт __photo —
+   vi.css img:off прячет (VI-инвариант T9.1). */
+.prd__photo {
+  box-sizing: border-box;
+  display: none;
+  position: absolute;
+  top: 4.4375rem; /* 71px production.css:45 */
+  left: 43.5%; /* production.css:44 «как есть» */
+  z-index: 2;
+  object-fit: contain;
+  object-position: bottom center;
+}
+
+@media (min-width: 1024px) {
+  .prd__photo {
+    display: block;
+  }
+}
+
+/* Тело слайда: flex-колонка gap 24 (production.css:58-61), max-width 545
+   (production.css:62), padding 72/56 (production.css:63), z 3. */
+.prd__body {
+  box-sizing: border-box;
+  display: flex;
+  position: relative;
+  z-index: 3;
+  flex-direction: column;
+  gap: var(--ui-space-4); /* 24px production.css:61 */
+  align-items: flex-start;
+  max-width: 34.0625rem; /* 545px production.css:62 */
+  padding: 0 0 4.5rem 3.5rem; /* 72/56 production.css:63 */
+}
+
+/* Заголовок: 48px/lh 1.2/fw 500 «как есть» (production.css:67-69 — против
+   роли ui-h2 60), пара цветов on-dark (production.css:70); fs/fw/lh —
+   override роли разметки. */
+.prd__title {
+  color: var(--ui-color-text-on-dark); /* production.css:70 */
+  font-size: 3rem; /* 48px production.css:67 «как есть» (против ui-h2 60) */
+  font-weight: var(--ui-fw-body-bold); /* 500 production.css:68 */
+  line-height: 1.2;
+}
+
+/* Текст: 18px/lh 1.22/fw 500 (production.css:75-77) — override роли
+   ui-lead, on-dark (production.css:78). */
+.prd__text {
+  color: var(--ui-color-text-on-dark); /* production.css:78 */
+  font-size: 1.125rem; /* 18px production.css:75 */
+  font-weight: var(--ui-fw-body-bold);
+  line-height: 1.22;
+}
+
+/* Кнопка — ui-button--light (вид ДС); регистр — сайт (production.css:93);
+   letter-spacing 0.01em production.css:92 не переносится — решение «не
+   переносить» по прецеденту шапки (REPORT, дайджест 25.10, бонус) — пин
+   errata 31.10. */
+.prd__btn {
+  font-size: var(--ui-fs-caption); /* production.css:90 */
+  text-transform: uppercase; /* production.css:93 */
+}
+
+/* Вариант 1 главной: текст/кнопка — абсолютные координаты макета
+   (production.css:202-249, breakpoint 1280 «как есть»), скоуп
+   модификатором --v1 — как в оригинале (в пилоте блок был без скоупа —
+   см. шапку связки). Пин errata 31.10: значения не тронуты. */
+@media (min-width: 1280px) {
+  .prd--v1 .prd__body {
+    display: block;
+    position: absolute;
+    inset: 0;
+    max-width: none;
+    padding: 0;
+  }
+
+  .prd--v1 .prd__title,
+  .prd--v1 .prd__text,
+  .prd--v1 .prd__btn {
+    position: absolute;
+    left: 3.4375rem; /* 55px production.css:215 */
+  }
+
+  .prd--v1 .prd__title {
+    top: 4.875rem; /* 78px production.css:219 */
+    width: 34.0625rem; /* 545px production.css:220 */
+  }
+
+  .prd--v1 .prd__text {
+    top: 26.875rem; /* 430px production.css:224 */
+    width: 34.0625rem; /* 545px production.css:225 */
+  }
+
+  .prd--v1 .prd__btn {
+    top: 32.6875rem; /* 523px production.css:228 */
+  }
+
+  .prd--v1 .prd__tab-num,
+  .prd--v1 .prd__tab-body {
+    transform: translateY(-0.5rem); /* -8px production.css:247 */
+  }
+}
+
+/* Позиции стрелок (вид — ui-carousel__arrow, компонент): по краям секции,
+   100×100 hit-area (production.css:79-96) — композиция оригинала. */
+.prd__arrow {
+  box-sizing: border-box;
+  display: inline-flex;
+  position: absolute;
+  top: 19.4375rem; /* 311px production.css:103 */
+  z-index: 4;
+  align-items: center;
+  justify-content: center;
+  width: 6.25rem; /* 100px production.css:107 */
+  height: 6.25rem; /* 100px production.css:108 */
+  opacity: 0.9; /* production.css:110 */
+  transition: opacity var(--ui-transition); /* production.css:111 */
+}
+
+.prd__arrow--prev {
+  right: auto;
+  left: 0; /* production.css:116 */
+}
+
+.prd__arrow--next {
+  right: 0; /* production.css:117 */
+}
+
+@media (hover: hover) {
+  .prd__arrow:hover {
+    opacity: 0.6; /* production.css:114 */
+  }
+}
+
+/* Лента табов (v1): абсолютная полоса внизу во всю ширину
+   (production.css:228-235). Табы вплотную — production.css:97-103 gap
+   не задаёт (canon 8px компонента погашен). Элементы списка прозрачны
+   для ленты (в оригинале кнопки — прямые дети степпера, build-разметка
+   несёт li). */
+.prd__stepper {
+  box-sizing: border-box;
+  position: absolute;
+  bottom: 0;
+  z-index: 3;
+  gap: 0;
+  width: 100%;
+  max-width: none;
+  height: 5.125rem; /* 82px production.css:235 */
+  margin: 0;
+  inset-inline: 0;
+}
+
+.prd__stepper > li {
+  display: contents;
+}
+
+/* Таб: заливка blue-100@30, без рамки, активности — 50% и радиус сверху
+   (production.css:99-111) — сайт-облик поверх рамки канона ui-carousel
+   (дельта канона с оригиналом — REPORT §9.1; font-family/text-align/
+   cursor несёт компонент). */
+.prd__tab {
+  box-sizing: border-box;
+  flex: 0 0 20%; /* 5 табов поровну (production.css:240-242) */
+  gap: 0.75rem; /* 12px production.css:134/103 */
+  min-height: 4.25rem; /* 68px production.css:135/104 */
+  padding: 0.875rem 1.75rem; /* 14/28 production.css:136/106 */
+  border: none;
+  border-radius: 0; /* production.css:139 */
+  background-color: color-mix(
+    in srgb,
+    var(--ui-color-surface-hover) 30%,
+    transparent
+  ); /* blue-100@30 production.css:138 */
+  transition:
+    background-color var(--ui-transition),
+    min-height var(--ui-transition); /* production.css:140 */
+}
+
+.prd__tab:where([aria-selected='true']) {
+  min-height: 5.125rem; /* 82px production.css:144/109 */
+  border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0; /* 16px сверху — production.css:146 */
+  background-color: color-mix(
+    in srgb,
+    var(--ui-color-surface-hover) 50%,
+    transparent
+  ); /* blue-100@50 production.css:145 */
+}
+
+/* Номер — только у активного таба (production.css:149-163). */
+.prd__tab-num {
+  box-sizing: border-box;
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 1.875rem; /* 30px production.css:153/150 */
+  height: 1.875rem;
+  border: var(--ui-border-width) solid
+    color-mix(in srgb, var(--ui-color-text-on-dark) 50%, transparent); /* white@50 production.css:155 */
+  border-radius: var(--ui-radius-pill); /* production.css:157 */
+  color: var(--ui-color-text-on-dark); /* production.css:160 */
+  font-size: var(--ui-fs-caption); /* production.css:158 */
+}
+
+.prd__tab:where([aria-selected='true']) .prd__tab-num {
+  display: inline-flex; /* production.css:163 */
+}
+
+/* Тело таба: колонка gap 2 (production.css:165-170); подпись/счётчик —
+   small/micro on-dark, nowrap-кламп (production.css:172-187). */
+.prd__tab-body {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* production.css:168 */
+  min-width: 0;
+}
+
+.prd__tab-title {
+  overflow: hidden;
+  color: var(--ui-color-text-on-dark); /* production.css:176 */
+  font-size: var(--ui-fs-small); /* production.css:173 */
+  font-weight: var(--ui-fw-small);
+  line-height: 1.35; /* production.css:175 */
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.prd__tab-count {
+  display: block;
+  color: var(--ui-color-text-on-dark); /* production.css:186 */
+  font-size: var(--ui-fs-micro); /* production.css:183 */
+  line-height: 1.35;
+}
+
+/* ── Вариант 2 главной (production.css:274-302 — производство «фото
+   слева, текст справа, чипы сверху»; батч «все страницы» 31.10) ── */
+.prd--v2 {
+  align-items: stretch; /* production.css:276 */
+  min-height: 46.25rem; /* 740px production.css:275 «как есть» */
+}
+
+.prd--v2 .prd__photo {
+  top: 4.5rem; /* 72px production.css:280 */
+  right: auto;
+  left: 1.375rem; /* 22px production.css:279 */
+}
+
+.prd--v2 .prd__body {
+  justify-content: flex-end; /* production.css:283 */
+  margin-left: auto;
+  padding: 0 3.5rem 4.5rem 0; /* 56/72 production.css:284 */
+}
+
+.prd--v2 .prd__title {
+  margin-bottom: 1.625rem; /* 26px production.css:288 */
+}
+
+.prd--v2 .prd__text {
+  margin-bottom: 1.5rem; /* 24px production.css:291 */
+}
+
+/* Чипы сверху: мобильная база — static-лента оригинала (production.css:313,
+   инверсия @max-1023; фиксированные 700px absolute пилота давали hscroll
+   на 375 — 32px-база T3.6), от lg — absolute справа сверху
+   (production.css:272-281): top 42/right 56/width 700, height auto +
+   bottom auto — погашение bottom 0 ленты-базы v1. */
+.prd--v2 .prd__stepper {
+  position: static;
+  flex-wrap: wrap; /* production.css:277 */
+  gap: 1.1875rem; /* 19px production.css:279/297 */
+  width: auto;
+  height: auto;
+  padding: 1.5rem 2.5rem 0; /* 24/40 production.css:313 */
+  background: none; /* production.css:280 */
+}
+
+@media (min-width: 1024px) {
+  .prd--v2 .prd__stepper {
+    position: absolute;
+    top: 2.625rem; /* 42px production.css:293 */
+    bottom: auto; /* погашение ленты-базы v1 */
+    width: 43.75rem; /* 700px production.css:296 */
+    height: auto;
+    padding: 0;
+    inset-inline: auto 3.5rem; /* right 56px production.css:294 */
+  }
+}
+
+/* Таб-чип: автоширина 59px, radius 32, blue-100@50 + blur(6px)
+   (production.css:283-291). Заливка 50% — production.css:288 (в пилоте
+   наследовалась база 30% — синхронизация оригиналу при выносе). */
+.prd--v2 .prd__tab {
+  flex: 0 0 auto; /* production.css:284 */
+  min-height: 3.6875rem; /* 59px production.css:285/301 */
+  padding: 0.75rem 1rem; /* 12/16 production.css:286/302 */
+  border-radius: 2rem; /* 32px production.css:287/303 */
+  background-color: color-mix(
+    in srgb,
+    var(--ui-color-surface-hover) 50%,
+    transparent
+  ); /* production.css:288 */
+  -webkit-backdrop-filter: blur(6px); /* production.css:290/305 */
+  backdrop-filter: blur(6px);
+}
+
+.prd--v2 .prd__tab:where([aria-selected='true']) {
+  --prd-tab-ring: inset 0 0 0 1px color-mix(in srgb, var(--ui-color-text-on-dark) 35%, transparent); /* production.css:296/310, хук — гейт теней требует var() */
+  min-height: 3.6875rem;
+  /* rgba(21,42,79,.9) production.css:295/309 */
+  background-color: color-mix(in srgb, var(--ui-color-primary-deep) 90%, transparent);
+  box-shadow: var(--prd-tab-ring);
+}
+
+.prd--v2 .prd__tab-num {
+  display: inline-flex; /* production.css:299/312 */
 }
