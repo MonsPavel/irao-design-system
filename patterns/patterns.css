@@ -3281,3 +3281,218 @@
 .prd--v2 .prd__tab-num {
   display: inline-flex; /* production.css:299/312 */
 }
+
+/* ════════════════ Сетка направлений (T18.14) — связка dir ════════════════
+ *
+ * Порт сетки карточек-направлений career-portal (.cp-directions —
+ * pilot.css:137-201; оригинал src/blocks/directions/directions.css — строки
+ * в комментариях; батч паритета 31.10 «приведи к оригиналу»: рамочные
+ * карточки 179px вместо прежнего «воздушнее» §9.1 — блок 652↔652
+ * байт-паритет). Разметка канона —
+ * patterns/landing-section/landing-section.html (секция lsp-directions; док
+ * — источник правды, пин синхронности
+ * tests/unit/pattern-directions-holding.test.js).
+ *
+ * Каркас: секция — светлая ui-section (без фото-примитива), вертикальный
+ * ритм 72/72 «как есть» погашением ритма ui-section (directions.css:2);
+ * карточка — кнопка-рамка: действие (открытие модалки направления) — сайт;
+ * модалка — семейство dir-modal сайт-зоны (вынос — T18.16), в канон не
+ * входит.
+ *
+ * Дельта канона (1:1 порт пилота): шрифт имени не задаётся — в ДС нет
+ * button-ресета оригинала (base.css:77 font-family: inherit), имя карточки
+ * рендерит UA-шрифт кнопки (13.3px системного семейства против Golos 16
+ * оригинала); принятый рендер паритета (высоты 652↔652) — воспроизведение
+ * ресурсета не задача выноса (кандидат — отдельное решение владельца).
+ * Hover-поворот стрелки оригинала (directions.css:65-67) пилотом не вёлся —
+ * не переносится.
+ *
+ * Мобильные базы канона — ступени пилота max-1023/767 (directions.css:222/
+ * 230), инвертированные mobile-first (прецедент msh/whu): колонка в базе,
+ * 2×1fr от md (768), 4×1fr от lg (1024, шкала T2.5). Лестница gap 24
+ * оригинала (directions.css:218, ≤1279) пилотом не велась — не переносится.
+ */
+
+/* Каркас: ритм 72/72 «как есть» (directions.css:2). */
+.dir {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  padding: 4.5rem 0; /* 72px directions.css:2 «как есть» (ритм ui-section погашен) */
+}
+
+/* Заголовок: низ 48px (directions.css:8); fs/fw/lh/цвет несёт роль ui-h2. */
+.dir .ui-h2 {
+  margin-bottom: 3rem; /* 48px directions.css:8 (ui-h2 канона без отступа) */
+}
+
+/* Сетка: колонка в мобильной базе (оригинал ≤767 — directions.css:230),
+   2×1fr от md (ступень пилота max-1023 — directions.css:222), 4×1fr от lg
+   (десктоп-форма — directions.css:16); шаг 36px «как есть»
+   (directions.css:10). */
+.dir__grid {
+  box-sizing: border-box;
+  display: grid;
+  gap: 2.25rem; /* 36px directions.css:10 «как есть» */
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+  .dir__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dir__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Карточка-рамка: flex-колонка gap 34 (directions.css:17), имя прижато к
+   низу (directions.css:15), min-height 179px (directions.css:18), padding
+   20px (directions.css:19), рамка gray-300 = --ui-border-color (directions.css:20),
+   радиус --radius-card 16px = md, поверхность surface, text-align left
+   (кнопка), переходы фона/рамки (directions.css:25). Шрифт не задаётся —
+   1:1 порт пилота (UA-кнопка; дельта канона — см. шапку связки). */
+.dir__card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 2.125rem; /* 34px directions.css:17 «как есть» */
+  justify-content: space-between; /* имя прижато к низу (directions.css:15) */
+  width: 100%;
+  min-height: 11.1875rem; /* 179px directions.css:18 */
+  padding: 1.25rem; /* 20px directions.css:19 */
+  border: var(--ui-border-width) solid var(--ui-border-color); /* gray-300 = D6D6D6 оригинала, directions.css:20 */
+  border-radius: var(--ui-radius-md);
+  background-color: var(--ui-color-surface); /* directions.css:21 */
+  text-align: left; /* directions.css:24 */
+  transition:
+    background-color var(--ui-transition),
+    border-color var(--ui-transition); /* directions.css:25 */
+}
+
+@media (hover: hover) {
+  .dir__card:hover {
+    border-color: var(--ui-color-surface-hover); /* blue-100 directions.css:27 */
+    background-color: var(--ui-color-surface-hover); /* blue-100 directions.css:28 */
+  }
+}
+
+/* Иконка 76px (directions.css:31-33). */
+.dir__icon {
+  box-sizing: border-box;
+  object-fit: contain; /* directions.css:32 */
+  width: 4.75rem; /* 76px directions.css:31 */
+  height: 4.75rem;
+}
+
+/* Имя: flex-строка gap 4 (directions.css:34), прижато к низу/space-between
+   (directions.css:36-37), color-text — не primary (directions.css:38), fw
+   500 (directions.css:36), ls −0.02em «как есть» (directions.css:37); fs
+   несёт UA-кнопка (дельта канона — см. шапку связки). */
+.dir__name {
+  box-sizing: border-box;
+  display: flex;
+  gap: 0.25rem; /* 4px directions.css:34 */
+  align-items: flex-end;
+  justify-content: space-between;
+  color: var(--ui-color-text); /* directions.css:38 — не primary */
+  font-weight: var(--ui-fw-body-bold); /* directions.css:36 */
+  letter-spacing: -0.02em; /* directions.css:37 «как есть» */
+}
+
+/* Стрелка: не сжимается (directions.css:45), прижата 5px (directions.css:42);
+   hover-поворот оригинала (directions.css:65-67) не переносится — пилотом не
+   вёлся. */
+.dir__name svg {
+  flex: 0 0 auto;
+  margin-bottom: 0.3125rem; /* 5px directions.css:42 */
+}
+
+/* ════════════════ Холдинг (T18.14) — связка hld ════════════════
+ *
+ * Порт секции «Один из крупнейших энергетических холдингов» career-portal
+ * (.cp-holding — pilot.css:126-245; оригинал src/blocks/holding/holding.css
+ * — строки в комментариях; паритет по высотам — батч ритма 01.11: index-2
+ * compact 758↔758 байт-паритет, index 723 против 798 — принятая дельта
+ * статов T17.4 lh 1.1). Разметка канона —
+ * patterns/landing-section/landing-section.html (секция lsp-holding; док —
+ * источник правды, пин синхронности
+ * tests/unit/pattern-directions-holding.test.js).
+ *
+ * Каркас: фото-фон — примитив ui-section--photo (T17.3, БЕЗ оверлея —
+ * on-dark текст несёт контент; position/isolation — от примитива); статы —
+ * компонент ui-stat--glass (T17.4: стекло/рамка/сноска и цвет значений несёт
+ * компонент, значения — роль ui-h2 lh 1.1); сетка и ритм секции — канон.
+ * Компакт-вариант v2 (index-2, .holding--compact оригинала) — модификатор
+ * --compact: специфичность 0-2-0 — решение батча 01.11 (паддинги 72/48 —
+ * на базе, модификатор несёт только высоту __inner; no-op-правило пилота
+ * снято). Модификатор без секции дока — прецедент lgo--mosaic/hro--marquee:
+ * вариант исполнен разметкой пилота (applyVariant2 — прецедент build.py
+ * оригинала).
+ *
+ * Мобильные базы канона — ступени пилота max-1023/767 (holding.css:87),
+ * инвертированные mobile-first: колонка в базе, 2×1fr от md (768), 3×1fr от
+ * lg (1024, шкала T2.5). Лестницы оригинала высоты/шага/размера значения
+ * статов (holding.css:85-91 — height auto/gap 12/fs 56) пилотом не велись —
+ * сайт-зона приняла десктоп-форму (не переносится).
+ *
+ * VI-инвариант: фон — __bg примитива (img:off прячет [class*='__bg']);
+ * статы — компонент ui-stat (перекраска VI — правила компонента).
+ */
+
+/* Каркас: ритм 72/48 «как есть» (holding.css:3; компакт — та же сумма
+   72+638+48 = 758 оригинала). position/isolation — примитив
+   ui-section--photo. */
+.hld {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  padding: 4.5rem 0 3rem; /* 72/48 holding.css:3 «как есть» (ритм ui-section погашен) */
+}
+
+/* Внутренняя зона: вертикальная геометрия space-8 (64px) — принятый батч
+   ритма 01.11 («ритм ui-section погашен — вертикальную геометрию несёт
+   __inner»); высоту ведёт контент (auto — форма index), компакт —
+   модификатор ниже. box-sizing несёт ui-container. */
+.hld__inner {
+  padding-top: var(--ui-space-8);
+  padding-bottom: var(--ui-space-8);
+}
+
+/* Заголовок: max-width 704px (44rem — принятый пилот) и цвет on-dark
+   (holding.css:42); fs/fw/lh несёт роль ui-h2. */
+.hld__title {
+  box-sizing: border-box;
+  max-width: 44rem;
+  color: var(--ui-color-text-on-dark); /* holding.css:42 */
+}
+
+/* Статы: grid — колонка в мобильной базе (оригинал ≤767), 2×1fr от md
+   (ступень пилота max-1023 — holding.css:87), 3×1fr от lg (десктоп-форма —
+   holding.css:47); шаг 12px = space-3 (принятый рендер T17.4), верх 48px =
+   space-7; маркеры списка снимает reset.css (но-опы пилота не переносятся). */
+.hld__stats {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-3); /* 12px — принятый рендер (T17.4) */
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: var(--ui-space-7); /* 48px — пилот */
+}
+
+@media (min-width: 768px) {
+  .hld__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .hld__stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Компакт-вариант v2 (holding.css:34): __inner фикс 638px «как есть» —
+   сумма блока 758 (72+638+48). Специфичность 0-2-0 — решение батча 01.11
+   (паддинги 72/48 — на базе). */
+.hld--compact .hld__inner {
+  height: 39.875rem; /* 638px holding.css:34 «как есть» */
+}

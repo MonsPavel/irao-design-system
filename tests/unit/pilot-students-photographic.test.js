@@ -327,9 +327,9 @@ describe('ценз T17.16 — семейство stu- не создаёт cp-с�
     );
   });
 
-  it('пороги семейств не тронуты (MAX_CP_FAMILIES 30; allowlist — errata T18.3: +company-feed, errata T18.10: −page-head/−page-subtitle, errata T18.11: −tabs-row/−tabs-links, errata T18.12: −why-us, errata T18.13: −production, 25)', () => {
+  it('пороги семейств не тронуты (MAX_CP_FAMILIES 30; allowlist — errata T18.3: +company-feed, errata T18.10: −page-head/−page-subtitle, errata T18.11: −tabs-row/−tabs-links, errata T18.12: −why-us, errata T18.13: −production, errata T18.14: −directions/−holding, 23)', () => {
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(25);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(23);
     expect(ALLOWED_CP_FAMILIES, 'семейство students в allowlist не появляется').not.toContain(
       'students',
     );

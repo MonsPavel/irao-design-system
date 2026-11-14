@@ -1,11 +1,12 @@
 # Паттерн «Landing-секция» (T8.3)
 
 Правила сборки лендинг-секций из системных примитивов + mini-эталон из
-пятнадцати секций (светлая / тёмная / с-изображением full-bleed /
+семнадцати секций (светлая / тёмная / с-изображением full-bleed /
 с-фото-фоном — T17.3 / nav-карточки и лента логотипов — T17.9 / hero,
 adv-marquee, спец-сетка «Медиа», cover-hero — T17.15 / наставничество,
 капсула вакансий — T18.2 / тёмная секция «why-us» — T18.12 / раскладки
-карусели production v1/v2 — T18.13).
+карусели production v1/v2 — T18.13 / сетка направлений и холдинг —
+T18.14).
 Эталон целиком: [`landing-section.html`](landing-section.html) — он же стенд
 `/showcase/dist/stands/patterns/landing-section.html` (генерируется
 `showcase/build.mjs`).
@@ -711,6 +712,100 @@ auto замирал текст слайда):
   сняты из `pilot.css` (~290 строк + ступень 1023); тинт — хук `--tint`
   на секции (errata 31.10).
 
+## Сетка направлений (dir, T18.14)
+
+Сетка карточек-направлений главной (порт `.cp-directions` career-portal —
+блок 652↔652 байт-паритет, батч паритета 31.10 «приведи к оригиналу»):
+светлая секция с рамочными карточками-кнопками. Связка живёт в паттерн-слое
+(`dist/ui-patterns.css`, гейт префиксов `dir`); значения — принятый пилот
+1:1 с источниками `directions.css` в комментариях:
+
+```html
+<section class="ui-section dir" aria-labelledby="dir-title">
+  <div class="ui-container">
+    <h2 class="ui-h2" id="dir-title">Направления деятельности</h2>
+    <ul class="dir__grid">
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="icon.svg" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Электрогенерация <svg … aria-hidden="true">…</svg></span>
+        </button>
+      </li>…
+    </ul>
+  </div>
+</section>
+```
+
+| Слой | Что | Откуда |
+|---|---|---|
+| Секция | `.dir` — ритм 72/72 «как есть» (ритм `ui-section` погашен) | паттерн-слой, порт `.cp-directions` (directions.css:2) |
+| Заголовок | `.dir .ui-h2` — низ 48px (роль без отступа); fs/fw несёт роль | паттерн-слой (directions.css:8) |
+| Сетка | `.dir__grid` — колонка в базе, 2×1fr от md, 4×1fr от lg, шаг 36 «как есть» | паттерн-слой (directions.css:10/16 + ступени 1023/767, инверсия) |
+| Карточка | `.dir__card` — flex-колонка gap 34, имя прижато к низу, min-height 179, padding 20, рамка gray-300, радиус md, переходы | паттерн-слой (directions.css:14-25) |
+| Hover | рамка+фон blue-100 (`--ui-color-surface-hover`) — под `(hover: hover)` | паттерн-слой (directions.css:27-28) |
+| Имя | `.dir__name` — flex-строка gap 4, прижато к низу, color-text, fw 500, ls −0.02em; стрелка прижата 5px | паттерн-слой (directions.css:34-45) |
+
+- **Действие — сайт**: карточка — кнопка (модалка направления — семейство
+  `dir-modal` сайт-зоны, вынос — T18.16); поворот стрелки на hover
+  (directions.css:65-67) пилотом не вёлся — не переносится.
+- **Дельта канона**: шрифт имени не задаётся (1:1 порт пилота) — в ДС нет
+  button-ресета оригинала, имя рендерит UA-шрифт кнопки (высоты блока при
+  этом паритетны 652↔652); ресурсет — отдельное решение владельца.
+- **Мобильные базы** — ступени пилота max-1023/767, инвертированные
+  mobile-first (колонка в базе, 2×1fr от md, 4×1fr от lg); лестница gap 24
+  оригинала (≤1279) пилотом не велась — не переносится.
+
+## Холдинг (hld, T18.14)
+
+Секция «Один из крупнейших энергетических холдингов» (порт `.cp-holding`
+career-portal — паритет по высотам: index-2 compact 758↔758 байт-паритет,
+index 723 против 798 — принятая дельта статов T17.4): фото-фон — примитив
+`ui-section--photo` (T17.3, **без оверлея** — on-dark текст несёт контент),
+стеклянные статы — компонент `ui-stat--glass` (T17.4). Связка живёт в
+паттерн-слое (`dist/ui-patterns.css`, гейт префиксов `hld`); значения —
+принятый пилот 1:1 с источниками `holding.css` в комментариях:
+
+```html
+<section class="ui-section ui-section--photo hld" aria-labelledby="hld-title">
+  <div class="ui-section__bg" aria-hidden="true">
+    <img src="holding.jpg" alt="" width="1600" height="900" loading="lazy">
+  </div>
+  <div class="ui-container hld__inner">
+    <h2 class="hld__title ui-h2" id="hld-title">Заголовок холдинга</h2>
+    <ul class="hld__stats">
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">50%</span>
+        <span class="ui-stat__label">…</span>
+        <span class="ui-stat__note">* …</span>
+      </li>…
+    </ul>
+  </div>
+</section>
+```
+
+| Слой | Что | Откуда |
+|---|---|---|
+| Секция | `.hld` — ритм 72/48 «как есть» (компакт — та же сумма 758); position/isolation — примитив `ui-section--photo` | паттерн-слой, порт `.cp-holding` (holding.css:3) |
+| Тело | `.hld__inner` — вертикальная геометрия space-8 (64px); высоту ведёт контент | паттерн-слой (батч ритма 01.11) |
+| Заголовок | `.hld__title` — max-width 704px (44rem), on-dark; fs/fw/lh несёт роль | паттерн-слой (holding.css:42 + пилот) |
+| Статы | `.hld__stats` — grid: колонка в базе, 2×1fr от md, 3×1fr от lg; шаг 12 (space-3), верх 48 (space-7) | паттерн-слой (holding.css:47/87 + T17.4) |
+| Плашки | `ui-stat--glass` — стекло/рамка/сноска/цвет значения несёт компонент | компонент (T17.4) |
+| Компакт | `.hld--compact .hld__inner` — height 638px «как есть», специфичность 0-2-0 | паттерн-слой (holding.css:34; решение батча 01.11) |
+
+- **Компакт-вариант v2** (index-2, `.holding--compact` оригинала) —
+  модификатор `hld--compact`: паддинги 72/48 на базе, модификатор несёт
+  только высоту `__inner` (638px) — сумма блока 758. Модификатор без секции
+  дока — прецедент `lgo--mosaic`/`hro--marquee`: вариант исполнен разметкой
+  пилота (`applyVariant2` — прецедент build.py оригинала).
+- **Мобильные базы** — ступени пилота max-1023/767, инвертированные
+  mobile-first (колонка в базе, 2×1fr от md, 3×1fr от lg); лестницы
+  оригинала высоты/шага/размера значения статов (holding.css:85-91) пилотом
+  не велись — не переносятся.
+- Миграция из пилота career-portal: разметка `cp-holding*` →
+  `hld`/`hld__*` (фон — `__bg` примитива, статы — `ui-stat--glass`),
+  правила сняты из `pilot.css` (+ группы ступеней 1023/767); модалка
+  направления (`cp-dir-modal__*`) — сайт-зона остаётся (T18.16).
+
 ## A11y
 
 - Заголовок секции — h2 с ролью `ui-h2`; секция именована
@@ -763,5 +858,7 @@ auto замирал текст слайда):
   синхронность дока и слоя, миграция пилота): `tests/unit/pattern-why-us.test.js`.
 - Юнит-пины раскладок карусели production (prd, поверх ui-carousel,
   синхронность дока и слоя, миграция пилота): `tests/unit/pattern-production.test.js`.
+- Юнит-пины сетки направлений и холдинга (dir/hld, синхронность дока и
+  слоя, миграция пилота): `tests/unit/pattern-directions-holding.test.js`.
 - Поверхность браузера (4 секции, computed on-dark-цвета, bleed-геометрия по
   вьюпортам, axe, адаптив, эталоны): `tests/e2e/pattern-landing-section.spec.js`.

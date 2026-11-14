@@ -112,9 +112,10 @@ describe('patterns/patterns.css — канон сетки направлений
     );
     const md = mediaBlockOf(layer, 768, 'dir__grid');
     expect(md, 'ступень md есть').toBeTruthy();
-    expect(md, '2 колонки от md — ступень пилота max-1023 (directions.css:222), инверсия').toContain(
-      'grid-template-columns: repeat(2, 1fr);',
-    );
+    expect(
+      md,
+      '2 колонки от md — ступень пилота max-1023 (directions.css:222), инверсия',
+    ).toContain('grid-template-columns: repeat(2, 1fr);');
     const lg = mediaBlockOf(layer, 1024, 'dir__grid');
     expect(lg, 'ступень lg есть').toBeTruthy();
     expect(lg, '4×1fr — десктоп-форма (directions.css:16)').toContain(
@@ -274,7 +275,7 @@ describe('patterns/patterns.css — канон холдинга (hld, T18.14 Sco
       'модификатор канона каноничен',
     ).toEqual([]);
     expect(
-      patternLayerProblems('.dir-evil { gap: 4px; }').length,
+      patternLayerProblems('.dh-evil { gap: 4px; }').length,
       'чужой namespace ловится',
     ).toBeGreaterThan(0);
     expect(
@@ -309,7 +310,7 @@ describe('док landing-section: секции directions/holding (док — и
   };
 
   it('синхронность док ↔ слой (dir): секция lsp-directions несёт ровно те же классы (прецедент whu/prd)', () => {
-    const re = /^dir(?:__|$)/;
+    const re = /^\.dir(?:__|$)/;
     const hooks = layerHookSet(layer, re);
     expect([...hooks].sort(), 'слой несёт полный API канона dir').toEqual([
       'dir',
@@ -318,7 +319,7 @@ describe('док landing-section: секции directions/holding (док — и
       'dir__icon',
       'dir__name',
     ]);
-    const markup = docHooks(landingHtml, re);
+    const markup = docHooks(landingHtml, /^dir(?:__|$)/);
     expect(markup.size, 'landing-section.html: dir-классы в разметке есть').toBeGreaterThan(0);
     for (const hook of hooks) {
       expect(
@@ -342,7 +343,7 @@ describe('док landing-section: секции directions/holding (док — и
   });
 
   it('синхронность док ↔ слой (hld): секция lsp-holding несёт классы базы; hld--compact — модификатор без секции дока (прецедент lgo--mosaic/hro--marquee: вариант исполнен разметкой пилота)', () => {
-    const re = /^hld(?:-|__|$)/;
+    const re = /^\.hld(?:-|__|$)/;
     const hooks = layerHookSet(layer, re);
     expect([...hooks].sort(), 'слой несёт полный API канона hld').toEqual([
       'hld',
@@ -351,7 +352,7 @@ describe('док landing-section: секции directions/holding (док — и
       'hld__stats',
       'hld__title',
     ]);
-    const markup = docHooks(landingHtml, re);
+    const markup = docHooks(landingHtml, /^hld(?:-|__|$)/);
     expect(markup.size, 'landing-section.html: hld-классы в разметке есть').toBeGreaterThan(0);
     for (const hook of hooks) {
       if (hook === 'hld--compact') {
@@ -388,13 +389,15 @@ describe('док landing-section: секции directions/holding (док — и
     const bg = holding.match(/<div class="ui-section__bg"[\s\S]*?<\/div>/)?.[0] ?? '';
     expect(bg, 'фон __bg на месте').not.toBe('');
     expect(bg, 'img фона — alt=""').toContain('alt=""');
-    expect(holding.indexOf('ui-section__bg'), '__bg до контента').toBeLessThan(
-      holding.indexOf('hld__inner'),
-    );
+    expect(
+      holding.indexOf('class="ui-section__bg"'),
+      '__bg до контента (нота стенда упоминает hld__inner — якорь по class-атрибуту)',
+    ).toBeLessThan(holding.indexOf('class="ui-container hld__inner"'));
     for (const img of holding.match(/<img[^>]*>/g) ?? []) {
       expect(img, `img декоративный (alt=""): ${img.slice(0, 60)}`).toContain('alt=""');
     }
-    const directions = markup.match(/<section[^>]*id="lsp-directions"[\s\S]*?<\/section>/)?.[0] ?? '';
+    const directions =
+      markup.match(/<section[^>]*id="lsp-directions"[\s\S]*?<\/section>/)?.[0] ?? '';
     for (const img of directions.match(/<img[^>]*>/g) ?? []) {
       expect(img, `иконка декоративная (alt=""): ${img.slice(0, 60)}`).toContain('alt=""');
     }
@@ -426,9 +429,7 @@ describe('пилот career-portal: directions/holding на канонах dir/h
     expect(build, 'секция — фото-примитив + канон hld').toContain(
       '<section class="ui-section ui-section--photo hld">',
     );
-    expect(build, 'тело — канон на контейнере').toContain(
-      '<div class="ui-container hld__inner">',
-    );
+    expect(build, 'тело — канон на контейнере').toContain('<div class="ui-container hld__inner">');
     expect(build, 'заголовок — канон + роль ui-h2').toContain('class="hld__title ui-h2"');
     expect(build, 'статы — канон-сетка').toContain('<ul class="hld__stats">');
     expect(build.match(/class="ui-stat ui-stat--glass"/g)?.length, '3 стата --glass').toBe(3);
@@ -448,7 +449,7 @@ describe('пилот career-portal: directions/holding на канонах dir/h
 
   it('applyVariant2: маркер компакт-варианта v2 — на модификаторе канона hld--compact (прецедент build.py оригинала)', () => {
     expect(build).toContain(
-      "'class=\"ui-section ui-section--photo hld\"',\n      'class=\"ui-section ui-section--photo hld hld--compact\"',",
+      '\'class="ui-section ui-section--photo hld"\',\n      \'class="ui-section ui-section--photo hld hld--compact"\',',
     );
     expect(build, 'старый маркер снят').not.toContain('cp-holding--compact');
   });

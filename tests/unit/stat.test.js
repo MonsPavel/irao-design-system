@@ -285,6 +285,8 @@ describe('пилот: 10 инстансов на компоненте, прав�
   const pilotDir = join(root, 'pilot', 'career-portal');
   const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8');
   const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
+  // T18.14: сетка статов холдинга — канон hld паттерн-слоя (пин по слою).
+  const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 
   it('holding: 3 стата --glass, значение — роль ui-h2, сноска __note (Implementation requirements п.4)', () => {
     expect(build.match(/class="ui-stat ui-stat--glass"/g)?.length ?? 0).toBe(3);
@@ -314,8 +316,12 @@ describe('пилот: 10 инстансов на компоненте, прав�
     }
   });
 
-  it('сетки-раскладки остаются сайт-зоной (Out of scope: раскладка — ui-grid/сайт)', () => {
-    for (const selector of ['.cp-holding__stats', '.cp-company-stats', '.cp-company-adv']) {
+  it('сетки-раскладки остаются сайт-зоной (Out of scope: раскладка — ui-grid/сайт); T18.14: сетка холдинга — канон hld слоя, статы-сетка пинится по слою', () => {
+    // T18.14 — holding на каноне hld паттерн-слоя: сетка .hld__stats в слое
+    // (прецедент пина по слою — pilot-photo-sections.test.js T18.12/18.13).
+    expect(blockOf(layerCss, '.hld__stats'), '.hld__stats — канон слоя (T18.14)').toBeTruthy();
+    expect(pilotCss, 'cp-сетка холдинга снята с каноном hld').not.toContain('.cp-holding__stats');
+    for (const selector of ['.cp-company-stats', '.cp-company-adv']) {
       expect(blockOf(pilotCss, selector), `${selector} — сетка остаётся`).toBeTruthy();
     }
   });

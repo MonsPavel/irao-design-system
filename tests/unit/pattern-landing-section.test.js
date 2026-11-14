@@ -206,12 +206,13 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
     expect(markup, 'атрибут style= в разметке паттерна не используется').not.toContain('style="');
   });
 
-  it('уникальный дизайн секций НЕ тащится в систему: декоративные приёмы — связки lsp-*, паттерн-связки слоя lnk-/lgo- (T17.9), hro/mrq/mdl/cvh (T17.15), msh/vcp (T18.2), whu (T18.12) и prd (T18.13)', () => {
+  it('уникальный дизайн секций НЕ тащится в систему: декоративные приёмы — связки lsp-*, паттерн-связки слоя lnk-/lgo- (T17.9), hro/mrq/mdl/cvh (T17.15), msh/vcp (T18.2), whu (T18.12), prd (T18.13) и dir/hld (T18.14)', () => {
     // Никаких новых компонентов: классы ui-*, связки lsp-* (зона сайта) и
     // паттерн-связки слоя lnk-/lgo- (nav-карточки/лента логотипов, T17.9),
     // hro/mrq/mdl/cvh (лендинг-композиции, T17.15), msh/vcp
     // (наставничество/капсула вакансий, T18.2), whu (тёмная секция
-    // why-us, T18.12) и prd (раскладки карусели production, T18.13).
+    // why-us, T18.12), prd (раскладки карусели production, T18.13) и
+    // dir/hld (сетка направлений/холдинг, T18.14).
     const classes = [...markupOf(pattern).matchAll(/class="([^"]+)"/g)]
       .flatMap(([, value]) => value.split(/\s+/))
       .filter(Boolean);
@@ -222,7 +223,7 @@ describe('patterns/landing-section/landing-section.html — mini-эталон и
         !cls.startsWith('lsp-') &&
         !cls.startsWith('lnk-') &&
         !cls.startsWith('lgo-') &&
-        !/^(hro|mrq|mdl|cvh|msh|vcp|whu|prd)(?:-|__|$)/.test(cls),
+        !/^(hro|mrq|mdl|cvh|msh|vcp|whu|prd|dir|hld)(?:-|__|$)/.test(cls),
     );
     expect(
       foreign,
