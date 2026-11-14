@@ -235,6 +235,23 @@
   align-items: center;
 }
 
+/* ── Карточка выдачи (T18.15): простая карточка-ссылка грид-ветки ──
+   Порт мини-карточек companies.html:153+ (страница «Компании группы» —
+   грид простых карточек, состав выдачи без тела/фото: имя — и вся
+   карточка). Паддинг 20/24px «как есть» — inline-стиль карточек оригинала
+   (вертикаль 20px вне шкалы отступов §3.2 — прецедент cp-breadcrumbs
+   1.25rem; горизонталь 24px = space-5). Имя — роль ui-small на САМОЙ
+   ссылке (T16.16: канон мини-карточки 14/500 = тройка small, вариант
+   «роль на span» отклонён замером — статтер строки родителя давал карточку
+   69px против 61); fs/fw слой не задаёт, цвет наследует от карточки. */
+.lpp-card {
+  box-sizing: border-box;
+  display: block;
+  padding: 1.25rem var(--ui-space-5);
+  color: var(--ui-color-text);
+  text-decoration: none;
+}
+
 /* ── Ветка «сайдбар фильтров» (T14.10): порт .vac-layout/.vac-side
    career-portal (pages.css:185–197). Мобильная база — одна колонка (сайдбар
    в потоке перед выдачей — порядок чтения «фильтры → результаты», как в
@@ -783,6 +800,115 @@
   .dpp-where {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+}
+
+/* ── Company-семейства детальной компании (T18.15): заголовок раздела,
+   факты, преимущества, CTA-баннер ── */
+
+/* Заголовок раздела страницы (section-title роль): низ 32px —
+   .section__title (components.css:341); вид — роль ui-h3 разметки
+   (= .section-title--h3 оригинала, fs-h3 42px/1.3, pages.css:880) — слой
+   типографику не дублирует (дисциплина ролей dpp__place). */
+.dpp-section-title {
+  box-sizing: border-box;
+  margin: 0 0 var(--ui-space-6);
+}
+
+/* Факты компании (company-stats): сетка 3 колонки, шаг 24px, низ 40px
+   «как есть» (pages.css:805). Плашки — компонент ui-stat--filled (T17.4,
+   API не меняется): поверхность/геометрия/цвета значений и подписей несёт
+   компонент. Errata ритма (probe 04.11): блок ниже оригинала на −15px —
+   принятая дельта lh 1.1 значений ui-stat (T17.4), сетка её не правит
+   (probe-пара company-stats в compare — дельта перенесена в канон).
+   Мобильная база — колонка (оригинал @max-767, pages.css:930), 3 колонки
+   от md (768, шкала T2.5). */
+.dpp-stats {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 2.5rem;
+}
+
+@media (min-width: 768px) {
+  .dpp-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Преимущества компании (company-adv): сетка 4 колонки, шаг 24px
+   (pages.css:813), низ 56px company-section-gap «как есть» (pages.css:884 —
+   класс в разметке оригинала, folded в канон, прецедент dpp-where). Плашки
+   — компонент ui-stat--deep (T17.4, API не меняется). Errata ритма
+   (probe 04.11): блок выше оригинала на +14px — принятая дельта ui-stat
+   (T17.4), сетка её не правит (probe-пара company-adv). Мобильная база —
+   колонка (pages.css:930), 2 колонки от md (оригинал @max-1279 → 2,
+   pages.css:914) и 4 от xl (1280) — канон принимает значение оригинала
+   (расхождение пилота 1024 снято, полоса 1024–1279 рендерится как в
+   оригинале — прецедент dpp-hero 1280). */
+.dpp-adv {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-5);
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 3.5rem;
+}
+
+@media (min-width: 768px) {
+  .dpp-adv {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .dpp-adv {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* CTA-баннер (banner-card оригинала, pages.css:655–674): flex-строка по
+   центру, min-height 320px «как есть», клип радиуса — overflow; низ 56px
+   company-section-gap «как есть» (pages.css:884 — класс в разметке
+   оригинала, folded в канон, прецедент dpp-where); ритм ui-section погашен
+   — высоту держит min-height + тело. position/isolation несёт примитив
+   ui-section--photo (T17.3) — слой не переобъявляет (прецедент hld/whu). */
+.dpp-banner {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-height: 20rem;
+  margin-bottom: 3.5rem;
+  padding: 0;
+  border-radius: var(--ui-radius-md);
+}
+
+/* Тело — CTA-центр-композиция на модификаторе ui-card--cta (T17.8):
+   раскладку (флекс-колонка/gap 12/центр/радиус) несёт компонент; тинт
+   primary-a55 остаётся НА ТЕЛЕ (pages.css:666 «как есть» — заливка
+   body-бокса со скруглением, полосы фото видны сверху/снизу; full-bleed
+   оверлей --tint ДС дал бы сплошной тинт — другой вид, проба скрин-пар
+   T17.3); рамка гасится — заливка-тинт без рамки. */
+.dpp-banner__body {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 2.5rem;
+  border: 0;
+  background-color: var(--ui-color-primary-a55);
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Цвет заголовка на тёмном — override роли ui-h2 (прецедент заголовка
+   холдинга hld__title); fs/fw несёт роль. */
+.dpp-banner__title {
+  box-sizing: border-box;
+  color: var(--ui-color-text-on-dark);
+}
+
+/* Ширина текста 560px «как есть» (pages.css:674). */
+.dpp-banner__text {
+  box-sizing: border-box;
+  max-width: 35rem;
 }
 
 /* ══════════════════ Паттерн «Страница формы» (T8.3) — связки fpp- ══════════════════ */

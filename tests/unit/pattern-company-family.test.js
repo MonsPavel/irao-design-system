@@ -131,11 +131,9 @@ describe('patterns/patterns.css — каноны company-семейств в dpp
       md,
       '3×1fr от md — десктоп-форма оригинала (pages.css:805; @max-767 → 1fr, инверсия)',
     ).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
-    const statsComment = layerRaw.slice(layerRaw.indexOf('.dpp-stats')).match(/\/\*[\s\S]*?\*\//);
-    expect(statsComment, 'errata ритма −15 зафиксирована в комментарии канона').not.toBeNull();
-    expect(statsComment[0], 'дельта −15 — принятая дельта ui-stat (T17.4), не ритм').toContain(
-      '−15',
-    );
+    const statsBefore = layerRaw.slice(0, layerRaw.indexOf('.dpp-stats {'));
+    const statsComment = statsBefore.slice(statsBefore.lastIndexOf('/*'));
+    expect(statsComment, 'errata ритма −15 зафиксирована в комментарии канона').toContain('−15');
   });
 
   it('dpp-adv (company-adv): grid, шаг 24 (space-5, pages.css:813), низ 56px company-section-gap «как есть» (pages.css:884, folded — прецедент dpp-where); база колонка, 2×1fr от md, 4×1fr от xl (1280 — оригинал @max-1279 → 2, канон принимает значение оригинала); errata ритма +14 в комментарии', () => {
@@ -160,11 +158,9 @@ describe('patterns/patterns.css — каноны company-семейств в dpp
     expect(xl, '4×1fr от 1280 — десктоп-форма оригинала (pages.css:813)').toContain(
       'grid-template-columns: repeat(4, minmax(0, 1fr));',
     );
-    const advComment = layerRaw.slice(layerRaw.indexOf('.dpp-adv')).match(/\/\*[\s\S]*?\*\//);
-    expect(advComment, 'errata ритма +14 зафиксирована в комментарии канона').not.toBeNull();
-    expect(advComment[0], 'дельта +14 — принятая дельта ui-stat (T17.4), не ритм').toContain(
-      '+14',
-    );
+    const advBefore = layerRaw.slice(0, layerRaw.indexOf('.dpp-adv {'));
+    const advComment = advBefore.slice(advBefore.lastIndexOf('/*'));
+    expect(advComment, 'errata ритма +14 зафиксирована в комментарии канона').toContain('+14');
   });
 
   it('dpp-banner (banner-card, pages.css:656–674): flex-строка по центру, min-height 320px «как есть», клип радиуса, низ 56px company-section-gap, ритм ui-section погашен (padding 0); position/isolation несёт примитив ui-section--photo (T17.3)', () => {
@@ -244,9 +240,10 @@ describe('patterns/patterns.css — каноны company-семейств в dpp
       ),
       'dpp-каноны — канонические префиксы',
     ).toEqual([]);
-    expect(patternLayerProblems('.cs-evil { gap: 4px; }').length, 'чужой namespace ловится').toBe(
-      1,
-    );
+    expect(
+      patternLayerProblems('.cs-evil { gap: 4px; }').length,
+      'чужой namespace ловится (две диагностики: нет крючка слоя + чужой крючок)',
+    ).toBe(2);
   });
 });
 
