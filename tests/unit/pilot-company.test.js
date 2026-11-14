@@ -57,10 +57,12 @@ const companyHtml = (
   build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? ''
 ).replace(/\r\n/g, '\n');
 
-/** Кусок pilot.css от блоков компании (сайт-зонные раскладки) до общего
- *  адаптива сайт-зоны. Hero-2кол и where-пары — канон dpp-hero/dpp-where
- *  (T17.14, паттерн-слой) — в pilot.css их больше нет. */
-const companyCssStart = pilotCss.indexOf('.cp-company-stats');
+/** Кусок pilot.css от хуков лент компании (сайт-зонные позиционные хуки,
+ *  T18.3) до общего адаптива сайт-зоны. Hero-2кол/where-пары — канон
+ *  dpp-hero/dpp-where (T17.14), статы/преимущества/титулы/баннеры — канон
+ *  dpp-stats/dpp-adv/dpp-section-title/dpp-banner (T18.15) — в pilot.css их
+ *  больше нет. */
+const companyCssStart = pilotCss.indexOf('.cp-company-feed');
 const companyCss = pilotCss.slice(
   companyCssStart,
   pilotCss.indexOf('/* Сайт-зона пилота: адаптив'),
@@ -102,8 +104,8 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     expect(companyHtml.match(/<p class="ui-body">/g)?.length ?? 0).toBe(2);
   });
 
-  it('company-stats: семантичный список ul из 3 фактов — ui-stat--filled (T17.4), числа — роль ui-h2, подписи — ui-small (Accessibility requirements)', () => {
-    expect(companyHtml).toContain('<ul class="cp-company-stats">');
+  it('company-stats: семантичный список ul из 3 фактов на каноне dpp-stats (T18.15, слой) — ui-stat--filled (T17.4), числа — роль ui-h2, подписи — ui-small (Accessibility requirements)', () => {
+    expect(companyHtml).toContain('<ul class="dpp-stats">');
     expect(companyHtml.match(/<li class="ui-stat ui-stat--filled">/g)?.length ?? 0).toBe(3);
     expect(companyHtml.match(/class="ui-stat__value ui-h2"/g)?.length ?? 0).toBe(3);
     expect(companyHtml.match(/class="ui-stat__label ui-small"/g)?.length ?? 0).toBe(3);
@@ -112,8 +114,8 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     }
   });
 
-  it('преимущества: список-сетка сайт-зоны из 4 пунктов — ui-stat--deep (T17.4), заголовок ui-h4 + текст ui-small, контент оригинала company.html:22–25', () => {
-    expect(companyHtml).toContain('<ul class="cp-company-adv">');
+  it('преимущества: список-сетка из 4 пунктов на каноне dpp-adv (T18.15, слой) — ui-stat--deep (T17.4), заголовок ui-h4 + текст ui-small, контент оригинала company.html:22–25', () => {
+    expect(companyHtml).toContain('<ul class="dpp-adv">');
     expect(companyHtml.match(/<li class="ui-stat ui-stat--deep">/g)?.length ?? 0).toBe(4);
     expect(companyHtml.match(/<h3 class="ui-h4 ui-stat__value">/g)?.length ?? 0).toBe(4);
     for (const title of [
@@ -141,11 +143,11 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     );
   });
 
-  it('banner-card №1 «Практики и стажировки»: CTA-панель с фото-подложкой и ui-button «смотреть предложения» на internships.html (T18.3: контент/позиция оригинала company.html:45–52 — замена CTA vacancies.html из T15.2, лента вакансий теперь на странице); тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
-    expect(companyHtml).toContain('<div class="ui-section ui-section--photo cp-company-banner">');
-    expect(companyHtml).toContain('<div class="cp-company-banner__body ui-card ui-card--cta">');
+  it('banner-card №1 «Практики и стажировки»: CTA-панель с фото-подложкой и ui-button «смотреть предложения» на internships.html (T18.3: контент/позиция оригинала company.html:45–52 — замена CTA vacancies.html из T15.2, лента вакансий теперь на странице); баннер — канон dpp-banner слоя (T18.15), тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
+    expect(companyHtml).toContain('<div class="ui-section ui-section--photo dpp-banner">');
+    expect(companyHtml).toContain('<div class="dpp-banner__body ui-card ui-card--cta">');
     expect(companyHtml).toContain(
-      '<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>',
+      '<h2 class="ui-h2 dpp-banner__title">Практики и стажировки</h2>',
     );
     expect(companyHtml).toContain(
       'Посмотрите предложения практики и стажировки именно в нашей компании.',
@@ -155,10 +157,10 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
     );
   });
 
-  it('заголовки разделов — роль ui-h3 (оригинал .section-title--h3 = fs-h3 42px/1.3, pages.css:880; тот же маппинг, что на companies.html; ревью T15.2: ui-h2 60px — в 1.4 раза крупнее оригинала). T18.3: 2 + 6 лент = 8 (каждая лента — с section__title 55px перед ней)', () => {
-    expect(companyHtml.match(/<h2 class="ui-h3 cp-company-title">/g)?.length ?? 0).toBe(8);
+  it('заголовки разделов — роль ui-h3 на каноне dpp-section-title (T18.15, слой; оригинал .section-title--h3 = fs-h3 42px/1.3, pages.css:880; тот же маппинг, что на companies.html; ревью T15.2: ui-h2 60px — в 1.4 раза крупнее оригинала). T18.3: 2 + 6 лент = 8 (каждая лента — с section__title 55px перед ней)', () => {
+    expect(companyHtml.match(/<h2 class="ui-h3 dpp-section-title">/g)?.length ?? 0).toBe(8);
     expect(companyHtml, 'ui-h2 на разделах не применяется').not.toContain(
-      '<h2 class="ui-h2 cp-company-title">',
+      '<h2 class="ui-h2 dpp-section-title">',
     );
   });
 
@@ -181,18 +183,22 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   });
 });
 
-describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14: hero/where — канон dpp)', () => {
-  it('блоки страницы существуют: stats/adv (сетки — плашки сняты в ui-stat T17.4), banner (+body/title; фото-подложка/оверлей — ui-section--photo T17.3); hero/where — в каноне dpp (T17.14)', () => {
-    for (const selector of [
+describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14/T18.15: семейства — каноны dpp)', () => {
+  it('пять cp-семейств сняты на каноны слоя: stats/adv/title/banner (+body/title/text) и карточка выдачи (T18.15); hero/where — в каноне dpp (T17.14); плашки ui-stat__* сняты (ui-stat, T17.4)', () => {
+    // T18.15: статы/преимущества/заголовки/баннеры — каноны dpp-stats/
+    // dpp-adv/dpp-section-title/dpp-banner слоя (пины значений —
+    // pattern-company-family.test.js), из pilot.css сняты.
+    for (const removed of [
       '.cp-company-stats',
+      '.cp-company-title',
       '.cp-company-adv',
       '.cp-company-banner',
-      // T17.3: фото-подложка (__photo) и тинт сняты — слои несёт
-      // ui-section--photo; сайт держит только хук тинта и раскладку.
       '.cp-company-banner .cp-company-banner__body',
       '.cp-company-banner__title',
+      '.cp-company-banner__text',
+      '.cp-company-card',
     ]) {
-      expect(blockOf(pilotCss, selector), `${selector} найдено`).toBeTruthy();
+      expect(blockOf(pilotCss, removed), `${removed} снято (канон dpp/lpp, T18.15)`).toBeFalsy();
     }
     // T17.14: hero/where — связки канона dpp-hero/dpp-where, из pilot.css сняты.
     for (const removed of [
@@ -206,7 +212,7 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
       expect(blockOf(pilotCss, removed), `${removed} снято (канон dpp, T17.14)`).toBeFalsy();
     }
     // T17.4: плашки стат/преимуществ — компонент ui-stat (--filled/--deep):
-    // правила сайт-zones сняты, у сеток остались только раскладки.
+    // правила сайт-zones сняты.
     for (const removed of [
       '.cp-company-stats__item',
       '.cp-company-stats__value',
@@ -218,12 +224,13 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
     }
   });
 
-  it('Technical considerations (унификация статов): две вариации holding/company сняты в компонент ui-stat (T17.4) — решение задокументировано комментарием у сеток', () => {
+  it('Technical considerations (унификация статов): две вариации holding/company сняты в компонент ui-stat (T17.4), сетки — каноны слоя (T18.15) — решение задокументировано комментарием секции', () => {
     const section = pilotCssRaw.slice(pilotCssRaw.indexOf('/* ── компания:'));
-    expect(section, 'ссылка на ui-stat в комментарий сетки стат').toContain('ui-stat--filled');
-    expect(section, 'ссылка на ui-stat--deep в комментарий сетки преимуществ').toContain(
-      'ui-stat--deep',
+    expect(section, 'ссылка на канон стат в комментарий секции').toContain('dpp-stats');
+    expect(section, 'ссылка на ui-stat--filled в комментарий секции').toContain(
+      'ui-stat--filled',
     );
+    expect(section, 'ссылка на ui-stat--deep в комментарий секции').toContain('ui-stat--deep');
   });
 
   it('статы на сплошном primary (оригинал .company-stats__item background var(--color-primary), pages.css:807) — поверхность и цвета несёт ui-stat--filled (T17.4)', () => {
@@ -256,39 +263,48 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
     expect(blockOf(stat, '.ui-stat--deep')).toContain('gap: var(--ui-space-3);');
   });
 
-  it('оверлей баннера — тинт primary-a55 на теле, как в оригинале (rgba(0,40,86,.55), pages.css:666 — ступень лестницы T14.7); фото-подложка — слой __bg фото-секции T17.3', () => {
-    const body = blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body');
-    expect(body).toContain('background-color: var(--ui-color-primary-a55);');
-    expect(body).toContain('color: var(--ui-color-text-on-dark);');
-    expect(blockOf(pilotCss, '.cp-company-banner__title')).toContain(
-      'color: var(--ui-color-text-on-dark);',
+  it('оверлей баннера и ширина текста — канон dpp-banner слоя (T18.15): тинт primary-a55 на теле (rgba(0,40,86,.55), pages.css:666 — ступень лестницы T14.7), on-dark-пара, текст 560px (pages.css:674); фото-подложка — слой __bg фото-секции T17.3 (пины по слою — прецедент hro/prd T17.15/T18.13)', () => {
+    const layer = stripCssComments(
+      readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'),
     );
-  });
-
-  it('ширина текста баннера — 560px «как есть» (pages.css:674); паддинг тела — 40px «как есть» (pages.css:667), не ступень шкалы (--ui-space-7 = 48px — ревью T15.2: дивергенция от оригинала и ложный комментарий); рамка гасится (CTA-карточка без заливки несёт border базы, T17.8)', () => {
-    expect(blockOf(pilotCss, '.cp-company-banner__text')).toContain('max-width: 35rem;');
-    expect(blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body')).toContain(
+    const body = blockOf(layer, '.dpp-banner__body');
+    expect(body, 'тинт на теле (слой, T18.15)').toContain(
+      'background-color: var(--ui-color-primary-a55);',
+    );
+    expect(body).toContain('color: var(--ui-color-text-on-dark);');
+    expect(body, 'паддинг 40px «как есть» (pages.css:667) — не ступень шкалы').toContain(
       'padding: 2.5rem;',
     );
-    expect(blockOf(pilotCss, '.cp-company-banner .cp-company-banner__body')).toContain(
-      'border: 0;',
+    expect(body, 'рамка гасится (T17.8)').toContain('border: 0;');
+    expect(blockOf(layer, '.dpp-banner__title')).toContain(
+      'color: var(--ui-color-text-on-dark);',
+    );
+    expect(blockOf(layer, '.dpp-banner__text'), 'текст 560px «как есть» (pages.css:674)').toContain(
+      'max-width: 35rem;',
     );
   });
 
-  it('в блоках компании нет hex и !important (инварианты системы; значения оригинала вне шкалы — rem «как есть» с комментарием-источником)', () => {
+  it('в хуках лент компании нет hex и !important (инварианты системы; значения оригинала вне шкалы — rem «как есть» с комментарием-источником)', () => {
     expect(companyCss).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(companyCss).not.toContain('!important');
   });
 
-  it('адаптив сайт-зоны: 1023 — преимущества 2×2 (hero/where — канон dpp-hero/dpp-where, T17.14: мобильные базы колонкой, ступени 1280/lg в слое — лестница 1023 снята); 767 — статы и преимущества в колонку (pages.css:929)', () => {
+  it('адаптив: ступени 1023/767 сеток компании сняты (T18.15 — канон dpp-stats/dpp-adv: мобильная база колонкой, 3×1fr от md, преимущества 2×1fr от md и 4×1fr от xl — значение оригинала, полоса 1024–1279 рендерится как в оригинале); hero/where — канон dpp (T17.14), лестница снята', () => {
     const m1023 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 1023px)'));
     const m767 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 767px)'));
-    for (const selector of ['.cp-company-hero', '.cp-company-where']) {
-      expect(m1023, `${selector} снят из ступени 1023 (канон dpp, T17.14)`).not.toContain(selector);
+    for (const selector of [
+      '.cp-company-hero',
+      '.cp-company-where',
+      '.cp-company-stats',
+      '.cp-company-adv',
+    ]) {
+      expect(m1023, `${selector} снят из ступени 1023 (канон dpp, T17.14/T18.15)`).not.toContain(
+        selector,
+      );
+      expect(m767, `${selector} снят из ступени 767 (мобильная база канона)`).not.toContain(
+        selector,
+      );
     }
-    expect(m1023, 'преимущества в ступени 1023 (сайт-зона)').toContain('.cp-company-adv');
-    expect(m767).toContain('.cp-company-stats');
-    expect(m767).toContain('.cp-company-adv');
   });
 });
 
@@ -298,7 +314,7 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
   const orderOf = (html) =>
     [
       ['vac feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--vac">'],
-      ['banner №1', '<h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>'],
+      ['banner №1', '<h2 class="ui-h2 dpp-banner__title">Практики и стажировки</h2>'],
       ['intern feed', '<div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--intern">'],
       [
         'practice feed',
@@ -308,7 +324,7 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
         'articles feed',
         '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">',
       ],
-      ['banner №2', '<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>'],
+      ['banner №2', '<h2 class="ui-h2 dpp-banner__title">Целевое обучение</h2>'],
       ['events feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--events">'],
       ['photos feed', '<div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--photos">'],
     ].map(([name, marker]) => [name, html.indexOf(marker)]);
@@ -332,7 +348,7 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
       'Фото о работе в компании',
     ]) {
       expect(companyHtml, `заголовок ленты «${title}»`).toContain(
-        `<h2 class="ui-h3 cp-company-title">${title}</h2>`,
+        `<h2 class="ui-h3 dpp-section-title">${title}</h2>`,
       );
     }
   });
@@ -370,13 +386,12 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
     );
   });
 
-  it('баннер №2 «Целевое обучение» (company.html:69–76): фото internship-4.png, кнопка — ui-button на education-catalog.html; тот же каркас cp-company-banner (переиспользование)', () => {
+  it('баннер №2 «Целевое обучение» (company.html:69–76): фото internship-4.png, кнопка — ui-button на education-catalog.html; тот же каркас dpp-banner (канон слоя, T18.15 — переиспользование)', () => {
     expect(
-      companyHtml.match(/<div class="ui-section ui-section--photo cp-company-banner">/g)?.length ??
-        0,
+      companyHtml.match(/<div class="ui-section ui-section--photo dpp-banner">/g)?.length ?? 0,
     ).toBe(2);
     expect(companyHtml).toContain(
-      '<h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>',
+      '<h2 class="ui-h2 dpp-banner__title">Целевое обучение</h2>',
     );
     expect(companyHtml).toContain('Посмотрите предложения целевого обучения от нашей компании.');
     expect(companyHtml).toMatch(
@@ -402,10 +417,10 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
     expect(build).not.toMatch(/companyVacancies[\s\S]*?applyDialogHtml/);
   });
 
-  it('hero/статы/преимущества/where неизменны (Out of scope: вынос company-семейств — T18.15)', () => {
+  it('hero/статы/преимущества/where на канонах слоя (T18.15 вынес company-семейства; порядок блоков страницы не изменился)', () => {
     expect(companyHtml).toContain('<div class="dpp-hero">');
-    expect(companyHtml).toContain('<ul class="cp-company-stats">');
-    expect(companyHtml).toContain('<ul class="cp-company-adv">');
+    expect(companyHtml).toContain('<ul class="dpp-stats">');
+    expect(companyHtml).toContain('<ul class="dpp-adv">');
     expect(companyHtml).toContain('<div class="dpp-where">');
   });
 });
@@ -473,7 +488,7 @@ describe('T18.3: compare.mjs — блок-пробы лент компании (
     const probes = companyProbes.replace(/\r\n/g, '\n');
     const expected = [
       ['company-vacancies', '.cards-grid--2', '.cp-company-feed--vac'],
-      ['company-banner', '.banner-card', '.cp-company-banner'],
+      ['company-banner', '.banner-card', '.dpp-banner'],
       [
         'company-internships',
         '.cards-grid--2:nth-child(2 of .cards-grid--2)',
@@ -488,7 +503,7 @@ describe('T18.3: compare.mjs — блок-пробы лент компании (
       [
         'company-banner-2',
         '.banner-card:nth-child(2 of .banner-card)',
-        '.cp-company-feed--articles ~ .cp-company-banner',
+        '.cp-company-feed--articles ~ .dpp-banner',
       ],
       [
         'company-events',

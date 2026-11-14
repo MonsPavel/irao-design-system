@@ -187,7 +187,13 @@ describe('patterns/detail-page/detail-page.html — контракт этало�
     for (const value of medias) {
       expect(BREAKPOINTS, `значение ${value}px — из шкалы T2.5`).toContain(value);
     }
-    expect(style, 'max-width в связках не используется (mobile-first)').not.toContain('max-width');
+    // errata T18.15: в dpp-секции есть декларация max-width канона
+    // dpp-banner__text (ширина текста баннера 560px «как есть», pages.css:674
+    // — свойство раскладки, не media) — гейт mobile-first скоупится на media:
+    // max-width в media-ступенях связок не используется.
+    expect(style, 'max-width в media-ступенях не используется (mobile-first)').not.toMatch(
+      /@media[^{]*max-width/,
+    );
   });
 
   it('связующие стили паттерна — только токены: без hex и !important (инварианты системы)', () => {

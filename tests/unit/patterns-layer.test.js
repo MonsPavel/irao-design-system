@@ -1134,7 +1134,7 @@ describe('пилот career-portal: детальные страницы на dpp
     );
   });
 
-  it('компания (company.html): hero-2кол и where-пары на каноне; статы/преимущества/заголовки/баннер — сайт-зона (ui-stat/фото-секция — свои задачи)', () => {
+  it('компания (company.html): все company-семейства — каноны dpp слоя (T17.14 hero/where; T18.15 статы/преимущества/заголовки/баннер)', () => {
     const main = mainOf('companyMain');
     expect(main, 'hero-2кол (400px/1fr, ступени)').toContain('<div class="dpp-hero">');
     expect(main, 'фото hero').toContain('<img class="ui-image ui-image--cover dpp-hero__photo"');
@@ -1146,18 +1146,27 @@ describe('пилот career-portal: детальные страницы на dpp
       build,
       'cp-company-hero/where из разметки сняты (упоминания в комментариях — история переноса)',
     ).not.toMatch(/class="[^"]*\bcp-company-(hero|where)/);
-    expect(main, 'статы — сайт-зона (ui-stat--filled, T17.4)').toContain(
-      '<ul class="cp-company-stats">',
+    // T18.15: статы/преимущества/заголовки разделов/баннеры — каноны слоя.
+    expect(main, 'статы — канон dpp-stats (плашки ui-stat--filled, T17.4)').toContain(
+      '<ul class="dpp-stats">',
     );
-    expect(main, 'преимущества — сайт-зона (ui-stat--deep)').toContain(
-      '<ul class="cp-company-adv">',
+    expect(main, 'преимущества — канон dpp-adv (плашки ui-stat--deep, T17.4)').toContain(
+      '<ul class="dpp-adv">',
     );
-    expect(main, 'баннер — сайт-зона (фото-секция + CTA, T17.3/17.8)').toContain(
-      'ui-section--photo cp-company-banner',
+    expect(main, 'заголовки разделов — роль ui-h3 на каноне dpp-section-title').toContain(
+      '<h2 class="ui-h3 dpp-section-title">',
     );
+    expect(
+      main,
+      'баннер — фото-секция + канон dpp-banner (T17.3/T17.8/T18.15)',
+    ).toContain('ui-section--photo dpp-banner');
+    expect(
+      build,
+      'cp-company-stats/adv/title/banner из разметки сняты (упоминания в комментариях — история переноса)',
+    ).not.toMatch(/class="[^"]*\bcp-company-(stats|adv|title|banner)/);
   });
 
-  it('pilot.css: связки детальных страниц сняты (~330 строк), сайт-зонные раскладки компании остались', () => {
+  it('pilot.css: связки детальных страниц сняты (~330 строк), site-раскладки компании сняты на каноны (T18.15)', () => {
     for (const gone of [
       '.cp-vacancy-page',
       '.cp-vacancy-page__head',
@@ -1184,17 +1193,21 @@ describe('пилот career-portal: детальные страницы на dpp
       '.cp-company-hero__text',
       '.cp-company-where',
       '.cp-company-where__photo',
+      // T18.15: статы/преимущества/титулы/баннеры (+тело) и карточка выдачи —
+      // каноны dpp-stats/dpp-adv/dpp-section-title/dpp-banner/lpp-card слоя.
+      '.cp-company-stats',
+      '.cp-company-title',
+      '.cp-company-adv',
+      '.cp-company-banner',
+      '.cp-company-banner__body',
+      '.cp-company-card',
     ]) {
       expect(pilotCss, `связка ${gone} перенесена в слой`).not.toContain(gone);
     }
     // Ступени 1023/767 cp-специфики детальных страниц сняты вместе с
     // правилами (лестницы канона — mobile-first 768/1024/1280).
-    for (const gone of ['.cp-article-gallery', '.cp-detail-photo']) {
+    for (const gone of ['.cp_article-gallery', '.cp-detail-photo']) {
       expect(pilotCss, `ступень 1023 ${gone} снята`).not.toContain(gone);
-    }
-    // Сайт-зона (раскладки сеток на ui-stat + баннер) — остаётся.
-    for (const kept of ['.cp-company-stats', '.cp-company-adv', '.cp-company-banner']) {
-      expect(pilotCss, `сайт-зона ${kept} остаётся (ui-stat/фото-секция)`).toContain(kept);
     }
   });
 

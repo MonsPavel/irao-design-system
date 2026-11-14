@@ -1276,12 +1276,13 @@ a.cp-intern-card {
    — patterns/patterns.css; разметка companyMain несёт классы
    dpp-hero и dpp-where с элементами __photo/__body/__text.
    Статы/преимущества/заголовки разделов/баннеры — ПАТТЕРН-СЛОЙ (T18.15):
-   каноны dpp-stats (сетка 3×1fr шаг 24/низ 40), dpp-adv (4×1fr шаг 24/
-   низ 56), dpp-section-title (низ 32) и dpp-banner (min-height 320,
-   тело на ui-card--cta с тинтом primary-a55) — cards/patterns.css
-   (patterns/patterns.css, секция dpp); карточка выдачи companies — канон
-   lpp-card (list-page). Из сайт-зоны остались позиционные хуки лент
-   (cp-company-feed, T18.3) и модалка направления (dir-modal, T18.16). */
+   каноны dpp-stats (сетка 3×1fr шаг 24/низ 40 — плашки ui-stat--filled,
+   T17.4), dpp-adv (4×1fr шаг 24/низ 56 — плашки ui-stat--deep, T17.4),
+   dpp-section-title (низ 32) и dpp-banner (min-height 320, тело на
+   ui-card--cta с тинтом primary-a55) — patterns/patterns.css (секция dpp);
+   карточка выдачи companies — канон lpp-card (list-page). Из сайт-зоны
+   остались позиционные хуки лент (cp-company-feed, T18.3) и модалка
+   направления (dir-modal, T18.16). */
 
 /* «Где мы работаем»: пары фото+подпись — канон dpp-where (T17.14): сетка
    от lg и высота фото 280px «как есть» (pages.css:821–823) — в слое;

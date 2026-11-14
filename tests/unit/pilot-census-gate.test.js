@@ -39,7 +39,9 @@
  *      двигается; T18.13: вынос раскладок карусели production (канон
  *      prd) — 2108 → 1818, потолок не двигается; T18.14: вынос сетки
  *      направлений и холдинга (каноны dir/hld) — 1818 → 1722, потолок
- *      не двигается;
+ *      не двигается; T18.15: вынос company-семейств (каноны
+ *      dpp-stats/dpp-adv/dpp-section-title/dpp-banner + lpp-card) —
+ *      1722 → 1648, потолок не двигается;
  *      MAX_PILOT_CSS_CODE_LINES 1089 — цель эпика в метрике кода
  *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723; errata T18.1:
  *      723 → 819 (тот же курс); errata T18.2: 819 → 822; errata T18.3:
@@ -50,10 +52,13 @@
  *      T18.11: 1269 → 1252; T18.12: вынос why-us — 1252 → 1142,
  *      потолок не двигается; T18.13: вынос production — 1142 → 911;
  *      T18.14: вынос directions/holding — 911 → 820, потолок не
- *      двигается;
+ *      двигается; T18.15: вынос company-семейств — 820 → 765, потолок
+ *      не двигается;
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
- *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
+ *      блоки запрещены (гейт «новых cp-визуальных блоков 0»); T18.15:
+ *      allowlist 23 → 18 (5 company-семейств ушли — вынос в слой,
+ *      судьба — REPORT §11.4).
  *  - compare.mjs: гейт подключен в тот же запуск до браузерного прогона
  *    (Scope: «подключение — в запуск compare, как гейт ссылок T15.9»).
  *  - Базлайн ценза §11.4 REPORT — пре-эпик дерево 922b505 (последняя
@@ -197,13 +202,13 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.14', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.15', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(23);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(18);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -317,11 +322,19 @@ describe('пороги ценза — числа зафиксированы по
       // сырые 1818→1722, код 911→820, селекторы 95→76; семейства 23→21 —
       // directions/holding ушли из allowlist (судьба «вынос в слой»,
       // REPORT §11.4):
-      expect(metrics.css.lines).toBe(1722);
-      expect(metrics.css.codeLines).toBe(820);
-      expect(metrics.css.selectors).toBe(76);
+      // T18.15 (вынос company-семейств в слой — каноны dpp-stats/dpp-adv/
+      // dpp-section-title/dpp-banner (секция dpp) + lpp-card (list-page):
+      // пять cp-пар — базы/элементы __body/__title/__text и ступени 1023/767
+      // сеток сняты из разметки build.mjs и pilot.css; ленты компании —
+      // семейство company-feed остаётся (позиционные хуки T18.3)):
+      // сырые 1722→1648, код 820→765, селекторы 76→65; семейства 21→16 —
+      // company-stats/company-adv/company-title/company-banner/company-card
+      // ушли из allowlist (судьба «вынос в слой», REPORT §11.4):
+      expect(metrics.css.lines).toBe(1648);
+      expect(metrics.css.codeLines).toBe(765);
+      expect(metrics.css.selectors).toBe(65);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(21);
+      expect(metrics.css.families).toHaveLength(16);
       expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
         'page-head',
       );
@@ -341,6 +354,17 @@ describe('пороги ценза — числа зафиксированы по
         'семейства directions/holding вынесены в слой (T18.14)',
       ).not.toContain('directions');
       expect(metrics.css.families).not.toContain('holding');
+      expect(
+        metrics.css.families,
+        'пять company-семейств вынесены в слой (T18.15)',
+      ).not.toContain('company-stats');
+      expect(metrics.css.families).not.toContain('company-adv');
+      expect(metrics.css.families).not.toContain('company-title');
+      expect(metrics.css.families).not.toContain('company-banner');
+      expect(metrics.css.families).not.toContain('company-card');
+      expect(metrics.css.families, 'ленты компании — сайт-зона T18.3').toContain(
+        'company-feed',
+      );
       expect(metrics.js.lines).toBe(187);
     },
   );

@@ -428,8 +428,8 @@ describe('пилот (T17.8): CTA-плашки на модификаторе, п
     expect(build).toMatch(/class="ui-h2 ui-link ui-link--on-dark"/);
   });
 
-  it('тело баннера компании — CTA-центр-композиция (bare --cta, оверлей — за T17.3)', () => {
-    expect(build).toMatch(/class="cp-company-banner__body ui-card ui-card--cta"/);
+  it('тело баннера компании — CTA-центр-композиция (bare --cta, оверлей — за T17.3; T18.15 — канон dpp-banner__body слоя)', () => {
+    expect(build).toMatch(/class="dpp-banner__body ui-card ui-card--cta"/);
   });
 
   it('compare-проба cta-mail ведёт на модификатор (прецедент video-block: селектор на компонент)', () => {
