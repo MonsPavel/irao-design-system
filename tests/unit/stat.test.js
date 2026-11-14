@@ -316,13 +316,18 @@ describe('пилот: 10 инстансов на компоненте, прав�
     }
   });
 
-  it('сетки-раскладки остаются сайт-зоной (Out of scope: раскладка — ui-grid/сайт); T18.14: сетка холдинга — канон hld слоя, статы-сетка пинится по слою', () => {
+  it('сетки-раскладки — каноны слоя (T18.14: сетка холдинга hld__stats; T18.15: сетки компании dpp-stats/dpp-adv) — пин по слою, cp-сетки сняты', () => {
     // T18.14 — holding на каноне hld паттерн-слоя: сетка .hld__stats в слое
     // (прецедент пина по слою — pilot-photo-sections.test.js T18.12/18.13).
     expect(blockOf(layerCss, '.hld__stats'), '.hld__stats — канон слоя (T18.14)').toBeTruthy();
     expect(pilotCss, 'cp-сетка холдинга снята с каноном hld').not.toContain('.cp-holding__stats');
+    // T18.15 — статы/преимущества компании на канонах dpp-stats/dpp-adv слоя
+    // (сетка над плашками ui-stat--filled/--deep; пин значений —
+    // pattern-company-family.test.js).
+    expect(blockOf(layerCss, '.dpp-stats'), '.dpp-stats — канон слоя (T18.15)').toBeTruthy();
+    expect(blockOf(layerCss, '.dpp-adv'), '.dpp-adv — канон слоя (T18.15)').toBeTruthy();
     for (const selector of ['.cp-company-stats', '.cp-company-adv']) {
-      expect(blockOf(pilotCss, selector), `${selector} — сетка остаётся`).toBeTruthy();
+      expect(blockOf(pilotCss, selector), `${selector} — снята с каноном (T18.15)`).toBeFalsy();
     }
   });
 });

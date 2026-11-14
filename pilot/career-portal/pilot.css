@@ -734,8 +734,9 @@
    классы dpp--article/dpp__meta/dpp__type/dpp__gallery/dpp__text/
    dpp-related. Карточка-ссылка related (практика/стажировка в статье):
    цвет — текст карточки, без «документного» подчёркивания — оригинал гасит
-   его inline (build.py:114 style="text-decoration: none"); пара прецедента
-   cp-company-card. Кнопочная версия (internships/practices) не задета. */
+   его inline (build.py:114 style="text-decoration: none"); пара с карточкой
+   выдачи — канон lpp-card слоя (T18.15). Кнопочная версия
+   (internships/practices) не задета. */
 a.cp-intern-card {
   color: var(--ui-color-text);
   text-decoration: none;
@@ -1263,19 +1264,6 @@ a.cp-intern-card {
   }
 }
 
-/* Простая карточка компании (companies): паддинг 20/24 — inline-стиль
-   карточек companies.html:153+ («как есть»: вертикаль 20px вне шкалы
-   отступов §3.2 — прецедент cp-breadcrumbs 1.25rem; горизонталь 24px —
-   --ui-space-5). Имя — роль ui-small на внутреннем span (T16.16: канон
-   мини-карточки 14/500 = --fs-small-regular × --fw-small оригинала; цвет
-   наследует; отдельной типографской строки нет). */
-.cp-company-card {
-  display: block;
-  padding: 1.25rem var(--ui-space-5);
-  color: var(--ui-color-text);
-  text-decoration: none;
-}
-
 /* ── компания: детальная страница (T15.2) ──
    Источник — src/pages/company.html + pages.css:796–825/656–674/884.
    Статы — вторая вариация блока статистики (Technical considerations
@@ -1286,81 +1274,19 @@ a.cp-intern-card {
    Hero-2кол и where-пары — ПАТТЕРН-СЛОЙ (T17.14): канон dpp-hero
    (400px/1fr от 1280, фото 260/320) и dpp-where (пары от lg, фото 280px)
    — patterns/patterns.css; разметка companyMain несёт классы
-   dpp-hero и dpp-where с элементами __photo/__body/__text. */
-
-/* Факты компании: сетка 3 колонки, шаг 24px, низ 40px «как есть»
-   (pages.css:805). Плашки — ui-stat--filled (T17.4): primary-поверхность,
-   геометрия 20/24 и цвета значений/подписей несёт компонент. */
-.cp-company-stats {
-  display: grid;
-  gap: var(--ui-space-5);
-  grid-template-columns: repeat(3, 1fr);
-  margin: 0 0 2.5rem;
-  padding: 0;
-  list-style: none;
-}
-
-/* заголовок раздела: mb 32px .section__title (components.css:341); роль в
-   разметке — ui-h3 = .section-title--h3 оригинала (fs-h3 42px/1.3,
-   pages.css:880) */
-.cp-company-title {
-  margin: 0 0 var(--ui-space-6);
-}
-
-/* Преимущества: сетка 4 колонки, шаг 24px (pages.css:813); низ 56px
-   company-section-gap «как есть» (pages.css:884). Плашки — ui-stat--deep
-   (T17.4): blue-deep, 24/20, шаг 12 и цвета несёт компонент. */
-.cp-company-adv {
-  display: grid;
-  gap: var(--ui-space-5);
-  grid-template-columns: repeat(4, 1fr);
-  margin: 0 0 3.5rem;
-  padding: 0;
-  list-style: none;
-}
+   dpp-hero и dpp-where с элементами __photo/__body/__text.
+   Статы/преимущества/заголовки разделов/баннеры — ПАТТЕРН-СЛОЙ (T18.15):
+   каноны dpp-stats (сетка 3×1fr шаг 24/низ 40 — плашки ui-stat--filled,
+   T17.4), dpp-adv (4×1fr шаг 24/низ 56 — плашки ui-stat--deep, T17.4),
+   dpp-section-title (низ 32) и dpp-banner (min-height 320, тело на
+   ui-card--cta с тинтом primary-a55) — patterns/patterns.css (секция dpp);
+   карточка выдачи companies — канон lpp-card (list-page). Из сайт-зоны
+   остались позиционные хуки лент (cp-company-feed, T18.3) и модалка
+   направления (dir-modal, T18.16). */
 
 /* «Где мы работаем»: пары фото+подпись — канон dpp-where (T17.14): сетка
    от lg и высота фото 280px «как есть» (pages.css:821–823) — в слое;
    подпись несёт ui-figure__caption (шаг 8px = pages.css:825). */
-
-/* CTA-баннер (banner-card оригинала, pages.css:656–674): min-height 320px,
-   низ 56px company-section-gap; фото-подложка — фото-секция
-   ui-section--photo (T17.3, слой __bg). Тинт primary-a55 остаётся НА ТЕЛЕ
-   (pages.css:666 «как есть»): заливка body-бокса со скруглением —
-   полосы фото видны сверху/снизу (full-bleed оверлей --tint ДС дал бы
-   сплошной тинт — другой вид, проба скрин-пар T17.3). Ритм ui-section
-   погашен — высоту держит min-height + тело; клип радиуса — overflow. */
-.cp-company-banner {
-  display: flex;
-  position: relative;
-  align-items: center;
-  overflow: hidden;
-  min-height: 20rem;
-  margin-bottom: 3.5rem;
-  padding: 0;
-  border-radius: var(--ui-radius-md);
-}
-
-/* тело — CTA-центр-композиция на модификаторе ui-card--cta (T17.8):
-   раскладку несёт компонент; тинт/паддинг 40px «как есть» (pages.css:666–
-   667); border гасится — заливка-тинт без рамки. */
-.cp-company-banner .cp-company-banner__body {
-  width: 100%;
-  padding: 2.5rem;
-  border: 0;
-  background-color: var(--ui-color-primary-a55);
-  color: var(--ui-color-text-on-dark);
-}
-
-/* цвет заголовка на тёмном — override роли ui-h2 (как заголовок холдинга) */
-.cp-company-banner__title {
-  color: var(--ui-color-text-on-dark);
-}
-
-/* ширина текста 560px «как есть» (pages.css:674) */
-.cp-company-banner__text {
-  max-width: 35rem;
-}
 
 /* ── Ленты компании (T18.3): сетки карточек — канон ui-grid--2/--3
    (колонки/адаптив несёт base/layout.css); хук связывает геометрию
@@ -1490,9 +1416,10 @@ a.cp-intern-card {
      (T17.14): мобильная база 260px, 420px от md — канон принимает значение
      оригинала (полоса 768–1023 рендерится как в оригинале). */
 
-  .cp-company-adv {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* Статы/преимущества компании — канон dpp-stats/dpp-adv слоя (T18.15):
+     ступень 1023 копипасты снята (2 колонки от md — инверсия, mobile-first);
+     канон принимает значение оригинала — полоса 1024–1279 преимуществ
+     рендерится 2 колонками, как в оригинале (прецедент dpp-hero 1280). */
 
   /* Hero компании и where-пары — канон dpp-hero/dpp-where (T17.14):
      мобильные базы колонкой, ступени 1280/lg — лестница 1023 снята. */
@@ -1581,10 +1508,9 @@ a.cp-intern-card {
      (T18.7 п.1). От md — row-nowrap канона (ступень md .lpp-row, T18.7):
      пилюля всегда справа. */
 
-  .cp-company-stats,
-  .cp-company-adv {
-    grid-template-columns: 1fr;
-  }
+  /* Статы/преимущества компании — канон dpp-stats/dpp-adv слоя (T18.15):
+     мобильная база канона и так колонка (оригинал @max-767, pages.css:930)
+     — ступень 767 копипасты снята (mobile-first). */
 
   /* Обложка — канон php (T18.10): ступень 767 split снята — мобильная база
      канона (.php--split колонка/прижато влево, инверсия components.css:46)

@@ -429,14 +429,21 @@
   </div>
 </section>
 
-<!-- Company-связки (T17.14): hero-2кол «фото 400px — текст» от 1280 и
-     where-пары «фото + подпись» (от lg). Уровень тега — семантика стенда. -->
+<!-- Company-связки (T17.14 + T18.15): hero-2кол «фото 400px — текст» от 1280,
+     факты/преимущества (ui-stat--filled/--deep на канонах dpp-stats/dpp-adv),
+     заголовок раздела (section-title роль dpp-section-title), where-пары
+     «фото + подпись» (от lg) и CTA-баннер (banner-card 320 — фото-секция +
+     CTA-карточка, канон dpp-banner). Уровень тега — семантика стенда: на
+     реальной странице заголовки разделов/баннера — h2 (роли те же). -->
 <section class="ui-section" id="dpp-company-demo" aria-labelledby="dpp-company-demo-title">
   <p class="ui-showcase-stand__note">
-    Company-связки: hero <code>dpp-hero</code> (400px/1fr от 1280, фото 260/320 по ступеням) и
-    where-пары <code>dpp-where</code> (2 колонки от lg, фото 280px). Статы/преимущества страницы
-    компании — компонент <code>ui-stat</code> (T17.4), CTA-баннер — фото-секция + CTA-карточка
-    (T17.3/T17.8).
+    Company-связки: hero <code>dpp-hero</code> (400px/1fr от 1280, фото 260/320 по ступеням), факты
+    <code>dpp-stats</code> и преимущества <code>dpp-adv</code> — сетки канона над плашками
+    <code>ui-stat--filled</code>/<code>--deep</code> (T17.4; errata ритма −15/+14 — принятые дельты
+    компонента), заголовок раздела <code>dpp-section-title</code> (section-title роль: низ 32px,
+    вид — роль <code>ui-h3</code>), where-пары <code>dpp-where</code> (2 колонки от lg, фото 280px)
+    и CTA-баннер <code>dpp-banner</code> (min-height 320px — фото-секция <code>ui-section--photo</code>
+    + CTA-карточка <code>ui-card--cta</code>, тинт primary-a55 на теле — T17.3/T17.8).
   </p>
 
   <h2 class="ui-h3" id="dpp-company-demo-title">Связки компании</h2>
@@ -465,6 +472,55 @@
       </div>
     </div>
   </div>
+
+  <!-- Факты компании (T18.15): канон dpp-stats — сетка 3×1fr шаг 24/низ 40
+       (pages.css:805); плашки и их вид несёт ui-stat--filled (T17.4). -->
+  <ul class="dpp-stats">
+    <li class="ui-stat ui-stat--filled">
+      <span class="ui-stat__value ui-h2">2,5 ГВт</span>
+      <span class="ui-stat__label ui-small">установленная электрическая мощность</span>
+    </li>
+    <li class="ui-stat ui-stat--filled">
+      <span class="ui-stat__value ui-h2">500+</span>
+      <span class="ui-stat__label ui-small">специалистов работают в компании</span>
+    </li>
+    <li class="ui-stat ui-stat--filled">
+      <span class="ui-stat__value ui-h2">Топ-10</span>
+      <span class="ui-stat__label ui-small">региональных генерирующих компаний</span>
+    </li>
+  </ul>
+
+  <!-- Заголовок раздела (T18.15): роль section-title — канон dpp-section-title
+       (низ 32px, components.css:341); на стенде тег h3 — под секционным h2,
+       на реальной странице — h2 (роль ui-h3 та же). -->
+  <h3 class="ui-h3 dpp-section-title">Преимущества компании</h3>
+
+  <!-- Преимущества компании (T18.15): канон dpp-adv — сетка 4×1fr шаг 24/низ 56
+       (pages.css:813/884); плашки и их вид несёт ui-stat--deep (T17.4). -->
+  <ul class="dpp-adv">
+    <li class="ui-stat ui-stat--deep">
+      <h4 class="ui-h4 ui-stat__value">Современное производство</h4>
+      <p class="ui-small ui-stat__label">
+        Новое оборудование и автоматизированные системы управления станциями.
+      </p>
+    </li>
+    <li class="ui-stat ui-stat--deep">
+      <h4 class="ui-h4 ui-stat__value">Наставничество</h4>
+      <p class="ui-small ui-stat__label">
+        Программа наставничества для новых сотрудников и молодых специалистов.
+      </p>
+    </li>
+    <li class="ui-stat ui-stat--deep">
+      <h4 class="ui-h4 ui-stat__value">Обучение и развитие</h4>
+      <p class="ui-small ui-stat__label">Корпоративный университет, тренинги и компенсация обучения.</p>
+    </li>
+    <li class="ui-stat ui-stat--deep">
+      <h4 class="ui-h4 ui-stat__value">Стабильность</h4>
+      <p class="ui-small ui-stat__label">Белая заработная плата, ДМС, соцпакет и гарантии по ТК РФ.</p>
+    </li>
+  </ul>
+
+  <h3 class="ui-h3 dpp-section-title">Где мы работаем</h3>
 
   <div class="dpp-where">
     <figure class="ui-figure">
@@ -495,6 +551,31 @@
         Производственные площадки и станции
       </figcaption>
     </figure>
+  </div>
+
+  <!-- CTA-баннер (T18.15): канон dpp-banner — фото-секция ui-section--photo
+       (T17.3) без оверлея: тинт primary-a55 несёт тело (pages.css:666,
+       заливка body-бокса со скруглением — полосы фото видны сверху/снизу);
+       раскладку тела несёт ui-card--cta (T17.8). Фото фона — декоративное
+       alt="" (README ui-image: подписывать декоративное нечего). -->
+  <div class="ui-section ui-section--photo dpp-banner">
+    <div class="ui-section__bg" aria-hidden="true">
+      <!-- prettier-ignore -->
+      <img
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27692%27%20height%3D%27326%27%3E%3Crect%20width%3D%27692%27%20height%3D%27326%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27150%27%20cy%3D%27160%27%20r%3D%27110%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27550%27%20cy%3D%27170%27%20r%3D%2795%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        width="692"
+        height="326"
+        loading="lazy"
+         >
+    </div>
+    <div class="dpp-banner__body ui-card ui-card--cta">
+      <h3 class="ui-h2 dpp-banner__title">Практики и стажировки</h3>
+      <p class="ui-small dpp-banner__text">
+        Посмотрите предложения практики и стажировки именно в нашей компании.
+      </p>
+      <a class="ui-button ui-button--primary" href="/internships/">смотреть предложения</a>
+    </div>
   </div>
 </section>
 

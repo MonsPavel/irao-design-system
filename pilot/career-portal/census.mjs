@@ -117,6 +117,15 @@
  *    — базы/элементы/hover и группы ступеней 1023/767 — из разметки и
  *    pilot.css; модалка направления — сайт-зона dir-modal остаётся (вынос —
  *    T18.16) (судьба семейств — REPORT §11.4).
+ *    T18.15: семейства company-stats/company-adv/company-title/
+ *    company-banner/company-card УШЛИ из allowlist — вынос company-семейств
+ *    в слой (каноны dpp-stats/dpp-adv/dpp-section-title/dpp-banner — секция
+ *    dpp; карточка выдачи — канон lpp-card — list-page), снятие пар
+ *    cp-company-stats/cp-company-title/cp-company-adv/cp-company-banner
+ *    (базы/элементы __body/__title/__text) и cp-company-card + ступени
+ *    1023/767 сеток из разметки и pilot.css; ленты компании — семейство
+ *    company-feed остаётся (позиционные хуки T18.3) (судьба семейств —
+ *    REPORT §11.4).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -149,12 +158,7 @@ export const ALLOWED_CP_FAMILIES = [
   'adv-grid',
   'article-card',
   'catalog-nav',
-  'company-adv',
-  'company-banner',
-  'company-card',
   'company-feed',
-  'company-stats',
-  'company-title',
   'dir-modal',
   'event-card',
   'events-feature',

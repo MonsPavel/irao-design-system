@@ -23,6 +23,9 @@
 import { expect } from '@playwright/test';
 
 import { a11y, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js';
+// Эталоны канонов company-семейств (T18.15) — element-снимки (прецедент
+// dir/hld T18.14): гейт контейнера — SNAPSHOTS_ENABLED (ADR-0004).
+import { SNAPSHOTS_ENABLED } from '../helpers/harness.js';
 
 const SEL = {
   breadcrumbs: '#dpp-breadcrumbs',
@@ -426,3 +429,54 @@ standTest.describe('patterns/detail-page: эталоны (AC: visual 375/768/144
     },
   );
 });
+
+// Company-семейства детальной компании (T18.15): контейнерные эталоны
+// канонов dpp-stats/dpp-adv/dpp-section-title/dpp-banner — секция
+// company-связок на desktop (1440 — порядок страницы компании: hero →
+// факты 3×1fr → титул+преимущества 4×1fr → where → баннер 320) и mobile
+// (375 — мобильные базы канонов колонкой) + баннер отдельно на desktop
+// (фото-подложка + CTA-карточка с тинтом primary-a55 на теле). Три снимка
+// (прецедент dir/hld T18.14 — element-снимки канона).
+standTest.describe(
+  'patterns/detail-page: эталоны company-связок dpp-company (T18.15, AC: ×3)',
+  () => {
+    standTest(
+      'dpp-company/dpp-banner — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/detail-page');
+
+        const shots = [
+          ['dpp-company', page.locator('#dpp-company-demo'), ['desktop', 'mobile']],
+          ['dpp-banner', page.locator('#dpp-company-demo .dpp-banner'), ['desktop']],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            await locator.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(300);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): у секции company-связок нет
+              // скруглённых карточек у правого среза снимка (сетка/секция во
+              // всю ширину контейнера стенда) — лотерея растеризации
+              // (диагноз 19.10) не проявлена; баннер — скруглённый клип
+              // целиком (срез по границе секции).
+            });
+          }
+        }
+      },
+    );
+  },
+);

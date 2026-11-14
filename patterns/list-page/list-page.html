@@ -858,6 +858,38 @@
   <!-- html-validate-enable irao/tabs-id-links -->
 </section>
 
+<section class="ui-section" id="lpp-card-demo" aria-labelledby="lpp-card-title">
+  <h2 class="ui-h3" id="lpp-card-title">Карточка выдачи (T18.15)</h2>
+  <p class="ui-showcase-stand__note">
+    Простая карточка-ссылка грид-ветки — канон <code>lpp-card</code> паттерн-слоя (T18.15: порт
+    мини-карточек <code>companies.html:153+</code> — грид простых карточек страницы «Компании
+    группы»): block-карточка поверх <code>ui-card--hover</code> с паддингом 20/24px «как есть»
+    (inline-стиль оригинала: вертикаль 20px вне шкалы отступов §3.2 — прецедент
+    <code>cp-breadcrumbs</code>; горизонталь 24px = space-5). Имя — роль <code>ui-small</code> на
+    самой ссылке (T16.16: канон мини-карточки 14/500 — тройка small; вариант «роль на span» отклонён
+    замером — статтер строки родителя давал карточку 69px против 61); цвет наследует от карточки
+    (fs/fw слой не задаёт). Сетка — <code>ui-grid--3</code> (колонки/адаптив несёт примитив).
+  </p>
+
+  <!-- Канон T18.15 — использование 1:1 пилота (companies.html): карточки-ссылки
+       без тела/фото, имя — вся карточка (ui-small на ссылке, цвет наследует);
+       href — страница компании. -->
+  <div class="ui-grid ui-grid--3">
+    <a class="ui-card ui-card--hover ui-small lpp-card" href="detail-page.html">ПАО «Интер РАО»</a>
+    <a class="ui-card ui-card--hover ui-small lpp-card" href="detail-page.html"
+      >АО «Интер РАО – Электрогенерация»</a
+    >
+    <a class="ui-card ui-card--hover ui-small lpp-card" href="detail-page.html"
+      >АО «Балтийская гидрогенерация»</a
+    >
+    <a class="ui-card ui-card--hover ui-small lpp-card" href="detail-page.html">АО «БашРТС»</a>
+    <a class="ui-card ui-card--hover ui-small lpp-card" href="detail-page.html"
+      >АО «Томская генерация»</a
+    >
+    <a class="ui-card ui-card--hover ui-small lpp-card" href="detail-page.html">АО «ТомскРТС»</a>
+  </div>
+</section>
+
 <section class="ui-section" id="lpp-cover" aria-labelledby="lpp-cover-title">
   <h2 class="ui-h3" id="lpp-cover-title">Обложка страницы (T18.10)</h2>
   <p class="ui-showcase-stand__note">

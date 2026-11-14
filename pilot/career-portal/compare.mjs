@@ -399,16 +399,18 @@ const SHELL_PROBES = [
   // Карточка компании (T16.16, REPORT §9.1 №7): канон мини-карточки — 14/500
   // color-text (inline-стиль companies.html:153+: --fs-small-regular ×
   // --fw-small = тройка small ДС, роль ui-small на ссылке), паддинг 20×24,
-  // высота строки в grid-3. Первое вхождение — companies.html. Селектор
-  // оригинала сужен сеткой сегментов (карта.card--hover без доп-класса
-  // живёт только в .cards-grid--3, build.py:649-653): без сужения на
-  // страницах без сетки компаний пара ловила первую попавшуюся .card--hover
-  // (ревью T16.16, батч 31.10; вариант находки «.companies» не существует —
-  // контейнер в оригинале называется cards-grid).
+  // высота строки в grid-3. T18.15: паддинг/цвет — канон lpp-card слоя
+  // (list-page), проба — на крючке канона (прецедент lpp-/nvp-). Первое
+  // вхождение — companies.html. Селектор оригинала сужен сеткой сегментов
+  // (карта.card--hover без доп-класса живёт только в .cards-grid--3,
+  // build.py:649-653): без сужения на страницах без сетки компаний пара
+  // ловила первую попавшуюся .card--hover (ревью T16.16, батч 31.10; вариант
+  // находки «.companies» не существует — контейнер в оригинале называется
+  // cards-grid).
   {
     name: 'company-card',
     original: '.cards-grid--3 .card--hover',
-    pilot: '.cp-company-card',
+    pilot: '.lpp-card',
     fields: {
       fs: 'font-size',
       fw: 'font-weight',
@@ -527,12 +529,13 @@ const BLOCK_PROBES = {
     // Подвал — крючок слоя ftp (T17.13, прецедент video-block/cta-mail).
     ['footer', '.footer', '.ftp'],
   ],
-  // Статы компании на ui-stat (T17.4): сетки — сайт-зона, плашки — компонент;
-  // блоки гейтят высоты миграции (AC: порог ±4px). Оригинал несёт те же
-  // классы блоков (.company-stats/.company-adv, pages.css:805/813).
+  // Статы компании на ui-stat (T17.4): сетки — канон dpp-stats/dpp-adv слоя
+  // (T18.15), плашки — компонент; блоки гейтят высоты миграции (AC: порог
+  // ±4px). Оригинал несёт те же классы блоков (.company-stats/.company-adv,
+  // pages.css:805/813).
   'company.html': [
-    ['company-stats', '.company-stats', '.cp-company-stats'],
-    ['company-adv', '.company-adv', '.cp-company-adv'],
+    ['company-stats', '.company-stats', '.dpp-stats'],
+    ['company-adv', '.company-adv', '.dpp-adv'],
     // T18.3: ленты компании в порядке оригинала (build.py:881–888) — гейт
     // высот AC (Δ ≤ 8px/feed). Оригинальные селекторы — позиционные
     // (.cards-grid--2 первая = вакансии; :nth-child(n of S) — стажировки/
@@ -541,8 +544,9 @@ const BLOCK_PROBES = {
     // вхождения, №2 — второй .banner-card / после ленты статей.
     ['company-vacancies', '.cards-grid--2', '.cp-company-feed--vac'],
     // Фото-секция ui-section--photo (T17.3): CTA-баннер №1 «Практики и
-    // стажировки» (banner-card оригинала, pages.css:656–674).
-    ['company-banner', '.banner-card', '.cp-company-banner'],
+    // стажировки» (banner-card оригинала, pages.css:656–674) — канон
+    // dpp-banner слоя (T18.15).
+    ['company-banner', '.banner-card', '.dpp-banner'],
     [
       'company-internships',
       '.cards-grid--2:nth-child(2 of .cards-grid--2)',
@@ -557,7 +561,7 @@ const BLOCK_PROBES = {
     [
       'company-banner-2',
       '.banner-card:nth-child(2 of .banner-card)',
-      '.cp-company-feed--articles ~ .cp-company-banner',
+      '.cp-company-feed--articles ~ .dpp-banner',
     ],
     [
       'company-events',
