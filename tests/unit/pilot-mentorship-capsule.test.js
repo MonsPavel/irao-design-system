@@ -269,8 +269,10 @@ describe('pilot.css — тон активной карточки на хуке �
     // tabs-row/tabs-links ушли (вынос строки табов в слой, канон tnv) —
     // 27 → 25; errata T18.12: why-us ушла (вынос тёмной секции в слой,
     // канон whu) — 25 → 24; errata T18.13: production ушла (вынос
-    // раскладок карусели в слой, канон prd) — 24 → 23
-    expect(metrics.css.families).toHaveLength(23);
+    // раскладок карусели в слой, канон prd) — 24 → 23; errata T18.14:
+    // directions/holding ушли (вынос сетки направлений/холдинга в слой,
+    // каноны dir/hld) — 23 → 21
+    expect(metrics.css.families).toHaveLength(21);
   });
 });
 
@@ -284,10 +286,11 @@ describe('ценз T17.16 — гейт чист после сборки блок
     // errata T18.10: page-head/page-subtitle ушли (вынос в слой) — 31 → 29;
     // errata T18.11: tabs-row/tabs-links ушли (вынос в слой) — 29 → 27;
     // errata T18.12: why-us ушла (вынос в слой) — 27 → 26;
-    // errata T18.13: production ушла (вынос раскладок карусели в слой) — 26 → 25
+    // errata T18.13: production ушла (вынос раскладок карусели в слой) — 26 → 25;
+    // errata T18.14: directions/holding ушли (вынос в слой) — 25 → 23
     expect(
       ALLOWED_CP_FAMILIES,
-      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13',
-    ).toHaveLength(25);
+      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13/T18.14',
+    ).toHaveLength(23);
   });
 });

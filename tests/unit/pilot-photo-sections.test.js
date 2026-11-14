@@ -72,11 +72,11 @@ describe('build.mjs — пять фоновых секций на ui-section--ph
     expect(indexHtml).not.toContain('ui-section__overlay--glow');
   });
 
-  it('holding и why-us: модификатор + __bg без оверлея (фото без затемнения — канон оригинала; why-us — канон whu слоя, T18.12)', () => {
-    expect(indexHtml).toContain('<section class="ui-section ui-section--photo cp-holding">');
+  it('holding и why-us: модификатор + __bg без оверлея (фото без затемнения — канон оригинала; holding — канон hld слоя T18.14, why-us — канон whu слоя, T18.12)', () => {
+    expect(indexHtml).toContain('<section class="ui-section ui-section--photo hld">');
     expect(indexHtml).toContain('<section class="ui-section ui-section--photo whu">');
     for (const [name, section] of [
-      ['holding', indexHtml.slice(indexHtml.indexOf('cp-holding'))],
+      ['holding', indexHtml.slice(indexHtml.indexOf('ui-section--photo hld'))],
       ['why-us', indexHtml.slice(indexHtml.indexOf('ui-section--photo whu'))],
     ]) {
       expect(section, `${name}: __bg на месте`).toContain('ui-section__bg');
@@ -84,7 +84,7 @@ describe('build.mjs — пять фоновых секций на ui-section--ph
         'ui-section__overlay',
       );
     }
-    expect(indexHtml).not.toContain('cp-holding__bg');
+    expect(indexHtml).not.toContain('cp-holding');
     expect(indexHtml).not.toContain('cp-why-us__bg');
   });
 
@@ -165,16 +165,18 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
       .match(/@media \(min-width: 1024px\)\s*\{\s*\.whu \{([^}]*)\}/);
     expect(whuLg, 'ступень lg ритма whu найдена').toBeTruthy();
     expect(whuLg[1], 'whu: ритм оригинала 140/80 от lg').toContain('padding: 8.75rem 0 5rem;');
-    expect(blockOf(pilotCss, '.cp-holding'), 'holding: ритм оригинала').toContain(
+    // T18.14 — holding на каноне hld слоя: пин ритма — по слою (72/48
+    // holding.css:3 «как есть»; компакт — та же сумма 758).
+    expect(blockOf(layerCss, '.hld'), 'holding: ритм оригинала (слой, T18.14)').toContain(
       'padding: 4.5rem 0 3rem;',
     );
   });
 
   it('позиционирование корней сохранено (якорь absolute-слоёв)', () => {
     // hero — канон hro (T17.15): пин position — по слою. why-us — канон whu
-    // (T18.12) и production — канон prd (T18.13): position несёт примитив
-    // ui-section--photo — слой его не переобъявляет (пин инварианта — по
-    // слою).
+    // (T18.12), production — канон prd (T18.13) и holding — канон hld
+    // (T18.14): position несёт примитив ui-section--photo — слой его не
+    // переобъявляет (пин инварианта — по слою).
     expect(blockOf(layerCss, '.hro'), '.hro: position: relative (слой)').toContain(
       'position: relative;',
     );
@@ -186,11 +188,14 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
       blockOf(layerCss, '.whu'),
       'whu: position несёт примитив (не переобъявляется)',
     ).not.toContain('position');
-    for (const block of ['.cp-holding', '.cp-company-banner']) {
-      expect(blockOf(pilotCss, block), `${block}: position: relative`).toContain(
-        'position: relative;',
-      );
-    }
+    expect(
+      blockOf(layerCss, '.hld'),
+      'hld: position несёт примитив (не переобъявляется, T18.14)',
+    ).not.toContain('position');
+    expect(
+      blockOf(pilotCss, '.cp-company-banner'),
+      '.cp-company-banner: position: relative',
+    ).toContain('position: relative;');
   });
 
   it('тинт баннера — на теле, как в оригинале (primary-a55 — ступень лестницы T14.7); тело не прозрачное', () => {

@@ -487,7 +487,8 @@ const BLOCK_PROBES = {
     // Вариант 2: те же блоки-семейства + мозаика employers.
     ['hero', '.hero', '.hro'],
     ['production', '.production', '.prd'],
-    ['holding', '.holding', '.cp-holding'],
+    // T18.14: holding — канон hld паттерн-слоя (прецедент prd).
+    ['holding', '.holding', '.hld'],
     ['employers', '.employers', '.lgo'],
     // T18.2: mentorship и капсула вакансий — каноны msh/vcp паттерн-слоя
     // (блоки v2, INDEX_FRAGS index-2 build.py:573-590). querySelector
@@ -506,8 +507,9 @@ const BLOCK_PROBES = {
     // Крючок слоя hro (T17.15): связка hero — паттерн-слой.
     ['hero', '.hero', '.hro'],
     ['production', '.production', '.prd'],
-    ['directions', '.directions', '#directions'],
-    ['holding', '.holding', '.cp-holding'],
+    // T18.14: directions/holding — каноны dir/hld паттерн-слоя (прецедент prd).
+    ['directions', '.directions', '.dir'],
+    ['holding', '.holding', '.hld'],
     // Лента логотипов — связка lgo-grid (T17.9): проба на крючке слоя
     // (прецедент video-block/cta-mail).
     ['employers', '.employers', '.lgo-grid'],

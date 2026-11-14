@@ -1049,3 +1049,131 @@
     </button></li>
   </ul>
 </section>
+
+<!-- Вариант 16 — сетка карточек-направлений (dir, T18.14): светлая секция
+     с рамочными карточками-кнопками (батч паритета 31.10 «приведи к
+     оригиналу» — блок 652↔652 байт-паритет): сетка 4×1fr с шагом 36 от lg
+     (2×1fr от md, колонка в базе), карточка min-height 179px с рамкой
+     gray-300 и hover-заливкой blue-100 (под (hover: hover)), имя прижато
+     вниз со стрелкой. Действие (открытие модалки направления) — сайт:
+     модалка — семейство dir-modal сайт-зоны (вынос — T18.16). В эталоне-
+     фрагменте иконки — декоративные плейсхолдеры alt="" (в пилоте —
+     assets/icons/dir-*.svg). -->
+<section class="ui-section dir" id="lsp-directions" aria-labelledby="lsp-directions-title">
+  <p class="ui-showcase-stand__note">
+    Связка «направления» (<code>dir</code>, T18.14): сетка рамочных
+    карточек-кнопок — 4×1fr шаг 36 от lg, карточка 179px с рамкой и
+    hover-заливкой blue-100, имя прижато вниз со стрелкой. Модалка
+    направления — слот сайта (<code>dir-modal</code>, T18.16).
+  </p>
+
+  <div class="ui-container">
+    <!-- Заголовок демо — «Ключевые направления»: имя landmark'а обязано быть
+         уникальным в стенде (гейт lint-html unique-landmark — совпадает с
+         демо-титулом секции lsp-light выше). -->
+    <h2 class="ui-h2" id="lsp-directions-title">Ключевые направления</h2>
+    <ul class="dir__grid">
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23164B89%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Электрогенерация <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23F26722%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Теплогенерация <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23002856%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Энергосбыт, ЕРЦП, НЭСК <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23164B89%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Инжиниринг <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23F26722%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Энергомашиностроение <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23002856%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23002856%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Сервисные компании <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23164B89%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23164B89%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">ИТ <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+      <li>
+        <button class="dir__card" type="button">
+          <img class="dir__icon" src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2776%27%20height%3D%2776%27%3E%3Crect%20width%3D%2776%27%20height%3D%2776%27%20rx%3D%2716%27%20fill%3D%27%23E8EEF6%27%2F%3E%3Ccircle%20cx%3D%2738%27%20cy%3D%2734%27%20r%3D%2714%27%20fill%3D%27%23F26722%27%2F%3E%3Cpath%20d%3D%27M18%2062c4-10%2010-14%2020-14s16%204%2020%2014%27%20fill%3D%27%23F26722%27%2F%3E%3C%2Fsvg%3E" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">Управляющая компания <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 12L12 4M6 4h6v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </button>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- Вариант 17 — холдинг (hld, T18.14): фото-секция на примитиве
+     ui-section--photo (T17.3, без оверлея — on-dark текст несёт контент):
+     заголовок 704px on-dark, стеклянные статы — компонент ui-stat--glass
+     (T17.4), сетка 3×1fr шаг 12 от lg (2×1fr от md, колонка в базе),
+     вертикальную геометрию несёт __inner (space-8). Компакт-вариант v2
+     index-2 — модификатор hld--compact (__inner 638px, сумма блока 758) —
+     исполнен разметкой пилота (applyVariant2, прецедент lgo--mosaic/
+     hro--marquee). -->
+<section class="ui-section ui-section--photo hld" id="lsp-holding" aria-labelledby="lsp-holding-title">
+  <p class="ui-showcase-stand__note">
+    Связка «холдинг» (<code>hld</code>, T18.14): фото-фон
+    <code>ui-section--photo</code> без оверлея, заголовок on-dark 704px,
+    стеклянные статы <code>ui-stat--glass</code> (T17.4) сеткой 3×1fr шаг 12
+    от lg; геометрию несёт <code>hld__inner</code> (space-8), компакт v2 —
+    модификатор <code>hld--compact</code> (638px).
+  </p>
+
+  <div class="ui-section__bg" aria-hidden="true">
+    <img
+      src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%271600%27%20height%3D%27900%27%3E%3Crect%20width%3D%271600%27%20height%3D%27900%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27400%27%20cy%3D%27300%27%20r%3D%27360%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%271280%27%20cy%3D%27700%27%20r%3D%27280%27%20fill%3D%27%23F26722%27%20opacity%3D%270.4%27%2F%3E%3C%2Fsvg%3E"
+      alt=""
+      width="1600"
+      height="900"
+      loading="lazy"
+     >
+  </div>
+
+  <div class="ui-container hld__inner">
+    <!-- Заголовок демо — «Холдинг в цифрах»: имя landmark'а обязано быть
+         уникальным в стенде (гейт lint-html unique-landmark — совпадает с
+         демо-титулом секции lsp-image выше); в пилоте — «Один из крупнейших
+         энергетических холдингов России». -->
+    <h2 class="hld__title ui-h2" id="lsp-holding-title">Холдинг в&nbsp;цифрах</h2>
+    <ul class="hld__stats">
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">50%</span>
+        <span class="ui-stat__label">молодых специалистов получают карьерное продвижение в&nbsp;течение 2-х лет после старта работы в&nbsp;Группе</span>
+        <span class="ui-stat__note">* по данным агрегированного мониторинга в&nbsp;области трудоустройства и&nbsp;развития выпускников</span>
+      </li>
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">60+</span>
+        <span class="ui-stat__label">тысяч человек работают в&nbsp;Группе</span>
+        <span class="ui-stat__note">* по данным годового отчёта Группы за&nbsp;2024&nbsp;год</span>
+      </li>
+      <li class="ui-stat ui-stat--glass">
+        <span class="ui-stat__value ui-h2">Топ-20</span>
+        <span class="ui-stat__label">крупнейших компаний РФ по&nbsp;чистой прибыли</span>
+        <span class="ui-stat__note">* по данным Forbes за&nbsp;2024&nbsp;год</span>
+      </li>
+    </ul>
+  </div>
+</section>

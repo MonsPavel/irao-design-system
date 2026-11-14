@@ -36,7 +36,10 @@
  *      «пороги не двигаются»); T18.11: вынос строки табов + ссылок
  *      (канон tnv) — 2250 → 2231, потолок не двигается; T18.12: вынос
  *      тёмной секции why-us (канон whu) — 2231 → 2108, потолок не
- *      двигается;
+ *      двигается; T18.13: вынос раскладок карусели production (канон
+ *      prd) — 2108 → 1818, потолок не двигается; T18.14: вынос сетки
+ *      направлений и холдинга (каноны dir/hld) — 1818 → 1722, потолок
+ *      не двигается;
  *      MAX_PILOT_CSS_CODE_LINES 1089 — цель эпика в метрике кода
  *      сайт-зоны; errata 31.10: 600 → 618 → 622 → 723; errata T18.1:
  *      723 → 819 (тот же курс); errata T18.2: 819 → 822; errata T18.3:
@@ -45,7 +48,9 @@
  *      T18.9: 1222 → 1297 (тот же курс); T18.10: вынос обложки —
  *      сжатие 1297 → 1269, потолок не двигается (прецедент T17.18);
  *      T18.11: 1269 → 1252; T18.12: вынос why-us — 1252 → 1142,
- *      потолок не двигается;
+ *      потолок не двигается; T18.13: вынос production — 1142 → 911;
+ *      T18.14: вынос directions/holding — 911 → 820, потолок не
+ *      двигается;
  *      MAX_PILOT_JS_LINES 187 — JS пилота (карусель/галерея — в dist);
  *      MAX_CP_FAMILIES 30 + ALLOWED_CP_FAMILIES — новые cp-визуальные
  *      блоки запрещены (гейт «новых cp-визуальных блоков 0»).
@@ -192,13 +197,13 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.13', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.14', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(25);
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(23);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -305,11 +310,18 @@ describe('пороги ценза — числа зафиксированы по
       // ui-carousel T17.7 в dist): сырые 2108→1818, код 1142→911,
       // селекторы 134→95; семейства 24→23 — production ушла из allowlist
       // (судьба «вынос в слой», REPORT §11.4):
-      expect(metrics.css.lines).toBe(1818);
-      expect(metrics.css.codeLines).toBe(911);
-      expect(metrics.css.selectors).toBe(95);
+      // T18.14 (вынос сетки направлений и холдинга в слой — каноны dir/hld:
+      // пары cp-directions/cp-holding целиком — базы/элементы/hover/компакт
+      // и группы ступеней 1023/767 сняты из разметки build.mjs и pilot.css;
+      // модалка направления — сайт-зона dir-modal остаётся, вынос T18.16):
+      // сырые 1818→1722, код 911→820, селекторы 95→76; семейства 23→21 —
+      // directions/holding ушли из allowlist (судьба «вынос в слой»,
+      // REPORT §11.4):
+      expect(metrics.css.lines).toBe(1722);
+      expect(metrics.css.codeLines).toBe(820);
+      expect(metrics.css.selectors).toBe(76);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(23);
+      expect(metrics.css.families).toHaveLength(21);
       expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
         'page-head',
       );
@@ -324,6 +336,11 @@ describe('пороги ценза — числа зафиксированы по
       expect(metrics.css.families, 'семейство production вынесено в слой (T18.13)').not.toContain(
         'production',
       );
+      expect(
+        metrics.css.families,
+        'семейства directions/holding вынесены в слой (T18.14)',
+      ).not.toContain('directions');
+      expect(metrics.css.families).not.toContain('holding');
       expect(metrics.js.lines).toBe(187);
     },
   );

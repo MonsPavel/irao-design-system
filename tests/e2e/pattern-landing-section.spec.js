@@ -1208,6 +1208,164 @@ standTest.describe('patterns/landing-section: раскладки карусел�
   );
 });
 
+// Сетка направлений (T18.14): канон dir слоя — светлая секция с рамочными
+// карточками-кнопками (батч паритета 31.10 «приведи к оригиналу», блок
+// 652↔652 байт-паритет).
+standTest.describe('patterns/landing-section: сетка направлений (dir, T18.14)', () => {
+  standTest(
+    'dir: каркас — сетка 4×1fr шаг 36 от lg, карточка 179px (рамка gray-300/паддинг 20/радиус 16/поверхность), имя прижато вниз со стрелкой, заголовок mb 48; hover-заливка blue-100 под (hover: hover)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.setViewportSize(VIEWPORTS.desktop);
+      const section = page.locator('#lsp-directions');
+      await expect(section, 'секция dir видима').toBeVisible();
+      const state = await section.evaluate((el) => {
+        const cs = (node) => getComputedStyle(node);
+        const rect = (node) => el.querySelector(node).getBoundingClientRect();
+        return {
+          sectionPad: cs(el).padding,
+          titleMb: cs(el.querySelector('.ui-h2')).marginBottom,
+          gridCols: cs(el.querySelector('.dir__grid')).gridTemplateColumns.split(' ').length,
+          gridGap: cs(el.querySelector('.dir__grid')).gap,
+          card: {
+            w: Math.round(rect('.dir__card').width),
+            h: Math.round(rect('.dir__card').height),
+            border: cs(el.querySelector('.dir__card')).borderTopWidth,
+            borderColor: cs(el.querySelector('.dir__card')).borderTopColor,
+            radius: cs(el.querySelector('.dir__card')).borderRadius,
+            pad: cs(el.querySelector('.dir__card')).padding,
+            bg: cs(el.querySelector('.dir__card')).backgroundColor,
+          },
+          cardCount: el.querySelectorAll('.dir__card').length,
+          nameAlign: cs(el.querySelector('.dir__name')).alignItems,
+          nameColor: cs(el.querySelector('.dir__name')).color,
+          iconSize: Math.round(rect('.dir__icon').width),
+        };
+      });
+      expect(state.sectionPad, 'ритм 72/72 — directions.css:2').toBe('72px 0px');
+      expect(state.titleMb, 'заголовок mb 48 — directions.css:8').toBe('48px');
+      expect(state.gridCols, 'сетка 4×1fr от lg — directions.css:16').toBe(4);
+      expect(state.gridGap, 'шаг 36 — directions.css:10').toBe('36px');
+      expect(state.cardCount, '8 карточек направлений').toBe(8);
+      expect(state.card.h, 'карточка min-height 179 — directions.css:18').toBe(179);
+      expect(state.card.border, 'рамка 1px — directions.css:20').toBe('1px');
+      expect(state.card.borderColor, 'рамка gray-300 (#D6D6D6)').toBe('rgb(214, 214, 214)');
+      expect(state.card.radius, 'радиус md 16').toBe('16px');
+      expect(state.card.pad, 'паддинг 20 — directions.css:19').toBe('20px');
+      expect(state.card.bg, 'поверхность — var(--ui-color-surface)').toBe('rgb(255, 255, 255)');
+      expect(state.nameAlign, 'имя прижато вниз (align-items flex-end — directions.css:36)').toBe(
+        'flex-end',
+      );
+      expect(state.nameColor, 'имя color-text (не primary) — directions.css:38').toBe(
+        'rgb(31, 31, 31)',
+      );
+      expect(state.iconSize, 'иконка 76px — directions.css:31').toBe(76);
+    },
+  );
+
+  standTest(
+    'dir: мобильная база — колонка (ступень пилота max-767, инверсия), карточки во всю ширину; hscroll нет на 375',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.setViewportSize(VIEWPORTS.mobile);
+      const state = await page.evaluate(() => {
+        const section = document.querySelector('#lsp-directions');
+        const grid = section.querySelector('.dir__grid');
+        return {
+          cols: getComputedStyle(grid).gridTemplateColumns.split(' ').length,
+          cardW: Math.round(grid.querySelector('.dir__card').getBoundingClientRect().width),
+          gridW: Math.round(grid.getBoundingClientRect().width),
+          sectionPad: getComputedStyle(section).padding,
+          hscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      });
+      expect(state.cols, 'мобильная база — колонка (оригинал ≤767, инверсия)').toBe(1);
+      expect(state.cardW, 'карточка во всю ширину сетки (32px-гейт T3.6: колонка проходит)').toBe(
+        state.gridW,
+      );
+      expect(state.sectionPad, 'ритм секции не меняется (72/72 — пилот ступени не вёз)').toBe(
+        '72px 0px',
+      );
+      expect(state.hscroll, 'на 375 горизонтального скролла нет (T3.6)').toBe(false);
+    },
+  );
+});
+
+// Холдинг (T18.14): канон hld слоя — фото-фон на примитиве ui-section--photo
+// без оверлея, стеклянные статы ui-stat--glass (T17.4), ритм 72/48.
+standTest.describe('patterns/landing-section: холдинг (hld, T18.14)', () => {
+  standTest(
+    'hld: каркас — фото-фон без оверлея (T17.3), заголовок on-dark 704px, статы 3×1fr шаг 12 (ui-stat--glass), ритм 72/48; геометрия __inner space-8',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.setViewportSize(VIEWPORTS.desktop);
+      const section = page.locator('#lsp-holding');
+      await expect(section, 'секция hld видима').toBeVisible();
+      const state = await section.evaluate((el) => {
+        const cs = (node) => getComputedStyle(node);
+        const rect = (node) => el.querySelector(node).getBoundingClientRect();
+        const bg = el.querySelector('.ui-section__bg');
+        return {
+          sectionPad: cs(el).padding,
+          overlayCount: el.querySelectorAll('.ui-section__overlay').length,
+          bgDisplay: cs(bg).display,
+          bgZ: cs(bg).zIndex,
+          innerPad: cs(el.querySelector('.hld__inner')).paddingTop,
+          titleMaxW: cs(el.querySelector('.hld__title')).maxWidth,
+          titleColor: cs(el.querySelector('.hld__title')).color,
+          statsCols: cs(el.querySelector('.hld__stats')).gridTemplateColumns.split(' ').length,
+          statsGap: cs(el.querySelector('.hld__stats')).gap,
+          statsMarginTop: cs(el.querySelector('.hld__stats')).marginTop,
+          glassCount: el.querySelectorAll('.ui-stat--glass').length,
+          glassH: Math.round(rect('.ui-stat--glass').height),
+        };
+      });
+      expect(state.sectionPad, 'ритм 72/48 — holding.css:3').toBe('72px 0px 48px');
+      expect(state.overlayCount, 'оверлея нет (фото без затемнения — канон оригинала)').toBe(0);
+      expect(state.bgDisplay, 'фон __bg примитива на месте').toBe('block');
+      expect(state.bgZ, 'фон под контентом (z-пара T17.3)').toBe('-1');
+      expect(state.innerPad, '__inner вертикальная геометрия space-8 (батч ритма 01.11)').toBe(
+        '64px',
+      );
+      expect(state.titleMaxW, 'заголовок max-width 704 (44rem — принятый пилот)').toBe('704px');
+      expect(state.titleColor, 'заголовок on-dark — holding.css:42').toBe('rgb(255, 255, 255)');
+      expect(state.statsCols, 'статы 3×1fr от lg — holding.css:47').toBe(3);
+      expect(state.statsGap, 'шаг 12 (space-3 — принятый рендер T17.4)').toBe('12px');
+      expect(state.statsMarginTop, 'верх 48 (space-7)').toBe('48px');
+      expect(state.glassCount, '3 стата --glass (T17.4)').toBe(3);
+      expect(state.glassH, 'стеклянная плашка выше мобильной базы (десктоп-форма)').toBeGreaterThan(
+        150,
+      );
+    },
+  );
+
+  standTest(
+    'hld: мобильная база — статы колонкой (ступень пилота max-767, инверсия), заголовок/фон не меняются; hscroll нет на 375',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+      await page.setViewportSize(VIEWPORTS.mobile);
+      const state = await page.evaluate(() => {
+        const section = document.querySelector('#lsp-holding');
+        const stats = section.querySelector('.hld__stats');
+        const glass = section.querySelector('.ui-stat--glass');
+        return {
+          cols: getComputedStyle(stats).gridTemplateColumns.split(' ').length,
+          glassW: Math.round(glass.getBoundingClientRect().width),
+          statsW: Math.round(stats.getBoundingClientRect().width),
+          sectionPad: getComputedStyle(section).padding,
+          hscroll: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        };
+      });
+      expect(state.cols, 'мобильная база — колонка (оригинал ≤767, инверсия)').toBe(1);
+      expect(state.glassW, 'плашка во всю ширину сетки (32px-гейт T3.6)').toBe(state.statsW);
+      expect(state.sectionPad, 'ритм 72/48 не меняется (пилот ступени секции не вёз)').toBe(
+        '72px 0px 48px',
+      );
+      expect(state.hscroll, 'на 375 горизонтального скролла нет (T3.6)').toBe(false);
+    },
+  );
+});
+
 standTest.describe('patterns/landing-section: a11y страницы (AC)', () => {
   standTest('axe страницы чист (вне реестра KNOWN_AXE_EXCEPTIONS)', async ({ stand }) => {
     const page = await stand('patterns/landing-section');
@@ -1344,3 +1502,50 @@ standTest.describe('patterns/landing-section: эталоны секции why-us
     },
   );
 });
+
+// Сетка направлений и холдинг (T18.14): контейнерные эталоны канонов
+// dir/hld — сетка направлений на desktop (1440 — 4×1fr шаг 36, карточки
+// 179px) и mobile (375 — мобильная база: колонка, карточки во всю ширину)
+// + холдинг на desktop (1440 — фото-фон без оверлея, заголовок 704px,
+// статы 3×1fr). Три снимка (прецедент prd/whu — element-снимки канона).
+standTest.describe(
+  'patterns/landing-section: эталоны сетки направлений/холдинга dir-hld (T18.14, AC: ×3)',
+  () => {
+    standTest(
+      'dir/hld — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/landing-section');
+
+        const shots = [
+          ['dir-grid', page.locator('#lsp-directions'), ['desktop', 'mobile']],
+          ['hld-section', page.locator('#lsp-holding'), ['desktop']],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            await locator.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(300);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): у секций нет скруглённых
+              // карточек у правого среза снимка — лотерея растеризации
+              // (диагноз 19.10) не проявлена.
+            });
+          }
+        }
+      },
+    );
+  },
+);

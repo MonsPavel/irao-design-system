@@ -561,8 +561,8 @@ describe('пилот career-portal: production на каноне prd (T18.13; AC
 describe('ценз сайт-зоны: семейство production ушло из allowlist (T18.13 AC)', () => {
   it('allowlist ценза без production — судьба семейства «вынос в слой» (REPORT §11.4)', () => {
     expect(ALLOWED_CP_FAMILIES, 'production — вынесена в слой').not.toContain('production');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('holding');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('directions');
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
+    // T18.14: directions/holding тоже ушли из allowlist (каноны dir/hld
+    // слоя) — прежние пины «не тронуты» сняты, судьба семейств — REPORT §11.4.
   });
 });

@@ -9,8 +9,8 @@
  * Различия между ui-компонентом и оригинальным классом — предмет отчёта
  * о сравнении (pilot/career-portal/REPORT.md), а не правки здесь.
  *
- * Блоки без аналога в ДС (directions, holding, why-us, video,
- * team, шапка/подвал сайта, page-head) — честная сайт-зона: кандидаты в
+ * Блоки без аналога в ДС (why-us, video,
+ * team, шапка/подвал сайта) — честная сайт-зона: кандидаты в
  * новые паттерны/компоненты ДС, до решения — живут здесь. Чипы с T14.8 —
  * компонент ui-chip: сайт-зоне остаётся только ритм раскладок вокруг них.
  * CTA-плашки (cta-mail, «Все вакансии») с T17.8 — компонент ui-card--cta.
@@ -18,6 +18,7 @@
  * лендинги стажировок) с T17.15 — паттерн-слой hro/mrq/mdl/cvh: сайт-зоне
  * остаются тон-строки тегов hero (хук --hro-tag-bg). Раскладки карусели
  * production с T18.13 — паттерн-слой prd (поверх ui-carousel T17.7).
+ * Сетка направлений и холдинг с T18.14 — паттерн-слой dir/hld.
  */
 
 /* ── страница ── */
@@ -123,126 +124,14 @@
   --hro-tag-bg: color-mix(in srgb, #ff3134 20%, transparent);
 }
 
-/* ── Холдинг v2 — компакт (holding.css:2 — паддинги секции 72/48,
-   holding.css:34 — __inner 638px; у канона v1 ритм секции погашен —
-   на модификаторе возвращается: компакт = сумма 758 оригинала). */
-.cp-holding.cp-holding--compact {
-  /* паддинги 72/48 теперь на базе .cp-holding — модификатор несёт только __inner 638 */
-}
-
-.cp-holding.cp-holding--compact .cp-holding__inner {
-  height: 39.875rem; /* 638px holding.css:34 «как есть» */
-}
-
-/* ── directions: сетка карточек-направлений (сайт-зона) ──
-   Каркас — оригинал directions.css (решение владельца 31.10 «приведи к
-   оригиналу»: прежнее «рамки нет — воздушнее» REPORT §9.1 снято). */
-
-.cp-directions {
-  padding-top: 4.5rem; /* 72px directions.css:2 «как есть» (ритм ui-section погашен) */
-  padding-bottom: 4.5rem;
-}
-
-.cp-directions .ui-h2 {
-  margin-bottom: 3rem; /* 48px directions.css:8 (ui-h2 канона без отступа) */
-}
-.cp-directions__grid {
-  display: grid;
-  gap: 2.25rem; /* 36px directions.css:10 «как есть» */
-  grid-template-columns: repeat(4, 1fr);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.cp-directions__card {
-  display: flex;
-  flex-direction: column;
-  gap: 2.125rem; /* 34px directions.css:17 «как есть» */
-  justify-content: space-between; /* имя прижато к низу (directions.css:15) */
-  width: 100%;
-  min-height: 11.1875rem; /* 179px directions.css:18 */
-  padding: 1.25rem; /* 20px directions.css:19 */
-  border: var(--ui-border-width) solid var(--ui-border-color); /* #D6D6D6 = gray-300, directions.css:20 */
-  border-radius: var(--ui-radius-md);
-  background-color: var(--ui-color-surface);
-  text-align: left;
-  transition:
-    background-color var(--ui-transition),
-    border-color var(--ui-transition);
-}
-
-@media (hover: hover) {
-  .cp-directions__card:hover {
-    border-color: var(--ui-color-surface-hover); /* blue-100 directions.css:25-28 */
-    background-color: var(--ui-color-surface-hover);
-  }
-}
-
-.cp-directions__icon {
-  object-fit: contain;
-  width: 4.75rem; /* 76px directions.css:31 */
-  height: 4.75rem;
-}
-
-.cp-directions__name {
-  display: flex;
-  gap: 0.25rem; /* 4px directions.css:34 */
-  align-items: flex-end;
-  justify-content: space-between;
-  color: var(--ui-color-text); /* directions.css:38 — не primary */
-  font-weight: var(--ui-fw-body-bold);
-  letter-spacing: -0.02em; /* directions.css:37 «как есть» */
-}
-
-.cp-directions__name svg {
-  flex: 0 0 auto;
-  margin-bottom: 0.3125rem; /* 5px directions.css:42 */
-}
-
-/* Модалка направления — ui-modal; контентная раскладка — сайт */
-.cp-directions__photo {
-  object-fit: cover;
-  width: 100%;
-  border-radius: var(--ui-radius-md);
-}
-
-.cp-directions__nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: calc(-1 * var(--ui-space-5));
-  padding: 0 var(--ui-space-2);
-}
-
-/* ── holding: фон + статистика (сайт-зона) ── */
-
-/* Фото-фон — ui-section--photo (T17.3, без оверлея); ритм ui-section
-   погашен — вертикальную геометрию несёт __inner (space-8). */
-.cp-holding {
-  position: relative;
-  padding: 4.5rem 0 3rem; /* 72/48 holding.css:3 «как есть» (ритм ui-section погашен; compact — та же сумма) */
-}
-
-.cp-holding__inner {
-  padding-top: var(--ui-space-8);
-  padding-bottom: var(--ui-space-8);
-}
-
-.cp-holding__title {
-  max-width: 44rem;
-  color: var(--ui-color-text-on-dark);
-}
-
-/* Статы холдинга — ui-stat--glass (T17.4): стекло/рамка/сноска и цвет
-   значений несёт компонент; сетка — раскладка сайт-зоны. */
-.cp-holding__stats {
-  display: grid;
-  gap: var(--ui-space-3);
-  grid-template-columns: repeat(3, 1fr);
-  margin: var(--ui-space-7) 0 0;
-  padding: 0;
-  list-style: none;
-}
+/* ── Холдинг и сетка направлений — каноны hld/dir паттерн-слоя (T18.14):
+   правила cp-holding/cp-directions-семейств сняты (секции/тела/заголовки/
+   статы/сетки/карточки/hover + компакт-вариант v2 — модификатор
+   hld--compact канона; фон holding — примитив ui-section--photo, статы —
+   компонент ui-stat--glass T17.4), семейства ушли из allowlist ценза
+   (судьба «вынос в слой», REPORT §11.4). Модалка направления — сайт-зона
+   dir-modal до T18.16: контентные классы модалки index — cp-dir-modal__
+   (фото дублирует правило стажировочной модалки 1:1 — правило снято). */
 
 /* Лента логотипов «Работодатели Группы» — связка lgo-grid/lgo-card (T17.9):
    правила cp-employers-семейства сняты, канон — паттерн-слой. */
@@ -1463,7 +1352,7 @@ a.cp-intern-card {
   color: var(--ui-color-text-on-dark);
 }
 
-/* цвет заголовка на тёмном — override роли ui-h2 (cp-holding__title) */
+/* цвет заголовка на тёмном — override роли ui-h2 (как заголовок холдинга) */
 .cp-company-banner__title {
   color: var(--ui-color-text-on-dark);
 }
@@ -1557,7 +1446,11 @@ a.cp-intern-card {
   height: 16.25rem;
 }
 
-/* Модалка направления стажировки: контент внутри ui-modal */
+/* Модалка направления стажировки: контент внутри ui-modal. T18.14:
+   контентные классы модалки направления index переименованы в семейство
+   (cp-directions__* ушли с каноном dir слоя) — фото дублирует правило
+   стажировочной модалки 1:1 (одно правило на обе модалки), навигация
+   галереи добавлена. Вынос семейства — T18.16. */
 .cp-dir-modal {
   display: grid;
   gap: var(--ui-space-4);
@@ -1568,6 +1461,13 @@ a.cp-intern-card {
   object-fit: cover;
   width: 100%;
   border-radius: var(--ui-radius-md);
+}
+
+.cp-dir-modal__nav {
+  display: flex;
+  justify-content: space-between;
+  margin-top: calc(-1 * var(--ui-space-5));
+  padding: 0 var(--ui-space-2);
 }
 
 .cp-dir-modal__tasks {
@@ -1582,9 +1482,8 @@ a.cp-intern-card {
 /* stylelint-disable media-feature-name-disallowed-list -- сайт-зона пилота (см. комментарий выше) */
 /* 1440 → 1024 */
 @media (max-width: 1023px) {
-  .cp-directions__grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* Сетка направлений — канон dir слоя (T18.14): ступень 1023 копипасты
+     снята (2 колонки от md — инверсия, mobile-first). */
 
   /* T15.1-бэклог: детальное фото event на ≤1023 — 260px оригинала
      (.internship__photo, pages.css:933); ступень снята в каноне dpp__photo
@@ -1604,10 +1503,13 @@ a.cp-intern-card {
   /* why-us — канон whu слоя (T18.12): ступень 2 колонок — база колонкой
      канона (оригинал ≤1023), лестница пилота снята. */
 
-  .cp-holding__stats,
   .cp-adv-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  /* Сетка направлений/статы холдинга — каноны dir/hld слоя (T18.14):
+     ступени 1023 копипасты сняты (2 колонки от md — инверсия, mobile-first,
+     Implementation requirements T17.1 п.4). */
 
   /* Спец-сетка «Медиа» — канон mdl (T17.15): 2 колонки от md, 4 от lg —
      ступень 1023 копипасты снята (mobile-first, Implementation
@@ -1654,11 +1556,13 @@ a.cp-intern-card {
   /* Hero — канон hro (T17.15): мобильная база min-height 35rem, 50.5rem
      от md — ступень 767 копипасты снята (mobile-first). */
 
-  .cp-directions__grid,
-  .cp-holding__stats,
   .cp-adv-grid {
     grid-template-columns: 1fr;
   }
+
+  /* Сетка направлений/статы холдинга — каноны dir/hld слоя (T18.14):
+     мобильная база канона и так колонка — ступень 767 копипасты снята
+     (mobile-first). */
 
   /* Спец-сетка «Медиа» — канон mdl (T17.15): мобильная база 1 колонка без
      span (span big/lead включается от md) — ступень 767 копипасты снята

@@ -20,10 +20,12 @@
  * строка вакансии) собраны как СТЫК СТОРОНЫ САЙТА
  * (pilot.css, префикс cp-) — ровно так, как это предписывает архитектура
  * (02-architecture §7: связки — зона сайта); page-head вынесен в паттерн-
- * слой каноном php (T18.10). Эти блоки — главные кандидаты
- * в доработки ДС по итогам сравнения (REPORT.md). Чипы (T14.8), табы-пилюли
- * и начальный выбор (T14.9), заголовок страницы (T14.2) и CTA-пилюля
- * (T14.4) с эпика EPIC-14 живут в ДС — пилот использует их напрямую.
+ * слой каноном php (T18.10), production — каноном prd (T18.13),
+ * directions/holding — канонами dir/hld (T18.14). Эти блоки — главные
+ * кандидаты в доработки ДС по итогам сравнения (REPORT.md). Чипы (T14.8),
+ * табы-пилюли и начальный выбор (T14.9), заголовок страницы (T14.2) и
+ * CTA-пилюля (T14.4) с эпика EPIC-14 живут в ДС — пилот использует их
+ * напрямую.
  * Лендинг-композиции (hero/adv-marquee/media/cover-hero — T17.15,
  * наставничество msh и капсула вакансий vcp — T18.2) — каноны
  * паттерн-слоя ds/ui-patterns.css.
@@ -1190,9 +1192,9 @@ function indexMain() {
   const directionPhotosJson = JSON.stringify(directionPhotos);
   const directionsGrid = DIRECTIONS.map(
     (name, index) => `      <li>
-        <button class="cp-directions__card" type="button" data-cp-direction="${index}">
-          <img class="cp-directions__icon" src="assets/icons/dir-${index + 1}.svg" alt="" width="76" height="76" loading="lazy">
-          <span class="cp-directions__name">${esc(name)} ${ARROW_UP_RIGHT}</span>
+        <button class="dir__card" type="button" data-cp-direction="${index}">
+          <img class="dir__icon" src="assets/icons/dir-${index + 1}.svg" alt="" width="76" height="76" loading="lazy">
+          <span class="dir__name">${esc(name)} ${ARROW_UP_RIGHT}</span>
         </button>
       </li>`,
   ).join('\n');
@@ -1349,10 +1351,13 @@ ${stepperTabs}
   </ul>
 </section>
 
-<section class="ui-section cp-directions" id="directions">
+<section class="ui-section dir" id="directions">
+  <!-- Сетка карточек-направлений — канон dir паттерн-слоя (T18.14):
+       рамки/сетка/ритм — слой (directions.css 1:1 батч 31.10); модалка
+       направления — сайт-зона dir-modal (вынос — T18.16). -->
   <div class="ui-container">
     <h2 class="ui-h2">Направления деятельности</h2>
-    <ul class="cp-directions__grid" data-cp-directions>
+    <ul class="dir__grid" data-cp-directions>
 ${directionsGrid}
     </ul>
   </div>
@@ -1366,8 +1371,8 @@ ${directionsGrid}
   <h2 class="ui-modal__title ui-h3" id="cp-direction-dialog-title" data-cp-dir-title>Направление</h2>
   <div class="ui-modal__body ui-carousel" data-ui-gallery>
     <script type="application/json" data-ui-gallery-photos>${directionPhotosJson.replaceAll('</', '<\\/')}</script>
-    <img class="cp-directions__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">
-    <div class="cp-directions__nav">
+    <img class="cp-dir-modal__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">
+    <div class="cp-dir-modal__nav">
       <button class="ui-button ui-button--light ui-button--sm" type="button" data-ui-gallery-prev hidden aria-label="Предыдущее фото">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -1381,14 +1386,17 @@ ${directionsGrid}
   </div>
 </dialog>
 
-<section class="ui-section ui-section--photo cp-holding">
-  <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст — контентом -->
+<section class="ui-section ui-section--photo hld">
+  <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст —
+       контентом. Секция — канон hld паттерн-слоя (T18.14): ритм 72/48,
+       __inner/заголовок/статы-сетка — слой; статы — ui-stat--glass (T17.4);
+       компакт-вариант v2 — модификатор hld--compact (applyVariant2). -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/about-holding.jpg" alt="" loading="lazy">
   </div>
-  <div class="ui-container cp-holding__inner">
-    <h2 class="cp-holding__title ui-h2">Один из крупнейших энергетических холдингов России</h2>
-    <ul class="cp-holding__stats">
+  <div class="ui-container hld__inner">
+    <h2 class="hld__title ui-h2">Один из крупнейших энергетических холдингов России</h2>
+    <ul class="hld__stats">
       <li class="ui-stat ui-stat--glass">
         <span class="ui-stat__value ui-h2">50%</span>
         <span class="ui-stat__label">молодых специалистов получают карьерное продвижение в&nbsp;течение 2-х лет после старта работы в&nbsp;Группе</span>
@@ -3236,8 +3244,8 @@ function applyVariant2(html) {
       'ui-section--photo prd prd--v2 ui-carousel"',
     )
     .replace(
-      'class="ui-section ui-section--photo cp-holding"',
-      'class="ui-section ui-section--photo cp-holding cp-holding--compact"',
+      'class="ui-section ui-section--photo hld"',
+      'class="ui-section ui-section--photo hld hld--compact"',
     )
     .replace('class="ui-section lgo"', 'class="ui-section lgo lgo--mosaic"')
     .replace('class="mdl"', 'class="mdl mdl--wide"')
