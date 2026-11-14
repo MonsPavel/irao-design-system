@@ -2351,8 +2351,9 @@ passed** (94 файла); `node pilot/career-portal/check-links.mjs` — 43
 гейт OK (1648 строк / код 765, 16 семейств, allowlist 18); `npm run build`
 + пересборка пилота (порядок «рантайм → пилот», errata T18.11);
 `npm run test:docker -- --update-snapshots` (полный chromium-проект) —
-**666 passed / 1 skipped** exit 0 (для записи эталонов), контрольный
-прогон без update — см. ниже. Эталоны dpp-company ×3
+**666 passed / 1 skipped** exit 0 (для записи эталонов), контрольный прогон
+без update — **666 passed / 1 skipped exit 0** (эталоны зелёные на
+закоммиченном состоянии). Эталоны dpp-company ×3
 (dpp-company--desktop 1425×1947 / dpp-company--mobile 360×3195 /
 dpp-banner--desktop 1425×321) — сняты в контейнере (ADR-0004).
 Дифф-лист пересъёма по протоколу ADR-0004: pattern-detail-page fullPage ×3
