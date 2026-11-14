@@ -146,9 +146,7 @@ describe('build.mjs — страница company.html (T15.2 Scope)', () => {
   it('banner-card №1 «Практики и стажировки»: CTA-панель с фото-подложкой и ui-button «смотреть предложения» на internships.html (T18.3: контент/позиция оригинала company.html:45–52 — замена CTA vacancies.html из T15.2, лента вакансий теперь на странице); баннер — канон dpp-banner слоя (T18.15), тело — CTA-центр-композиция на ui-card--cta (T17.8), фон/оверлей — фото-секция ui-section--photo (T17.3)', () => {
     expect(companyHtml).toContain('<div class="ui-section ui-section--photo dpp-banner">');
     expect(companyHtml).toContain('<div class="dpp-banner__body ui-card ui-card--cta">');
-    expect(companyHtml).toContain(
-      '<h2 class="ui-h2 dpp-banner__title">Практики и стажировки</h2>',
-    );
+    expect(companyHtml).toContain('<h2 class="ui-h2 dpp-banner__title">Практики и стажировки</h2>');
     expect(companyHtml).toContain(
       'Посмотрите предложения практики и стажировки именно в нашей компании.',
     );
@@ -227,9 +225,7 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
   it('Technical considerations (унификация статов): две вариации holding/company сняты в компонент ui-stat (T17.4), сетки — каноны слоя (T18.15) — решение задокументировано комментарием секции', () => {
     const section = pilotCssRaw.slice(pilotCssRaw.indexOf('/* ── компания:'));
     expect(section, 'ссылка на канон стат в комментарий секции').toContain('dpp-stats');
-    expect(section, 'ссылка на ui-stat--filled в комментарий секции').toContain(
-      'ui-stat--filled',
-    );
+    expect(section, 'ссылка на ui-stat--filled в комментарий секции').toContain('ui-stat--filled');
     expect(section, 'ссылка на ui-stat--deep в комментарий секции').toContain('ui-stat--deep');
   });
 
@@ -264,9 +260,7 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
   });
 
   it('оверлей баннера и ширина текста — канон dpp-banner слоя (T18.15): тинт primary-a55 на теле (rgba(0,40,86,.55), pages.css:666 — ступень лестницы T14.7), on-dark-пара, текст 560px (pages.css:674); фото-подложка — слой __bg фото-секции T17.3 (пины по слою — прецедент hro/prd T17.15/T18.13)', () => {
-    const layer = stripCssComments(
-      readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'),
-    );
+    const layer = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
     const body = blockOf(layer, '.dpp-banner__body');
     expect(body, 'тинт на теле (слой, T18.15)').toContain(
       'background-color: var(--ui-color-primary-a55);',
@@ -276,9 +270,7 @@ describe('pilot.css — сайт-зона компании (T15.2 Scope + T17.14
       'padding: 2.5rem;',
     );
     expect(body, 'рамка гасится (T17.8)').toContain('border: 0;');
-    expect(blockOf(layer, '.dpp-banner__title')).toContain(
-      'color: var(--ui-color-text-on-dark);',
-    );
+    expect(blockOf(layer, '.dpp-banner__title')).toContain('color: var(--ui-color-text-on-dark);');
     expect(blockOf(layer, '.dpp-banner__text'), 'текст 560px «как есть» (pages.css:674)').toContain(
       'max-width: 35rem;',
     );
@@ -390,9 +382,7 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
     expect(
       companyHtml.match(/<div class="ui-section ui-section--photo dpp-banner">/g)?.length ?? 0,
     ).toBe(2);
-    expect(companyHtml).toContain(
-      '<h2 class="ui-h2 dpp-banner__title">Целевое обучение</h2>',
-    );
+    expect(companyHtml).toContain('<h2 class="ui-h2 dpp-banner__title">Целевое обучение</h2>');
     expect(companyHtml).toContain('Посмотрите предложения целевого обучения от нашей компании.');
     expect(companyHtml).toMatch(
       /<a class="ui-button ui-button--primary" href="education-catalog.html">смотреть предложения<\/a>/,

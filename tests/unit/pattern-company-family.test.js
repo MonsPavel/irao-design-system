@@ -65,7 +65,8 @@ const mediaBlockOf = (css, px, hook) => {
 
 /** Кусок слоя секции dpp (от .dpp-breadcrumbs до fpp-секции) — для пинов
  *  вхождения канонов в dpp-секцию (Scope спеки: «patterns.css dpp»). */
-const dppSection = (layer) => layer.slice(layer.indexOf('.dpp-breadcrumbs'), layer.indexOf('.fpp-breadcrumbs'));
+const dppSection = (layer) =>
+  layer.slice(layer.indexOf('.dpp-breadcrumbs'), layer.indexOf('.fpp-breadcrumbs'));
 
 const layerFile = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8');
 const layer = stripCssComments(layerFile);
@@ -90,21 +91,21 @@ const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8').replace(/\r\
 const companyHtml = (
   build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? ''
 ).replace(/\r\n/g, '\n');
-const companiesHtml = (
-  // якорь — внешний return (внутренний return map-билдера сегментов раньше;
+const companiesHtml = // якорь — внешний return (внутренний return map-билдера сегментов раньше;
   // захват до закрывающего </section> — практика pilot-company.test.js)
-  build.match(/function companiesMain[\s\S]*?return `\$\{breadcrumbs\(\[([\s\S]*?)<\/section>/)
-    ?.[1] ?? ''
-).replace(/\r\n/g, '\n');
+  (
+    build.match(
+      /function companiesMain[\s\S]*?return `\$\{breadcrumbs\(\[([\s\S]*?)<\/section>/,
+    )?.[1] ?? ''
+  ).replace(/\r\n/g, '\n');
 
 describe('patterns/patterns.css — каноны company-семейств в dpp-секции (T18.15 Scope)', () => {
   it('каноны в dpp-секции слоя (до fpp-секции) — Scope «patterns.css dpp»', () => {
     const section = dppSection(layer);
     for (const hook of ['dpp-section-title', 'dpp-stats', 'dpp-adv', 'dpp-banner']) {
-      expect(
-        section.includes(`.${hook}`),
-        `канон .${hook} — в dpp-секции слоя (перед fpp)`,
-      ).toBe(true);
+      expect(section.includes(`.${hook}`), `канон .${hook} — в dpp-секции слоя (перед fpp)`).toBe(
+        true,
+      );
     }
   });
 
@@ -172,12 +173,8 @@ describe('patterns/patterns.css — каноны company-семейств в dpp
     expect(banner, 'box-sizing на корне (ADR-0002)').toContain('box-sizing: border-box;');
     expect(banner, 'flex — оригинал .banner-card (pages.css:655)').toContain('display: flex;');
     expect(banner, 'align-items: center — pages.css:655').toContain('align-items: center;');
-    expect(banner, 'клип радиуса — overflow hidden (pages.css:655)').toContain(
-      'overflow: hidden;',
-    );
-    expect(banner, 'min-height 320px «как есть» — pages.css:655').toContain(
-      'min-height: 20rem;',
-    );
+    expect(banner, 'клип радиуса — overflow hidden (pages.css:655)').toContain('overflow: hidden;');
+    expect(banner, 'min-height 320px «как есть» — pages.css:655').toContain('min-height: 20rem;');
     expect(banner, 'низ 56px «как есть» — company-section-gap (pages.css:884)').toContain(
       'margin-bottom: 3.5rem;',
     );
@@ -228,9 +225,7 @@ describe('patterns/patterns.css — каноны company-семейств в dpp
     const section = dppSection(layer);
     const medias = [...section.matchAll(/@media \(min-width: (\d+)px\)/g)].map((m) => m[1]);
     for (const value of medias) {
-      expect(['480', '768', '1024', '1280', '1440'], `${value}px — из шкалы T2.5`).toContain(
-        value,
-      );
+      expect(['480', '768', '1024', '1280', '1440'], `${value}px — из шкалы T2.5`).toContain(value);
     }
     expect(section, 'max-width в media-ступенях нет (mobile-first)').not.toMatch(
       /@media[^{]*max-width/,
@@ -238,9 +233,7 @@ describe('patterns/patterns.css — каноны company-семейств в dpp
     expect(layer, 'hex только в tokens/primitives.css').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(layer, '!important только в a11y/vi.css').not.toContain('!important');
     expect(
-      patternLayerProblems(
-        '.dpp-stats { display: grid; }\n.dpp-banner__body { padding: 2.5rem; }',
-      ),
+      patternLayerProblems('.dpp-stats { display: grid; }\n.dpp-banner__body { padding: 2.5rem; }'),
       'dpp-каноны — канонические префиксы',
     ).toEqual([]);
     expect(
@@ -311,14 +304,11 @@ describe('доки паттернов — источник правды (син�
       'dpp-stats',
     ]);
     const markup = docHooks(detailHtml, /^dpp(?:-section-title|-stats|-adv|-banner(?:__|$))/);
-    expect(markup.size, 'detail-page.html: классы канонов компании в разметке есть').toBe(
-      7,
-    );
+    expect(markup.size, 'detail-page.html: классы канонов компании в разметке есть').toBe(7);
     for (const hook of hooks) {
-      expect(
-        markup.has(hook),
-        `detail-page: крючок «${hook}» из слоя есть в разметке дока`,
-      ).toBe(true);
+      expect(markup.has(hook), `detail-page: крючок «${hook}» из слоя есть в разметке дока`).toBe(
+        true,
+      );
     }
     for (const name of markup) {
       expect(hooks.has(name), `detail-page: класс «${name}» разметки имеет правило слоя`).toBe(
@@ -328,9 +318,8 @@ describe('доки паттернов — источник правды (син�
   });
 
   it('секция company-связок стенда расширена канонами в порядке страницы компании: hero → stats → титул+adv → титул+where → banner', () => {
-    const section = detailHtml.match(
-      /<section[^>]*id="dpp-company-demo"[\s\S]*?<\/section>/,
-    )?.[0] ?? '';
+    const section =
+      detailHtml.match(/<section[^>]*id="dpp-company-demo"[\s\S]*?<\/section>/)?.[0] ?? '';
     expect(section, 'секция company-связок найдена').not.toBe('');
     expect(section, 'сетка фактов — канон dpp-stats').toContain('<ul class="dpp-stats">');
     expect(
@@ -362,9 +351,10 @@ describe('доки паттернов — источник правды (син�
       expect(at, `${name} найдено`).toBeGreaterThan(-1);
     }
     for (let i = 1; i < order.length; i += 1) {
-      expect(order[i][1], `${order[i][0]} после ${order[i - 1][0]} (порядок страницы)`).toBeGreaterThan(
-        order[i - 1][1],
-      );
+      expect(
+        order[i][1],
+        `${order[i][0]} после ${order[i - 1][0]} (порядок страницы)`,
+      ).toBeGreaterThan(order[i - 1][1]);
     }
   });
 
@@ -374,16 +364,15 @@ describe('доки паттернов — источник правды (син�
     const markup = docHooks(listHtml, /^lpp-card$/);
     expect(markup.has('lpp-card'), 'list-page.html: lpp-card в разметке есть').toBe(true);
     for (const name of markup) {
-      expect(hooks.has(name), `list-page: класс «${name}» разметки имеет правило слоя`).toBe(
-        true,
-      );
+      expect(hooks.has(name), `list-page: класс «${name}» разметки имеет правило слоя`).toBe(true);
     }
   });
 
   it('VI-инвариант дока: фон баннера — __bg примитива (aria-hidden, alt=""), оверлея нет (тинт — на теле)', () => {
-    const section = detailHtml
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .match(/<section[^>]*id="dpp-company-demo"[\s\S]*?<\/section>/)?.[0] ?? '';
+    const section =
+      detailHtml
+        .replace(/<!--[\s\S]*?-->/g, '')
+        .match(/<section[^>]*id="dpp-company-demo"[\s\S]*?<\/section>/)?.[0] ?? '';
     const banner = section.slice(section.indexOf('ui-section--photo dpp-banner'));
     expect(banner, 'фрагмент баннера найден').not.toBe('');
     expect(banner, 'оверлея нет (тинт на теле — pages.css:666)').not.toContain(
@@ -404,9 +393,7 @@ describe('пилот career-portal: company-семейства на канона
     expect(build, 'cp-company-title из разметки снят').not.toMatch(
       /class="[^"]*\bcp-company-title\b/,
     );
-    expect(build, 'cp-company-adv из разметки снят').not.toMatch(
-      /class="[^"]*\bcp-company-adv\b/,
-    );
+    expect(build, 'cp-company-adv из разметки снят').not.toMatch(/class="[^"]*\bcp-company-adv\b/);
     expect(build, 'cp-company-banner из разметки снят').not.toMatch(
       /class="[^"]*\bcp-company-banner/,
     );
@@ -448,13 +435,10 @@ describe('пилот career-portal: company-семейства на канона
     expect(build, 'карточка — канон lpp-card').toContain(
       '<a class="ui-card ui-card--hover ui-small lpp-card" href="company.html">${esc(name)}</a>',
     );
-    expect(
-      build,
-      'сетки сегментов — ui-grid--3 (колонки/адаптив несёт примитив)',
-    ).toContain('<div class="ui-grid ui-grid--3 cmp-grid">');
-    expect(companiesHtml, 'ленты сегментов вставлены одной интерполяцией').toContain(
-      '${sections}',
+    expect(build, 'сетки сегментов — ui-grid--3 (колонки/адаптив несёт примитив)').toContain(
+      '<div class="ui-grid ui-grid--3 cmp-grid">',
     );
+    expect(companiesHtml, 'ленты сегментов вставлены одной интерполяцией').toContain('${sections}');
   });
 
   it('pilot.css: пять cp-семейств сняты (базы/элементы + ступени 1023/767 сеток); ленты cp-company-feed (T18.3) и модалка dir-modal остаются', () => {
@@ -473,17 +457,14 @@ describe('пилот career-portal: company-семейства на канона
     expect(pilotCss, 'ленты компании — сайт-зона T18.3 (Out of scope)').toContain(
       '.cp-company-feed',
     );
-    expect(pilotCss, 'модалка направления — сайт-зона до T18.16').toContain(
-      '.cp-dir-modal__photo',
-    );
+    expect(pilotCss, 'модалка направления — сайт-зона до T18.16').toContain('.cp-dir-modal__photo');
     const m1023 = pilotCss.slice(
       pilotCss.indexOf('@media (max-width: 1023px)'),
       pilotCss.indexOf('@media (max-width: 767px)'),
     );
-    expect(
-      m1023,
-      'ступень 1023: сетка преимуществ снята (канон — ступень md слоя)',
-    ).not.toContain('cp-company-adv');
+    expect(m1023, 'ступень 1023: сетка преимуществ снята (канон — ступень md слоя)').not.toContain(
+      'cp-company-adv',
+    );
     expect(m1023, 'ступень 1023: сетка фактов снята').not.toContain('cp-company-stats');
     const m767 = pilotCss.slice(pilotCss.indexOf('@media (max-width: 767px)'));
     expect(m767, 'ступень 767: статы сняты (мобильная база канона)').not.toContain(
@@ -511,20 +492,22 @@ describe('пилот career-portal: company-семейства на канона
     expect(compare).not.toContain('.cp-company-banner');
     expect(compare).not.toContain('.cp-company-card');
   });
-
 });
 
 describe('ценз сайт-зоны: пять company-семейств ушли из allowlist (T18.15 AC)', () => {
   it('allowlist ценза без company-stats/adv/banner/card/title — судьба семейств «вынос в слой» (REPORT §11.4); company-feed остаётся (T18.3)', () => {
-    for (const family of ['company-stats', 'company-adv', 'company-banner', 'company-card', 'company-title']) {
-      expect(
-        ALLOWED_CP_FAMILIES,
-        `${family} — вынесено в слой (канон, T18.15)`,
-      ).not.toContain(family);
+    for (const family of [
+      'company-stats',
+      'company-adv',
+      'company-banner',
+      'company-card',
+      'company-title',
+    ]) {
+      expect(ALLOWED_CP_FAMILIES, `${family} — вынесено в слой (канон, T18.15)`).not.toContain(
+        family,
+      );
     }
-    expect(ALLOWED_CP_FAMILIES, 'ленты компании — сайт-зона до T18.17').toContain(
-      'company-feed',
-    );
+    expect(ALLOWED_CP_FAMILIES, 'ленты компании — сайт-зона до T18.17').toContain('company-feed');
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('vacancy-search');
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('dir-modal');
   });

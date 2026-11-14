@@ -354,17 +354,14 @@ describe('пороги ценза — числа зафиксированы по
         'семейства directions/holding вынесены в слой (T18.14)',
       ).not.toContain('directions');
       expect(metrics.css.families).not.toContain('holding');
-      expect(
-        metrics.css.families,
-        'пять company-семейств вынесены в слой (T18.15)',
-      ).not.toContain('company-stats');
+      expect(metrics.css.families, 'пять company-семейств вынесены в слой (T18.15)').not.toContain(
+        'company-stats',
+      );
       expect(metrics.css.families).not.toContain('company-adv');
       expect(metrics.css.families).not.toContain('company-title');
       expect(metrics.css.families).not.toContain('company-banner');
       expect(metrics.css.families).not.toContain('company-card');
-      expect(metrics.css.families, 'ленты компании — сайт-зона T18.3').toContain(
-        'company-feed',
-      );
+      expect(metrics.css.families, 'ленты компании — сайт-зона T18.3').toContain('company-feed');
       expect(metrics.js.lines).toBe(187);
     },
   );

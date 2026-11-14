@@ -148,10 +148,9 @@ describe('pilot.css — фоновые правила __bg/__glow сняты, р
     // T18.15 — company-banner на каноне dpp-banner слоя: пин ритма — по слою
     // (высоту держит min-height 320 + тело, ритм ui-section погашен).
     expect(blockOf(layerCss, '.dpp-banner'), '.dpp-banner найдено (слой, T18.15)').toBeTruthy();
-    expect(
-      blockOf(layerCss, '.dpp-banner'),
-      '.dpp-banner: ритм ui-section погашен',
-    ).toContain('padding: 0;');
+    expect(blockOf(layerCss, '.dpp-banner'), '.dpp-banner: ритм ui-section погашен').toContain(
+      'padding: 0;',
+    );
     // Errata 01.11 — ритм-батч: why-us 140/80 (why-us.css:3), holding
     // 72/48 (holding.css:3) — паритет высот compare (why 1350↔1350);
     // у holding остаток −75 = принятая дельта статов (T17.4, lh 1.1).

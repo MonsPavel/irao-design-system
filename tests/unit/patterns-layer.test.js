@@ -1156,10 +1156,9 @@ describe('пилот career-portal: детальные страницы на dpp
     expect(main, 'заголовки разделов — роль ui-h3 на каноне dpp-section-title').toContain(
       '<h2 class="ui-h3 dpp-section-title">',
     );
-    expect(
-      main,
-      'баннер — фото-секция + канон dpp-banner (T17.3/T17.8/T18.15)',
-    ).toContain('ui-section--photo dpp-banner');
+    expect(main, 'баннер — фото-секция + канон dpp-banner (T17.3/T17.8/T18.15)').toContain(
+      'ui-section--photo dpp-banner',
+    );
     expect(
       build,
       'cp-company-stats/adv/title/banner из разметки сняты (упоминания в комментариях — история переноса)',
