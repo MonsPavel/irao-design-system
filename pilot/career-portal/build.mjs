@@ -2974,7 +2974,7 @@ function companiesMain() {
       // Имя компании — роль ui-small на САМОЙ ссылке-карточке (T16.16: канон
       // мини-карточки 14/500 — inline-стиль карточек companies.html:153+
       // `--fs-small-regular` × `--fw-small` = тройка small ДС; цвет наследует
-      // от .cp-company-card). Решение по замеру (accept-t1616-probe):
+      // от карточки). Решение по замеру (accept-t1616-probe):
       // вариант спеки «роль на внутреннем span» оставляет строке статтер
       // родительского блока (27px) — карточка 69px против 61px оригинала;
       // роль на ссылке (один текстовый узел, БЭМ-расширений не требует)
@@ -2982,7 +2982,7 @@ function companiesMain() {
       const cards = names
         .map(
           (name) =>
-            `        <a class="ui-card ui-card--hover ui-small cp-company-card" href="company.html">${esc(name)}</a>`,
+            `        <a class="ui-card ui-card--hover ui-small lpp-card" href="company.html">${esc(name)}</a>`,
         )
         .join('\n');
       return `    <h2 class="ui-h3 cmp-title">${esc(segment)}</h2>
@@ -2994,7 +2994,8 @@ ${cards}
   // T18.9: ритм страницы ведут сайт-хуки cmp- (гашение верхнего ритма
   // секции inline companies.html:147; заголовки 32, сетки 36/48 — источники
   // в pilot.css; шапка 16/40 — с T18.10 база канона php). Каркас —
-  // ui-section/php/ui-grid канонов ДС/слоя.
+  // ui-section/php/ui-grid канонов ДС/слоя; карточки выдачи — канон
+  // lpp-card слоя (T18.15).
   return `${breadcrumbs([
     ['Главная', 'index.html'],
     ['Компании группы', ''],
@@ -3024,7 +3025,7 @@ ${sections}
    существующие API ДС: vac-row — lpp-row (T14.10), dir-card —
    cp-intern-card (T15.4: карточка ведёт на internship.html вместо модалки
    оригинала), article/event — ui-card--media (T17.5), баннеры —
-   cp-company-banner, фото — ui-figure/ui-image. href — реальные страницы
+   dpp-banner (канон слоя, T18.15), фото — ui-figure/ui-image. href — реальные страницы
    клона (гейт ссылок compare); триггер «откликнуться» строк — без модалки,
    как на article.html (диалога #vac-apply на странице нет ни в оригинале,
    ни в клоне — modals.js молча выходит). */
@@ -3068,10 +3069,11 @@ function companyMain() {
       </div>
     </div>
 
-    <!-- Факты компании: ui-stat--filled (T17.4) — числа роль ui-h2, цвет
-         on-dark несёт компонент (override роли); список — семантика фактов
-         (Accessibility requirements). -->
-    <ul class="cp-company-stats">
+    <!-- Факты компании: канон dpp-stats слоя (T18.15 — сетка 3×1fr шаг 24/
+         низ 40, pages.css:805); плашки — ui-stat--filled (T17.4) — числа
+         роль ui-h2, цвет on-dark несёт компонент (override роли); список —
+         семантика фактов (Accessibility requirements). -->
+    <ul class="dpp-stats">
       <li class="ui-stat ui-stat--filled">
         <span class="ui-stat__value ui-h2">2,5 ГВт</span>
         <span class="ui-stat__label ui-small">установленная электрическая мощность</span>
@@ -3086,8 +3088,8 @@ function companyMain() {
       </li>
     </ul>
 
-    <h2 class="ui-h3 cp-company-title">Преимущества компании</h2>
-    <ul class="cp-company-adv">
+    <h2 class="ui-h3 dpp-section-title">Преимущества компании</h2>
+    <ul class="dpp-adv">
       <li class="ui-stat ui-stat--deep">
         <h3 class="ui-h4 ui-stat__value">Современное производство</h3>
         <p class="ui-small ui-stat__label">Новое оборудование и автоматизированные системы управления станциями.</p>
@@ -3110,7 +3112,7 @@ function companyMain() {
          карта-иллюстрация); пара фото+подпись — ui-figure (подпись
          связана семантически), alt дублирует подпись (подпись не заменяет
          alt — README ui-figure). Сетка пар — канон dpp-where (T17.14). -->
-    <h2 class="ui-h3 cp-company-title">Где мы работаем</h2>
+    <h2 class="ui-h3 dpp-section-title">Где мы работаем</h2>
     <div class="dpp-where">
       <figure class="ui-figure">
         <img class="ui-image ui-image--cover dpp-where__photo" src="assets/images/media-main.jpg" alt="Головной офис компании" width="1447" height="824" loading="lazy">
@@ -3123,12 +3125,13 @@ function companyMain() {
     </div>
 
     <!-- ── Ленты компании (T18.3): порядок оригинала company.html:40–88 ──
-         Лента — заголовок section__title (ui-h3 cp-company-title) + сетка
-         ui-grid--2/--3 с хуком cp-company-feed (шаг/низ — позиционные хуки
-         pilot.css); модификаторы --vac/--intern/--practice/--articles/
-         --events/--photos — крючки блок-проб compare. -->
+         Лента — заголовок section__title (роль ui-h3 на каноне
+         dpp-section-title, T18.15) + сетка ui-grid--2/--3 с хуком
+         cp-company-feed (шаг/низ — позиционные хуки pilot.css);
+         модификаторы --vac/--intern/--practice/--articles/--events/
+         --photos — крючки блок-проб compare. -->
 
-    <h2 class="ui-h3 cp-company-title">Вакансии компании</h2>
+    <h2 class="ui-h3 dpp-section-title">Вакансии компании</h2>
     <div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--vac">
 ${companyVacancies}
     </div>
@@ -3139,46 +3142,46 @@ ${companyVacancies}
          — на теле, как в оригинале. Кнопка — ui-button на internships.html
          (Scope T18.3; замена CTA vacancies.html из T15.2 — лента вакансий
          теперь на странице). -->
-    <div class="ui-section ui-section--photo cp-company-banner">
+    <div class="ui-section ui-section--photo dpp-banner">
       <div class="ui-section__bg" aria-hidden="true">
         <img src="assets/images/internship-3.png" alt="" width="692" height="326" loading="lazy">
       </div>
-      <div class="cp-company-banner__body ui-card ui-card--cta">
-        <h2 class="ui-h2 cp-company-banner__title">Практики и стажировки</h2>
-        <p class="ui-small cp-company-banner__text">Посмотрите предложения практики и стажировки именно в нашей компании.</p>
+      <div class="dpp-banner__body ui-card ui-card--cta">
+        <h2 class="ui-h2 dpp-banner__title">Практики и стажировки</h2>
+        <p class="ui-small dpp-banner__text">Посмотрите предложения практики и стажировки именно в нашей компании.</p>
         <a class="ui-button ui-button--primary" href="internships.html">смотреть предложения</a>
       </div>
     </div>
 
-    <h2 class="ui-h3 cp-company-title">Стажировки компании</h2>
+    <h2 class="ui-h3 dpp-section-title">Стажировки компании</h2>
     <div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--intern">
 ${companyInternships}
     </div>
 
-    <h2 class="ui-h3 cp-company-title">Практики компании</h2>
+    <h2 class="ui-h3 dpp-section-title">Практики компании</h2>
     <div class="ui-grid ui-grid--2 cp-company-feed cp-company-feed--practice">
 ${companyPractices}
     </div>
 
-    <h2 class="ui-h3 cp-company-title">Может быть интересно</h2>
+    <h2 class="ui-h3 dpp-section-title">Может быть интересно</h2>
     <div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--articles">
 ${companyArticles}
     </div>
 
     <!-- Баннер №2 (banner-card оригинала, company.html:69–76) — тот же
-         каркас cp-company-banner, фото internship-4.png. -->
-    <div class="ui-section ui-section--photo cp-company-banner">
+         каркас dpp-banner (канон слоя, T18.15), фото internship-4.png. -->
+    <div class="ui-section ui-section--photo dpp-banner">
       <div class="ui-section__bg" aria-hidden="true">
         <img src="assets/images/internship-4.png" alt="" width="692" height="326" loading="lazy">
       </div>
-      <div class="cp-company-banner__body ui-card ui-card--cta">
-        <h2 class="ui-h2 cp-company-banner__title">Целевое обучение</h2>
-        <p class="ui-small cp-company-banner__text">Посмотрите предложения целевого обучения от нашей компании.</p>
+      <div class="dpp-banner__body ui-card ui-card--cta">
+        <h2 class="ui-h2 dpp-banner__title">Целевое обучение</h2>
+        <p class="ui-small dpp-banner__text">Посмотрите предложения целевого обучения от нашей компании.</p>
         <a class="ui-button ui-button--primary" href="education-catalog.html">смотреть предложения</a>
       </div>
     </div>
 
-    <h2 class="ui-h3 cp-company-title">Наши мероприятия</h2>
+    <h2 class="ui-h3 dpp-section-title">Наши мероприятия</h2>
     <div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--events">
 ${companyEvents}
     </div>
@@ -3187,7 +3190,7 @@ ${companyEvents}
          без подписей — ui-figure (без figcaption) + ui-image--cover; alt=""
          оригинала сохранён (фото-подборка без текстов-источников, подписывать
          декоративное нечего); высоту 260px несёт хук cp-company-feed--photos. -->
-    <h2 class="ui-h3 cp-company-title">Фото о работе в компании</h2>
+    <h2 class="ui-h3 dpp-section-title">Фото о работе в компании</h2>
     <div class="ui-grid ui-grid--3 cp-company-feed cp-company-feed--photos">
 ${companyPhotos}
     </div>

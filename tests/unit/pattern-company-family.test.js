@@ -91,7 +91,10 @@ const companyHtml = (
   build.match(/function companyMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? ''
 ).replace(/\r\n/g, '\n');
 const companiesHtml = (
-  build.match(/function companiesMain[\s\S]*?return `([\s\S]*?)`;/)?.[1] ?? ''
+  // якорь — внешний return (внутренний return map-билдера сегментов раньше;
+  // захват до закрывающего </section> — практика pilot-company.test.js)
+  build.match(/function companiesMain[\s\S]*?return `\$\{breadcrumbs\(\[([\s\S]*?)<\/section>/)
+    ?.[1] ?? ''
 ).replace(/\r\n/g, '\n');
 
 describe('patterns/patterns.css — каноны company-семейств в dpp-секции (T18.15 Scope)', () => {
@@ -440,11 +443,17 @@ describe('пилот career-portal: company-семейства на канона
     expect(build, 'cp-company-card из разметки снят').not.toMatch(
       /class="[^"]*\bcp-company-card\b/,
     );
-    expect(companiesHtml, 'карточка — канон lpp-card').toContain(
-      '<a class="ui-card ui-card--hover ui-small lpp-card" href="company.html">',
+    // карточки собирает map-билдер сегментов (карточка — интерполяция имени
+    // из данных) — пин строки билдера, лента вставляется в return шаблона
+    expect(build, 'карточка — канон lpp-card').toContain(
+      '<a class="ui-card ui-card--hover ui-small lpp-card" href="company.html">${esc(name)}</a>',
     );
-    expect(companiesHtml, 'имя компании — интерполяция данных').toMatch(
-      /lpp-card" href="company\.html">\$\{esc\(name\)\}<\/a>/,
+    expect(
+      build,
+      'сетки сегментов — ui-grid--3 (колонки/адаптив несёт примитив)',
+    ).toContain('<div class="ui-grid ui-grid--3 cmp-grid">');
+    expect(companiesHtml, 'ленты сегментов вставлены одной интерполяцией').toContain(
+      '${sections}',
     );
   });
 
