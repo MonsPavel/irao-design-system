@@ -315,8 +315,8 @@ describe('patterns/patterns.css — единый исходник паттерн
     // Ступень lpp-layout — по вхождению крючка, не «первая media 1024»
     // (errata T18.16: ступень lg канона vcs встала в lpp-секции раньше —
     // позиционный пин «первая media» ловил её; практика mediaBlockOf).
-    const lgBlock = [...code.matchAll(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/g)].find(
-      (m) => m[0].includes('.lpp-layout {'),
+    const lgBlock = [...code.matchAll(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/g)].find((m) =>
+      m[0].includes('.lpp-layout {'),
     );
     expect(lgBlock, 'ступень lg сайдбара в слое есть').toBeTruthy();
     expect(

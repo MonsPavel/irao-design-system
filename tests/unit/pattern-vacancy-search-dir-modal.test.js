@@ -58,7 +58,6 @@ const mediaBlockOf = (css, px, hook) => {
 
 const layerFile = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8');
 const layer = stripCssComments(layerFile);
-const layerRaw = layerFile.replace(/\r\n/g, '\n');
 
 /** lpp-секция слоя (от .lpp-breadcrumbs до dpp-секции) — Scope спеки
  *  «patterns.css: vcs — стык с lpp-filters» (практика dppSection T18.15). */
@@ -73,10 +72,10 @@ const detailHtml = readFileSync(
   join(root, 'patterns', 'detail-page', 'detail-page.html'),
   'utf8',
 ).replace(/\r\n/g, '\n');
-const listHtml = readFileSync(join(root, 'patterns', 'list-page', 'list-page.html'), 'utf8').replace(
-  /\r\n/g,
-  '\n',
-);
+const listHtml = readFileSync(
+  join(root, 'patterns', 'list-page', 'list-page.html'),
+  'utf8',
+).replace(/\r\n/g, '\n');
 
 const pilotDir = join(root, 'pilot', 'career-portal');
 const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8').replace(/\r\n/g, '\n');
@@ -143,12 +142,8 @@ describe('patterns/patterns.css — канон панели «Найди сво�
     expect(fields, 'шаг 16px — vacancy-search.css:33').toContain('gap: 1rem;');
     const pill = blockOf(layer, '.vcs__fields > .ui-select--pill');
     expect(pill, 'ширина пилюли — правило на потомке .ui-select--pill').toBeTruthy();
-    expect(pill, 'basis 260px «как есть» — vacancy-search.css:36').toContain(
-      'flex: 0 0 16.25rem;',
-    );
-    expect(pill, 'max-width: 100% — reflow-гранула 32px-гейта T3.6').toContain(
-      'max-width: 100%;',
-    );
+    expect(pill, 'basis 260px «как есть» — vacancy-search.css:36').toContain('flex: 0 0 16.25rem;');
+    expect(pill, 'max-width: 100% — reflow-гранула 32px-гейта T3.6').toContain('max-width: 100%;');
   });
 
   it('инварианты vcs: медиа только min-width из шкалы T2.5; геометрию пилюли несёт компонент ui-select--pill (T17.12) — слой её не дублирует', () => {
@@ -307,9 +302,7 @@ describe('пилот career-portal: панель и модалка на кано
     expect(build, 'плитка панели — канон vcs__panel').toContain(
       '<form class="vcs__panel" action="vacancies.html" method="get" aria-label="Поиск вакансии">',
     );
-    expect(build, 'лента пилюль — канон vcs__fields').toContain(
-      '<div class="vcs__fields">',
-    );
+    expect(build, 'лента пилюль — канон vcs__fields').toContain('<div class="vcs__fields">');
     expect(build, 'CTA-плитка — компонент ui-card--cta (T17.8) сохранён').toContain(
       '<a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" href="vacancies.html">',
     );
@@ -355,7 +348,9 @@ describe('пилот career-portal: панель и модалка на кано
     expect(compare, 'блок-пара панели — id не меняется').toContain(
       "['vacancy-search', '.vacancy-search', '#vacancies']",
     );
-    expect(compare, 'computed-пара фото модалки — на крючке слоя').toContain("pilot: '.dmd__photo'");
+    expect(compare, 'computed-пара фото модалки — на крючке слоя').toContain(
+      "pilot: '.dmd__photo'",
+    );
     expect(compare, 'computed-пара навигации — на крючке слоя').toContain("pilot: '.dmd__nav'");
     expect(compare).not.toContain('.cp-vacancy-search');
     expect(compare).not.toContain('.cp-dir-modal');

@@ -951,8 +951,8 @@
     паддинг 36px, шаг 48px «как есть» (<code>vacancy-search.css:15–18</code>), лента пилюль
     <code>vcs__fields</code> — стык с лентой фильтров <code>lpp-filters</code> (шаг 16px; ширина
     пилюли 260px на потомке <code>ui-select--pill</code> — геометрия несёт компонент, T17.12).
-    Заголовок — роль <code>ui-page-title</code>, кнопка — <code>ui-button--accent</code>
-    («найти», оранжевая пара оригинала), CTA-плитка — <code>ui-card--cta --accent/--row</code>
+    Заголовок — роль <code>ui-page-title</code>, кнопка — <code>ui-button--accent</code> («найти»,
+    оранжевая пара оригинала), CTA-плитка — <code>ui-card--cta --accent/--row</code>
     (T17.8). Без JS нативный GET-сабмит ведёт на страницу списка.
   </p>
 
@@ -967,12 +967,7 @@
       <h3 class="ui-page-title">Найди свою вакансию</h3>
       <div class="vcs__fields">
         <div class="ui-select--pill">
-          <select
-            class="ui-field__select"
-            name="vcs-city"
-            aria-label="Город"
-            data-ui-select="wrap"
-          >
+          <select class="ui-field__select" name="vcs-city" aria-label="Город" data-ui-select="wrap">
             <option value="" selected>Город</option>
             <option value="msk">Москва</option>
             <option value="spb">Санкт-Петербург</option>

@@ -31,6 +31,7 @@
 | Секции | h2 (`ui-h4`) + `dpp__section` | уровень тега — семантика страницы, роль — вид; база — шаг 8px, на вакансии — 16px (`.vacancy-page__section` pages.css:285–289, T18.8) |
 | Foot | `dpp__foot` | T17.14/T18.8: «дата — CTA» по краям (space-between, шаг 24 — pages.css:342) без разделителя (errata T18.8 — оригинал pages.css:338–343); мобильная база — колонка, строка от md |
 | Контент | роли T3.3 (`ui-body`, `ui-list`) | |
+| Контент модалки направления (T18.16) | каркас `ui-modal--md` (T7.2) + связка `dmd__photo`/`dmd__nav` + галерея `data-ui-gallery` (`ui-carousel` T17.7) | фото — во всю ширину тела, клип радиуса, cover (высоту ведут width/height атрибуты — aspect-канон); стрелки галереи по краям, накрывают нижний край фото (отрицательный верх −24px); док-раздел — `#dpp-dir-modal-demo` |
 | Aside | справочная панель `dl` + CTA `ui-button` + дисклеймер `ui-link` | перенос `form-aside` career-portal; **sticky только ≥ md (768)** |
 | Related | h2 + `ui-grid--3` + `ui-card--hover ui-card--link` | после main; заголовки карточек — h3 |
 
@@ -331,6 +332,50 @@ T8.2 п.1) закрыт e2e на эталоне: `tests/e2e/pattern-detail-page.
 В списковой странице (T8.1) промежуточного h2 нет — там карточки h2: уровень
 тега определяет контекст страницы, а не канон `ui-card`.
 
+### Контент модалки направления: связка dmd (T18.16)
+
+Модалка «контентная раскладка» — каркас несёт компонент `ui-modal` (--md,
+T7.2: панель/заголовок/закрывающая — слоты компонента, API не меняется),
+контент — связка `dmd` паттерн-слоя (порт `cp-dir-modal__photo/__nav`
+pilot.css 1:1 — интерпретация пилота T18.14/T18.16; оригинал
+`src/blocks/directions/directions.css:150–160`). Галерея фото — форма
+`data-ui-gallery` компонента `ui-carousel` (T17.7): слот
+`[data-ui-gallery-photo]`, стрелки `[data-ui-gallery-prev/-next]` скрыты в
+разметке (`hidden`) — их снимает модуль при инициализации:
+
+```html
+<dialog class="ui-modal ui-modal--md" id="direction-dialog" data-ui-modal
+  aria-labelledby="direction-dialog-title">
+  <button class="ui-modal__close" type="button" aria-label="Закрыть">…</button>
+  <h2 class="ui-modal__title ui-h3" id="direction-dialog-title">Теплогенерация</h2>
+  <div class="ui-modal__body ui-carousel" data-ui-gallery>
+    <script type="application/json" data-ui-gallery-photos>[…]</script>
+    <img class="dmd__photo" src="…" alt="" data-ui-gallery-photo width="590" height="400">
+    <div class="dmd__nav">
+      <button class="ui-button ui-button--light ui-button--sm" type="button"
+        data-ui-gallery-prev hidden aria-label="Предыдущее фото">…</button>
+      <button class="ui-button ui-button--light ui-button--sm" type="button"
+        data-ui-gallery-next hidden aria-label="Следующее фото">…</button>
+    </div>
+    <p class="ui-h5">Теплогенерация Группы «Интер РАО»</p>
+    <p class="ui-body">Описание направления.</p>
+    <p><a class="ui-button ui-button--primary" href="/vacancies/">Смотреть вакансии</a></p>
+  </div>
+</dialog>
+```
+
+- Фото `dmd__photo` — во всю ширину тела, cover, клип радиуса md
+  (= `--radius-card` 16px оригинала); фиксированную высоту 400px оригинала
+  ведут `width`/`height` атрибуты (aspect-канон); ступени 300/200 оригинала
+  (`directions.css:224/235`) пилотом не велись — канон их не несёт.
+- Навигация `dmd__nav` — стрелки по краям (`space-between`, боковой паддинг
+  8px), отрицательный верх −24px накрывает нижний край фото (интерпретация
+  T18.14; оригинал — flex-лента gap 16).
+- Подпись/описание — роли `ui-h5`/`ui-body`, CTA — `ui-button--primary`.
+- В бою диалог несёт `data-ui-modal` (модуль снимает статичный `open` —
+  PE-деградация К9 ADR-0011); док-раздел стенда `#dpp-dir-modal-demo`
+  показывает контент статично — без `data-ui-modal` (для эталона).
+
 ## Schema.org-кейс: JobPosting / Article («когда уместно»)
 
 Микроразметка ставится там, где у страницы есть машиночитаемый смысл
@@ -473,7 +518,9 @@ $sDateTs = $sDate === '' ? false : strtotime($sDate);
 
 ## Тесты
 
-- Юнит-пины контракта: `tests/unit/pattern-detail-page.test.js`.
+- Юнит-пины контракта: `tests/unit/pattern-detail-page.test.js`; пины канона
+  панели/модалки — `tests/unit/pattern-vacancy-search-dir-modal.test.js`
+  (T18.16).
 - Поверхность браузера (schema-парсер JobPosting, sticky/32px, CTA с
-  клавиатуры, axe, иерархия h1→h2→h3, эталоны 375/768/1440):
-  `tests/e2e/pattern-detail-page.spec.js`.
+  клавиатуры, axe, иерархия h1→h2→h3, эталоны 375/768/1440 + контент модалки
+  dmd — T18.16): `tests/e2e/pattern-detail-page.spec.js`.

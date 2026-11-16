@@ -921,4 +921,47 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
       },
     );
   });
+
+  // Панель «Найди свою вакансию» (T18.16): контейнерные эталоны канона vcs —
+  // сетка «панель | CTA-плитка» (desktop 1440 — 2fr 1fr ступени lg; mobile
+  // 375 — мобильная база канона: колонка, инверсия ступени 1023 оригинала).
+  // Два снимка (прецедент dir/hld T18.14 — element-снимки канона; ×3 вместе
+  // с dmd на детальной — спека T18.16).
+  standTest.describe('patterns/list-page: эталоны панели vcs (T18.16, AC)', () => {
+    standTest(
+      'vcs-panel — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const shots = [
+          ['vcs-panel', page.locator('#lpp-vcs-demo .vcs__wrap'), ['desktop', 'mobile']],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            await locator.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(300);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): плитка панели/CTA-плитка —
+              // скруглённые клипы во всю ширину колонок (срез по границе
+              // секции) — лотерея растеризации (диагноз 19.10) не проявлена.
+            });
+          }
+        }
+      },
+    );
+  });
 });

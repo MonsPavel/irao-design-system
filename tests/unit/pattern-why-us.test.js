@@ -390,9 +390,10 @@ describe('пилот career-portal: why-us на каноне whu (T18.12; AC: cp
     expect(build, 'номер карточки — aria-hidden').toContain(
       '<span class="whu__card-num" aria-hidden="true">0${index + 1}</span>',
     );
-    expect(build, 'панель вакансий внутри секции сохранена (build.py SLOTS; T18.16 — канон vcs)').toContain(
-      '<div class="vcs__wrap" id="vacancies">',
-    );
+    expect(
+      build,
+      'панель вакансий внутри секции сохранена (build.py SLOTS; T18.16 — канон vcs)',
+    ).toContain('<div class="vcs__wrap" id="vacancies">');
   });
 
   it('applyVariant2: маркер снятия секции — на новом классе канона (v2 оригинала why-us не несёт)', () => {

@@ -32,6 +32,7 @@
 | Сайдбар фильтров (T14.10) | select-пилюли, `ui-radio-group`, `ui-checkbox`, `ui-button`, промо `ui-card--filled`, чипы `ui-chip` (T14.8) | grid «aside \| выдача»; aside sticky от md + scrollable-focusable |
 | Поднавигация разделов (T17.11) | `ui-tabs--pill` + связка `nvp` | межстраничные ссылки без панелей: `data-ui-tabs` не ставится (контракт T13.6), активный раздел — `aria-current="page"` (активную пилюлю красит модификатор, покой + hover); раскладка — связки `nvp` паттерн-слоя: маргины 24/48, сетка 5×1fr от md (мобильная база — перенос ленты) |
 | Строка табов + ссылок (T18.11) | `ui-tabs--pill` + табы `ui-tabs__tab` (tablist, `data-ui-tabs` + панели-подсказки) + связки `tnv`/`tnv__links` | смешанный набор «табы + ссылки разделов» (T18.11): ряд одной полосой от md (мобильная база — перенос, осознанное отклонение — прецедент `nvp`), лента ссылок вне tablist (правило ui-tabs), DS-маргин ленты в ряду погашен; раздел стенда — `#lpp-tabs-row` |
+| Панель «Найди свою вакансию» (T18.16) | `ui-page-title` + select-пилюли `ui-select--pill` + `ui-button--accent` + CTA `ui-card--cta--accent--row` + связка `vcs__wrap`/`vcs__panel`/`vcs__fields` | плитка 310px «как есть» (`vacancy-search.css:15–18`), сетка «панель \| CTA-плитка» 2fr 1fr от lg (мобильная база — колонка); стык с лентой `lpp-filters` (шаг 16, ширина пилюли 260px на потомке); раздел стенда — `#lpp-vcs-demo` |
 | Пагинация | `ui-pagination` | T6.3; сохраняет GET-параметры фильтров |
 | Empty-ветка | `ui-empty` | заголовок-роль h2; сброс — ссылка на чистый URL |
 
@@ -280,6 +281,51 @@ career-portal, `companies.html:153+`): вся карточка — имя-ссы
 цвет наследует от карточки — fs/fw слой не задаёт. Колонки/адаптив несёт
 примитив `ui-grid`.
 
+### Панель «Найди свою вакансию»: связка vcs (T18.16)
+
+Точка расширения «плитка-панель фильтров» — макро-композиция главной
+career-portal (панель 310px в тёмной секции whu, `build.py SLOTS`; порт
+`cp-vacancy-search` pilot.css 1:1). Сетка «панель | CTA-плитка» — `vcs__wrap`
+(2fr 1fr от lg, шаг 12px; мобильная база — колонка: инверсия ступени ≤1023
+оригинала `vacancy-search.css:75`); плитка — `vcs__panel`: колонка
+«заголовок → лента» с шагом 48px, `space-between`, мин-высота 310px, паддинг
+36px «как есть» (`vacancy-search.css:15–18`); лента пилюль — `vcs__fields`
+(стык с `lpp-filters` T17.12: flex-wrap, шаг 16px, ширина пилюли 260px на
+потомке `ui-select--pill` — геометрия несёт компонент):
+
+```html
+<div class="vcs__wrap">
+  <form class="vcs__panel" action="/vacancies/" method="get" aria-label="Поиск вакансии">
+    <h2 class="ui-page-title">Найди свою вакансию</h2>
+    <div class="vcs__fields">
+      <div class="ui-select--pill">
+        <select class="ui-field__select" name="city" aria-label="Город" data-ui-select="wrap">
+          <option value="" selected>Город</option>
+          <option value="msk">Москва</option>
+        </select>
+      </div>
+      <button class="ui-button ui-button--accent" type="submit">найти</button>
+    </div>
+  </form>
+  <a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" href="/vacancies/">
+    <span class="ui-h4">Все 140 вакансий</span>
+    <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><!-- стрелка --></svg>
+  </a>
+</div>
+```
+
+- Заголовок — роль `ui-page-title` (без JS-блока: на реальной странице тег —
+  h2 внутри секции), кнопка — `ui-button--accent` (оранжевая пара «найти»
+  оригинала), CTA-плитка — `ui-card--cta --accent/--row` (T17.8) — вид плитки
+  несёт компонент, слой её не дублирует.
+- Пилюли без видимых подписей — `aria-label` на select (как в пилоте и в
+  ленте каталога); радиус плитки — принятая интерпретация клона
+  `radius-lg` (оригинал `--radius-card` 16px; расхождение принято клоном —
+  блок-пара compare Δ0).
+- Панель растягивается на трек сетки (высоту колонки ведёт `vcs__wrap`);
+  ступени плитки/ленты оригинала ≤767 (`vacancy-search.css:81–87`) пилотом
+  не велись — канон их не несёт.
+
 ### Empty-ветка: ui-empty со сбросом
 
 ```html
@@ -510,8 +556,10 @@ $iCount = count($arResult['ITEMS']);
 
 ## Тесты
 
-- Юнит-пины контракта: `tests/unit/pattern-list-page.test.js`.
+- Юнит-пины контракта: `tests/unit/pattern-list-page.test.js`; пины канона
+  панели/модалки — `tests/unit/pattern-vacancy-search-dir-modal.test.js`
+  (T18.16).
 - Поверхность браузера (GET-цикл с JS/без, empty-ветка со сбросом, фокус,
   axe, иерархия h1→h2, ветки T14.10: состав строки/CTA-модалка, sticky-сайдбар
   с label/legend, чипы до выдачи, no-JS GET и фокус-гвард ветки, эталоны 4
-  веток): `tests/e2e/pattern-list-page.spec.js`.
+  веток + панель vcs — T18.16): `tests/e2e/pattern-list-page.spec.js`.
