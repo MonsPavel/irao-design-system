@@ -386,7 +386,7 @@ md = `--radius-card` 16px оригинала. Рамки и фона нет: blu
 | Тон | Значение `--hro-tag-bg` | Где живёт |
 |---|---|---|
 | sand (дефолт) | `var(--ui-color-primary-a26)` — ступень 26% лестницы тинтов T14.7 | канон хука; пилот дублирует строкой тона для явности |
-| violet | `color-mix(in srgb, #3142ff 20%, transparent)` — оригинал rgba(49,66,255,0.2) (hero.css:152) | сайт-зона (pilot.css, класс `.cp-hero__tag--violet`) |
+| violet | `color-mix(in srgb, #3142ff 20%, transparent)` — оригинал rgba(49,66,255,0.2) (hero.css:152) | сайт-зона (pilot.css, класс `.hero-tone--violet`, T18.17) |
 | green | `color-mix(in srgb, #31ff76 20%, transparent)` — rgba(49,255,118,0.2) (hero.css:154) | сайт-зона |
 | rose | `color-mix(in srgb, #ff3134 20%, transparent)` — rgba(255,49,52,0.2) (hero.css:155) | сайт-зона |
 

@@ -488,6 +488,42 @@ describe('пилот career-portal: снятие и переименование
     expect(blockOf(pilotCss, '.site-page')).toContain('background-color: var(--ui-color-surface);');
   });
 
+  it('доки — строки «где живёт» синхронны с переименованиями T18.17 (ревью: рассинхрон доки и кода — снятые классы не называются в настоящем времени)', () => {
+    const landingReadme = readFileSync(
+      join(root, 'patterns', 'landing-section', 'README.md'),
+      'utf8',
+    ).replace(/\r\n/g, '\n');
+    const listReadme = readFileSync(
+      join(root, 'patterns', 'list-page', 'README.md'),
+      'utf8',
+    ).replace(/\r\n/g, '\n');
+    expect(
+      landingReadme,
+      'таблица тонов hero: строка violet — актуальный класс сайт-зоны (T18.17 — hero-tone--violet)',
+    ).toContain('сайт-зона (pilot.css, класс `.hero-tone--violet`, T18.17)');
+    expect(
+      landingReadme,
+      'снятый класс cp-hero__tag--* в доке landing-section не называется в настоящем времени',
+    ).not.toContain('cp-hero__tag');
+    expect(
+      listReadme,
+      'колонка сайта вакансий — vac-main (T18.17 — не-cp имя); снятый cp-vac-main не называется',
+    ).not.toContain('cp-vac-main');
+    expect(listReadme, 'актуальное имя тон-хука — vac-main').toContain('vac-main пилота');
+    const mapping = readFileSync(
+      join(root, 'docs', 'ui-system', 'architecture', 'tokens-career-portal-mapping.md'),
+      'utf8',
+    ).replace(/\r\n/g, '\n');
+    expect(
+      mapping,
+      'зазоры тулбара media — канон mtb слоя (T18.17); снятая пара cp-media-toolbar не называется в настоящем времени',
+    ).not.toContain('сайт-зона пилота `.cp-media-toolbar`');
+    expect(
+      mapping,
+      'кламп шорта — не-cp имя intern-card (T18.17); снятый cp-intern-card не называется в настоящем времени',
+    ).not.toContain('сайт-зона пилота `.cp-intern-card .ui-small`');
+  });
+
   it('compare: блок-пары и компонентные пробы — на крючках канонов (прецедент prd/whu/dir/vcs)', () => {
     expect(compare, 'блок-пара команды — на крючке слоя').toContain(
       "['team', '.team', '.tm__photo']",
