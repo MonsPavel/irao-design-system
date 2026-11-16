@@ -964,4 +964,48 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
       },
     );
   });
+
+  // Батч cp-остатков (T18.17): контейнерные эталоны канонов mtb/ofc-card/
+  // org-card/cnv — по одному на вынесенное семейство (спека T18.17 Scope;
+  // прецедент dir/hld T18.14 — element-снимки канона).
+  standTest.describe('patterns/list-page: эталоны канонов T18.17 (AC)', () => {
+    standTest(
+      'mtb/ofc-card/org-card/cnv — element-снимки канона, только из контейнера/CI (ADR-0004)',
+      async ({ stand }) => {
+        const page = await stand('patterns/list-page');
+
+        const shots = [
+          ['mtb-toolbar', page.locator('#lpp-mtb .mtb'), ['desktop']],
+          ['ofc-card', page.locator('#lpp-offer-card .ofc-card').first(), ['desktop']],
+          ['org-card', page.locator('#lpp-org-card .org-card').first(), ['desktop']],
+          ['cnv', page.locator('#lpp-cnv .cnv'), ['desktop']],
+        ];
+
+        for (const [name, locator, viewports] of shots) {
+          for (const viewport of viewports) {
+            await page.setViewportSize(VIEWPORTS[viewport]);
+            await locator.scrollIntoViewIfNeeded();
+            await page.waitForTimeout(300);
+            const info = standTest.info();
+            if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+              info.annotations.push({
+                type: 'shot-skipped',
+                description:
+                  `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                  '(ADR-0004) — запустите npm run test:docker',
+              });
+              continue;
+            }
+            await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+              animations: 'disabled',
+              caret: 'hide',
+              // Строгий допуск 8 px (глобальный): карточки/пилюли тегов —
+              // скруглённые клипы; лотерея растеризации (диагноз 19.10)
+              // на сплошных плашках не проявлена.
+            });
+          }
+        }
+      },
+    );
+  });
 });
