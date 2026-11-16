@@ -163,6 +163,10 @@ describe('patterns/patterns.css — канон карточки предложе
   it('элементы ofc-card: шапка baseline/space-between с шагом 8 (интерпретация T18.5 против 16px pages.css:839), дата muted (pages.css:843), мета-колонка шаг 2 (pages.css:849) с компанией fw-small/primary (pages.css:851), футер к низу', () => {
     const head = blockOf(layer, '.ofc-card__head');
     expect(head, '.ofc-card__head найдено').toContain('display: flex;');
+    expect(
+      head,
+      'flex-wrap — ступень оригинала @max-767 (pages.css:927), инверсия — гранула T3.6',
+    ).toContain('flex-wrap: wrap;');
     expect(head, 'шаг 8px = space-2 — принятая интерпретация T18.5').toContain(
       'gap: var(--ui-space-2);',
     );
@@ -236,10 +240,13 @@ describe('patterns/patterns.css — канон сетки преимуществ
     ).toContain('grid-template-columns: minmax(0, 1fr);');
     const md = mediaBlockOf(layer, 768, 'adv-grid');
     expect(md, 'ступень md (768) есть — 2 колонки (оригинал ≤1023 pages.css:900)').toBeTruthy();
-    expect(md).toContain('grid-template-columns: repeat(2, 1fr);');
+    expect(
+      md,
+      'minmax(0, 1fr) — гранула 32px-гейта T3.6 (прецедент lpp-layout/vcs__wrap)',
+    ).toContain('grid-template-columns: repeat(2, minmax(0, 1fr));');
     const lg = mediaBlockOf(layer, 1024, 'adv-grid');
     expect(lg, 'ступень lg (1024) есть — 3 колонки (десктоп-форма pages.css:505)').toBeTruthy();
-    expect(lg).toContain('grid-template-columns: repeat(3, 1fr);');
+    expect(lg).toContain('grid-template-columns: repeat(3, minmax(0, 1fr));');
   });
 });
 
