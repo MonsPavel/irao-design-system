@@ -2524,3 +2524,137 @@ computed-стили читаются — прецедент dropdown-item; ра�
 приняты T18.14/T18.16 и в пару не входят). Compare-прогон 16.11 — **exit 0**:
 гейты до браузеров зелёные (ссылки 43 страницы / 917 ссылок / 0 DEAD, ценз 0
 новых cp-блоков — allowlist 16), консоль-ошибок пилота 0 на 43 страницах.
+
+## T18.17 — Макро-вынос: батч cp-остатков сайт-зоны → слой (16.11)
+
+Спека: `docs/ui-system/epics/EPIC-18-macro-parity/T18.17-cp-batch.md`.
+
+Судьбы 16 семейств цели закрыты строками (§11.4 errata T18.17 выше): **8 —
+вынос в слой** (каноны паттерн-слоя, гейт префиксов расширен
+`mtb|ofc|org|cnv|adv|evt|tm`):
+
+- **`mtb`** (list-page) — тулбар тегов-фильтров каталога: порт
+  `cp-media-toolbar` (T16.14) — лента шаг 12px «как есть» (pages.css:594),
+  группы `display: contents` (landmark остаётся), подпись 24px (inline
+  media.html:14); ритм 16px по краям — принятый рендер пилота;
+- **`ofc-card`** (list-page) — карточка предложения целевого обучения:
+  колонка шаг 14 «как есть»/паддинг 24 (pages.css:837, калибровка T18.5),
+  пара заголовка lh 1.3 без трекинга (pages.css:841), шапка baseline/шаг 8
+  (принятая интерпретация T18.5), мета-колонка шаг 2/company fw-small
+  primary (pages.css:849/851), футер к низу; гранулы T3.6 — `min-width: 0`
+  + `__head flex-wrap: wrap` (порт ступеней оригинала @max-767
+  pages.css:926/927, инверсия mobile-first — рендер 1:1 при достатке места);
+- **`org-card`** (list-page) — карточка организации: шаг 12/паддинг 24
+  (pages.css:829), пара заголовка (pages.css:831), мета к низу
+  (pages.css:835);
+- **`cnv`** (list-page) — навигация каталога «пагинация по центру, ритм
+  48px» (inline education-catalog.html:57 / events.html:357 — один приём,
+  два потребителя `catalog-nav`/`events-nav`);
+- **`adv-grid`** (landing-section) — сетка преимуществ: шаг 24
+  (pages.css:505), колонки — база колонкой/2×1fr от md/3×1fr от lg
+  (инверсия ступеней pages.css:900/929, гранулы `minmax(0, 1fr)` T3.6);
+- **`evt-feature`** (landing-section) — фича-лента мероприятий лендингов
+  стажировок (порт T18.6): 2fr/1fr от lg, большая карточка на два ряда,
+  вид .event-card «как есть» (pages.css:565–581), фото 200→220
+  (pages.css:932/569), радиус md — принятая интерпретация клона;
+- **`tm`** (landing-section) — секция команды: фото-полоса во всю ширину,
+  радиус radius-lg — принятая интерпретация клона (высоту ведёт
+  натуральный размер фото, ступени team.css:20 не переносятся — дельта
+  team −186 принята).
+
+**5 — «остаётся сайт-зоне»** (тон-строки/позиции, Implementation
+requirements п.1 — тон в слой не едет; сокращение cp-хуков — не-cp имена по
+конвенции stu-/ctr-/msh__card): `hero` (тоны тегов на хуке --hro-tag-bg —
+`hero-tone--*`), `article-card` (fw 400 даты — `article-date`), `intern-card`
+(кламп шорта T16.12 + ссылочная пара поверх ui-card--media — `intern-card`),
+`vac-main` (позиция main-колонки вакансий T17.1 + ритм чипов T14.8 —
+`vac-main`), `page` (тон корня страницы — `site-page`). **3 — снято ранее**
+(строкой судьбы): `event-card`/`intern-person` — ui-card--media (T17.5,
+висячие входы allowlist), `cta-mail` — ui-card--cta (T17.8).
+
+**Снятие из сайт-зоны.** Разметка build.mjs — на крючках канонов
+(`mtb__group`/`mtb__label`, `ofc-card__*`, `org-card__*`, `adv-grid`,
+`evt-feature`, `cnv`, `tm__photo`) и не-cp тон-хуков; 55 → 11 cp-селекторов
+(остались только позиционные хуки лент `cp-company-feed` T18.3). Правила
+семейств сняты из pilot.css целиком (базы/элементы/пары/ступени 1023/767
+adv-сетки).
+
+**Ценз**: 15 семейств ушли из allowlist (судьба каждого — строкой, §11.4):
+семейства 14 → **1** (`company-feed` — позиционно-необходимый минимум),
+селекторы 55 → **11**, сырые 1599 → **1441**, код 715 → **580**.
+Потолки-пороги НЕ двигаются (файл сжался; прецедент T18.10–T18.16),
+факт-пины переписаны (pilot-census-gate — errata-цепочка в шапке census.mjs
+и теста; соседние пины allowlist «прочие семейства не тронуты» —
+directions-holding/tabs-row/production/page-head/why-us — переведены с
+`hero` на `company-feed`; пины «семейства не менялись»
+mentorship-capsule/students-photographic — 14 → 1; пины класса в
+pilot-vac-rows/patterns-layer/card/landing-compositions/axe/education/
+education-catalog/events-search-pagination/internships/media-filters/
+mentorship-capsule — на не-cp имена/крючки канонов; пин шорт организации в
+pattern-company-family — на канон org-card слоя).
+
+**Гейт префиксов слоя** расширен каноническими `mtb|ofc|org|cnv|adv|evt|tm`
+(showcase/patterns-layer-gate.mjs + юнит-пины patterns-layer/pattern-cp-batch;
+пин «чужих классов» эталона landing-section допускает adv/evt/tm —
+pattern-landing-section.test.js).
+
+**Доки-паттерны — источник правды**: разметка
+patterns/list-page/list-page.html (#lpp-mtb — тулбар «Рубрики:/Тип
+контента», #lpp-offer-card — 2 карточки предложения, #lpp-org-card — 3
+организации, #lpp-cnv — пагинация ui-pagination по центру) и
+patterns/landing-section/landing-section.html (#lsp-adv-grid — 3 карточки
+преимуществ, #lsp-events-feature — фича-лента «1 большая + 2»,
+#lsp-team — фото-полоса) несут те же классы (пин синхронности
+pattern-cp-batch.test.js — прецедент vcs/dmd T18.16; landing-section — по
+модели whu/msh — пин в файле задачи). README обоих доков — строки Состава /
+разделы канонов.
+
+**Пин-тест (TDD красный → зелёный):**
+tests/unit/pattern-cp-batch.test.js — 25 пинов (значения канонов 1:1 с
+источниками pages.css:594/829–853/900/929/505/1150–1171/565–581 и
+team.css:18–23; гранулы T3.6 — minmax(0,1fr)/min-width:0/flex-wrap; гейт
+7 префиксов; синхронность док ↔ слой; разметка/снятие cp-семейств; не-cp
+тон-хуки; compare-пары; allowlist ['company-feed']) — красный 24/25 до
+реализации, зелёный после.
+
+**Приёмка.** Гейты: `node tools/validate-backlog.mjs` — clean (0 broken);
+`npm run lint` 0 (css/js/format/html); `npm run test:unit` — **2433 passed**
+(96 файлов); `node pilot/career-portal/check-links.mjs` — 43 страницы /
+917 ссылок / 0 DEAD; `node pilot/career-portal/census.mjs` — гейт OK
+(1441 строка / код 580, 1 семейство, allowlist 1); `npm run build` +
+пересборка пилота (порядок «рантайм → пилот», errata T18.11);
+`npm run test:docker -- --update-snapshots` (полный chromium-проект) —
+**670 passed / 1 skipped** exit 0 (для записи эталонов), контрольный прогон
+без update — **670 passed / 1 skipped exit 0** (эталоны зелёные на
+закоммиченном состоянии; первый прогон поймал 32px-гейт T3.6 на двух
+стендах — гранулы minmax(0,1fr)/flex-wrap внесены в каноны, демо-слова
+короче стресса — см. выше). Эталоны ×7 — по одному контейнерному на
+вынесенное семейство (mtb-toolbar/ofc-card/org-card/cnv --desktop на
+list-page; adv-grid/evt-feature/tm-photo --desktop на landing-section) —
+сняты в контейнере (ADR-0004). Дифф-лист пересъёма по протоколу ADR-0004:
+pattern-landing-section fullPage ×3 (секции adv-grid/evt-feature/tm
+вставлены в конец стенда, после lsp-holding) — ревью диффа (проба-декодер
+PNG, .zcode/t1817-etalon-diff): desktop 12783 → 14701 (+1918), tablet
+14809 → 17166 (+2357), mobile 17385 → 19844 (+2459); верх до первой строки
+различий попиксельно идентичен на всех трёх вьюпортах (первая строка
+12730/14707/17244 — конец lsp-holding), прирост = вставка трёх секций +
+сдвиг хвоста; полосы 6279–6463 на mobile — AA ≤8 (4453 px, класс
+«лотереи растеризации» 19.10 — вне порога гейта); list-page — эталоны
+element-снимки новых секций не задевают существующие ветки.
+
+**Пин пиксель-нейтральности (AC)**: docHeight всех 43 страниц до/после —
+**Δ0 на каждой** (порог ±4px; «до» — проба .zcode/t1817-docheight.mjs на
+собранном пилоте от main b90513f — worktree-базлайн D:/repositories/
+irao-t1817-baseline, протокол lazyWarmup compare.mjs, факт = пины приёмки
+T18.16: index 9722, index-2 9138, company 5535, companies 3075; «после» —
+та же проба после пересборки). Блок-пары (compare 16.11, оригинал = live
+Pages ↔ пилот локально, 1440): index team **716 ↔ 530** (принятая дельта
+−186 — не изменилась), education edu-adv **283 ↔ 278** (принятая −5 —
+T18.5), internships/practices advantages **283 ↔ 274** (принятая −9 —
+T18.6), events **990 ↔ 990** (Δ0), probe card-title-primary (новая, на
+крючке канона adv-grid) — fs 20/fw 500/color #002856 — **MATCH**; probe
+card-short (на каноне org-card) — fs 14, color gray-97 против gray-128
+оригинала — принятая пара AA gray-700 (T16.12, не изменилась).
+Compare-прогон 16.11 — **exit 0**: гейты до браузеров зелёные (ссылки 43
+страницы / 917 ссылок / 0 DEAD, ценз 0 новых cp-блоков — allowlist 1),
+консоль-ошибок пилота 0 на 43 страницах.

@@ -491,8 +491,8 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-width: 0; /* ступень оригинала @max-767 (pages.css:926), инверсия mobile-first — гранула 32px-гейта T3.6 */
   gap: 0.875rem; /* 14px pages.css:837 «как есть», вне шкалы §3.2 */
+  min-width: 0; /* ступень оригинала @max-767 (pages.css:926), инверсия mobile-first — гранула 32px-гейта T3.6 */
   padding: var(--ui-space-5); /* 24px pages.css:837 */
 }
 
@@ -3902,13 +3902,13 @@
 
 @media (min-width: 768px) {
   .adv-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr)); /* ≤1023 — pages.css:900, инверсия; minmax(0, 1fr) — гранула 32px-гейта T3.6 */
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* ≤1023 — pages.css:900, инверсия */
   }
 }
 
 @media (min-width: 1024px) {
   .adv-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 колонки — десктоп-форма (pages.css:505); гранула T3.6 */
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 колонки — pages.css:505 */
   }
 }
 
