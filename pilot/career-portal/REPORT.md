@@ -869,7 +869,8 @@ white); index-2: why-us и #vacancies сняты, `.stu-photo--v2` 778 ↔ 778
 | marquee | снято — `mrq` слоя | T16.15/T17.15 |
 | спец-тинты hero-тегов | **осталось** — тон-строки на хуке `--hro-tag-bg` (тон — бренд-слой; решение владельца — вариант (а)) | T17.15 |
 | article-meta/type/gallery | снято сверх плана — `dpp__meta/__type/__gallery` | T17.14 |
-| dir-modal | **осталось** — контент-композиция модалки (ценз п.3) | остаток |
+| dir-modal | **снято T18.16 — канон `dmd` слоя** (контент модалки поверх `ui-modal`: фото клип/cover — aspect-канон, стрелки галереи по краям — −24 накрытие края; мёртвые база-сетка/`__tasks` стажировочной модалки T15.4 сняты без переноса; каркас — компонент `ui-modal` T7.2, галерея — `data-ui-gallery` T17.7) | T18.16 |
+| панель «Найди свою вакансию» (`cp-vacancy-search`) | **снято T18.16 — канон `vcs` слоя** (list-page; сетка «панель \| CTA-плитка» 2fr 1fr от lg — мобильная база колонкой, инверсия ступени 1023; плитка 310px «как есть» vacancy-search.css:15–18; лента пилюль — стык `lpp-filters`, ширина 260px на потомке `ui-select--pill` T17.12; CTA-плитка — `ui-card--cta` T17.8) | T18.16 |
 | cover-hero | снято — `cvh` слоя | T17.15 |
 | спец-сетка media | снято — `mdl` слоя; big-span в каноне есть, активация в пилоте — design-decision | T17.15 |
 | центрирование пагинации ×2 | **осталось** — `cp-catalog-nav`/`cp-events-nav` (ценз п.3) | остаток |
@@ -914,6 +915,10 @@ ui-stat/ui-carousel/ui-section--photo/ui-card); 17 — ритм/раскладк
 секции dpp + карточный канон `lpp-card` list-page; ленты компании —
 семейство `company-feed` остаётся — позиционные хуки T18.3); семейств
 ценза 21 → 16.
+**Errata T18.16**: `vacancy-search`/`dir-modal` ушли из allowlist (вынос
+панели «Найди свою вакансию» и контента модалки направления в слой —
+каноны `vcs` list-page и `dmd` секции dpp поверх `ui-modal`); семейств
+ценза 16 → 14.
 
 **Количественная цель эпика — итог:**
 
@@ -2383,3 +2388,112 @@ fs 14 / fw 500 / lh 18.9 / color text / padding 20px 24px / height 61 —
 выборки, как до задачи). Compare-прогон 14.11 — **exit 0**: гейты до
 браузеров зелёные (ссылки 43 страницы / 917 ссылок / 0 DEAD, ценз 0 новых
 cp-блоков — allowlist 18), консоль-ошибок пилота 0 на 43 страницах.
+
+## T18.16 — Макро-вынос: vacancy-search (панель фильтров) и dir-modal → слой (16.11)
+
+Спека: `docs/ui-system/epics/EPIC-18-macro-parity/T18.16-vacancy-search-dir-modal.md`.
+
+Два cp-семейства главной вынесены в паттерн-слой: панель «Найди свою вакансию» —
+канон **`vcs`** секции list-page (стык с лентой фильтров `lpp-filters` T17.12 —
+тот же исходник `.vacancy-search__select-wrap` оригинала, vacancy-search.css:36/41):
+сетка «панель | CTA-плитка» `vcs__wrap` (шаг 12 = space-3 — принятая интерпретация
+клона, сетка 2fr 1fr вместо флекс-ленты оригинала gap 36px; мобильная база —
+колонка, инверсия ступени ≤1023 — vacancy-search.css:75, «панель | CTA-плитка» от
+lg 1024, шкала T2.5, прецедент whu/dir), плитка `vcs__panel` (колонка «заголовок →
+лента» шаг 48/space-between/мин-высота 310/паддинг 36 «как есть» —
+vacancy-search.css:15–18; радиус — принятая интерпретация клона radius-lg,
+оригинал --radius-card 16px — расхождение принято клоном, блок-пара Δ0; фон
+surface), лента пилюль `vcs__fields` (flex-wrap, шаг 16; ширина пилюли 260px «как
+есть» — vacancy-search.css:36 — на потомке `ui-select--pill`, геометрия несёт
+компонент T17.12; max-width: 100% — reflow-гранула 32px-гейта T3.6, прецедент
+lpp-pill). Заголовок/кнопка/CTA-плитка — роли/компоненты разметки
+(ui-page-title/ui-button--accent/ui-card--cta --accent/--row T17.8). Контент
+модалки направления — канон **`dmd`** секции dpp поверх ui-modal: `dmd__photo`
+(во всю ширину тела, cover, клип радиуса md = --radius-card 16px —
+directions.css:153–154; фиксированную высоту 400px ведут width/height атрибуты —
+aspect-канон; ступени 300/200 оригинала directions.css:224/235 пилотом не велись —
+не переносятся) и `dmd__nav` (стрелки по краям space-between + боковой паддинг
+8px, отрицательный верх −24px = space-5 — накрытие нижнего края фото; каркас —
+компонент `ui-modal` T7.2, API не меняется — Implementation requirements п.2;
+галерея — форма `data-ui-gallery` компонента `ui-carousel` T17.7).
+
+**Снятие из сайт-зоны.** Разметка build.mjs — на канонах: панель —
+`vcs__wrap` (id="vacancies" сохранён — цель навигации не меняется; блок-пара
+compare `['vacancy-search', '.vacancy-search', '#vacancies']` не менялась),
+`vcs__panel`/`vcs__fields`; модалка — `dmd__photo`/`dmd__nav` (каркас
+`ui-modal ui-modal--md` и галерея прежние). Обе cp-пары сняты из pilot.css
+целиком (обёртка/плитка/лента + ширина на потомке + ступень 1023; фото/навигация
++ мёртвые база-сетка 14rem/1fr и `__tasks` стажировочной модалки T15.4 —
+потребителя в разметке нет с замены попапа детальной страницей internship.html —
+и ступень 1023); комментарий T18.14 «dir-modal — сайт-зона до T18.16» закрыт.
+
+**Ценз**: семейства `vacancy-search`/`dir-modal` ушли из allowlist (судьба
+«вынос в слой», §11.4 выше): семейства 16 → **14**, селекторы 65 → **55**, сырые
+1648 → **1599**, код 765 → **715**. Потолки-пороги НЕ двигаются (файл сжался;
+прецедент T18.10–T18.15), факт-пины переписаны (pilot-census-gate — errata-цепочка
+в шапке census.mjs и теста; соседние пины pilot-mentorship-capsule/
+pilot-students-photographic — прецедент errata T18.3–T18.15; пины cp-dir-modal в
+pattern-directions-holding/pattern-company-family и cp-vacancy-search в
+pattern-why-us инвертированы — каноны по слою; пин ширины пилюли панели
+select-pill — на каноне vcs слоя; пины allowlist «прочие не тронуты»
+pattern-page-head/pattern-tabs-row сняты по ушедшим семействам; пин «первая
+media-1024» сайдбара patterns-layer — по вхождению .lpp-layout, ступень lg канона
+vcs встала в lpp-секции раньше; пары синхронности vcs/dmd добавлены в
+PATTERN_SOURCE_EXTRA — доки list-page/detail-page).
+
+**Гейт префиксов слоя** расширен каноническими `vcs|dmd`
+(showcase/patterns-layer-gate.mjs + юнит-пин patterns-layer.test.js — голые
+блоки с BEM-элементами __*, по образцу dpp/hro).
+
+**Доки-паттерны — источник правды**: разметка
+patterns/list-page/list-page.html (раздел `#lpp-vcs-demo` — панель + 3 пилюли
+`ui-select--pill` + «найти» accent + CTA-плитка) и
+patterns/detail-page/detail-page.html (раздел `#dpp-dir-modal-demo` — диалог
+`ui-modal--md` статично открыт, БЕЗ `data-ui-modal`: модуль при init снимает
+open — PE-деградация К9 ADR-0011; для эталона контент статичен, в бою —
+`data-ui-modal`, как в пилоте; галерея — `data-ui-gallery` с data-URI фото) несут
+те же классы (пин синхронности patterns-layer.test.js — пары vcs/dmd, прецедент
+php/tnv). README обоих доков — разделы связок + строки Состава.
+
+**Пин-тест (TDD красный → зелёный):**
+tests/unit/pattern-vacancy-search-dir-modal.test.js — 17 пинов (значения канонов
+1:1 с источниками vacancy-search.css:15–18/33/36/75 и directions.css:153–154,
+интерпретациями пилота — wrap-сетка 2fr 1fr шаг 12, nav −24/8px; мобильная база
+lg; гейты vcs/dmd; синхронность док ↔ слой; разметка/снятие cp-семейств вкл.
+мёртвые правила стажировочной модалки; compare-пары; allowlist без 2 семейств) —
+красный 17/17 до реализации, зелёный после.
+
+**Приёмка.** Гейты: `node tools/validate-backlog.mjs` — clean (0 broken);
+`npm run lint` 0 (css/js/format/html); `npm run test:unit` — **2408 passed**
+(95 файлов); `node pilot/career-portal/check-links.mjs` — 43 страницы / 917
+ссылок / 0 DEAD; `node pilot/career-portal/census.mjs` — гейт OK (1599 строк /
+код 715, 14 семейств, allowlist 16); `npm run build` + пересборка пилота
+(порядок «рантайм → пилот», errata T18.11); `npm run test:docker --
+--update-snapshots` (полный chromium-проект) — **668 passed / 1 skipped** exit 0
+(для записи эталонов), контрольный прогон без update — **668 passed / 1 skipped
+exit 0** (эталоны зелёные на закоммиченном состоянии). Эталоны vcs/dmd ×3
+(vcs-panel--desktop 1425×311 / vcs-panel--mobile 360×534 — сетка «панель |
+CTA-плитка» и мобильная база колонкой; dmd-modal--desktop 641×726 — диалог
+ui-modal--md: фото клип/cover, стрелки dmd__nav по краям поверх нижнего края
+фото) — сняты в контейнере (ADR-0004). Дифф-лист пересъёма по протоколу
+ADR-0004: pattern-detail-page fullPage ×3 (секция dmd вставлена между company-
+демо и cover) — ревью диффа (проба-декодер PNG, .zcode/acc-t1816): верх до
+первой строки различий попиксельно идентичен на всех трёх вьюпортах (desktop
+6268 / tablet 8225 / mobile 8962 — начало вставки канона), прирост = вставка
+секции dmd + сдвиг хвоста (+992/+979/+1051), существующие секции не тронуты;
+pattern-list-page — эталоны element-снимки веток/php/tnv вставку `#lpp-vcs-demo`
+(последняя секция стенда) не задевают — байт-идентичны, пересъёма не требуется.
+
+**Пин пиксель-нейтральности (AC)**: docHeight index/index-2/company/companies
+до/после — index **9722 → 9722**, index-2 **9138 → 9138**, company **5535 →
+5535** (пин принятого значения эпохи T18.3/T18.9) и companies **3075 → 3075**
+(пин приёмки T18.9) — все Δ0. Пробы панели/модалки (compare 16.11, оригинал =
+live Pages ↔ пилот локально, 1440): блок-пара панели vacancy-search **310 ↔ 310**
+(Δ0 — порог AC ±4px; ширины 1345↔1361 — принятый контейнер); computed-пара
+dir-modal (новая, на крючках канона) — w 100%/of cover/radius 16px/nav flex —
+**MATCH** (оригинальная сторона — панель display:none на мок-странице,
+computed-стили читаются — прецедент dropdown-item; расхождения интерпретации
+пилота — фикс-высота 400 против aspect, nav gap 16 против space-between/−24 —
+приняты T18.14/T18.16 и в пару не входят). Compare-прогон 16.11 — **exit 0**:
+гейты до браузеров зелёные (ссылки 43 страницы / 917 ссылок / 0 DEAD, ценз 0
+новых cp-блоков — allowlist 16), консоль-ошибок пилота 0 на 43 страницах.
