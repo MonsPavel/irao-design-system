@@ -202,13 +202,15 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.15', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.16', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(18);
+    // errata T18.16: vacancy-search/dir-modal ушли из allowlist (вынос в
+    // слой — каноны vcs/dmd) — 18 → 16
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(16);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -330,11 +332,21 @@ describe('пороги ценза — числа зафиксированы по
       // сырые 1722→1648, код 820→765, селекторы 76→65; семейства 21→16 —
       // company-stats/company-adv/company-title/company-banner/company-card
       // ушли из allowlist (судьба «вынос в слой», REPORT §11.4):
-      expect(metrics.css.lines).toBe(1648);
-      expect(metrics.css.codeLines).toBe(765);
-      expect(metrics.css.selectors).toBe(65);
+      // T18.16 (вынос панели «Найди свою вакансию» и контента модалки
+      // направления в слой — каноны vcs (list-page)/dmd (dpp, поверх
+      // ui-modal): пара cp-vacancy-search — обёртка/плитка/лента + ширина
+      // пилюли на потомке ui-select--pill + ступень 1023 — и пара
+      // cp-dir-modal — фото/навигация + мёртвые база-сетка/__tasks
+      // стажировочной модалки T15.4 + ступень 1023 — сняты из разметки
+      // build.mjs и pilot.css):
+      // сырые 1648→1599, код 765→715, селекторы 65→55; семейства 16→14 —
+      // vacancy-search/dir-modal ушли из allowlist (судьба «вынос в слой»,
+      // REPORT §11.4):
+      expect(metrics.css.lines).toBe(1599);
+      expect(metrics.css.codeLines).toBe(715);
+      expect(metrics.css.selectors).toBe(55);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(16);
+      expect(metrics.css.families).toHaveLength(14);
       expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
         'page-head',
       );
@@ -361,6 +373,11 @@ describe('пороги ценза — числа зафиксированы по
       expect(metrics.css.families).not.toContain('company-title');
       expect(metrics.css.families).not.toContain('company-banner');
       expect(metrics.css.families).not.toContain('company-card');
+      expect(
+        metrics.css.families,
+        'панель/модалка направления вынесены в слой (T18.16)',
+      ).not.toContain('vacancy-search');
+      expect(metrics.css.families).not.toContain('dir-modal');
       expect(metrics.css.families, 'ленты компании — сайт-зона T18.3').toContain('company-feed');
       expect(metrics.js.lines).toBe(187);
     },

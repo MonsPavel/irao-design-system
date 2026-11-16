@@ -312,8 +312,13 @@ describe('patterns/patterns.css — единый исходник паттерн
   });
 
   it('значения канона 1:1 — сайдбар (280px от lg, mobile-база одна колонка, sticky от md)', () => {
-    const lgBlock = code.match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/);
-    expect(lgBlock, 'ступень lg в слое есть').toBeTruthy();
+    // Ступень lpp-layout — по вхождению крючка, не «первая media 1024»
+    // (errata T18.16: ступень lg канона vcs встала в lpp-секции раньше —
+    // позиционный пин «первая media» ловил её; практика mediaBlockOf).
+    const lgBlock = [...code.matchAll(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/g)].find(
+      (m) => m[0].includes('.lpp-layout {'),
+    );
+    expect(lgBlock, 'ступень lg сайдбара в слое есть').toBeTruthy();
     expect(
       lgBlock[0],
       'колонка сайдбара 17.5rem = 280px оригинала (калибровка T17.1: значение канона, не пилота)',

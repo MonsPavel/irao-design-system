@@ -23,10 +23,10 @@
  *  - пилот: cp-directions/cp-holding сняты из разметки build.mjs и pilot.css
  *    (включая группы ступеней 1023/767) — семейства directions/holding уходят
  *    из allowlist ценза (судьба «вынос в слой», REPORT §11.4); модалка
- *    направления (dir-modal — T18.16, Out of scope) остаётся сайт-зоной:
- *    контентные классы модалки index переименованы в семейство dir-modal
- *    (cp-dir-modal__photo — дубликат правила стажировочной модалки снят
- *    1:1, cp-dir-modal__nav добавлен);
+ *    направления — контент на каноне dmd слоя (errata T18.16: пин
+ *    «dir-modal остаётся сайт-зоной» инвертирован; cp-dir-modal__photo —
+ *    дубликат правила стажировочной модалки сведён в одно, __nav добавлен —
+ *    T18.14);
  *  - compare: блок-пары directions/holding — на крючках канона (.dir/.hld).
  *
  * Поверхность браузера (эталоны dir/hld ×3, docHeight index/index-2 ±4px) —
@@ -191,8 +191,11 @@ describe('patterns/patterns.css — канон сетки направлений
     expect(arrow, 'прижатие 5px — directions.css:42').toContain('margin-bottom: 0.3125rem;');
   });
 
-  it('инварианты слоя: без hex, без !important (гейт); модалки направления в каноне нет (dir-modal — T18.16, Out of scope)', () => {
-    expect(layer.match(/\.dir-modal|\.dmd-/g)?.length ?? 0, 'модалки в слое нет (T18.16)').toBe(0);
+  it('инварианты слоя: без hex, без !important (гейт); модалки в каноне dir нет — контент — отдельный канон dmd (T18.16, errata пина T18.14)', () => {
+    expect(
+      layer.match(/\.dir-modal/g)?.length ?? 0,
+      'классов dir-modal в слое нет (контент — канон dmd)',
+    ).toBe(0);
     expect(layer, 'hex только в tokens/primitives.css').not.toMatch(/#[0-9a-fA-F]{3,8}\b/);
     expect(layer, '!important только в a11y/vi.css').not.toContain('!important');
   });
@@ -435,16 +438,15 @@ describe('пилот career-portal: directions/holding на канонах dir/h
     expect(build.match(/class="ui-stat ui-stat--glass"/g)?.length, '3 стата --glass').toBe(3);
   });
 
-  it('модалка направления — dir-modal остаётся сайт-зоной (T18.16, Out of scope): контентные классы модалки index переименованы в семейство dir-modal', () => {
-    expect(build, 'фото модалки — семейство dir-modal').toContain(
-      '<img class="cp-dir-modal__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">',
+  it('модалка направления — контент на каноне dmd слоя (T18.16 — errata пина T18.14 «dir-modal остаётся»): контентные классы модалки index — dmd__* (каркас ui-modal/галерея — компоненты)', () => {
+    expect(build, 'фото модалки — канон dmd').toContain(
+      '<img class="dmd__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">',
     );
-    expect(build, 'навигация модалки — семейство dir-modal').toContain(
-      '<div class="cp-dir-modal__nav">',
-    );
+    expect(build, 'навигация модалки — канон dmd').toContain('<div class="dmd__nav">');
     expect(build, 'классов cp-directions__photo/__nav нет').not.toMatch(
       /cp-directions__(photo|nav)/,
     );
+    expect(build, 'семейство dir-modal из разметки снято (T18.16)').not.toContain('cp-dir-modal');
   });
 
   it('applyVariant2: маркер компакт-варианта v2 — на модификаторе канона hld--compact (прецедент build.py оригинала)', () => {
@@ -454,11 +456,10 @@ describe('пилот career-portal: directions/holding на канонах dir/h
     expect(build, 'старый маркер снят').not.toContain('cp-holding--compact');
   });
 
-  it('pilot.css: пара cp-семейств снята целиком (базы/элементы/hover + группы ступеней 1023/767); модалка dir-modal остаётся', () => {
+  it('pilot.css: пара cp-семейств снята целиком (базы/элементы/hover + группы ступеней 1023/767); модалка — канон dmd слоя (errata T18.16)', () => {
     expect(pilotCss, 'семейство .cp-directions перенесено в слой').not.toContain('.cp-directions');
     expect(pilotCss, 'семейство .cp-holding перенесено в слой').not.toContain('.cp-holding');
-    expect(pilotCss, 'модалка — сайт-зона до T18.16').toContain('.cp-dir-modal__photo');
-    expect(pilotCss, 'модалка — сайт-зона до T18.16').toContain('.cp-dir-modal__nav');
+    expect(pilotCss, 'модалка вынесена в слой (T18.16)').not.toContain('.cp-dir-modal');
   });
 
   it('compare: блок-пары directions/holding — на крючках канона .dir/.hld (прецедент prd/whu)', () => {
@@ -479,8 +480,11 @@ describe('ценз сайт-зоны: семейства directions/holding уш
       'directions',
     );
     expect(ALLOWED_CP_FAMILIES, 'holding — вынесен в слой (канон hld)').not.toContain('holding');
-    expect(ALLOWED_CP_FAMILIES, 'модалка dir-modal — сайт-зона до T18.16').toContain('dir-modal');
+    // errata T18.16: семейство dir-modal ушло из allowlist вместе с
+    // directions/holding (пин T18.14 инвертирован — канон dmd слоя)
+    expect(ALLOWED_CP_FAMILIES, 'модалка dir-modal — вынесена в слой (T18.16)').not.toContain(
+      'dir-modal',
+    );
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('vacancy-search');
   });
 });
