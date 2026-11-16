@@ -129,9 +129,8 @@
    статы/сетки/карточки/hover + компакт-вариант v2 — модификатор
    hld--compact канона; фон holding — примитив ui-section--photo, статы —
    компонент ui-stat--glass T17.4), семейства ушли из allowlist ценза
-   (судьба «вынос в слой», REPORT §11.4). Модалка направления — сайт-зона
-   dir-modal до T18.16: контентные классы модалки index — cp-dir-modal__
-   (фото дублирует правило стажировочной модалки 1:1 — правило снято). */
+   (судьба «вынос в слой», REPORT §11.4). Контент модалки направления —
+   канон dmd слоя (T18.16). */
 
 /* Лента логотипов «Работодатели Группы» — связка lgo-grid/lgo-card (T17.9):
    правила cp-employers-семейства сняты, канон — паттерн-слой. */
@@ -139,42 +138,14 @@
 /* Тёмная секция why-us — канон whu паттерн-слоя (T18.12): правила
    cp-why-us-семейства сняты (секция/top/title/row/стекло-карточки + hover-
    раскрытие), семейство ушло из allowlist ценза (судьба «вынос в слой»,
-   REPORT §11.4). Панель вакансий внутри секции — сайт-зона (vacancy-search,
-   вынос — T18.16). */
+   REPORT §11.4). */
 
-/* ── vacancy-search: панель фильтров-пилюль (связки поверх ui-select) ── */
-
-.cp-vacancy-search__wrap {
-  display: grid;
-  gap: var(--ui-space-3);
-  grid-template-columns: 2fr 1fr;
-}
-
-.cp-vacancy-search__panel {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem; /* 48px vacancy-search.css:16 «как есть» */
-  justify-content: space-between; /* vacancy-search.css:15 */
-  min-height: 19.375rem; /* 310px vacancy-search.css:17 */
-  padding: 2.25rem; /* 36px vacancy-search.css:18 */
-  border-radius: var(--ui-radius-lg);
-  background-color: var(--ui-color-surface);
-}
-
-.cp-vacancy-search__fields {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem; /* 16px vacancy-search.css:33 */
-}
-
-/* Пилюли селектов панели — модификатор ДС ui-select--pill (T17.12: геометрия
-   пилюли — рамка/радиус/фон — переехала из сайт-зоны в компонент ui-select,
-   сайт-класс cp-pill снят). Ширина — раскладка сайта (Implementation
-   requirements T17.12): flex-basis 12rem ленты фильтров панели — канон
-   list-page, запинен пробой против оригинала. */
-.cp-vacancy-search__fields > .ui-select--pill {
-  flex: 0 0 16.25rem; /* 260px vacancy-search.css:36 «как есть» (лента фильтров панели) */
-}
+/* ── Панель «Найди свою вакансию» — канон vcs паттерн-слоя (T18.16):
+   правила cp-vacancy-search-семейства сняты (сетка «панель | CTA-плитка»/
+   плитка 310px/лента пилюль + ширина на потомке ui-select--pill + ступень
+   1023 — мобильная база lg канона), семейство ушло из allowlist ценза
+   (судьба «вынос в слой», REPORT §11.4). Панель — слот контента секции
+   whu. ── */
 
 /* ── students/employers: постерные карточки и лента логотипов — связки слоя
    pstr-card (T17.18; прежде lnk-card T17.9 — его тон-строки сняты: тоны
@@ -1372,35 +1343,13 @@ a.cp-intern-card {
   height: 16.25rem;
 }
 
-/* Модалка направления стажировки: контент внутри ui-modal. T18.14:
-   контентные классы модалки направления index переименованы в семейство
-   (cp-directions__* ушли с каноном dir слоя) — фото дублирует правило
-   стажировочной модалки 1:1 (одно правило на обе модалки), навигация
-   галереи добавлена. Вынос семейства — T18.16. */
-.cp-dir-modal {
-  display: grid;
-  gap: var(--ui-space-4);
-  grid-template-columns: 14rem 1fr;
-}
-
-.cp-dir-modal__photo {
-  object-fit: cover;
-  width: 100%;
-  border-radius: var(--ui-radius-md);
-}
-
-.cp-dir-modal__nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: calc(-1 * var(--ui-space-5));
-  padding: 0 var(--ui-space-2);
-}
-
-.cp-dir-modal__tasks {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-2);
-}
+/* Модалка направления стажировки: контент — канон dmd паттерн-слоя
+   (T18.16) поверх ui-modal: правила cp-dir-modal-семейства сняты (фото/
+   навигация галереи — канон dmd__photo/__nav; мёртвые база-сетка 14rem/1fr
+   и __tasks стажировочной модалки T15.4 — без потребителя в разметке),
+   семейство ушло из allowlist ценза (судьба «вынос в слой», REPORT §11.4).
+   Каркас — компонент ui-modal (T7.2), галерея — форма data-ui-gallery
+   компонента ui-carousel (T17.7). */
 
 /* Сайт-зона пилота: адаптив десктоп-первый, как в career-portal (в оригинале
    max-width-лестница 1023/767). Система irao-ui — mobile-first min-width;
@@ -1446,9 +1395,10 @@ a.cp-intern-card {
      (ряд от 1024, до — колонка; mobile-first Implementation requirements
      T17.1 п.4). */
 
-  .cp-vacancy-search__wrap {
-    grid-template-columns: 1fr;
-  }
+  /* Панель «Найди свою вакансию» — канон vcs слоя (T18.16): ступень 1023
+     копипасты снята — колонка в мобильной базе канона (оригинал ≤1023,
+     vacancy-search.css:75), «панель | CTA-плитка» от lg (инверсия,
+     mobile-first). */
 
   /* Лейаут/сайдбар вакансий — слой lpp-layout/lpp-side (T17.1): мобильная
      база и ступени канона (одна колонка → md) вместо лестницы 1023 —
@@ -1460,9 +1410,10 @@ a.cp-intern-card {
   /* Adv-marquee — канон mrq (T17.15): база — колонка, 1.2fr/1fr от lg —
      ступень 1023 копипасты снята (mobile-first). */
 
-  .cp-dir-modal {
-    grid-template-columns: 1fr;
-  }
+  /* Контент модалки направления — канон dmd слоя (T18.16): ступень 1023
+     снята вместе с мёртвой базой-сеткой (потребителя в разметке нет —
+     высоту фото ведёт aspect разметки, ступени 300/200 оригинала
+     directions.css:224/235 пилотом не велись). */
 
   /* Карусель production — канон prd слоя (T18.13): ступень 1023 photo-hide
      — мобильная база канона (фото скрыто до lg, инвертирована mobile-first),

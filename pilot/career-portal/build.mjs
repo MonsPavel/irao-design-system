@@ -180,7 +180,8 @@ function selectField({
     // пилюля фильтра: геометрию несёт модификатор ДС ui-select--pill (T17.12 —
     // перенос cp-pill из сайт-зоны; рамка/радиус/фон — компонент), триггер
     // растягивается. Ширина пилюли — раскладка потребителя (hero 12rem —
-    // правило сайта; каталог 260px — канон lpp-filters слоя; сайдбар —
+    // правило сайта; каталог 260px — канон lpp-filters слоя; панель
+    // «Найди свою вакансию» 260px — канон vcs слоя, T18.16; сайдбар —
     // растягивает flex-столб). compact здесь игнорируется осознанно: пилюля —
     // не ui-field, компактность — режим ui-field; pill-вызовы compact не
     // передают.
@@ -1353,8 +1354,8 @@ ${stepperTabs}
 
 <section class="ui-section dir" id="directions">
   <!-- Сетка карточек-направлений — канон dir паттерн-слоя (T18.14):
-       рамки/сетка/ритм — слой (directions.css 1:1 батч 31.10); модалка
-       направления — сайт-зона dir-modal (вынос — T18.16). -->
+       рамки/сетка/ритм — слой (directions.css 1:1 батч 31.10); контент
+       модалки направления — канон dmd слоя (T18.16) поверх ui-modal. -->
   <div class="ui-container">
     <h2 class="ui-h2">Направления деятельности</h2>
     <ul class="dir__grid" data-cp-directions>
@@ -1371,8 +1372,8 @@ ${directionsGrid}
   <h2 class="ui-modal__title ui-h3" id="cp-direction-dialog-title" data-cp-dir-title>Направление</h2>
   <div class="ui-modal__body ui-carousel" data-ui-gallery>
     <script type="application/json" data-ui-gallery-photos>${directionPhotosJson.replaceAll('</', '<\\/')}</script>
-    <img class="cp-dir-modal__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">
-    <div class="cp-dir-modal__nav">
+    <img class="dmd__photo" src="${esc(directionPhotos[0])}" alt="" data-ui-gallery-photo width="590" height="400">
+    <div class="dmd__nav">
       <button class="ui-button ui-button--light ui-button--sm" type="button" data-ui-gallery-prev hidden aria-label="Предыдущее фото">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </button>
@@ -1428,7 +1429,7 @@ ${employerLogos}
 <section class="ui-section ui-section--photo whu">
   <!-- фото-фон — ui-section--photo (T17.3): без оверлея, on-dark текст — контентом.
        Секция — канон whu паттерн-слоя (T18.12); панель вакансий — слот
-       контента секции (сайт-зона vacancy-search, вынос — T18.16). -->
+       контента секции (канон vcs слоя, T18.16). -->
   <div class="ui-section__bg" aria-hidden="true">
     <img src="assets/images/bg-elektro.jpg" alt="" loading="lazy">
   </div>
@@ -1444,10 +1445,10 @@ ${whyCards.slice(1).join('\n')}
          build.py SLOTS — VACANCY_SLOT внутри why-us, why-us.css:46-47;
          батч ритма 01.11 — композиция приведена к оригиналу). id
          сохранён — цель навигации не меняется. -->
-    <div class="cp-vacancy-search__wrap" id="vacancies">
-      <form class="cp-vacancy-search__panel" action="vacancies.html" method="get" aria-label="Поиск вакансии">
+    <div class="vcs__wrap" id="vacancies">
+      <form class="vcs__panel" action="vacancies.html" method="get" aria-label="Поиск вакансии">
         <h2 class="ui-page-title">Найди свою вакансию</h2>
-        <div class="cp-vacancy-search__fields">
+        <div class="vcs__fields">
           ${selectField({ name: 'city', ariaLabel: 'Город', options: ['Город', 'Москва', 'Санкт-Петербург', 'Екатеринбург'], pill: true })}
           ${selectField({ name: 'position', ariaLabel: 'Должность', options: ['Должность', 'Инженер', 'Электромонтёр', 'Специалист'], pill: true })}
           ${selectField({ name: 'experience', ariaLabel: 'Опыт', options: ['Опыт', 'Без опыта', 'От 1 года', 'От 3 лет'], pill: true })}

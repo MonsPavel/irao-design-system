@@ -126,6 +126,13 @@
  *    1023/767 сеток из разметки и pilot.css; ленты компании — семейство
  *    company-feed остаётся (позиционные хуки T18.3) (судьба семейств —
  *    REPORT §11.4).
+ *    T18.16: семейства vacancy-search/dir-modal УШЛИ из allowlist — вынос
+ *    панели «Найди свою вакансию» и контента модалки направления в слой
+ *    (каноны vcs — list-page; dmd — dpp, поверх ui-modal), снятие пар
+ *    cp-vacancy-search (обёртка/плитка/лента + ширина пилюли на потомке
+ *    ui-select--pill + ступень 1023) и cp-dir-modal (фото/навигация +
+ *    мёртвые база-сетка/__tasks стажировочной модалки T15.4 + ступень
+ *    1023) из разметки и pilot.css (судьба семейств — REPORT §11.4).
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -159,7 +166,6 @@ export const ALLOWED_CP_FAMILIES = [
   'article-card',
   'catalog-nav',
   'company-feed',
-  'dir-modal',
   'event-card',
   'events-feature',
   'events-nav',
@@ -172,7 +178,6 @@ export const ALLOWED_CP_FAMILIES = [
   'page',
   'team',
   'vac-main',
-  'vacancy-search',
 ];
 
 /** wc -l — число \n (файлы под prettier всегда с завершающим \n). */
