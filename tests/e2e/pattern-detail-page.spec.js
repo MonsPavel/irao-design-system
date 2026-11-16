@@ -480,3 +480,46 @@ standTest.describe(
     );
   },
 );
+
+// Контент модалки направления (T18.16): контейнерный эталон канона dmd —
+// диалог ui-modal--md целиком (каркас компонента + контент канона: фото
+// клип/cover, стрелки dmd__nav по краям поверх нижнего края фото). Один
+// снимок на desktop (1440) — ×3 вместе с vcs на списковом (спека T18.16);
+// диалог в разметке статично открыт (open, без data-ui-modal — контент
+// стенда статичен, см. док).
+standTest.describe('patterns/detail-page: эталон модалки dmd (T18.16, AC)', () => {
+  standTest(
+    'dmd-modal — element-снимок канона, только из контейнера/CI (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('patterns/detail-page');
+
+      const shots = [['dmd-modal', page.locator('#dpp-dir-modal-demo-dialog'), ['desktop']]];
+
+      for (const [name, locator, viewports] of shots) {
+        for (const viewport of viewports) {
+          await page.setViewportSize(VIEWPORTS[viewport]);
+          await locator.scrollIntoViewIfNeeded();
+          await page.waitForTimeout(300);
+          const info = standTest.info();
+          if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+            info.annotations.push({
+              type: 'shot-skipped',
+              description:
+                `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                '(ADR-0004) — запустите npm run test:docker',
+            });
+            continue;
+          }
+          await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+            animations: 'disabled',
+            caret: 'hide',
+            // Строгий допуск 8 px (глобальный): панель ui-modal — скруглённый
+            // клип целиком (срез по границе body стенда, тень целиком);
+            // фото-слот внутри — клип радиуса (лотерея растеризации
+            // диагноз 19.10 возможна по арке — допуск покрывает AA-шум).
+          });
+        }
+      }
+    },
+  );
+});

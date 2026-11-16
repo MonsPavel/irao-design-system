@@ -481,6 +481,24 @@ const SHELL_PROBES = [
     fields: { display: 'display', fd: 'flex-direction', gap: 'gap' },
     rect: true,
   },
+  // Модалка направления (T18.16: probe-пара «блок на каноне» — контент на
+  // каноне dmd слоя поверх ui-modal; каркас/галерея — компоненты T7.2/T17.7).
+  // Оригинал — панель .directions__modal (display:none на мок-странице —
+  // computed-стили читаются, rect не берём — прецедент dropdown-item);
+  // расхождения пары (фикс-высота 400 против aspect, nav: gap 16 против
+  // space-between/−24) — принятая интерпретация пилота T18.14/T18.16,
+  // сравниваем совпадающие значения канона (cover/клип/ширина/флекс-строка).
+  {
+    name: 'dir-modal',
+    original: '.directions__modal-photo',
+    pilot: '.dmd__photo',
+    fields: { w: 'width', of: 'object-fit', radius: 'border-radius' },
+    extra: {
+      original: '.directions__modal-nav',
+      pilot: '.dmd__nav',
+      fields: { navDisplay: 'display' },
+    },
+  },
 ];
 
 /** Пары блоков главной (высота секций). */

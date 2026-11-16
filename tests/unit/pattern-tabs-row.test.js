@@ -229,6 +229,7 @@ describe('ценз сайт-зоны: семейства tabs-row/tabs-links у�
     expect(ALLOWED_CP_FAMILIES, 'tabs-row — вынесена в слой').not.toContain('tabs-row');
     expect(ALLOWED_CP_FAMILIES, 'tabs-links — вынесена в слой').not.toContain('tabs-links');
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('dir-modal');
+    // errata T18.16: семейство dir-modal ушло из allowlist (канон dmd слоя)
+    // — пин «прочие не тронуты» по нему снят
   });
 });

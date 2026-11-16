@@ -272,8 +272,10 @@ describe('pilot.css — тон активной карточки на хуке �
     // раскладок карусели в слой, канон prd) — 24 → 23; errata T18.14:
     // directions/holding ушли (вынос сетки направлений/холдинга в слой,
     // каноны dir/hld) — 23 → 21; errata T18.15: пять company-семейств ушли
-    // (вынос company-семейств в слой, каноны dpp-* + lpp-card) — 21 → 16
-    expect(metrics.css.families).toHaveLength(16);
+    // (вынос company-семейств в слой, каноны dpp-* + lpp-card) — 21 → 16;
+    // errata T18.16: vacancy-search/dir-modal ушли (вынос панели/модалки в
+    // слой, каноны vcs/dmd) — 16 → 14
+    expect(metrics.css.families).toHaveLength(14);
   });
 });
 
@@ -289,10 +291,11 @@ describe('ценз T17.16 — гейт чист после сборки блок
     // errata T18.12: why-us ушла (вынос в слой) — 27 → 26;
     // errata T18.13: production ушла (вынос раскладок карусели в слой) — 26 → 25;
     // errata T18.14: directions/holding ушли (вынос в слой) — 25 → 23;
-    // errata T18.15: пять company-семейств ушли (вынос в слой) — 23 → 18
+    // errata T18.15: пять company-семейств ушли (вынос в слой) — 23 → 18;
+    // errata T18.16: vacancy-search/dir-modal ушли (вынос в слой) — 18 → 16
     expect(
       ALLOWED_CP_FAMILIES,
-      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13/T18.14/T18.15',
-    ).toHaveLength(18);
+      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13/T18.14/T18.15/T18.16',
+    ).toHaveLength(16);
   });
 });

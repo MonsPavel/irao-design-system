@@ -210,12 +210,17 @@ describe('пилот career-portal: cp-* сняты (AC «~30 строк»)', ()
     expect(pilotCss).not.toContain('.lpp-side__group .cp-pill');
   });
 
-  it('pilot.css: ширина пилюль hero-панели (16.25rem = 260px оригинала) — правило сайта на модификаторе', () => {
+  it('pilot.css: ширина пилюль hero-панели — канон vcs слоя (errata T18.16: 16.25rem = 260px оригинала переехал в слой)', () => {
     // Errata 01.11 (батч ритма): 12rem канона list-page → 260px — замер
     // .vacancy-search__select-wrap оригинала (vacancy-search.css:36);
-    // лента list-page остаётся на своём каноне.
-    const hero = blockOf(pilotCss, '.cp-vacancy-search__fields > .ui-select--pill');
-    expect(hero, 'правило hero-панели найдено').toBeTruthy();
+    // лента list-page остаётся на своём каноне. Errata T18.16: правило
+    // панели — в слое (канон vcs__fields > .ui-select--pill), из сайт-зоны
+    // снято.
+    expect(pilotCss, 'правило панели из сайт-зоны снято').not.toContain(
+      '.cp-vacancy-search__fields',
+    );
+    const hero = blockOf(layer, '.vcs__fields > .ui-select--pill');
+    expect(hero, 'правило панели — в слое (канон vcs)').toBeTruthy();
     expect(hero).toContain('flex: 0 0 16.25rem;');
   });
 });

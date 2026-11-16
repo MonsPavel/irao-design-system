@@ -441,7 +441,7 @@ describe('пилот career-portal: company-семейства на канона
     expect(companiesHtml, 'ленты сегментов вставлены одной интерполяцией').toContain('${sections}');
   });
 
-  it('pilot.css: пять cp-семейств сняты (базы/элементы + ступени 1023/767 сеток); ленты cp-company-feed (T18.3) и модалка dir-modal остаются', () => {
+  it('pilot.css: пять cp-семейств сняты (базы/элементы + ступени 1023/767 сеток); ленты cp-company-feed (T18.3) остаются, модалка — канон dmd слоя (errata T18.16)', () => {
     for (const gone of [
       '.cp-company-stats',
       '.cp-company-title',
@@ -457,7 +457,9 @@ describe('пилот career-portal: company-семейства на канона
     expect(pilotCss, 'ленты компании — сайт-зона T18.3 (Out of scope)').toContain(
       '.cp-company-feed',
     );
-    expect(pilotCss, 'модалка направления — сайт-зона до T18.16').toContain('.cp-dir-modal__photo');
+    expect(pilotCss, 'модалка направления — вынесена в слой (T18.16)').not.toContain(
+      '.cp-dir-modal',
+    );
     const m1023 = pilotCss.slice(
       pilotCss.indexOf('@media (max-width: 1023px)'),
       pilotCss.indexOf('@media (max-width: 767px)'),
@@ -508,7 +510,14 @@ describe('ценз сайт-зоны: пять company-семейств ушли
       );
     }
     expect(ALLOWED_CP_FAMILIES, 'ленты компании — сайт-зона до T18.17').toContain('company-feed');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('vacancy-search');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('dir-modal');
+    // errata T18.16: панель vacancy-search и модалка dir-modal вынесены в
+    // слой (каноны vcs/dmd) — семейства ушли из allowlist (пины T18.15
+    // инвертированы)
+    expect(ALLOWED_CP_FAMILIES, 'панель vacancy-search — вынесена в слой (T18.16)').not.toContain(
+      'vacancy-search',
+    );
+    expect(ALLOWED_CP_FAMILIES, 'модалка dir-modal — вынесена в слой (T18.16)').not.toContain(
+      'dir-modal',
+    );
   });
 });

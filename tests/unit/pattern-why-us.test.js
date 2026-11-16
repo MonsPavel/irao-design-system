@@ -23,10 +23,10 @@
  *    row колонкой до 1023 → база, строка/3 колонки от lg (1024, шкала
  *    T2.5); top-карточка 429px от lg, во всю ширину в базе (гейт T3.6:
  *    429px на 375 переполняет — колонка проходит);
- *  - слот панели вакансий — контент секции (канон правила не несёт):
- *    панель в пилоте — cp-vacancy-search__wrap id="vacancies" (семейство
- *    vacancy-search — сайт-зона, вынос — T18.16); ритм до панели ведёт
- *    margin-bottom 144px строки (why-us.css:42);
+ *  - слот панели вакансий — контент секции (канон секции правила не несёт):
+ *    панель в пилоте — канон vcs слоя T18.16 (vcs__wrap id="vacancies",
+ *    семейство vacancy-search ушло из сайт-зоны — errata пина T18.12);
+ *    ритм до панели ведёт margin-bottom 144px строки (why-us.css:42);
  *  - док-паттерн landing-section — источник правды: секция lsp-why-us
  *    несёт те же классы (пин синхронности, прецедент msh/vcp T18.2);
  *  - пилот: cp-why-us снят из разметки build.mjs и pilot.css — семейство
@@ -368,7 +368,7 @@ describe('patterns/patterns.css — канон тёмной секции why-us 
 });
 
 describe('пилот career-portal: why-us на каноне whu (T18.12; AC: cp-семейство 0)', () => {
-  it('разметка build.mjs: cp-why-us снят — секция/зоны/карточки на whu, панель вакансий внутри секции сохранена (cp-vacancy-search — сайт-зона, вынос T18.16)', () => {
+  it('разметка build.mjs: cp-why-us снят — секция/зоны/карточки на whu, панель вакансий внутри секции сохранена (канон vcs слоя, T18.16 — errata пина T18.12)', () => {
     expect(build, 'cp-why-us из разметки снят').not.toMatch(/class="[^"]*\bcp-why-us/);
     expect(build, 'секция — фото-примитив + канон whu слоя').toContain(
       '<section class="ui-section ui-section--photo whu">',
@@ -390,9 +390,10 @@ describe('пилот career-portal: why-us на каноне whu (T18.12; AC: cp
     expect(build, 'номер карточки — aria-hidden').toContain(
       '<span class="whu__card-num" aria-hidden="true">0${index + 1}</span>',
     );
-    expect(build, 'панель вакансий внутри секции сохранена (build.py SLOTS)').toContain(
-      '<div class="cp-vacancy-search__wrap" id="vacancies">',
-    );
+    expect(
+      build,
+      'панель вакансий внутри секции сохранена (build.py SLOTS; T18.16 — канон vcs)',
+    ).toContain('<div class="vcs__wrap" id="vacancies">');
   });
 
   it('applyVariant2: маркер снятия секции — на новом классе канона (v2 оригинала why-us не несёт)', () => {
@@ -402,9 +403,9 @@ describe('пилот career-portal: why-us на каноне whu (T18.12; AC: cp
     );
   });
 
-  it('pilot.css: пара cp-why-us снята целиком (секция/top/title/row/карточки/hover) + ступени 1023/767; сайт-зона панели vacancy-search остаётся', () => {
+  it('pilot.css: пара cp-why-us снята целиком (секция/top/title/row/карточки/hover) + ступени 1023/767; панель — канон vcs слоя (errata T18.16)', () => {
     expect(pilotCss, 'пара .cp-why-us перенесена в слой').not.toContain('.cp-why-us');
-    expect(pilotCss, 'панель — сайт-зона (T18.16)').toContain('.cp-vacancy-search__wrap');
+    expect(pilotCss, 'панель вынесена в слой (T18.16)').not.toContain('.cp-vacancy-search');
   });
 
   it('compare: блок-пара why-us — на крючке канона .whu (прецедент lpp-/msh-)', () => {
@@ -418,10 +419,11 @@ describe('пилот career-portal: why-us на каноне whu (T18.12; AC: cp
 describe('ценз сайт-зоны: семейство why-us ушло из allowlist (T18.12 AC)', () => {
   it('allowlist ценза без why-us — судьба семейства «вынос в слой» (REPORT §11.4)', () => {
     expect(ALLOWED_CP_FAMILIES, 'why-us — вынесена в слой').not.toContain('why-us');
-    expect(ALLOWED_CP_FAMILIES, 'панель vacancy-search — сайт-зона до T18.16').toContain(
+    // errata T18.16: панель vacancy-search вынесена в слой (канон vcs) —
+    // семейство ушло из allowlist вместе с why-us (пин T18.12 инвертирован)
+    expect(ALLOWED_CP_FAMILIES, 'панель vacancy-search — вынесена в слой (T18.16)').not.toContain(
       'vacancy-search',
     );
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('dir-modal');
   });
 });

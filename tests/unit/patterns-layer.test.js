@@ -74,6 +74,14 @@ const PATTERN_SOURCE_EXTRA = [
   // (поднавигационное семейство, рядом с nvp; док-раздел «строка табов +
   // ссылок» несёт API tnv/tnv__links).
   ['patterns/list-page/list-page.html', 'tnv'],
+  // Панель «Найди свою вакансию» (T18.16): канон vcs — тот же док-источник
+  // list-page (точка расширения «панель-плитка фильтров» рядом с лентой
+  // lpp-filters; док-раздел несёт API vcs__wrap/vcs__panel/vcs__fields).
+  ['patterns/list-page/list-page.html', 'vcs'],
+  // Контент модалки направления (T18.16): канон dmd — док-источник
+  // detail-page (модалка — сущность детальной композиции поверх ui-modal;
+  // док-раздел несёт API dmd__photo/dmd__nav).
+  ['patterns/detail-page/detail-page.html', 'dmd'],
   // Тёмная секция «why-us» (T18.12): канон whu — док-источник landing-section,
   // НО в этот цикл он не входит: док легитимно несёт <style> связующих стилей
   // сайт-зоны (lsp-* — «в бою template_styles.css, на стенде рядом, не в
@@ -184,7 +192,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12; prd — раскладки карусели production T18.13; dir/hld — сетка направлений/холдинг T18.14)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12; prd — раскладки карусели production T18.13; dir/hld — сетка направлений/холдинг T18.14; vcs — панель «Найди свою вакансию», dmd — контент модалки направления T18.16)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
@@ -192,21 +200,22 @@ describe('patterns/patterns.css — единый исходник паттерн
       // лендинг-композиций (mrq/mdl/cvh, T17.15; hro — по образцу dpp:
       // голый блок с BEM-элементами __*), обложки страницы (php, T18.10),
       // строки табов + ссылок (tnv, T18.11), тёмной секции why-us (whu,
-      // T18.12), раскладок карусели production (prd, T18.13) и сетки
-      // направлений/холдинга (dir/hld, T18.14) — голые,
-      // без суффикса: префикс продолжается дефисом,
+      // T18.12), раскладок карусели production (prd, T18.13), сетки
+      // направлений/холдинга (dir/hld, T18.14), панели «Найди свою
+      // вакансию» (vcs) и контента модалки направления (dmd, T18.16) —
+      // голые, без суффикса: префикс продолжается дефисом,
       // модификатором __ или заканчивается на нём.
       expect(
         hooks.some((hook) =>
-          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld)(?:-|__|$)/.test(
+          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$)/.test(
             hook,
           ),
         ),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld`,
+        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld/vcs/dmd`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld)(?:-|__|$))/.test(
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$))/.test(
             hook,
           ),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
@@ -303,8 +312,13 @@ describe('patterns/patterns.css — единый исходник паттерн
   });
 
   it('значения канона 1:1 — сайдбар (280px от lg, mobile-база одна колонка, sticky от md)', () => {
-    const lgBlock = code.match(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/);
-    expect(lgBlock, 'ступень lg в слое есть').toBeTruthy();
+    // Ступень lpp-layout — по вхождению крючка, не «первая media 1024»
+    // (errata T18.16: ступень lg канона vcs встала в lpp-секции раньше —
+    // позиционный пин «первая media» ловил её; практика mediaBlockOf).
+    const lgBlock = [...code.matchAll(/@media \(min-width: 1024px\)\s*\{[\s\S]*?\n\}/g)].find((m) =>
+      m[0].includes('.lpp-layout {'),
+    );
+    expect(lgBlock, 'ступень lg сайдбара в слое есть').toBeTruthy();
     expect(
       lgBlock[0],
       'колонка сайдбара 17.5rem = 280px оригинала (калибровка T17.1: значение канона, не пилота)',

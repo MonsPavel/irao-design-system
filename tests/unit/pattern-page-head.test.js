@@ -302,6 +302,7 @@ describe('ценз сайт-зоны: семейства page-head/page-subtitle
     expect(ALLOWED_CP_FAMILIES, 'page-head — вынесена в слой').not.toContain('page-head');
     expect(ALLOWED_CP_FAMILIES, 'page-subtitle — вынесена в слой').not.toContain('page-subtitle');
     expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('vacancy-search');
+    // errata T18.16: семейство vacancy-search ушло из allowlist (канон vcs
+    // слоя) — пин «прочие не тронуты» по нему снят
   });
 });

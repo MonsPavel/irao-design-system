@@ -579,6 +579,77 @@
   </div>
 </section>
 
+<!-- Контент модалки направления (T18.16): связка dmd паттерн-слоя поверх
+     компонента ui-modal --md (каркас/заголовок/закрывающая — слоты
+     компонента, T7.2), галерея фото — форма data-ui-gallery компонента
+     ui-carousel (T17.7). Демо-диалог без data-ui-modal: модуль при init
+     снимает open (PE-деградация К9 ADR-0011) — для эталона контент
+     статичен; в бою диалог несёт data-ui-modal, как в пилоте
+     (build.mjs #cp-direction-dialog). Close-кнопка демо — без привязки
+     (вид несёт компонент). -->
+<section class="ui-section" id="dpp-dir-modal-demo" aria-labelledby="dpp-dir-modal-demo-title">
+  <p class="ui-showcase-stand__note">
+    Контент модалки направления — связка <code>dmd</code> паттерн-слоя (T18.16) поверх каркаса
+    <code>ui-modal --md</code> (T7.2): фото <code>dmd__photo</code> — во всю ширину тела, клип
+    радиуса, cover (высоту ведут width/height атрибуты — aspect-канон), навигация галереи
+    <code>dmd__nav</code> — стрелки по краям, накрывающие нижний край фото (отрицательный верх
+    −24px); подпись/описание — роли <code>ui-h5</code>/<code>ui-body</code>, CTA —
+    <code>ui-button--primary</code>. Галерея — форма <code>data-ui-gallery</code>
+    <code>ui-carousel</code> (T17.7): стрелки скрыты в разметке, их снимает модуль.
+  </p>
+
+  <h2 class="ui-h3" id="dpp-dir-modal-demo-title">Контент модалки направления (T18.16)</h2>
+
+  <!-- На стенде заголовок модалки — h3 ролью ui-h3 (роль на слоте
+       ui-modal__title): h1/h2 секций выше; на реальной странице тег — h2
+       (как в пилоте). Фото — data-URI-подложка стенда (декоративное,
+       alt="" — как в пилоте). -->
+  <dialog
+    class="ui-modal ui-modal--md"
+    id="dpp-dir-modal-demo-dialog"
+    open
+    aria-labelledby="dpp-dir-modal-demo-caption"
+  >
+    <button class="ui-modal__close" type="button" aria-label="Закрыть">
+      <!-- prettier-ignore -->
+      <svg class="ui-modal__icon" aria-hidden="true" focusable="false" width="24" height="24" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+    </button>
+    <h3 class="ui-modal__title ui-h3" id="dpp-dir-modal-demo-caption">Теплогенерация</h3>
+    <div class="ui-modal__body ui-carousel" data-ui-gallery>
+      <script type="application/json" data-ui-gallery-photos>
+        [
+          "data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27590%27%20height%3D%27400%27%3E%3Crect%20width%3D%27590%27%20height%3D%27400%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27160%27%20r%3D%27110%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27430%27%20cy%3D%27230%27%20r%3D%2795%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+        ]
+      </script>
+      <!-- prettier-ignore -->
+      <img
+        class="dmd__photo"
+        src="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27590%27%20height%3D%27400%27%3E%3Crect%20width%3D%27590%27%20height%3D%27400%27%20fill%3D%27%23164B89%27%2F%3E%3Ccircle%20cx%3D%27160%27%20cy%3D%27160%27%20r%3D%27110%27%20fill%3D%27%23002856%27%2F%3E%3Ccircle%20cx%3D%27430%27%20cy%3D%27230%27%20r%3D%2795%27%20fill%3D%27%23F26722%27%20opacity%3D%270.85%27%2F%3E%3C%2Fsvg%3E"
+        alt=""
+        data-ui-gallery-photo
+        width="590"
+        height="400"
+         >
+      <div class="dmd__nav">
+        <button class="ui-button ui-button--light ui-button--sm" type="button" data-ui-gallery-prev hidden aria-label="Предыдущее фото">
+          <!-- prettier-ignore -->
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 8H3M8 3L3 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+        <button class="ui-button ui-button--light ui-button--sm" type="button" data-ui-gallery-next hidden aria-label="Следующее фото">
+          <!-- prettier-ignore -->
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h11M8 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </button>
+      </div>
+      <p class="ui-h5">Теплогенерация Группы «Интер РАО»</p>
+      <p class="ui-body">
+        Шесть крупных региональных энергокомпаний, 22 электростанции и более 35&nbsp;ГВт
+        установленной мощности — ядро энергетического бизнеса Группы.
+      </p>
+      <p><a class="ui-button ui-button--primary" href="#dpp-related">Смотреть вакансии</a></p>
+    </div>
+  </dialog>
+</section>
+
 <section class="ui-section" id="dpp-cover" aria-labelledby="dpp-cover-title">
   <h2 class="ui-h3" id="dpp-cover-title">Обложка страницы (T18.10)</h2>
   <p class="ui-showcase-stand__note">

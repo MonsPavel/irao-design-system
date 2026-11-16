@@ -18,7 +18,9 @@
  * (наставничество/капсула вакансий, T18.2), php (обложка страницы, T18.10),
  * tnv (строка табов + ссылок разделов, T18.11), whu (тёмная секция
  * «why-us» со стеклом, T18.12), prd (раскладки карусели production
- * v1/v2, T18.13); потомки — компоненты
+ * v1/v2, T18.13), dir/hld (сетка направлений/холдинг, T18.14), vcs
+ * (панель «Найди свою вакансию», T18.16), dmd (контент модалки
+ * направления, T18.16); потомки — компоненты
  * ui-*. Список пополняют задачи эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
@@ -250,6 +252,85 @@
   padding: 1.25rem var(--ui-space-5);
   color: var(--ui-color-text);
   text-decoration: none;
+}
+
+/* ── Панель «Найди свою вакансию» (T18.16): связка vcs ──
+ * Порт панели фильтров-пилюль главной career-portal (.cp-vacancy-search —
+ * pilot.css:147–177; оригинал src/blocks/vacancy-search/vacancy-search.css —
+ * строки в комментариях; сетку «панель | CTA-плитка» и её шаг несёт
+ * принятый рендер пилота — блок-пара compare .vacancy-search → #vacancies
+ * 310↔310). Разметка канона — patterns/list-page/list-page.html
+ * (#lpp-vcs-demo; док — источник правды, пин синхронности
+ * tests/unit/patterns-layer.test.js — пара vcs).
+ *
+ * Стык с лентой фильтров lpp-filters (T17.12 — тот же исходник
+ * .vacancy-search__select-wrap оригинала, vacancy-search.css:36/41): лента
+ * та же — flex-wrap, шаг 16px, ширина пилюли 260px на потомке
+ * .ui-select--pill; но ритм до/после ленты ведёт плитка панели (шаг 48,
+ * «заголовок → лента») — маргинов ленты (space-5/2.5rem) у канона нет.
+ * Геометрию пилюли несёт компонент ui-select--pill (T17.12) — слой её не
+ * дублирует; заголовок/кнопка/CTA-плитка правой колонки — роли/компоненты
+ * разметки (ui-page-title/ui-button/ui-card--cta --accent/--row T17.8).
+ * max-width: 100% на пилюле — reflow-гранула 32px-гейта T3.6 (прецедент
+ * lpp-pill): на нормальной базе меньше контейнера — рендер прежний.
+ *
+ * Мобильная база канона — ступень пилота max-1023 (оригинал ≤1023 —
+ * vacancy-search.css:75), инвертированная mobile-first (прецедент whu/dir):
+ * колонка в базе, «панель | CTA-плитка» от lg (1024, шкала T2.5). Ступени
+ * панели/полей оригинала ≤767 (vacancy-search.css:81–87) пилотом не велись —
+ * сайт-зона приняла десктоп-форму, не переносятся.
+ */
+
+/* Сетка «панель | CTA-плитка»: шаг 12px = space-3 — принятая интерпретация
+   клона (сетка 2fr 1fr вместо флекс-ленты оригинала gap 36px,
+   vacancy-search.css:4); minmax(0, 1fr) — гранула 32px-гейта T3.6
+   (прецедент lpp-layout). */
+.vcs__wrap {
+  box-sizing: border-box;
+  display: grid;
+  gap: var(--ui-space-3);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .vcs__wrap {
+    grid-template-columns: 2fr 1fr; /* панель | CTA-плитка — принятый рендер пилота */
+  }
+}
+
+/* Плитка панели: колонка «заголовок → лента пилюль» с шагом 48px «как
+   есть» (vacancy-search.css:16), растяжка по высоте (vacancy-search.css:15),
+   мин-высота 310px «как есть» (vacancy-search.css:17), паддинг 36px «как
+   есть» (vacancy-search.css:18), фон surface (vacancy-search.css:19); радиус
+   — принятая интерпретация клона radius-lg (24px; оригинал --radius-card
+   16px — расхождение принято клоном, блок-пара Δ0). Высоту колонки ведёт
+   сетка: панель растягивается на трек (стартовое выравнивание — default). */
+.vcs__panel {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  justify-content: space-between;
+  min-height: 19.375rem;
+  padding: 2.25rem;
+  border-radius: var(--ui-radius-lg);
+  background-color: var(--ui-color-surface);
+}
+
+/* Лента пилюль панели — стык lpp-filters (см. шапку связки). */
+.vcs__fields {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* 16px vacancy-search.css:33 «как есть» */
+}
+
+/* Ширина пилюли в ленте панели: 260px «как есть» (vacancy-search.css:36,
+   .vacancy-search__select-wrap) — без неё бокс нативного select сжимается
+   до самой длинной опции; max-width: 100% — гранула 32px-гейта T3.6. */
+.vcs__fields > .ui-select--pill {
+  flex: 0 0 16.25rem;
+  max-width: 100%;
 }
 
 /* ── Ветка «сайдбар фильтров» (T14.10): порт .vac-layout/.vac-side
@@ -909,6 +990,49 @@
 .dpp-banner__text {
   box-sizing: border-box;
   max-width: 35rem;
+}
+
+/* ── Контент модалки направления (T18.16): связка dmd поверх ui-modal ──
+ * Порт контентной раскладки модалки направления career-portal в
+ * интерпретации пилота (.cp-dir-modal__photo/__nav — pilot.css:1386–1397;
+ * каркас — компонент ui-modal --md T7.2: панель/заголовок/закрывающая —
+ * слоты компонента, API не меняется — Implementation requirements п.2;
+ * галерея фото — форма data-ui-gallery компонента ui-carousel T17.7).
+ * Разметка канона — patterns/detail-page/detail-page.html
+ * (#dpp-dir-modal-demo-dialog; док — источник правды, пин синхронности
+ * patterns-layer.test.js — пара dmd).
+ *
+ * Значения — 1:1 принятого пилота (T18.14: фото — дубликат правила
+ * стажировочной модалки, сведён в одно правило; оригинал
+ * src/blocks/directions/directions.css:150–155/157–160 — фиксированную
+ * высоту 400px ведут width/height атрибуты разметки, aspect-канон;
+ * ступени 300/200 оригинала directions.css:224/235 пилотом не велись —
+ * не переносятся). Отрицательный верх __nav — стрелки накрывают нижний
+ * край фото (крайние по бокам: space-between + боковой паддинг 8px —
+ * интерпретация T18.14). Мёртвые правила стажировочной модалки T15.4
+ * (.cp-dir-modal база-сетка 14rem/1fr и __tasks) сняты вместе с
+ * семейством — потребителя в разметке нет (попап стажировки заменён
+ * детальной страницей internship.html, T15.4).
+ */
+
+/* Фото модалки: во всю ширину тела, cover (directions.css:153), клип
+   радиуса md = --radius-card 16px оригинала (directions.css:154). */
+.dmd__photo {
+  box-sizing: border-box;
+  object-fit: cover;
+  width: 100%;
+  border-radius: var(--ui-radius-md);
+}
+
+/* Навигация галереи: стрелки по краям (space-between — интерпретация
+   пилота T18.14), боковой паддинг 8px = space-2, отрицательный верх
+   −24px = space-5 — накрытие нижнего края фото. */
+.dmd__nav {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  margin-top: calc(-1 * var(--ui-space-5));
+  padding: 0 var(--ui-space-2);
 }
 
 /* ══════════════════ Паттерн «Страница формы» (T8.3) — связки fpp- ══════════════════ */
@@ -2806,10 +2930,10 @@
  *
  * Каркас: фото-фон — примитив ui-section--photo (T17.3, без оверлея —
  * on-dark текст несёт контент; VI-инвариант — не голым IMG, прецедент msh
- * T18.2). Панель вакансий — СЛОТ контента секции: канон правила не несёт
- * (в пилоте — cp-vacancy-search__wrap id="vacancies", семейство
- * vacancy-search — сайт-зона, вынос — T18.16); ритм до панели ведёт
- * margin-bottom строки (144px, why-us.css:42).
+ * T18.2). Панель вакансий — СЛОТ контента секции: канон секции правила
+ * панели не несёт (панель — канон vcs слоя T18.16: в пилоте vcs__wrap
+ * id="vacancies", семейство vacancy-search ушло из сайт-зоны — вынос
+ * T18.16); ритм до панели ведёт margin-bottom строки (144px, why-us.css:42).
  *
  * hover-раскрытие карточек (Implementation requirements T18.12 п.2) —
  * CSS-канон без JS: текст/номер/фото переключаются opacity/max-height под
@@ -3422,8 +3546,8 @@
  * Каркас: секция — светлая ui-section (без фото-примитива), вертикальный
  * ритм 72/72 «как есть» погашением ритма ui-section (directions.css:2);
  * карточка — кнопка-рамка: действие (открытие модалки направления) — сайт;
- * модалка — семейство dir-modal сайт-зоны (вынос — T18.16), в канон не
- * входит.
+ * контент модалки — канон dmd слоя (T18.16) поверх ui-modal, в канон dir
+ * не входит.
  *
  * Дельта канона (1:1 порт пилота): шрифт имени не задаётся — в ДС нет
  * button-ресета оригинала (base.css:77 font-family: inherit), имя карточки
