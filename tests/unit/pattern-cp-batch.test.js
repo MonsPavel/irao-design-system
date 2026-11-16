@@ -150,6 +150,10 @@ describe('patterns/patterns.css — канон карточки предложе
     expect(ofc, 'паддинг 24px — pages.css:837 (калибровка T18.5)').toContain(
       'padding: var(--ui-space-5);',
     );
+    expect(
+      ofc,
+      'карточка — 1:1 базлайну b90513f: без min-width (ревью приёмки: безусловная гранула меняла десктоп)',
+    ).not.toContain('min-width');
     const title = blockOf(layer, '.ofc-card .ui-h6');
     expect(title, 'пара карточного заголовка — правило на роли').toBeTruthy();
     expect(title, 'lh 1.3 — pages.css:841 (.offer-card__direction fs-body × 1.3)').toContain(
@@ -160,13 +164,13 @@ describe('patterns/patterns.css — канон карточки предложе
     );
   });
 
-  it('элементы ofc-card: шапка baseline/space-between с шагом 8 (интерпретация T18.5 против 16px pages.css:839), дата muted (pages.css:843), мета-колонка шаг 2 (pages.css:849) с компанией fw-small/primary (pages.css:851), футер к низу', () => {
+  it('элементы ofc-card: шапка baseline/space-between с шагом 8 (интерпретация T18.5 против 16px pages.css:839), дата muted (pages.css:843), мета-колонка шаг 2 (pages.css:849) с компанией fw-small/primary (pages.css:851), футер к низу; десктоп 1:1 базлайну — шапка БЕЗ переноса строки (ревью приёмки: безусловный flex-wrap валил дату под заголовок — docHeight +8)', () => {
     const head = blockOf(layer, '.ofc-card__head');
     expect(head, '.ofc-card__head найдено').toContain('display: flex;');
     expect(
       head,
-      'flex-wrap — ступень оригинала @max-767 (pages.css:927), инверсия — гранула T3.6',
-    ).toContain('flex-wrap: wrap;');
+      'шапка — одна строка на десктопе (базлайн b90513f): без flex-wrap (оригинал .offer-card__head pages.css:839 wrap не несёт — ступени @max-767 оригинала 954/955 не переносятся)',
+    ).not.toContain('flex-wrap');
     expect(head, 'шаг 8px = space-2 — принятая интерпретация T18.5').toContain(
       'gap: var(--ui-space-2);',
     );
@@ -185,6 +189,18 @@ describe('patterns/patterns.css — канон карточки предложе
     );
     expect(company, 'fw-small — pages.css:851').toContain('font-weight: var(--ui-fw-small);');
     expect(blockOf(layer, '.ofc-card__footer')).toContain('margin-top: auto;');
+  });
+
+  it('стресс-гранула шапки предложения (32px-гейт T3.6, ревью приёмки): заголовок ломается по символам при сжатии — дата остаётся в строке на десктопе (no-op при 1x, прецедент reflow-гранул lpp-pill/vcs max-width: 100%)', () => {
+    const granule = blockOf(layer, '.ofc-card__head .ui-h6');
+    expect(granule, 'гранула .ofc-card__head .ui-h6 найдена').toBeTruthy();
+    expect(granule, 'ломка длинного слова при сжатии — строка шапки не выталкивает дату').toContain(
+      'overflow-wrap: anywhere;',
+    );
+    expect(
+      granule,
+      'гранула — одно свойство: высота шапки на десктопе 1:1 базлайну (дата не переносится)',
+    ).not.toMatch(/flex-wrap|min-width/);
   });
 });
 
