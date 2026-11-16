@@ -1,7 +1,7 @@
 /**
  * Гейт селекторов паттерн-слоя (T17.1, Implementation requirements п.2 —
  * «stylelint-правило/проверка в сборке»): селекторы слоя — только
- * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd
+ * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd|mtb|ofc|org|cnv|adv|evt|tm
  * (lnk-/lgo- — лендинг-связки nav-карточек и ленты логотипов, T17.9; tlp- —
  * таймлайн, T17.10; nvp — поднавигация разделов, T17.11; hsp-/ftp- — каркасы
  * шапки/подвала, T17.13; hro/mrq/mdl/cvh — лендинг-композиции hero/adv-marquee/
@@ -10,7 +10,11 @@
  * T18.10; tnv — строка табов + ссылок разделов, T18.11; whu — тёмная секция
  * «why-us» со стеклом, T18.12; prd — раскладки карусели production v1/v2,
  * T18.13; dir — сетка направлений, hld — холдинг, T18.14; vcs — панель
- * «Найди свою вакансию», dmd — контент модалки направления, T18.16; потомки —
+ * «Найди свою вакансию», dmd — контент модалки направления, T18.16; mtb —
+ * тулбар тегов-фильтров каталога, ofc — карточка предложения, org —
+ * карточка организации, cnv — навигация каталога, adv — сетка
+ * преимуществ, evt — фича-лента мероприятий, tm — секция команды (батч
+ * cp-остатков, T18.17); потомки —
  * компоненты ui-*), ID и чужие namespace-крючки запрещены — защита от
  * превращения слоя в свалку.
  *
@@ -85,31 +89,33 @@ export function patternLayerProblems(css) {
     // строки табов + ссылок (tnv, T18.11), тёмной секции why-us (whu,
     // T18.12), раскладок карусели production (prd, T18.13), сетки
     // направлений/холдинга (dir/hld, T18.14), панели «Найди свою
-    // вакансию» (vcs) и контента модалки направления (dmd, T18.16) —
+    // вакансию» (vcs) и контента модалки направления (dmd, T18.16),
+    // батча cp-остатков (mtb/ofc/org/cnv/adv/evt/tm, T18.17) —
     // голые `tlp`/`nvp`/`mrq`/`mdl`/`cvh`/`hro`/`php`/`tnv`/`whu`/`prd`/
-    // `dir`/`hld`/`vcs`/`dmd` (примеры спек), у остальных паттернов блок
-    // несёт суффикс (lpp-row; pstr-card — постерная карточка, T17.18):
+    // `dir`/`hld`/`vcs`/`dmd`/`cnv` (примеры спек), у остальных паттернов
+    // блок несёт суффикс (lpp-row; pstr-card — постерная карточка,
+    // T17.18; ofc-card; adv-grid; evt-feature):
     // префикс обязан продолжаться дефисом, модификатором __ или
     // закончиться на нём.
     if (
       !hooks.some((hook) =>
-        /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$)/.test(
+        /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd|mtb|ofc|org|cnv|adv|evt|tm)(?:-|__|$)/.test(
           hook,
         ),
       )
     ) {
       problems.push(
-        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld/vcs/dmd: «${selector}»`,
+        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld/vcs/dmd/mtb/ofc/org/cnv/adv/evt/tm: «${selector}»`,
       );
     }
     for (const hook of hooks) {
       if (
-        !/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$))/.test(
+        !/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd|mtb|ofc|org|cnv|adv|evt|tm)(?:-|__|$))/.test(
           hook,
         )
       ) {
         problems.push(
-          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd + ui-потомки)`,
+          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd|mtb|ofc|org|cnv|adv|evt|tm + ui-потомки)`,
         );
       }
     }

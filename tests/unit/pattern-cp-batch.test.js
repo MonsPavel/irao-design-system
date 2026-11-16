@@ -94,13 +94,11 @@ const layer = stripCssComments(layerFile);
 
 /** lpp-секция слоя (до dpp-секции) — стык list-page. */
 const lppSection = layer.slice(0, layer.indexOf('.dpp-breadcrumbs'));
-/** Хвост слоя — лендинг-связки (после hld-секции T18.14). */
-const tailSection = layer.slice(layer.indexOf('.hld {'));
 
-const listHtml = readFileSync(join(root, 'patterns', 'list-page', 'list-page.html'), 'utf8').replace(
-  /\r\n/g,
-  '\n',
-);
+const listHtml = readFileSync(
+  join(root, 'patterns', 'list-page', 'list-page.html'),
+  'utf8',
+).replace(/\r\n/g, '\n');
 const landingHtml = readFileSync(
   join(root, 'patterns', 'landing-section', 'landing-section.html'),
   'utf8',
@@ -232,9 +230,10 @@ describe('patterns/patterns.css — канон сетки преимуществ
     expect(grid, 'шаг 24px = space-5 «как есть» — pages.css:505').toContain(
       'gap: var(--ui-space-5);',
     );
-    expect(grid, 'мобильная база — колонка (оригинал ≤767 pages.css:929); minmax(0, 1fr) — гранула T3.6').toContain(
-      'grid-template-columns: minmax(0, 1fr);',
-    );
+    expect(
+      grid,
+      'мобильная база — колонка (оригинал ≤767 pages.css:929); minmax(0, 1fr) — гранула T3.6',
+    ).toContain('grid-template-columns: minmax(0, 1fr);');
     const md = mediaBlockOf(layer, 768, 'adv-grid');
     expect(md, 'ступень md (768) есть — 2 колонки (оригинал ≤1023 pages.css:900)').toBeTruthy();
     expect(md).toContain('grid-template-columns: repeat(2, 1fr);');
@@ -301,9 +300,10 @@ describe('patterns/patterns.css — канон секции команды tm (T
     expect(photo, 'радиус — принятая интерпретация клона (radius-lg)').toContain(
       'border-radius: var(--ui-radius-lg);',
     );
-    expect(photo, 'фикс-высоты/object-fit оригинала не переносятся (натуральный размер фото)').not.toContain(
-      'height',
-    );
+    expect(
+      photo,
+      'фикс-высоты/object-fit оригинала не переносятся (натуральный размер фото)',
+    ).not.toContain('height');
     expect(photo).not.toContain('object-fit');
   });
 });
@@ -331,6 +331,9 @@ describe('гейт префиксов слоя — расширен mtb|ofc|org|
 
 describe('доки паттернов — источник правды (синхронность док ↔ слой, T18.17)', () => {
   it('синхронность док ↔ слой (list-page): стенд несёт полный API канонов mtb/ofc-card/org-card/cnv', () => {
+    // Классы-маркеры канона без собственных правил (цвет/вес несёт
+    // разметка — прецедент MARKERS_WITHOUT_RULES patterns-layer.test.js).
+    const markers = new Set(['ofc-card__city']);
     const hooks = layerHookSet(layer, /^\.?(mtb|ofc|org|cnv)(?:-|__|$)/);
     expect(hooks.size, 'крючки T18.17 в lpp-секции слоя есть').toBeGreaterThan(0);
     const markup = docHooks(listHtml, /^(mtb|ofc|org|cnv)(?:-|__|$)/);
@@ -340,7 +343,10 @@ describe('доки паттернов — источник правды (син�
       );
     }
     for (const name of markup) {
-      expect(hooks.has(name), `list-page: класс «${name}» разметки имеет правило слоя`).toBe(true);
+      expect(
+        hooks.has(name) || markers.has(name),
+        `list-page: класс «${name}» разметки имеет правило слоя`,
+      ).toBe(true);
     }
   });
 
@@ -388,7 +394,6 @@ describe('пилот career-portal: снятие и переименование
     'cp-offer-card',
     'cp-org-card',
     'cp-events-feature',
-    'cp-page',
   ];
 
   it('разметка build.mjs: вынесенные семейства — на крючках канонов слоя', () => {
@@ -398,9 +403,13 @@ describe('пилот career-portal: снятие и переименование
     );
     expect(build, 'тулбар медиа-каталога — канон mtb').toContain('<div class="mtb">');
     expect(build, 'группа тулбара — mtb__group').toContain('class="mtb__group"');
-    expect(build, 'подпись группы — mtb__label').toContain('class="mtb__label"');
-    expect(build, 'карточка предложения — канон ofc-card').toMatch(/class="ui-card ui-card--hover ofc-card"/);
-    expect(build, 'карточка организации — канон org-card').toMatch(/class="ui-card ui-card--hover org-card"/);
+    expect(build, 'подпись группы — mtb__label').toContain('ui-tag--gray mtb__label');
+    expect(build, 'карточка предложения — канон ofc-card').toMatch(
+      /class="ui-card ui-card--hover ofc-card"/,
+    );
+    expect(build, 'карточка организации — канон org-card').toMatch(
+      /class="ui-card ui-card--hover org-card"/,
+    );
     expect(build, 'сетка преимуществ — канон adv-grid').toContain('<div class="adv-grid">');
     expect(build, 'фича-лента мероприятий — канон evt-feature').toContain(
       '<div class="evt-feature">',
@@ -418,13 +427,18 @@ describe('пилот career-portal: снятие и переименование
     for (const gone of GONE_MARKUP) {
       expect(build, `${gone} снят из разметки`).not.toContain(gone);
     }
+    expect(
+      build,
+      'тело страницы: cp-page снят (упоминания cp-page-head в истории — вне)',
+    ).not.toMatch(/class="[^"]*\bcp-page\b/);
   });
 
   it('pilot.css: cp-селекторы снятых семейств сняты — остались только позиционные хуки company-feed (T18.3)', () => {
     const metrics = censusMetrics(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'), '');
-    expect(metrics.css.families, 'единственное cp-семейство — позиционные хуки лент компании').toEqual(
-      ['company-feed'],
-    );
+    expect(
+      metrics.css.families,
+      'единственное cp-семейство — позиционные хуки лент компании',
+    ).toEqual(['company-feed']);
     for (const gone of [
       '.cp-page',
       '.cp-hero__tag',
@@ -494,13 +508,22 @@ describe('пилот career-portal: снятие и переименование
 
 describe('ценз сайт-зоны: судьбы 16 семейств T18.17 — allowlist до позиционно-необходимого минимума', () => {
   it('allowlist ценза — ровно company-feed (позиционные хуки лент T18.3 — «остаётся сайт-зоне»)', () => {
-    expect(ALLOWED_CP_FAMILIES, 'позиционно-необходимый минимум — ленты компании (T18.3)').toEqual(
-      ['company-feed'],
-    );
+    expect(ALLOWED_CP_FAMILIES, 'позиционно-необходимый минимум — ленты компании (T18.3)').toEqual([
+      'company-feed',
+    ]);
   });
 
   it('семейства-выносы ушли из ценза (судьба «вынос в слой», REPORT §11.4)', () => {
-    for (const family of ['media-toolbar', 'offer-card', 'org-card', 'events-feature', 'events-nav', 'catalog-nav', 'adv-grid', 'team']) {
+    for (const family of [
+      'media-toolbar',
+      'offer-card',
+      'org-card',
+      'events-feature',
+      'events-nav',
+      'catalog-nav',
+      'adv-grid',
+      'team',
+    ]) {
       expect(ALLOWED_CP_FAMILIES, `${family} — вынесено в слой`).not.toContain(family);
     }
   });

@@ -49,6 +49,8 @@ const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8').replace(/\r\n/g,
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8').replace(/\r\n/g, '\n');
 const pilotCssRaw = readFileSync(join(pilotDir, 'pilot.css'), 'utf8').replace(/\r\n/g, '\n');
 const pilotCss = stripCssComments(pilotCssRaw);
+// Слой — каноны T18.17 (ofc-card/org-card/adv-grid).
+const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 const edu = JSON.parse(readFileSync(join(pilotDir, 'data', 'educat.json'), 'utf8'));
 
 /** Разметка educationMain() (один return-шаблон; CRLF нормализуется). */
@@ -152,7 +154,7 @@ describe('build.mjs — секция предложений и преимуще�
     );
   });
 
-  it('«Наши преимущества целевого обучения» — cp-adv-grid из EDU.advantages (6 карточек, education.html:273–281)', () => {
+  it('«Наши преимущества целевого обучения» — adv-grid (канон слоя T18.17) из EDU.advantages (6 карточек, education.html:273–281)', () => {
     expect(eduHtml).toContain('Наши преимущества целевого обучения');
     expect(eduFn).toContain('EDU.advantages.map(advCard)');
     expect(edu.advantages).toHaveLength(6);
@@ -176,10 +178,10 @@ describe('build.mjs — секция предложений и преимуще�
 });
 
 describe('build.mjs — offerCard: мета-колонка оригинала (T18.5, pages.css:861–864)', () => {
-  it('мета — колонка company/city отдельными спанами, не строка « · » (company fw-small primary, city muted — pilot.css)', () => {
-    expect(build).toContain('<p class="cp-offer-card__meta ui-small">');
+  it('мета — колонка company/city отдельными спанами, не строка « · » (company fw-small primary, city muted — канон ofc-card слоя, T18.17)', () => {
+    expect(build).toContain('<p class="ofc-card__meta ui-small">');
     expect(build).toContain(
-      '<span class="cp-offer-card__company">${esc(o.company)}</span><span class="cp-offer-card__city">${esc(o.city)}</span>',
+      '<span class="ofc-card__company">${esc(o.company)}</span><span class="ofc-card__city">${esc(o.city)}</span>',
     );
     expect(build).not.toContain('${esc(o.company)} · ${esc(o.city)}');
   });
@@ -192,7 +194,8 @@ describe('compare.mjs — блок-пробы education (T18.5, практика
     expect(compare).toContain("['edu-orgs', '#orgs', '#orgs']");
     expect(compare).toContain("['edu-offers-head', '.page-head--split', '.php--split']");
     expect(compare).toContain("['edu-company-hero', '.company-hero', '.edu-company-hero']");
-    expect(compare).toContain("['edu-adv', '.adv-grid', '.cp-adv-grid']");
+    // T18.17: сетка преимуществ — канон adv-grid слоя (пара на крючке слоя).
+    expect(compare).toContain("['edu-adv', '.adv-grid', '.adv-grid']");
   });
 });
 
@@ -259,33 +262,38 @@ describe('pilot.css — позиционные хуки edu- (T18.5 Scope: бе�
     expect(blockOf(pilotCss, '.edu-company-hero__text')).toContain('line-height: 1.45');
   });
 
-  it('карточки к канону оригинала: cp-org-card паддинг 24/шаг 12 + мета к низу (pages.css:829/835), cp-offer-card паддинг 24/шаг 14 «как есть» (pages.css:838), мета-колонка шаг 2 с company fw-small primary (pages.css:861–864)', () => {
-    const org = blockOf(pilotCss, '.cp-org-card');
+  it('карточки к канону оригинала: org-card паддинг 24/шаг 12 + мета к низу (pages.css:829/835), ofc-card паддинг 24/шаг 14 «как есть» (pages.css:837), мета-колонка шаг 2 с company fw-small primary (pages.css:849/851) — каноны слоя (T18.17)', () => {
+    const org = blockOf(layerCss, '.org-card');
     expect(org).toContain('padding: var(--ui-space-5)');
     expect(org).toContain('gap: var(--ui-space-3)');
-    expect(blockOf(pilotCss, '.cp-org-card__meta')).toContain('margin-top: auto');
-    const offer = blockOf(pilotCss, '.cp-offer-card');
+    expect(blockOf(layerCss, '.org-card__meta')).toContain('margin-top: auto');
+    const offer = blockOf(layerCss, '.ofc-card');
     expect(offer).toContain('padding: var(--ui-space-5)');
     expect(offer).toContain('gap: 0.875rem');
-    const meta = blockOf(pilotCss, '.cp-offer-card__meta');
+    const meta = blockOf(layerCss, '.ofc-card__meta');
     expect(meta).toContain('flex-direction: column');
     expect(meta).toContain('gap: 0.125rem');
-    const company = blockOf(pilotCss, '.cp-offer-card__company');
+    const company = blockOf(layerCss, '.ofc-card__company');
     expect(company).toContain('font-weight: var(--ui-fw-small)');
     expect(company).toContain('color: var(--ui-color-primary)');
+    expect(pilotCss, 'cp-org-card/cp-offer-card из сайт-зоны сняты (T18.17)').not.toContain(
+      '.cp-org-card',
+    );
+    expect(pilotCss).not.toContain('.cp-offer-card');
   });
 
-  it('пары карточных заголовков: имена/направления на роли ui-h6 (T16.12) — lh 1.3 без трекинга роли (pages.css:831/840; замер 05.11: трекинг роли −0.02em переворачивал перенос имени «Санкт-Петербургский…» — ряд 190 вместо 219)', () => {
-    const orgName = blockOf(pilotCss, '.cp-org-card .ui-h6');
+  it('пары карточных заголовков: имена/направления на роли ui-h6 (T16.12) — lh 1.3 без трекинга роли (pages.css:831/841; замер 05.11: трекинг роли −0.02em переворачивал перенос имени «Санкт-Петербургский…» — ряд 190 вместо 219) — в канонах слоя (T18.17)', () => {
+    const orgName = blockOf(layerCss, '.org-card .ui-h6');
     expect(orgName).toContain('line-height: 1.3');
     expect(orgName).toContain('letter-spacing: normal');
-    const offerDir = blockOf(pilotCss, '.cp-offer-card .ui-h6');
+    const offerDir = blockOf(layerCss, '.ofc-card .ui-h6');
     expect(offerDir).toContain('line-height: 1.3');
     expect(offerDir).toContain('letter-spacing: normal');
   });
 
-  it('сетка преимуществ — шаг 24 (.adv-grid pages.css:505, против 12 прежнего значения сайт-зоны)', () => {
-    expect(blockOf(pilotCss, '.cp-adv-grid')).toContain('gap: var(--ui-space-5)');
+  it('сетка преимуществ — шаг 24 (.adv-grid pages.css:505, против 12 прежнего значения сайт-зоны) — канон adv-grid слоя (T18.17)', () => {
+    expect(blockOf(layerCss, '.adv-grid')).toContain('gap: var(--ui-space-5)');
+    expect(pilotCss).not.toContain('.cp-adv-grid');
   });
 
   it('без !important и без сырых цветов в цветовых свойствах (инварианты слой-гейтов)', () => {

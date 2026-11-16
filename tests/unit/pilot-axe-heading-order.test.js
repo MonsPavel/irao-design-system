@@ -61,7 +61,7 @@ describe('build.mjs — заголовки карточек новых стра�
     expect(eventsMainBody).toContain('EVT.past.map(eventCard)');
   });
 
-  it('education-catalog: предложения — offerCard с тегом h2 (первый offer следует за h1 без промежуточной секции — цель axe «.cp-offer-card__head > h3»)', () => {
+  it('education-catalog: предложения — offerCard с тегом h2 (первый offer следует за h1 без промежуточной секции — цель axe «.ofc-card__head > h3»)', () => {
     expect(catalogMainBody).toContain(`EDU.offers.map((offer) => offerCard(offer, 'h2'))`);
   });
 
@@ -117,7 +117,7 @@ describe('KNOWN_AXE_EXCEPTIONS — атрибутные цели того же �
     const results = {
       violations: [
         contrastNode(
-          '.cp-offer-card:nth-child(1) > .cp-offer-card__footer > .ui-button--accent[href$="trudvsem.ru/"][target="_blank"]',
+          '.ofc-card:nth-child(1) > .ofc-card__footer > .ui-button--accent[href$="trudvsem.ru/"][target="_blank"]',
         ),
       ],
     };
@@ -126,9 +126,9 @@ describe('KNOWN_AXE_EXCEPTIONS — атрибутные цели того же �
 
   it('негативный контроль: нарушение вне реестра (heading-order) остаётся неожиданным — реестр не расширяется мимо одобренных пар', () => {
     const results = {
-      violations: [{ id: 'heading-order', nodes: [{ target: ['.cp-offer-card__head > h3'] }] }],
+      violations: [{ id: 'heading-order', nodes: [{ target: ['.ofc-card__head > h3'] }] }],
     };
-    expect(unexpectedViolations(results)).toEqual(['heading-order → .cp-offer-card__head > h3']);
+    expect(unexpectedViolations(results)).toEqual(['heading-order → .ofc-card__head > h3']);
   });
 
   it('прежнее поведение в силе: голый .ui-button--accent, стендовый #ui-button-accent и цепочка классов .ui-button--accent.ui-button[type…] известны; более длинное имя класса (.ui-button--accent-hover) — НЕ исключение (сужения/расширения мимо класса нет); реестр не пустеет', () => {

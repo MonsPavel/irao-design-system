@@ -187,7 +187,7 @@ describe('pilot.css — шимы сайт-зоны на крючках слоя 
 
   it('в блоке шимов сайдбара нет hex и !important (инварианты системы)', () => {
     const start = pilotCss.indexOf('.lpp-side > .ui-button--text');
-    const end = pilotCss.indexOf('.cp-vac-main');
+    const end = pilotCss.indexOf('.vac-main');
     const section = pilotCss.slice(start, end);
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(section).not.toContain('!important');

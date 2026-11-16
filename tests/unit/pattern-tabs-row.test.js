@@ -228,7 +228,10 @@ describe('ценз сайт-зоны: семейства tabs-row/tabs-links у�
   it('allowlist ценза без tabs-row/tabs-links — судьба семейств «вынос в слой» (REPORT §11.4)', () => {
     expect(ALLOWED_CP_FAMILIES, 'tabs-row — вынесена в слой').not.toContain('tabs-row');
     expect(ALLOWED_CP_FAMILIES, 'tabs-links — вынесена в слой').not.toContain('tabs-links');
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
+    expect(
+      ALLOWED_CP_FAMILIES,
+      'прочие семейства ценза не тронуты (T18.17: минимум — ленты компании)',
+    ).toContain('company-feed');
     // errata T18.16: семейство dir-modal ушло из allowlist (канон dmd слоя)
     // — пин «прочие не тронуты» по нему снят
   });

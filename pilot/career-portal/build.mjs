@@ -28,7 +28,11 @@
  * напрямую.
  * Лендинг-композиции (hero/adv-marquee/media/cover-hero — T17.15,
  * наставничество msh и капсула вакансий vcp — T18.2) — каноны
- * паттерн-слоя ds/ui-patterns.css.
+ * паттерн-слоя ds/ui-patterns.css. Батч cp-остатков (T18.17): тулбар
+ * каталога mtb, карточки ofc-card/org-card, навигация cnv, сетка
+ * adv-grid, фича-лента evt-feature, секция команды tm — каноны слоя;
+ * тон-строки/позиции (page/hero-тоны/article-date/intern-card/vac-main)
+ * — не-cp имена сайт-зоны.
  *
  * Запуск:  node pilot/career-portal/build.mjs [--ref <путь-к-career-portal>]
  * Перед запуском нужен собранный dist/ ДС:  npm run build
@@ -415,7 +419,7 @@ function articleCard(a, headingTag = 'h3') {
     </div>
     <div class="ui-card__body">
       <${heading} class="ui-small">${esc(a.title)}</${heading}>
-      <time class="ui-small ui-text--muted cp-article-card__date">${esc(a.date)}</time>
+      <time class="ui-small ui-text--muted article-date">${esc(a.date)}</time>
     </div>
   </a>
 </article>`;
@@ -435,7 +439,7 @@ function internCard(i) {
  *  (.dir-card__short)) */
 function internLinkCard(i, href) {
   const paid = i.paid ? '<span class="ui-tag ui-tag--orange">оплачиваемая</span>' : '';
-  return `<a class="ui-card ui-card--hover cp-intern-card" href="${esc(href)}">
+  return `<a class="ui-card ui-card--hover intern-card" href="${esc(href)}">
   <p>${paid}</p>
   <h3 class="ui-h6">${esc(i.title)}</h3>
   <p class="ui-small ui-text--muted">${esc(i.short)}</p>
@@ -464,10 +468,10 @@ function internPerson(p, photo) {
 /** карточка организации (целевое обучение; T16.12: заголовок — ui-h6 20/500
  *  color-text — наследование, шорт — muted) */
 function orgCard(o) {
-  return `<article class="ui-card ui-card--hover cp-org-card">
+  return `<article class="ui-card ui-card--hover org-card">
   <h3 class="ui-h6">${esc(o.name)}</h3>
   <p class="ui-small ui-text--muted">${esc(o.short)}</p>
-  <p class="cp-org-card__meta">
+  <p class="org-card__meta">
     <span class="ui-tag ui-tag--blue">${esc(o.type)}</span>
     <span class="ui-tag ui-tag--gray">${esc(o.city)}</span>
   </p>
@@ -485,18 +489,18 @@ function orgCard(o) {
  *  (muted наследует мета) — прежняя склейка «компания · город» одной
  *  muted-строкой не соответствовала оригиналу. */
 function offerCard(o, headingTag) {
-  return `<article class="ui-card ui-card--hover cp-offer-card">
-  <div class="cp-offer-card__head">
+  return `<article class="ui-card ui-card--hover ofc-card">
+  <div class="ofc-card__head">
     <${cardHeading(headingTag)} class="ui-h6 ui-h6--primary">${esc(o.direction)}</${cardHeading(headingTag)}>
-    <time class="cp-offer-card__date ui-small ui-text--muted">${esc(o.date)}</time>
+    <time class="ofc-card__date ui-small ui-text--muted">${esc(o.date)}</time>
   </div>
   <p class="ui-small">${esc(o.short)}</p>
   <p>
     <span class="ui-tag ui-tag--blue">${esc(o.orgTag)}</span>
     <span class="ui-tag ui-tag--gray">${esc(o.form)}</span>
   </p>
-  <p class="cp-offer-card__meta ui-small"><span class="cp-offer-card__company">${esc(o.company)}</span><span class="cp-offer-card__city">${esc(o.city)}</span></p>
-  <div class="cp-offer-card__footer">
+  <p class="ofc-card__meta ui-small"><span class="ofc-card__company">${esc(o.company)}</span><span class="ofc-card__city">${esc(o.city)}</span></p>
+  <div class="ofc-card__footer">
     <!-- базовая accent-кнопка 52px оригинала (раунд 2: probe height 52→32
          при --sm, прочие стили совпали; T15.6 снял --sm) -->
     <a class="ui-button ui-button--accent" href="https://trudvsem.ru/" target="_blank" rel="noopener">сайт «Работа России»</a>
@@ -735,7 +739,7 @@ function page({ title, main, staticHeader = true, bodyClass = '' }) {
   <link rel="stylesheet" href="ds/ui-patterns.css">
   <link rel="stylesheet" href="pilot.css">
 </head>
-<body class="cp-page${bodyClass ? ` ${bodyClass}` : ''}">
+<body class="site-page${bodyClass ? ` ${bodyClass}` : ''}">
 <a class="ui-skip-link" href="#main">Перейти к основному содержимому</a>
 ${viPanelHtml()}
 ${headerHtml({ staticHeader })}
@@ -1083,7 +1087,7 @@ function mediaHomeCard(card, kind = '') {
   // on-photo в пилоте не применяется). Заголовок (ветка с desc) — мини-тайтл
   // 14/500, один выбор с articleCard (T16.12); дата — muted (.media__card-date
   // оригинала). T17.5: каркас — ui-card--media (правила cp-article-card*,
-  // которые занимала эта карточка-заёмщик, сняты); класс cp-article-card__date
+  // которые занимала эта карточка-заёмщик, сняты); класс article-date (T18.17 —
   // на дате — специфика fw 400 (см. pilot.css). Мёртвый extraClass снят
   // (батч 31.10 — ревью T17.15: единственный вызов с классом был снят T17.5).
   const dot = { статья: 'ui-tag--blue', видео: 'ui-tag--orange', подкаст: 'ui-tag--green' }[
@@ -1097,7 +1101,7 @@ function mediaHomeCard(card, kind = '') {
       <span class="ui-card__media-tag ui-tag ${dot}"><span class="ui-tag__icon" aria-hidden="true"></span>${esc(card.type)}</span>
     </div>
     <div class="ui-card__body">
-    ${card.desc ? `<h3 class="ui-small">${esc(card.caption)}</h3>\n    <p class="ui-small ui-text--muted cp-article-card__date">${esc(card.date)}</p>` : `<p>${esc(card.caption)}</p>\n    <time class="ui-small ui-text--muted cp-article-card__date">${esc(card.date)}</time>`}
+    ${card.desc ? `<h3 class="ui-small">${esc(card.caption)}</h3>\n    <p class="ui-small ui-text--muted article-date">${esc(card.date)}</p>` : `<p>${esc(card.caption)}</p>\n    <time class="ui-small ui-text--muted article-date">${esc(card.date)}</time>`}
     </div>
   </a>
 </article>`;
@@ -1312,10 +1316,10 @@ function indexMain() {
     </form>
   </div>
   <div class="hro__tags">
-    <span class="ui-tag hro__tag cp-hero__tag--violet">Стабильная компания</span>
-    <span class="ui-tag hro__tag cp-hero__tag--sand">Масштаб задач</span>
-    <span class="ui-tag hro__tag cp-hero__tag--green">Работа со смыслом</span>
-    <span class="ui-tag hro__tag cp-hero__tag--rose">Сильная команда</span>
+    <span class="ui-tag hro__tag hero-tone--violet">Стабильная компания</span>
+    <span class="ui-tag hro__tag hero-tone--sand">Масштаб задач</span>
+    <span class="ui-tag hro__tag hero-tone--green">Работа со смыслом</span>
+    <span class="ui-tag hro__tag hero-tone--rose">Сильная команда</span>
   </div>
 </section>
 
@@ -1515,7 +1519,7 @@ ${mediaCards}
 <section class="ui-section">
   <div class="ui-container">
     <h2 class="ui-h2">Стань частью нашей большой команды</h2>
-    <img class="cp-team__photo" src="assets/images/team-wide.jpg" alt="Команда Интер РАО" loading="lazy">
+    <img class="tm__photo" src="assets/images/team-wide.jpg" alt="Команда Интер РАО" loading="lazy">
   </div>
 </section>
 
@@ -1558,7 +1562,7 @@ function vacanciesMain() {
          сайдбара 17.5rem = 280px оригинала (калибровка REPORT §11 против
          20rem копипасты). Подписи групп — канон lpp-pill__name; хук пробы
          side-promo (cp-vac-side__promo) — класс без CSS, как в T16.5.
-         main-колонка (cp-vac-main) остаётся сайт-зоной: композиция страницы
+         main-колонка (vac-main) остаётся сайт-зоной: композиция страницы
          с findBar — канона в док-HTML нет (T17.12). -->
     <div class="lpp-layout">
       <!-- tabindex="0" — паритет канона lpp-side (list-page.html): панель от md
@@ -1618,7 +1622,7 @@ function vacanciesMain() {
         </div>
       </aside>
 
-      <div class="cp-vac-main">
+      <div class="vac-main">
         <!-- панель поиска — общий findBar vacancies/events-search (T15.5,
              Technical considerations: переиспользуемая cp-функция) -->
         ${findBar({
@@ -2339,7 +2343,7 @@ ${applyDialogHtml()}
 <section class="ui-section int-sec">
   <div class="ui-container">
     <h2 class="ui-h2 int-title">Преимущества прохождения ${titleLower}</h2>
-    <div class="cp-adv-grid">
+    <div class="adv-grid">
 ${advantages}
     </div>
   </div>
@@ -2365,11 +2369,11 @@ ${interns}
 
 <!-- Секция 8 (T18.6 Goal: −555px): лента events-feature оригинала
      (internships.html:313–361) — большая карточка на два ряда (2fr/1fr),
-     каркас — ui-card--media ДС + hooks cp-events-feature. -->
+     каркас — ui-card--media ДС + канон evt-feature слоя (T18.17). -->
 <section class="ui-section int-sec">
   <div class="ui-container">
     <h2 class="ui-h2 int-title">Наши мероприятия</h2>
-    <div class="cp-events-feature">
+    <div class="evt-feature">
 ${events}
     </div>
   </div>
@@ -2418,7 +2422,7 @@ function educationMain() {
          .vacancy-search__select оригинала), ширина 260 — канон ленты; теги —
          ui-tag--blue × ui-tag--filter (T16.14), активный «Все» —
          aria-current (оригинал красит inline-стилем); группа — nav
-         (landmark-маркер, прецедент cp-media-toolbar__group). Шаг 24 внутри
+         (landmark-маркер, прецедент mtb__group). Шаг 24 внутри
          группы — хук .edu-filter-group. -->
     <div class="lpp-filters">
       ${selectField({ name: 'region', options: ['Все регионы', 'Москва', 'Санкт-Петербург', 'Омская область'], pill: true, ariaLabel: 'Регион' })}
@@ -2454,7 +2458,7 @@ ${offers}
       <p class="edu-company-hero__text ui-body">Компании Группы «Интер РАО» заинтересованы в молодых специалистах: целевики получают стипендию, оплачиваемую практику и гарантированное рабочее место после выпуска.</p>
     </div>
     <h2 class="ui-h2 edu-title">Наши преимущества целевого обучения</h2>
-    <div class="cp-adv-grid">
+    <div class="adv-grid">
 ${advantages}
     </div>
   </div>
@@ -2474,7 +2478,7 @@ ${advantages}
    (пилюли ui-select--pill, T17.12; ширина 260px — канон ленты lpp-filters
    слоя); подписи — label[for] рядом
    (канон ui-select T7.3, Accessibility requirements). Список предложений —
-   те же cp-offer-card, что на education.html (оригинал строит каталог
+   те же ofc-card, что на education.html (оригинал строит каталог
    тем же offer_card в cards-grid--3, build.py:803); данные educat.json
    целиком (6 предложений). Клиентской фильтрации нет — Out of scope
    (селекты оригинала инертны, как фильтры-сайдбар vacancies).
@@ -2545,7 +2549,7 @@ ${filters}
 ${offers}
     </div>
 
-    <div class="cp-catalog-nav">
+    <div class="cnv">
       <nav class="ui-pagination" aria-label="Пагинация: каталог обучения">
         <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${ARROW_LEFT}</button>
         <span class="ui-pagination__page" aria-current="page">1</span>
@@ -2637,7 +2641,7 @@ ${past}
          --bare). Недоступная стрелка — button[disabled] (канон T6.3: в
          оригинале disabled на <a> невалиден); мок-пагинация ?page=N без
          бэкенда (Out of scope T15.5). -->
-    <div class="cp-events-nav">
+    <div class="cnv">
       <nav class="ui-pagination" aria-label="Пагинация: мероприятия">
         <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">${ARROW_LEFT}</button>
         <span class="ui-pagination__page" aria-current="page">1</span>
@@ -2654,7 +2658,7 @@ ${past}
    «Все мероприятия» навигации оригинала (build.py:817–823): панель поиска —
    общий findBar vacancies (Technical considerations: единственный второй
    потребитель панели, дублирования не плодить), тулбар «Найдено: N» с
-   фильтр-тегами — прецедент cp-media-toolbar media.html (активного состояния
+   фильтр-тегами — прецедент mtb media.html (активного состояния
    у оригинала нет — events-search.html:158–164, aria-current не ставится),
    выдача — все предстоящие события тем же eventCard, что на events.html
    (оригинал строит страницу тем же events_upcoming(), build.py:821).
@@ -2686,7 +2690,7 @@ function eventsSearchMain() {
       variant: 'primary',
     })}
 
-    <div class="cp-media-toolbar">
+    <div class="mtb">
       <span class="ui-tag ui-tag--gray">Найдено: ${EVT.upcoming.length}</span>
       <nav class="ui-chip" aria-label="Фильтры мероприятий">
         <a class="ui-chip__pill" href="events-search.html">Все</a>
@@ -2730,16 +2734,16 @@ function mediaMain() {
       <p class="php-subtitle ui-lead ui-text--muted">Статьи, видео и подкасты о работе в Группе «Интер РАО»: люди, проекты, технология и профессии энергетики.</p>
     </div>
 
-    <div class="cp-media-toolbar">
+    <div class="mtb">
       <span class="ui-tag ui-tag--gray">Тип контента:</span>
-      <nav class="cp-media-toolbar__group" aria-label="Тип контента">
+      <nav class="mtb__group" aria-label="Тип контента">
         <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html" aria-current="page">Все</a>
         <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">статьи</a>
         <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">видео</a>
         <a class="ui-tag ui-tag--blue ui-tag--filter" href="media.html">подкасты</a>
       </nav>
-      <span class="ui-tag ui-tag--gray cp-media-toolbar__rubrics-label">Рубрики:</span>
-      <nav class="cp-media-toolbar__group" aria-label="Рубрики">
+      <span class="ui-tag ui-tag--gray mtb__label">Рубрики:</span>
+      <nav class="mtb__group" aria-label="Рубрики">
       ${rubrics}
       </nav>
     </div>
@@ -3024,7 +3028,7 @@ ${sections}
    стажировки/практики (все элементы данных), статьи (первые 3), баннер
    «Целевое обучение», события (первые 3), фото-галерея. Каркасы лент —
    существующие API ДС: vac-row — lpp-row (T14.10), dir-card —
-   cp-intern-card (T15.4: карточка ведёт на internship.html вместо модалки
+   intern-card (T15.4: карточка ведёт на internship.html вместо модалки
    оригинала), article/event — ui-card--media (T17.5), баннеры —
    dpp-banner (канон слоя, T18.15), фото — ui-figure/ui-image. href — реальные страницы
    клона (гейт ссылок compare); триггер «откликнуться» строк — без модалки,

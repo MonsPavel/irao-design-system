@@ -356,7 +356,7 @@ describe('T18.3: ленты компании (company.html) — build.mjs: со�
     );
   });
 
-  it('ленты стажировок/практик: все элементы данных (internship_cards build.py:479–483), каркас — internCard/cp-intern-card (переиспользование, не дублирование; T15.4: карточка ведёт на internship.html)', () => {
+  it('ленты стажировок/практик: все элементы данных (internship_cards build.py:479–483), каркас — internCard/intern-card (переиспользование, не дублирование; T15.4: карточка ведёт на internship.html)', () => {
     expect(build).toMatch(/const companyInternships = INT\.internship\.items\.map\(internCard\)/);
     expect(build).toMatch(/const companyPractices = INT\.practice\.items\.map\(internCard\)/);
     expect(companyHtml).toMatch(
@@ -520,7 +520,7 @@ describe('T18.3: compare.mjs — блок-пробы лент компании (
 });
 
 describe('T18.3: census — errata порогов и семейства company-feed', () => {
-  it('семейство company-feed в allowlist (позиционные хуки лент — не новый визуальный блок: каркасы лент — ui-grid/ui-card/lpp-row/cp-intern-card)', () => {
+  it('семейство company-feed в allowlist (позиционные хуки лент — не новый визуальный блок: каркасы лент — ui-grid/ui-card/lpp-row/intern-card)', () => {
     expect(ALLOWED_CP_FAMILIES).toContain('company-feed');
   });
 });

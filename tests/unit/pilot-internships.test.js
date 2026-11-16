@@ -49,6 +49,8 @@ const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8').replace(/\r\n/g,
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8').replace(/\r\n/g, '\n');
 const pilotCssRaw = readFileSync(join(pilotDir, 'pilot.css'), 'utf8').replace(/\r\n/g, '\n');
 const pilotCss = stripCssComments(pilotCssRaw);
+// Слой — каноны T18.17 (evt-feature).
+const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 
 /** Тело internshipsMain() — общий строитель internships.html/practices.html. */
 const internFn = build.slice(
@@ -156,10 +158,10 @@ describe('build.mjs + pilot.css — сетка направлений (T18.6, pa
     expect(css).toContain('min-height: 26.5rem');
   });
 
-  it('карточка направления — шаг 12 (.dir-card pages.css:1024) против 14 канона ui-card; кламп шорта 3 строки — канон T16.12 на общей cp-intern-card (pages.css:1045–1054), дублирующего хука нет', () => {
-    expect(blockOf(pilotCss, '.int-dir-grid .cp-intern-card')).toContain('gap: var(--ui-space-3)');
-    expect(blockOf(pilotCss, '.cp-intern-card .ui-small')).toContain('-webkit-line-clamp: 3');
-    expect(blockOf(pilotCss, '.int-dir-grid .cp-intern-card .ui-small')).toBeNull();
+  it('карточка направления — шаг 12 (.dir-card pages.css:1024) против 14 канона ui-card; кламп шорта 3 строки — канон T16.12 на общей intern-card (pages.css:1045–1054; T18.17 — не-cp имя), дублирующего хука нет', () => {
+    expect(blockOf(pilotCss, '.int-dir-grid .intern-card')).toContain('gap: var(--ui-space-3)');
+    expect(blockOf(pilotCss, '.intern-card .ui-small')).toContain('-webkit-line-clamp: 3');
+    expect(blockOf(pilotCss, '.int-dir-grid .intern-card .ui-small')).toBeNull();
   });
 });
 
@@ -203,45 +205,46 @@ describe('build.mjs + pilot.css — карточки стажёров (T18.6, pa
   });
 });
 
-describe('build.mjs + pilot.css — секция 8 «Наши мероприятия» (T18.6 Goal: −555px, pages.css:565–581/1150–1171)', () => {
-  it('лента — 2fr/1fr от lg (pages.css:1150–1155, mobile-first: база колонка), большой карточке — два ряда (pages.css:1157–1161)', () => {
-    const base = blockOf(pilotCss, '.cp-events-feature');
+describe('секция 8 «Наши мероприятия» — канон evt-feature слоя (T18.6 Goal: −555px, pages.css:565–581/1150–1171; T18.17 — вынос)', () => {
+  it('лента — 2fr/1fr от lg (pages.css:1150–1155, mobile-first: база колонка), большой карточке — два ряда (pages.css:1157–1161) — значения канона evt-feature в слое', () => {
+    const base = blockOf(layerCss, '.evt-feature');
     expect(base).toContain('display: grid');
     expect(base).toContain('gap: var(--ui-space-5)');
     expect(base).toContain('grid-template-columns: minmax(0, 1fr)');
-    expect(pilotCss).toMatch(
-      /\.cp-events-feature \{\s*grid-template-columns: 2fr minmax\(0, 1fr\);/,
+    expect(layerCss).toMatch(/\.evt-feature \{\s*grid-template-columns: 2fr minmax\(0, 1fr\);/);
+    expect(layerCss).toMatch(/\.evt-feature \.ui-card:first-child \{\s*grid-row: 1 \/ 3;/);
+    expect(pilotCss, 'cp-events-feature из сайт-зоны снят (T18.17)').not.toContain(
+      '.cp-events-feature',
     );
-    expect(pilotCss).toMatch(/\.cp-events-feature \.ui-card:first-child \{\s*grid-row: 1 \/ 3;/);
   });
 
   it('большая карточка — слот без аспекта и img без фикс-высоты (pages.css:1163–1171: флекс-растяжка; internship-1.png 431×431 — квадрат; ревью T18.6: aspect-ratio 1/1 на слоте оставлял img полосой 220px от правил 12.5/13.75rem — 627px пустоты при Δ0 гейта; гашение специфичностью (0,4,1), height:100% не нужен — урок ui-card.css:163–172)', () => {
-    expect(pilotCss).toMatch(
-      /\.cp-events-feature \.ui-card:first-child \.ui-card__media \{\s*aspect-ratio: auto;/,
+    expect(layerCss).toMatch(
+      /\.evt-feature \.ui-card:first-child \.ui-card__media \{\s*aspect-ratio: auto;/,
     );
-    expect(pilotCss).toMatch(
-      /\.cp-events-feature \.ui-card:first-child \.ui-card__media img \{\s*height: auto;/,
+    expect(layerCss).toMatch(
+      /\.evt-feature \.ui-card:first-child \.ui-card__media img \{\s*height: auto;/,
     );
   });
 
   it('карточка события — паддинг 16 (.event-card pages.css:565), фото 200→220 (pages.css:569/932), тело 16 4 0 с шагом 10 (pages.css:575)', () => {
-    const card = blockOf(pilotCss, '.cp-events-feature .ui-card');
+    const card = blockOf(layerCss, '.evt-feature .ui-card');
     expect(card).toContain('padding: var(--ui-space-4)');
     expect(card).toContain('gap: 0');
-    expect(blockOf(pilotCss, '.cp-events-feature .ui-card__media')).toContain('aspect-ratio: auto');
-    const img = blockOf(pilotCss, '.cp-events-feature .ui-card__media img');
+    expect(blockOf(layerCss, '.evt-feature .ui-card__media')).toContain('aspect-ratio: auto');
+    const img = blockOf(layerCss, '.evt-feature .ui-card__media img');
     expect(img).toContain('height: 12.5rem');
-    expect(pilotCss).toMatch(
-      /@media \(min-width: 768px\) \{\s*\.cp-events-feature \.ui-card__media img \{\s*height: 13\.75rem;/,
+    expect(layerCss).toMatch(
+      /@media \(min-width: 768px\) \{\s*\.evt-feature \.ui-card__media img \{\s*height: 13\.75rem;/,
     );
-    const body = blockOf(pilotCss, '.cp-events-feature .ui-card__body');
+    const body = blockOf(layerCss, '.evt-feature .ui-card__body');
     expect(body).toContain('padding: var(--ui-space-4) 0.25rem 0');
     expect(body).toContain('gap: 0.625rem');
   });
 
   it('заголовок карточки — lh 1.3 (.event-card__title pages.css:579; прецедент пар T18.5), дата — fs-small (.event-card__date pages.css:577)', () => {
-    expect(blockOf(pilotCss, '.cp-events-feature .ui-h6')).toContain('line-height: 1.3');
-    expect(blockOf(pilotCss, '.cp-events-feature .ui-card__body time')).toContain(
+    expect(blockOf(layerCss, '.evt-feature .ui-h6')).toContain('line-height: 1.3');
+    expect(blockOf(layerCss, '.evt-feature .ui-card__body time')).toContain(
       'font-size: var(--ui-fs-small)',
     );
   });
