@@ -934,6 +934,88 @@
   </div>
 </section>
 
+<!-- Панель «Найди свою вакансию» (T18.16): связка vcs паттерн-слоя —
+     сетка «панель | CTA-плитка» (2fr 1fr от lg, мобильная база — колонка,
+     инверсия ступени 1023 оригинала vacancy-search.css:75); плитка панели
+     310px «как есть» (vacancy-search.css:15–18), лента пилюль — стык
+     lpp-filters (шаг 16, ширина пилюли 260px «как есть» на потомке
+     ui-select--pill — геометрия несёт компонент T17.12); CTA-плитка —
+     компонент ui-card--cta (--accent/--row T17.8). На реальной странице
+     панель — слот тёмной секции whu главной career-portal (build.py
+     SLOTS — why-us.css:46–47). -->
+<section class="ui-section" id="lpp-vcs-demo" aria-labelledby="lpp-vcs-demo-title">
+  <p class="ui-showcase-stand__note">
+    Панель «Найди свою вакансию» главной — связка <code>vcs</code> паттерн-слоя (T18.16): сетка
+    «панель | CTA-плитка» — <code>vcs__wrap</code> (2fr 1fr от lg, шаг 12px; мобильная база —
+    колонка, инверсия ступени ≤1023), плитка панели <code>vcs__panel</code> — мин-высота 310px,
+    паддинг 36px, шаг 48px «как есть» (<code>vacancy-search.css:15–18</code>), лента пилюль
+    <code>vcs__fields</code> — стык с лентой фильтров <code>lpp-filters</code> (шаг 16px; ширина
+    пилюли 260px на потомке <code>ui-select--pill</code> — геометрия несёт компонент, T17.12).
+    Заголовок — роль <code>ui-page-title</code>, кнопка — <code>ui-button--accent</code>
+    («найти», оранжевая пара оригинала), CTA-плитка — <code>ui-card--cta --accent/--row</code>
+    (T17.8). Без JS нативный GET-сабмит ведёт на страницу списка.
+  </p>
+
+  <h2 class="ui-h3" id="lpp-vcs-demo-title">Панель «Найди свою вакансию» (T18.16)</h2>
+
+  <!-- На стенде заголовок панели — h3 ролью ui-page-title: h1 ветки «с
+       данными» выше (гейт irao/one-h1); на реальной странице — h2 (роль
+       та же, T14.2). Пилюли без видимых подписей — aria-label на select
+       (как в пилоте; пара APG listbox-button строится модулем ui-select). -->
+  <div class="vcs__wrap">
+    <form class="vcs__panel" method="get" action="#lpp-vcs-demo-title" aria-label="Поиск вакансии">
+      <h3 class="ui-page-title">Найди свою вакансию</h3>
+      <div class="vcs__fields">
+        <div class="ui-select--pill">
+          <select
+            class="ui-field__select"
+            name="vcs-city"
+            aria-label="Город"
+            data-ui-select="wrap"
+          >
+            <option value="" selected>Город</option>
+            <option value="msk">Москва</option>
+            <option value="spb">Санкт-Петербург</option>
+            <option value="ekb">Екатеринбург</option>
+          </select>
+        </div>
+        <div class="ui-select--pill">
+          <select
+            class="ui-field__select"
+            name="vcs-position"
+            aria-label="Должность"
+            data-ui-select="wrap"
+          >
+            <option value="" selected>Должность</option>
+            <option value="ing">Инженер</option>
+            <option value="elec">Электромонтёр</option>
+            <option value="spec">Специалист</option>
+          </select>
+        </div>
+        <div class="ui-select--pill">
+          <select
+            class="ui-field__select"
+            name="vcs-experience"
+            aria-label="Опыт"
+            data-ui-select="wrap"
+          >
+            <option value="" selected>Опыт</option>
+            <option value="none">Без опыта</option>
+            <option value="1y">От 1 года</option>
+            <option value="3y">От 3 лет</option>
+          </select>
+        </div>
+        <button class="ui-button ui-button--accent" type="submit">найти</button>
+      </div>
+    </form>
+    <a class="ui-card ui-card--cta ui-card--cta--accent ui-card--cta--row" href="#lpp-results">
+      <span class="ui-h4">Все 140 вакансий</span>
+      <!-- prettier-ignore -->
+      <svg width="34" height="34" viewBox="0 0 34 34" fill="none" aria-hidden="true"><path d="M8 26L26 8M12 8h14v14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+    </a>
+  </div>
+</section>
+
 <script>
   // T8.1, Technical considerations: после применения фильтра (перезагрузка
   // GET-формы) фокус — на заголовок результатов: скринридер объявляет

@@ -1,7 +1,7 @@
 /**
  * Гейт селекторов паттерн-слоя (T17.1, Implementation requirements п.2 —
  * «stylelint-правило/проверка в сборке»): селекторы слоя — только
- * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld
+ * канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd
  * (lnk-/lgo- — лендинг-связки nav-карточек и ленты логотипов, T17.9; tlp- —
  * таймлайн, T17.10; nvp — поднавигация разделов, T17.11; hsp-/ftp- — каркасы
  * шапки/подвала, T17.13; hro/mrq/mdl/cvh — лендинг-композиции hero/adv-marquee/
@@ -9,7 +9,8 @@
  * наставничество, vcp — капсула вакансий, T18.2; php — обложка страницы,
  * T18.10; tnv — строка табов + ссылок разделов, T18.11; whu — тёмная секция
  * «why-us» со стеклом, T18.12; prd — раскладки карусели production v1/v2,
- * T18.13; dir — сетка направлений, hld — холдинг, T18.14; потомки —
+ * T18.13; dir — сетка направлений, hld — холдинг, T18.14; vcs — панель
+ * «Найди свою вакансию», dmd — контент модалки направления, T18.16; потомки —
  * компоненты ui-*), ID и чужие namespace-крючки запрещены — защита от
  * превращения слоя в свалку.
  *
@@ -82,31 +83,33 @@ export function patternLayerProblems(css) {
     // лендинг-композиций (mrq/mdl/cvh, T17.15; hro — голый блок с BEM-
     // элементами __*, по образцу dpp), обложки страницы (php, T18.10),
     // строки табов + ссылок (tnv, T18.11), тёмной секции why-us (whu,
-    // T18.12), раскладок карусели production (prd, T18.13) и сетки
-    // направлений/холдинга (dir/hld, T18.14) — голые
-    // `tlp`/`nvp`/`mrq`/`mdl`/`cvh`/`hro`/`php`/`tnv`/`whu`/`prd`/`dir`/`hld`
-    // (примеры спек), у остальных паттернов блок несёт суффикс
-    // (lpp-row; pstr-card — постерная карточка, T17.18): префикс обязан
-    // продолжаться дефисом, модификатором __ или закончиться на нём.
+    // T18.12), раскладок карусели production (prd, T18.13), сетки
+    // направлений/холдинга (dir/hld, T18.14), панели «Найди свою
+    // вакансию» (vcs) и контента модалки направления (dmd, T18.16) —
+    // голые `tlp`/`nvp`/`mrq`/`mdl`/`cvh`/`hro`/`php`/`tnv`/`whu`/`prd`/
+    // `dir`/`hld`/`vcs`/`dmd` (примеры спек), у остальных паттернов блок
+    // несёт суффикс (lpp-row; pstr-card — постерная карточка, T17.18):
+    // префикс обязан продолжаться дефисом, модификатором __ или
+    // закончиться на нём.
     if (
       !hooks.some((hook) =>
-        /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld)(?:-|__|$)/.test(
+        /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$)/.test(
           hook,
         ),
       )
     ) {
       problems.push(
-        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld: «${selector}»`,
+        `селектор слоя без крючка lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld/vcs/dmd: «${selector}»`,
       );
     }
     for (const hook of hooks) {
       if (
-        !/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld)(?:-|__|$))/.test(
+        !/^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$))/.test(
           hook,
         )
       ) {
         problems.push(
-          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld + ui-потомки)`,
+          `чужой крючок «${hook}» в селекторе слоя: «${selector}» (только lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd + ui-потомки)`,
         );
       }
     }
