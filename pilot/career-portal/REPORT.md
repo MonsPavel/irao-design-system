@@ -2541,9 +2541,15 @@ computed-стили читаются — прецедент dropdown-item; ра�
   колонка шаг 14 «как есть»/паддинг 24 (pages.css:837, калибровка T18.5),
   пара заголовка lh 1.3 без трекинга (pages.css:841), шапка baseline/шаг 8
   (принятая интерпретация T18.5), мета-колонка шаг 2/company fw-small
-  primary (pages.css:849/851), футер к низу; гранулы T3.6 — `min-width: 0`
-  + `__head flex-wrap: wrap` (порт ступеней оригинала @max-767
-  pages.css:926/927, инверсия mobile-first — рендер 1:1 при достатке места);
+  primary (pages.css:849/851), футер к низу; шапка — одна строка, 1:1
+  базлайну b90513f (без flex-wrap/min-width: ступени оригинала @max-767 —
+  pages.css:954/955 в локальном чекауте a083292, 926/927 на 8469ea6 — не
+  переносятся; errata приёмки T18.17: безусловные гранулы валили дату под
+  заголовок на десктопе — docHeight education/education-catalog/article
+  +8, порог ±4px — сняты). Стресс-гранула 32px-гейта T3.6 —
+  `__head .ui-h6 { overflow-wrap: anywhere }`: при сжатии заголовок
+  ломается по символам, дата не выталкивается за карточку; при 1x — no-op
+  (прецедент reflow-гранул слоя lpp-pill/vcs: max-width: 100%);
 - **`org-card`** (list-page) — карточка организации: шаг 12/паддинг 24
   (pages.css:829), пара заголовка (pages.css:831), мета к низу
   (pages.css:835);
@@ -2610,28 +2616,41 @@ pattern-cp-batch.test.js — прецедент vcs/dmd T18.16; landing-section 
 разделы канонов.
 
 **Пин-тест (TDD красный → зелёный):**
-tests/unit/pattern-cp-batch.test.js — 25 пинов (значения канонов 1:1 с
+tests/unit/pattern-cp-batch.test.js — 27 пинов (значения канонов 1:1 с
 источниками pages.css:594/829–853/900/929/505/1150–1171/565–581 и
-team.css:18–23; гранулы T3.6 — minmax(0,1fr)/min-width:0/flex-wrap; гейт
-7 префиксов; синхронность док ↔ слой; разметка/снятие cp-семейств; не-cp
-тон-хуки; compare-пары; allowlist ['company-feed']) — красный 24/25 до
-реализации, зелёный после.
+team.css:18–23; стресс-гранула шапки предложения — overflow-wrap: anywhere
+на `.ofc-card__head .ui-h6`; гранулы T3.6 — minmax(0,1fr) ступеней
+adv-grid; шапка ofc — без flex-wrap/min-width, 1:1 базлайну; гейт
+7 префиксов; синхронность док ↔ слой вкл. строки «где живёт» без снятых
+классов — ревью; разметка/снятие cp-семейств; не-cp тон-хуки; compare-пары;
+allowlist ['company-feed']) — красные: 24/25 на старте задачи, 3/27 при
+приёмке (дефект десктопа ofc-card), зелёный после каждого цикла.
 
-**Приёмка.** Гейты: `node tools/validate-backlog.mjs` — clean (0 broken);
-`npm run lint` 0 (css/js/format/html); `npm run test:unit` — **2433 passed**
-(96 файлов); `node pilot/career-portal/check-links.mjs` — 43 страницы /
-917 ссылок / 0 DEAD; `node pilot/career-portal/census.mjs` — гейт OK
-(1441 строка / код 580, 1 семейство, allowlist 1); `npm run build` +
-пересборка пилота (порядок «рантайм → пилот», errata T18.11);
-`npm run test:docker -- --update-snapshots` (полный chromium-проект) —
-**670 passed / 1 skipped** exit 0 (для записи эталонов), контрольный прогон
-без update — **670 passed / 1 skipped exit 0** (эталоны зелёные на
-закоммиченном состоянии; первый прогон поймал 32px-гейт T3.6 на двух
-стендах — гранулы minmax(0,1fr)/flex-wrap внесены в каноны, демо-слова
-короче стресса — см. выше). Эталоны ×7 — по одному контейнерному на
+**Приёмка.** Гейты (финальное состояние HEAD): `node tools/validate-backlog.mjs`
+— clean (0 broken); `npm run lint` 0 (css/js/format/html);
+`npm run test:unit` — **2435 passed** (96 файлов);
+`node pilot/career-portal/check-links.mjs` — 43 страницы / 917 ссылок /
+0 DEAD; `node pilot/career-portal/census.mjs` — гейт OK (1441 строка /
+код 580, 1 семейство, allowlist 1); `npm run build` + пересборка пилота
+(порядок «рантайм → пилот», errata T18.11);
+`npm run test:docker` — **670 passed / 1 skipped** exit 0 (эталоны зелёные
+на закоммиченном состоянии). История 32px-гейта T3.6 (errata): первый
+docker-прогон поймал hscroll на двух стендах (ofc-шапка выталкивала дату
+за карточку на 32px-базе) — первым решением были безусловные гранулы
+`min-width: 0` + `flex-wrap: wrap` (13e176b); приёмка показала, что они
+меняли десктоп (дата валила под заголовок — docHeight
+education/education-catalog/article **+8** при пороге ±4px; reproduced
+пробой на HEAD до фикса: 3967→3975 / 1663→1671 / 3303→3311) — гранулы
+сняты (TDD: красные пины 3/27 — шапка без flex-wrap, карточка без
+min-width, стресс-гранула anywhere), финальное решение — стресс-гранула
+`overflow-wrap: anywhere` на заголовке шапки (no-op при 1x) + демо-слова
+стендов короче стресса. Эталоны ×7 — по одному контейнерному на
 вынесенное семейство (mtb-toolbar/ofc-card/org-card/cnv --desktop на
 list-page; adv-grid/evt-feature/tm-photo --desktop на landing-section) —
-сняты в контейнере (ADR-0004). Дифф-лист пересъёма по протоколу ADR-0004:
+сняты в контейнере (ADR-0004); пересъёма не потребовали (шапки демо
+ofc-card на десктопе не переносились ни с гранулами, ни без — эталон
+ofc-card--desktop идентичен; контрольный docker зелёный на тех же
+эталонах). Дифф-лист пересъёма по протоколу ADR-0004:
 pattern-landing-section fullPage ×3 (секции adv-grid/evt-feature/tm
 вставлены в конец стенда, после lsp-holding) — ревью диффа (проба-декодер
 PNG, .zcode/t1817-etalon-diff): desktop 12783 → 14701 (+1918), tablet
@@ -2642,19 +2661,30 @@ PNG, .zcode/t1817-etalon-diff): desktop 12783 → 14701 (+1918), tablet
 «лотереи растеризации» 19.10 — вне порога гейта); list-page — эталоны
 element-снимки новых секций не задевают существующие ветки.
 
-**Пин пиксель-нейтральности (AC)**: docHeight всех 43 страниц до/после —
-**Δ0 на каждой** (порог ±4px; «до» — проба .zcode/t1817-docheight.mjs на
-собранном пилоте от main b90513f — worktree-базлайн D:/repositories/
-irao-t1817-baseline, протокол lazyWarmup compare.mjs, факт = пины приёмки
+**Пин пиксель-нейтральности (AC)** — errata приёмки: первая «после»-проба
+(20:42, .zcode/t1817-docheight-after.json тождественен baseline) измеряла
+пилот-дист БЕЗ гранул 13e176b (пересборка пилота не выполнялась после
+правки слоя) — заявленное «Δ0 всех 43» было преждевременным; на HEAD с
+гранулами приёмка измерила **education 3967→3975 / education-catalog
+1663→1671 / article 3303→3311 (Δ+8, за порогом)**. После фикса (снятие
+гранул, стресс-гранула anywhere) пилот пересобран и пины переведены на
+актуальный HEAD: docHeight всех 43 страниц до/после — **Δ0 на каждой**
+(порог ±4px; три флаговых страницы: education **3967 → 3967**,
+education-catalog **1663 → 1663**, article **3303 → 3303**; «до» — проба
+.zcode/t1817-docheight.mjs на собранном пилоте от main b90513f —
+worktree-базлайн, протокол lazyWarmup compare.mjs, факт = пины приёмки
 T18.16: index 9722, index-2 9138, company 5535, companies 3075; «после» —
-та же проба после пересборки). Блок-пары (compare 16.11, оригинал = live
-Pages ↔ пилот локально, 1440): index team **716 ↔ 530** (принятая дельта
-−186 — не изменилась), education edu-adv **283 ↔ 278** (принятая −5 —
-T18.5), internships/practices advantages **283 ↔ 274** (принятая −9 —
-T18.6), events **990 ↔ 990** (Δ0), probe card-title-primary (новая, на
-крючке канона adv-grid) — fs 20/fw 500/color #002856 — **MATCH**; probe
-card-short (на каноне org-card) — fs 14, color gray-97 против gray-128
-оригинала — принятая пара AA gray-700 (T16.12, не изменилась).
-Compare-прогон 16.11 — **exit 0**: гейты до браузеров зелёные (ссылки 43
-страницы / 917 ссылок / 0 DEAD, ценз 0 новых cp-блоков — allowlist 1),
-консоль-ошибок пилота 0 на 43 страницах.
+та же проба на пересобранном HEAD, артефакты .zcode/t1817-docheight-{
+before,after}.json перезаписаны). Геометрия шапок предложения на
+education (1440): head 52/52/52 — базлайн (было 53/53/79 с гранулами).
+Блок-пары (compare 16.11, оригинал = live Pages ↔ пилот локально, 1440):
+index team **716 ↔ 530** (принятая дельта −186 — не изменилась), education
+edu-adv **283 ↔ 278** (принятая −5 — T18.5), internships/practices
+advantages **283 ↔ 274** (принятая −9 — T18.6), events **990 ↔ 990** (Δ0),
+probe card-title-primary (новая, на крючке канона adv-grid) — fs 20/
+fw 500/color #002856 — **MATCH**; probe card-short (на каноне org-card) —
+fs 14, color gray-97 против gray-128 оригинала — принятая пара AA
+gray-700 (T16.12, не изменилась). Compare-прогон 16.11 (на пересобранном
+HEAD) — **exit 0**: гейты до браузеров зелёные (ссылки 43 страницы / 917
+ссылок / 0 DEAD, ценз 0 новых cp-блоков — allowlist 1), консоль-ошибок
+пилота 0 на 43 страницах.

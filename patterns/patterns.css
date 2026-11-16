@@ -480,7 +480,12 @@
    .cp-breadcrumbs 1.25rem). Направление — роль ui-h6 разметки, пара
    карточного заголовка оригинала: lh 1.3 без трекинга роли (pages.css:841
    — .offer-card__direction fs-body × 1.3; замер T18.5: имя 2 строки
-   52 ↔ 50, переносы совпадают). Шапка — шаг 8 и baseline: принятая
+   52 ↔ 50, переносы совпадают). Шапка — одна строка (базлайн b90513f:
+   без flex-wrap — оригинал .offer-card__head pages.css:839 wrap не несёт;
+   ступени @max-767 оригинала — 954/955 в локальном чекауте, 926/927 на
+   8469ea6 — не переносятся, errata приёмки T18.17: безусловные
+   min-width/flex-wrap валили дату под заголовок на десктопе, docHeight
+   education/education-catalog/article +8). Шаг 8 и baseline — принятая
    интерпретация клона T18.5 (оригинал gap 16/flex-start, pages.css:839 —
    расхождение принято, рендер гейтится compare). Дата muted
    (pages.css:843). Мета — колонка с шагом 2 «как есть» (pages.css:849):
@@ -492,7 +497,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.875rem; /* 14px pages.css:837 «как есть», вне шкалы §3.2 */
-  min-width: 0; /* ступень оригинала @max-767 (pages.css:926), инверсия mobile-first — гранула 32px-гейта T3.6 */
   padding: var(--ui-space-5); /* 24px pages.css:837 */
 }
 
@@ -503,10 +507,21 @@
 
 .ofc-card__head {
   display: flex;
-  flex-wrap: wrap; /* ступень оригинала @max-767 (pages.css:927), инверсия mobile-first — гранула T3.6 (дата уходит под заголовок на стрессе 32px) */
   gap: var(--ui-space-2); /* 8px — принятая интерпретация T18.5 (оригинал 16px, pages.css:839) */
   align-items: baseline; /* принятая интерпретация T18.5 (оригинал flex-start) */
   justify-content: space-between;
+}
+
+/* Стресс-гранула шапки (32px-гейт T3.6, errata приёмки T18.17): при сжатии
+   заголовок ломается по символам — строка «заголовок + дата» не
+   выталкивает дату за карточку на 32px-базе. При 1x строка шапки не
+   переполняется и мин-размеры не связываются — гранула no-op (рендер
+   десктопа 1:1 базлайну b90513f; прецедент reflow-гранул слоя
+   lpp-pill/vcs: max-width: 100%). Прежняя пара min-width: 0 +
+   flex-wrap: wrap снята — валила дату под заголовок на десктопе
+   (docHeight education/education-catalog/article +8, порог ±4px). */
+.ofc-card__head .ui-h6 {
+  overflow-wrap: anywhere;
 }
 
 .ofc-card__date {
