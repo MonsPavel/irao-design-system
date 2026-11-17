@@ -93,7 +93,8 @@ jobs:
   unit:
     name: Unit (vitest)
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Сборка (~30 c) + vitest; 5 мин не хватало (урок T18.17, 17.11).
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -106,6 +107,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      # Пины юнит-слоя читают артефакты сборки (dist/ui-core.min.css,
+      # pilot/career-portal/dist/*.html) — дистрибутивы не коммитятся,
+      # сборка перед test:unit обязательна (урок T18.17, 17.11).
+      - name: Build dist + showcase
+        run: npm run build
 
       - name: Unit tests
         run: npm run test:unit
