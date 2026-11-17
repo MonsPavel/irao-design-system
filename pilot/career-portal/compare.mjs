@@ -945,9 +945,7 @@ const viewerSections = PAGES.map((pageName) => {
   const blockRows = Object.entries(data.blocks)
     .map(([name, pair]) => {
       const mismatch =
-        pair.original &&
-        pair.pilot &&
-        Math.abs(pair.original.height - pair.pilot.height) > 8;
+        pair.original && pair.pilot && Math.abs(pair.original.height - pair.pilot.height) > 8;
       const mark = (v) => (mismatch ? `<b style="color:#b33">${esc(v)}</b>` : esc(v));
       return (
         `<tr><td style="padding:4px 10px;white-space:nowrap">${esc(name)}</td>` +

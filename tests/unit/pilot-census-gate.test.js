@@ -483,6 +483,85 @@ describe('закрывающая T18.18 — BLOCK_PROBES новые макро-�
   });
 });
 
+describe('закрывающая T18.18 — REPORT §11.6/§8.4 синхронны факту (юнит-пин ценза)', () => {
+  const report = readSource('REPORT.md');
+
+  it('§11.6: итог ценза в REPORT равен фактическим метрикам файлов (синхронность раздела)', () => {
+    const metrics = censusMetrics(readSource('pilot.css'), readSource('pilot.js'));
+    expect(metrics.css.lines).toBe(1441);
+    expect(metrics.css.codeLines).toBe(580);
+    expect(metrics.css.selectors).toBe(11);
+    expect(metrics.css.families).toEqual(['company-feed']);
+    expect(report).toContain('### 11.6 Раунд 8 (17.11): закрывающий прогон EPIC-18 (T18.18)');
+    expect(report).toContain('| pilot.css, сырых строк | 2272 | 1441 | **1441** |');
+    expect(report).toContain('| pilot.css, код сайт-зоны | 1297 | 580 | **580** |');
+    expect(report).toContain('| cp-семейств | 29 | 1 | **1** (`company-feed`) |');
+    expect(report).toContain('Пороги-потолки **не понижены**');
+  });
+
+  it('§11.6: судьба 30 семейств — таблица после, каждая судьба закрыта', () => {
+    expect(report).toContain('Судьба 30 семейств ценза — после');
+    const fates = {
+      'вынос в слой': [
+        'page-head',
+        'page-subtitle',
+        'tabs-row',
+        'tabs-links',
+        'why-us',
+        'production',
+        'directions',
+        'holding',
+        'company-stats',
+        'company-adv',
+        'company-title',
+        'company-banner',
+        'company-card',
+        'vacancy-search',
+        'dir-modal',
+        'media-toolbar',
+        'offer-card',
+        'org-card',
+        'catalog-nav',
+        'events-nav',
+        'adv-grid',
+        'events-feature',
+        'team',
+      ],
+      'остаётся сайт-зоне': ['hero', 'article-card', 'intern-card', 'vac-main', 'page'],
+      'снято ранее': ['event-card', 'intern-person'],
+    };
+    for (const [fate, families] of Object.entries(fates)) {
+      for (const family of families) {
+        expect(report, `судьба семейства ${family} — «${fate}» в закрывающей таблице`).toMatch(
+          new RegExp(`\\| \`${family}\` \\| ${fate} \\|`),
+        );
+      }
+    }
+  });
+
+  it('§11.6: docHeight-цель — 38/43 в допуске, 5 страниц с разбором корней, число для STATUS', () => {
+    expect(report).toContain('38/43 в допуске ±60');
+    expect(report).toContain('максимальный остаток |Δ| = 177');
+    // пять страниц вне допуска — все с разбором корня
+    expect(report).toContain('| index | 9899 | 9722 | −177 |');
+    expect(report).toContain('| vacancies | 3224 | 3048 | −176 |');
+    expect(report).toContain('| index-2 | 9002 | 9138 | +136 |');
+    expect(report).toContain('| internship | 1658 | 1586 | −72 |');
+    expect(report).toContain('| vacancy-4 | 1849 | 1910 | +61 |');
+    expect(report).toContain('мок-\n  состояние оригинала');
+    expect(report).toContain('дрейф внешней стороны: оригинал 1658');
+    expect(report).toContain('errata-кандидат владельцу\n  (декомпозиция T18.8)');
+  });
+
+  it('§8.4: решения-отклонения задач эпика — свод присутствует', () => {
+    expect(report).toContain('### 8.4 Дополнение T18.18: решения-отклонения задач EPIC-18 (свод)');
+    expect(report).toContain('капсула вакансий **без select-фильтров**');
+    expect(report).toContain('row-nowrap строки — от md');
+    expect(report).toContain('пороги-потолки ценза НЕ понижены при сжатии файла');
+    expect(report).toContain('пара employers выровнена на секцию `.lgo`');
+  });
+});
+
 describe('базлайн ценза §11.4 — пре-эпик дерево 922b505 (ревью T17.16)', () => {
   /** Содержимое файла пилота на коммите (рабочая копия Windows — CRLF
    *  нормализуется, как в readSource). */
