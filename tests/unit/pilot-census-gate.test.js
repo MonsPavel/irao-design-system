@@ -202,15 +202,18 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.16', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.17', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
     expect(MAX_PILOT_JS_LINES).toBe(187);
     expect(MAX_CP_FAMILIES).toBe(30);
-    // errata T18.16: vacancy-search/dir-modal ушли из allowlist (вынос в
-    // слой — каноны vcs/dmd) — 18 → 16
-    expect(ALLOWED_CP_FAMILIES).toHaveLength(16);
+    // errata T18.17: батч cp-остатков — 15 семейств ушли (7 вынос в слой —
+    // каноны mtb/ofc-card/org-card/cnv/adv-grid/evt-feature/tm; 5 «остаётся
+    // сайт-зоне» — тон-строки/позиции с сокращением cp-хуков; 2 висячих
+    // входа T17.5) — 16 → 1 (позиционно-необходимый минимум: company-feed)
+    expect(ALLOWED_CP_FAMILIES).toHaveLength(1);
+    expect(ALLOWED_CP_FAMILIES).toEqual(['company-feed']);
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -342,11 +345,23 @@ describe('пороги ценза — числа зафиксированы по
       // сырые 1648→1599, код 765→715, селекторы 65→55; семейства 16→14 —
       // vacancy-search/dir-modal ушли из allowlist (судьба «вынос в слой»,
       // REPORT §11.4):
-      expect(metrics.css.lines).toBe(1599);
-      expect(metrics.css.codeLines).toBe(715);
-      expect(metrics.css.selectors).toBe(55);
+      // T18.17 (батч cp-остатков сайт-зоны: 7 семейств — вынос в слой,
+      // каноны mtb/ofc-card/org-card/cnv/adv-grid/evt-feature/tm — правила
+      // cp-media-toolbar/cp-offer-card/cp-org-card/пара cp-catalog-nav/
+      // cp-events-nav/cp-adv-grid (+ ступени 1023/767)/cp-events-feature/
+      // cp-team__photo сняты из разметки build.mjs и pilot.css; 5 семейств —
+      // судьба «тон-строка/позиция — остаётся сайт-зоне» с сокращением
+      // cp-хуков (не-cp имена site-page/hero-tone--*/article-date/
+      // intern-card/vac-main — конвенция stu-/ctr-/msh__card);
+      // event-card/intern-person — висячие входы снятых семейств T17.5):
+      // сырые 1599→1224, код 715→477, селекторы 55→11; семейства 14→1 —
+      // единственное cp-семейство company-feed (позиционные хуки лент T18.3
+      // — позиционно-необходимый минимум, судьбы всех — REPORT §11.4):
+      expect(metrics.css.lines).toBe(1441);
+      expect(metrics.css.codeLines).toBe(580);
+      expect(metrics.css.selectors).toBe(11);
       // код: см. строку ниже (батч ритма 01.11)
-      expect(metrics.css.families).toHaveLength(14);
+      expect(metrics.css.families).toHaveLength(1);
       expect(metrics.css.families, 'семейства обложки вынесены в слой (T18.10)').not.toContain(
         'page-head',
       );
@@ -378,7 +393,29 @@ describe('пороги ценза — числа зафиксированы по
         'панель/модалка направления вынесены в слой (T18.16)',
       ).not.toContain('vacancy-search');
       expect(metrics.css.families).not.toContain('dir-modal');
-      expect(metrics.css.families, 'ленты компании — сайт-зона T18.3').toContain('company-feed');
+      expect(
+        metrics.css.families,
+        'батч cp-остатков: 8 выносов в слой (T18.17) — семейств нет',
+      ).not.toContain('media-toolbar');
+      expect(metrics.css.families).not.toContain('offer-card');
+      expect(metrics.css.families).not.toContain('org-card');
+      expect(metrics.css.families).not.toContain('catalog-nav');
+      expect(metrics.css.families).not.toContain('events-nav');
+      expect(metrics.css.families).not.toContain('adv-grid');
+      expect(metrics.css.families).not.toContain('events-feature');
+      expect(metrics.css.families).not.toContain('team');
+      expect(
+        metrics.css.families,
+        'батч cp-остатков: 5 «остаётся» — тон-строки/позиции на не-cp именах (T18.17)',
+      ).not.toContain('hero');
+      expect(metrics.css.families).not.toContain('article-card');
+      expect(metrics.css.families).not.toContain('intern-card');
+      expect(metrics.css.families).not.toContain('vac-main');
+      expect(metrics.css.families).not.toContain('page');
+      expect(
+        metrics.css.families,
+        'ленты компании — сайт-зона T18.3 (позиционный минимум)',
+      ).toContain('company-feed');
       expect(metrics.js.lines).toBe(187);
     },
   );

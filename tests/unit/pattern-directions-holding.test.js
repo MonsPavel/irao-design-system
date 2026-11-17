@@ -485,6 +485,9 @@ describe('ценз сайт-зоны: семейства directions/holding уш
     expect(ALLOWED_CP_FAMILIES, 'модалка dir-modal — вынесена в слой (T18.16)').not.toContain(
       'dir-modal',
     );
-    expect(ALLOWED_CP_FAMILIES, 'прочие семейства ценза не тронуты').toContain('hero');
+    expect(
+      ALLOWED_CP_FAMILIES,
+      'прочие семейства ценза не тронуты (T18.17: минимум — ленты компании)',
+    ).toContain('company-feed');
   });
 });

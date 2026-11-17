@@ -20,7 +20,10 @@
  * «why-us» со стеклом, T18.12), prd (раскладки карусели production
  * v1/v2, T18.13), dir/hld (сетка направлений/холдинг, T18.14), vcs
  * (панель «Найди свою вакансию», T18.16), dmd (контент модалки
- * направления, T18.16); потомки — компоненты
+ * направления, T18.16), mtb/ofc-card/org-card/cnv (тулбар тегов-фильтров/
+ * карточки предложения и организации/навигация каталога — батч cp-остатков,
+ * T18.17), adv-grid/evt-feature/tm (сетка преимуществ/фича-лента
+ * мероприятий/секция команды — T18.17); потомки — компоненты
  * ui-*. Список пополняют задачи эпика, не руками сайтов.
  *
  * ДОКИ-ПАТТЕРНЫ — источник правды: разметка patterns/<name>/<name>.html
@@ -438,6 +441,150 @@
   .lpp-layout {
     grid-template-columns: 17.5rem minmax(0, 1fr);
   }
+}
+
+/* ── Тулбар тегов-фильтров каталога (T18.17) — связка mtb ──
+   Порт cp-media-toolbar pilot.css (медиа-каталог, T16.14): лента тегов,
+   шаг 12px «как есть» (.media-toolbar pages.css:594 — gap 12), подписи
+   группы в центре ленты (align-items). Ритм 16px по краям — принятый
+   рендер пилота (оригинал ведёт mb 40 — расхождение принято T16.14,
+   рендер страницы гейтится compare). Группы — landmark'и-документы:
+   раскладку ведёт лента (display: contents), именованный nav сохраняется.
+   Подпись группы — отступ 24px (inline media.html:14 поверх gap ленты;
+   inline-стили запрещены — VI-инвариант §5). Разметка канона — док
+   list-page (#lpp-mtb; синхронность — пин pattern-cp-batch.test.js). */
+.mtb {
+  box-sizing: border-box;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-3); /* 12px pages.css:594 «как есть» */
+  align-items: center;
+  margin: var(--ui-space-4) 0; /* 16px — принятый рендер пилота T16.14 */
+}
+
+/* Группа фильтров — плоская в ленте тулбара (фильтры — прямые дети
+   flex-ленты оригинала, перенос поэлементный). */
+.mtb__group {
+  display: contents;
+}
+
+/* Подпись группы («Рубрики:») — отступ 24px поверх шага ленты. */
+.mtb__label {
+  margin-left: var(--ui-space-5); /* 24px media.html:14 «как есть» */
+}
+
+/* ── Карточка предложения целевого обучения (T18.17) — связка ofc-card ──
+   Порт cp-offer-card pilot.css (education/каталог/event; калибровка
+   T18.5): колонка с паддингом 24 = space-5 и шагом 14px «как есть»
+   (pages.css:837 — .offer-card; 14px вне шкалы §3.2 — прецедент
+   .cp-breadcrumbs 1.25rem). Направление — роль ui-h6 разметки, пара
+   карточного заголовка оригинала: lh 1.3 без трекинга роли (pages.css:841
+   — .offer-card__direction fs-body × 1.3; замер T18.5: имя 2 строки
+   52 ↔ 50, переносы совпадают). Шапка — одна строка (базлайн b90513f:
+   без flex-wrap — оригинал .offer-card__head pages.css:839 wrap не несёт;
+   ступени @max-767 оригинала — 954/955 в локальном чекауте, 926/927 на
+   8469ea6 — не переносятся, errata приёмки T18.17: безусловные
+   min-width/flex-wrap валили дату под заголовок на десктопе, docHeight
+   education/education-catalog/article +8). Шаг 8 и baseline — принятая
+   интерпретация клона T18.5 (оригинал gap 16/flex-start, pages.css:839 —
+   расхождение принято, рендер гейтится compare). Дата muted
+   (pages.css:843). Мета — колонка с шагом 2 «как есть» (pages.css:849):
+   компания fw-small/primary (pages.css:851), город наследует muted меты
+   (pages.css:853). Футер к низу — карточки ряда растягиваются.
+   Разметка канона — док list-page (#lpp-offer-card). */
+.ofc-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem; /* 14px pages.css:837 «как есть», вне шкалы §3.2 */
+  padding: var(--ui-space-5); /* 24px pages.css:837 */
+}
+
+.ofc-card .ui-h6 {
+  line-height: 1.3; /* pages.css:841 (роль — 1.25) */
+  letter-spacing: normal; /* .offer-card__direction оригинала без трекинга */
+}
+
+.ofc-card__head {
+  display: flex;
+  gap: var(--ui-space-2); /* 8px — принятая интерпретация T18.5 (оригинал 16px, pages.css:839) */
+  align-items: baseline; /* принятая интерпретация T18.5 (оригинал flex-start) */
+  justify-content: space-between;
+}
+
+/* Стресс-гранула шапки (32px-гейт T3.6, errata приёмки T18.17): при сжатии
+   заголовок ломается по символам — строка «заголовок + дата» не
+   выталкивает дату за карточку на 32px-базе. При 1x строка шапки не
+   переполняется и мин-размеры не связываются — гранула no-op (рендер
+   десктопа 1:1 базлайну b90513f; прецедент reflow-гранул слоя
+   lpp-pill/vcs: max-width: 100%). Прежняя пара min-width: 0 +
+   flex-wrap: wrap снята — валила дату под заголовок на десктопе
+   (docHeight education/education-catalog/article +8, порог ±4px). */
+.ofc-card__head .ui-h6 {
+  overflow-wrap: anywhere;
+}
+
+.ofc-card__date {
+  color: var(--ui-color-text-muted); /* pages.css:843 */
+}
+
+/* Мета — колонка .offer-card__meta (pages.css:849): компания над городом. */
+.ofc-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem; /* 2px pages.css:849 «как есть» */
+  color: var(--ui-color-text-muted);
+}
+
+.ofc-card__company {
+  color: var(--ui-color-primary); /* pages.css:851 */
+  font-weight: var(--ui-fw-small); /* pages.css:851 */
+}
+
+.ofc-card__footer {
+  margin-top: auto; /* карточки ряда растягиваются — футер к низу */
+}
+
+/* ── Карточка организации (T18.17) — связка org-card ──
+   Порт cp-org-card pilot.css (education #orgs; калибровка T18.5):
+   колонка с паддингом 24 = space-5 и шагом 12 = space-3 «как есть»
+   (pages.css:829 — .org-card). Имя — роль ui-h6 разметки, пара
+   карточного заголовка: lh 1.3 без трекинга (pages.css:831 —
+   .org-card__name fs-body × 1.3; замер T18.5: трекинг −0.02em роли
+   переворачивал перенос «Санкт-Петербургский политехнический…» в 2
+   строки вместо 3 — ряд 190 вместо 219). Мета к низу — margin-top: auto
+   (pages.css:835: карточки ряда растягиваются, мета прижата к низу).
+   Разметка канона — док list-page (#lpp-org-card). */
+.org-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ui-space-3); /* 12px pages.css:829 «как есть» */
+  padding: var(--ui-space-5); /* 24px pages.css:829 */
+}
+
+.org-card .ui-h6 {
+  line-height: 1.3; /* pages.css:831 (роль — 1.25) */
+  letter-spacing: normal; /* .org-card__name оригинала без трекинга */
+}
+
+.org-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ui-space-1); /* 8px pages.css:835 */
+  margin-top: auto; /* pages.css:835 — мета прижата к низу */
+}
+
+/* ── Навигация каталога: пагинация по центру (T18.17) — связка cnv ──
+   Порт пары cp-catalog-nav/cp-events-nav pilot.css (T15.3/T15.5): один
+   приём — два потребителя (inline-обёртки оригинала «flex + margin-top
+   48px» — education-catalog.html:57 и events.html:357) на токенах.
+   Разметка канона — док list-page (#lpp-cnv). */
+.cnv {
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  margin-top: var(--ui-space-7); /* 48px inline оригинала */
 }
 
 /* ══════════════════ Паттерн «Детальная страница» (T8.2) — связки dpp- ══════════════════ */
@@ -3745,4 +3892,136 @@
    (паддинги 72/48 — на базе). */
 .hld--compact .hld__inner {
   height: 39.875rem; /* 638px holding.css:34 «как есть» */
+}
+
+/* ════════════════ Сетка преимуществ (T18.17) — связка adv-grid ════════════════
+ *
+ * Порт cp-adv-grid pilot.css (лендинги стажировок/практик и education;
+ * калибровка T18.5/T18.6): шаг 24px «как есть» (pages.css:505 — .adv-grid;
+ * прежние 12px занижали высоту ленты). Колонки — мобильная база колонкой,
+ * 2×1fr от md, 3×1fr от lg: ступени оригинала @max-1023 (pages.css:900) и
+ * @max-767 (pages.css:929), инвертированные mobile-first — прецедент
+ * hld__stats (шкала T2.5). Карточки — ui-card--filled разметки; шаг внутри
+ * карточек ведёт компонент (хук «как есть» .adv-card 12px на стажировках —
+ * int-сайт-зона T18.6, канон карточки не дублирует). Разметка канона — док
+ * landing-section (#lsp-adv-grid; синхронность — пин pattern-cp-batch
+ * .test.js).
+ */
+
+.adv-grid {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: grid;
+  gap: var(--ui-space-5); /* 24px pages.css:505 «как есть» */
+  grid-template-columns: minmax(0, 1fr); /* колонка — оригинал ≤767 (pages.css:929), гранула T3.6 */
+}
+
+@media (min-width: 768px) {
+  .adv-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)); /* ≤1023 — pages.css:900, инверсия */
+  }
+}
+
+@media (min-width: 1024px) {
+  .adv-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* 3 колонки — pages.css:505 */
+  }
+}
+
+/* ════════════════ Фича-лента мероприятий лендинга (T18.17) — связка evt-feature ════════════════
+ *
+ * Порт cp-events-feature pilot.css (секция 8 «Наши мероприятия» лендингов
+ * стажировок/практик; T18.6): сетка «фича» оригинала events-feature
+ * (pages.css:1150–1171) — большая карточка на два ряда (pages.css:1158),
+ * её фото растягивает флекс до натуральной пропорции (слот без аспекта,
+ * img без фикс-высоты — pages.css:1163–1171; ревью T18.6: height: 100%
+ * не нужен — интринсик-цикл, урок ui-card.css:163–172). Карточки — вид
+ * .event-card «как есть» (pages.css:565–581): паддинг 16 = space-4, тело
+ * 16/4/0 с шагом 10 «как есть» (pages.css:575), заголовок lh 1.3 без
+ * трекинга (pages.css:579; прецедент пар T18.5), дата fs-small
+ * (pages.css:577), радиус фото md — принятая интерпретация клона
+ * (оригинал photo-wrap 12px, pages.css:567). Мобильные ступени —
+ * инверсия: база колонкой (оригинал ≤1023 — pages.css:1254–1255), фото
+ * 200px — мобильная база оригинала @max-767 (pages.css:932), 220px от md
+ * (pages.css:569). Каркас карточек — ui-card--media (T17.5); слот ДС
+ * гасится каноном («как есть»-форма события). Разметка канона — док
+ * landing-section (#lsp-events-feature).
+ */
+
+.evt-feature {
+  box-sizing: border-box; /* ADR-0002: box-sizing на корне блока */
+  display: grid;
+  gap: var(--ui-space-5); /* 24px pages.css:1154 */
+  grid-template-columns: minmax(0, 1fr); /* колонка — оригинал ≤1023 (pages.css:1254) */
+}
+
+/* Карточка .event-card: ритм ведёт тело (pages.css:565/575) — шаг
+   компонента гасится, паддинг 16px. */
+.evt-feature .ui-card {
+  gap: 0;
+  padding: var(--ui-space-4); /* 16px pages.css:565 */
+}
+
+.evt-feature .ui-card__media {
+  aspect-ratio: auto; /* высоту несёт img (pages.css:569) */
+}
+
+.evt-feature .ui-card__media img {
+  height: 12.5rem; /* 200px @max-767 pages.css:932 — мобильная база */
+  border-radius: var(--ui-radius-md); /* принятая интерпретация клона (pages.css:567 — 12px) */
+}
+
+.evt-feature .ui-card__body {
+  gap: 0.625rem; /* 10px pages.css:575 «как есть» */
+  padding: var(--ui-space-4) 0.25rem 0; /* 16px 4px 0 pages.css:575 */
+}
+
+.evt-feature .ui-h6 {
+  line-height: 1.3; /* pages.css:579 (роль — 1.25); прецедент пар T18.5 */
+  letter-spacing: normal; /* .event-card__title оригинала без трекинга */
+}
+
+.evt-feature .ui-card__body time {
+  font-size: var(--ui-fs-small); /* .event-card__date pages.css:577 */
+}
+
+@media (min-width: 768px) {
+  .evt-feature .ui-card__media img {
+    height: 13.75rem; /* 220px pages.css:569 */
+  }
+}
+
+@media (min-width: 1024px) {
+  .evt-feature {
+    grid-template-columns: 2fr minmax(0, 1fr); /* pages.css:1152 */
+  }
+
+  .evt-feature .ui-card:first-child {
+    grid-row: 1 / 3; /* pages.css:1158 */
+  }
+
+  .evt-feature .ui-card:first-child .ui-card__media {
+    aspect-ratio: auto; /* pages.css:1163–1171 — высоту несёт img */
+  }
+
+  .evt-feature .ui-card:first-child .ui-card__media img {
+    height: auto; /* специфичность (0,4,1) гасит 12.5/13.75rem выше */
+  }
+}
+
+/* ════════════════ Секция команды (T18.17) — связка tm ════════════════
+ *
+ * Порт cp-team__photo pilot.css (главная, секция «Стань частью нашей
+ * большой команды»): фото-полоса во всю ширину контейнера. Радиус —
+ * принятая интерпретация клона radius-lg (оригинал team.css:18–23 —
+ * --radius-card 16px с фикс-высотами 530/360/200 и object-fit: cover;
+ * клон ведёт высоту натуральным размером фото team-wide.jpg — ступени
+ * и кавер не переносились: известная дельта секции team −186, принято
+ * T18.9). Секция (ui-section + контейнер + заголовок-роль) — примитивы
+ * разметки, канон несёт только фото. Разметка канона — док
+ * landing-section (#lsp-team).
+ */
+
+.tm__photo {
+  width: 100%; /* team.css:19 */
+  border-radius: var(--ui-radius-lg); /* принятая интерпретация клона (team.css:22) */
 }

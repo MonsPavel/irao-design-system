@@ -1549,3 +1549,46 @@ standTest.describe(
     );
   },
 );
+
+// Батч cp-остатков (T18.17): контейнерные эталоны канонов adv-grid/
+// evt-feature/tm — по одному на вынесенное семейство (спека T18.17 Scope;
+// прецедент dir/hld — element-снимки канона).
+standTest.describe('patterns/landing-section: эталоны канонов T18.17 (AC)', () => {
+  standTest(
+    'adv-grid/evt-feature/tm — element-снимки канона, только из контейнера/CI (ADR-0004)',
+    async ({ stand }) => {
+      const page = await stand('patterns/landing-section');
+
+      const shots = [
+        ['adv-grid', page.locator('#lsp-adv-grid .adv-grid'), ['desktop']],
+        ['evt-feature', page.locator('#lsp-events-feature .evt-feature'), ['desktop']],
+        ['tm-photo', page.locator('#lsp-team .tm__photo'), ['desktop']],
+      ];
+
+      for (const [name, locator, viewports] of shots) {
+        for (const viewport of viewports) {
+          await page.setViewportSize(VIEWPORTS[viewport]);
+          await locator.scrollIntoViewIfNeeded();
+          await page.waitForTimeout(300);
+          const info = standTest.info();
+          if (!SNAPSHOTS_ENABLED || info.project.name !== 'chromium') {
+            info.annotations.push({
+              type: 'shot-skipped',
+              description:
+                `${name}--${viewport}: эталоны создаются только из контейнера/CI ` +
+                '(ADR-0004) — запустите npm run test:docker',
+            });
+            continue;
+          }
+          await expect(locator).toHaveScreenshot(`${name}--${viewport}.png`, {
+            animations: 'disabled',
+            caret: 'hide',
+            // Строгий допуск 8 px (глобальный): карточки/фото — скруглённые
+            // клипы во всю ширину колонок; лотерея растеризации (диагноз
+            // 19.10) на сплошных плашках не проявлена.
+          });
+        }
+      }
+    },
+  );
+});

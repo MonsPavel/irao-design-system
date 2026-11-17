@@ -192,7 +192,7 @@ describe('build.mjs — index2Main: позиции оригинала (AC: бл�
     const stuPhoto = html.indexOf(
       '<section class="ui-section stu-photo stu-photo--v2" id="students">',
     );
-    const team = html.indexOf('<img class="cp-team__photo"');
+    const team = html.indexOf('<img class="tm__photo"');
     const capsule2 = html.indexOf('Найди свою команду');
     const cta = html.indexOf('<section class="ui-section" id="contacts-block">');
     for (const [name, index] of [
@@ -274,8 +274,10 @@ describe('pilot.css — тон активной карточки на хуке �
     // каноны dir/hld) — 23 → 21; errata T18.15: пять company-семейств ушли
     // (вынос company-семейств в слой, каноны dpp-* + lpp-card) — 21 → 16;
     // errata T18.16: vacancy-search/dir-modal ушли (вынос панели/модалки в
-    // слой, каноны vcs/dmd) — 16 → 14
-    expect(metrics.css.families).toHaveLength(14);
+    // слой, каноны vcs/dmd) — 16 → 14; errata T18.17: батч cp-остатков —
+    // 7 выносов в слой + 5 «остаётся» на не-cp именах + 2 висячих входа —
+    // 14 → 1 (company-feed)
+    expect(metrics.css.families).toHaveLength(1);
   });
 });
 
@@ -292,10 +294,12 @@ describe('ценз T17.16 — гейт чист после сборки блок
     // errata T18.13: production ушла (вынос раскладок карусели в слой) — 26 → 25;
     // errata T18.14: directions/holding ушли (вынос в слой) — 25 → 23;
     // errata T18.15: пять company-семейств ушли (вынос в слой) — 23 → 18;
-    // errata T18.16: vacancy-search/dir-modal ушли (вынос в слой) — 18 → 16
+    // errata T18.16: vacancy-search/dir-modal ушли (вынос в слой) — 18 → 16;
+    // errata T18.17: батч cp-остатков — 15 семейств ушли (7 вынос в слой,
+    // 5 «остаётся» с сокращением cp-хуков, 2 висячих входа T17.5) — 16 → 1
     expect(
       ALLOWED_CP_FAMILIES,
-      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13/T18.14/T18.15/T18.16',
-    ).toHaveLength(16);
+      'allowlist — errata T18.3/T18.10/T18.11/T18.12/T18.13/T18.14/T18.15/T18.16/T18.17',
+    ).toHaveLength(1);
   });
 });

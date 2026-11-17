@@ -496,9 +496,10 @@ describe('пилот career-portal: лендинг-композиции на к�
     expect(pilotBuild).toContain('<h1 class="hro__title ui-h1">');
     expect(pilotBuild).toContain('<form class="hro__search"');
     expect(pilotBuild).toContain('<div class="hro__tags">');
-    expect(pilotBuild, 'тег — ui-tag hro__tag + тон-класс сайт-зоны (пример спеки)').toContain(
-      '<span class="ui-tag hro__tag cp-hero__tag--violet">',
-    );
+    expect(
+      pilotBuild,
+      'тег — ui-tag hro__tag + тон-класс сайт-зоны (T18.17 — hero-tone--*, не cp-)',
+    ).toContain('<span class="ui-tag hro__tag hero-tone--violet">');
     for (const gone of [
       'cp-hero__content',
       'cp-hero__title',
@@ -508,13 +509,13 @@ describe('пилот career-portal: лендинг-композиции на к�
     ]) {
       expect(
         pilotBuild,
-        `${gone} из разметки снят (тон-классы cp-hero__tag--* — исключение)`,
+        `${gone} из разметки снят (тон-классы hero-tone--* — T18.17, не cp-)`,
       ).not.toMatch(new RegExp(`class="[^"]*\\b${gone}\\b`));
     }
     expect(
       pilotBuild,
-      'базовый cp-hero__tag снят (остались только тон-классы --violet/--sand/--green/--rose)',
-    ).not.toMatch(/cp-hero__tag(?!-)/);
+      'базовый cp-hero__tag снят (тон-классы hero-tone--* — T18.17: cp-семейства hero нет)',
+    ).not.toMatch(/cp-hero__tag/);
   });
 
   it('marquee — разметка mrq: строки с модификаторами канона T16.15', () => {
@@ -594,14 +595,17 @@ describe('пилот career-portal: лендинг-композиции на к�
       expect(pilotCss, `связка ${gone} перенесена в слой`).not.toContain(gone);
     }
     for (const tone of PILOT_TAG_TONES) {
-      const row = blockOf(pilotCss, `.cp-hero__tag--${tone}`);
-      expect(row, `тон-строка ${tone} остаётся (AC «тон-строки остаются»)`).toBeTruthy();
+      const row = blockOf(pilotCss, `.hero-tone--${tone}`);
+      expect(
+        row,
+        `тон-строка ${tone} остаётся (AC «тон-строки остаются»; T18.17 — hero-tone--*, не cp-)`,
+      ).toBeTruthy();
       expect(
         row,
         `тон ${tone} — на хуке канона (спец-тоны violet/green/rose — color-mix 20% сайт-зоны; sand — токен T14.7)`,
       ).toContain('--hro-tag-bg:');
     }
-    const violet = blockOf(pilotCss, '.cp-hero__tag--violet');
+    const violet = blockOf(pilotCss, '.hero-tone--violet');
     expect(violet, 'violet 20% — value в сайт-зоне (hex не едет в ДС)').toContain(
       'color-mix(in srgb, #3142ff 20%, transparent);',
     );

@@ -133,6 +133,19 @@
  *    ui-select--pill + ступень 1023) и cp-dir-modal (фото/навигация +
  *    мёртвые база-сетка/__tasks стажировочной модалки T15.4 + ступень
  *    1023) из разметки и pilot.css (судьба семейств — REPORT §11.4).
+ *    T18.17: 15 семейств УШЛИ из allowlist — батч cp-остатков сайт-зоны:
+ *    media-toolbar/offer-card/org-card/catalog-nav/events-nav/adv-grid/
+ *    events-feature/team — вынос в слой (каноны mtb/ofc-card/org-card/
+ *    cnv/adv-grid/evt-feature/tm, гейт префиксов расширен); hero/
+ *    article-card/intern-card/vac-main/page — судьба «тон-строка/позиция —
+ *    остаётся сайт-зоне» (Implementation requirements п.1 — тон — бренд-
+ *    слой; сокращение cp-хуков — не-cp имена hero-tone--, article-date,
+ *    intern-card, vac-main, site-page — конвенция stu-, ctr-, msh__card);
+ *    event-card/intern-person — висячие входы снятых семейств (T17.5 —
+ *    ui-card--media, правил/разметки нет); allowlist = ['company-feed'] —
+ *    позиционно-необходимый минимум (позиционные хуки лент T18.3); cta-mail
+ *    в allowlist не был (снято T17.8 — ui-card--cta) — судьба строкой,
+ *    REPORT §11.4.
  *
  * Логика — чистые функции censusMetrics/runCensusGate (юнит-пин —
  * tests/unit/pilot-census-gate.test.js); CLI — тонкая обёртка. Запуск:
@@ -157,28 +170,20 @@ export const MAX_PILOT_CSS_CODE_LINES = 1297;
 export const MAX_PILOT_JS_LINES = 187;
 export const MAX_CP_FAMILIES = 30;
 
-/** Семейства сайт-зоны на закрытие эпика (ценз после, REPORT §11.4):
- *  ритм/раскладки страниц, тоны/тон-строки и хуки проб — классификация
- *  каждой судьбы в REPORT §11.4; новое семейство = новый cp-визуальный
- *  блок = ошибка гейта. */
-export const ALLOWED_CP_FAMILIES = [
-  'adv-grid',
-  'article-card',
-  'catalog-nav',
-  'company-feed',
-  'event-card',
-  'events-feature',
-  'events-nav',
-  'hero',
-  'intern-card',
-  'intern-person',
-  'media-toolbar',
-  'offer-card',
-  'org-card',
-  'page',
-  'team',
-  'vac-main',
-];
+/** Семейства сайт-зоны после T18.17 (позиционно-необходимый минимум,
+ *  REPORT §11.4): ленты компании — позиционные хуки T18.3 (шаг/низ,
+ *  типографика «как есть», фикс-высоты фото) — судьба «остаётся сайт-зоне».
+ *  Судьбы остальных семейств батча cp-остатков T18.17 (строкой, REPORT
+ *  §11.4): media-toolbar/offer-card/org-card/catalog-nav/events-nav/
+ *  adv-grid/events-feature/team — вынос в слой (каноны mtb/ofc-card/
+ *  org-card/cnv/adv-grid/evt-feature/tm); hero/article-card/intern-card/
+ *  vac-main/page — «остаётся сайт-зоне» (тон-строки/позиции, сокращение
+ *  cp-хуков — не-cp имена hero-tone--, article-date, intern-card,
+ *  vac-main, site-page — конвенция stu-, ctr-, msh__card); event-card/intern-person —
+ *  снято T17.5 (ui-card--media, правил/разметки нет); cta-mail — снято
+ *  T17.8 (ui-card--cta). Новое семейство = новый cp-визуальный блок =
+ *  ошибка гейта. */
+export const ALLOWED_CP_FAMILIES = ['company-feed'];
 
 /** wc -l — число \n (файлы под prettier всегда с завершающим \n). */
 const wcLines = (text) => (text.match(/\n/g) ?? []).length;

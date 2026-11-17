@@ -278,14 +278,16 @@ const SHELL_PROBES = [
   {
     name: 'card-title-primary',
     original: '.adv-card__title',
-    pilot: '.cp-adv-grid .ui-card--filled h3',
+    // T18.17: сетка преимуществ — канон adv-grid слоя (прецедент lpp-/nvp-).
+    pilot: '.adv-grid .ui-card--filled h3',
     fields: { fs: 'font-size', fw: 'font-weight', color: 'color' },
   },
   // Шорт карточки организации (T16.12): подпись muted (AA-цвет gray-700)
   {
     name: 'card-short',
     original: '.org-card__short',
-    pilot: '.cp-org-card .ui-text--muted',
+    // T18.17: карточка организации — канон org-card слоя.
+    pilot: '.org-card .ui-text--muted',
     fields: { fs: 'font-size', color: 'color' },
   },
   // ── Деталка вакансии и aside анкеты (T16.13, REPORT §9.1 №3/№4) ──
@@ -542,7 +544,9 @@ const BLOCK_PROBES = {
     ['students-photo', '.students--photographic', '.stu-photo'],
     ['video-block', '.video-block', '.ui-video'],
     ['media', '.media', '#media'],
-    ['team', '.team', '.cp-team__photo'],
+    // T18.17: секция команды — канон tm слоя (фото-полоса; высоту ведёт
+    // натуральный размер фото — принятая дельта, судьба §11.4).
+    ['team', '.team', '.tm__photo'],
     ['cta-mail', '.cta-mail', '.ui-card--cta--primary'],
     // Подвал — крючок слоя ftp (T17.13, прецедент video-block/cta-mail).
     ['footer', '.footer', '.ftp'],
@@ -611,14 +615,15 @@ const BLOCK_PROBES = {
   // организации — id="orgs" с обеих сторон; шапка предложений —
   // .page-head--split → .php--split (канон обложки слоя, T18.10 — хук
   // .edu-offer-head остался только на кнопке); hero — .company-hero →
-  // .edu-company-hero; сетка преимуществ — .adv-grid → .cp-adv-grid
+  // .edu-company-hero; сетка преимуществ — .adv-grid → канон adv-grid слоя (T18.17)
   // (крючки проб — не новые сущности: классы есть в разметке).
   'education.html': [
     ['edu-cover', '.cover-hero', '.edu-cover'],
     ['edu-orgs', '#orgs', '#orgs'],
     ['edu-offers-head', '.page-head--split', '.php--split'],
     ['edu-company-hero', '.company-hero', '.edu-company-hero'],
-    ['edu-adv', '.adv-grid', '.cp-adv-grid'],
+    // T18.17: сетка преимуществ — канон adv-grid слоя.
+    ['edu-adv', '.adv-grid', '.adv-grid'],
   ],
   // T18.6: лендинги стажировок/практик — состав и ритм 1:1 (internships
   // .html:145–403, practices — зеркальная страница): обложка cover-hero,
@@ -631,10 +636,12 @@ const BLOCK_PROBES = {
     ['tabs', '.tabs-pill', '.tnv'],
     ['directions', '#directions', '#directions'],
     ['marquee', '.adv-marquee', '.int-marquee'],
-    ['advantages', '.adv-grid', '.cp-adv-grid'],
+    // T18.17: сетка преимуществ — канон adv-grid слоя.
+    ['advantages', '.adv-grid', '.adv-grid'],
     ['timeline', '.timeline', '.tlp'],
     ['interns', '.cards-grid--3:not(.dir-set)', '.int-people'],
-    ['events', '.events-feature', '.cp-events-feature'],
+    // T18.17: фича-лента — канон evt-feature слоя.
+    ['events', '.events-feature', '.evt-feature'],
     ['faq', '.faq', '.ui-accordion'],
   ],
   'practices.html': [
@@ -642,10 +649,12 @@ const BLOCK_PROBES = {
     ['tabs', '.tabs-pill', '.tnv'],
     ['directions', '#directions', '#directions'],
     ['marquee', '.adv-marquee', '.int-marquee'],
-    ['advantages', '.adv-grid', '.cp-adv-grid'],
+    // T18.17: сетка преимуществ — канон adv-grid слоя.
+    ['advantages', '.adv-grid', '.adv-grid'],
     ['timeline', '.timeline', '.tlp'],
     ['interns', '.cards-grid--3:not(.dir-set)', '.int-people'],
-    ['events', '.events-feature', '.cp-events-feature'],
+    // T18.17: фича-лента — канон evt-feature слоя.
+    ['events', '.events-feature', '.evt-feature'],
     ['faq', '.faq', '.ui-accordion'],
   ],
 };

@@ -192,7 +192,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12; prd — раскладки карусели production T18.13; dir/hld — сетка направлений/холдинг T18.14; vcs — панель «Найди свою вакансию», dmd — контент модалки направления T18.16)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12; prd — раскладки карусели production T18.13; dir/hld — сетка направлений/холдинг T18.14; vcs — панель «Найди свою вакансию», dmd — контент модалки направления T18.16; mtb/ofc/org/cnv/adv/evt/tm — батч cp-остатков T18.17)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
@@ -207,7 +207,7 @@ describe('patterns/patterns.css — единый исходник паттерн
       // модификатором __ или заканчивается на нём.
       expect(
         hooks.some((hook) =>
-          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$)/.test(
+          /^\.(lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd|mtb|ofc|org|cnv|adv|evt|tm)(?:-|__|$)/.test(
             hook,
           ),
         ),
@@ -215,7 +215,7 @@ describe('patterns/patterns.css — единый исходник паттерн
       ).toBe(true);
       for (const hook of hooks) {
         expect(
-          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd)(?:-|__|$))/.test(
+          /^\.(?:ui-|(?:lpp|dpp|fpp|lnk|lgo|tlp|nvp|hsp|ftp|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd|mtb|ofc|org|cnv|adv|evt|tm)(?:-|__|$))/.test(
             hook,
           ),
           `крючок «${hook}» селектора «${selector}» — канонический префикс (или компонент-потомок ui-), не свалка`,
@@ -955,9 +955,10 @@ describe('пилот career-portal: слой подключён, ваканси�
       pilotCss,
       'шим пилюли сайдбара снят (T17.12: модификатор ui-select--pill не несёт flex-basis)',
     ).not.toContain('.lpp-side__group .cp-pill');
-    expect(pilotCss, 'cp-vac-main остаётся (нет в списке снятия — ритм main-колонки)').toContain(
-      '.cp-vac-main',
-    );
+    expect(
+      pilotCss,
+      'vac-main остаётся (нет в списке снятия — ритм main-колонки; T18.17 — не-cp имя)',
+    ).toContain('.vac-main');
   });
 
   it('пробы compare переведены на lpp-*: MATCH-статусы REPORT §8.2 сохраняются', () => {

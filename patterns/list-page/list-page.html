@@ -1011,6 +1011,200 @@
   </div>
 </section>
 
+<!-- Тулбар тегов-фильтров каталога (T18.17): связка mtb паттерн-слоя —
+     порт cp-media-toolbar пилота (медиа-каталог, T16.14): лента тегов с
+     шагом 12px «как есть» (.media-toolbar pages.css:594), подписи групп
+     в центре ленты; группы — display: contents (landmark остаётся,
+     раскладку ведёт лента); подпись «Рубрики:» — отступ 24px (inline
+     media.html:14 поверх gap ленты). Фильтры — ui-tag--blue ×
+     ui-tag--filter (T16.14), подписи — ui-tag--gray. -->
+<section class="ui-section" id="lpp-mtb" aria-labelledby="lpp-mtb-title">
+  <h2 class="ui-h3" id="lpp-mtb-title">Тулбар тегов-фильтров каталога (T18.17)</h2>
+  <p class="ui-showcase-stand__note">
+    Лента тегов-фильтров медиа-каталога — канон <code>mtb</code> паттерн-слоя (T18.17: порт тулбара
+    <code>cp-media-toolbar</code> пилота, T16.14): flex-лента с шагом 12px «как есть»
+    (<code>pages.css:594</code>), подписи групп в центре ленты; ритм 16px по краям — принятый рендер
+    пилота. Группы — <code>mtb__group</code> (named landmark, раскладку ведёт лента —
+    <code>display: contents</code>); подпись группы — <code>mtb__label</code> (отступ 24px поверх
+    шага ленты — inline <code>media.html:14</code> оригинала). Теги — компоненты:
+    <code>ui-tag--blue × ui-tag--filter</code> (T16.14), подписи — <code>ui-tag--gray</code>.
+  </p>
+
+  <div class="mtb">
+    <span class="ui-tag ui-tag--gray mtb__label">Рубрики:</span>
+    <nav class="mtb__group" aria-label="Рубрики">
+      <a class="ui-tag ui-tag--blue ui-tag--filter" href="#lpp-mtb-title" aria-current="page"
+        >Все</a
+      >
+      <a class="ui-tag ui-tag--blue ui-tag--filter" href="#lpp-mtb-title">Энергетика</a>
+      <a class="ui-tag ui-tag--blue ui-tag--filter" href="#lpp-mtb-title">Стажировки</a>
+    </nav>
+    <nav class="mtb__group" aria-label="Тип контента">
+      <span class="ui-tag ui-tag--gray">Видео</span>
+      <span class="ui-tag ui-tag--gray">Статьи</span>
+      <span class="ui-tag ui-tag--gray">Интервью</span>
+    </nav>
+  </div>
+</section>
+
+<!-- Карточка предложения целевого обучения (T18.17): канон ofc-card —
+     порт cp-offer-card пилота (калибровка T18.5): колонка «шапка → шорт →
+     теги → мета → футер» с шагом 14 «как есть» (pages.css:837), паддинг 24
+     = space-5; направление — роль ui-h6 с парой карточного заголовка
+     (lh 1.3 без трекинга, pages.css:841); мета — колонка шаг 2
+     (pages.css:849), компания fw-small/primary (pages.css:851); футер
+     к низу. -->
+<section class="ui-section" id="lpp-offer-card" aria-labelledby="lpp-offer-card-title">
+  <h2 class="ui-h3" id="lpp-offer-card-title">Карточка предложения целевого обучения (T18.17)</h2>
+  <p class="ui-showcase-stand__note">
+    Карточка предложения целевого обучения — канон <code>ofc-card</code> паттерн-слоя (T18.17: порт
+    <code>cp-offer-card</code> пилота, калибровка T18.5): колонка с паддингом 24 =
+    <code>space-5</code> и шагом 14px «как есть» (<code>pages.css:837</code> — вне шкалы §3.2,
+    прецедент <code>lpp-breadcrumbs</code>). Направление — роль <code>ui-h6</code> с парой
+    карточного заголовка (<code>lh 1.3</code> без трекинга — <code>pages.css:841</code>); шапка —
+    шаг 8/baseline (принятая интерпретация T18.5), дата — <code>ofc-card__date</code> muted
+    (<code>pages.css:843</code>); мета — колонка с шагом 2 (<code>pages.css:849</code>): компания —
+    <code>fw-small</code>/primary (<code>pages.css:851</code>), город наследует muted меты; футер к
+    низу (<code>margin-top: auto</code>). Кнопка — <code>ui-button--accent</code>.
+  </p>
+
+  <div class="ui-grid ui-grid--2">
+    <article class="ui-card ui-card--hover ofc-card">
+      <div class="ofc-card__head">
+        <h3 class="ui-h6 ui-h6--primary">Химическая технология</h3>
+        <time class="ofc-card__date ui-small ui-text--muted" datetime="2025-09-01"
+          >до 01.09.2025</time
+        >
+      </div>
+      <p class="ui-small">
+        Целевое обучение от компании Группы — гарантия трудоустройства после выпуска.
+      </p>
+      <p>
+        <span class="ui-tag ui-tag--blue">Целевое обучение</span>
+        <span class="ui-tag ui-tag--gray">Очно</span>
+      </p>
+      <p class="ofc-card__meta ui-small">
+        <span class="ofc-card__company">АО «Интер РАО – Электрогенерация»</span
+        ><span class="ofc-card__city">Москва</span>
+      </p>
+      <div class="ofc-card__footer">
+        <a
+          class="ui-button ui-button--accent"
+          href="https://trudvsem.ru/"
+          target="_blank"
+          rel="noopener"
+          >сайт «Работа России»</a
+        >
+      </div>
+    </article>
+    <article class="ui-card ui-card--hover ofc-card">
+      <div class="ofc-card__head">
+        <h3 class="ui-h6 ui-h6--primary">Атомная энергетика</h3>
+        <time class="ofc-card__date ui-small ui-text--muted" datetime="2025-08-15"
+          >до 15.08.2025</time
+        >
+      </div>
+      <p class="ui-small">Стипендия компании, оплачиваемая практика и рабочее место по профилю.</p>
+      <p>
+        <span class="ui-tag ui-tag--blue">Целевое обучение</span>
+        <span class="ui-tag ui-tag--gray">Очно</span>
+      </p>
+      <p class="ofc-card__meta ui-small">
+        <span class="ofc-card__company">ПАО «Интер РАО»</span
+        ><span class="ofc-card__city">Санкт-Петербург</span>
+      </p>
+      <div class="ofc-card__footer">
+        <a
+          class="ui-button ui-button--accent"
+          href="https://trudvsem.ru/"
+          target="_blank"
+          rel="noopener"
+          >сайт «Работа России»</a
+        >
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- Карточка организации (T18.17): канон org-card — порт cp-org-card
+     пилота (калибровка T18.5): колонка с шагом 12 и паддингом 24 «как
+     есть» (pages.css:829); имя — роль ui-h6 с парой заголовка
+     (pages.css:831); мета к низу — margin-top: auto (pages.css:835). -->
+<section class="ui-section" id="lpp-org-card" aria-labelledby="lpp-org-card-title">
+  <h2 class="ui-h3" id="lpp-org-card-title">Карточка организации (T18.17)</h2>
+  <p class="ui-showcase-stand__note">
+    Карточка организации каталога целевого обучения — канон <code>org-card</code> паттерн-слоя
+    (T18.17: порт <code>cp-org-card</code> пилота, калибровка T18.5): колонка с паддингом 24 =
+    <code>space-5</code> и шагом 12 = <code>space-3</code> «как есть» (<code>pages.css:829</code>);
+    имя — роль <code>ui-h6</code> с парой карточного заголовка (<code>lh 1.3</code> без трекинга —
+    <code>pages.css:831</code>: трекинг роли переворачивал перенос длинных имён);
+    <code>org-card__meta</code> к низу — <code>margin-top: auto</code> (<code>pages.css:835</code> —
+    карточки ряда растягиваются). Теги — <code>ui-tag</code> (тип — blue, город — gray).
+  </p>
+
+  <div class="ui-grid ui-grid--3">
+    <article class="ui-card ui-card--hover org-card">
+      <h3 class="ui-h6">Политех Петра Великого</h3>
+      <p class="ui-small ui-text--muted">
+        Крупнейший технический вуз — участник программы «Приоритет-2030».
+      </p>
+      <p class="org-card__meta">
+        <span class="ui-tag ui-tag--blue">ВУЗ</span>
+        <span class="ui-tag ui-tag--gray">Санкт-Петербург</span>
+      </p>
+    </article>
+    <article class="ui-card ui-card--hover org-card">
+      <h3 class="ui-h6">НИУ «МЭИ»</h3>
+      <p class="ui-small ui-text--muted">
+        Ведущий энергетический вуз — базовые кафедры компаний Группы.
+      </p>
+      <p class="org-card__meta">
+        <span class="ui-tag ui-tag--blue">ВУЗ</span>
+        <span class="ui-tag ui-tag--gray">Москва</span>
+      </p>
+    </article>
+    <article class="ui-card ui-card--hover org-card">
+      <h3 class="ui-h6">Омский ГТУ</h3>
+      <p class="ui-small ui-text--muted">Опорный университет региона — целевые программы.</p>
+      <p class="org-card__meta">
+        <span class="ui-tag ui-tag--blue">ВУЗ</span>
+        <span class="ui-tag ui-tag--gray">Омск</span>
+      </p>
+    </article>
+  </div>
+</section>
+
+<!-- Навигация каталога (T18.17): канон cnv — порт пары
+     cp-catalog-nav/cp-events-nav пилота (T15.3/T15.5): пагинация по
+     центру с ритмом 48px (inline-обёртки оригинала
+     education-catalog.html:57 / events.html:357) на токенах. -->
+<section class="ui-section" id="lpp-cnv" aria-labelledby="lpp-cnv-title">
+  <h2 class="ui-h3" id="lpp-cnv-title">Навигация каталога — пагинация по центру (T18.17)</h2>
+  <p class="ui-showcase-stand__note">
+    Обёртка пагинации каталога — канон <code>cnv</code> паттерн-слоя (T18.17: порт пары
+    <code>cp-catalog-nav</code>/<code>cp-events-nav</code> пилота — один приём, два потребителя):
+    flex-строка по центру с ритмом 48px сверху (<code>space-7</code> — inline-обёртки оригинала
+    <code>education-catalog.html:57</code> и <code>events.html:357</code>). Пагинация — компонент
+    <code>ui-pagination</code> (T6.3).
+  </p>
+
+  <div class="cnv">
+    <nav class="ui-pagination" aria-label="Пагинация: пример канона cnv">
+      <button class="ui-pagination__arrow" type="button" disabled aria-label="Предыдущая страница">
+        <!-- prettier-ignore -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M14 8H2m4-5L2 8l4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
+      <span class="ui-pagination__page" aria-current="page">1</span>
+      <a class="ui-pagination__page" href="#lpp-cnv-title" aria-label="Страница 2">2</a>
+      <a class="ui-pagination__page" href="#lpp-cnv-title" aria-label="Страница 3">3</a>
+      <a class="ui-pagination__arrow" href="#lpp-cnv-title" aria-label="Следующая страница">
+        <!-- prettier-ignore -->
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h12m-4-5l4 5-4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </a>
+    </nav>
+  </div>
+</section>
+
 <script>
   // T8.1, Technical considerations: после применения фильтра (перезагрузка
   // GET-формы) фокус — на заголовок результатов: скринридер объявляет

@@ -34,7 +34,7 @@ const blockOf = (css, selector) => {
 const pilotDir = join(root, 'pilot', 'career-portal');
 const build = readFileSync(join(pilotDir, 'build.mjs'), 'utf8').replace(/\r\n/g, '\n');
 const compare = readFileSync(join(pilotDir, 'compare.mjs'), 'utf8').replace(/\r\n/g, '\n');
-const pilotCss = stripCssComments(readFileSync(join(pilotDir, 'pilot.css'), 'utf8'));
+const layerCss = stripCssComments(readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8'));
 
 /** Тело mediaMain целиком (до `}` в начале строки — вложенные скобки
  *  отступом). Рубрики: articles.json — источник второй группы. */
@@ -74,10 +74,10 @@ describe('build.mjs — фильтры обеих групп как ui-tag--blue
   });
 });
 
-describe('pilot.css — тулбар cp-media-toolbar по канону (T16.14 Scope: минимальный align, зазоры по замеру)', () => {
-  it('зазор ленты 12px (--ui-space-3 — .media-toolbar pages.css:594: flex/wrap/gap 12px); выравнивание подписей — центр (оригинал align-self: center на span)', () => {
-    const toolbar = blockOf(pilotCss, '.cp-media-toolbar');
-    expect(toolbar, '.cp-media-toolbar найдено').toBeTruthy();
+describe('тулбар тегов-фильтров — канон mtb слоя (T18.17; T16.14 Scope: минимальный align, зазоры по замеру)', () => {
+  it('зазор ленты 12px (--ui-space-3 — .media-toolbar pages.css:594: flex/wrap/gap 12px); выравнивание подписей — центр (оригинал align-self: center на span) — значения канона mtb в слое', () => {
+    const toolbar = blockOf(layerCss, '.mtb');
+    expect(toolbar, '.mtb найдено в слое').toBeTruthy();
     expect(toolbar).toContain('box-sizing: border-box;');
     expect(toolbar).toContain('display: flex;');
     expect(toolbar).toContain('flex-wrap: wrap;');
@@ -87,21 +87,21 @@ describe('pilot.css — тулбар cp-media-toolbar по канону (T16.14 
   });
 
   it('группа-обёртка nav плоская в ленте (display: contents): перенос фильтров — поэлементный, как у оригинала; nav остаётся именованным landmark-маркером', () => {
-    const group = blockOf(pilotCss, '.cp-media-toolbar__group');
-    expect(group, '.cp-media-toolbar__group найдено').toBeTruthy();
+    const group = blockOf(layerCss, '.mtb__group');
+    expect(group, '.mtb__group найдено в слое').toBeTruthy();
     expect(group).toContain('display: contents;');
   });
 
   it('«Рубрики:» — отступ группы 24px (--ui-space-5; оригинал media.html:160 inline margin-left: 24px — без inline-стилей)', () => {
-    const label = blockOf(pilotCss, '.cp-media-toolbar__rubrics-label');
-    expect(label, 'крючок подписи рубрик найден').toBeTruthy();
+    const label = blockOf(layerCss, '.mtb__label');
+    expect(label, 'крючок подписи рубрик найден в слое').toBeTruthy();
     expect(label).toContain('margin-left: var(--ui-space-5);');
   });
 
-  it('в зоне тулбара нет hex и !important (инварианты системы)', () => {
-    const start = pilotCss.indexOf('.cp-media-toolbar');
-    const end = pilotCss.indexOf('.cp-offer-card');
-    const section = pilotCss.slice(start, end);
+  it('в каноне тулбара нет hex и !important (инварианты системы)', () => {
+    const start = layerCss.indexOf('.mtb');
+    const end = layerCss.indexOf('.ofc-card');
+    const section = layerCss.slice(start, end);
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(section).not.toContain('!important');
   });

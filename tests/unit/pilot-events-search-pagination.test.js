@@ -200,8 +200,8 @@ describe('build.mjs — пагинация events.html (T15.5 Scope)', () => {
     ).not.toMatch(/aria-label="Назад"|aria-label="Вперёд"/);
   });
 
-  it('обёртка пагинации — сайт-зона cp-events-nav (по центру, ритм 48px — оригинал events.html:357); список карточек events не тронут', () => {
-    expect(eventsMainBody).toContain('cp-events-nav');
+  it('обёртка пагинации — канон cnv слоя (T18.17: пара cp-events-nav снята; по центру, ритм 48px — оригинал events.html:357); список карточек events не тронут', () => {
+    expect(eventsMainBody).toContain('<div class="cnv">');
     expect(eventsMainBody).toContain('EVT.upcoming.map(eventCard)');
     expect(eventsMainBody).toContain('EVT.past.map(eventCard)');
   });
@@ -221,19 +221,28 @@ describe('pilot.css — сайт-зона поиска и пагинации (T1
     expect(pilotCss, 'старое имя cp-vac-find не остаётся').not.toContain('cp-vac-find');
   });
 
-  it('cp-events-nav — box-sizing (ADR-0002), по центру с ритмом 48px (--ui-space-7; оригинал events.html:357 — пара cp-catalog-nav)', () => {
-    const nav = blockOf(pilotCss, '.cp-events-nav');
-    expect(nav, '.cp-events-nav найдено').toBeTruthy();
+  it('cnv — box-sizing (ADR-0002), по центру с ритмом 48px (--ui-space-7; оригинал events.html:357 — пара cp-catalog-nav; T18.17 — значения в слое)', () => {
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8')
+      .replace(/\r\n/g, '\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    expect(pilotCss, 'cp-events-nav снят — канон cnv в слое (T18.17)').not.toContain(
+      '.cp-events-nav',
+    );
+    const nav = blockOf(layer, '.cnv');
+    expect(nav, '.cnv найдено в слое').toBeTruthy();
     expect(nav, 'box-sizing первой строкой (ADR-0002)').toContain('box-sizing: border-box;');
     expect(nav).toContain('display: flex;');
     expect(nav).toContain('justify-content: center;');
     expect(nav).toContain('margin-top: var(--ui-space-7);');
   });
 
-  it('в новых блоках нет hex и !important (инварианты системы)', () => {
-    const start = pilotCss.indexOf('.cp-events-nav');
-    const end = pilotCss.indexOf('}', pilotCss.indexOf('.cp-events-nav'));
-    const section = pilotCss.slice(start, end);
+  it('в каноне cnv нет hex и !important (инварианты системы)', () => {
+    const layer = readFileSync(join(root, 'patterns', 'patterns.css'), 'utf8')
+      .replace(/\r\n/g, '\n')
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const start = layer.indexOf('.cnv');
+    const end = layer.indexOf('}', layer.indexOf('.cnv'));
+    const section = layer.slice(start, end);
     expect(section).not.toMatch(/#[0-9a-f]{3,8}\b/i);
     expect(section).not.toContain('!important');
   });

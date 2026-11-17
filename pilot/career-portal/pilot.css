@@ -10,7 +10,7 @@
  * о сравнении (pilot/career-portal/REPORT.md), а не правки здесь.
  *
  * Блоки без аналога в ДС (why-us, video,
- * team, шапка/подвал сайта) — честная сайт-зона: кандидаты в
+ * шапка/подвал сайта) — честная сайт-зона: кандидаты в
  * новые паттерны/компоненты ДС, до решения — живут здесь. Чипы с T14.8 —
  * компонент ui-chip: сайт-зоне остаётся только ритм раскладок вокруг них.
  * CTA-плашки (cta-mail, «Все вакансии») с T17.8 — компонент ui-card--cta.
@@ -19,14 +19,24 @@
  * остаются тон-строки тегов hero (хук --hro-tag-bg). Раскладки карусели
  * production с T18.13 — паттерн-слой prd (поверх ui-carousel T17.7).
  * Сетка направлений и холдинг с T18.14 — паттерн-слой dir/hld.
+ * Батч cp-остатков с T18.17 — паттерн-слой mtb/ofc-card/org-card/cnv/
+ * adv-grid/evt-feature/tm (тулбар каталога, карточки предложения и
+ * организации, навигация каталога, сетка преимуществ, фича-лента
+ * мероприятий, секция команды); тон-строки/позиции — не-cp имена
+ * сайт-зоны (site-page, hero-tone--, article-date, intern-card, vac-main —
+ * судьба семейств «остаётся сайт-зоне», REPORT §11.4). Единственное
+ * cp-семейство — позиционные хуки лент компании cp-company-feed (T18.3).
  */
 
 /* ── страница ── */
 
-.cp-page {
-  /* Фон страницы — белый оригинала (--color-surface); blue-50
-     (--ui-color-surface-muted) — токен «фон карточек», он остаётся
-     точечным внутри (герой-поиск, пилюли фильтров), не на всей странице. */
+/* Тон корня страницы (T18.17: судьба семейства page — «остаётся сайт-зоне»,
+   сокращение cp-хука — не-cp имя по конвенции stu-/ctr-/msh__card; тон —
+   бренд-слой, НЕ система — прецедент T17.15 «тон — сайт, вид — ДС»):
+   фон — белый оригинала (--color-surface); blue-50 (--ui-color-surface-muted)
+   — токен «фон карточек», он остаётся точечным внутри (герой-поиск, пилюли
+   фильтров), не на всей странице. */
+.site-page {
   background-color: var(--ui-color-surface);
   color: var(--ui-color-text);
 }
@@ -102,7 +112,7 @@
    — mapping T14.7). */
 
 /* Тон violet: color-mix спец-тинта оригинала (hero.css:152). */
-.cp-hero__tag--violet {
+.hero-tone--violet {
   --hro-tag-bg: color-mix(in srgb, #3142ff 20%, transparent);
 }
 
@@ -110,17 +120,17 @@
    акцентная rgba(234,125,29,0.26) — mapping-решение T14.7:
    --ui-color-primary-a26); значение совпадает с дефолтом хука — строка
    оставлена для явности тона в разметке (активация не зависит от дефолта). */
-.cp-hero__tag--sand {
+.hero-tone--sand {
   --hro-tag-bg: var(--ui-color-primary-a26);
 }
 
 /* Тон green: color-mix спец-тинта оригинала (hero.css:154). */
-.cp-hero__tag--green {
+.hero-tone--green {
   --hro-tag-bg: color-mix(in srgb, #31ff76 20%, transparent);
 }
 
 /* Тон rose: color-mix спец-тинта оригинала (hero.css:155). */
-.cp-hero__tag--rose {
+.hero-tone--rose {
   --hro-tag-bg: color-mix(in srgb, #ff3134 20%, transparent);
 }
 
@@ -306,17 +316,15 @@
    порога compare ±1%); канон mdl__big в слое есть (док-стенд рендерит
    2×2), активация в пилоте — design-decision владельца. */
 
-/* ── team / cta-mail (сайт-зона) ── */
-
-.cp-team__photo {
-  width: 100%;
-  border-radius: var(--ui-radius-lg);
-}
-
-/* CTA-плашки главной — ui-card--cta (T17.8): правила cp-cta-mail__card/email
-   и cp-vacancy-search__all сняты, поверхность/центр/ритм и on-dark-пара —
-   компонент; содержимое карточки — ролями (ui-h2/ui-lead/ui-h4) и
-   контролами (ui-link--on-dark). */
+/* ── team / cta-mail ──
+   Секция команды — канон tm паттерн-слоя (T18.17): правило cp-team__photo
+   снято (фото-полоса во всю ширину, радиус — принятая интерпретация клона
+   radius-lg), семейство team ушло из allowlist ценза (судьба «вынос в
+   слой», REPORT §11.4). CTA-плашки главной — ui-card--cta (T17.8):
+   правила cp-cta-mail__card/email и cp-vacancy-search__all сняты,
+   поверхность/центр/ритм и on-dark-пара — компонент; содержимое карточки —
+   ролями (ui-h2/ui-lead/ui-h4) и контролами (ui-link--on-dark). Судьба
+   семейства cta-mail — «снято T17.8»: остатка в сайт-зоне нет. */
 
 /* ── подвал сайта — ПАТТЕРН-СЛОЙ (T17.13) ──
    Каркас (сетка auto 2fr 2fr 1fr, колонка ссылок 9px/1.35, контакты 28/4,
@@ -595,8 +603,11 @@
 /* Ритм лент ui-chip (T14.8) в раскладках пилота: компонент отступов не
    несёт — вертикальный ритм добавляет раскладка сайт-зоны (вид пилюль и
    состояния — сам компонент). Ритм #directions ведёт хук .int-chips
-   (T18.6 — низ 32 .chip-row оригинала, pages.css:135). */
-.cp-vac-main .ui-chip {
+   (T18.6 — низ 32 .chip-row оригинала, pages.css:135). Хук несёт тон-имя
+   vac-main (T18.17: судьба семейства vac-main — «остаётся сайт-зоне» —
+   позиция main-колонки вакансий T17.1 + ритм чипов; сокращение cp-хука —
+   не-cp имя по конвенции stu-/ctr-/msh__card). */
+.vac-main .ui-chip {
   margin: var(--ui-space-4) 0;
 }
 
@@ -606,24 +617,11 @@
    2.5rem «как есть» (pages.css:19) и шириной пилюль 260px (оригинал
    vacancy-search.css:41; правила слоя, канон list-page). Скрытая подпись
    select-пилюли (label[for] канона ui-select T7.3) — утилита ДС .ui-vh
-   (T17.2). Пагинация каталога по центру (T15.3; оригинал — inline-обёртка
-   education-catalog.html:57: flex + margin-top 48px = --ui-space-7). */
-.cp-catalog-nav {
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  margin-top: var(--ui-space-7);
-}
-
-/* Пагинация events по центру (T15.5; оригинал — inline-обёртка
-   events.html:357 — тот же приём, что education-catalog.html:57; пара
-   cp-catalog-nav). */
-.cp-events-nav {
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  margin-top: var(--ui-space-7);
-}
+   (T17.2). Пагинация каталога и events по центру (T15.3/T15.5; оригинал —
+   inline-обёртки education-catalog.html:57 / events.html:357 — тот же
+   приём) — канон cnv паттерн-слоя (T18.17): пара cp-catalog-nav/
+   cp-events-nav снята, семейства catalog-nav/events-nav ушли из allowlist
+   ценза (судьба «вынос в слой», REPORT §11.4). */
 
 /* Поднавигация разделов — ПАТТЕРН-СЛОЙ (T17.11): раскладка (сетка 5×1fr
    «сетка 264», маргины 24/48) — канон nvp (ds/ui-patterns.css), вид трека
@@ -667,7 +665,10 @@
    есть», padding 24px против 20 оригинала — «принято ДС» REPORT §3.3,
    mapping). Класс в разметке — hook пробы side-promo. */
 
-.cp-vac-main {
+/* Main-колонка вакансий (T17.1: «main-колонка — композиция страницы», нет
+   в списке снятия): позиция — раскладка сайт-зоны; имя vac-main (T18.17 —
+   сокращение cp-хука, судьба «остаётся сайт-зоне», REPORT §11.4). */
+.vac-main {
   display: flex;
   flex-direction: column;
 }
@@ -707,8 +708,8 @@
    цвет — текст карточки, без «документного» подчёркивания — оригинал гасит
    его inline (build.py:114 style="text-decoration: none"); пара с карточкой
    выдачи — канон lpp-card слоя (T18.15). Кнопочная версия
-   (internships/practices) не задета. */
-a.cp-intern-card {
+   (internships/practices) не задета. Имя intern-card (T18.17: судьба семейства intern-card — «остаётся сайт-зоне» — кламп/ссылочная пара поверх каркаса ui-card--media T17.5; сокращение cp-хука). */
+a.intern-card {
   color: var(--ui-color-text);
   text-decoration: none;
 }
@@ -718,7 +719,7 @@ a.cp-intern-card {
    строка «как .org-card__short», но clamp в оригинале несёт именно
    dir-card__short, у .org-card__short (pages.css:833) обреза нет — применено
    по фактическому канону). Паттерн «как есть»: -webkit-box + line-clamp. */
-.cp-intern-card .ui-small {
+.intern-card .ui-small {
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;
@@ -742,135 +743,41 @@ a.cp-intern-card {
    cp-timeline сняты, канон приходит dist/ui-patterns.css (точки 56px
    surface-hover/primary, ряд от 1024). */
 
-/* Сетка преимуществ — карточки ui-card--filled. T18.5: шаг 24 — канон
-   .adv-grid (pages.css:505); прежние 12px занижали высоту ленты
-   (потребители — стажировки/практики/education, у всех тот же .adv-grid). */
-.cp-adv-grid {
-  display: grid;
-  gap: var(--ui-space-5);
-  grid-template-columns: repeat(3, 1fr);
-}
-
-/* Лента мероприятий «фича» на лендинге стажировок — events-feature оригинала
-   (T18.6): правила семейства int- выше (сетка 2fr/1fr от lg, большая
-   карточка на два ряда, карточки .event-card). */
+/* Сетка преимуществ — ПАТТЕРН-СЛОЙ (T18.17): правило cp-adv-grid снято
+   (карточки ui-card--filled; шаг 24 — pages.css:505), канон adv-grid
+   (landing-section; ступени 1023/767 — мобильные базы md/lg канона),
+   семейство adv-grid ушло из allowlist ценза (судьба «вынос в слой»,
+   REPORT §11.4). Лента мероприятий «фича» на лендинге стажировок —
+   канон evt-feature слоя (T18.17: порт cp-events-feature T18.6), судьба —
+   «вынос в слой». */
 
 /* Карточки событий/статей/стажёров — медиа-карточки ui-card--media (T17.5):
    фото __media (3/2; --square 1/1), тег __media-tag (absolute 8/8), тело
    __body (флекс-колонка gap 8, паддинг 12) и __meta — компонент; правила
    cp-event-card, cp-article-card и cp-intern-person сняты (~80 строк).
    Специфика тела — мета-строки — на разметке сайта: дата статьи несёт
-   класс cp-article-card__date ради fw 400. */
+   класс article-date ради fw 400. */
 
 /* Специфика мета-строки статьи (карточка на ui-card--media, T17.5): дата —
    fw 400 — small-regular оригинала (pages.css:610, маппинг small-regular =
    small × fw 400, semantic.css:317); роль ui-small тянет 500 (T15.1-бэклог)
-   — вес несёт разметка сайта этим классом, вид — существующий токен. */
-.cp-article-card__date {
+   — вес несёт разметка сайта этим классом, вид — существующий токен.
+   Имя article-date (T18.17: судьба семейства article-card — «остаётся
+   сайт-зоне» — тон-строка fw 400 даты; сокращение cp-хука). */
+.article-date {
   font-weight: var(--ui-fw-body);
 }
 
-/* Тулбар медиа-каталога (T16.14: зазоры по канону .media-toolbar
-   pages.css:594 — gap 12px, подписи группы в центре ленты). Фильтры —
-   ui-tag--blue × ui-tag--filter (ДС, T16.14), подписи — ui-tag--gray. */
-.cp-media-toolbar {
-  box-sizing: border-box;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-3);
-  align-items: center;
-  margin: var(--ui-space-4) 0;
-}
-
-/* Группа фильтров — плоская в ленте тулбара (фильтры — прямые дети
-   flex-ленты оригинала, перенос поэлементный): nav остаётся именованным
-   landmark-маркером, в раскладку не вмешивается. */
-.cp-media-toolbar__group {
-  display: contents;
-}
-
-/* «Рубрики:» — отступ группы 24px (оригинал media.html:160, inline
-   margin-left: 24px поверх gap 12px ленты; inline-стили запрещены —
-   VI-инвариант §5). */
-.cp-media-toolbar__rubrics-label {
-  margin-left: var(--ui-space-5);
-}
-
-/* Карточка предложения целевого обучения. T18.5: паддинг 24/шаг 14 — канон
-   .offer-card (pages.css:838; шаг «как есть» — 14px вне шкалы §3.2,
-   прецедент .cp-breadcrumbs 1.25rem); прежние 16/8 занижали карточку
-   (339 ↔ 275 на 1440). Потребители мета-колонки — education/каталог/event. */
-.cp-offer-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.875rem;
-  padding: var(--ui-space-5);
-}
-
-/* Направление — роль ui-h6 (T16.12), пара карточного заголовка оригинала:
-   lh 1.3 без трекинга роли (pages.css:840 — .offer-card__direction,
-   fs-body × 1.3; замер 05.11: имя 2 строки 52 ↔ 50, переносы совпадают) */
-.cp-offer-card .ui-h6 {
-  line-height: 1.3;
-  letter-spacing: normal;
-}
-
-.cp-offer-card__head {
-  display: flex;
-  gap: var(--ui-space-2);
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.cp-offer-card__date {
-  color: var(--ui-color-text-muted);
-}
-
-/* Мета — колонка .offer-card__meta (pages.css:861–864): компания над
-   городом, шаг 2 «как есть»; подпись компании — fw-small/primary
-   (pages.css:865–866), город наследует muted меты. */
-.cp-offer-card__meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  color: var(--ui-color-text-muted);
-}
-
-.cp-offer-card__company {
-  color: var(--ui-color-primary);
-  font-weight: var(--ui-fw-small);
-}
-
-.cp-offer-card__footer {
-  margin-top: auto;
-}
-
-/* Карточка организации. T18.5: паддинг 24/шаг 12 — канон .org-card
-   (pages.css:829); мета к низу — .org-card__meta margin-top auto
-   (pages.css:835: карточки ряда растягиваются, мета прижата к низу). */
-.cp-org-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--ui-space-3);
-  padding: var(--ui-space-5);
-}
-
-/* Имя организации — роль ui-h6 (T16.12), пара карточного заголовка
-   оригинала: lh 1.3 без трекинга роли (pages.css:831 — .org-card__name,
-   fs-body × 1.3; замер 05.11: трекинг роли −0.02em переворачивал перенос
-   «Санкт-Петербургский политехнический…» в 2 строки вместо 3 — ряд 190
-   вместо 219). */
-.cp-org-card .ui-h6 {
-  line-height: 1.3;
-  letter-spacing: normal;
-}
-
-.cp-org-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--ui-space-1);
-  margin-top: auto;
-}
+/* Тулбар медиа-каталога — ПАТТЕРН-СЛОЙ (T18.17): правила cp-media-toolbar
+   сняты, канон mtb (list-page; T16.14: зазоры по канону .media-toolbar
+   pages.css:594 — gap 12px, подписи группы в центре ленты), семейство
+   media-toolbar ушло из allowlist ценза (судьба «вынос в слой», REPORT
+   §11.4). Фильтры — ui-tag--blue × ui-tag--filter (ДС, T16.14), подписи —
+   ui-tag--gray. Карточка предложения — канон ofc-card слоя (T18.17: порт
+   cp-offer-card, калибровка T18.5), карточка организации — канон org-card
+   (T18.17); семейства offer-card/org-card ушли из allowlist ценза (судьба
+   «вынос в слой», REPORT §11.4). Потребители мета-колонки предложения —
+   education/каталог/event. */
 
 /* ── education.html: интро, каталог, направления (T18.5) ──
    Позиционные хуки edu- (конвенция не-cp имени сайт-зоны — прецедент ctr-
@@ -1043,7 +950,7 @@ a.cp-intern-card {
 /* Сетка преимуществ — карточки с шагом 12 (.adv-card pages.css:507)
    против 14 канона ui-card (позиция — секции int-; education T18.5 не
    задет). */
-.int-sec .cp-adv-grid .ui-card {
+.int-sec .adv-grid .ui-card {
   gap: var(--ui-space-3);
 }
 
@@ -1108,16 +1015,16 @@ a.cp-intern-card {
 }
 
 /* Карточка направления — шаг 12 (.dir-card pages.css:1024) против 14
-   канона ui-card. Кламп шорта — канон T16.12 на общей cp-intern-card
+   канона ui-card. Кламп шорта — канон T16.12 на общей intern-card
    (.dir-card__short pages.css:1045–1054), отдельного хука не требует. */
-.int-dir-grid .cp-intern-card {
+.int-dir-grid .intern-card {
   gap: var(--ui-space-3);
 }
 
 /* Заголовок карточки направления — lh 1.3 без трекинга роли
    (.dir-card__title pages.css:1041 — fs-body × 1.3; прецедент пар T18.5:
    трекинг −0.02em роли ui-h6 переворачивал переносы заголовков). */
-.int-dir-grid .cp-intern-card .ui-h6 {
+.int-dir-grid .intern-card .ui-h6 {
   line-height: 1.3;
   letter-spacing: normal;
 }
@@ -1166,74 +1073,10 @@ a.cp-intern-card {
   padding: 0 1.25rem 1.25rem; /* 0 20px 20px pages.css:1142–1146 */
 }
 
-/* Лента мероприятий «фича» — events-feature оригинала (pages.css:1150–1171):
-   2fr/1fr от lg (mobile-first: база колонка — оригинал держал колонку до
-   1024, pages.css:1254), большая карточка — на два ряда; её фото растягивал
-   флекс до натуральной пропорции (pages.css:1163–1171): слот без аспекта и
-   img без фикс-высоты (ревью T18.6: aspect-ratio 1/1 на слоте оставлял img
-   полосой 220px от правил ниже — 627px пустоты при Δ0 высотного гейта;
-   height: 100% не нужен — интринсик-цикл, урок в ui-card.css:163–172).
-   Карточки — .event-card (pages.css:565–581): паддинг 16, фото 200→220 (md),
-   тело 16 4 0 с шагом 10; канон ui-card--media (паддинг 24, фото 3/2,
-   тело 12/шаг 8) давал
-   ленту 613 против 1168 (замер 06.11). */
-.cp-events-feature {
-  display: grid;
-  gap: var(--ui-space-5); /* 24px pages.css:1154 */
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.cp-events-feature .ui-card {
-  gap: 0; /* .event-card — ритм несёт тело (pages.css:565/575) */
-  padding: var(--ui-space-4); /* 16px pages.css:565 */
-}
-
-.cp-events-feature .ui-card__media {
-  aspect-ratio: auto; /* высоту несёт img (pages.css:569) */
-}
-
-.cp-events-feature .ui-card__media img {
-  height: 12.5rem; /* 200px @max-767 pages.css:932 — мобильная база */
-  border-radius: var(--ui-radius-md); /* pages.css:567 */
-}
-
-.cp-events-feature .ui-card__body {
-  gap: 0.625rem; /* 10px pages.css:575 */
-  padding: var(--ui-space-4) 0.25rem 0; /* 16px 4px 0 pages.css:575 */
-}
-
-.cp-events-feature .ui-h6 {
-  line-height: 1.3; /* pages.css:579 (роль — 1.25); прецедент пар T18.5 */
-  letter-spacing: normal; /* .event-card__title оригинала без трекинга */
-}
-
-.cp-events-feature .ui-card__body time {
-  font-size: var(--ui-fs-small); /* .event-card__date pages.css:577 */
-}
-
-@media (min-width: 768px) {
-  .cp-events-feature .ui-card__media img {
-    height: 13.75rem; /* 220px pages.css:569 */
-  }
-}
-
-@media (min-width: 1024px) {
-  .cp-events-feature {
-    grid-template-columns: 2fr minmax(0, 1fr); /* pages.css:1152 */
-  }
-
-  .cp-events-feature .ui-card:first-child {
-    grid-row: 1 / 3; /* pages.css:1158 */
-  }
-
-  .cp-events-feature .ui-card:first-child .ui-card__media {
-    aspect-ratio: auto; /* pages.css:1163–1171 — высоту несёт img */
-  }
-
-  .cp-events-feature .ui-card:first-child .ui-card__media img {
-    height: auto; /* специфичность (0,4,1) гасит 12.5/13.75rem выше */
-  }
-}
+/* Лента мероприятий «фича» — ПАТТЕРН-СЛОЙ (T18.17): правила cp-events-feature
+   сняты, канон evt-feature (landing-section; порт events-feature оригинала
+   pages.css:1150–1171 + вид .event-card pages.css:565–581 — T18.6), судьба
+   семейства events-feature — «вынос в слой», REPORT §11.4. */
 
 /* ── компания: детальная страница (T15.2) ──
    Источник — src/pages/company.html + pages.css:796–825/656–674/884.
@@ -1379,9 +1222,9 @@ a.cp-intern-card {
   /* why-us — канон whu слоя (T18.12): ступень 2 колонок — база колонкой
      канона (оригинал ≤1023), лестница пилота снята. */
 
-  .cp-adv-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  /* Сетка преимуществ — канон adv-grid слоя (T18.17): ступень 1023 снята
+     (2 колонки от md — мобильная база md канона, инверсия pages.css:900,
+     mobile-first, Implementation requirements T17.1 п.4). */
 
   /* Сетка направлений/статы холдинга — каноны dir/hld слоя (T18.14):
      ступени 1023 копипасты сняты (2 колонки от md — инверсия, mobile-first,
@@ -1434,9 +1277,8 @@ a.cp-intern-card {
   /* Hero — канон hro (T17.15): мобильная база min-height 35rem, 50.5rem
      от md — ступень 767 копипасты снята (mobile-first). */
 
-  .cp-adv-grid {
-    grid-template-columns: 1fr;
-  }
+  /* Сетка преимуществ — канон adv-grid слоя (T18.17): мобильная база
+     канона и так колонка (оригинал ≤767) — ступень 767 снята. */
 
   /* Сетка направлений/статы холдинга — каноны dir/hld слоя (T18.14):
      мобильная база канона и так колонка — ступень 767 копипасты снята

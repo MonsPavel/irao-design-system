@@ -454,9 +454,9 @@ describe('пилот (T17.5): медиа-карточки на модифика�
     // Специфика тела остаётся на разметке сайта (Scope T17.5): дата статьи —
     // fw 400 small-regular оригинала (pages.css:610; T15.1-бэклог: роль
     // ui-small тянет 500) — на существующем токене --ui-fw-body.
-    expect(pilotCss).toMatch(
-      /\.cp-article-card__date\s*\{[^}]*font-weight:\s*var\(--ui-fw-body\);/,
-    );
+    // T18.17: судьба семейства article-card — «остаётся сайт-зоне» —
+    // тон-строка fw 400 на не-cp имени article-date (сокращение cp-хука).
+    expect(pilotCss).toMatch(/\.article-date\s*\{[^}]*font-weight:\s*var\(--ui-fw-body\);/);
   });
 
   it('eventCard/articleCard/mediaHomeCard — ui-card--media на карточке, фото — __media, тег — __media-tag, тело — __body', () => {

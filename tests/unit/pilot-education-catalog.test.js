@@ -216,16 +216,17 @@ describe('build.mjs — страница education-catalog.html (T15.3 Scope)', 
   });
 });
 
-describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 Scope, правила пилота: токены --ui-*)', () => {
-  it('лента фильтров — канон слоя lpp-filters (T17.12): сайт-зонный cp-catalog-filters снят; пагинация остаётся сайтом и несёт box-sizing (ADR-0002)', () => {
+describe('пагинация каталога — канон cnv слоя (T18.17; T15.3 Scope: правила пилота на токенах --ui-*)', () => {
+  it('лента фильтров — канон слоя lpp-filters (T17.12): сайт-зонный cp-catalog-filters снят; обёртка пагинации — канон cnv слоя (T18.17): cp-catalog-nav из pilot.css снят', () => {
     expect(pilotCss, 'cp-catalog-filters снят — вид ленты в patterns/patterns.css').not.toContain(
       '.cp-catalog-filters',
     );
-    const nav = blockOf(pilotCss, '.cp-catalog-nav');
-    expect(nav, '.cp-catalog-nav найдено').toBeTruthy();
-    expect(nav, '.cp-catalog-nav: box-sizing первой строкой (ADR-0002)').toContain(
-      'box-sizing: border-box;',
+    expect(pilotCss, 'cp-catalog-nav снят — канон cnv в слое (T18.17)').not.toContain(
+      '.cp-catalog-nav',
     );
+    const cnv = blockOf(layerCss, '.cnv');
+    expect(cnv, '.cnv найдено в слое').toBeTruthy();
+    expect(cnv, '.cnv: box-sizing первой строкой (ADR-0002)').toContain('box-sizing: border-box;');
   });
 
   it('лента фильтров — значения канона в слое: gap 16px (--ui-space-4), отступ снизу 2.5rem «как есть» (pages.css:19; 40px вне шкалы §3.2 — прецедент --ui-card-gap)', () => {
@@ -245,15 +246,15 @@ describe('pilot.css — сайт-зона каталога cp-catalog-* (T15.3 S
     expect(build, 'генератор пилюль на утилите ДС').toMatch(/label class="ui-vh"/);
   });
 
-  it('обёртка пагинации — по центру с ритмом 48px (--ui-space-7; оригинал education-catalog.html:57)', () => {
-    const nav = blockOf(pilotCss, '.cp-catalog-nav');
+  it('обёртка пагинации — по центру с ритмом 48px (--ui-space-7; оригинал education-catalog.html:57) — значения канона cnv в слое (T18.17)', () => {
+    const nav = blockOf(layerCss, '.cnv');
     expect(nav).toContain('display: flex;');
     expect(nav).toContain('justify-content: center;');
     expect(nav).toContain('margin-top: var(--ui-space-7);');
   });
 
-  it('в блоках каталога нет hex и !important (инварианты системы)', () => {
-    const start = pilotCss.indexOf('.cp-catalog-nav');
+  it('в каноне cnv нет hex и !important (инварианты системы)', () => {
+    const start = layerCss.indexOf('.cnv');
     // срез ровно по проверяемому блоку (ревью T17.12: до-веточная формула
     // складывала два абсолютных индекса — end уходил за конец файла,
     // проверка фактически покрывала хвост всего pilot.css)
