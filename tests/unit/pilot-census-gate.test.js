@@ -202,7 +202,7 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.17', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.18', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
@@ -214,6 +214,15 @@ describe('пороги ценза — числа зафиксированы по
     // входа T17.5) — 16 → 1 (позиционно-необходимый минимум: company-feed)
     expect(ALLOWED_CP_FAMILIES).toHaveLength(1);
     expect(ALLOWED_CP_FAMILIES).toEqual(['company-feed']);
+    // закрывающая T18.18: итог эпика — сырые 1441 / код 580 / 11 селекторов /
+    // 1 семейство; потолки-порогы НЕ понижены (файл сжался — прецедент
+    // «пороги не двигаются» T17.18/T18.10–T18.17; переход ценза «порога-
+    // потолка» на убывающий гейт — решение владельца, Out of scope EPIC-18:
+    // README эпика; факты итога — REPORT §11.6)
+    expect(MAX_PILOT_CSS_LINES, 'потолок сырых строк не понижается при сжатии файла').toBe(2272);
+    expect(MAX_PILOT_CSS_CODE_LINES, 'потолок кода сайт-зоны не понижается при сжатии файла').toBe(
+      1297,
+    );
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -354,7 +363,9 @@ describe('пороги ценза — числа зафиксированы по
       // cp-хуков (не-cp имена site-page/hero-tone--*/article-date/
       // intern-card/vac-main — конвенция stu-/ctr-/msh__card);
       // event-card/intern-person — висячие входы снятых семейств T17.5):
-      // сырые 1599→1224, код 715→477, селекторы 55→11; семейства 14→1 —
+      // сырые 1599→1441, код 715→580, селекторы 55→11 (errata приёмки
+      // T18.17: после снятия валивших гранул шапки предложения — без них
+      // файл 1441/580; числа пинов ниже — факт HEAD); семейства 14→1 —
       // единственное cp-семейство company-feed (позиционные хуки лент T18.3
       // — позиционно-необходимый минимум, судьбы всех — REPORT §11.4):
       expect(metrics.css.lines).toBe(1441);
@@ -433,6 +444,42 @@ describe('compare.mjs — гейт ценза подключен в тот же 
     expect(censusCall).toBeGreaterThan(-1);
     expect(browserLaunch).toBeGreaterThan(-1);
     expect(censusCall).toBeLessThan(browserLaunch);
+  });
+});
+
+describe('закрывающая T18.18 — BLOCK_PROBES новые макро-блоки (позиции/высоты)', () => {
+  it('блок-проба снимает позицию блока (top от начала документа) на обеих сторонах — площадок замера две', () => {
+    // compare.mjs: замер блоков — две одинаковые evaluate-площадки
+    // (оригинал/пилот), каждая берёт rect.width/height + rect.top+scrollY
+    expect(compare.match(/rect\.top \+ window\.scrollY/g)).toHaveLength(2);
+    expect(compare).toContain('top: Math.round(rect.top + window.scrollY)');
+  });
+
+  it('новые макро-блоки эпика покрыты парами (Goal T18.18: mentorship, vacancy-capsule, students--photographic, ленты company/career-track)', () => {
+    // index-2 (T18.2): наставничество + капсула вакансий — каноны msh/vcp;
+    // фото-секция students (T18.1, apply_variant2) меряет #students
+    expect(compare).toContain("['mentorship', '.mentorship', '.msh']");
+    expect(compare).toContain("['vacancy-capsule', '.vacancy-capsule', '.vcp']");
+    expect(compare).toContain("['students', '.students--photographic', '#students']");
+    // index (T18.1): вторая секция «Школьникам и студентам» — фото-карточки
+    expect(compare).toContain("['students-photo', '.students--photographic', '.stu-photo']");
+    // company.html (T18.3): шесть лент + два баннера + фото-галерея
+    for (const name of [
+      'company-vacancies',
+      'company-banner',
+      'company-internships',
+      'company-practices',
+      'company-articles',
+      'company-banner-2',
+      'company-events',
+      'company-photos',
+    ]) {
+      expect(compare).toContain(`'${name}',`);
+    }
+    // career-track.html (T18.4): обложка / секция треков / тест / статьи
+    for (const name of ['ctr-cover', 'ctr-tracks', 'ctr-test', 'ctr-articles']) {
+      expect(compare).toContain(`'${name}',`);
+    }
   });
 });
 

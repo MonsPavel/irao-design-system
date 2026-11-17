@@ -412,8 +412,13 @@ describe('пилот career-portal: students/employers на связках (AC T
     expect(pilotCss).not.toMatch(/\.cp-employers__grid/);
   });
 
-  it('compare-проба employers — на крючке слоя (прецедент video-block/cta-mail T17.8)', () => {
-    expect(compare).toContain("['employers', '.employers', '.lgo-grid']");
+  it('compare-проба employers — на крючке слоя; T18.18: пара на секции .lgo — синхронно паре index-2 (проба на сетке .lgo-grid меряла решётку против секции оригинала — ASYM −327; секции паритетны: 583 ↔ 586)', () => {
+    expect(compare, 'пара employers — на секции слоя (index и index-2 одинаково)').toContain(
+      "['employers', '.employers', '.lgo'],",
+    );
+    expect(compare, 'крючок сетки из пробы снят — пара меряла решётку (ASYM)').not.toContain(
+      "'.lgo-grid'",
+    );
     expect(compare, 'старый крючок из пробы снят').not.toContain("'.cp-employers__grid'");
   });
 });
