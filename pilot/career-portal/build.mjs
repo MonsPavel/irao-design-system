@@ -35,6 +35,7 @@
  * — не-cp имена сайт-зоны.
  *
  * Запуск:  node pilot/career-portal/build.mjs [--ref <путь-к-career-portal>]
+ *          [--assets-optional — без референса (CI): разметка полная, ассеты пропущены]
  * Перед запуском нужен собранный dist/ ДС:  npm run build
  */
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -52,14 +53,19 @@ const REF = resolve(
   ROOT,
   refIndex !== -1 ? process.argv[refIndex + 1] : '../career-portal-clone-ref',
 );
+// --assets-optional: сборка без чекаута референса (CI, чистые клоны) —
+// разметка/рантайм ДС полные, ассеты оригинала пропускаются (сравнение
+// изображений всё равно требует референс — гонять его без ассетов смысла нет).
+const assetsOptional = process.argv.includes('--assets-optional');
 
 if (!existsSync(join(DIST, 'ui-core.min.css'))) {
   console.error('dist/ui-core.min.css не найден — сначала соберите ДС: npm run build');
   process.exit(1);
 }
-if (!existsSync(join(REF, 'assets'))) {
+let refAssets = existsSync(join(REF, 'assets'));
+if (!refAssets && !assetsOptional) {
   console.error(
-    `Ассеты оригинала не найдены: ${REF} — укажите чекаут career-portal через --ref <путь>`,
+    `Ассеты оригинала не найдены: ${REF} — укажите чекаут career-portal через --ref <путь> (или --assets-optional)`,
   );
   process.exit(1);
 }
@@ -3438,7 +3444,11 @@ for (const file of ['ui-core.min.css', 'ui-vi.min.css', 'ui-patterns.css', 'ui.m
 cpSync(join(DIST, 'fonts'), join(OUT, 'ds', 'fonts'), { recursive: true });
 
 // ассеты оригинала (23 МБ — в git не попадают: pilot/career-portal/dist/ игнорируется)
-cpSync(join(REF, 'assets'), join(OUT, 'assets'), { recursive: true });
+if (refAssets) {
+  cpSync(join(REF, 'assets'), join(OUT, 'assets'), { recursive: true });
+} else {
+  console.warn(`--assets-optional: ассеты оригинала пропущены (${REF} не найден)`);
+}
 
 // стили/скрипты сайт-зоны
 cpSync(join(PILOT, 'pilot.css'), join(OUT, 'pilot.css'));

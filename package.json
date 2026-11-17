@@ -21,6 +21,7 @@
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
     "build": "node showcase/build.mjs",
+    "build:pilot": "node pilot/career-portal/build.mjs",
     "serve": "node showcase/serve.mjs"
   },
   "devDependencies": {

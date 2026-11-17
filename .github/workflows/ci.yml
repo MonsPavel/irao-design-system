@@ -114,6 +114,11 @@ jobs:
       - name: Build dist + showcase
         run: npm run build
 
+      # Пины юнит-слоя читают и пилотный dist (pilot-tail-parity: events.html);
+      # чекаута референса career-portal на CI нет — ассеты пропускаются.
+      - name: Build pilot (career-portal clone)
+        run: npm run build:pilot -- --assets-optional
+
       - name: Unit tests
         run: npm run test:unit
 
