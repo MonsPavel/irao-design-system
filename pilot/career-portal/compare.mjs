@@ -8,7 +8,8 @@
  *    скриншоты 1440px для просмотра владельцем;
  *  - compare.json — машинные метрики:
  *      docHeight — высота документа (грубая мера вертикального ритма);
- *      blocks    — высота/ширина одноимённых блоков (hero, production, …);
+ *      blocks    — высота/ширина/позиция (top от начала документа, T18.18)
+ *                  одноимённых блоков (hero, production, …);
  *      probes    — computed-стили пар «класс оригинала → ui-компонент»
  *                  (кнопка, тег, поле, карточка, крошки, FAQ, …) и
  *                  shell-проб EPIC-16 (фон страницы, шапка, dropdown,
@@ -532,9 +533,12 @@ const BLOCK_PROBES = {
     // T18.14: directions/holding — каноны dir/hld паттерн-слоя (прецедент prd).
     ['directions', '.directions', '.dir'],
     ['holding', '.holding', '.hld'],
-    // Лента логотипов — связка lgo-grid (T17.9): проба на крючке слоя
-    // (прецедент video-block/cta-mail).
-    ['employers', '.employers', '.lgo-grid'],
+    // Лента логотипов — связка lgo (T17.9): проба на крючке слоя
+    // (прецедент video-block/cta-mail). T18.18: пара на СЕКЦИИ .lgo —
+    // синхронно паре index-2 (мозаика); прежний крючок сетки .lgo-grid
+    // мерял решётку против секции оригинала — ASYM −327 (секции
+    // паритетны: 583 ↔ 586, проба .zcode/acc-t1818-probe.mjs).
+    ['employers', '.employers', '.lgo'],
     // T18.12: why-us — канон whu паттерн-слоя (прецедент hro/msh).
     ['why-us', '.why-us', '.whu'],
     ['vacancy-search', '.vacancy-search', '#vacancies'],
@@ -788,7 +792,14 @@ for (const pageName of PAGES) {
       const el = document.querySelector(selector);
       if (!el) return null;
       const rect = el.getBoundingClientRect();
-      return { width: Math.round(rect.width), height: Math.round(rect.height) };
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        // T18.18: позиция блока от начала документа — пара меряет и высоту,
+        // и место в потоке страницы (зафиксировать числом: BLOCK_PROBES
+        // «позиции/высоты»); страница отскроллена lazyWarmup-ом наверх.
+        top: Math.round(rect.top + window.scrollY),
+      };
     }, selector);
   }
   const originalProbes = {};
@@ -821,7 +832,12 @@ for (const pageName of PAGES) {
       const el = document.querySelector(selector);
       if (!el) return null;
       const rect = el.getBoundingClientRect();
-      return { width: Math.round(rect.width), height: Math.round(rect.height) };
+      return {
+        width: Math.round(rect.width),
+        height: Math.round(rect.height),
+        // T18.18: та же площадка замера, что на стороне оригинала (top).
+        top: Math.round(rect.top + window.scrollY),
+      };
     }, pilotSelector);
   }
   const pilotProbes = {};
@@ -922,6 +938,22 @@ const viewerSections = PAGES.map((pageName) => {
   const rows = Object.entries(data.probes)
     .map(([name, pair]) => probeRow(name, pair))
     .join('');
+  // T18.18: блок-пробы (высота/позиция) — таблица рядом с пробами: владелец
+  // видит паритет высот/позиций новых макро-блоков эпика без чтения json.
+  const blockCell = (b) =>
+    b ? `h ${b.height}, w ${b.width}, top ${b.top}` : '<i style="color:#888">null</i>';
+  const blockRows = Object.entries(data.blocks)
+    .map(([name, pair]) => {
+      const mismatch =
+        pair.original && pair.pilot && Math.abs(pair.original.height - pair.pilot.height) > 8;
+      const mark = (v) => (mismatch ? `<b style="color:#b33">${esc(v)}</b>` : esc(v));
+      return (
+        `<tr><td style="padding:4px 10px;white-space:nowrap">${esc(name)}</td>` +
+        `<td style="padding:4px 10px">${pair.original ? mark(blockCell(pair.original)) : blockCell(null)}</td>` +
+        `<td style="padding:4px 10px">${pair.pilot ? mark(blockCell(pair.pilot)) : blockCell(null)}</td></tr>`
+      );
+    })
+    .join('');
   return (
     `<section style="margin:24px 0"><h2 style="font:600 20px/1.3 system-ui">${esc(pageName)} ` +
     `<small style="color:#666;font-weight:400">— высота документа: оригинал ${data.docHeight.original}px / пилот ${data.docHeight.pilot}px</small></h2>` +
@@ -930,6 +962,10 @@ const viewerSections = PAGES.map((pageName) => {
     `<img style="width:100%;display:block;border:1px solid #ccc" src="original/${esc(png)}"></figure>` +
     `<figure style="margin:0"><figcaption style="font:12px system-ui;color:#666">пилот на irao-ui</figcaption>` +
     `<img style="width:100%;display:block;border:1px solid #ccc" src="pilot/${esc(png)}"></figure></div>` +
+    `<details style="margin-top:8px"><summary style="cursor:pointer;font:13px system-ui;color:#444">блоки — высота/ширина/позиция (${Object.keys(data.blocks).length}; красным — |Δ высоты| &gt; 8px)</summary>` +
+    `<table style="border-collapse:collapse;font:12px/1.5 ui-monospace,monospace;min-width:900px">` +
+    `<thead><tr><th style="text-align:left;padding:4px 10px">block</th><th style="text-align:left;padding:4px 10px">оригинал</th><th style="text-align:left;padding:4px 10px">пилот</th></tr></thead>` +
+    `<tbody>${blockRows}</tbody></table></details>` +
     `<details style="margin-top:8px"><summary style="cursor:pointer;font:13px system-ui;color:#444">пробы (${Object.keys(data.probes).length})</summary>` +
     `<table style="border-collapse:collapse;font:12px/1.5 ui-monospace,monospace;min-width:900px">` +
     `<thead><tr><th style="text-align:left;padding:4px 10px">probe</th><th style="text-align:left;padding:4px 10px">оригинал</th><th style="text-align:left;padding:4px 10px">пилот</th></tr></thead>` +

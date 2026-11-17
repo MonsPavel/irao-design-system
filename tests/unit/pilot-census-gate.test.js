@@ -202,7 +202,7 @@ describe('гейт ценза — runCensusGate (порог числом; дег
   });
 });
 
-describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.17', () => {
+describe('пороги ценза — числа зафиксированы по факту итога T17.16 + errata 31.10/T18.1…T18.18', () => {
   it('пороги — явные числа (Implementation requirements п.1: не «меньше»)', () => {
     expect(MAX_PILOT_CSS_LINES).toBe(2272);
     expect(MAX_PILOT_CSS_CODE_LINES).toBe(1297);
@@ -214,6 +214,15 @@ describe('пороги ценза — числа зафиксированы по
     // входа T17.5) — 16 → 1 (позиционно-необходимый минимум: company-feed)
     expect(ALLOWED_CP_FAMILIES).toHaveLength(1);
     expect(ALLOWED_CP_FAMILIES).toEqual(['company-feed']);
+    // закрывающая T18.18: итог эпика — сырые 1441 / код 580 / 11 селекторов /
+    // 1 семейство; потолки-порогы НЕ понижены (файл сжался — прецедент
+    // «пороги не двигаются» T17.18/T18.10–T18.17; переход ценза «порога-
+    // потолка» на убывающий гейт — решение владельца, Out of scope EPIC-18:
+    // README эпика; факты итога — REPORT §11.6)
+    expect(MAX_PILOT_CSS_LINES, 'потолок сырых строк не понижается при сжатии файла').toBe(2272);
+    expect(MAX_PILOT_CSS_CODE_LINES, 'потолок кода сайт-зоны не понижается при сжатии файла').toBe(
+      1297,
+    );
   });
 
   it.skipIf(!existsSync(join(pilotDir, 'pilot.css')))(
@@ -354,7 +363,9 @@ describe('пороги ценза — числа зафиксированы по
       // cp-хуков (не-cp имена site-page/hero-tone--*/article-date/
       // intern-card/vac-main — конвенция stu-/ctr-/msh__card);
       // event-card/intern-person — висячие входы снятых семейств T17.5):
-      // сырые 1599→1224, код 715→477, селекторы 55→11; семейства 14→1 —
+      // сырые 1599→1441, код 715→580, селекторы 55→11 (errata приёмки
+      // T18.17: после снятия валивших гранул шапки предложения — без них
+      // файл 1441/580; числа пинов ниже — факт HEAD); семейства 14→1 —
       // единственное cp-семейство company-feed (позиционные хуки лент T18.3
       // — позиционно-необходимый минимум, судьбы всех — REPORT §11.4):
       expect(metrics.css.lines).toBe(1441);
@@ -433,6 +444,153 @@ describe('compare.mjs — гейт ценза подключен в тот же 
     expect(censusCall).toBeGreaterThan(-1);
     expect(browserLaunch).toBeGreaterThan(-1);
     expect(censusCall).toBeLessThan(browserLaunch);
+  });
+});
+
+describe('закрывающая T18.18 — BLOCK_PROBES новые макро-блоки (позиции/высоты)', () => {
+  it('блок-проба снимает позицию блока (top от начала документа) на обеих сторонах — площадок замера две', () => {
+    // compare.mjs: замер блоков — две одинаковые evaluate-площадки
+    // (оригинал/пилот), каждая берёт rect.width/height + rect.top+scrollY
+    expect(compare.match(/rect\.top \+ window\.scrollY/g)).toHaveLength(2);
+    expect(compare).toContain('top: Math.round(rect.top + window.scrollY)');
+  });
+
+  it('новые макро-блоки эпика покрыты парами (Goal T18.18: mentorship, vacancy-capsule, students--photographic, ленты company/career-track)', () => {
+    // index-2 (T18.2): наставничество + капсула вакансий — каноны msh/vcp;
+    // фото-секция students (T18.1, apply_variant2) меряет #students
+    expect(compare).toContain("['mentorship', '.mentorship', '.msh']");
+    expect(compare).toContain("['vacancy-capsule', '.vacancy-capsule', '.vcp']");
+    expect(compare).toContain("['students', '.students--photographic', '#students']");
+    // index (T18.1): вторая секция «Школьникам и студентам» — фото-карточки
+    expect(compare).toContain("['students-photo', '.students--photographic', '.stu-photo']");
+    // company.html (T18.3): шесть лент + два баннера + фото-галерея
+    for (const name of [
+      'company-vacancies',
+      'company-banner',
+      'company-internships',
+      'company-practices',
+      'company-articles',
+      'company-banner-2',
+      'company-events',
+      'company-photos',
+    ]) {
+      expect(compare).toContain(`'${name}',`);
+    }
+    // career-track.html (T18.4): обложка / секция треков / тест / статьи
+    for (const name of ['ctr-cover', 'ctr-tracks', 'ctr-test', 'ctr-articles']) {
+      expect(compare).toContain(`'${name}',`);
+    }
+  });
+});
+
+describe('закрывающая T18.18 — REPORT §11.6/§8.4 синхронны факту (юнит-пин ценза)', () => {
+  const report = readSource('REPORT.md');
+
+  it('§11.6: итог ценза в REPORT равен фактическим метрикам файлов (синхронность раздела)', () => {
+    const metrics = censusMetrics(readSource('pilot.css'), readSource('pilot.js'));
+    expect(metrics.css.lines).toBe(1441);
+    expect(metrics.css.codeLines).toBe(580);
+    expect(metrics.css.selectors).toBe(11);
+    expect(metrics.css.families).toEqual(['company-feed']);
+    expect(report).toContain('### 11.6 Раунд 8 (17.11): закрывающий прогон EPIC-18 (T18.18)');
+    expect(report).toContain('| pilot.css, сырых строк | 2272 | 1441 | **1441** |');
+    expect(report).toContain('| pilot.css, код сайт-зоны | 1297 | 580 | **580** |');
+    expect(report).toContain('| cp-семейств | 29 | 1 | **1** (`company-feed`) |');
+    expect(report).toContain('Пороги-потолки **не понижены**');
+  });
+
+  it('§11.6: судьба 30 семейств — таблица после, каждая судьба закрыта', () => {
+    expect(report).toContain('Судьба 30 семейств ценза — после');
+    const fates = {
+      'вынос в слой': [
+        'page-head',
+        'page-subtitle',
+        'tabs-row',
+        'tabs-links',
+        'why-us',
+        'production',
+        'directions',
+        'holding',
+        'company-stats',
+        'company-adv',
+        'company-title',
+        'company-banner',
+        'company-card',
+        'vacancy-search',
+        'dir-modal',
+        'media-toolbar',
+        'offer-card',
+        'org-card',
+        'catalog-nav',
+        'events-nav',
+        'adv-grid',
+        'events-feature',
+        'team',
+      ],
+      'остаётся сайт-зоне': ['hero', 'article-card', 'intern-card', 'vac-main', 'page'],
+      'снято ранее': ['event-card', 'intern-person'],
+    };
+    for (const [fate, families] of Object.entries(fates)) {
+      for (const family of families) {
+        expect(report, `судьба семейства ${family} — «${fate}» в закрывающей таблице`).toMatch(
+          new RegExp(`\\| \`${family}\` \\| ${fate} \\|`),
+        );
+      }
+    }
+  });
+
+  it('§11.6: docHeight-цель — 38/43 в допуске, 5 страниц с разбором корней, число для STATUS', () => {
+    expect(report).toContain('38/43 в допуске ±60');
+    expect(report).toContain('максимальный остаток |Δ| = 177');
+    // пять страниц вне допуска — все с разбором корня
+    expect(report).toContain('| index | 9899 | 9722 | −177 |');
+    expect(report).toContain('| vacancies | 3224 | 3048 | −176 |');
+    expect(report).toContain('| index-2 | 9002 | 9138 | +136 |');
+    expect(report).toContain('| internship | 1658 | 1586 | −72 |');
+    expect(report).toContain('| vacancy-4 | 1849 | 1910 | +61 |');
+    expect(report).toContain('мок-\n  состояние оригинала');
+    expect(report).toContain('дрейф внешней стороны: оригинал 1658');
+    expect(report).toContain('errata-кандидат владельцу\n  (декомпозиция T18.8)');
+  });
+
+  it('§8.4: решения-отклонения задач эпика — свод присутствует', () => {
+    expect(report).toContain('### 8.4 Дополнение T18.18: решения-отклонения задач EPIC-18 (свод)');
+    expect(report).toContain('капсула вакансий **без select-фильтров**');
+    expect(report).toContain('row-nowrap строки — от md');
+    expect(report).toContain('пороги-потолки ценза НЕ понижены при сжатии файла');
+    expect(report).toContain('пара employers выровнена на секцию `.lgo`');
+  });
+});
+
+describe('закрывающая T18.18 — ledger STATUS.md и акт приёмки (AC3/AC4 раунда приёмки)', () => {
+  const report = readSource('REPORT.md');
+  const status = readFileSync(join(root, 'docs', 'ui-system', 'STATUS.md'), 'utf8').replace(
+    /\r\n/g,
+    '\n',
+  );
+
+  it('STATUS.md, строка T18.18 — done с итоговым числом docHeight-цели и цензом в примечании (AC3)', () => {
+    const row = status.match(/\| T18\.18 \| [^\n]+\|/);
+    expect(row, 'строка T18.18 в ledger STATUS.md').toBeTruthy();
+    expect(
+      row[0],
+      'статус задачи — done (ledger-коммит закрывающей, прецедент T18.17 dd0ac7d)',
+    ).toContain('| T18.18 | done |');
+    // число docHeight-цели в примечании (AC3 приёмки): максимальный остаток
+    // и доля страниц в допуске — из закрывающего прогона REPORT §11.6
+    expect(row[0]).toContain('177');
+    expect(row[0]).toContain('38/43');
+    // ценз-итог числом (синхронно census.mjs/pilot.css)
+    expect(row[0]).toContain('1441');
+    expect(row[0]).toContain('580');
+  });
+
+  it('REPORT §11.6 — акт приёмки владельца записан в репо (AC4)', () => {
+    expect(report).toContain('Акт приёмки владельца (раунд 17.11)');
+    expect(report).toContain('верифицирован приёмкой');
+    expect(report).toContain('Замечания раунда приёмки');
+    // прежняя формулировка «подпись вне конвейера» снята — акт записан
+    expect(report).not.toContain('подпись приёмки — за владельцем, вне конвейера');
   });
 });
 
