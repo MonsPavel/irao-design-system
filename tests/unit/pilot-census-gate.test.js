@@ -562,6 +562,38 @@ describe('закрывающая T18.18 — REPORT §11.6/§8.4 синхронн
   });
 });
 
+describe('закрывающая T18.18 — ledger STATUS.md и акт приёмки (AC3/AC4 раунда приёмки)', () => {
+  const report = readSource('REPORT.md');
+  const status = readFileSync(join(root, 'docs', 'ui-system', 'STATUS.md'), 'utf8').replace(
+    /\r\n/g,
+    '\n',
+  );
+
+  it('STATUS.md, строка T18.18 — done с итоговым числом docHeight-цели и цензом в примечании (AC3)', () => {
+    const row = status.match(/\| T18\.18 \| [^\n]+\|/);
+    expect(row, 'строка T18.18 в ledger STATUS.md').toBeTruthy();
+    expect(
+      row[0],
+      'статус задачи — done (ledger-коммит закрывающей, прецедент T18.17 dd0ac7d)',
+    ).toContain('| T18.18 | done |');
+    // число docHeight-цели в примечании (AC3 приёмки): максимальный остаток
+    // и доля страниц в допуске — из закрывающего прогона REPORT §11.6
+    expect(row[0]).toContain('177');
+    expect(row[0]).toContain('38/43');
+    // ценз-итог числом (синхронно census.mjs/pilot.css)
+    expect(row[0]).toContain('1441');
+    expect(row[0]).toContain('580');
+  });
+
+  it('REPORT §11.6 — акт приёмки владельца записан в репо (AC4)', () => {
+    expect(report).toContain('Акт приёмки владельца (раунд 17.11)');
+    expect(report).toContain('верифицирован приёмкой');
+    expect(report).toContain('Замечания раунда приёмки');
+    // прежняя формулировка «подпись вне конвейера» снята — акт записан
+    expect(report).not.toContain('подпись приёмки — за владельцем, вне конвейера');
+  });
+});
+
 describe('базлайн ценза §11.4 — пре-эпик дерево 922b505 (ревью T17.16)', () => {
   /** Содержимое файла пилота на коммите (рабочая копия Windows — CRLF
    *  нормализуется, как в readSource). */
