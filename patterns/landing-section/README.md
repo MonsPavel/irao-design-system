@@ -636,7 +636,7 @@ auto замирал текст слайда):
 
 ```html
 <section class="ui-section ui-section--photo prd prd--v1 ui-carousel"
-         data-ui-carousel aria-labelledby="prd-title">
+         data-ui-carousel aria-label="Раскладка карусели «production» — вариант 1 (лента табов)">
   <div class="ui-section__bg" aria-hidden="true">
     <img src="factory.jpg" alt="" width="1600" height="900" loading="lazy">
   </div>
