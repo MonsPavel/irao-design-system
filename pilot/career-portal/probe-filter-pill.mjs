@@ -12,9 +12,10 @@
  *    канон list-page, pin probe»;
  *  - hero-pill (index.html): .vacancy-search__panel
  *    .vacancy-search__select-wrap (база 260px оригинала) vs
- *    .cp-vacancy-search__fields .ui-select--pill (лента фильтров панели —
- *    принятое ДС 12rem; расхождение ширины с оригиналом — осознанное,
- *    «принято ДС» T15.x) — AC «12rem — канон list-page, pin probe»;
+ *    .vcs__fields > .ui-select--pill (лента фильтров панели — канон слоя
+ *    T18.16, flex 0 0 16.25rem = 260px; errata 01.11: «12rem… принятое ДС»
+ *    устарело — ширина приведена к оригиналу) — AC «260px — канон
+ *    list-page, pin probe»;
  *  - side-pill (vacancies.html): .vac-side__dd vs .lpp-side__group
  *    .ui-select--pill — вертикальная пилюля сайдбара, ширина колонки;
  *  - find-bar (vacancies.html): .vac-find vs .lpp-find (gap/ритм — метрики
@@ -67,7 +68,7 @@ const PAIRS = [
     'hero-pill',
     'index.html',
     '.vacancy-search__panel .vacancy-search__select-wrap',
-    '.cp-vacancy-search__fields .ui-select--pill',
+    '.vcs__fields > .ui-select--pill',
   ],
   ['side-pill', 'vacancies.html', '.vac-side__dd', '.lpp-side__group .ui-select--pill'],
   ['find-bar', 'vacancies.html', '.vac-find', '.lpp-find'],

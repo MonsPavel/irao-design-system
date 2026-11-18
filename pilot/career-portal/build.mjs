@@ -2876,7 +2876,7 @@ function careerTrackMain() {
     ) => `      <button class="ctr-step${index === 0 ? ' is-active' : ''}" type="button">
         <span class="ctr-step__dot" aria-hidden="true"></span>
         <span class="ctr-step__name ui-caption">${esc(step.name)}</span>
-        <span class="ctr-step__duration ui-micro">${esc(step.duration)}</span>
+        <span class="ctr-step__duration ui-micro ui-text--muted">${esc(step.duration)}</span>
       </button>`,
   );
 
@@ -2942,22 +2942,23 @@ ${infoRows.join('\n')}
         <p class="ctr-test-text ui-body">${esc(TRK.test.intro.text)}</p>
         <button class="ui-button ui-button--primary" type="button">${esc(TRK.test.intro.button)}</button>
       </div>
-    </div>
-    <!-- quiz/result — скрытые ветки интерактива оригинала (career-track.html:200–214):
-         наполнение — js/tracks.js по ходу теста; в пилоте ветки не активируются. -->
-    <div class="ctr-quiz" hidden>
-      <p class="ctr-quiz-progress ui-small ui-text--muted"></p>
-      <img class="ctr-quiz-photo" src="${esc(TRK.test.questions[1].image)}" alt="">
-      <p class="ctr-quiz-question ui-h4"></p>
-      <div class="ctr-quiz-options"></div>
-    </div>
-    <div class="ctr-result" hidden>
-      <img class="ctr-result-photo" src="${esc(TRK.test.directions.energo.image)}" alt="">
-      <h3 class="ui-h3 ctr-result-title"></h3>
-      <div class="ctr-result-directions"></div>
-      <p class="ctr-result-text ui-body"></p>
-      <div class="ctr-result-links"></div>
-      <button class="ui-button ui-button--light" type="button">пройти тест ещё раз</button>
+      <!-- quiz/result — скрытые ветки интерактива оригинала (career-track.html:190–214,
+           вложены внутрь .test); наполнение — js/tracks.js по ходу теста;
+           в пилоте ветки не активируются. -->
+      <div class="ctr-quiz" hidden>
+        <p class="ctr-quiz-progress ui-small ui-text--muted"></p>
+        <img class="ctr-quiz-photo" src="${esc(TRK.test.questions[1].image)}" alt="">
+        <p class="ctr-quiz-question ui-h4"></p>
+        <div class="ctr-quiz-options"></div>
+      </div>
+      <div class="ctr-result" hidden>
+        <img class="ctr-result-photo" src="${esc(TRK.test.directions.energo.image)}" alt="">
+        <h3 class="ui-h3 ctr-result-title"></h3>
+        <div class="ctr-result-directions"></div>
+        <p class="ctr-result-text ui-body"></p>
+        <div class="ctr-result-links"></div>
+        <button class="ui-button ui-button--light" type="button">пройти тест ещё раз</button>
+      </div>
     </div>
   </div>
 </section>
@@ -3039,7 +3040,8 @@ ${sections}
    dpp-banner (канон слоя, T18.15), фото — ui-figure/ui-image. href — реальные страницы
    клона (гейт ссылок compare); триггер «откликнуться» строк — без модалки,
    как на article.html (диалога #vac-apply на странице нет ни в оригинале,
-   ни в клоне — modals.js молча выходит). */
+   ни в клоне; в клоне ui-modal ДС пишет console.warn при клике — no-op,
+   в оригинале modals.js молча выходит). */
 function companyMain() {
   const company = COMP.companies.find((c) => c.segment === 'Генерация');
   const companyVacancies = [

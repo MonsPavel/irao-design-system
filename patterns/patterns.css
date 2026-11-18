@@ -55,8 +55,8 @@
   flex-wrap: wrap;
   gap: var(--ui-space-4);
   align-items: center;
-  /* Ритм ленты: верх 24px — ритм дока T8.1 (space-5; с mb .cp-page-head 32px
-     каталога коллапсирует в те же 32 — рендер не меняет); низ 2.5rem «как
+  /* Ритм ленты: верх 24px — ритм дока T8.1 (space-5; с mb php-канона
+     32px каталога коллапсирует в те же 32 — рендер не меняет); низ 2.5rem «как
      есть» — .vac-filters pages.css:19 (40px вне шкалы §3.2, прецедент
      --ui-card-gap; калибровка T17.12: T8.1 нёс 24px). */
   margin: var(--ui-space-5) 0 2.5rem;
@@ -120,7 +120,8 @@
    patterns-layer.test.js). Композиция: в каноне find-bar — ребёнок
    gap-колонки .lpp-main (gap 24), margin-bottom НЕ схлопывается во флексе —
    фактический ритм find-bar→чипы на стенде 32px (8+24); «чистые» 8px из
-   метрик пилота держатся в cp-vac-main (колонка без gap). Гашение маргина
+   метрик пилота держатся в vac-main (колонка без gap, T18.17 — не-cp имя).
+   Гашение маргина
    в каноне — design-decision владельца (батч 31.10, ревью T17.12). */
 .lpp-find {
   box-sizing: border-box;
@@ -406,7 +407,10 @@
    Строки (T18.7): row-nowrap — пилюля не переносится, всегда справа
    (оригинал .vac-row pages.css:159–166 wrap не имеет); main flex: 1 —
    занимает строку (текст переносится внутри, min-width: 0 базы),
-   пилюля прижата к правому краю. */
+   пилюля прижата к правому краю. Окно 761–767: действует мобильная база
+   wrap, а оригинал держит nowrap до 760 включительно (pages.css:358–359) —
+   осознанный допуск, граница паритета ведётся по ступеням шкалы T2.5
+   (REPORT §T18.7). */
 @media (min-width: 768px) {
   .lpp-layout {
     /* Доли на md (канон detail-page): фиксированный rem-трек под стрессом
@@ -474,7 +478,7 @@
 }
 
 /* ── Карточка предложения целевого обучения (T18.17) — связка ofc-card ──
-   Порт cp-offer-card pilot.css (education/каталог/event; калибровка
+   Порт cp-offer-card pilot.css (education/каталог/article; калибровка
    T18.5): колонка с паддингом 24 = space-5 и шагом 14px «как есть»
    (pages.css:837 — .offer-card; 14px вне шкалы §3.2 — прецедент
    .cp-breadcrumbs 1.25rem). Направление — роль ui-h6 разметки, пара
@@ -528,12 +532,15 @@
   color: var(--ui-color-text-muted); /* pages.css:843 */
 }
 
-/* Мета — колонка .offer-card__meta (pages.css:849): компания над городом. */
+/* Мета — колонка .offer-card__meta (pages.css:849): компания над городом.
+   Вес 400 явно (оригинал fs-small-regular, pages.css:849) — роль ui-small
+   разметки несёт 500, канон возвращает «как есть». */
 .ofc-card__meta {
   display: flex;
   flex-direction: column;
   gap: 0.125rem; /* 2px pages.css:849 «как есть» */
   color: var(--ui-color-text-muted);
+  font-weight: var(--ui-fw-body);
 }
 
 .ofc-card__company {
@@ -1048,8 +1055,9 @@
    компонент. Errata ритма (probe 04.11): блок ниже оригинала на −15px —
    принятая дельта lh 1.1 значений ui-stat (T17.4), сетка её не правит
    (probe-пара company-stats в compare — дельта перенесена в канон).
-   Мобильная база — колонка (оригинал @max-767, pages.css:930), 3 колонки
-   от md (768, шкала T2.5). */
+   Мобильная база — колонка (оригинал @max-767, pages.css:929), 3 колонки
+   от md (768, шкала T2.5); сброс ul (list-style/padding) несёт
+   base/reset.css — маргин 2.5rem переобъявлен каноном (порт cp-правила). */
 .dpp-stats {
   box-sizing: border-box;
   display: grid;
@@ -1070,10 +1078,11 @@
    — компонент ui-stat--deep (T17.4, API не меняется). Errata ритма
    (probe 04.11): блок выше оригинала на +14px — принятая дельта ui-stat
    (T17.4), сетка её не правит (probe-пара company-adv). Мобильная база —
-   колонка (pages.css:930), 2 колонки от md (оригинал @max-1279 → 2,
-   pages.css:914) и 4 от xl (1280) — канон принимает значение оригинала
+   колонка (pages.css:929), 2 колонки от md (оригинал @max-1279 → 2,
+   pages.css:904) и 4 от xl (1280) — канон принимает значение оригинала
    (расхождение пилота 1024 снято, полоса 1024–1279 рендерится как в
-   оригинале — прецедент dpp-hero 1280). */
+   оригинале — прецедент dpp-hero 1280); сброс ul несёт base/reset.css,
+   маргин 3.5rem переобъявлен каноном (порт cp-правила). */
 .dpp-adv {
   box-sizing: border-box;
   display: grid;
@@ -2833,8 +2842,9 @@
 
 /* Rail-полоса карточек-тегов (mentorship.css:63-72): flex-лента со
    скроллом, gap 24px; отступ слева «под контейнер» — max(container-pad,
-   (100vw − container-max)/2) со ступенями pad оригинала (аналог
-   ui-container: 16 → 24 md → 32 lg); справа 16px; скроллбар скрыт. */
+   (100vw − container-max)/2) по лестнице ui-container 16/24/32 — ступень
+   40px ≥1440 оригинала ДС не несёт (системное отображение лестницы,
+   T3.4/T2.5); справа 16px; скроллбар скрыт. */
 .msh__rail {
   box-sizing: border-box;
   display: flex;
@@ -3724,7 +3734,8 @@
 /* Сетка: колонка в мобильной базе (оригинал ≤767 — directions.css:230),
    2×1fr от md (ступень пилота max-1023 — directions.css:222), 4×1fr от lg
    (десктоп-форма — directions.css:16); шаг 36px «как есть»
-   (directions.css:10). */
+   (directions.css:10); маркеры списка снимает reset.css (но-опы пилота
+   не переносятся — симметрия с .hld__stats). */
 .dir__grid {
   box-sizing: border-box;
   display: grid;

@@ -220,7 +220,7 @@
 .stu-photo-card {
   --pstr-action-bg: var(--ui-color-surface); /* пара «white» students.css:167 */
   --pstr-action-color: var(--ui-color-text);
-  overflow: hidden; /* клип фото — students.css:92 (канон pstr-card слоя) */
+  overflow: hidden; /* клип фото — students.css:91 (канон pstr-card слоя) */
   min-height: 23.75rem; /* 380px students.css:179 — мобильная база (лестница pstr-card T17.18) */
   padding: 1.25rem; /* 20px students.css:89 «как есть», вне шкалы §3.2 — перекрывает каркас ui-card (24px, ui-card.css:65; ревью T18.1) */
   border: 0; /* рамки ui-card у карточек оригинала нет */
@@ -472,7 +472,10 @@
 }
 
 /* steps-bar (pages.css:681+.696–727): лента пилюль этапов, шаг 8, низ 32;
-   перенос — мобильная база (оригинал: wrap ≤767, pages.css:922). Точка —
+   wrap — на всех ширинах: ДЕВИАЦИЯ принята как итог EPIC-18 (18.11) —
+   оригинал переносит только ≤767 (pages.css:922), десктоп ряд nowrap
+   (pages.css:694), на 768–1023 пилот переносит ряд вместо усадки ступеней.
+   Точка —
    тон одобренного литерала #C4CDDC (pages.css:714, вне токенов ДС) на хуке
    кастом-свойства (прецедент --msh-card-active-bg T18.2); тень активной
    пилюли — var()-хук (гейт теней требует var(), прецедент --cp-tab-ring). */
@@ -1147,7 +1150,11 @@ a.intern-card {
 /* Фото карточек лент — фиксированные высоты оригинала вместо aspect 3/2
    канона ui-card--media: .event-card__photo 220px (pages.css:569),
    .article-card__photo 200px (pages.css:604) — позиции лент, не новые
-   визуальные сущности (Scope T18.3). */
+   визуальные сущности (Scope T18.3). Высоты — на всех ширинах; мобильная
+   лестница оригинала (≤1023 gap 24, ≤767 event 200/article 180 —
+   pages.css:910/932/934) сознательно не переносится — паритет гейтится
+   на 1440, узкие экраны крупнее оригинала (прецедент отказа T17.1,
+   REPORT §T18.3). */
 .cp-company-feed--articles .ui-card__media {
   aspect-ratio: auto;
 }
