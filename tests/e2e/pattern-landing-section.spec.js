@@ -861,6 +861,10 @@ standTest.describe('patterns/landing-section: тёмная секция why-us (
       expect(rest.textDisplay, 'текст в потоке (не display:none — VI/a11y-инвариант)').not.toBe(
         'none',
       );
+      // Сильный пин инварианта: элемент реально видим для движка
+      // (checkVisibility учитывает visibility/opacity цепочки), не только
+      // display≠none (находка ревью T18.12 — замер был мёртвым).
+      expect(rest.textHidden, 'текст видим checkVisibility в покое').toBe(true);
       expect(rest.ariaContent, 'текст карточки присутствует в DOM').toBe(true);
 
       await card.hover();
@@ -1158,7 +1162,7 @@ standTest.describe('patterns/landing-section: раскладки карусел�
       expect(state.stepper.h, 'чипы сжимаются по контенту (bottom 0 ленты погашен)').toBeLessThan(
         300,
       );
-      expect(state.tabH, 'чип 59px (production.css:301)').toBe(61);
+      expect(state.tabH, 'чип: min-height 59 (production.css:301), computed 61').toBe(61);
       expect(state.tabRadius, 'radius 32 (production.css:303)').toBe('32px');
       expectColor(state.activeBg, [21, 42, 79, 0.9], 'актив primary-deep 90% (production.css:309)');
       // inline-flex блока-фицируется во flex-item таба (computed display)
@@ -1426,7 +1430,10 @@ standTest.describe(
 
         const shots = [
           ['prd-v1', page.locator('#lsp-production'), ['desktop', 'mobile']],
-          ['prd-v2', page.locator('#lsp-production-v2'), ['desktop']],
+          // mobile у v2 — static-лента ≤1023 (самая изменённая новая логика
+          // выноса, фиксация hscroll на 375) — пиксельный пин наравне с v1
+          // (находка ревью T18.13; эталон снят контейнером 18.11).
+          ['prd-v2', page.locator('#lsp-production-v2'), ['desktop', 'mobile']],
         ];
 
         for (const [name, locator, viewports] of shots) {

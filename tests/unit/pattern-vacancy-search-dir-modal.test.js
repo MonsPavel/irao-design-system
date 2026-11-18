@@ -366,7 +366,7 @@ describe('ценз сайт-зоны: vacancy-search/dir-modal ушли из all
       'dir-modal',
     );
     expect(ALLOWED_CP_FAMILIES, 'ленты компании — сайт-зона (T18.3)').toContain('company-feed');
-    // errata T18.17: батч cp-остатков — 15 семейств ушли (7 вынос в слой,
+    // errata T18.17: батч cp-остатков — 15 семейств ушли (8 вынос в слой,
     // 5 «остаётся» с сокращением cp-хуков, 2 висячих входа T17.5) — минимум.
     expect(ALLOWED_CP_FAMILIES, 'allowlist — errata T18.3/T18.10–T18.17').toHaveLength(1);
   });

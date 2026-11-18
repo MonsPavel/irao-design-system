@@ -116,7 +116,7 @@ describe('build.mjs — секция треков #tracks (T18.4 Goal п.2, ка
     expect(trackHtml).toContain('<h2 class="ui-h3 ctr-name">${esc(activeTrack.name)}</h2>');
   });
 
-  it('steps-bar: пилюли этапа из мока (имя ui-caption + длительность ui-micro; первая is-active — начальный рендер js/tracks.js:34–42)', () => {
+  it('steps-bar: пилюли этапа из мока (имя ui-caption + длительность ui-micro ui-text--muted — errata 18.11: приглушённый тон оригинала pages.css:724; первая is-active — начальный рендер js/tracks.js:34–42)', () => {
     expect(trackHtml).toContain('<div class="ctr-steps">');
     expect(trackFn).toContain('activeTrack.steps.map(');
     expect(trackFn).toContain(
@@ -125,7 +125,7 @@ describe('build.mjs — секция треков #tracks (T18.4 Goal п.2, ка
     expect(trackFn).toContain('<span class="ctr-step__dot" aria-hidden="true"></span>');
     expect(trackFn).toContain('<span class="ctr-step__name ui-caption">${esc(step.name)}</span>');
     expect(trackFn).toContain(
-      '<span class="ctr-step__duration ui-micro">${esc(step.duration)}</span>',
+      '<span class="ctr-step__duration ui-micro ui-text--muted">${esc(step.duration)}</span>',
     );
     expect(firstTrack.steps.length).toBe(4);
   });

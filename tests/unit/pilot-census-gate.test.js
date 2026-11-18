@@ -215,7 +215,9 @@ describe('пороги ценза — числа зафиксированы по
     expect(ALLOWED_CP_FAMILIES).toHaveLength(1);
     expect(ALLOWED_CP_FAMILIES).toEqual(['company-feed']);
     // закрывающая T18.18: итог эпика — сырые 1441 / код 580 / 11 селекторов /
-    // 1 семейство; потолки-порогы НЕ понижены (файл сжался — прецедент
+    // 1 семейство; errata 18.11 (батч бэклога): 1448 — комментарии-девиации
+    // хуков ctr-steps/company-feed, код 580 без движения; потолки-порогы НЕ
+    // понижены (файл сжался — прецедент
     // «пороги не двигаются» T17.18/T18.10–T18.17; переход ценза «порога-
     // потолка» на убывающий гейт — решение владельца, Out of scope EPIC-18:
     // README эпика; факты итога — REPORT §11.6)
@@ -315,7 +317,7 @@ describe('пороги ценза — числа зафиксированы по
       // селекторы 158→154; семейства 27→25 — tabs-row/tabs-links ушли
       // из allowlist (судьба «вынос в слой», REPORT §11.4):
       // T18.12 (вынос тёмной секции why-us в слой — канон whu: пара
-      // cp-why-us целиком — 14 базовых правил + 3 hover-ветки — и ступени
+      // cp-why-us целиком — 13 базовых правил + 3 hover-ветки — и ступени
       // 1023/767 (2×2 селектора в группах) сняты из разметки build.mjs и
       // pilot.css; no-op __inner снята — вертикальных паддингов у
       // ui-container нет): сырые 2231→2108, код 1252→1142, селекторы
@@ -354,7 +356,8 @@ describe('пороги ценза — числа зафиксированы по
       // сырые 1648→1599, код 765→715, селекторы 65→55; семейства 16→14 —
       // vacancy-search/dir-modal ушли из allowlist (судьба «вынос в слой»,
       // REPORT §11.4):
-      // T18.17 (батч cp-остатков сайт-зоны: 7 семейств — вынос в слой,
+      // T18.17 (батч cp-остатков сайт-зоны: 8 семейств — вынос в слой
+      // (7 канонов, cnv покрывает пару catalog-nav/events-nav),
       // каноны mtb/ofc-card/org-card/cnv/adv-grid/evt-feature/tm — правила
       // cp-media-toolbar/cp-offer-card/cp-org-card/пара cp-catalog-nav/
       // cp-events-nav/cp-adv-grid (+ ступени 1023/767)/cp-events-feature/
@@ -368,7 +371,9 @@ describe('пороги ценза — числа зафиксированы по
       // файл 1441/580; числа пинов ниже — факт HEAD); семейства 14→1 —
       // единственное cp-семейство company-feed (позиционные хуки лент T18.3
       // — позиционно-необходимый минимум, судьбы всех — REPORT §11.4):
-      expect(metrics.css.lines).toBe(1441);
+      // errata 18.11 (батч бэклога): 1441 → 1448 — комментарии-девиации
+      // хуков ctr-steps/company-feed, код 580 без движения:
+      expect(metrics.css.lines).toBe(1448);
       expect(metrics.css.codeLines).toBe(580);
       expect(metrics.css.selectors).toBe(11);
       // код: см. строку ниже (батч ритма 01.11)
@@ -488,12 +493,14 @@ describe('закрывающая T18.18 — REPORT §11.6/§8.4 синхронн
 
   it('§11.6: итог ценза в REPORT равен фактическим метрикам файлов (синхронность раздела)', () => {
     const metrics = censusMetrics(readSource('pilot.css'), readSource('pilot.js'));
-    expect(metrics.css.lines).toBe(1441);
+    expect(metrics.css.lines).toBe(1448);
     expect(metrics.css.codeLines).toBe(580);
     expect(metrics.css.selectors).toBe(11);
     expect(metrics.css.families).toEqual(['company-feed']);
     expect(report).toContain('### 11.6 Раунд 8 (17.11): закрывающий прогон EPIC-18 (T18.18)');
-    expect(report).toContain('| pilot.css, сырых строк | 2272 | 1441 | **1441** |');
+    expect(report).toContain(
+      '| pilot.css, сырых строк | 2272 | 1441 | **1441 → 1448** (errata 18.11: батч бэклога — комментарии-девиации хуков ctr-steps/company-feed, порог не тронут) |',
+    );
     expect(report).toContain('| pilot.css, код сайт-зоны | 1297 | 580 | **580** |');
     expect(report).toContain('| cp-семейств | 29 | 1 | **1** (`company-feed`) |');
     expect(report).toContain('Пороги-потолки **не понижены**');
@@ -580,8 +587,9 @@ describe('закрывающая T18.18 — ledger STATUS.md и акт приё�
     // и доля страниц в допуске — из закрывающего прогона REPORT §11.6
     expect(row[0]).toContain('177');
     expect(row[0]).toContain('38/43');
-    // ценз-итог числом (синхронно census.mjs/pilot.css)
-    expect(row[0]).toContain('1441');
+    // ценз-итог числом (синхронно census.mjs/pilot.css; errata 18.11 —
+    // батч бэклога: 1441 → 1448, код 580 без движения)
+    expect(row[0]).toContain('1448');
     expect(row[0]).toContain('580');
   });
 

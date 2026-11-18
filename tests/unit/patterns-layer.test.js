@@ -5,7 +5,7 @@
  *
  * Исполняемая форма решения:
  *  - patterns/patterns.css — единый исходник слоя: канонические связки
- *    list/detail/form-страниц (классы lpp-, ddp-, fpp-), перенесённые 1:1 из
+ *    list/detail/form-страниц (классы lpp-, dpp-, fpp-), перенесённые 1:1 из
  *    док-HTML паттернов (значения и «как есть»-литералы с комментариями-
  *    источниками); компонентные стили слой не дублирует;
  *  - showcase/build.mjs собирает слой в dist/ui-patterns.css (минифицированный,
@@ -13,7 +13,7 @@
  *  - подключение ОПЦИОНАЛЬНО: ui-core.min.css не меняется; порядок в <head>:
  *    токены → core → patterns → сайт;
  *  - селекторы слоя — только канонические префиксы
- *    lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|pstr-|php|tnv (гейт «защита от
+ *    lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|pstr-|php|tnv (гейт «защита от
  *    превращения слоя в свалку»); док-HTML паттернов и слой синхронны
  *    (одни классы);
  *  - слой не содержит @media-ступеней, кроме канонических ступеней паттернов
@@ -158,7 +158,7 @@ const markupClasses = (html, prefix) => {
   return found;
 };
 
-/** Крючки слоя по префиксам из селекторов (классы lpp-, ddp-, fpp-). Блок
+/** Крючки слоя по префиксам из селекторов (классы lpp-, dpp-, fpp-). Блок
  *  таймлайна — голый `tlp` (пример спеки T17.10, без дефиса) — значение без
  *  дефиса матчит префикс и его BEM-потомков. */
 const layerHooks = (prefix) => {
@@ -192,7 +192,7 @@ describe('patterns/patterns.css — единый исходник паттерн
     expect(layer, 'порядок каскада: токены → core → patterns → сайт').toContain('core');
   });
 
-  it('селекторы слоя — только канонические префиксы lpp-|ddp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12; prd — раскладки карусели production T18.13; dir/hld — сетка направлений/холдинг T18.14; vcs — панель «Найди свою вакансию», dmd — контент модалки направления T18.16; mtb/ofc/org/cnv/adv/evt/tm — батч cp-остатков T18.17)', () => {
+  it('селекторы слоя — только канонические префиксы lpp-|dpp-|fpp-|lnk-|lgo-|tlp-|nvp|hsp-|ftp-|hro|mrq|mdl|cvh|pstr|msh|vcp|php|tnv|whu|prd|dir|hld|vcs|dmd (Implementation requirements п.2; lnk-/lgo- — лендинг-связки T17.9; tlp- — таймлайн T17.10; nvp — поднавигация T17.11; hsp-/ftp- — каркасы шапки/подвала T17.13; hro/mrq/mdl/cvh — лендинг-композиции T17.15; pstr — постерная карточка T17.18; msh/vcp — наставничество/капсула вакансий T18.2; php — обложка страницы T18.10; tnv — строка табов + ссылок T18.11; whu — тёмная секция why-us T18.12; prd — раскладки карусели production T18.13; dir/hld — сетка направлений/холдинг T18.14; vcs — панель «Найди свою вакансию», dmd — контент модалки направления T18.16; mtb/ofc/org/cnv/adv/evt/tm — батч cp-остатков T18.17)', () => {
     expect(selectors.length, 'правила в слое есть').toBeGreaterThan(0);
     for (const selector of selectors) {
       const hooks = hookClasses(selector);
@@ -211,7 +211,7 @@ describe('patterns/patterns.css — единый исходник паттерн
             hook,
           ),
         ),
-        `селектор «${selector}» несёт крючок слоя lpp-/ddp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld/vcs/dmd`,
+        `селектор «${selector}» несёт крючок слоя lpp-/dpp-/fpp-/lnk-/lgo-/tlp-/nvp/hsp-/ftp-/hro/mrq/mdl/cvh/pstr/msh/vcp/php/tnv/whu/prd/dir/hld/vcs/dmd`,
       ).toBe(true);
       for (const hook of hooks) {
         expect(

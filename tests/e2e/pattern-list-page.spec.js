@@ -434,6 +434,7 @@ standTest.describe(
               const mainRect = main.getBoundingClientRect();
               const pillRect = pill.getBoundingClientRect();
               return {
+                rowHeight: rowRect.height,
                 rightDelta:
                   rowRect.right -
                   parseFloat(rowStyle.borderRightWidth) -
@@ -454,6 +455,17 @@ standTest.describe(
                 Math.abs(geo.rightDelta),
                 `${where}: пилюля прижата к правому краю строки (right-edge)`,
               ).toBeLessThanOrEqual(2);
+              // Пин высоты строки (Scope п.3 T18.7, «rowH ≤ 180» —
+              // geometry-проба vacancies из .zcode перенесена в репо) —
+              // только десктоп-шкала (≥1024): на 768 main-колонка уже,
+              // текст переносится чаще и строка законно выше. Допуск 2px —
+              // квантование дробных боксов (firefox, урок T18.7).
+              if (viewport.width >= 1024) {
+                expect(
+                  geo.rowHeight,
+                  `${where}: высота строки в допуске (rowH ≤ 182)`,
+                ).toBeLessThanOrEqual(182);
+              }
               // y-совпадение с main: пилюля в вертикальной полосе main-блока;
               // перенос под текст давал бы pillTop > mainBottom (гэп 48).
               expect(geo.pillTop, `${where}: пилюля не выше main.top`).toBeGreaterThanOrEqual(
@@ -874,7 +886,7 @@ standTest.describe('patterns/list-page: эталоны веток (AC: visual 3 
   });
 
   // Строка табов + ссылок (T18.11): контейнерные эталоны канона tnv — ряд
-  // «лента табов + nav ссылок» (desktop 1280 — «одна полоса» ступени md;
+  // «лента табов + nav ссылок» (desktop 1440 — «одна полоса» ступени md;
   // mobile 375 — мобильная база канона: перенос, осознанное отклонение —
   // прецедент nvp) и активный таб (aria-current="page" → заливка
   // модификатора ui-tabs--pill, T14.9/T17.11 — active-состояние 1:1

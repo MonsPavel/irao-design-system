@@ -23,6 +23,9 @@
  *  6. эталоны 375/768/1440 — element-снимки секции, только из
  *     контейнера/CI (ADR-0004), по прецеденту T14.10/T14.11.
  */
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { expect } from '@playwright/test';
 
 import { a11y, shot, test as standTest, VIEWPORTS } from '../helpers/harness.js';
@@ -260,7 +263,14 @@ standTest.describe('patterns/poster-card: эталонная сборка (Scope
         'переход на transform',
       ).toContain('transform');
       await button.hover();
-      await page.waitForTimeout(300);
+      // transition --ui-transition = 0.25s (patterns.css): фикс-таймаут 300ms
+      // оставлял ~50ms запаса и флаковал на загруженных раннерах — детермин-
+      // ное ожидание computed transform (находка ревью T17.18).
+      await expect
+        .poll(() => button.evaluate((el) => getComputedStyle(el).transform), {
+          timeout: 2000,
+        })
+        .toMatch(/matrix\(1\.08, 0, 0, 1\.08/);
       const matrix = await button.evaluate((el) => getComputedStyle(el).transform);
       expect(matrix, 'hover — scale(1.08) (students.css:172)').toMatch(
         /matrix\(1\.08, 0, 0, 1\.08/,
@@ -304,8 +314,23 @@ standTest.describe('patterns/poster-card: эталонная сборка (Scope
     await shot(page, { name: 'poster-card-375', viewport: 'mobile' });
     await shot(page, { name: 'poster-card-768', viewport: 'tablet' });
     await shot(page, { name: 'poster-card-1440', viewport: 'desktop' });
-    // Вне окружения создания эталонов хелпер аннотирует shot-skipped —
-    // здесь важно само наличие трёх снимков в сценарии (масштаб AC2).
-    expect(MIN_HEIGHT_BY_VIEWPORT).toHaveProperty('mobile');
+    // Пин shotName ↔ снятым эталонам (находка ревью T17.18: прежний assert
+    // был тавтологичным). Локально исполним: PNG эталонов коммятся
+    // (ADR-0004), снимает их контейнер/CI; дрейф имени/вьюпорта shot()
+    // против фактических файлов ловится без контейнера.
+    const snapDir = join(
+      process.cwd(),
+      'tests',
+      'visual',
+      '__screenshots__',
+      'pattern-poster-card.spec.js',
+    );
+    for (const png of [
+      'poster-card-375--mobile',
+      'poster-card-768--tablet',
+      'poster-card-1440--desktop',
+    ]) {
+      expect(existsSync(join(snapDir, `${png}.png`)), `эталон ${png}.png в репо`).toBe(true);
+    }
   });
 });
